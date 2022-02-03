@@ -102,9 +102,7 @@ describe('workers/pr/index', () => {
       config = partial<BranchConfig>({
         ...getConfig(),
       });
-      pr = partial<Pr>({
-        canMerge: true,
-      });
+      pr = partial<Pr>({});
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -154,7 +152,7 @@ describe('workers/pr/index', () => {
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.canMerge = undefined;
+      pr.cannotMergeReason = 'some reason';
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -291,6 +289,7 @@ describe('workers/pr/index', () => {
     });
     it('should create group PR', async () => {
       const depsWithSameNotesSourceUrl = ['e', 'f'];
+      const depsWithSameSourceUrl = ['g', 'h'];
       config.upgrades = config.upgrades.concat([
         {
           depName: 'a',
@@ -324,6 +323,16 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
         },
+        {
+          depName: depsWithSameSourceUrl[0],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
+        {
+          depName: depsWithSameSourceUrl[1],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
       ] as never);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
@@ -347,6 +356,27 @@ describe('workers/pr/index', () => {
                   ...V.releaseNotes,
                   notesSourceUrl:
                     'https://github.com/renovateapp/dummymonorepo/blob/changelogfile.md',
+                },
+              };
+            }),
+          };
+        }
+
+        if (depsWithSameSourceUrl.includes(upgrade.depName)) {
+          upgrade.sourceDirectory = `packages/${upgrade.depName}`;
+
+          upgrade.logJSON = {
+            ...upgrade.logJSON,
+            project: {
+              ...upgrade.logJSON.project,
+              repository: 'renovateapp/anotherdummymonorepo',
+            },
+            versions: upgrade.logJSON.versions.map((V) => {
+              return {
+                ...V,
+                releaseNotes: {
+                  ...V.releaseNotes,
+                  notesSourceUrl: null,
                 },
               };
             }),

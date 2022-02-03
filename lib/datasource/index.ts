@@ -181,28 +181,37 @@ async function mergeRegistries(
   return null;
 }
 
+function massageRegistryUrls(registryUrls: string[]): string[] {
+  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+}
+
 function resolveRegistryUrls(
   datasource: DatasourceApi,
-  extractedUrls: string[]
+  defaultRegistryUrls: string[],
+  registryUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [] } = datasource;
   if (!datasource.customRegistrySupport) {
-    if (is.nonEmptyArray(extractedUrls)) {
+    if (
+      is.nonEmptyArray(registryUrls) ||
+      is.nonEmptyArray(defaultRegistryUrls)
+    ) {
       logger.warn(
-        { datasource: datasource.id, registryUrls: extractedUrls },
+        { datasource: datasource.id, registryUrls, defaultRegistryUrls },
         'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
-    return defaultRegistryUrls;
+    return datasource.defaultRegistryUrls ?? [];
   }
-  const customUrls = extractedUrls?.filter(Boolean);
-  let registryUrls: string[];
+  const customUrls = registryUrls?.filter(Boolean);
+  let resolvedUrls: string[] = [];
   if (is.nonEmptyArray(customUrls)) {
-    registryUrls = [...customUrls];
-  } else {
-    registryUrls = [...defaultRegistryUrls];
+    resolvedUrls = [...customUrls];
+  } else if (is.nonEmptyArray(defaultRegistryUrls)) {
+    resolvedUrls = [...defaultRegistryUrls];
+  } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
+    resolvedUrls = [...datasource.defaultRegistryUrls];
   }
-  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+  return massageRegistryUrls(resolvedUrls);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
@@ -235,7 +244,11 @@ async function fetchReleases(
     return null;
   }
   const datasource = getDatasourceFor(datasourceName);
-  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
+  const registryUrls = resolveRegistryUrls(
+    datasource,
+    config.defaultRegistryUrls,
+    config.registryUrls
+  );
   let dep: ReleaseResult = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
   try {
@@ -383,7 +396,11 @@ function getDigestConfig(
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
   const lookupName = config.lookupName ?? config.depName;
-  const [registryUrl] = resolveRegistryUrls(datasource, config.registryUrls);
+  const [registryUrl] = resolveRegistryUrls(
+    datasource,
+    config.defaultRegistryUrls,
+    config.registryUrls
+  );
   return { lookupName, registryUrl, currentValue, currentDigest };
 }
 
