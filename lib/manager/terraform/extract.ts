@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
@@ -54,7 +54,7 @@ export async function extractPackageFile(
   }
   let deps: PackageDependency<TerraformManagerData>[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
       const terraformDependency = dependencyBlockExtractionRegex.exec(line);
