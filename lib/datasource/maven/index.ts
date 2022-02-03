@@ -234,11 +234,11 @@ async function addReleasesUsingHeadRequests(
 
   const cacheNs = 'datasource-maven:head-requests';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  const cachedReleaseMap: ReleaseMap | undefined =
+  const oldReleaseMap: ReleaseMap | undefined =
     await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
-  const newReleaseMap: ReleaseMap = cachedReleaseMap ?? {};
+  const newReleaseMap: ReleaseMap = oldReleaseMap ?? {};
 
-  if (!cachedReleaseMap) {
+  if (!oldReleaseMap) {
     const unknownVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
         const isDiscoveredOutside = !!release;
@@ -280,7 +280,7 @@ async function addReleasesUsingHeadRequests(
 
       await pAll(queue, { concurrency: 5 });
       const cacheTTL = retryEarlier ? 60 : 24 * 60;
-      await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, cacheTTL);
+      await packageCache.set(cacheNs, cacheKey, newReleaseMap, cacheTTL);
     }
   }
 
