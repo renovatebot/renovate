@@ -947,76 +947,7 @@ export async function fetchCommit({
     config.branchIsModified[branchName] = false;
     return commit;
   } catch (err) /* istanbul ignore next */ {
-    const errChecked = checkForPlatformFailure(err);
-    if (errChecked) {
-      throw errChecked;
-    }
-    if (err.message.includes(`'refs/heads/renovate' exists`)) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = 'None';
-      error.validationError = 'An existing branch is blocking Renovate';
-      error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
-      throw error;
-    }
-    if (
-      err.message.includes(
-        'refusing to allow a GitHub App to create or update workflow'
-      )
-    ) {
-      logger.warn(
-        'App has not been granted permissions to update Workflows - aborting branch.'
-      );
-      return null;
-    }
-    if (
-      (err.message.includes('remote rejected') ||
-        err.message.includes('403')) &&
-      files?.some((file) => file.path?.startsWith('.github/workflows/'))
-    ) {
-      logger.debug({ err }, 'commitFiles error');
-      logger.info('Workflows update rejection - aborting branch.');
-      return null;
-    }
-    if (err.message.includes('protected branch hook declined')) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = branchName;
-      error.validationError = 'Renovate branch is protected';
-      error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
-      throw error;
-    }
-    if (err.message.includes('can only push your own commits')) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = branchName;
-      error.validationError = 'Bitbucket committer error';
-      error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: "${String(
-        err.message
-      )}"`;
-      throw error;
-    }
-    if (err.message.includes('remote: error: cannot lock ref')) {
-      logger.error({ err }, 'Error committing files.');
-      return null;
-    }
-    if (err.message.includes('[rejected] (stale info)')) {
-      logger.info(
-        'Branch update was rejected because local copy is not up-to-date.'
-      );
-      return null;
-    }
-    if (
-      err.message.includes('denying non-fast-forward') ||
-      err.message.includes('GH003: Sorry, force-pushing')
-    ) {
-      logger.debug({ err }, 'Permission denied to update branch');
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = branchName;
-      error.validationError = 'Force push denied';
-      error.validationMessage = `Renovate is unable to update branch(es) due to force pushes being disallowed.`;
-      throw error;
-    }
-    logger.debug({ err }, 'Unknown error committing files');
-    // We don't know why this happened, so this will cause bubble up to a branch error
-    throw err;
+    return handleCommitError(files, branchName, err);
   }
 }
 
