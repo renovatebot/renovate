@@ -1,4 +1,4 @@
-import { BunyanRecord } from '../../logger/types';
+import type { BunyanRecord } from '../../logger/types';
 
 export interface DependencyStats {
   branch: string;

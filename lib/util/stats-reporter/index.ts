@@ -1,9 +1,9 @@
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
-import { BunyanRecord } from '../../logger/types';
+import type { BunyanRecord } from '../../logger/types';
 import * as memCache from '../cache/memory';
 import { readFile, writeFile } from '../fs';
-import { RenovateStats, RepositoryStats } from './types';
+import type { RenovateStats, RepositoryStats } from './types';
 
 export abstract class RepositoryStatisticsReporter {
   public static initRepoStats(repoName: string): void {
