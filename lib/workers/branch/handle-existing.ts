@@ -6,8 +6,6 @@ import { branchExists, deleteBranch } from '../../util/git';
 import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
 import * as template from '../../util/template';
 import { BranchConfig } from '../types';
-//import { StatsReporter } from '../../util/stats-reporter';
-//import { DependencyStats } from '../../util/stats-reporter/types';
 
 export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
   if (pr.state === PrState.Closed) {

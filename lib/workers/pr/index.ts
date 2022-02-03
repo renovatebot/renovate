@@ -21,8 +21,6 @@ import type { BranchConfig, BranchUpgradeConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
-//import { StatsReporter } from '../../util/stats-reporter';
-//import { DependencyStats } from '../../util/stats-reporter/types';
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
