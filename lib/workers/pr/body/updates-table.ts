@@ -38,7 +38,7 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
-  const headers = Object.keys(config.prBodyDefinitions);
+  const headers = config.prBodyColumns;
   const tableValues = config.upgrades.map((upgrade) => {
     const res: Record<string, string> = {};
     const rowDefinition = getRowDefinition(headers, upgrade);
