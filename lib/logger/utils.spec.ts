@@ -17,23 +17,18 @@ describe('logger/utils', () => {
     expect(validateLogLevel(10)).toBeUndefined();
   });
 
-  it('checks for invalid log levels', () => {
+  it.each`
+    input
+    ${'warning'}
+    ${'100'}
+  `('checks for invalid log level: $input', (input) => {
     // Mock when the function exits
     const mockExit = jest.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {
-      validateLogLevel('warning');
-    }).toThrow();
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockClear();
-
-    mockExit.mockImplementationOnce((number) => {
-      throw new Error(`process.exit: ${number}`);
-    });
-    expect(() => {
-      validateLogLevel('100');
+      validateLogLevel(input);
     }).toThrow();
     expect(mockExit).toHaveBeenCalledWith(1);
   });
