@@ -110,7 +110,10 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   }
 
   if (foundRules.keyStore) {
-    let ksData = fs.readFileSync(foundRules.keyStore.filename);
+    let ksData = foundRules.keyStore.pkcs12;
+    if (!(ksData instanceof Buffer)) {
+      ksData = Buffer.from(ksData, 'base64');
+    }
     options.https = {
       pfx: [
         {

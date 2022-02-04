@@ -1123,6 +1123,35 @@ To adjust it down to 10s for all queries, do this:
 }
 ```
 
+### keyStore
+
+This option configures a PKCS12 keystore to use for retrieving and applying
+client certificates when making HTTPS requests towards matching hosts.
+
+```json
+{
+  "hostRules": [
+    {
+      "keyStore": {
+        "pkcs12": "<base64 encoded PKCS12 store>",
+        "passphrase": "<optional passphrase>"
+      }
+  ]
+}
+```
+
+The `keyStore` object is specified as:
+
+```ts
+keyStore?: {
+  pkcs12: string | Buffer;
+  passphrase?: string;
+};
+```
+
+This allows for the `pkcs12` field to be initialized by a `readFile` or similar
+operation on `config.js`.
+
 ## ignoreDeprecated
 
 By default, Renovate won't update a dependency version to a deprecated release unless the current version was _itself_ deprecated.

@@ -15,7 +15,7 @@ export interface HostRule {
   concurrentRequestLimit?: number;
   resolvedHost?: string;
   keyStore?: {
-    filename: string;
+    pkcs12: string | Buffer;
     passphrase?: string;
   };
 }
