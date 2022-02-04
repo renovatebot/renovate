@@ -70,7 +70,6 @@ function matches(a: string, b: string): boolean {
   }
 
   if (type === REV_TYPE_SUBREV) {
-    dynamicRevision;
     return isSubversion(value, a);
   }
 
