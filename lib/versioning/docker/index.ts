@@ -73,7 +73,6 @@ class DockerVersioningApi extends GenericVersioningApi {
       return parsed2.suffix.localeCompare(parsed1.suffix);
     }
 
-    // istanbul ignore next
     return 0;
   }
 
