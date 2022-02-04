@@ -49,35 +49,38 @@ function matches(a: string, b: string): boolean {
   if (!a || !b) {
     return false;
   }
-  const dynamicRevision = parseDynamicRevision(b);
-  if (!dynamicRevision) {
+  const rev = parseDynamicRevision(b);
+  if (!rev) {
     return equals(a, b);
   }
-  const { type, value } = dynamicRevision;
 
-  if (type === REV_TYPE_LATEST) {
-    if (!value) {
+  if (rev.type === REV_TYPE_LATEST) {
+    if (!rev.value) {
       return true;
     }
     const tokens = tokenize(a);
     if (tokens.length) {
       const token = tokens[tokens.length - 1];
       if (token.type === TYPE_QUALIFIER) {
-        return token.val.toLowerCase() === value;
+        return token.val.toLowerCase() === rev.value;
       }
     }
     return false;
   }
 
-  if (type === REV_TYPE_SUBREV) {
-    return isSubversion(value, a);
+  if (rev.type === REV_TYPE_SUBREV) {
+    rev;
+    return isSubversion(rev.value, a);
   }
 
-  return mavenMatches(a, value);
+  return mavenMatches(a, rev.value);
 }
 
-function getSatisfyingVersion(versions: string[], range: string): string {
-  return versions.reduce((result, version) => {
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
