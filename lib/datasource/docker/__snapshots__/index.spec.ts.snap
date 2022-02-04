@@ -22,10 +22,10 @@ Object {
       "version": "1.0.0",
     },
     Object {
-      "version": "1.2.3-alpine",
+      "version": "1.2.3",
     },
     Object {
-      "version": "1.2.3",
+      "version": "1.2.3-alpine",
     },
     Object {
       "version": "1-alpine",
