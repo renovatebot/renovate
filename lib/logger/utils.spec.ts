@@ -1,4 +1,3 @@
-import bunyan from 'bunyan';
 import { validateLogLevel } from './utils';
 
 describe('logger/utils', () => {
@@ -11,7 +10,7 @@ describe('logger/utils', () => {
     expect(validateLogLevel('warn')).toBeUndefined();
     expect(validateLogLevel('debug')).toBeUndefined();
     expect(validateLogLevel('trace')).toBeUndefined();
-    expect(validateLogLevel('info' as bunyan.LogLevel)).toBeUndefined();
+    expect(validateLogLevel('info')).toBeUndefined();
   });
 
   it.each`

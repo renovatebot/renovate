@@ -213,9 +213,7 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
  * @param logLevelToCheck
  * @returns returns undefined when the logLevelToCheck is valid. Else it stops execution.
  */
-export function validateLogLevel(
-  logLevelToCheck: string | undefined | bunyan.LogLevel
-): void {
+export function validateLogLevel(logLevelToCheck: string | undefined): void {
   const allowedValues: bunyan.LogLevel[] = [
     'trace',
     'debug',
