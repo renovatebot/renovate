@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import simpleGit, {
   Options,
@@ -23,9 +24,13 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { regEx } from '../regex';
+import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
+import {
+  getCachedConflictResult,
+  setCachedConflictResult,
+} from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
@@ -127,7 +132,7 @@ async function fetchBranchCommits(): Promise<void> {
   }
   try {
     (await git.raw(opts))
-      .split('\n')
+      .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
@@ -168,7 +173,7 @@ async function deleteLocalBranch(branchName: string): Promise<void> {
 
 async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
-    .split('\n')
+    .split(newlineRegex)
     .map((branch) => branch.trim())
     .filter((branch) => branch.length)
     .filter((branch) => !branch.startsWith('* '));
@@ -423,7 +428,7 @@ export async function getFileList(): Promise<string[]> {
     return [];
   }
   return files
-    .split('\n')
+    .split(newlineRegex)
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop())
@@ -518,12 +523,28 @@ export async function isBranchConflicted(
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
   await writeGitAuthor();
-  if (!branchExists(baseBranch) || !branchExists(branch)) {
+
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
+  if (!baseBranchSha || !branchSha) {
     logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
     );
     return true;
+  }
+
+  const cachedResult = getCachedConflictResult(
+    baseBranch,
+    baseBranchSha,
+    branch,
+    branchSha
+  );
+  if (is.boolean(cachedResult)) {
+    logger.debug(
+      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+    );
+    return cachedResult;
   }
 
   let result = false;
@@ -558,6 +579,7 @@ export async function isBranchConflicted(
     }
   }
 
+  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
   return result;
 }
 
@@ -793,9 +815,10 @@ export async function prepareCommit({
 export async function pushCommit({
   branchName,
   files,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<boolean> {
   await syncGit();
   logger.debug(`Pushing branch ${branchName}`);
+  let result = false;
   try {
     const pushOptions: TaskOptions = {
       '--force-with-lease': null,
@@ -813,9 +836,11 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue(Limit.Commits);
+    result = true;
   } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);
   }
+  return result;
 }
 
 export async function fetchCommit({
@@ -840,11 +865,13 @@ export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
   const commitResult = await prepareCommit(config);
-  if (!commitResult) {
-    return null;
+  if (commitResult) {
+    const pushResult = await pushCommit(config);
+    if (pushResult) {
+      return fetchCommit(config);
+    }
   }
-  await pushCommit(config);
-  return fetchCommit(config);
+  return null;
 }
 
 export function getUrl({

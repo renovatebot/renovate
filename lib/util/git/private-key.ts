@@ -4,6 +4,7 @@ import upath from 'upath';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../exec';
+import { newlineRegex } from '../regex';
 
 let gitPrivateKey: string;
 let keyId: string;
@@ -21,7 +22,7 @@ async function importKey(): Promise<void> {
   const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
   logger.debug({ stdout, stderr }, 'Private key import result');
   keyId = (stdout + stderr)
-    .split('\n')
+    .split(newlineRegex)
     .find((line) => line.includes('secret key imported'))
     .replace('gpg: key ', '')
     .split(':')

@@ -6,7 +6,7 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import { linkify } from '../../../util/markdown';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -136,7 +136,7 @@ export async function getReleaseNotes(
 
 function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
-  const lines = text.split('\n');
+  const lines = text.split(newlineRegex);
   const tokens = markdown.parse(text, undefined);
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
@@ -254,7 +254,7 @@ export async function getReleaseNotesMd(
             regEx(/[[\]()]/g),
             ' '
           );
-          const [heading] = deParenthesizedSection.split('\n');
+          const [heading] = deParenthesizedSection.split(newlineRegex);
           const title = heading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')

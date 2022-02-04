@@ -30,8 +30,10 @@ docker run --rm renovate/renovate:31.14
 docker run --rm renovate/renovate:31
 ```
 
-Do not use the example tags listed above, as they will be out-of-date.
-Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
+<!-- prettier-ignore -->
+!!! warning
+    Do not use the example tags listed above, as they will be out-of-date.
+    Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
 If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
@@ -264,8 +266,10 @@ export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 renovate
 ```
 
-Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
-You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
+<!-- prettier-ignore -->
+!!! note
+    The GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
+    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 

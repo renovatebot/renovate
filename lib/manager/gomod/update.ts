@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
@@ -22,7 +22,7 @@ export function updateDependency({
       return null;
     }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
-    const lines = fileContent.split('\n');
+    const lines = fileContent.split(newlineRegex);
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
