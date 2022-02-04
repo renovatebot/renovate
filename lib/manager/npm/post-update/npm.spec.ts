@@ -20,7 +20,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValueOnce(() => 'package-lock-contents');
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
