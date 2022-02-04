@@ -9,6 +9,7 @@ import { readLocalFile, stat, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import type { StatusResult } from '../../util/git/types';
 import { Http } from '../../util/http';
+import { newlineRegex } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
@@ -27,7 +28,8 @@ async function addIfUpdated(
   if (status.modified.includes(fileProjectPath)) {
     return {
       file: {
-        name: fileProjectPath,
+        type: 'addition',
+        path: fileProjectPath,
         contents: await readLocalFile(fileProjectPath),
       },
     };
@@ -37,7 +39,7 @@ async function addIfUpdated(
 
 function getDistributionUrl(newPackageFileContent: string): string {
   const distributionUrlLine = newPackageFileContent
-    .split('\n')
+    .split(newlineRegex)
     .find((line) => line.startsWith('distributionUrl='));
   if (distributionUrlLine) {
     return distributionUrlLine
@@ -130,7 +132,7 @@ export async function updateArtifacts({
       )
     ).filter(Boolean);
     logger.debug(
-      { files: updateArtifactsResult.map((r) => r.file.name) },
+      { files: updateArtifactsResult.map((r) => r.file.path) },
       `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;

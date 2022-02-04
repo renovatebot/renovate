@@ -163,9 +163,6 @@ export function migrateConfig(
           '{{managerBranchPrefix}}',
           '{{additionalBranchPrefix}}'
         );
-      } else if (key === 'managerBranchPrefix') {
-        delete migratedConfig.managerBranchPrefix;
-        migratedConfig.additionalBranchPrefix = val;
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
@@ -174,16 +171,6 @@ export function migrateConfig(
         const templateIndex = val.indexOf(`{{`);
         migratedConfig.branchPrefix = val.substring(0, templateIndex);
         migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
-      } else if (key === 'upgradeInRange') {
-        delete migratedConfig.upgradeInRange;
-        if (val === true) {
-          migratedConfig.rangeStrategy = 'bump';
-        }
-      } else if (key === 'versionStrategy') {
-        delete migratedConfig.versionStrategy;
-        if (val === 'widen') {
-          migratedConfig.rangeStrategy = 'widen';
-        }
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
@@ -438,19 +425,6 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'raiseDeprecationWarnings') {
-        delete migratedConfig.raiseDeprecationWarnings;
-        if (val === false) {
-          migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications || [];
-          migratedConfig.suppressNotifications.push('deprecationWarningIssues');
-        }
-      } else if (key === 'composerIgnorePlatformReqs') {
-        if (val === true) {
-          migratedConfig.composerIgnorePlatformReqs = [];
-        } else if (val === false) {
-          migratedConfig.composerIgnorePlatformReqs = null;
-        }
       } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key] !== undefined) {
           migratedConfig.platformAutomerge = migratedConfig[key];
@@ -474,10 +448,6 @@ export function migrateConfig(
           );
         }
       }
-    }
-    if (migratedConfig.endpoints) {
-      migratedConfig.hostRules = migratedConfig.endpoints;
-      delete migratedConfig.endpoints;
     }
     if (is.array(migratedConfig.packageRules)) {
       const renameMap = {

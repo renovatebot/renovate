@@ -1,4 +1,3 @@
-import { Http } from '../../util/http';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { getSourceUrl as githubSourceUrl } from '../github-releases/common';
 import { id as githubDatasource } from '../github-tags';
@@ -7,12 +6,9 @@ import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
 
 import type { DataSource } from './types';
 
-export const id = 'go';
-
-export const http = new Http(id);
-
 export const bitbucket = new BitBucketTagsDatasource();
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum GoproxyFallback {
   WhenNotFoundOrGone = ',',
   Always = '|',

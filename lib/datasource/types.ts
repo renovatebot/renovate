@@ -1,13 +1,17 @@
 import type { ModuleApi } from '../types';
 
-export interface Config {
+export interface GetDigestInputConfig {
   datasource?: string;
-  depName?: string;
   lookupName?: string;
+  depName: string;
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  currentValue?: string;
+  currentDigest?: string;
 }
 
-export interface DigestConfig extends Config {
+export interface DigestConfig {
+  lookupName: string;
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
@@ -15,6 +19,7 @@ export interface DigestConfig extends Config {
 
 export interface ReleasesConfigBase {
   npmrc?: string;
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 }
 

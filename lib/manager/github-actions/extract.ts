@@ -1,7 +1,6 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -17,7 +16,7 @@ const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  for (const line of content.split('\n')) {
+  for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
       continue;
     }
@@ -56,7 +55,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else {
         dep.currentValue = currentValue;
         if (!dockerVersioning.api.isValid(currentValue)) {
-          dep.skipReason = SkipReason.InvalidVersion;
+          dep.skipReason = 'invalid-version';
         }
       }
       deps.push(dep);

@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(
@@ -14,7 +13,7 @@ export function extractPackageFile(
   // TODO: fix type
   let doc: any;
   try {
-    doc = load(content, { json: true });
+    doc = load(content, { json: true }); // TODO #9610
   } catch (err) {
     logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
     return null;
@@ -24,23 +23,32 @@ export function extractPackageFile(
     return null;
   }
   deps = doc.dependencies.map((dep) => {
+    let currentValue; // Remove when #9610 has been implemented
+    switch (typeof dep.version) {
+      case 'number':
+        currentValue = String(dep.version);
+        break;
+      case 'string':
+        currentValue = dep.version;
+    }
+
     const res: PackageDependency = {
       depName: dep.name,
-      currentValue: dep.version,
+      currentValue,
     };
 
     if (!res.depName) {
-      res.skipReason = SkipReason.InvalidName;
+      res.skipReason = 'invalid-name';
       return res;
     }
 
     if (!res.currentValue) {
-      res.skipReason = SkipReason.InvalidVersion;
+      res.skipReason = 'invalid-version';
       return res;
     }
 
     if (!dep.repository) {
-      res.skipReason = SkipReason.NoRepository;
+      res.skipReason = 'no-repository';
       return res;
     }
 
@@ -55,16 +63,16 @@ export function extractPackageFile(
         return res;
       }
 
-      res.skipReason = SkipReason.PlaceholderUrl;
+      res.skipReason = 'placeholder-url';
     } else {
       try {
         const url = new URL(dep.repository);
         if (url.protocol === 'file:') {
-          res.skipReason = SkipReason.LocalDependency;
+          res.skipReason = 'local-dependency';
         }
       } catch (err) {
         logger.debug({ err }, 'Error parsing url');
-        res.skipReason = SkipReason.InvalidUrl;
+        res.skipReason = 'invalid-url';
       }
     }
     return res;

@@ -775,6 +775,17 @@ const options: RenovateOptions[] = [
     supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
   },
   {
+    name: 'defaultRegistryUrls',
+    description:
+      'List of registry URLs to use as the default for a datasource.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'registryUrls',
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
@@ -1158,6 +1169,7 @@ const options: RenovateOptions[] = [
       'replace',
       'widen',
       'update-lockfile',
+      'in-range-only',
     ],
     cli: false,
     env: false,
@@ -1314,6 +1326,13 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
+    name: 'stopUpdatingLabel',
+    description: 'Label to use to request the bot to stop updating a PR.',
+    type: 'string',
+    default: 'stop-updating',
+    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
+  },
+  {
     name: 'stabilityDays',
     description:
       'Number of days required before a new release is considered to be stabilized.',
@@ -1386,7 +1405,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
   // Automatic merging
   {
@@ -1966,6 +1985,7 @@ const options: RenovateOptions[] = [
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
     },
@@ -1975,7 +1995,7 @@ const options: RenovateOptions[] = [
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
-    default: ['Package', 'Type', 'Update', 'Change'],
+    default: ['Package', 'Type', 'Update', 'Change', 'Pending'],
   },
   {
     name: 'prBodyNotes',
@@ -2205,6 +2225,7 @@ const options: RenovateOptions[] = [
     description:
       'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
     type: 'object',
+    freeChoice: true,
     default: {
       ignoreTopic: 'Renovate Ignore Notification',
       ignoreMajor:

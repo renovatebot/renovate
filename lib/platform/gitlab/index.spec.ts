@@ -439,11 +439,7 @@ describe('platform/gitlab/index', () => {
           base: {
             sha: '1234',
           },
-        })
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
-        .reply(200, []);
+        });
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -478,11 +474,7 @@ describe('platform/gitlab/index', () => {
           base: {
             sha: '1234',
           },
-        })
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
-        .reply(200, []);
+        });
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -517,11 +509,7 @@ describe('platform/gitlab/index', () => {
           base: {
             sha: '1234',
           },
-        })
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
-        .reply(200, []);
+        });
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1757,11 +1745,7 @@ describe('platform/gitlab/index', () => {
           assignee: {
             id: 1,
           },
-        })
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
-        .reply(200, [{ status: 'success' }]);
+        });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBeTrue();
@@ -1987,9 +1971,9 @@ These updates have all been created already. Click a checkbox below to force a r
 
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
         `;
       const scope = await initRepo();

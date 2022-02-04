@@ -73,7 +73,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         headRefName
         baseRefName
         title
-        mergeable
         mergeStateStatus
         labels(last: 100) {
           nodes {
@@ -85,26 +84,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         }
         reviewRequests {
           totalCount
-        }
-        commits(first: 2) {
-          nodes {
-            commit {
-              author {
-                email
-              }
-              committer {
-                email
-              }
-              parents(last: 1) {
-                edges {
-                  node {
-                    abbreviatedOid
-                    oid
-                  }
-                }
-              }
-            }
-          }
         }
         body
         reviews(first: 1, states: [CHANGES_REQUESTED]){

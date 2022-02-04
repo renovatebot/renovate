@@ -4,9 +4,8 @@ import { GlobalConfig } from '../../config/global';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
@@ -33,7 +32,7 @@ export function extractPackageFile(
 
   let indexUrl: string;
   const extraUrls = [];
-  content.split('\n').forEach((line) => {
+  content.split(newlineRegex).forEach((line) => {
     if (line.startsWith('--index-url ')) {
       indexUrl = line.substring('--index-url '.length).split(' ')[0];
     }
@@ -60,12 +59,12 @@ export function extractPackageFile(
   const pkgRegex = regEx(`^(${packagePattern})$`);
   const pkgValRegex = regEx(`^${dependencyPattern}$`);
   const deps = content
-    .split('\n')
+    .split(newlineRegex)
     .map((rawline) => {
       let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = SkipReason.Ignored;
+        dep.skipReason = 'ignored';
       }
       const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
       const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];

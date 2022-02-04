@@ -11,14 +11,14 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();
-  const lines: string[] = content.split('\n');
+  const lines: string[] = content.split(newlineRegex);
   lines.forEach((line) => {
     const match = pluginRegex.exec(line);
     if (match) {
@@ -108,7 +108,8 @@ export async function updateArtifacts({
   const res: UpdateArtifactsResult[] = [
     {
       file: {
-        name: lockFileName,
+        type: 'addition',
+        path: lockFileName,
         contents: lockFileContent,
       },
     },
@@ -121,7 +122,8 @@ export async function updateArtifacts({
       if (f.startsWith(podsDir)) {
         res.push({
           file: {
-            name: f,
+            type: 'addition',
+            path: f,
             contents: await readLocalFile(f),
           },
         });
@@ -130,8 +132,8 @@ export async function updateArtifacts({
     for (const f of status.deleted || []) {
       res.push({
         file: {
-          name: '|delete|',
-          contents: f,
+          type: 'deletion',
+          path: f,
         },
       });
     }

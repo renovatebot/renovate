@@ -4,24 +4,21 @@ import type { GitlabTag } from '../../../../datasource/gitlab-tags/types';
 import { logger } from '../../../../logger';
 import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../util/http/gitlab';
-import { regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
-const http = new GitlabHttp();
-
-function getRepoId(repository: string): string {
-  return repository.replace(regEx(/\//g), '%2f');
-}
+export const id = 'gitlab-changelog';
+const http = new GitlabHttp(id);
 
 export async function getTags(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
   logger.trace('gitlab.getTags()');
-  const url = `${ensureTrailingSlash(endpoint)}projects/${getRepoId(
-    repository
-  )}/repository/tags?per_page=100`;
+  const urlEncodedRepo = encodeURIComponent(repository);
+  const url = `${ensureTrailingSlash(
+    endpoint
+  )}projects/${urlEncodedRepo}/repository/tags?per_page=100`;
   try {
     const res = await http.getJson<GitlabTag[]>(url, {
       paginate: true,
@@ -54,10 +51,10 @@ export async function getReleaseNotesMd(
   sourceDirectory?: string
 ): Promise<ChangeLogFile> | null {
   logger.trace('gitlab.getReleaseNotesMd()');
-  const repoid = getRepoId(repository);
+  const urlEncodedRepo = encodeURIComponent(repository);
   const apiPrefix = `${ensureTrailingSlash(
     apiBaseUrl
-  )}projects/${repoid}/repository/`;
+  )}projects/${urlEncodedRepo}/repository/`;
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
   const tree = (
@@ -99,10 +96,10 @@ export async function getReleaseList(
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
 
-  const repoId = getRepoId(repository);
+  const urlEncodedRepo = encodeURIComponent(repository);
   const apiUrl = `${ensureTrailingSlash(
     apiBaseUrl
-  )}projects/${repoId}/releases`;
+  )}projects/${urlEncodedRepo}/releases`;
 
   const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
     paginate: true,

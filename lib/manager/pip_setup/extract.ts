@@ -1,7 +1,6 @@
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { lang, lexer, query as q } from 'good-enough-parser';
 import { PypiDatasource } from '../../datasource/pypi';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
@@ -56,7 +55,7 @@ function depStringHandler(
 function depSkipHandler(ctx: Context): Context {
   const dep = ctx.deps[ctx.deps.length - 1];
   const deps = ctx.deps.slice(0, -1);
-  deps.push({ ...dep, skipReason: SkipReason.Ignored });
+  deps.push({ ...dep, skipReason: 'ignored' });
   return { ...ctx, deps };
 }
 

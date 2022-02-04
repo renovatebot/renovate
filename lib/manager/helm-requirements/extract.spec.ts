@@ -1,5 +1,4 @@
 import { fs } from '../../../test/util';
-import { SkipReason } from '../../types';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -10,6 +9,33 @@ describe('manager/helm-requirements/extract', () => {
       jest.resetAllMocks();
       fs.readLocalFile = jest.fn();
     });
+
+    it('ensure that currentValue is string', () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - name: redis
+          version: 0.9
+          repository: '@placeholder'
+      `;
+      const fileName = 'requirements.yaml';
+      const result = extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable/',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(typeof result.deps[0]?.currentValue).toBe('string');
+      expect(result).toMatchSnapshot();
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
+    });
+
     it('skips invalid registry urls', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -207,7 +233,7 @@ describe('manager/helm-requirements/extract', () => {
             {
               currentValue: undefined,
               depName: undefined,
-              skipReason: SkipReason.InvalidName,
+              skipReason: 'invalid-name',
             },
           ],
         },
@@ -224,7 +250,7 @@ describe('manager/helm-requirements/extract', () => {
             {
               currentValue: undefined,
               depName: 'postgres',
-              skipReason: SkipReason.InvalidVersion,
+              skipReason: 'invalid-version',
             },
           ],
         },
@@ -242,7 +268,7 @@ describe('manager/helm-requirements/extract', () => {
             {
               currentValue: '0.1.0',
               depName: 'postgres',
-              skipReason: SkipReason.NoRepository,
+              skipReason: 'no-repository',
             },
           ],
         },

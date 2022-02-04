@@ -36,8 +36,9 @@ const config: UpdateArtifactsConfig = {};
 
 const updatedGemfileLock = {
   file: {
+    type: 'addition',
+    path: 'Gemfile.lock',
     contents: 'Updated Gemfile.lock',
-    name: 'Gemfile.lock',
   },
 };
 
@@ -137,6 +138,9 @@ describe('manager/bundler/artifacts', () => {
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
           { version: '1.2.0' },
@@ -162,6 +166,9 @@ describe('manager/bundler/artifacts', () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
+      });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -194,6 +201,9 @@ describe('manager/bundler/artifacts', () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
+      });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -228,6 +238,9 @@ describe('manager/bundler/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
+      });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -358,6 +371,9 @@ describe('manager/bundler/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
+      });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
