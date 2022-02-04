@@ -1,5 +1,6 @@
 import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
+import type { CommitFilesConfig, CommitSha } from '../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -48,8 +49,7 @@ export interface RepoParams {
 export interface Pr {
   body?: string;
   sourceBranch: string;
-  canMerge?: boolean;
-  canMergeReason?: string;
+  cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
   displayNumber?: string;
@@ -195,4 +195,5 @@ export interface Platform {
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
+  commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
 }

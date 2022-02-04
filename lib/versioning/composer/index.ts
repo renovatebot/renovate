@@ -14,7 +14,13 @@ export const urls = [
   'https://semver.mwl.be',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = [
+  'bump',
+  'extend',
+  'pin',
+  'replace',
+  'update-lockfile',
+];
 
 function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');

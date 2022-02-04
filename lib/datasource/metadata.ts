@@ -61,6 +61,7 @@ const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
     'google/cloud-sdk': 'https://cloud.google.com/sdk/docs/release-notes',
     neo4j: 'https://neo4j.com/release-notes/',
+    'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
   },
 };
 

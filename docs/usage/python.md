@@ -72,8 +72,10 @@ e.g.:
 }
 ```
 
-Note: the index-url found in the `requirements.txt` file takes precedence over a `registryUrl` configured like the above.
-To override the URL found in `requirements.txt`, you need to configure it in `packageRules`, as they are applied _after_ package file extraction.
+<!-- prettier-ignore -->
+!!! tip
+    The index-url found in the `requirements.txt` file takes precedence over a `registryUrl` configured like the above.
+    To override the URL found in `requirements.txt`, you need to configure it in `packageRules`, as they are applied _after_ package file extraction.
 
 ## Disabling Python support
 

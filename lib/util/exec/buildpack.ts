@@ -20,6 +20,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  flux: {
+    datasource: 'github-releases',
+    depName: 'fluxcd/flux2',
+    versioning: semverVersioningId,
+  },
+  helm: {
+    datasource: 'github-releases',
+    depName: 'helm/helm',
+    versioning: semverVersioningId,
+  },
   jb: {
     datasource: 'github-releases',
     depName: 'jsonnet-bundler/jsonnet-bundler',

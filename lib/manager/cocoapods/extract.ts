@@ -4,7 +4,7 @@ import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
@@ -86,7 +86,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const lines: string[] = content.split('\n');
+  const lines: string[] = content.split(newlineRegex);
 
   const registryUrls: string[] = [];
 
