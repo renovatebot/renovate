@@ -10,7 +10,12 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import {
+  BranchStatus,
+  HostRule,
+  PrState,
+  VulnerabilityAlert,
+} from '../../../types';
 import type { GitProtocol } from '../../../types/git';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
@@ -153,6 +158,41 @@ export async function getJsonFile(
   return JSON.parse(raw);
 }
 
+function getRepoGitUrl(
+  repository: string,
+  info: BbsRestRepo,
+  opts: HostRule
+): string {
+  let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+  if (!cloneUrl) {
+    // Http access might be disabled, try to find ssh url in this case
+    cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+  }
+
+  let gitUrl: string;
+  if (!cloneUrl) {
+    // Fallback to generating the url if the API didn't give us an URL
+    const { host, pathname } = url.parse(defaults.endpoint);
+    gitUrl = git.getUrl({
+      protocol: defaults.endpoint.split(':')[0] as GitProtocol,
+      auth: `${opts.username}:${opts.password}`,
+      host: `${host}${pathname}${
+        pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      }scm`,
+      repository,
+    });
+  } else if (cloneUrl.name === 'http') {
+    // Inject auth into the API provided URL
+    const repoUrl = url.parse(cloneUrl.href);
+    repoUrl.auth = `${opts.username}:${opts.password}`;
+    gitUrl = url.format(repoUrl);
+  } else {
+    // SSH urls can be used directly
+    gitUrl = cloneUrl.href;
+  }
+  return gitUrl;
+}
+
 // Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
@@ -193,33 +233,7 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
-    let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
-    if (!cloneUrl) {
-      // Http access might be disabled, try to find ssh url in this case
-      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-    }
-
-    let gitUrl: string;
-    if (!cloneUrl) {
-      // Fallback to generating the url if the API didn't give us an URL
-      const { host, pathname } = url.parse(defaults.endpoint);
-      gitUrl = git.getUrl({
-        protocol: defaults.endpoint.split(':')[0] as GitProtocol,
-        auth: `${opts.username}:${opts.password}`,
-        host: `${host}${pathname}${
-          pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
-        }scm`,
-        repository,
-      });
-    } else if (cloneUrl.name === 'http') {
-      // Inject auth into the API provided URL
-      const repoUrl = url.parse(cloneUrl.href);
-      repoUrl.auth = `${opts.username}:${opts.password}`;
-      gitUrl = url.format(repoUrl);
-    } else {
-      // SSH urls can be used directly
-      gitUrl = cloneUrl.href;
-    }
+    const gitUrl = getRepoGitUrl(config.repositorySlug, info, opts);
 
     await git.initRepo({
       ...config,
