@@ -49,31 +49,32 @@ function matches(a: string, b: string): boolean {
   if (!a || !b) {
     return false;
   }
-  const rev = parseDynamicRevision(b);
-  if (!rev) {
+  const dynamicRevision = parseDynamicRevision(b);
+  if (!dynamicRevision) {
     return equals(a, b);
   }
+  const { type, value } = dynamicRevision;
 
-  if (rev.type === REV_TYPE_LATEST) {
-    if (!rev.value) {
+  if (type === REV_TYPE_LATEST) {
+    if (!value) {
       return true;
     }
     const tokens = tokenize(a);
     if (tokens.length) {
       const token = tokens[tokens.length - 1];
       if (token.type === TYPE_QUALIFIER) {
-        return token.val.toLowerCase() === rev.value;
+        return token.val.toLowerCase() === value;
       }
     }
     return false;
   }
 
-  if (rev.type === REV_TYPE_SUBREV) {
-    rev;
-    return isSubversion(rev.value, a);
+  if (type === REV_TYPE_SUBREV) {
+    dynamicRevision;
+    return isSubversion(value, a);
   }
 
-  return mavenMatches(a, rev.value);
+  return mavenMatches(a, value);
 }
 
 function getSatisfyingVersion(
