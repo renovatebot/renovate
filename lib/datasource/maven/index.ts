@@ -114,7 +114,7 @@ async function addReleasesFromIndexPage(
           const match = line.trim().match(mavenCentralHtmlVersionRegex);
           if (match) {
             const { version, releaseTimestamp: timestamp } =
-              match?.groups || {};
+              match?.groups ?? {};
             if (version && timestamp) {
               const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
                 zone: 'UTC',
@@ -234,19 +234,16 @@ async function addReleasesUsingHeadRequests(
 
   const cacheNs = 'datasource-maven:head-requests';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let workingReleaseMap: ReleaseMap = await packageCache.get<ReleaseMap>(
-    cacheNs,
-    cacheKey
-  );
+  const oldReleaseMap: ReleaseMap | undefined =
+    await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
+  const newReleaseMap: ReleaseMap = oldReleaseMap ?? {};
 
-  if (!workingReleaseMap) {
-    workingReleaseMap = {};
-
+  if (!oldReleaseMap) {
     const unknownVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
         const isDiscoveredOutside = !!release;
         const isDiscoveredInsideAndCached = !is.undefined(
-          workingReleaseMap[version]
+          newReleaseMap[version]
         );
         const isDiscovered = isDiscoveredOutside || isDiscoveredInsideAndCached;
         return !isDiscovered;
@@ -276,26 +273,31 @@ async function addReleasesUsingHeadRequests(
           }
 
           if (res !== 'not-found' && res !== 'error') {
-            workingReleaseMap[version] = release;
+            newReleaseMap[version] = release;
           }
         }
       );
 
       await pAll(queue, { concurrency: 5 });
       const cacheTTL = retryEarlier ? 60 : 24 * 60;
-      await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
+      await packageCache.set(cacheNs, cacheKey, newReleaseMap, cacheTTL);
     }
   }
 
   for (const version of Object.keys(releaseMap)) {
-    releaseMap[version] ||= workingReleaseMap[version] ?? null;
+    releaseMap[version] ||= newReleaseMap[version] ?? null;
   }
 
   return releaseMap;
 }
 
 function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
-  const releases = Object.values(releaseMap).filter(Boolean);
+  const releases: Release[] = [];
+  for (const release of Object.values(releaseMap)) {
+    if (release) {
+      releases.push(release);
+    }
+  }
   if (releases.length) {
     return releases;
   }
@@ -306,6 +308,11 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // istanbul ignore if
+  if (!registryUrl) {
+    return null;
+  }
+
   const dependency = getDependencyParts(lookupName);
   const repoUrl = ensureTrailingSlash(registryUrl);
 
