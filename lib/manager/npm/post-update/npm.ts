@@ -111,9 +111,11 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // massage to shrinkwrap if necessary
+    const localDir = GlobalConfig.get('localDir');
+    const subDir = cwd === localDir ? '' : cwd.replace(localDir, '');
     if (
       filename === 'npm-shrinkwrap.json' &&
-      (await localPathExists('package-lock.json'))
+      (await localPathExists(upath.join(subDir, 'package-lock.json')))
     ) {
       await move(
         upath.join(cwd, 'package-lock.json'),
@@ -122,7 +124,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    lockFile = await readLocalFile(filename, 'utf8');
+    lockFile = await readLocalFile(upath.join(subDir, filename), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

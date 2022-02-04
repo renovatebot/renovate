@@ -1,5 +1,4 @@
-import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
 import type { PostUpdateConfig } from '../../types';
 import * as _pnpmHelper from './pnpm';
@@ -9,7 +8,6 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('./node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const pnpmHelper = mocked(_pnpmHelper);
 delete process.env.NPM_CONFIG_CACHE;
 

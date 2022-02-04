@@ -1,6 +1,5 @@
-import { exec as _exec } from 'child_process';
 import upath from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { env, fs } from '../../../../test/util';
 import * as npmHelper from './npm';
 
@@ -8,8 +7,6 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('./node-version');
-
-const exec: jest.Mock<typeof _exec> = _exec as any;
 
 describe('manager/npm/post-update/npm', () => {
   beforeEach(() => {
@@ -63,7 +60,7 @@ describe('manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll(exec);
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.move = jest.fn();
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -71,7 +68,9 @@ describe('manager/npm/post-update/npm', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(fs.localPathExists).toHaveBeenCalledWith('package-lock.json');
+    expect(fs.localPathExists).toHaveBeenCalledWith(
+      'some-dir/package-lock.json'
+    );
     expect(fs.move).toHaveBeenCalledTimes(1);
     expect(fs.move).toHaveBeenCalledWith(
       upath.join('some-dir', 'package-lock.json'),
@@ -79,7 +78,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.readLocalFile).toHaveBeenCalledWith(
-      'npm-shrinkwrap.json',
+      'some-dir/npm-shrinkwrap.json',
       'utf8'
     );
     expect(res.error).toBeUndefined();
@@ -91,7 +90,7 @@ describe('manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll(exec);
     fs.localPathExists.mockResolvedValueOnce(false);
     fs.move = jest.fn();
-    fs.readLocalFile = jest.fn((_, _1) => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -99,11 +98,13 @@ describe('manager/npm/post-update/npm', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(fs.localPathExists).toHaveBeenCalledWith('package-lock.json');
+    expect(fs.localPathExists).toHaveBeenCalledWith(
+      'some-dir/package-lock.json'
+    );
     expect(fs.move).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.readLocalFile).toHaveBeenCalledWith(
-      'npm-shrinkwrap.json',
+      'some-dir/npm-shrinkwrap.json',
       'utf8'
     );
     expect(res.error).toBeUndefined();
@@ -113,7 +114,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('performs full install', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = false;
     const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
@@ -130,7 +131,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('runs twice if remediating', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -147,9 +148,9 @@ describe('manager/npm/post-update/npm', () => {
 
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => {
+    fs.readLocalFile.mockImplementation(() => {
       throw new Error('not found');
-    }) as never;
+    });
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -163,7 +164,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('finds npm globally', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -176,7 +177,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('uses docker npm', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -190,7 +191,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
