@@ -818,6 +818,7 @@ export async function pushCommit({
 }: CommitFilesConfig): Promise<boolean> {
   await syncGit();
   logger.debug(`Pushing branch ${branchName}`);
+  let result = false;
   try {
     const pushOptions: TaskOptions = {
       '--force-with-lease': null,
@@ -835,11 +836,11 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue(Limit.Commits);
-    return true;
+    result = true;
   } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);
   }
-  return false;
+  return result;
 }
 
 export async function fetchCommit({
