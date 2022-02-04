@@ -398,8 +398,6 @@
     "lib/versioning/hashicorp/index.ts",
     "lib/versioning/helm/index.ts",
     "lib/versioning/index.ts",
-    "lib/versioning/ivy/index.ts",
-    "lib/versioning/ivy/parse.ts",
     "lib/versioning/poetry/index.ts",
     "lib/versioning/poetry/patterns.ts",
     "lib/versioning/poetry/transform.ts",
