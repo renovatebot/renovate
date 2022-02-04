@@ -27,6 +27,11 @@ export class HexDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     // Get dependency name from lookupName.
     // If the dependency is private lookupName contains organization name as following:
     // hexPackageName:organizationName
@@ -75,7 +80,7 @@ export class HexDatasource extends Datasource {
     }
 
     if (meta?.links?.Github) {
-      result.sourceUrl = hexRelease.meta.links.Github;
+      result.sourceUrl = meta?.links?.Github;
     }
 
     return result;

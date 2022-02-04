@@ -818,9 +818,10 @@ export async function prepareCommit({
 export async function pushCommit({
   branchName,
   files,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<boolean> {
   await syncGit();
   logger.debug(`Pushing branch ${branchName}`);
+  let result = false;
   try {
     const pushOptions: TaskOptions = {
       '--force-with-lease': null,
@@ -838,9 +839,11 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue(Limit.Commits);
+    result = true;
   } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);
   }
+  return result;
 }
 
 export async function fetchCommit({
@@ -865,11 +868,13 @@ export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
   const commitResult = await prepareCommit(config);
-  if (!commitResult) {
-    return null;
+  if (commitResult) {
+    const pushResult = await pushCommit(config);
+    if (pushResult) {
+      return fetchCommit(config);
+    }
   }
-  await pushCommit(config);
-  return fetchCommit(config);
+  return null;
 }
 
 export function getUrl({
