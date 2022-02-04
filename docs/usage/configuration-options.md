@@ -1136,6 +1136,7 @@ client certificates when making HTTPS requests towards matching hosts.
         "pkcs12": "<base64 encoded PKCS12 store>",
         "passphrase": "<optional passphrase>"
       }
+    }
   ]
 }
 ```
