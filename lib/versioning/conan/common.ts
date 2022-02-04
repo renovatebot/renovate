@@ -9,7 +9,7 @@ export function makeVersion(
   const prerelease = semver.prerelease(version, options);
 
   if (prerelease && !options.includePrerelease) {
-    if (!Number.isNaN(+prerelease[0])) {
+    if (!Number.isNaN(parseInt(prerelease[0], 10))) {
       const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
       return semver.valid(stringVersion, options);
     }
@@ -29,7 +29,7 @@ export function makeVersion(
 export function cleanVersion(version: string): string {
   if (version) {
     return version
-      .replace(/,|\[|\]|"|include_prerelease=|loose=|True|False/g, '')
+      .replace(regEx(/,|\[|\]|"|include_prerelease=|loose=|True|False/g), '')
       .trim();
   }
   return version;

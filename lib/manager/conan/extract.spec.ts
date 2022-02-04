@@ -1,9 +1,9 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const conanfile1 = loadFixture('conanfile.txt');
-const conanfile2 = loadFixture('conanfile2.txt');
-const conanfile3 = loadFixture('conanfile.py');
+const conanfile1 = Fixtures.get('conanfile.txt');
+const conanfile2 = Fixtures.get('conanfile2.txt');
+const conanfile3 = Fixtures.get('conanfile.py');
 
 describe('manager/conan/extract', () => {
   describe('extractPackageFile', () => {

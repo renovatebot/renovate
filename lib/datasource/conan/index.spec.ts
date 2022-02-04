@@ -1,18 +1,19 @@
 import { getPkgReleases } from '..';
+import type { GetPkgReleasesConfig } from '../types';
 import * as httpMock from '../../../test/http-mock';
-import { loadJsonFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import * as conan from '../../versioning/conan';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
-const pocoJson: any = loadJsonFixture('poco.json');
-const malformedJson: any = loadJsonFixture('malformed.json');
-const fakeJson: any = loadJsonFixture('fake.json');
+const pocoJson = Fixtures.get('poco.json');
+const malformedJson = Fixtures.get('malformed.json');
+const fakeJson = Fixtures.get('fake.json');
 const datasource = ConanDatasource.id;
 
-const config = {
+const config: GetPkgReleasesConfig = {
+    datasource,
   versioning: conan.id,
-  registryUrls: [defaultRegistryUrl],
 };
 
 describe('datasource/conan/index', () => {
@@ -22,7 +23,6 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, null);
-      config.registryUrls = [defaultRegistryUrl];
       expect(
         await getPkgReleases({
           ...config,
@@ -38,7 +38,6 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, {});
-      config.registryUrls = [defaultRegistryUrl];
       expect(
         await getPkgReleases({
           ...config,
@@ -70,7 +69,6 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, fakeJson);
-      config.registryUrls = [defaultRegistryUrl];
       expect(
         await getPkgReleases({
           ...config,
@@ -86,7 +84,6 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
-      config.registryUrls = [defaultRegistryUrl];
       expect(
         await getPkgReleases({
           ...config,
@@ -121,7 +118,6 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
-      config.registryUrls = [defaultRegistryUrl];
       expect(
         await getPkgReleases({
           ...config,
@@ -137,7 +133,6 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=bad')
         .reply(200, malformedJson);
-      config.registryUrls = [defaultRegistryUrl];
       expect(
         await getPkgReleases({
           ...config,
