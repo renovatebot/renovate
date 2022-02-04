@@ -7,7 +7,7 @@ import * as memCache from '../../util/cache/memory';
 import { cache } from '../../util/cache/package/decorator';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { simpleGitConfig } from '../../util/git/config';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { parseUrl } from '../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
@@ -66,7 +66,7 @@ export class CrateDatasource extends Datasource {
       lookupName
     );
     const lines = payload
-      .split('\n') // break into lines
+      .split(newlineRegex) // break into lines
       .map((line) => line.trim()) // remove whitespace
       .filter((line) => line.length !== 0) // remove empty lines
       .map((line) => JSON.parse(line) as CrateRecord); // parse

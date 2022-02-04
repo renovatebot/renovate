@@ -1786,17 +1786,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
 ]
 `;
 
@@ -1852,17 +1841,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
 ]
 `;
 
@@ -1917,17 +1895,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
 `;
@@ -2437,7 +2404,6 @@ Array [
 exports[`platform/gitlab/index getPr(prNo) removes deprecated draft prefix from returned title 1`] = `
 Object {
   "body": "a merge request",
-  "canMerge": false,
   "displayNumber": "Merge Request #12345",
   "hasAssignees": false,
   "hasReviewers": false,
@@ -2471,7 +2437,6 @@ Array [
 exports[`platform/gitlab/index getPr(prNo) removes draft prefix from returned title 1`] = `
 Object {
   "body": "a merge request",
-  "canMerge": false,
   "displayNumber": "Merge Request #12345",
   "hasAssignees": false,
   "hasReviewers": false,
@@ -2505,7 +2470,6 @@ Array [
 exports[`platform/gitlab/index getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
-  "canMerge": false,
   "displayNumber": "Merge Request #12345",
   "hasAssignees": false,
   "hasReviewers": false,
@@ -2538,7 +2502,6 @@ Array [
 exports[`platform/gitlab/index getPr(prNo) returns the PR with nonexisting branch 1`] = `
 Object {
   "body": "a merge request",
-  "canMerge": false,
   "displayNumber": "Merge Request #12345",
   "hasAssignees": true,
   "hasReviewers": false,
@@ -2571,7 +2534,6 @@ Array [
 exports[`platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] = `
 Object {
   "body": "a merge request",
-  "canMerge": true,
   "displayNumber": "Merge Request #12345",
   "hasAssignees": true,
   "hasReviewers": false,
@@ -2608,17 +2570,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/12345?include_diverged_commits_count=1",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
 `;

@@ -73,7 +73,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         headRefName
         baseRefName
         title
-        mergeable
         mergeStateStatus
         labels(last: 100) {
           nodes {
