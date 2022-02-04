@@ -146,20 +146,20 @@ export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): url.URL | null {
+): url.URL {
   return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
   pkgUrl: url.URL | null
-): Promise<MavenXml | null> {
+): Promise<MavenXml> {
   /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
-  let rawContent: string;
-  let authorization: boolean;
-  let statusCode: number;
+  let rawContent: string | undefined;
+  let authorization: boolean | undefined;
+  let statusCode: number | undefined;
   switch (pkgUrl.protocol) {
     case 'http:':
     case 'https:':
