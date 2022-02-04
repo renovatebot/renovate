@@ -179,10 +179,9 @@ function getNewValue({
     newValue = `${operator}${toMajor}`;
   } else if (regEx(/^[~^]([0-9]*(?:\.[0-9]*)?)$/).test(currentValue)) {
     const operator = currentValue.substr(0, 1);
-    // istanbul ignore
     const currentVersionMajor = currentVersion
       ? getMajor(currentVersion)
-      : null;
+      : /* istanbul ignore next */ null;
     // handle ~4.1 case
     if (
       currentVersion &&
@@ -199,10 +198,9 @@ function getNewValue({
     npm.isValid(normalizeVersion(currentValue)) &&
     composer2npm(currentValue) === normalizeVersion(currentValue)
   ) {
-    // istanbul ignore
     const normalizedCurrentVersion = currentVersion
       ? normalizeVersion(currentVersion)
-      : currentVersion;
+      : /* istanbul ignore next */ currentVersion;
     newValue = npm.getNewValue({
       currentValue: normalizeVersion(currentValue),
       rangeStrategy,
@@ -228,20 +226,18 @@ function getNewValue({
       if (rangeStrategy === 'replace') {
         newValue = replacementValue;
       } else {
-        // istanbul ignore
         const parsedRange = replacementValue
           ? parseRange(replacementValue)
-          : [];
+          : /* istanbul ignore next */ [];
         const element = parsedRange[parsedRange.length - 1];
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
           splitCurrent.pop();
           newValue = splitCurrent.join(element.operator) + replacementValue;
         } else {
-          // istanbul ignore
           newValue = replacementValue
             ? currentValue + ' || ' + replacementValue
-            : currentValue; // unsure
+            : /* istanbul ignore next*/ currentValue;
         }
       }
     }
