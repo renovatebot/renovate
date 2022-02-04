@@ -32,6 +32,8 @@ This makes it harder for us to review your work because we don't know what has c
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
+If you are updating your PR branch from within the GitHub PR interface, then only use the default "Update branch" button.
+
 Force pushing a PR is OK when:
 
 - you need to make large changes on a PR which require a full review anyway
