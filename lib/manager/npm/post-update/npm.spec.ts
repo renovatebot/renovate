@@ -17,7 +17,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockResolvedValueOnce(() => 'package-lock-contents');
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
