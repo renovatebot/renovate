@@ -125,13 +125,12 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     range: string
   ): string | null {
     const parsedRange = this._parse(range);
-    if (parsedRange) {
-      return semver.maxSatisfying(
-        this._getSemverVersions(versions),
-        asSemver(parsedRange)
-      );
-    }
-    return null;
+    return parsedRange
+      ? semver.maxSatisfying(
+          this._getSemverVersions(versions),
+          asSemver(parsedRange)
+        )
+      : null;
   }
 
   override minSatisfyingVersion(
@@ -139,13 +138,12 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     range: string
   ): string | null {
     const parsedRange = this._parse(range);
-    if (parsedRange) {
-      return semver.minSatisfying(
-        this._getSemverVersions(versions),
-        asSemver(parsedRange)
-      );
-    }
-    return null;
+    return parsedRange
+      ? semver.minSatisfying(
+          this._getSemverVersions(versions),
+          asSemver(parsedRange)
+        )
+      : null;
   }
 
   override matches(version: string, range: string): boolean {
