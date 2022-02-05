@@ -42,21 +42,6 @@ Object {
 }
 `;
 
-exports[`platform/azure/util getRenovatePRFormat should be formated (isConflicted) 1`] = `
-Object {
-  "body": undefined,
-  "createdAt": undefined,
-  "displayNumber": "Pull Request #undefined",
-  "isConflicted": true,
-  "mergeStatus": 2,
-  "number": undefined,
-  "sourceBranch": undefined,
-  "sourceRefName": undefined,
-  "state": "open",
-  "targetBranch": undefined,
-}
-`;
-
 exports[`platform/azure/util getRenovatePRFormat should be formated (not closed) 1`] = `
 Object {
   "body": undefined,

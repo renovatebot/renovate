@@ -1,6 +1,7 @@
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import type { PackageDependency } from '../types';
+import type { ChartDefinition, Repository } from './types';
 
 export function parseRepository(
   depName: string,
@@ -40,7 +41,7 @@ export function resolveAlias(
   repository: string,
   aliases: Record<string, string>
 ): string | null {
-  if (!(repository.startsWith('@') || repository.startsWith('alias:'))) {
+  if (!isAlias(repository)) {
     return repository;
   }
 
@@ -50,4 +51,42 @@ export function resolveAlias(
     return alias;
   }
   return null;
+}
+
+export function getRepositories(definitions: ChartDefinition[]): Repository[] {
+  const repositoryList = definitions
+    .flatMap((value) => value.dependencies)
+    .filter((dependency) => !isAlias(dependency.repository)) // do not add aliases
+    .map((dependency) => {
+      // remove additional keys to prevent interference at deduplication
+      return {
+        name: dependency.name,
+        repository: dependency.repository,
+      };
+    });
+  const dedup = new Set();
+  return repositoryList.filter((el) => {
+    const duplicate = dedup.has(el.repository);
+    dedup.add(el.repository);
+    return !duplicate;
+  });
+}
+
+function isAlias(repository: string): boolean {
+  return repository.startsWith('@') || repository.startsWith('alias:');
+}
+
+export function isOCIRegistry(repository: Repository): boolean {
+  return repository.repository.startsWith('oci://');
+}
+
+export function aliasRecordToRepositories(
+  aliases: Record<string, string>
+): Repository[] {
+  return Object.entries(aliases).map(([alias, url]) => {
+    return {
+      name: alias,
+      repository: url,
+    };
+  });
 }
