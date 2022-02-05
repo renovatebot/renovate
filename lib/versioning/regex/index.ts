@@ -109,7 +109,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     );
   }
 
-  private getSemverVersions(versions: string[]): string[] {
+  private _getSemverVersions(versions: string[]): string[] {
     const parsedVersions: string[] = [];
     versions.forEach((v) => {
       const parsedVersion = this._parse(v);
@@ -127,7 +127,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const parsedRange = this._parse(range);
     if (parsedRange) {
       return semver.maxSatisfying(
-        this.getSemverVersions(versions),
+        this._getSemverVersions(versions),
         asSemver(parsedRange)
       );
     }
@@ -141,7 +141,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const parsedRange = this._parse(range);
     if (parsedRange) {
       return semver.minSatisfying(
-        this.getSemverVersions(versions),
+        this._getSemverVersions(versions),
         asSemver(parsedRange)
       );
     }
