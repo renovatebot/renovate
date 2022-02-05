@@ -1,7 +1,7 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { validResponse } from './common';
+import { IResponse, Response } from './common';
 
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
@@ -27,8 +27,10 @@ export class CdnJsDatasource extends Datasource {
     const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
     let result: ReleaseResult | null = null;
     try {
-      const { body } = await this.http.getJson(url);
-      const { assets, homepage, repository } = validResponse(body);
+      const { body } = await this.http.getJson<IResponse>(url, {
+        responseParser: Response,
+      });
+      const { assets, homepage, repository } = body;
 
       const assetName = lookupName.replace(`${library}/`, '');
       const releases = assets

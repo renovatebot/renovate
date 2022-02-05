@@ -23,7 +23,3 @@ export const Response = z.object({
 
 // export type IResponse = z.infer<typeof Response>;
 export type IResponse = CdnjsResponse;
-
-export function validResponse(input: unknown): IResponse {
-  return Response.parse(input) as IResponse;
-}
