@@ -69,10 +69,9 @@ class DockerVersioningApi extends GenericVersioningApi {
       }
     }
 
+    // equals
     const suffix1 = parsed1.suffix ?? '';
     const suffix2 = parsed2.suffix ?? '';
-
-    // equals
     return suffix2.localeCompare(suffix1);
   }
 
