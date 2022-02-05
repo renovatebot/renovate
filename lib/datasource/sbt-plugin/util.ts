@@ -7,6 +7,6 @@ export function parseIndexDir(
   content: string,
   filterFn = (x: string): boolean => !regEx(/^\.+/).test(x)
 ): string[] {
-  const unfiltered = content.match(/(?<=href=['"])[^'"]*(?=\/['"])/g) || [];
+  const unfiltered = content.match(/(?<=href=['"])[^'"]*(?=\/['"])/g) ?? [];
   return unfiltered.filter(filterFn);
 }
