@@ -140,6 +140,7 @@ export async function flattenUpdates(
           packageFileConfig.lockFileMaintenance
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
+        lockFileConfig.isLockFileMaintenance = true;
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
