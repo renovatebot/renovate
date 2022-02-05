@@ -68,12 +68,12 @@ class DockerVersioningApi extends GenericVersioningApi {
         return parsed1.prerelease.localeCompare(parsed2.prerelease);
       }
     }
-    // equals
-    if (parsed2.suffix && parsed1.suffix) {
-      return parsed2.suffix.localeCompare(parsed1.suffix);
-    }
 
-    return 0;
+    const suffix1 = parsed1.suffix ?? '';
+    const suffix2 = parsed2.suffix ?? '';
+
+    // equals
+    return suffix2.localeCompare(suffix1);
   }
 
   override isCompatible(version: string, current: string): boolean {
