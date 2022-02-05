@@ -28,7 +28,7 @@ export class CdnJsDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     try {
       const { body } = await this.http.getJson<IResponse>(url, {
-        responseParser: Response,
+        responseSchema: Response,
       });
       const { assets, homepage, repository } = body;
 

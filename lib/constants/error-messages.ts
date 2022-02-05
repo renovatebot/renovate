@@ -55,3 +55,6 @@ export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
 
 // Unknown Error
 export const UNKNOWN_ERROR = 'unknown-error';
+
+// Schema Error
+export const SCHEMA_ERROR = 'schema-error';

@@ -13,12 +13,12 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
+import { Schema, handleSchemaError } from './schema';
 import type {
   GotJSONOptions,
   GotOptions,
   OutgoingHttpHeaders,
   RequestStats,
-  ResponseParser,
 } from './types';
 
 // TODO: refactor code to remove this (#9651)
@@ -39,7 +39,7 @@ export interface HttpOptions<ResponseType = any> {
   throwHttpErrors?: boolean;
   useCache?: boolean;
 
-  responseParser?: ResponseParser<ResponseType>;
+  responseSchema?: Schema<ResponseType>;
 }
 
 export interface HttpPostOptions extends HttpOptions {
@@ -184,9 +184,17 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
           url,
           queueDuration,
         });
-        if (httpOptions.responseParser) {
-          gotResponse.body = httpOptions.responseParser.parse(gotResponse.body);
+
+        if (httpOptions.responseSchema) {
+          try {
+            gotResponse.body = httpOptions.responseSchema.parse(
+              gotResponse.body
+            );
+          } catch (err) {
+            handleSchemaError(err);
+          }
         }
+
         return gotResponse;
       };
       const queue = getQueue(url);
