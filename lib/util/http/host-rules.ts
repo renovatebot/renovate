@@ -109,15 +109,11 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   }
 
   if (foundRules.keyStore) {
-    let ksData = foundRules.keyStore.pkcs12;
-    if (!(ksData instanceof Buffer)) {
-      ksData = Buffer.from(ksData, 'base64');
-    }
     options.https = {
       pfx: [
         {
           passphrase: foundRules.keyStore.passphrase,
-          buf: ksData,
+          buf: foundRules.keyStore.pkcs12,
         },
       ],
     };

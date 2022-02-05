@@ -63,6 +63,11 @@ export function add(params: HostRule): void {
     );
     sanitize.addSecretForSanitizing(secret);
   }
+  if (rule.keyStore) {
+    if (rule.keyStore.pkcs12 instanceof String) {
+      rule.keyStore.pkcs12 = Buffer.from(rule.keyStore.pkcs12, 'base64');
+    }
+  }
   hostRules.push(rule);
 }
 
