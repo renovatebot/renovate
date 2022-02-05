@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -10,7 +10,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     for (const line of lines) {
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {

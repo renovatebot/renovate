@@ -1,7 +1,7 @@
 import semver from 'semver';
-import * as datasourceGo from '../../datasource/go';
+import { GoDatasource } from '../../datasource/go';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -22,7 +22,7 @@ function getDep(
     currentValue,
   };
   if (isVersion(currentValue)) {
-    dep.datasource = datasourceGo.id;
+    dep.datasource = GoDatasource.id;
   } else {
     dep.skipReason = 'unsupported-version';
   }
@@ -39,7 +39,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const constraints: Record<string, any> = {};
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       if (

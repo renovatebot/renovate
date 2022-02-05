@@ -1,28 +1,14 @@
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
-import * as memCache from '../../util/cache/memory';
-import {
-  encodeCase,
-  getReleases,
-  listVersions,
-  parseGoproxy,
-  parseNoproxy,
-  versionInfo,
-} from './releases-goproxy';
+import { GoProxyDatasource } from './releases-goproxy';
+
+const datasource = new GoProxyDatasource();
 
 describe('datasource/go/releases-goproxy', () => {
-  beforeEach(() => {
-    memCache.init();
-  });
-
-  afterEach(() => {
-    memCache.reset();
-  });
-
   it('encodeCase', () => {
-    expect(encodeCase('foo')).toBe('foo');
-    expect(encodeCase('Foo')).toBe('!foo');
-    expect(encodeCase('FOO')).toBe('!f!o!o');
+    expect(datasource.encodeCase('foo')).toBe('foo');
+    expect(datasource.encodeCase('Foo')).toBe('!foo');
+    expect(datasource.encodeCase('FOO')).toBe('!f!o!o');
   });
 
   describe('requests', () => {
@@ -35,7 +21,7 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/github.com/go-kit/kit/@v/list')
         .reply(200, loadFixture('go-kit.list.txt'));
 
-      const versions = await listVersions(baseUrl, lookupName);
+      const versions = await datasource.listVersions(baseUrl, lookupName);
 
       expect(versions).not.toBeEmpty();
       expect(versions).toHaveLength(10);
@@ -48,7 +34,11 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/github.com/go-kit/kit/@v/v0.5.0.info')
         .reply(200, { Version: 'v0.5.0', Time: '2017-06-08T17:28:36Z' });
 
-      const release = await versionInfo(baseUrl, lookupName, 'v0.5.0');
+      const release = await datasource.versionInfo(
+        baseUrl,
+        lookupName,
+        'v0.5.0'
+      );
 
       expect(release).toEqual({
         version: 'v0.5.0',
@@ -60,12 +50,12 @@ describe('datasource/go/releases-goproxy', () => {
 
   describe('parseGoproxy', () => {
     it('parses single url', () => {
-      const result = parseGoproxy('foo');
+      const result = datasource.parseGoproxy('foo');
       expect(result).toMatchObject([{ url: 'foo' }]);
     });
 
     it('parses multiple urls', () => {
-      const result = parseGoproxy('foo,bar|baz,qux');
+      const result = datasource.parseGoproxy('foo,bar|baz,qux');
       expect(result).toMatchObject([
         { url: 'foo', fallback: ',' },
         { url: 'bar', fallback: '|' },
@@ -75,16 +65,16 @@ describe('datasource/go/releases-goproxy', () => {
     });
 
     it('ignores everything starting from "direct" and "off" keywords', () => {
-      expect(parseGoproxy(undefined)).toBeEmpty();
-      expect(parseGoproxy(null)).toBeEmpty();
-      expect(parseGoproxy('')).toBeEmpty();
-      expect(parseGoproxy('off')).toMatchObject([
+      expect(datasource.parseGoproxy(undefined)).toBeEmpty();
+      expect(datasource.parseGoproxy(null)).toBeEmpty();
+      expect(datasource.parseGoproxy('')).toBeEmpty();
+      expect(datasource.parseGoproxy('off')).toMatchObject([
         { url: 'off', fallback: '|' },
       ]);
-      expect(parseGoproxy('direct')).toMatchObject([
+      expect(datasource.parseGoproxy('direct')).toMatchObject([
         { url: 'direct', fallback: '|' },
       ]);
-      expect(parseGoproxy('foo,off|direct,qux')).toMatchObject([
+      expect(datasource.parseGoproxy('foo,off|direct,qux')).toMatchObject([
         { url: 'foo', fallback: ',' },
         { url: 'off', fallback: '|' },
         { url: 'direct', fallback: ',' },
@@ -93,83 +83,185 @@ describe('datasource/go/releases-goproxy', () => {
     });
   });
 
-  describe('parseNoproxy', () => {
+  describe('GoProxyDatasource.parseNoproxy', () => {
     it('produces regex', () => {
-      expect(parseNoproxy(undefined)).toBeNull();
-      expect(parseNoproxy(null)).toBeNull();
-      expect(parseNoproxy('')).toBeNull();
-      expect(parseNoproxy('/')).toBeNull();
-      expect(parseNoproxy('*')?.source).toBe('^(?:[^\\/]*)(?:\\/.*)?$');
-      expect(parseNoproxy('?')?.source).toBe('^(?:[^\\/])(?:\\/.*)?$');
-      expect(parseNoproxy('foo')?.source).toBe('^(?:foo)(?:\\/.*)?$');
-      expect(parseNoproxy('\\f\\o\\o')?.source).toBe('^(?:foo)(?:\\/.*)?$');
-      expect(parseNoproxy('foo,bar')?.source).toBe('^(?:foo|bar)(?:\\/.*)?$');
-      expect(parseNoproxy('[abc]')?.source).toBe('^(?:[abc])(?:\\/.*)?$');
-      expect(parseNoproxy('[a-c]')?.source).toBe('^(?:[a-c])(?:\\/.*)?$');
-      expect(parseNoproxy('[\\a-\\c]')?.source).toBe('^(?:[a-c])(?:\\/.*)?$');
-      expect(parseNoproxy('a.b.c')?.source).toBe('^(?:a\\.b\\.c)(?:\\/.*)?$');
-      expect(parseNoproxy('trailing/')?.source).toBe(
+      expect(GoProxyDatasource.parseNoproxy(undefined)).toBeNull();
+      expect(GoProxyDatasource.parseNoproxy(null)).toBeNull();
+      expect(GoProxyDatasource.parseNoproxy('')).toBeNull();
+      expect(GoProxyDatasource.parseNoproxy('/')).toBeNull();
+      expect(GoProxyDatasource.parseNoproxy('*')?.source).toBe(
+        '^(?:[^\\/]*)(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('?')?.source).toBe(
+        '^(?:[^\\/])(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('foo')?.source).toBe(
+        '^(?:foo)(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('\\f\\o\\o')?.source).toBe(
+        '^(?:foo)(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('foo,bar')?.source).toBe(
+        '^(?:foo|bar)(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('[abc]')?.source).toBe(
+        '^(?:[abc])(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('[a-c]')?.source).toBe(
+        '^(?:[a-c])(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('[\\a-\\c]')?.source).toBe(
+        '^(?:[a-c])(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('a.b.c')?.source).toBe(
+        '^(?:a\\.b\\.c)(?:\\/.*)?$'
+      );
+      expect(GoProxyDatasource.parseNoproxy('trailing/')?.source).toBe(
         '^(?:trailing)(?:\\/.*)?$'
       );
     });
 
     it('matches on real package prefixes', () => {
-      expect(parseNoproxy('ex.co').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('ex.co/').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('ex.co/foo/bar').test('ex.co/foo/bar')).toBeTrue();
-      expect(parseNoproxy('ex.co/foo/bar').test('ex.co/foo/bar')).toBeTrue();
-      expect(parseNoproxy('*/foo/*').test('example.com/foo/bar')).toBeTrue();
-      expect(parseNoproxy('ex.co/foo/*').test('ex.co/foo/bar')).toBeTrue();
-      expect(parseNoproxy('ex.co/foo/*').test('ex.co/foo/baz')).toBeTrue();
-      expect(parseNoproxy('ex.co').test('ex.co/foo/v2')).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar').test('ex.co/foo/bar')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar').test('ex.co/foo/bar')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/*').test('example.com/foo/bar')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*').test('ex.co/foo/bar')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*').test('ex.co/foo/baz')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co').test('ex.co/foo/v2')
+      ).toBeTrue();
 
       expect(
-        parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test('ex.co/foo/bar')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar').test('ex.co/foo/bar')
       ).toBeTrue();
       expect(
-        parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test('ex.co/foo/baz')
+        GoProxyDatasource.parseNoproxy('*/foo/*').test('example.com/foo/bar')
       ).toBeTrue();
       expect(
-        parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test('ex.co/foo/qux')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*').test('ex.co/foo/bar')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*').test('ex.co/foo/baz')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test(
+          'ex.co/foo/bar'
+        )
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test(
+          'ex.co/foo/baz'
+        )
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz').test(
+          'ex.co/foo/qux'
+        )
       ).toBeFalse();
 
-      expect(parseNoproxy('ex').test('ex.co/foo')).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex').test('ex.co/foo')
+      ).toBeFalse();
 
-      expect(parseNoproxy('aba').test('x/aba')).toBeFalse();
-      expect(parseNoproxy('x/b').test('x/aba')).toBeFalse();
-      expect(parseNoproxy('x/ab').test('x/aba')).toBeFalse();
-      expect(parseNoproxy('x/ab[a-b]').test('x/aba')).toBeTrue();
+      expect(GoProxyDatasource.parseNoproxy('aba').test('x/aba')).toBeFalse();
+      expect(GoProxyDatasource.parseNoproxy('x/b').test('x/aba')).toBeFalse();
+      expect(GoProxyDatasource.parseNoproxy('x/ab').test('x/aba')).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('x/ab[a-b]').test('x/aba')
+      ).toBeTrue();
     });
 
     it('matches on wildcards', () => {
-      expect(parseNoproxy('/*/').test('ex.co/foo')).toBeFalse();
-      expect(parseNoproxy('*/foo').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('*/fo').test('ex.co/foo')).toBeFalse();
-      expect(parseNoproxy('*/fo?').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('*/fo*').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('*fo*').test('ex.co/foo')).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('/*/').test('ex.co/foo')
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/fo').test('ex.co/foo')
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/fo?').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/fo*').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*fo*').test('ex.co/foo')
+      ).toBeFalse();
 
-      expect(parseNoproxy('*.co').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('ex*').test('ex.co/foo')).toBeTrue();
-      expect(parseNoproxy('*/foo').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/foo/').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/foo/*').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/foo/*/').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/v2').test('ex.co/foo/v2')).toBeFalse();
-      expect(parseNoproxy('*/*/v2').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/*/*').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/*/*/').test('ex.co/foo/v2')).toBeTrue();
-      expect(parseNoproxy('*/*/*').test('ex.co/foo')).toBeFalse();
-      expect(parseNoproxy('*/*/*/').test('ex.co/foo')).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*.co').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex*').test('ex.co/foo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/*').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/*/').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/v2').test('ex.co/foo/v2')
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/v2').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*/').test('ex.co/foo/v2')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*').test('ex.co/foo')
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*/').test('ex.co/foo')
+      ).toBeFalse();
 
-      expect(parseNoproxy('*/*/*,,').test('ex.co/repo')).toBeFalse();
-      expect(parseNoproxy('*/*/*,,*/repo').test('ex.co/repo')).toBeTrue();
-      expect(parseNoproxy(',,*/repo').test('ex.co/repo')).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*,,').test('ex.co/repo')
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*,,*/repo').test('ex.co/repo')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy(',,*/repo').test('ex.co/repo')
+      ).toBeTrue();
     });
 
     it('matches on character ranges', () => {
-      expect(parseNoproxy('x/ab[a-b]').test('x/aba')).toBeTrue();
-      expect(parseNoproxy('x/ab[a-b]').test('x/abc')).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('x/ab[a-b]').test('x/aba')
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('x/ab[a-b]').test('x/abc')
+      ).toBeFalse();
     });
   });
 
@@ -193,7 +285,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/repos/google/btree/releases?per_page=100')
         .reply(200, []);
 
-      const res = await getReleases({ lookupName: 'github.com/google/btree' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/google/btree',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
         releases: [
@@ -216,7 +310,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
-      const res = await getReleases({ lookupName: 'github.com/google/btree' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/google/btree',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
         releases: [
@@ -239,7 +335,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/@v/v1.0.1.info')
         .reply(410);
 
-      const res = await getReleases({ lookupName: 'github.com/google/btree' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/google/btree',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
         releases: [{ version: 'v1.0.0' }, { version: 'v1.0.1' }],
@@ -264,7 +362,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
-      const res = await getReleases({ lookupName: 'github.com/google/btree' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/google/btree',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
         releases: [
@@ -301,7 +401,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
-      const res = await getReleases({ lookupName: 'github.com/google/btree' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/google/btree',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
         releases: [
@@ -335,7 +437,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .replyWithError('unknown');
 
-      const res = await getReleases({ lookupName: 'github.com/foo/bar' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/foo/bar',
+      });
 
       expect(httpMock.getTrace()).toMatchSnapshot([
         { method: 'GET', url: 'https://foo.com/github.com/foo/bar/@v/list' },
@@ -369,7 +473,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/repos/foo/bar/releases?per_page=100')
         .reply(200, []);
 
-      const res = await getReleases({ lookupName: 'github.com/foo/bar' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/foo/bar',
+      });
 
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
@@ -396,7 +502,9 @@ describe('datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(410);
 
-      const res = await getReleases({ lookupName: 'github.com/foo/bar' });
+      const res = await datasource.getReleases({
+        lookupName: 'github.com/foo/bar',
+      });
 
       expect(httpMock.getTrace()).toMatchSnapshot([
         { method: 'GET', url: 'https://foo.com/github.com/foo/bar/@v/list' },

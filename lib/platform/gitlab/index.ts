@@ -611,15 +611,6 @@ export async function getPr(iid: number): Promise<Pr> {
     sha: mr.sha,
   };
 
-  if (mr.merge_status === 'cannot_be_merged') {
-    logger.debug('pr cannot be merged');
-    pr.canMerge = false;
-  } else if (pr.state === PrState.Open) {
-    const branchStatus = await getBranchStatus(pr.sourceBranch);
-    if (branchStatus === BranchStatus.green) {
-      pr.canMerge = true;
-    }
-  }
   return massagePr(pr);
 }
 

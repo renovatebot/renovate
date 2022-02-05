@@ -21,7 +21,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -288,17 +288,6 @@ export async function getPr(
   };
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
-
-  if (pr.state === PrState.Open) {
-    const mergeRes = await bitbucketServerHttp.getJson<{
-      conflicted: string;
-      canMerge: string;
-    }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
-      { useCache: !refreshCache }
-    );
-    pr.canMerge = !!mergeRes.body.canMerge;
-  }
 
   return pr;
 }
@@ -994,7 +983,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  logger.debug(`massageMarkdown(${input.split('\n')[0]})`);
+  logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
     .replace(
