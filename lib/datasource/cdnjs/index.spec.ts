@@ -25,6 +25,15 @@ describe('datasource/cdnjs/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('throws for missing required field', async () => {
+      httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(200, {});
+      await expect(
+        getPkgReleases({
+          datasource: CdnJsDatasource.id,
+          depName: 'foo/bar',
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
     it('throws for error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
@@ -49,7 +58,7 @@ describe('datasource/cdnjs/index', () => {
       httpMock
         .scope(baseUrl)
         .get(pathFor('doesnotexist/doesnotexist'))
-        .reply(200, {});
+        .reply(200, { assets: [] });
       expect(
         await getPkgReleases({
           datasource: CdnJsDatasource.id,

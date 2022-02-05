@@ -1,7 +1,7 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { CdnjsResponse } from './types';
+import { validResponse } from './common';
 
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
@@ -25,26 +25,24 @@ export class CdnJsDatasource extends Datasource {
     // Each library contains multiple assets, so we cache at the library level instead of per-asset
     const library = lookupName.split('/')[0];
     const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
-    let result: ReleaseResult;
+    let result: ReleaseResult | null = null;
     try {
-      const { assets, homepage, repository } = (
-        await this.http.getJson<CdnjsResponse>(url)
-      ).body;
-      if (!assets) {
-        return null;
-      }
+      const { body } = await this.http.getJson(url);
+      const { assets, homepage, repository } = validResponse(body);
+
       const assetName = lookupName.replace(`${library}/`, '');
       const releases = assets
         .filter(({ files }) => files.includes(assetName))
         .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
 
-      result = { releases };
-
-      if (homepage) {
-        result.homepage = homepage;
-      }
-      if (repository?.url) {
-        result.sourceUrl = repository.url;
+      if (releases.length) {
+        result = { releases };
+        if (homepage) {
+          result.homepage = homepage;
+        }
+        if (repository?.url) {
+          result.sourceUrl = repository.url;
+        }
       }
     } catch (err) {
       if (err.statusCode !== 404) {
@@ -52,6 +50,7 @@ export class CdnJsDatasource extends Datasource {
       }
       this.handleGenericErrors(err);
     }
-    return result || null;
+
+    return result ?? null;
   }
 }
