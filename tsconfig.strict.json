@@ -392,6 +392,8 @@
     "lib/versioning/common.ts",
     "lib/versioning/composer/index.ts",
     "lib/versioning/docker/index.ts",
+    "lib/versioning/generic.ts",
+    "lib/versioning/git/index.ts",
     "lib/versioning/hashicorp/index.ts",
     "lib/versioning/helm/index.ts",
     "lib/versioning/index.ts",
