@@ -96,3 +96,12 @@ export interface CommitResult {
   sha: string;
   files: FileChange[];
 }
+
+/**
+ * Represents a git authentication rule in the form of e.g.:
+ * git config --global url."https://api@github.com/".insteadOf "https://github.com/"
+ */
+export interface AuthenticationRule {
+  url: string;
+  insteadOf: string;
+}
