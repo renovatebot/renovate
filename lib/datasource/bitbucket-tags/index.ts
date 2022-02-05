@@ -29,7 +29,7 @@ export class BitBucketTagsDatasource extends Datasource {
   }
 
   static getCacheKey(
-    registryUrl = this.defaultRegistryUrls[0],
+    registryUrl: string | undefined,
     repo: string,
     type: string
   ): string {
@@ -68,7 +68,6 @@ export class BitBucketTagsDatasource extends Datasource {
 
     const dependency: ReleaseResult = {
       sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
-      registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
       releases,
     };
 
