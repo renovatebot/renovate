@@ -9,10 +9,10 @@ import ivy from '.';
 describe('versioning/ivy/index', () => {
   test.each`
     input                   | type               | value
-    ${'latest'}             | ${REV_TYPE_LATEST} | ${null}
+    ${'latest'}             | ${REV_TYPE_LATEST} | ${''}
     ${'latest.release'}     | ${REV_TYPE_LATEST} | ${'release'}
     ${'latest.milestone'}   | ${REV_TYPE_LATEST} | ${'milestone'}
-    ${'latest.integration'} | ${REV_TYPE_LATEST} | ${null}
+    ${'latest.integration'} | ${REV_TYPE_LATEST} | ${''}
     ${'1.0.+'}              | ${REV_TYPE_SUBREV} | ${'1.0'}
     ${'1.2.3.+'}            | ${REV_TYPE_SUBREV} | ${'1.2.3'}
     ${'[1.0,2.0]'}          | ${REV_TYPE_RANGE}  | ${'[1.0,2.0]'}
