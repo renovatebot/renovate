@@ -164,6 +164,11 @@ export class CrateDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const url = parseUrl(registryUrl);
     if (!url) {
       logger.debug({ registryUrl }, 'could not parse registry URL');
