@@ -22,16 +22,15 @@ class DockerVersioningApi extends GenericVersioningApi {
       return null;
     }
     const versionPieces = version.replace(regEx(/^v/), '').split('-');
-    const prefix = versionPieces.shift();
-    const suffix = versionPieces.join('-');
-    const m = versionPattern.exec(prefix);
-    if (!m?.groups) {
+    const [prefix, ...suffixPieces] = versionPieces;
+    const matchGroups = prefix?.match(versionPattern)?.groups;
+    if (!matchGroups) {
       return null;
     }
 
-    const { version: ver, prerelease } = m.groups;
+    const { version: ver, prerelease } = matchGroups;
     const release = ver.split('.').map(Number);
-    return { release, suffix, prerelease };
+    return { release, suffix: suffixPieces.join('-'), prerelease };
   }
 
   protected override _compare(version: string, other: string): number {
@@ -65,16 +64,23 @@ class DockerVersioningApi extends GenericVersioningApi {
         return -1;
       }
       // alphabetic order
-      return parsed1.prerelease.localeCompare(parsed2.prerelease);
+      if (parsed1.prerelease && parsed2.prerelease) {
+        return parsed1.prerelease.localeCompare(parsed2.prerelease);
+      }
     }
+
     // equals
-    return parsed2.suffix.localeCompare(parsed1.suffix);
+    const suffix1 = parsed1.suffix ?? '';
+    const suffix2 = parsed2.suffix ?? '';
+    return suffix2.localeCompare(suffix1);
   }
 
   override isCompatible(version: string, current: string): boolean {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(current);
-    return (
+    return !!(
+      parsed1 &&
+      parsed2 &&
       parsed1.suffix === parsed2.suffix &&
       parsed1.release.length === parsed2.release.length
     );

@@ -88,7 +88,7 @@ Because of how it works, it functions on public repositories only and additional
 
 ##### Benefits
 
-Forking Renovate needs only `read` level access to any repository it runs on.
+Forking Renovate needs only `read` level access to the code of any repository it runs on.
 
 ##### Drawbacks
 
