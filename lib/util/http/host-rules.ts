@@ -9,7 +9,6 @@ import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import type { GotOptions } from './types';
-import * as fs from 'fs';
 
 function findMatchingRules(options: GotOptions, url: string): HostRule {
   const { hostType } = options;
