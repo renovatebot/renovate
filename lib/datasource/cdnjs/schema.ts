@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { CdnjsResponse } from './types';
+import type { CdnjsResponse as CdnjsResponseDeprecated } from './types';
 
 /**
  * See: https://cdnjs.com/api
  */
-export const Response = z.object({
+export const CdnjsResponseSchema = z.object({
   homepage: z.string().url().optional(),
   repository: z
     .object({
@@ -21,5 +21,5 @@ export const Response = z.object({
   ),
 });
 
-// export type IResponse = z.infer<typeof Response>;
-export type IResponse = CdnjsResponse;
+// export type CdnjsResponse = z.infer<typeof CdnjsResponseSchema>;
+export type CdnjsResponse = CdnjsResponseDeprecated;

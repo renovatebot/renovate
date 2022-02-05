@@ -1,7 +1,7 @@
 import { HttpResponse } from '../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { DartResult } from './types';
+import { DartResponse, DartResponseSchema } from './schema';
 
 export class DartDatasource extends Datasource {
   static readonly id = 'dart';
@@ -25,9 +25,11 @@ export class DartDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const pkgUrl = `${registryUrl}api/packages/${lookupName}`;
 
-    let raw: HttpResponse<DartResult> | null = null;
+    let raw: HttpResponse<DartResponse> | null = null;
     try {
-      raw = await this.http.getJson<DartResult>(pkgUrl);
+      raw = await this.http.getJson<DartResponse>(pkgUrl, {
+        responseSchema: DartResponseSchema,
+      });
     } catch (err) {
       this.handleGenericErrors(err);
     }
