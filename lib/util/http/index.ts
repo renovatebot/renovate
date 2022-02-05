@@ -18,12 +18,13 @@ import type {
   GotOptions,
   OutgoingHttpHeaders,
   RequestStats,
+  ResponseParser,
 } from './types';
 
 // TODO: refactor code to remove this (#9651)
 import './legacy';
 
-export interface HttpOptions {
+export interface HttpOptions<ResponseType = any> {
   body?: any;
   username?: string;
   password?: string;
@@ -37,6 +38,8 @@ export interface HttpOptions {
 
   throwHttpErrors?: boolean;
   useCache?: boolean;
+
+  responseParser?: ResponseParser<ResponseType>;
 }
 
 export interface HttpPostOptions extends HttpOptions {
@@ -174,13 +177,17 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const queueTask = (): Promise<Response<T>> => {
+      const queueTask = async (): Promise<Response<T>> => {
         const queueDuration = Date.now() - startTime;
-        return gotRoutine(url, options, {
+        const gotResponse = await gotRoutine<T>(url, options, {
           method: options.method,
           url,
           queueDuration,
         });
+        if (httpOptions.responseParser) {
+          gotResponse.body = httpOptions.responseParser.parse(gotResponse.body);
+        }
+        return gotResponse;
       };
       const queue = getQueue(url);
       resPromise = queue?.add(queueTask) ?? queueTask();

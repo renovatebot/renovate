@@ -203,7 +203,8 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "3.0.0",
-    "xmldoc": "1.1.2"
+    "xmldoc": "1.1.2",
+    "zod": "3.11.6"
   },
   "optionalDependencies": {
     "re2": "1.17.3"

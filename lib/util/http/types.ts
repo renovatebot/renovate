@@ -34,3 +34,7 @@ export interface RequestStats {
 }
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;
+
+export interface ResponseParser<Output> {
+  parse(input: unknown): Output;
+}
