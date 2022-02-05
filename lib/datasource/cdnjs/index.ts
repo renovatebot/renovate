@@ -27,7 +27,7 @@ export class CdnJsDatasource extends Datasource {
     const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
     let result: ReleaseResult | null = null;
     try {
-      const { body } = await this.http.getJson<CdnjsResponse>(url, {
+      const { body } = await this.http.getJson<CdnjsResponse>(url, null, {
         responseSchema: CdnjsResponseSchema,
       });
       const { assets, homepage, repository } = body;

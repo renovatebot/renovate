@@ -13,7 +13,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { Schema, handleSchemaError } from './schema';
+import { HttpSchema, handleSchemaError } from './schema';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -24,7 +24,7 @@ import type {
 // TODO: refactor code to remove this (#9651)
 import './legacy';
 
-export interface HttpOptions<ResponseType = any> {
+export interface HttpOptions {
   body?: any;
   username?: string;
   password?: string;
@@ -38,8 +38,6 @@ export interface HttpOptions<ResponseType = any> {
 
   throwHttpErrors?: boolean;
   useCache?: boolean;
-
-  responseSchema?: Schema<ResponseType>;
 }
 
 export interface HttpPostOptions extends HttpOptions {
@@ -121,7 +119,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions = {}
+    httpOptions: InternalHttpOptions = {},
+    schema: HttpSchema<unknown, T> = {}
   ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
@@ -185,11 +184,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
           queueDuration,
         });
 
-        if (httpOptions.responseSchema) {
+        if (schema.response) {
           try {
-            gotResponse.body = httpOptions.responseSchema.parse(
-              gotResponse.body
-            );
+            gotResponse.body = schema.response.parse(gotResponse.body);
           } catch (err) {
             handleSchemaError(err);
           }
@@ -217,49 +214,69 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
   }
 
-  get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
-    return this.request<string>(url, options);
+  get(
+    url: string,
+    options: HttpOptions = {},
+    schema: HttpSchema<unknown, string> = {}
+  ): Promise<HttpResponse> {
+    return this.request<string>(url, options, schema);
   }
 
-  head(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
-    return this.request<string>(url, { ...options, method: 'head' });
+  head(
+    url: string,
+    options: HttpOptions = {},
+    schema: HttpSchema<unknown, undefined> = {}
+  ): Promise<HttpResponse> {
+    return this.request<string>(url, { ...options, method: 'head' }, schema);
   }
 
   protected requestBuffer(
     url: string | URL,
-    httpOptions?: InternalHttpOptions
+    httpOptions?: InternalHttpOptions,
+    schema?: HttpSchema<unknown, Buffer>
   ): Promise<HttpResponse<Buffer> | null> {
-    return this.request<Buffer>(url, {
-      ...httpOptions,
-      responseType: 'buffer',
-    });
+    return this.request<Buffer>(
+      url,
+      {
+        ...httpOptions,
+        responseType: 'buffer',
+      },
+      schema
+    );
   }
 
   getBuffer(
     url: string,
-    options: HttpOptions = {}
+    options: HttpOptions = {},
+    schema: HttpSchema<unknown, Buffer> = {}
   ): Promise<HttpResponse<Buffer> | null> {
-    return this.requestBuffer(url, options);
+    return this.requestBuffer(url, options, schema);
   }
 
   private async requestJson<T = unknown>(
     url: string,
-    options: InternalHttpOptions
+    options: InternalHttpOptions,
+    schema: HttpSchema<unknown, T> = {}
   ): Promise<HttpResponse<T>> {
     const { body, ...jsonOptions } = options;
     if (body) {
       jsonOptions.json = body;
     }
-    const res = await this.request<T>(url, {
-      ...jsonOptions,
-      responseType: 'json',
-    });
+    const res = await this.request<T>(
+      url,
+      {
+        ...jsonOptions,
+        responseType: 'json',
+      },
+      schema
+    );
     return { ...res, body: res.body };
   }
 
   getJson<T = unknown>(
     url: string,
-    options?: GetOptions
+    options?: GetOptions,
+    schema?: HttpSchema<unknown, T>
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options });
   }

@@ -5,6 +5,11 @@ export interface Schema<Output> {
   parse(input: unknown): Output;
 }
 
+export interface HttpSchema<Req, Resp> {
+  request?: Schema<Req>;
+  response?: Schema<Resp>;
+}
+
 class SchemaError extends Error {
   issues: ZodIssue[];
 

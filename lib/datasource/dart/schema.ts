@@ -8,7 +8,7 @@ export const DartResponseSchema = z.object({
   versions: z.object({
     version: z.string(),
     retracted: z.boolean().optional(),
-    published: z.string().optional(),
+    published: z.boolean().optional(),
   }),
   latest: z
     .object({
