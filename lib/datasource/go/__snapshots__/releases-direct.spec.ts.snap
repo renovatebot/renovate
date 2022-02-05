@@ -93,7 +93,6 @@ Array [
 
 exports[`datasource/go/releases-direct getReleases support bitbucket tags 1`] = `
 Object {
-  "registryUrl": "https://bitbucket.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
