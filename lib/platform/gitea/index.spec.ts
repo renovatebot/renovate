@@ -137,9 +137,9 @@ describe('platform/gitea/index', () => {
   ];
 
   const mockComments: ght.Comment[] = [
-    { id: 1, body: 'some-body' },
-    { id: 2, body: 'other-body' },
-    { id: 3, body: '### some-topic\n\nsome-content' },
+    { id: 11, body: 'some-body' },
+    { id: 12, body: 'other-body' },
+    { id: 13, body: '### some-topic\n\nsome-content' },
   ];
 
   const mockRepoLabels: ght.Label[] = [
@@ -576,7 +576,7 @@ describe('platform/gitea/index', () => {
     it('should fallback to direct fetching if cache fails', async () => {
       const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce([]);
-      helper.getPR.mockResolvedValueOnce(mockPR);
+      helper.getPR.mockResolvedValueOnce({ ...mockPR, mergeable: false });
       await initFakeRepo();
 
       const res = await gitea.getPr(mockPR.number);
@@ -1351,7 +1351,7 @@ describe('platform/gitea/index', () => {
     it('should update comment with topic if found', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       helper.updateComment.mockResolvedValueOnce(
-        partial<ght.Comment>({ id: 42 })
+        partial<ght.Comment>({ id: 13 })
       );
 
       await initFakeRepo();
@@ -1367,7 +1367,7 @@ describe('platform/gitea/index', () => {
       expect(helper.updateComment).toHaveBeenCalledTimes(1);
       expect(helper.updateComment).toHaveBeenCalledWith(
         mockRepo.full_name,
-        1,
+        13,
         body
       );
     });
@@ -1407,7 +1407,7 @@ describe('platform/gitea/index', () => {
       await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
-      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 3);
+      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 13);
     });
 
     it('should remove existing comment by content', async () => {
@@ -1416,7 +1416,7 @@ describe('platform/gitea/index', () => {
       await gitea.ensureCommentRemoval({ number: 1, content: 'some-body' });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
-      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 1);
+      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 11);
     });
 
     it('should gracefully fail with warning', async () => {
@@ -1550,9 +1550,9 @@ describe('platform/gitea/index', () => {
 
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
       `;
       helper.getRepoContents.mockResolvedValueOnce({

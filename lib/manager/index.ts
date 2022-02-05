@@ -79,11 +79,19 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const m = managers.get(manager);
   if (m.getRangeStrategy) {
     // Use manager's own function if it exists
-    return m.getRangeStrategy(config);
+    const managerRangeStrategy = m.getRangeStrategy(config);
+    if (managerRangeStrategy === 'in-range-only') {
+      return 'update-lockfile';
+    }
+    return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
     // default to 'replace' for auto
     return 'replace';
   }
+  if (rangeStrategy === 'in-range-only') {
+    return 'update-lockfile';
+  }
+
   return config.rangeStrategy;
 }

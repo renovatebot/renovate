@@ -41,7 +41,7 @@ export function resolveAlias(
   repository: string,
   aliases: Record<string, string>
 ): string | null {
-  if (!(repository.startsWith('@') || repository.startsWith('alias:'))) {
+  if (!isAlias(repository)) {
     return repository;
   }
 
@@ -56,6 +56,7 @@ export function resolveAlias(
 export function getRepositories(definitions: ChartDefinition[]): Repository[] {
   const repositoryList = definitions
     .flatMap((value) => value.dependencies)
+    .filter((dependency) => !isAlias(dependency.repository)) // do not add aliases
     .map((dependency) => {
       // remove additional keys to prevent interference at deduplication
       return {
@@ -69,6 +70,10 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
     dedup.add(el.repository);
     return !duplicate;
   });
+}
+
+function isAlias(repository: string): boolean {
+  return repository.startsWith('@') || repository.startsWith('alias:');
 }
 
 export function isOCIRegistry(repository: Repository): boolean {

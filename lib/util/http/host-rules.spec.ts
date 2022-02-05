@@ -40,12 +40,6 @@ describe('util/http/host-rules', () => {
     });
 
     hostRules.add({
-      hostType: 'github-releases',
-      username: 'some',
-      password: 'xxx',
-    });
-
-    hostRules.add({
       hostType: PlatformId.Bitbucket,
       token: 'cdef',
     });
@@ -135,7 +129,25 @@ describe('util/http/host-rules', () => {
     `);
   });
 
-  it('no fallback', () => {
+  it('no fallback to github', () => {
+    hostRules.add({
+      hostType: 'github-tags',
+      username: 'some2',
+      password: 'xxx2',
+    });
+    hostRules.add({
+      hostType: 'github-changelog',
+      token: 'changelogtoken',
+    });
+    hostRules.add({
+      hostType: 'pod',
+      token: 'pod-token',
+    });
+    hostRules.add({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
+    });
     expect(
       applyHostRules(url, { ...options, hostType: 'github-releases' })
     ).toEqual({
@@ -143,19 +155,57 @@ describe('util/http/host-rules', () => {
       username: 'some',
       password: 'xxx',
     });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-tags' })
+    ).toEqual({
+      hostType: 'github-tags',
+      username: 'some2',
+      password: 'xxx2',
+    });
+    expect(applyHostRules(url, { ...options, hostType: 'pod' })).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'pod',
+      token: 'pod-token',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-changelog' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'github-changelog',
+      token: 'changelogtoken',
+    });
   });
 
   it('fallback to github', () => {
-    expect(applyHostRules(url, { ...options, hostType: 'github-tags' }))
-      .toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "authType": undefined,
-        },
-        "hostType": "github-tags",
-        "token": "token",
-      }
-    `);
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-tags' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'github-tags',
+      token: 'token',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-changelog' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'github-changelog',
+      token: 'token',
+    });
+    expect(applyHostRules(url, { ...options, hostType: 'pod' })).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'pod',
+      token: 'token',
+    });
   });
 
   it('no fallback to gitlab', () => {
@@ -226,6 +276,15 @@ describe('util/http/host-rules', () => {
         authType: undefined,
       },
       hostType: 'gitlab-packages',
+      token: 'abc',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-changelog' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-changelog',
       token: 'abc',
     });
   });
