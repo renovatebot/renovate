@@ -102,8 +102,9 @@ function toRenovatePR(data: helper.PR): Pr | null {
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
-    canMerge: data.mergeable,
-    isConflicted: !data.mergeable,
+    cannotMergeReason: data.mergeable
+      ? undefined
+      : `pr.mergeable="${data.mergeable}"`,
     hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
@@ -761,34 +762,34 @@ const platform: Platform = {
       const commentList = await helper.getComments(config.repository, issue);
 
       // Search comment by either topic or exact body
-      let comment: helper.Comment = null;
+      let comment: helper.Comment | null = null;
       if (topic) {
         comment = findCommentByTopic(commentList, topic);
         body = `### ${topic}\n\n${body}`;
       } else {
-        comment = commentList.find((c) => c.body === body);
+        comment = findCommentByContent(commentList, body);
       }
 
       // Create a new comment if no match has been found, otherwise update if necessary
       if (!comment) {
-        const c = await helper.createComment(config.repository, issue, body);
+        comment = await helper.createComment(config.repository, issue, body);
         logger.info(
-          { repository: config.repository, issue, comment: c.id },
+          { repository: config.repository, issue, comment: comment.id },
           'Comment added'
         );
       } else if (comment.body === body) {
         logger.debug(`Comment #${comment.id} is already up-to-date`);
       } else {
-        const c = await helper.updateComment(config.repository, issue, body);
+        await helper.updateComment(config.repository, comment.id, body);
         logger.debug(
-          { repository: config.repository, issue, comment: c.id },
+          { repository: config.repository, issue, comment: comment.id },
           'Comment updated'
         );
       }
 
       return true;
     } catch (err) {
-      logger.warn({ err }, 'Error ensuring comment');
+      logger.warn({ err, issue, subject: topic }, 'Error ensuring comment');
       return false;
     }
   },
@@ -803,11 +804,12 @@ const platform: Platform = {
     );
     const commentList = await helper.getComments(config.repository, issue);
     let comment: helper.Comment | null = null;
+    const body = sanitize(content);
 
     if (topic) {
       comment = findCommentByTopic(commentList, topic);
-    } else if (content) {
-      comment = findCommentByContent(commentList, content);
+    } else if (body) {
+      comment = findCommentByContent(commentList, body);
     }
 
     // Abort and do nothing if no matching comment was found

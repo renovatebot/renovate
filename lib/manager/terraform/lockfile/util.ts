@@ -1,5 +1,5 @@
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
@@ -31,7 +31,7 @@ export function readLockFile(lockFilePath: string): Promise<string> {
 }
 
 export function extractLocks(lockFileContent: string): ProviderLock[] {
-  const lines = lockFileContent.split('\n');
+  const lines = lockFileContent.split(newlineRegex);
   const blockStarts: number[] = [];
   // get first lines of blocks
   lines.forEach((line, index) => {
@@ -134,7 +134,7 @@ export function writeLockUpdates(
   lockFilePath: string,
   oldLockFileContent: string
 ): UpdateArtifactsResult {
-  const lines = oldLockFileContent.split('\n');
+  const lines = oldLockFileContent.split(newlineRegex);
 
   const sections: string[][] = [];
 
@@ -211,7 +211,8 @@ export function writeLockUpdates(
 
   return {
     file: {
-      name: lockFilePath,
+      type: 'addition',
+      path: lockFilePath,
       contents: newContent,
     },
   };

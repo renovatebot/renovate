@@ -16,10 +16,7 @@ async function updateArtifact(
     const contents = response.body;
 
     return {
-      file: {
-        name: path,
-        contents,
-      },
+      file: { type: 'addition', path, contents },
     };
   } catch (err) {
     const errorDescription: string = err.toString();

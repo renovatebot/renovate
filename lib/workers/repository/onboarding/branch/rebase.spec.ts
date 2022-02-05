@@ -1,4 +1,9 @@
-import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  defaultConfig,
+  git,
+  platform,
+} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { rebaseOnboardingBranch } from './rebase';
 
@@ -39,6 +44,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
+    it('rebases via platform', async () => {
+      platform.commitFiles = jest.fn();
+      config.platformCommit = true;
+      git.isBranchStale.mockResolvedValueOnce(true);
+      await rebaseOnboardingBranch(config);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+    });
     it('uses the onboardingConfigFileName if set', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch({
@@ -49,7 +61,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(git.commitFiles.mock.calls[0][0].message).toContain(
         '.github/renovate.json'
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].name).toBe(
+      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
         '.github/renovate.json'
       );
     });
@@ -63,7 +75,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(git.commitFiles.mock.calls[0][0].message).toContain(
         'renovate.json'
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].name).toBe(
+      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
         'renovate.json'
       );
     });

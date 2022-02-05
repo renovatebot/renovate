@@ -3,9 +3,9 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 export class RebaseStalePrsMigration extends AbstractMigration {
   override readonly deprecated = true;
-  readonly propertyName = 'rebaseStalePrs';
+  override readonly propertyName = 'rebaseStalePrs';
 
-  override run(value): void {
+  override run(value: unknown): void {
     const rebaseConflictedPrs = this.get('rebaseConflictedPrs');
 
     if (rebaseConflictedPrs !== false) {

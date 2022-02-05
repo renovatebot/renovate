@@ -44,7 +44,7 @@ export async function getPrConfigDescription(
   prBody += emojify(':recycle: **Rebasing**: ');
   if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
-  } else if (config.rebaseWhen === 'never') {
+  } else if (config.rebaseWhen === 'never' || config.stopUpdating) {
     prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';

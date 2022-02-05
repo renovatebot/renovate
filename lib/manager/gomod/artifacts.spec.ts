@@ -142,11 +142,11 @@ describe('manager/gomod/artifacts', () => {
     });
     expect(res).not.toBeNull();
     expect(res?.map(({ file }) => file)).toEqual([
-      { contents: 'New go.sum', name: 'go.sum' },
-      { contents: 'Foo go.sum', name: foo },
-      { contents: 'Bar go.sum', name: bar },
-      { contents: baz, name: '|delete|' },
-      { contents: 'New go.mod', name: 'go.mod' },
+      { type: 'addition', path: 'go.sum', contents: 'New go.sum' },
+      { type: 'addition', path: foo, contents: 'Foo go.sum' },
+      { type: 'addition', path: bar, contents: 'Bar go.sum' },
+      { type: 'deletion', path: baz },
+      { type: 'addition', path: 'go.mod', contents: 'New go.mod' },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -598,9 +598,9 @@ describe('manager/gomod/artifacts', () => {
         },
       })
     ).toEqual([
-      { file: { contents: 'New go.sum', name: 'go.sum' } },
-      { file: { contents: 'New main.go', name: 'main.go' } },
-      { file: { contents: 'New go.mod', name: 'go.mod' } },
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -628,8 +628,8 @@ describe('manager/gomod/artifacts', () => {
         },
       })
     ).toEqual([
-      { file: { contents: 'New go.sum', name: 'go.sum' } },
-      { file: { contents: 'New go.mod', name: 'go.mod' } },
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -714,9 +714,9 @@ describe('manager/gomod/artifacts', () => {
         },
       })
     ).toEqual([
-      { file: { contents: 'New go.sum', name: 'go.sum' } },
-      { file: { contents: 'New main.go', name: 'main.go' } },
-      { file: { contents: 'New go.mod', name: 'go.mod' } },
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -748,9 +748,9 @@ describe('manager/gomod/artifacts', () => {
         },
       })
     ).toEqual([
-      { file: { contents: 'New go.sum', name: 'go.sum' } },
-      { file: { contents: 'New main.go', name: 'main.go' } },
-      { file: { contents: 'New go.mod', name: 'go.mod' } },
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -778,8 +778,8 @@ describe('manager/gomod/artifacts', () => {
         },
       })
     ).toEqual([
-      { file: { contents: 'New go.sum', name: 'go.sum' } },
-      { file: { contents: 'New go.mod', name: 'go.mod' } },
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });

@@ -54,6 +54,7 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;
@@ -66,6 +67,7 @@ export interface RenovateSharedConfig {
   timezone?: string;
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
+  platformCommit?: boolean;
 }
 
 // Config options used only within the global worker
@@ -202,6 +204,7 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;

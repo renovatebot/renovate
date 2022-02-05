@@ -31,6 +31,7 @@ const qJson = {
   ...loadJsonFixture('01.json', fixtureRoot),
   latestVersion: '1.4.1',
 };
+
 const helmetJson = loadJsonFixture('02.json', fixtureRoot);
 const coffeelintJson = loadJsonFixture('coffeelint.json', fixtureRoot);
 const nextJson = loadJsonFixture('next.json', fixtureRoot);
@@ -341,6 +342,30 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toBe('minor');
     });
+
+    it('handles the in-range-only strategy and updates lockfile within range', async () => {
+      config.currentValue = '^1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'in-range-only';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates[0].updateType).toBe('minor');
+    });
+
+    it('handles the in-range-only strategy and discards changes not within range', async () => {
+      config.currentValue = '~1.2.0';
+      config.lockedVersion = '1.2.0';
+      config.rangeStrategy = 'in-range-only';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toBeEmptyArray();
+    });
+
     it('handles unconstrainedValue values', async () => {
       config.lockedVersion = '1.2.1';
       config.rangeStrategy = 'update-lockfile';
