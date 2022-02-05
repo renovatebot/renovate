@@ -79,7 +79,6 @@
     "lib/datasource/adoptium-java/index.ts",
     "lib/datasource/api.ts",
     "lib/datasource/artifactory/index.ts",
-    "lib/datasource/aws-machine-image/index.ts",
     "lib/datasource/bitbucket-tags/index.ts",
     "lib/datasource/cdnjs/index.ts",
     "lib/datasource/crate/index.ts",
