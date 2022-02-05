@@ -84,6 +84,30 @@
       "published": "2017-05-09T18:25:24.268386Z"
     },
     {
+      "version": "0.1.2",
+      "retracted": true,
+      "pubspec": {
+        "version": "0.1.1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.shared_preferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs",
+        "homepage": "https://github.com/flutter/plugins"
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.1.1.tar.gz",
+      "published": "2017-05-09T18:25:24.268386Z"
+    },
+    {
       "version": "0.2.0",
       "pubspec": {
         "version": "0.2.0",
