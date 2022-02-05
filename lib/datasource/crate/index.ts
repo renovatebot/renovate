@@ -130,7 +130,7 @@ export class CrateDatasource extends Datasource {
         return `https://crates.io/crates/${lookupName}`;
       case RegistryFlavor.Cloudsmith: {
         // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
-        const tokens = info.url?.pathname.split('/');
+        const tokens = info.url.pathname.split('/');
         const org = tokens[2];
         const repo = tokens[3];
         return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${lookupName}`;
@@ -162,7 +162,7 @@ export class CrateDatasource extends Datasource {
    */
   private static async fetchRegistryInfo({
     lookupName,
-    registryUrl = '',
+    registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
     const url = parseUrl(registryUrl);
     if (!url) {
