@@ -189,9 +189,8 @@ function getNewValue({
     return currentValue;
   }
   try {
-    const currentSemverVersion = currentVersion
-      ? poetry2semver(currentVersion)
-      : null;
+    const currentSemverVersion =
+      currentVersion && poetry2semver(currentVersion);
 
     const newSemverVersion = poetry2semver(newVersion);
 
@@ -213,6 +212,8 @@ function getNewValue({
       'Could not generate new value using npm.getNewValue()'
     );
   }
+
+  // istanbul ignore next
   return currentValue;
 }
 
