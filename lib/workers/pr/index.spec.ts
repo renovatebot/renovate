@@ -102,9 +102,7 @@ describe('workers/pr/index', () => {
       config = partial<BranchConfig>({
         ...getConfig(),
       });
-      pr = partial<Pr>({
-        canMerge: true,
-      });
+      pr = partial<Pr>({});
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -154,7 +152,7 @@ describe('workers/pr/index', () => {
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.canMerge = undefined;
+      pr.cannotMergeReason = 'some reason';
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });

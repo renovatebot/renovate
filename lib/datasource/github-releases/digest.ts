@@ -1,6 +1,6 @@
 import hasha from 'hasha';
 import * as packageCache from '../../util/cache/package';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { cacheNamespace, http } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
@@ -13,7 +13,7 @@ async function findDigestFile(
   );
   for (const asset of smallAssets) {
     const res = await http.get(asset.browser_download_url);
-    for (const line of res.body.split('\n')) {
+    for (const line of res.body.split(newlineRegex)) {
       const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
       if (lineDigest === digest) {
         return {
@@ -127,7 +127,7 @@ export async function mapDigestAssetToRelease(
   if (digestAsset.digestedFileName) {
     const releaseFilename = digestAsset.digestedFileName.replace(current, next);
     const res = await http.get(releaseAsset.browser_download_url);
-    for (const line of res.body.split('\n')) {
+    for (const line of res.body.split(newlineRegex)) {
       const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
       if (lineFn === releaseFilename) {
         return lineDigest;
