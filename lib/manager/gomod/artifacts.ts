@@ -132,23 +132,6 @@ function useModcacherw(goVersion: string): boolean {
   );
 }
 
-function commentReplaceDirective(content: string): string {
-  const inlineReplaceRegEx: RegExp = regEx(
-    /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
-  );
-
-  const inlineCommentOut = '\n// renovate-replace $1';
-
-  const blockReplaceRegEx: RegExp = regEx(/\nreplace\s*\([^)]+\s*\)/g);
-
-  const blockCommentOut = (match): string =>
-    match.replaceAll('\n', '\n// renovate-replace ');
-
-  return content
-    .replace(inlineReplaceRegEx, inlineCommentOut)
-    .replace(blockReplaceRegEx, blockCommentOut);
-}
-
 export async function updateArtifacts({
   packageFileName: goModFileName,
   updatedDeps,
@@ -169,7 +152,20 @@ export async function updateArtifacts({
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
-    const massagedGoMod = commentReplaceDirective(newGoModContent);
+    const inlineReplaceRegEx: RegExp = regEx(
+      /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
+    );
+
+    const inlineCommentOut = '\n// renovate-replace $1';
+
+    const blockReplaceRegEx: RegExp = regEx(/\nreplace\s*\([^)]+\s*\)/g);
+
+    const blockCommentOut = (match): string =>
+      match.replaceAll('\n', '\n// renovate-replace ');
+
+    const massagedGoMod = newGoModContent
+      .replace(inlineReplaceRegEx, inlineCommentOut)
+      .replace(blockReplaceRegEx, blockCommentOut);
 
     if (massagedGoMod !== newGoModContent) {
       logger.debug('Removed some relative replace statements from go.mod');
