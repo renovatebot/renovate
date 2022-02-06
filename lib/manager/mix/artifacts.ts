@@ -9,6 +9,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
+import { truthy } from '../../util/truthy';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -26,7 +27,7 @@ export async function updateArtifacts({
   }
 
   const lockFileName =
-    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) || 'mix.lock';
+    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
@@ -59,18 +60,21 @@ export async function updateArtifacts({
     }
   }
 
-  const preCommands = Array.from(organizations).reduce((acc, organization) => {
-    const url = `${hexRepoUrl}api/repos/${organization}/`;
-    const { token } = hostRules.find({ url });
+  const preCommands: string[] = Array.from(organizations).reduce(
+    (acc: string[], organization: string) => {
+      const url = `${hexRepoUrl}api/repos/${organization}/`;
+      const { token } = hostRules.find({ url });
 
-    if (token) {
-      logger.debug(`Authenticating to hex organization ${organization}`);
-      const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
-      return [...acc, authCommand];
-    }
+      if (token) {
+        logger.debug(`Authenticating to hex organization ${organization}`);
+        const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
+        return [...acc, authCommand];
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    []
+  );
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
@@ -82,7 +86,10 @@ export async function updateArtifacts({
   const command = [
     'mix',
     'deps.update',
-    ...updatedDeps.map((dep) => quote(dep.depName)),
+    ...updatedDeps
+      .map((dep) => dep.depName)
+      .filter(truthy)
+      .map(quote),
   ].join(' ');
 
   try {
