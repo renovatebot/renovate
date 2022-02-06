@@ -116,7 +116,6 @@
     "lib/datasource/nuget/index.ts",
     "lib/datasource/nuget/v2.ts",
     "lib/datasource/nuget/v3.ts",
-    "lib/datasource/orb/index.ts",
     "lib/datasource/packagist/index.ts",
     "lib/datasource/pod/index.ts",
     "lib/datasource/pypi/index.ts",

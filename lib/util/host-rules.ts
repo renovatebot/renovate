@@ -151,13 +151,10 @@ export function find(search: HostRuleSearch): HostRule {
 }
 
 export function hosts({ hostType }: { hostType: string }): string[] {
-  const result: string[] = [];
-  for (const rule of hostRules) {
-    if (rule.hostType === hostType && rule.resolvedHost) {
-      result.push(rule.resolvedHost);
-    }
-  }
-  return result;
+  return hostRules
+    .filter((rule) => rule.hostType === hostType)
+    .map((rule) => rule.resolvedHost)
+    .filter(is.truthy);
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
