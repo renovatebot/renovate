@@ -385,7 +385,6 @@
     "lib/util/ignore.ts",
     "lib/util/merge-confidence/index.ts",
     "lib/util/package-rules.ts",
-    "lib/util/template/index.ts",
     "lib/versioning/api.ts",
     "lib/versioning/common.ts",
     "lib/versioning/helm/index.ts",
