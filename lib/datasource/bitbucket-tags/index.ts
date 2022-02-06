@@ -11,7 +11,7 @@ export class BitBucketTagsDatasource extends Datasource {
 
   static readonly id = 'bitbucket-tags';
 
-  static readonly customRegistrySupport = false;
+  static readonly customRegistrySupport = true;
 
   static readonly registryStrategy = 'first';
 
