@@ -292,12 +292,7 @@ async function addReleasesUsingHeadRequests(
 }
 
 function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
-  const releases: Release[] = [];
-  for (const release of Object.values(releaseMap)) {
-    if (release) {
-      releases.push(release);
-    }
-  }
+  const releases = Object.values(releaseMap).filter(is.truthy);
   if (releases.length) {
     return releases;
   }
