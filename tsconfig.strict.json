@@ -107,8 +107,6 @@
     "lib/datasource/go/types.ts",
     "lib/datasource/golang-version/index.ts",
     "lib/datasource/gradle-version/index.ts",
-    "lib/datasource/helm/common.ts",
-    "lib/datasource/helm/index.ts",
     "lib/datasource/index.ts",
     "lib/datasource/jenkins-plugins/index.ts",
     "lib/datasource/node/index.ts",
