@@ -111,7 +111,6 @@
     "lib/datasource/helm/index.ts",
     "lib/datasource/index.ts",
     "lib/datasource/jenkins-plugins/index.ts",
-    "lib/datasource/node/index.ts",
     "lib/datasource/npm/get.ts",
     "lib/datasource/npm/index.ts",
     "lib/datasource/npm/npmrc.ts",
