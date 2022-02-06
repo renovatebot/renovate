@@ -29,6 +29,9 @@ require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
 
 replace github.com/pkg/errors => ../errors
+
+replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
+
 `;
 
 const adminConfig: RepoGlobalConfig = {
