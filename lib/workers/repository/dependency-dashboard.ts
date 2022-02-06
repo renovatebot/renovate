@@ -103,7 +103,7 @@ export async function ensureDependencyDashboard(
   const branches = allBranches.filter(
     (branch) =>
       branch.result !== BranchResult.Automerged &&
-      branch.upgrades.some((upgrade) => !upgrade.remediationNotPossible)
+      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
   );
   if (
     !(
