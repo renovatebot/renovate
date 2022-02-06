@@ -218,9 +218,8 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  const semverA = poetry2semver(a) ?? '';
-  const semverB = poetry2semver(b) ?? '';
-  return npm.sortVersions(semverA, semverB);
+  // istanbul ignore next
+  return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
 }
 
 export const api: VersioningApi = {
