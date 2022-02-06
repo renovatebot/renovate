@@ -52,13 +52,11 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string | null {
   if (['replace', 'update-lockfile'].includes(rangeStrategy)) {
-    if (
-      regEx(/~>\s*0\.\d+/).test(currentValue) &&
-      npm.getMajor(newVersion) === 0
-    ) {
+    const minor = npm.getMinor(newVersion);
+    const major = npm.getMajor(newVersion);
+    if (regEx(/~>\s*0\.\d+/).test(currentValue) && major === 0 && minor) {
       const testFullVersion = regEx(/(~>\s*0\.)(\d+)\.\d$/);
       let replaceValue = '';
-      const minor = npm.getMinor(newVersion) ?? '0';
       if (testFullVersion.test(currentValue)) {
         replaceValue = `$<prefix>${minor}.0`;
       } else {
@@ -70,8 +68,7 @@ function getNewValue({
       );
     }
     // handle special ~> 1.2 case
-    if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
-      const major = npm.getMajor(newVersion) ?? '0';
+    if (major && regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
         regEx(`(?<prefix>~>\\s*)\\d+\\.\\d+$`),
         `$<prefix>${major}.0`
