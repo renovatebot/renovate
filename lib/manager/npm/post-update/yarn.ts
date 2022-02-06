@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -12,9 +13,9 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
+  deleteLocalFile,
   exists,
   readLocalFile,
-  remove,
   writeLocalFile,
 } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -28,7 +29,8 @@ export async function checkYarnrc(
   let offlineMirror = false;
   let yarnPath: string = null;
   try {
-    const yarnrc = await readLocalFile(`.yarnrc`, 'utf8');
+    const subDir = cwd.replace(GlobalConfig.get('localDir'), '');
+    const yarnrc = await readLocalFile(upath.join(subDir, '.yarnrc'), 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
@@ -46,7 +48,7 @@ export async function checkYarnrc(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
-        await writeLocalFile(`.yarnrc`, scrubbedYarnrc);
+        await writeLocalFile(`${subDir}/.yarnrc`, scrubbedYarnrc);
         yarnPath = null;
       }
     }
@@ -72,7 +74,8 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = 'yarn.lock';
+  const subDir = cwd.replace(GlobalConfig.get('localDir'), '');
+  const lockFileName = upath.join(subDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
@@ -219,7 +222,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -233,6 +236,9 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
+    if (lockFile === null) {
+      throw new Error('Error reading local file');
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

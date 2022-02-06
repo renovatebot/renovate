@@ -1,9 +1,10 @@
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
-import { readLocalFile, remove } from '../../../util/fs';
+import { deleteLocalFile, readLocalFile } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -14,7 +15,8 @@ export async function generateLockFile(
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = 'pnpm-lock.yaml';
+  const subDir = cwd.replace(GlobalConfig.get('localDir'), '');
+  const lockFileName = upath.join(subDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
@@ -61,7 +63,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },

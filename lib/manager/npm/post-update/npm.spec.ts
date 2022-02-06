@@ -38,7 +38,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const updates = [
       { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
@@ -58,8 +58,9 @@ describe('manager/npm/post-update/npm', () => {
 
   it('performs npm-shrinkwrap.json updates', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.localPathExists.mockResolvedValueOnce(true);
-    fs.move = jest.fn();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(
+      'some-dir/package-lock.json'
+    );
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
@@ -67,9 +68,6 @@ describe('manager/npm/post-update/npm', () => {
       {},
       'npm-shrinkwrap.json',
       { skipInstalls }
-    );
-    expect(fs.localPathExists).toHaveBeenCalledWith(
-      'some-dir/package-lock.json'
     );
     expect(fs.move).toHaveBeenCalledTimes(1);
     expect(fs.move).toHaveBeenCalledWith(
@@ -88,8 +86,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.localPathExists.mockResolvedValueOnce(false);
-    fs.move = jest.fn();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
@@ -97,9 +94,6 @@ describe('manager/npm/post-update/npm', () => {
       {},
       'npm-shrinkwrap.json',
       { skipInstalls }
-    );
-    expect(fs.localPathExists).toHaveBeenCalledWith(
-      'some-dir/package-lock.json'
     );
     expect(fs.move).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -200,7 +194,7 @@ describe('manager/npm/post-update/npm', () => {
       [{ isLockFileMaintenance: true }]
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.remove).toHaveBeenCalledTimes(1);
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });

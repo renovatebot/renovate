@@ -7,7 +7,12 @@ import {
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
-import { localPathExists, move, readLocalFile, remove } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  findLocalSiblingOrParent,
+  move,
+  readLocalFile,
+} from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -91,14 +96,17 @@ export async function generateLockFile(
     }
 
     // TODO: don't assume package-lock.json is in the same directory
-    const lockFileName = upath.join(cwd, filename);
+    const localDir = GlobalConfig.get('localDir');
+    // Get lockFileName relative to localDir
+    const subDir = cwd.replace(localDir, '');
+    const lockFileName = upath.join(subDir, filename);
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -111,11 +119,9 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // massage to shrinkwrap if necessary
-    const localDir = GlobalConfig.get('localDir');
-    const subDir = cwd === localDir ? '' : cwd.replace(localDir, '');
     if (
       filename === 'npm-shrinkwrap.json' &&
-      (await localPathExists(upath.join(subDir, 'package-lock.json')))
+      (await findLocalSiblingOrParent(lockFileName, 'package-lock.json'))
     ) {
       await move(
         upath.join(cwd, 'package-lock.json'),
@@ -124,7 +130,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    lockFile = await readLocalFile(upath.join(subDir, filename), 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
