@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import { isTruthy } from '../../util/is-truthy';
 import { regEx } from '../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApiConstructor } from '../types';
@@ -109,17 +110,6 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     );
   }
 
-  private _getSemverVersions(versions: string[]): string[] {
-    const parsedVersions: string[] = [];
-    versions.forEach((v) => {
-      const parsedVersion = this._parse(v);
-      if (parsedVersion) {
-        parsedVersions.push(asSemver(parsedVersion));
-      }
-    });
-    return parsedVersions;
-  }
-
   override getSatisfyingVersion(
     versions: string[],
     range: string
@@ -127,7 +117,10 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const parsedRange = this._parse(range);
     return parsedRange
       ? semver.maxSatisfying(
-          this._getSemverVersions(versions),
+          versions
+            .map((v) => this._parse(v))
+            .filter(isTruthy)
+            .map(asSemver),
           asSemver(parsedRange)
         )
       : null;
@@ -140,7 +133,10 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const parsedRange = this._parse(range);
     return parsedRange
       ? semver.minSatisfying(
-          this._getSemverVersions(versions),
+          versions
+            .map((v) => this._parse(v))
+            .filter(isTruthy)
+            .map(asSemver),
           asSemver(parsedRange)
         )
       : null;
