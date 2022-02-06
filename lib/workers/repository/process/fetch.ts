@@ -50,10 +50,12 @@ async function fetchManagerPackagerFileUpdates(
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
-  const queue = pFile.deps.map(
-    (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(packageFileConfig, dep)
-  );
+  const queue = pFile.deps
+    .filter((dep) => dep.depName?.length)
+    .map(
+      (dep) => (): Promise<PackageDependency> =>
+        fetchDepUpdates(packageFileConfig, dep)
+    );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },
     'fetchManagerPackagerFileUpdates starting with concurrency'
