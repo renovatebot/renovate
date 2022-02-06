@@ -152,16 +152,16 @@ export async function updateArtifacts({
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
-    const inlineReplaceRegEx: RegExp = regEx(
-      /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
+    const inlineReplaceRegEx = regEx(
+      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
     );
 
-    const inlineCommentOut = '\n// renovate-replace $1';
+    const inlineCommentOut = '$1// renovate-replace $2';
 
-    const blockReplaceRegEx: RegExp = regEx(/\nreplace\s*\([^)]+\s*\)/g);
+    const blockReplaceRegEx = regEx(/(\r?\n)replace\s*\([^)]+\s*\)/g);
 
     const blockCommentOut = (match): string =>
-      match.replaceAll('\n', '\n// renovate-replace ');
+      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
 
     const massagedGoMod = newGoModContent
       .replace(inlineReplaceRegEx, inlineCommentOut)
