@@ -158,9 +158,7 @@ export async function updateArtifacts({
 
     const inlineCommentOut = '\n// renovate-replace $1';
 
-    const blockReplaceRegEx: RegExp = regEx(
-      /\n((replace\s+\(\n+(\s*[^)]+)+)\n+\))/
-    );
+    const blockReplaceRegEx: RegExp = regEx(/\nreplace\s*\([^)]+\s*\)/g);
 
     const blockCommentOut = (match): string =>
       match.replaceAll('\n', '\n// renovate-replace ');
