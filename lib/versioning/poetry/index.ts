@@ -17,19 +17,24 @@ export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function equals(a: string, b: string): boolean {
-  return npm.equals(poetry2semver(a), poetry2semver(b));
+  const semverA = poetry2semver(a);
+  const semverB = poetry2semver(b);
+  return !!(semverA && semverB && npm.equals(semverA, semverB));
 }
 
-function getMajor(version: string): number {
-  return npm.getMajor(poetry2semver(version));
+function getMajor(version: string): number | null {
+  const semverVersion = poetry2semver(version);
+  return semverVersion ? npm.getMajor(semverVersion) : null;
 }
 
-function getMinor(version: string): number {
-  return npm.getMinor(poetry2semver(version));
+function getMinor(version: string): number | null {
+  const semverVersion = poetry2semver(version);
+  return semverVersion ? npm.getMinor(semverVersion) : null;
 }
 
-function getPatch(version: string): number {
-  return npm.getPatch(poetry2semver(version));
+function getPatch(version: string): number | null {
+  const semverVersion = poetry2semver(version);
+  return semverVersion ? npm.getPatch(semverVersion) : null;
 }
 
 function isVersion(input: string): boolean {
@@ -37,13 +42,17 @@ function isVersion(input: string): boolean {
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  return npm.isGreaterThan(poetry2semver(a), poetry2semver(b));
+  const semverA = poetry2semver(a);
+  const semverB = poetry2semver(b);
+  return !!(semverA && semverB && npm.isGreaterThan(semverA, semverB));
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  return (
+  const semverVersion = poetry2semver(version);
+  return !!(
     isVersion(version) &&
-    npm.isLessThanRange(poetry2semver(version), poetry2npm(range))
+    semverVersion &&
+    npm.isLessThanRange?.(semverVersion, poetry2npm(range))
   );
 }
 
@@ -52,31 +61,49 @@ export function isValid(input: string): boolean {
 }
 
 function isStable(version: string): boolean {
-  return npm.isStable(poetry2semver(version));
+  const semverVersion = poetry2semver(version);
+  return !!(semverVersion && npm.isStable(semverVersion));
 }
 
 function matches(version: string, range: string): boolean {
-  return (
-    isVersion(version) && npm.matches(poetry2semver(version), poetry2npm(range))
+  const semverVersion = poetry2semver(version);
+  return !!(
+    isVersion(version) &&
+    semverVersion &&
+    npm.matches(semverVersion, poetry2npm(range))
   );
 }
 
-function getSatisfyingVersion(versions: string[], range: string): string {
-  return semver2poetry(
-    npm.getSatisfyingVersion(
-      versions.map((version) => poetry2semver(version)),
-      poetry2npm(range)
-    )
-  );
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  const semverVersions: string[] = [];
+  versions.forEach((version) => {
+    const semverVersion = poetry2semver(version);
+    if (semverVersion) {
+      semverVersions.push(semverVersion);
+    }
+  });
+  const npmRange = poetry2npm(range);
+  const satisfyingVersion = npm.getSatisfyingVersion(semverVersions, npmRange);
+  return satisfyingVersion ? semver2poetry(satisfyingVersion) : null;
 }
 
-function minSatisfyingVersion(versions: string[], range: string): string {
-  return semver2poetry(
-    npm.minSatisfyingVersion(
-      versions.map((version) => poetry2semver(version)),
-      poetry2npm(range)
-    )
-  );
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  const semverVersions: string[] = [];
+  versions.forEach((version) => {
+    const semverVersion = poetry2semver(version);
+    if (semverVersion) {
+      semverVersions.push(semverVersion);
+    }
+  });
+  const npmRange = poetry2npm(range);
+  const satisfyingVersion = npm.minSatisfyingVersion(semverVersions, npmRange);
+  return satisfyingVersion ? semver2poetry(satisfyingVersion) : null;
 }
 
 function isSingleVersion(constraint: string): boolean {
@@ -91,15 +118,19 @@ function handleShort(
   operator: string,
   currentValue: string,
   newVersion: string
-): string {
+): string | null {
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const split = currentValue.split('.');
-  if (split.length === 1) {
+  if (toVersionMajor !== null && split.length === 1) {
     // [^,~]4
     return `${operator}${toVersionMajor}`;
   }
-  if (split.length === 2) {
+  if (
+    toVersionMajor !== null &&
+    toVersionMinor !== null &&
+    split.length === 2
+  ) {
     // [^,~]4.1
     return `${operator}${toVersionMajor}.${toVersionMinor}`;
   }
@@ -117,6 +148,7 @@ function getNewValue({
     try {
       const massagedNewVersion = poetry2semver(newVersion);
       if (
+        massagedNewVersion &&
         isVersion(massagedNewVersion) &&
         npm.matches(massagedNewVersion, npmCurrentValue)
       ) {
@@ -157,25 +189,37 @@ function getNewValue({
     return currentValue;
   }
   try {
-    const newSemver = npm.getNewValue({
-      currentValue: poetry2npm(currentValue),
-      rangeStrategy,
-      currentVersion: poetry2semver(currentVersion),
-      newVersion: poetry2semver(newVersion),
-    });
-    const newPoetry = npm2poetry(newSemver);
-    return newPoetry;
+    const currentSemverVersion = currentVersion
+      ? poetry2semver(currentVersion)
+      : null;
+
+    const newSemverVersion = poetry2semver(newVersion);
+
+    if (currentSemverVersion && newSemverVersion) {
+      const newSemver = npm.getNewValue({
+        currentValue: poetry2npm(currentValue),
+        rangeStrategy,
+        currentVersion: currentSemverVersion,
+        newVersion: newSemverVersion,
+      });
+      const newPoetry = newSemver && npm2poetry(newSemver);
+      if (newPoetry) {
+        return newPoetry;
+      }
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { currentValue, rangeStrategy, currentVersion, newVersion, err },
       'Could not generate new value using npm.getNewValue()'
     );
-    return currentValue;
   }
+  return currentValue;
 }
 
 function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(poetry2semver(a), poetry2semver(b));
+  const semverA = poetry2semver(a) ?? '';
+  const semverB = poetry2semver(b) ?? '';
+  return npm.sortVersions(semverA, semverB);
 }
 
 export const api: VersioningApi = {
