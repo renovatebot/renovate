@@ -20,7 +20,6 @@ export function extractPackageFile(content: string): PackageFile | null {
     if (line.trim().startsWith('#')) {
       continue;
     }
-    line = line.replaceAll('"', '');
 
     const dockerMatch = dockerRe.exec(line);
     if (dockerMatch) {
@@ -32,6 +31,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue;
     }
 
+    line = line.replaceAll('"', '');
     const tagMatch = actionRe.exec(line);
     if (tagMatch?.groups) {
       const {
