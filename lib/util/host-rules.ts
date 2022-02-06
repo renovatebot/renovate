@@ -3,7 +3,6 @@ import merge from 'deepmerge';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import { clone } from './clone';
-import { isTruthy } from './is-truthy';
 import * as sanitize from './sanitize';
 import { parseUrl, validateUrl } from './url';
 
@@ -155,7 +154,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
     .map((rule) => rule.resolvedHost)
-    .filter(isTruthy);
+    .filter(is.truthy);
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {

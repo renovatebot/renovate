@@ -4,7 +4,6 @@ import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
-import { isTruthy } from '../../util/is-truthy';
 import { newlineRegex, regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
@@ -293,7 +292,7 @@ async function addReleasesUsingHeadRequests(
 }
 
 function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
-  const releases = Object.values(releaseMap).filter(isTruthy);
+  const releases = Object.values(releaseMap).filter(is.truthy);
   if (releases.length) {
     return releases;
   }
