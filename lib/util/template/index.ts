@@ -149,9 +149,11 @@ const allowedFieldsList = Object.keys(allowedFields)
 
 type CompileInput = Record<string, unknown>;
 
-function getFilteredObject(input: CompileInput): any {
+type FilteredObject = Record<string, CompileInput | CompileInput[] | unknown>;
+
+function getFilteredObject(input: CompileInput): FilteredObject {
   const obj = clone(input);
-  const res = {};
+  const res: FilteredObject = {};
   const allAllowed = [
     ...Object.keys(allowedFields),
     ...exposedConfigOptions,
