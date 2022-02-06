@@ -131,11 +131,15 @@ const mock1Image: DescribeImagesResult = {
 
 const mockEmpty: DescribeImagesResult = {};
 
+function mockDescribeImagesCommand(result: DescribeImagesResult): void {
+  ec2Mock.reset();
+  ec2Mock.on(DescribeImagesCommand).resolves(result);
+}
+
 describe('datasource/aws-machine-image/index', () => {
   describe('getSortedAwsMachineImages()', () => {
     it('with 3 returned images', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      mockDescribeImagesCommand(mock3Images);
       const ec2DataSource = new AwsMachineImageDataSource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
         '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["3images"]}]'
@@ -144,8 +148,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(ec2Mock.calls()).toMatchSnapshot();
     });
     it('with 1 returned image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock1Image);
+      mockDescribeImagesCommand(mock1Image);
       const ec2DataSource = new AwsMachineImageDataSource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
         '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["1image"]}]'
@@ -154,8 +157,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(ec2Mock.calls()).toMatchSnapshot();
     });
     it('without returned images', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
+      mockDescribeImagesCommand(mockEmpty);
       const ec2DataSource = new AwsMachineImageDataSource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
         '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["noiamge"]}]'
@@ -167,8 +169,7 @@ describe('datasource/aws-machine-image/index', () => {
 
   describe('getDigest()', () => {
     it('without newValue, without returned images to be null', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
+      mockDescribeImagesCommand(mockEmpty);
       const res = await getDigest({
         datasource,
         depName:
@@ -177,8 +178,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(res).toBeNull();
     });
     it('without newValue, with one matching image to return that image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock1Image);
+      mockDescribeImagesCommand(mock1Image);
       const res = await getDigest({
         datasource,
         depName:
@@ -187,8 +187,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(res).toStrictEqual(image3.Name);
     });
     it('without newValue, with 3 matching image to return the newest image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      mockDescribeImagesCommand(mock3Images);
       const res = await getDigest({
         datasource,
         depName:
@@ -197,8 +196,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(res).toStrictEqual(image3.Name);
     });
     it('with matching newValue, with 3 matching image to return the matching image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      mockDescribeImagesCommand(mock3Images);
       const res = await getDigest(
         {
           datasource,
@@ -210,8 +208,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(res).toStrictEqual(image1.Name);
     });
     it('with not matching newValue, with 3 matching images to return the matching image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      mockDescribeImagesCommand(mock3Images);
       const res = await getDigest(
         {
           datasource,
@@ -226,8 +223,7 @@ describe('datasource/aws-machine-image/index', () => {
 
   describe('getPkgReleases()', () => {
     it('without returned images to be null', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
+      mockDescribeImagesCommand(mockEmpty);
       const res = await getPkgReleases({
         datasource,
         depName:
@@ -236,8 +232,7 @@ describe('datasource/aws-machine-image/index', () => {
       expect(res).toBeNull();
     });
     it('with one matching image to return that image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock1Image);
+      mockDescribeImagesCommand(mock1Image);
       const res = await getPkgReleases({
         datasource,
         depName:
@@ -255,8 +250,7 @@ describe('datasource/aws-machine-image/index', () => {
       });
     });
     it('with one deprecated matching image to return that image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves({ Images: [image2] });
+      mockDescribeImagesCommand({ Images: [image2] });
       const res = await getPkgReleases({
         datasource,
         depName:
@@ -274,8 +268,7 @@ describe('datasource/aws-machine-image/index', () => {
       });
     });
     it('with 3 matching image to return the newest image', async () => {
-      ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      mockDescribeImagesCommand(mock3Images);
       const res = await getPkgReleases({
         datasource,
         depName:
