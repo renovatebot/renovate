@@ -4293,10 +4293,10 @@ eslint-visitor-keys@^3.0.0, eslint-visitor-keys@^3.1.0, eslint-visitor-keys@^3.2
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.2.0.tgz#6fbb166a6798ee5991358bc2daa1ba76cc1254a1"
   integrity sha512-IOzT0X126zn7ALX0dwFiUQEdsfzrm4+ISsQS8nukaJXwEyYKRSnEIIDULYg1mCtGp7UUXgfGl7BIolXREQK+XQ==
 
-eslint@8.7.0:
-  version "8.7.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.7.0.tgz#22e036842ee5b7cf87b03fe237731675b4d3633c"
-  integrity sha512-ifHYzkBGrzS2iDU7KjhCAVMGCvF6M3Xfs8X8b37cgrUlDt6bWRTpRh6T/gtSXv1HJ/BUGgmjvNvOEGu85Iif7w==
+eslint@8.8.0:
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.8.0.tgz#9762b49abad0cb4952539ffdb0a046392e571a2d"
+  integrity sha512-H3KXAzQGBH1plhYS3okDix2ZthuYJlQQEGE5k0IKuEqUSiyu4AmxxlJ2MtTYeJ3xB4jDhcYCwGOg2TXYdnDXlQ==
   dependencies:
     "@eslint/eslintrc" "^1.0.5"
     "@humanwhocodes/config-array" "^0.9.2"
@@ -5676,10 +5676,10 @@ jest-environment-node@^27.4.6:
     jest-mock "^27.4.6"
     jest-util "^27.4.2"
 
-jest-extended@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-1.2.0.tgz#6ef87d806bd9501a0aeae56fe8c7af73777987ed"
-  integrity sha512-KYc5DgD+/8viJSEKBzb1vRXe/rEEQUxEovBTdNEer9A6lzvHvhuyslM5tQFBz8TbLEkicCmsEcQF+4N7GiPTLg==
+jest-extended@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-1.2.1.tgz#bf94031b76fa19f8b8a0a9a98bdddff16beb2d71"
+  integrity sha512-eKZR5iDpyTkcDesj16FpIPnjAWQNUB81ZFQW08EIddM6iqO7DjRIi39td9qol+1dpJS4Mqr9Qzp8ZMhanbSeug==
   dependencies:
     expect "^26.6.2"
     jest-diff "^27.2.5"
