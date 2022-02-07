@@ -19,44 +19,6 @@ export class ConanDatasource extends Datasource {
     super(ConanDatasource.id);
   }
 
-  private async lookupConanPackage(
-    packageName: string,
-    hostUrl: any,
-    userAndChannel: string
-  ): Promise<ReleaseResult | null> {
-    logger.trace({ packageName, hostUrl }, 'Looking up conan api dependency');
-
-    try {
-      const url = ensureTrailingSlash(hostUrl);
-      const lookupUrl = joinUrlParts(url, `v2/conans/search?q=${packageName}`);
-
-      logger.trace({ lookupUrl }, 'conan api got lookup');
-      const rep = await this.http.getJson<ConanJSON>(lookupUrl);
-      const versions = rep?.body;
-      if (versions) {
-        logger.trace({ lookupUrl }, 'Got conan api result');
-        const dep: ReleaseResult = { releases: [] };
-
-        for (const resultString of Object.values(versions.results || {})) {
-          const fromMatch = conanDatasourceRegex.exec(resultString);
-          if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
-            const version = fromMatch.groups.version;
-            if (fromMatch.groups.userChannel === userAndChannel) {
-              const result: Release = {
-                version,
-              };
-              dep.releases.push(result);
-            }
-          }
-        }
-        return dep;
-      }
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
-    return null;
-  }
-
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
@@ -69,12 +31,37 @@ export class ConanDatasource extends Datasource {
     const depName = lookupName.split('/')[0];
     const userAndChannel = '@' + lookupName.split('@')[1];
 
-    const result = await this.lookupConanPackage(
-      depName,
-      registryUrl,
-      userAndChannel
-    );
+    logger.trace({ depName, registryUrl }, 'Looking up conan api dependency');
+    if (registryUrl) {
+      const url = ensureTrailingSlash(registryUrl);
+      const lookupUrl = joinUrlParts(url, `v2/conans/search?q=${depName}`);
 
-    return result?.releases.length ? result : null;
+      try {
+        const rep = await this.http.getJson<ConanJSON>(lookupUrl);
+        const versions = rep?.body;
+        if (versions) {
+          logger.trace({ lookupUrl }, 'Got conan api result');
+          const dep: ReleaseResult = { releases: [] };
+
+          for (const resultString of Object.values(versions.results || {})) {
+            const fromMatch = conanDatasourceRegex.exec(resultString);
+            if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
+              const version = fromMatch.groups.version;
+              if (fromMatch.groups.userChannel === userAndChannel) {
+                const result: Release = {
+                  version,
+                };
+                dep.releases.push(result);
+              }
+            }
+          }
+          return dep;
+        }
+      } catch (err) {
+        this.handleGenericErrors(err);
+      }
+    }
+
+    return null;
   }
 }

@@ -12,7 +12,7 @@ describe('manager/conan/extract', () => {
     });
     it('extracts multiple image lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile1);
-      expect(res?.deps).toHaveLength(10);
+      expect(res?.deps).toMatchSnapshot();
     });
     it('extracts multiple 0 lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile2);
@@ -20,7 +20,7 @@ describe('manager/conan/extract', () => {
     });
     it('extracts multiple image lines from conanfile.py', () => {
       const res = extractPackageFile(conanfile3);
-      expect(res?.deps).toHaveLength(16);
+      expect(res?.deps).toMatchSnapshot();
     });
   });
 });
