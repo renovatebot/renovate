@@ -6,7 +6,7 @@ import {
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
-import { AllConfig, RenovateConfig } from './types';
+import type { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 

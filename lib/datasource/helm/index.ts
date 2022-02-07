@@ -93,6 +93,11 @@ export class HelmDatasource extends Datasource {
     lookupName,
     registryUrl: helmRepository,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!helmRepository) {
+      return null;
+    }
+
     const repositoryData = await this.getRepositoryData(helmRepository);
     if (!repositoryData) {
       logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
