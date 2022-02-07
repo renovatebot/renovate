@@ -49,6 +49,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
     if (!registryUrl) {
       return null;
     }
