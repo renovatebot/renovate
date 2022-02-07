@@ -22,7 +22,7 @@ export class ConanDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}:${lookupName}release`,
+      `${registryUrl}:${lookupName}`,
   })
   async getReleases({
     registryUrl,
