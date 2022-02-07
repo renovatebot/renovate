@@ -1,20 +1,16 @@
 # Security and Permissions
 
-## How we keep Renovate safe to use
-
-...
-
 ## Permission comparison
 
 | Permission        | Renovate hosted app |  Forking Renovate  | Why                                                 |
 | ----------------- | :-----------------: | :----------------: | --------------------------------------------------- |
-| Dependabot alerts |       `read`        |       `read`       | Create security updates                             |
-| Administration    |       `read`        |       `read`       | ...                                                 |
-| Metadata          |       `read`        |       `read`       | Get basic repository information                    |
-| Checks            | `read` and `write`  |   not applicable   | ...                                                 |
-| Code              | `read` and `write`  |       `read`       | Find Renovate config file and package manager files |
-| Commit statuses   | `read` and `write`  | `read` and `write` | ...                                                 |
-| Issues            | `read` and `write`  | `read` and `write` | Create dependency dashboard                         |
+| Dependabot alerts |       `read`        |       `read`       | Create vulnerability fix PRs                             |
+| Administration    |       `read`        |       `read`       | Read branch protections and to be able to assign teams to PRs                                                 |
+| Metadata          |       `read`        |       `read`       | Mandatory for all apps                    |
+| Checks            | `read` and `write`  |   not applicable   | Read and write status checks                                                 |
+| Code              | `read` and `write`  |       `read`       | Read for repository content and write for creating branches |
+| Commit statuses   | `read` and `write`  | `read` and `write` | Read and write commit statuses for Renovate PRs                                                 |
+| Issues            | `read` and `write`  | `read` and `write` | Create dependency dashboard or Config Warning issues                         |
 | Pull Requests     | `read` and `write`  | `read` and `write` | Create update PRs                                   |
-| Workflows         | `read` and `write`  |   not applicable   | Update dependencies in workflow files               |
+| Workflows         | `read` and `write`  |   not applicable   | Explicit permission needed in order to update workflows |
 | Deployments       |   not applicable    |       `read`       | ...                                                 |
