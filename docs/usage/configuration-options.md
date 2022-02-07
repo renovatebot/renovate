@@ -293,7 +293,7 @@ Solutions:
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
-- You have a use case we didn't anticipate and we should have a feature request from you to add it to the project
+- You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
 ## branchPrefix
 
