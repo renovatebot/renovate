@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
-import { XmlDocument } from 'xmldoc';
+import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { newlineRegex, regEx } from '../../util/regex';
@@ -292,12 +292,7 @@ async function addReleasesUsingHeadRequests(
 }
 
 function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
-  const releases: Release[] = [];
-  for (const release of Object.values(releaseMap)) {
-    if (release) {
-      releases.push(release);
-    }
-  }
+  const releases = Object.values(releaseMap).filter(is.truthy);
   if (releases.length) {
     return releases;
   }

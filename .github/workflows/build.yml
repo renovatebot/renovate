@@ -101,8 +101,6 @@ jobs:
 
       - name: Codecov
         uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
-        with:
-          version: 'v0.1.15'
         if: always() && env.coverage == 'true'
 
       - name: E2E Test

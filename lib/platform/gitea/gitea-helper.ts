@@ -1,7 +1,7 @@
 import { BranchStatus, PrState } from '../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../util/http/gitea';
 import { getQueryString } from '../../util/url';
-import { PrReviewersParams } from './types';
+import type { PrReviewersParams } from './types';
 
 const giteaHttp = new GiteaHttp();
 

@@ -1,6 +1,6 @@
 import { emojify } from '../../../util/emoji';
 import { isBranchModified } from '../../../util/git';
-import { BranchConfig } from '../../types';
+import type { BranchConfig } from '../../types';
 
 export async function getControls(config: BranchConfig): Promise<string> {
   const warning = (await isBranchModified(config.branchName))
