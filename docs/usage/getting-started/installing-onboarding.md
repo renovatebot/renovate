@@ -41,7 +41,7 @@ For more details on GitLab security for bots, please see the [GitLab Bot Securit
 
 ## Repository onboarding
 
-Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:
+Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
 ![Onboarding](../assets/images/onboarding.png)
 
@@ -134,4 +134,4 @@ Any existing Renovate PRs will be closed after you've completed these steps.
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the hosted WhiteSource Renovate App and you don't receive a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you're using the hosted WhiteSource Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
