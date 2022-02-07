@@ -38,6 +38,7 @@ describe('manager/maven/index', () => {
         'simple.pom.xml',
       ]);
       const urls = [
+        'https://repo.maven.apache.org/maven2',
         'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://artifactory.company.com/artifactory/my-maven-repo',
       ];
@@ -179,6 +180,7 @@ describe('manager/maven/index', () => {
         'child.pom.xml',
       ]);
       const urls = new Set([
+        'https://repo.maven.apache.org/maven2',
         'http://example.com/',
         'http://example.com/nexus/xyz',
       ]);
