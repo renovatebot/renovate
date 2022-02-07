@@ -25,7 +25,7 @@ The only choice you need to make is whether to run Renovate on all repositories 
 
 Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
-Unfortunately GitHub doesn't offer a "select all except X,Y,Z" option, so you must select each repository where you want Renovate to run.
+Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
 Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
@@ -54,7 +54,7 @@ You can edit your Renovate configuration **within the `renovate/configure` branc
 
 ### Check for warnings
 
-If you have any Warnings or Errors listed, see if you need or want to make any changes to address them.
+If you have any Warnings or Errors listed, see if you need or want to make any changes to fix them.
 Warnings and errors should be fixed on the base branch (e.g. `main`) so that Renovate can recreate its Configure Renovate PR on its next cycle.
 
 ### Configuration location
