@@ -65,5 +65,21 @@ describe('workers/repository/process/fetch', () => {
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
     });
+    it('skips deps with empty names', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        docker: [
+          {
+            packageFile: 'values.yaml',
+            deps: [
+              { depName: '', currentValue: '2.8.11', datasource: 'docker' },
+              { depName: 'abcd' },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.docker[0].deps[0].skipReason).toBe('missing-depname');
+      expect(packageFiles.docker[0].deps[1].skipReason).toBeUndefined();
+    });
   });
 });
