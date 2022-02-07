@@ -13,7 +13,7 @@ export function extractPackageFile(
   // TODO: fix type
   let doc: any;
   try {
-    doc = load(content, { json: true });
+    doc = load(content, { json: true }); // TODO #9610
   } catch (err) {
     logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
     return null;
@@ -23,9 +23,18 @@ export function extractPackageFile(
     return null;
   }
   deps = doc.dependencies.map((dep) => {
+    let currentValue; // Remove when #9610 has been implemented
+    switch (typeof dep.version) {
+      case 'number':
+        currentValue = String(dep.version);
+        break;
+      case 'string':
+        currentValue = dep.version;
+    }
+
     const res: PackageDependency = {
       depName: dep.name,
-      currentValue: dep.version,
+      currentValue,
     };
 
     if (!res.depName) {

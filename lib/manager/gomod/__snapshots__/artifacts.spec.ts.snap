@@ -279,15 +279,19 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_COUNT -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_KEY_1 -e GIT_CONFIG_VALUE_1 -e GIT_CONFIG_KEY_2 -e GIT_CONFIG_VALUE_2 -e GIT_CONFIG_COUNT -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
-        "GIT_CONFIG_COUNT": "1",
-        "GIT_CONFIG_KEY_0": "url.https://some-token@github.com/.insteadOf",
-        "GIT_CONFIG_VALUE_0": "https://github.com/",
+        "GIT_CONFIG_COUNT": "3",
+        "GIT_CONFIG_KEY_0": "url.\\"https://ssh:some-token@github.com/\\".insteadOf",
+        "GIT_CONFIG_KEY_1": "url.\\"https://git:some-token@github.com/\\".insteadOf",
+        "GIT_CONFIG_KEY_2": "url.\\"https://some-token@github.com/\\".insteadOf",
+        "GIT_CONFIG_VALUE_0": "ssh://git@github.com/",
+        "GIT_CONFIG_VALUE_1": "git@github.com:",
+        "GIT_CONFIG_VALUE_2": "https://github.com/",
         "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",

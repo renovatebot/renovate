@@ -2,7 +2,7 @@ import moo from 'moo';
 import { ProgrammingLanguage } from '../../constants';
 import { id as datasource } from '../../datasource/nuget';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 
 export const language = ProgrammingLanguage.NET;
 

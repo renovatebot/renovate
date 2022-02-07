@@ -19,10 +19,10 @@ function parseDynamicRevision(str: string): Revision | null {
   }
 
   if (LATEST_REGEX.test(str)) {
-    const value = str.replace(LATEST_REGEX, '').toLowerCase() || null;
+    const value = str.replace(LATEST_REGEX, '').toLowerCase() || '';
     return {
       type: REV_TYPE_LATEST,
-      value: value === 'integration' ? null : value,
+      value: value === 'integration' ? '' : value,
     };
   }
 
@@ -39,10 +39,13 @@ function parseDynamicRevision(str: string): Revision | null {
 
   const range = parseRange(str);
   if (range && range.length === 1) {
-    return {
-      type: REV_TYPE_RANGE,
-      value: rangeToStr(range),
-    };
+    const rangeValue = rangeToStr(range);
+    if (rangeValue) {
+      return {
+        type: REV_TYPE_RANGE,
+        value: rangeValue,
+      };
+    }
   }
 
   return null;

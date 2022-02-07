@@ -52,16 +52,22 @@ export class AwsMachineImageDataSource extends Datasource {
     });
     const matchingImages = await this.ec2.getValue().send(cmd);
     matchingImages.Images = matchingImages.Images ?? [];
-    return matchingImages.Images.sort(
-      (image1, image2) =>
-        Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
-    );
+    return matchingImages.Images.sort((image1, image2) => {
+      const ts1 = image1.CreationDate
+        ? Date.parse(image1.CreationDate)
+        : /* istanbul ignore next */ 0;
+
+      const ts2 = image2.CreationDate
+        ? Date.parse(image2.CreationDate)
+        : /* istanbul ignore next */ 0;
+      return ts1 - ts2;
+    });
   }
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig, newValue: string) =>
-      `getDigest:${registryUrl}:${lookupName}:${newValue ?? ''}`,
+    key: ({ lookupName }: GetReleasesConfig, newValue: string) =>
+      `getDigest:${lookupName}:${newValue ?? ''}`,
   })
   override async getDigest(
     { lookupName: serializedAmiFilter }: GetReleasesConfig,
@@ -77,28 +83,29 @@ export class AwsMachineImageDataSource extends Datasource {
         (image) => image.ImageId === newValue
       );
       if (newValueMatchingImages.length === 1) {
-        return newValueMatchingImages[0].Name;
+        return (
+          newValueMatchingImages[0].Name ?? /* istanbul ignore next */ null
+        );
       }
       return null;
     }
 
-    return (await this.getReleases({ lookupName: serializedAmiFilter }))
-      .releases[0].newDigest;
+    const res = await this.getReleases({ lookupName: serializedAmiFilter });
+    return res?.releases?.[0]?.newDigest ?? /* istanbul ignore next */ null;
   }
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `getReleases:${registryUrl}:${lookupName}`,
+    key: ({ lookupName }: GetReleasesConfig) => `getReleases:${lookupName}`,
   })
   async getReleases({
     lookupName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    if (images.length === 0) {
+    const latestImage = images[images.length - 1];
+    if (!latestImage?.ImageId) {
       return null;
     }
-    const latestImage = images[images.length - 1];
     return {
       releases: [
         {
