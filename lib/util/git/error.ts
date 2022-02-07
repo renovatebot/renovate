@@ -1,7 +1,7 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { FileChange } from './types';
+import type { FileChange } from './types';
 
 // istanbul ignore next
 export function checkForPlatformFailure(err: Error): void {

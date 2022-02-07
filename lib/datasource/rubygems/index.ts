@@ -2,7 +2,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
-import { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { InternalRubyGemsDatasource } from './get';
 import { RubyGemsOrgDatasource } from './get-rubygems-org';
 

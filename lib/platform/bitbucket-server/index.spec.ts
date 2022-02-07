@@ -5,7 +5,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
+import type * as _git from '../../util/git';
 import type { Platform } from '../types';
 
 function sshLink(projectKey: string, repositorySlug: string): string {
