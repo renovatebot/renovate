@@ -59,7 +59,7 @@ api.set('github-releases', githubReleases);
 api.set('github-tags', githubTags);
 api.set('gitlab-packages', new GitlabPackagesDatasource());
 api.set(GitlabReleasesDatasource.id, new GitlabReleasesDatasource());
-api.set('gitlab-tags', new GitlabTagsDatasource());
+api.set(GitlabTagsDatasource.id, new GitlabTagsDatasource());
 api.set('go', new GoDatasource());
 api.set('golang-version', new GolangVersionDatasource());
 api.set('gradle-version', new GradleVersionDatasource());
