@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { parseUrl, validateUrl } from './url';
