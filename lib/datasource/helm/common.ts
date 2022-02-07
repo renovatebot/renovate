@@ -16,13 +16,13 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
     return { sourceUrl: releaseMatch[1] };
   }
 
-  let homeMatch;
+  let homeMatch: { url: string; repo: string } | undefined;
   if (release.home) {
-    homeMatch = githubUrl.exec(release.home);
-    if (homeMatch?.groups && chartRepo.test(homeMatch?.groups.repo)) {
+    homeMatch = githubUrl.exec(release.home)?.groups;
+    if (homeMatch && chartRepo.test(homeMatch.repo)) {
       return {
-        sourceUrl: homeMatch.groups.url,
-        sourceDirectory: homeMatch.groups.path,
+        sourceUrl: homeMatch.url,
+        sourceDirectory: homeMatch.path,
       };
     }
   }
@@ -43,10 +43,10 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
 
   // fallback: if neither home nor sources are a chart repo URL, use githubUrl (if present)
   const firstSourceMatch = githubUrl.exec(release.sources[0]);
-  if (homeMatch?.groups.url && homeMatch?.groups.path) {
+  if (homeMatch?.url && homeMatch?.path) {
     return {
-      sourceUrl: homeMatch.groups.url,
-      sourceDirectory: homeMatch.groups.path,
+      sourceUrl: homeMatch.url,
+      sourceDirectory: homeMatch.path,
     };
   } else if (firstSourceMatch?.groups.url && firstSourceMatch?.groups.path) {
     return {
