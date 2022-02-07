@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
-import type { GetPkgReleasesConfig } from '../types';
-import * as httpMock from '../../../test/http-mock';
 import { Fixtures } from '../../../test/fixtures';
+import * as httpMock from '../../../test/http-mock';
 import * as conan from '../../versioning/conan';
+import type { GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
@@ -12,22 +12,27 @@ const fakeJson = Fixtures.get('fake.json');
 const datasource = ConanDatasource.id;
 
 const config: GetPkgReleasesConfig = {
-    datasource,
+  depName: '',
+  datasource,
   versioning: conan.id,
+  registryUrls: [defaultRegistryUrl],
 };
 
 describe('datasource/conan/index', () => {
+  beforeEach(() => {
+    config.registryUrls = [defaultRegistryUrl];
+  });
+
   describe('getReleases', () => {
     it('handles bad return', async () => {
       httpMock
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, null);
+      config.depName = 'fakepackage';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
@@ -38,11 +43,10 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, {});
+      config.depName = 'fakepackage';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
@@ -54,11 +58,10 @@ describe('datasource/conan/index', () => {
         .get('/v2/conans/search?q=poco')
         .reply(404);
       config.registryUrls = ['https://fake.bintray.com/'];
+      config.depName = 'poco';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
       ).toBeNull();
@@ -69,11 +72,10 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, fakeJson);
+      config.depName = 'fakepackage';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
@@ -84,11 +86,10 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
+      config.depName = 'poco';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
       ).toEqual({
@@ -118,11 +119,10 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
+      config.depName = 'poco';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'poco',
           lookupName: 'poco/1.2@un/matched',
         })
       ).toBeNull();
@@ -133,11 +133,10 @@ describe('datasource/conan/index', () => {
         .scope(defaultRegistryUrl)
         .get('/v2/conans/search?q=bad')
         .reply(200, malformedJson);
+      config.depName = 'bad';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'bad',
           lookupName: 'bad/1.2@_/_',
         })
       ).toEqual({
@@ -156,12 +155,10 @@ describe('datasource/conan/index', () => {
         .get('/v2/conans/search?q=poco')
         .replyWithError('error');
       config.registryUrls = ['https://fake.bintray.com/'];
-
+      config.depName = 'poco';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
       ).toBeNull();
@@ -173,11 +170,10 @@ describe('datasource/conan/index', () => {
         .get('/v2/conans/search?q=poco')
         .reply(200, fakeJson);
       config.registryUrls = ['https://fake.bintray.com'];
+      config.depName = 'poco';
       expect(
         await getPkgReleases({
           ...config,
-          datasource,
-          depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
       ).toBeNull();

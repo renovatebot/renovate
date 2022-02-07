@@ -9,7 +9,7 @@ export function makeVersion(
   const prerelease = semver.prerelease(version, options);
 
   if (prerelease && !options.includePrerelease) {
-    if (!Number.isNaN(parseInt(prerelease[0], 10))) {
+    if (!Number.isNaN(parseInt(prerelease.toString()[0], 10))) {
       const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
       return semver.valid(stringVersion, options);
     }
