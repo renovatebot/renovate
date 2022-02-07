@@ -89,6 +89,9 @@ export async function getUpdatedPackageFiles(
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
       }
+      if (status === 'update-failed' || status === 'unsupported') {
+        upgrade.remediationNotPossible = true;
+      }
     } else if (upgrade.isLockfileUpdate) {
       if (updateLockedDependency) {
         const { status, files } = await updateLockedDependency({

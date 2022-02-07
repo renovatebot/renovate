@@ -9,7 +9,7 @@ export function parseIndexDir(
   content: string,
   filterFn = (x: string): boolean => !regEx(/^\.+/).test(x)
 ): string[] {
-  const unfiltered = content.match(linkRegExp) || [];
+  const unfiltered = content.match(linkRegExp) ?? [];
   return unfiltered.filter(filterFn);
 }
 

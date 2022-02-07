@@ -19,7 +19,7 @@ export async function getArtifactSubdirs(
   searchRoot: string,
   artifact: string,
   scalaVersion: string
-): Promise<string[]> {
+): Promise<string[] | null> {
   const pkgUrl = ensureTrailingSlash(searchRoot);
   const { body: indexContent } = await downloadHttpProtocol(pkgUrl, 'sbt');
   if (indexContent) {
@@ -52,8 +52,8 @@ export async function getArtifactSubdirs(
 
 export async function getPackageReleases(
   searchRoot: string,
-  artifactSubdirs: string[]
-): Promise<string[]> {
+  artifactSubdirs: string[] | null
+): Promise<string[] | null> {
   if (artifactSubdirs) {
     const releases: string[] = [];
     const parseReleases = (content: string): string[] =>
@@ -75,7 +75,7 @@ export async function getPackageReleases(
   return null;
 }
 
-export function getLatestVersion(versions: string[]): string | null {
+export function getLatestVersion(versions: string[] | null): string | null {
   if (versions?.length) {
     return versions.reduce((latestVersion, version) =>
       compare(version, latestVersion) === 1 ? version : latestVersion
@@ -86,8 +86,8 @@ export function getLatestVersion(versions: string[]): string | null {
 
 export async function getUrls(
   searchRoot: string,
-  artifactDirs: string[],
-  version: string
+  artifactDirs: string[] | null,
+  version: string | null
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
 
@@ -139,6 +139,11 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // istanbul ignore if
+  if (!registryUrl) {
+    return null;
+  }
+
   const [groupId, artifactId] = lookupName.split(':');
   const groupIdSplit = groupId.split('.');
   const artifactIdSplit = artifactId.split('_');

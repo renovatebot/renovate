@@ -1,7 +1,7 @@
 import { getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { BranchStatus } from '../../types';
-import { BranchConfig } from '../types';
+import type { BranchConfig } from '../types';
 import { setArtifactErrorStatus } from './artifacts';
 
 describe('workers/branch/artifacts', () => {
