@@ -1,3 +1,4 @@
+import url from 'url';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -24,9 +25,9 @@ function httpByHostType(hostType: string): Http {
   return http[hostType];
 }
 
-const getHost = (x: string): string => new URL(x).host;
+const getHost = (x: string): string => new url.URL(x).host;
 
-function isMavenCentral(pkgUrl: URL | string): boolean {
+function isMavenCentral(pkgUrl: url.URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
   return getHost(MAVEN_REPO) === host;
 }
@@ -64,7 +65,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 }
 
 export async function downloadHttpProtocol(
-  pkgUrl: URL | string,
+  pkgUrl: url.URL | string,
   hostType = id
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
@@ -106,7 +107,7 @@ export async function downloadHttpProtocol(
 }
 
 export async function checkHttpResource(
-  pkgUrl: URL | string,
+  pkgUrl: url.URL | string,
   hostType = id
 ): Promise<HttpResourceCheckResult> {
   try {
@@ -145,12 +146,12 @@ export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): URL | null {
-  return new URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+): url.URL | null {
+  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
-  pkgUrl: URL | null
+  pkgUrl: url.URL | null
 ): Promise<MavenXml | null> {
   /* istanbul ignore if */
   if (!pkgUrl) {
