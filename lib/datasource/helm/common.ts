@@ -16,7 +16,7 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
     return { sourceUrl: releaseMatch[1] };
   }
 
-  let homeMatch: { url: string; repo: string } | undefined;
+  let homeMatch: { url?: string; repo?: string; path?: string } | undefined;
   if (release.home) {
     homeMatch = githubUrl.exec(release.home)?.groups;
     if (homeMatch && chartRepo.test(homeMatch.repo)) {
