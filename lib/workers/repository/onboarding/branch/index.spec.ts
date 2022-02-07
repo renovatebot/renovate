@@ -12,7 +12,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
-import { Pr } from '../../../../platform';
+import type { Pr } from '../../../../platform';
 import { PrState } from '../../../../types';
 import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
