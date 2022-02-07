@@ -1,4 +1,4 @@
-import {
+import type {
   BranchStatusConfig,
   EnsureIssueConfig,
   Platform,
@@ -14,12 +14,12 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import { logger as _logger } from '../../logger';
+import type { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
+import type * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
-import { PlatformResult } from '../types';
-import * as ght from './gitea-helper';
+import type { PlatformResult } from '../types';
+import type * as ght from './gitea-helper';
 
 /**
  * latest tested gitea version.
