@@ -12,6 +12,7 @@ Array [
         "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -22,6 +23,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 905,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -32,6 +34,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 1093,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -42,6 +45,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 1347,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -52,6 +56,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 1545,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -62,6 +67,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 2276,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -72,6 +78,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2484,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
         "skipReason": "name-placeholder",
@@ -83,6 +90,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2634,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
         "skipReason": "name-placeholder",
@@ -95,6 +103,7 @@ Array [
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -106,6 +115,7 @@ Array [
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -116,6 +126,7 @@ Array [
         "depType": "test",
         "fileReplacePosition": 3086,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -126,6 +137,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3252,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -136,6 +148,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3410,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -145,6 +158,7 @@ Array [
         "depName": "org.example:relocation-artifact",
         "fileReplacePosition": 3612,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -155,6 +169,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3944,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
         "skipReason": "version-placeholder",
@@ -166,6 +181,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 4200,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -176,6 +192,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 4594,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
@@ -198,6 +215,7 @@ Array [
         "depType": "parent",
         "fileReplacePosition": 185,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/nexus/xyz",
           "http://example.com/",
         ],
@@ -211,6 +229,7 @@ Array [
         "fileReplacePosition": 470,
         "groupName": "quuxVersion",
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -229,6 +248,7 @@ Array [
         "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -240,6 +260,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 806,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -251,6 +272,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 954,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -262,6 +284,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 1188,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -273,6 +296,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 1386,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -284,6 +308,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2131,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -296,6 +321,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2281,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -308,6 +334,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2574,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -319,6 +346,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2714,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -330,6 +358,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2872,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -341,6 +370,7 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3134,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
@@ -353,6 +383,7 @@ Array [
         "depType": "build",
         "fileReplacePosition": 3410,
         "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
