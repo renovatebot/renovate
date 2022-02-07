@@ -73,6 +73,10 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               { depName: '', currentValue: '2.8.11', datasource: 'docker' },
               { depName: 'abcd' },
+              { currentValue: '2.8.11', datasource: 'docker' },
+              { depName: ' ' },
+              { depName: null },
+              { depName: undefined },
             ],
           },
         ],
@@ -80,6 +84,10 @@ describe('workers/repository/process/fetch', () => {
       await fetchUpdates(config, packageFiles);
       expect(packageFiles.docker[0].deps[0].skipReason).toBe('missing-depname');
       expect(packageFiles.docker[0].deps[1].skipReason).toBeUndefined();
+      expect(packageFiles.docker[0].deps[2].skipReason).toBe('missing-depname');
+      expect(packageFiles.docker[0].deps[3].skipReason).toBe('missing-depname');
+      expect(packageFiles.docker[0].deps[4].skipReason).toBe('missing-depname');
+      expect(packageFiles.docker[0].deps[5].skipReason).toBe('missing-depname');
     });
   });
 });
