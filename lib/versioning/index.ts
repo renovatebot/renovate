@@ -19,16 +19,11 @@ export function get(versioning: string): VersioningApi {
     logger.trace('Missing versioning, using semver as fallback.');
     return versionings.get('semver') as VersioningApi;
   }
-  let versioningName: string;
-  let versioningConfig: string;
+  const [versioningName, ...versioningRest] = versioning.split(':');
+  const versioningConfig = versioningRest.length
+    ? versioningRest.join(':')
+    : undefined;
 
-  if (versioning.includes(':')) {
-    const versionSplit = versioning.split(':');
-    versioningName = versionSplit.shift();
-    versioningConfig = versionSplit.join(':');
-  } else {
-    versioningName = versioning;
-  }
   const theVersioning = versionings.get(versioningName);
   if (!theVersioning) {
     logger.info({ versioning }, 'Unknown versioning - defaulting to semver');
