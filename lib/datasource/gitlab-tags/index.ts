@@ -23,9 +23,9 @@ export class GitlabTagsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 10,
-    namespace: 'datasource-gitlab',
+    namespace: `datasource-${GitlabTagsDatasource.id}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${lookupName}:tags`,
+      `${getDepHost(registryUrl)}:${lookupName}`,
   })
   async getReleases({
     registryUrl,
@@ -64,9 +64,9 @@ export class GitlabTagsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 10,
-    namespace: 'datasource-gitlab',
+    namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${lookupName}:commit`,
+      `${getDepHost(registryUrl)}:${lookupName}`,
   })
   /**
    * gitlab.getDigest
