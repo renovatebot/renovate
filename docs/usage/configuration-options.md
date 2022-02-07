@@ -257,7 +257,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the amount of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
+The `config:base` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -2560,13 +2560,13 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
-Note: Renovate will wait for the set amount of `stabilityDays` to pass for each **separate** version.
+Note: Renovate will wait for the set number of `stabilityDays` to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x `stabilityDays`.
 `stabilityDays` is not intended to help with slowing down fast releasing project updates.
 If you want to slow down PRs for a specific package, setup a custom schedule for that package.
 Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
 
-If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
+If the number of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
 Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
