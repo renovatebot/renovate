@@ -2,7 +2,7 @@ import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
 import { fs, logger } from '../../../test/util';
 import { PlatformId } from '../../constants';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
 import * as _configParser from './config/parse';
@@ -48,7 +48,7 @@ describe('workers/global/index', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
           username: 'some-user',
           password: 'some-password',
         },
@@ -67,7 +67,7 @@ describe('workers/global/index', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
           username: 'some-user',
           password: 'some-password',
         },

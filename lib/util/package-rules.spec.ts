@@ -1,7 +1,6 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
 import { ProgrammingLanguage } from '../constants';
-
-import * as datasourceDocker from '../datasource/docker';
+import { DockerDatasource } from '../datasource/docker';
 import { OrbDatasource } from '../datasource/orb';
 import { applyPackageRules } from './package-rules';
 
@@ -319,7 +318,7 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [OrbDatasource.id, datasourceDocker.id],
+          matchDatasources: [OrbDatasource.id, DockerDatasource.id],
           x: 1,
         },
       ],

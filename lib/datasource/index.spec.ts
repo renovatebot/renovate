@@ -8,7 +8,6 @@ import {
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
 import { Datasource } from './datasource';
-import * as datasourceDocker from './docker';
 import { GalaxyDatasource } from './galaxy';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
@@ -17,12 +16,27 @@ import * as datasourcePackagist from './packagist';
 import type { DatasourceApi } from './types';
 import * as datasource from '.';
 
-jest.mock('./docker');
+jest.mock('./docker', () => ({
+  __esModule: true,
+  DockerDatasource: jest.fn(() => {
+    const { DockerDatasource: ActualDockerDatasource } =
+      jest.requireActual('./docker');
+    return Object.assign(Object.create(ActualDockerDatasource.prototype), {
+      id: ActualDockerDatasource.id,
+      registryStrategy: 'first',
+      customRegistrySupport: true,
+      getDigest: () => undefined,
+      getReleases: () => dockerDatasourceGetReleasesMock(),
+    });
+  }),
+}));
 jest.mock('./maven');
 jest.mock('./npm');
 jest.mock('./packagist');
 
-const dockerDatasource = mocked(datasourceDocker);
+const dockerDatasourceGetReleasesMock = jest.fn();
+const { DockerDatasource: ActualDockerDatasource } =
+  jest.requireActual('./docker');
 const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
@@ -109,7 +123,7 @@ describe('datasource/index', () => {
   it('returns getDigest', async () => {
     expect(
       await datasource.getDigest({
-        datasource: datasourceDocker.id,
+        datasource: ActualDockerDatasource.id,
         depName: 'docker/node',
       })
     ).toBeUndefined();
@@ -170,9 +184,9 @@ describe('datasource/index', () => {
     expect(logger.logger.warn).toHaveBeenCalled();
   });
   it('warns if multiple registryUrls for registryStrategy=first', async () => {
-    dockerDatasource.getReleases.mockResolvedValue(null);
+    dockerDatasourceGetReleasesMock.mockResolvedValue(null);
     const res = await datasource.getPkgReleases({
-      datasource: datasourceDocker.id,
+      datasource: ActualDockerDatasource.id,
       depName: 'something',
       registryUrls: ['https://docker.com', 'https://docker.io'],
     });

@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
@@ -12,7 +12,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  datasourceDocker.id,
+  DockerDatasource.id,
   datasourceGithubReleases.id,
   datasourceGithubTags.id,
   GoDatasource.id,
