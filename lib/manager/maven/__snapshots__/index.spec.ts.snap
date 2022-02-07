@@ -12,8 +12,8 @@ Array [
         "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -23,8 +23,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 905,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -34,8 +34,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 1093,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -45,8 +45,8 @@ Array [
         "depType": "build",
         "fileReplacePosition": 1347,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -56,8 +56,8 @@ Array [
         "depType": "build",
         "fileReplacePosition": 1545,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -67,8 +67,8 @@ Array [
         "depType": "build",
         "fileReplacePosition": 2276,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -78,8 +78,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2484,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "name-placeholder",
       },
@@ -90,8 +90,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 2634,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "name-placeholder",
       },
@@ -103,8 +103,8 @@ Array [
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -115,8 +115,8 @@ Array [
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -126,8 +126,8 @@ Array [
         "depType": "test",
         "fileReplacePosition": 3086,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -137,8 +137,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3252,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -148,8 +148,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3410,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -158,8 +158,8 @@ Array [
         "depName": "org.example:relocation-artifact",
         "fileReplacePosition": 3612,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -169,8 +169,8 @@ Array [
         "depType": "compile",
         "fileReplacePosition": 3944,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "version-placeholder",
       },
@@ -181,8 +181,8 @@ Array [
         "depType": "build",
         "fileReplacePosition": 4200,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       Object {
@@ -192,8 +192,8 @@ Array [
         "depType": "build",
         "fileReplacePosition": 4594,
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
     ],

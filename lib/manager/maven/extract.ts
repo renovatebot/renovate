@@ -7,7 +7,12 @@ import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { MavenProp } from './types';
+import type {
+  MavenMirror,
+  MavenProp,
+  MavenRepository,
+  MavenSettings,
+} from './types';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;
@@ -57,7 +62,7 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
     const datasource = datasourceMaven.id;
-    const registryUrls = [MAVEN_REPO];
+    const registryUrls = [];
     const result: PackageDependency = {
       datasource,
       depName,
@@ -250,42 +255,75 @@ export function extractPackage(
   return result;
 }
 
-export function extractRegistries(rawContent: string): string[] {
+export function extractSettings(rawContent: string): MavenSettings {
   if (!rawContent) {
-    return [];
+    return {
+      mirrors: [],
+      repositories: [],
+    };
   }
 
   const settings = parseSettings(rawContent);
   if (!settings) {
-    return [];
+    return {
+      mirrors: [],
+      repositories: [],
+    };
   }
 
-  const urls = [];
-
-  const mirrorUrls = parseUrls(settings, 'mirrors');
-  urls.push(...mirrorUrls);
+  const mirrors = parseMirrors(settings, 'mirrors');
+  const repositories: MavenRepository[] = [];
 
   settings.childNamed('profiles')?.eachChild((profile) => {
-    const repositoryUrls = parseUrls(profile, 'repositories');
-    urls.push(...repositoryUrls);
+    const repositoryUrls = parseRepositories(profile, 'repositories');
+    repositories.push(...repositoryUrls);
   });
 
-  // filter out duplicates
-  return [...new Set(urls)];
+  return {
+    mirrors,
+    repositories,
+  };
 }
 
-function parseUrls(xmlNode: XmlElement, path: string): string[] {
+function parseMirrors(xmlNode: XmlElement, path: string): MavenMirror[] {
   const children = xmlNode.descendantWithPath(path);
-  const urls = [];
+  const mirrors = [];
   if (children?.children) {
     children.eachChild((child) => {
       const url = child.valueWithPath('url');
-      if (url) {
-        urls.push(url);
+      const id = child.valueWithPath('id');
+      const mirrorOf = child.valueWithPath('mirrorOf');
+      if (url && id && mirrorOf) {
+        mirrors.push({
+          id,
+          url,
+          mirrorOf,
+        });
       }
     });
   }
-  return urls;
+  return mirrors;
+}
+
+function parseRepositories(
+  xmlNode: XmlElement,
+  path: string
+): MavenRepository[] {
+  const children = xmlNode.descendantWithPath(path);
+  const repositories = [];
+  if (children?.children) {
+    children.eachChild((child) => {
+      const url = child.valueWithPath('url');
+      const id = child.valueWithPath('id');
+      if (url && id) {
+        repositories.push({
+          id,
+          url,
+        });
+      }
+    });
+  }
+  return repositories;
 }
 
 export function parseSettings(raw: string): XmlDocument | null {
@@ -392,7 +430,14 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
-  const additionalRegistryUrls = [];
+
+  const mirrors = [];
+  const repositories: MavenRepository[] = [
+    {
+      id: 'central',
+      url: MAVEN_REPO,
+    },
+  ];
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
@@ -401,13 +446,14 @@ export async function extractAllPackageFiles(
       continue;
     }
     if (packageFile.endsWith('settings.xml')) {
-      const registries = extractRegistries(content);
-      if (registries) {
+      const settings = extractSettings(content);
+      if (settings.mirrors || settings.repositories) {
         logger.debug(
-          { registries, packageFile },
-          'Found registryUrls in settings.xml'
+          { registries: settings, packageFile },
+          'Found registries in settings.xml'
         );
-        additionalRegistryUrls.push(...registries);
+        mirrors.push(...settings.mirrors);
+        repositories.push(...settings.repositories);
       }
     } else {
       const pkg = extractPackage(content, packageFile);
@@ -418,17 +464,74 @@ export async function extractAllPackageFiles(
       }
     }
   }
-  if (additionalRegistryUrls) {
+  // merge repos and mirrors
+  const mergedRegistries = mergeReposAndMirrors(mirrors, repositories);
+
+  if (mergedRegistries) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
         /* istanbul ignore else */
         if (dep.registryUrls) {
-          dep.registryUrls.push(...additionalRegistryUrls);
+          dep.registryUrls.push(...mergedRegistries);
         } else {
-          dep.registryUrls = [...additionalRegistryUrls];
+          dep.registryUrls = [...mergedRegistries];
         }
       }
     }
   }
   return cleanResult(resolveParents(packages));
+}
+
+export function mergeReposAndMirrors(
+  mirrors: MavenMirror[],
+  repositories: MavenRepository[]
+): string[] {
+  // loop through each repository
+  const mergedRepositories: string[] = [];
+  for (const repo of repositories) {
+    const matchedMirror = getMirrorMatch(mirrors, repo);
+    if (matchedMirror) {
+      mergedRepositories.push(matchedMirror.url);
+    } else {
+      mergedRepositories.push(repo.url);
+    }
+  }
+  // unique urls
+  return [...new Set(mergedRepositories)];
+}
+
+export function getMirrorMatch(
+  mirrors: MavenMirror[],
+  repo: MavenRepository
+): MavenMirror | undefined {
+  // we support only:
+  // *                      (all)
+  // repo1                  (direct)
+  // repo1, repo2           (multiple direct)
+  // *,!repo2 | !repo2,*    (all, except)
+  for (const mirror of mirrors) {
+    if (mirror.mirrorOf === '*') {
+      // match all
+      return mirror;
+    }
+    const matches = mirror.mirrorOf.split(',');
+    if (matches.includes('*') && matches.find((e) => e.startsWith('!'))) {
+      for (const match of matches) {
+        if (match !== '*' && `!${repo.id}` !== match) {
+          return mirror;
+        }
+      }
+    } else if (
+      !matches.includes('*') &&
+      !matches.find((e) => e.startsWith('!'))
+    ) {
+      // match directly (as well as multiple)
+      for (const match of matches) {
+        if (repo.id === match) {
+          return mirror;
+        }
+      }
+    }
+  }
+  return undefined;
 }

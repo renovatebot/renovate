@@ -10,6 +10,7 @@ const pomParent = loadFixture('parent.pom.xml');
 const pomChild = loadFixture('child.pom.xml');
 const origContent = loadFixture('grouping.pom.xml');
 const settingsContent = loadFixture('mirror.settings.xml');
+const profileSettingsContent = loadFixture('profile.settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -29,7 +30,7 @@ describe('manager/maven/index', () => {
       expect(res).toBeEmptyArray();
     });
 
-    it('should return packages with urls from a settings file', async () => {
+    it('should return packages with mirror urls from a settings file', async () => {
       fs.readLocalFile
         .mockResolvedValueOnce(settingsContent)
         .mockResolvedValueOnce(pomContent);
@@ -38,9 +39,29 @@ describe('manager/maven/index', () => {
         'simple.pom.xml',
       ]);
       const urls = [
-        'https://repo.maven.apache.org/maven2',
         'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://artifactory.company.com/artifactory/my-maven-repo',
+      ];
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          const depUrls = [...dep.registryUrls];
+          expect(depUrls).toEqual(urls);
+        }
+      }
+    });
+
+    it('should return packages with profile urls from a settings file', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(profileSettingsContent)
+        .mockResolvedValueOnce(pomContent);
+      const packages = await extractAllPackageFiles({}, [
+        'settings.xml',
+        'simple.pom.xml',
+      ]);
+      const urls = [
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
+        'https://repo.adobe.com/nexus/content/groups/public',
       ];
       for (const pkg of packages) {
         for (const dep of pkg.deps) {

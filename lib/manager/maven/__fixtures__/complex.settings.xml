@@ -3,7 +3,7 @@
     <mirror>
       <id>my-maven-repo</id>
       <url>https://artifactory.company.com/artifactory/my-maven-repo</url>
-      <mirrorOf>*</mirrorOf>
+      <mirrorOf>*,!custom-repo</mirrorOf>
     </mirror>
     <mirror>
       <id>my-maven-repo-v2</id>
