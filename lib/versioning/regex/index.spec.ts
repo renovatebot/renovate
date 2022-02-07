@@ -247,6 +247,7 @@ describe('versioning/regex/index', () => {
       ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6-foo'} | ${'2.1.6'}
       ${['2.1.5-foo', '2.1.6']}                     | ${'2.1.6-foo'} | ${'2.1.6'}
       ${['1.2.3', '1.2.4']}                         | ${'3.5.0'}     | ${null}
+      ${['1.2.3', '1.2.4']}                         | ${'!@#'}       | ${null}
     `(
       'getSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
@@ -260,6 +261,7 @@ describe('versioning/regex/index', () => {
       ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6-foo'} | ${'2.1.6'}
       ${['2.1.5', '2.1.6-foo']}                     | ${'2.1.5-foo'} | ${'2.1.5'}
       ${['1.2.3', '1.2.4']}                         | ${'3.5.0'}     | ${null}
+      ${['1.2.3', '1.2.4']}                         | ${'!@#'}       | ${null}
     `(
       'minSatisfyingVersion($versions, "$range") === "$expected"',
       ({ versions, range, expected }) => {

@@ -3,6 +3,7 @@ import { extractPackage, extractRegistries } from './extract';
 
 const minimumContent = Fixtures.get(`minimum.pom.xml`);
 const simpleContent = Fixtures.get(`simple.pom.xml`);
+const simpleCentralContent = Fixtures.get(`simple.central.pom.xml`);
 
 const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
 const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
@@ -120,6 +121,32 @@ describe('manager/maven/extract', () => {
             val: '1.2.3.4',
           },
         },
+        packageFile: null,
+      });
+    });
+    it('extract dependencies from any XML position with Central Maven', () => {
+      const res = extractPackage(simpleCentralContent);
+      expect(res).toMatchSnapshot({
+        deps: [
+          {
+            depName: 'org.example:foo',
+            currentValue: '0.0.1',
+            depType: 'compile',
+            registryUrls: [],
+          },
+          {
+            depName: 'org.example:quuz',
+            currentValue: '1.2.3',
+            depType: 'test',
+            registryUrls: [],
+          },
+          {
+            depName: 'org.example:profile-build-artefact',
+            currentValue: '2.17',
+            depType: 'build',
+            registryUrls: [],
+          },
+        ],
         packageFile: null,
       });
     });
