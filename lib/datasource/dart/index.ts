@@ -1,4 +1,4 @@
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { DartResult } from './types';

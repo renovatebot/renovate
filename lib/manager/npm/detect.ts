@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../logger';
 import { readFile } from '../../util/fs';
-import { GlobalManagerConfig } from '../types';
+import type { GlobalManagerConfig } from '../types';
 
 export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
   const res: GlobalManagerConfig = {};
