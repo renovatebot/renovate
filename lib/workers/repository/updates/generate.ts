@@ -312,7 +312,7 @@ export function generateBranchConfig(
         []
       )
     ),
-  ];
+  ].filter(is.truthy);
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   // combine all labels
   config.labels = [
