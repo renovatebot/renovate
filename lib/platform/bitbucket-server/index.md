@@ -47,7 +47,7 @@ export LOG_LEVEL=debug
 yarn start --autodiscover=true
 ```
 
-You should then receive a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
+You should then get a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
 
 ## Supported versions
 
