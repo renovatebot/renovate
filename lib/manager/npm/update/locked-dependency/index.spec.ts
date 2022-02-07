@@ -14,6 +14,14 @@ const serveStaticJson = JSON.parse(
 );
 const sendJson = JSON.parse(loadFixture('send.json', './package-lock'));
 const typeIsJson = JSON.parse(loadFixture('type-is.json', './package-lock'));
+const bundledPackageJson = loadFixture(
+  'bundled.package.json',
+  './package-lock'
+);
+const bundledPackageLockJson = loadFixture(
+  'bundled.package-lock.json',
+  './package-lock'
+);
 
 describe('manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
@@ -150,6 +158,15 @@ describe('manager/npm/update/locked-dependency/index', () => {
       config.currentVersion = '1.2.11';
       config.newVersion = '1.4.1';
       config.allowParentUpdates = false;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('update-failed');
+    });
+    it('fails remediation if bundled', async () => {
+      config.depName = 'ansi-regex';
+      config.currentVersion = '3.0.0';
+      config.newVersion = '5.0.1';
+      config.packageFileContent = bundledPackageJson;
+      config.lockFileContent = bundledPackageLockJson;
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('update-failed');
     });

@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { BranchConfig } from '../../types';
+import type { BranchConfig } from '../../types';
 import { getPrConfigDescription } from './config-description';
 
 jest.mock('../../../util/git');

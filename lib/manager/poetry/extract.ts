@@ -2,7 +2,7 @@ import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import {
   getSiblingFileName,
   localPathExists,
