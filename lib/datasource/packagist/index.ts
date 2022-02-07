@@ -191,9 +191,9 @@ function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   //check in apiv2 subdirectory first
-  const v2CacheNamespace = 'datasource-packagist-org-v2';
-  let cachedResult = await packageCache.get<ReleaseResult>(
-    v2CacheNamespace,
+  const cacheNamespace = 'datasource-packagist-org-v2';
+  const cachedResult = await packageCache.get<ReleaseResult>(
+    cacheNamespace,
     name
   );
   //if found return result
@@ -203,27 +203,10 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   //else fetch new result + store in apiv2 sub-dir + return result
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
-  let pkgUrl = URL.resolve(regUrl, `/p2/${name}.json`);
-  let res = (await http.getJson<any>(pkgUrl)).body.packages[name];
+  const pkgUrl = URL.resolve(regUrl, `/p2/${name}.json`);
+  const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     //might need to update this
-    dep = extractDepReleases(res);
-    logger.trace({ dep }, 'dep');
-    const cacheMinutes = 10;
-    await packageCache.set(v2CacheNamespace, name, dep, cacheMinutes);
-    return dep;
-  }
-  //else fallback to old code
-  const cacheNamespace = 'datasource-packagist-org';
-  cachedResult = await packageCache.get<ReleaseResult>(cacheNamespace, name);
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-  pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  // TODO: fix types (#9610)
-  res = (await http.getJson<any>(pkgUrl)).body.packages[name];
-  if (res) {
     dep = extractDepReleases(res);
     logger.trace({ dep }, 'dep');
   }
