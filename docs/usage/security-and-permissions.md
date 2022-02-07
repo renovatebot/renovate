@@ -13,4 +13,3 @@
 | Issues            | `read` and `write`  | `read` and `write` | Create dependency dashboard or Config Warning issues          |
 | Pull Requests     | `read` and `write`  | `read` and `write` | Create update PRs                                             |
 | Workflows         | `read` and `write`  |   not applicable   | Explicit permission needed in order to update workflows       |
-| Deployments       |   not applicable    |       `read`       | ...                                                           |
