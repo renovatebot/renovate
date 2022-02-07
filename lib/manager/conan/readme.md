@@ -1,6 +1,6 @@
 Automated dependency updates for Conan
 
-Renovate supports upgrading dependencies in `conanfile.txt` or `conanfile.py` files.
+Renovate can upgrade dependencies in `conanfile.txt` or `conanfile.py` files.
 
 How it works:
 
