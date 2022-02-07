@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
-import { trimTrailingSlash } from '../../util/url';
+import { parseUrl, trimTrailingSlash } from '../../util/url';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import { bitbucket } from './common';
@@ -149,23 +149,31 @@ export class BaseGoDatasource {
         logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
         // get server base url from import url
-        const parsedUrl = URL.parse(goImportURL);
+        const parsedUrl = parseUrl(goImportURL);
 
-        // split the go module from the URL: host/go/module -> go/module
-        const lookupName = trimTrailingSlash(parsedUrl.pathname)
-          .replace(regEx(/\.git$/), '')
-          .split('/')
-          .slice(-2)
-          .join('/');
+        // istanbul ignore else
+        if (parsedUrl) {
+          // split the go module from the URL: host/go/module -> go/module
+          const lookupName = trimTrailingSlash(parsedUrl.pathname)
+            .replace(regEx(/\.git$/), '')
+            .split('/')
+            .slice(-2)
+            .join('/');
 
-        return {
-          datasource: github.id,
-          registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-          lookupName,
-        };
+          return {
+            datasource: github.id,
+            registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+            lookupName,
+          };
+        } else {
+          logger.trace(
+            { goModule, url: goImportURL },
+            'Unable to parse go-import URL'
+          );
+        }
+      } else {
+        logger.trace({ goModule }, 'No go-source or go-import header found');
       }
-
-      logger.trace({ goModule }, 'No go-source or go-import header found');
     }
     return null;
   }

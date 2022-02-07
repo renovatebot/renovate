@@ -62,9 +62,7 @@ export class GoProxyDatasource extends Datasource {
         });
         const releases = await pAll(queue, { concurrency: 5 });
         if (releases.length) {
-          const datasource = await BaseGoDatasource.getDatasource(lookupName);
-          const sourceUrl = getSourceUrl(datasource);
-          result = { releases, sourceUrl };
+          result = { releases };
           break;
         }
       } catch (err) {
@@ -80,6 +78,14 @@ export class GoProxyDatasource extends Datasource {
         if (!canFallback) {
           break;
         }
+      }
+    }
+
+    if (result) {
+      const datasource = await BaseGoDatasource.getDatasource(lookupName);
+      const sourceUrl = datasource ? getSourceUrl(datasource) : undefined;
+      if (sourceUrl) {
+        result.sourceUrl = sourceUrl;
       }
     }
 
@@ -99,7 +105,7 @@ export class GoProxyDatasource extends Datasource {
    *
    * @see https://golang.org/ref/mod#goproxy-protocol
    */
-  parseGoproxy(input: string = process.env.GOPROXY): GoproxyItem[] {
+  parseGoproxy(input: string | undefined = process.env.GOPROXY): GoproxyItem[] {
     if (!is.string(input)) {
       return [];
     }
@@ -172,7 +178,7 @@ export class GoProxyDatasource extends Datasource {
   static parsedNoproxy: Record<string, RegExp | null> = {};
 
   static parseNoproxy(
-    input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
+    input: unknown = process.env.GONOPROXY ?? process.env.GOPRIVATE
   ): RegExp | null {
     if (!is.string(input)) {
       return null;

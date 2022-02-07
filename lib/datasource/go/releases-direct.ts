@@ -33,7 +33,7 @@ export class GoDirectDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { lookupName } = config;
 
-    let res: ReleaseResult = null;
+    let res: ReleaseResult | null = null;
 
     logger.trace(`go.getReleases(${lookupName})`);
     const source = await BaseGoDatasource.getDatasource(lookupName);

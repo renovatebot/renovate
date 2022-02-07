@@ -42,10 +42,10 @@ export class GoDatasource extends Datasource {
    */
   @cache({
     namespace: GoDatasource.id,
-    key: ({ lookupName }: Partial<DigestConfig>) => `${lookupName}-digest`,
+    key: ({ lookupName }: DigestConfig) => `${lookupName}-digest`,
   })
   override async getDigest(
-    { lookupName }: Partial<DigestConfig>,
+    { lookupName }: DigestConfig,
     value?: string
   ): Promise<string | null> {
     const source = await BaseGoDatasource.getDatasource(lookupName);
