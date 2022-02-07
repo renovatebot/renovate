@@ -1,4 +1,4 @@
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import { findAll } from '../../util/host-rules';
 
 function isAuthenticatable(rule: HostRule): boolean {

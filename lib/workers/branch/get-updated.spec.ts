@@ -200,6 +200,25 @@ describe('workers/branch/get-updated', () => {
         ],
       });
     });
+    it('handles unsupported isRemediation', async () => {
+      config.upgrades.push({
+        manager: 'npm',
+        lockFile: 'package-lock.json',
+        isRemediation: true,
+      } as never);
+      npm.updateLockedDependency.mockResolvedValueOnce({
+        status: 'unsupported',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": undefined,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
+    });
     it('handles isRemediation rebase', async () => {
       config.upgrades.push({
         manager: 'npm',

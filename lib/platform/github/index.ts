@@ -56,7 +56,7 @@ import {
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
-import {
+import type {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
