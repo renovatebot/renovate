@@ -92,7 +92,6 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
   content.split(newlineRegex).map((rawLine) => {
-    let dep: PackageDependency = {};
     let line = rawLine;
     const newSectionName = getSectionName(line);
     const newSectionRecord = getSectionRecord(line);
@@ -105,7 +104,7 @@ export function extractPackageFile(
       line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
     }
 
-    dep = parseDep(line, sectionName, sectionRecord);
+    const dep = parseDep(line, sectionName, sectionRecord);
     if (dep) {
       deps.push(dep);
     }
