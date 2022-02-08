@@ -3,7 +3,7 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { newlineRegex, regEx } from '../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
   const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || [];
@@ -33,74 +33,83 @@ function getDepType(section: string, record: string): null | string {
   return null;
 }
 
-export const packagePattern =
-  '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
-const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
+function parseDep(
+  line: string,
+  section: string,
+  record: string
+): PackageDependency | null {
+  const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
+  const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
-const rangePattern: string = RANGE_PATTERN;
-const specifierPartPattern = `\\s*${rangePattern.replace(
-  regEx(/\?<\w+>/g),
-  '?:'
-)}`;
-const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+  const rangePattern: string = RANGE_PATTERN;
+  const specifierPartPattern = `\\s*${rangePattern.replace(
+    regEx(/\?<\w+>/g),
+    '?:'
+  )}`;
+  const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
+  const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
-export function extractPackageFile(content: string): PackageFile | null {
+  const pkgRegex = regEx(`^(${packagePattern})$`);
+  const pkgValRegex = regEx(`^${dependencyPattern}$`);
+
+  const depType = getDepType(section, record);
+  if (!depType) {
+    return null;
+  }
+
+  const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
+  const packageMatches =
+    pkgValRegex.exec(lineNoEnvMarkers) || pkgRegex.exec(lineNoEnvMarkers);
+
+  if (!packageMatches) {
+    return null;
+  }
+
+  const [, depName, , currVal] = packageMatches;
+  const currentValue = currVal?.trim();
+
+  const dep: PackageDependency = {
+    depName,
+    currentValue,
+    datasource: PypiDatasource.id,
+    depType: depType,
+  };
+
+  if (currentValue?.startsWith('==')) {
+    dep.currentVersion = currentValue.replace(/^==\s*/, '');
+  }
+
+  return dep;
+}
+
+export function extractPackageFile(
+  content: string
+): Result<PackageFile | null> {
   logger.trace('setup-cfg.extractPackageFile()');
 
   let sectionName = null;
   let sectionRecord = null;
 
-  const pkgRegex = regEx(`^(${packagePattern})$`);
-  const pkgValRegex = regEx(`^${dependencyPattern}$`);
+  const deps: PackageDependency[] = [];
+  content.split(newlineRegex).map((rawLine) => {
+    let dep: PackageDependency = {};
+    let line = rawLine;
+    const newSectionName = getSectionName(line);
+    const newSectionRecord = getSectionRecord(line);
+    if (newSectionName) {
+      sectionName = newSectionName;
+    }
+    if (newSectionRecord) {
+      sectionRecord = newSectionRecord;
+      // Propably there are also requirements in this line. Strip the sectionRecord.
+      line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
+    }
 
-  const deps = content
-    .split(newlineRegex)
-    .map((rawLine) => {
-      let dep: PackageDependency = {};
-      let line = rawLine;
-      const newSectionName = getSectionName(line);
-      const newSectionRecord = getSectionRecord(line);
-      if (newSectionName) {
-        sectionName = newSectionName;
-      }
-      if (newSectionRecord) {
-        sectionRecord = newSectionRecord;
-        // Propably there are also requirements in this line. Strip the sectionRecord.
-        line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
-      }
-
-      const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
-      const packageMatches =
-        pkgValRegex.exec(lineNoEnvMarkers) || pkgRegex.exec(lineNoEnvMarkers);
-
-      if (!packageMatches) {
-        return null;
-      }
-
-      const depType = getDepType(sectionName, sectionRecord);
-      if (!depType) {
-        return null;
-      }
-
-      const [, depName, , currVal] = packageMatches;
-      const currentValue = currVal?.trim();
-
-      dep = {
-        ...dep,
-        depName,
-        currentValue,
-        datasource: PypiDatasource.id,
-        depType: depType,
-      };
-
-      if (currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(/^==\s*/, '');
-      }
-
-      return dep;
-    })
-    .filter(Boolean);
+    dep = parseDep(line, sectionName, sectionRecord);
+    if (dep) {
+      deps.push(dep);
+    }
+  });
 
   return deps.length ? { deps } : null;
 }
