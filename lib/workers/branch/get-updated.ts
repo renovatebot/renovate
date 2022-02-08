@@ -75,6 +75,7 @@ export async function getUpdatedPackageFiles(
         packageFileContent,
         lockFileContent,
         allowParentUpdates: true,
+        allowHigherOrRemoved: true,
       });
       if (reuseExistingBranch && status !== 'already-updated') {
         logger.debug(
