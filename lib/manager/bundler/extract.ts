@@ -189,6 +189,7 @@ export async function extractPackageFile(
       for (const dep of res.deps) {
         const lockedDepValue = lockedEntries.get(dep.depName);
         if (lockedDepValue) {
+          dep.depType = 'dependencies';
           dep.lockedVersion = lockedDepValue;
         }
       }
