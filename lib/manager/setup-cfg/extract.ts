@@ -30,7 +30,7 @@ function getDepType(section: string, record: string): null | string {
   if (section === 'options.extras_require') {
     return 'extra';
   }
-  return undefined;
+  return null;
 }
 
 export const packagePattern =
