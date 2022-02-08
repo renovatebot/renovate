@@ -10,6 +10,7 @@ Object {
       "currentValue": "~> 5.2.1",
       "datasource": "rubygems",
       "depName": "rails",
+      "depType": "dependencies",
       "lockedVersion": "5.2.3",
       "managerData": Object {
         "lineNumber": 4,
@@ -18,6 +19,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "puma",
+      "depType": "dependencies",
       "lockedVersion": "4.3.1",
       "managerData": Object {
         "lineNumber": 5,
@@ -26,6 +28,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "bootsnap",
+      "depType": "dependencies",
       "lockedVersion": "1.4.5",
       "managerData": Object {
         "lineNumber": 6,
@@ -35,6 +38,7 @@ Object {
       "currentValue": "~> 5.0",
       "datasource": "rubygems",
       "depName": "sass-rails",
+      "depType": "dependencies",
       "lockedVersion": "5.1.0",
       "managerData": Object {
         "lineNumber": 8,
@@ -43,6 +47,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sass-rails-bootstrap",
+      "depType": "dependencies",
       "lockedVersion": "2.2.2.3",
       "managerData": Object {
         "lineNumber": 9,
@@ -51,6 +56,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "jquery-rails",
+      "depType": "dependencies",
       "lockedVersion": "4.3.5",
       "managerData": Object {
         "lineNumber": 10,
@@ -59,6 +65,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "uglifier",
+      "depType": "dependencies",
       "lockedVersion": "4.2.0",
       "managerData": Object {
         "lineNumber": 11,
@@ -67,6 +74,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "foreman",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -78,6 +86,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sqlite3",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -89,6 +98,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "listen",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -100,6 +110,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "pg",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
       ],
@@ -111,6 +122,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "newrelic_rpm",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
       ],
@@ -123,6 +135,7 @@ Object {
       "currentValue": "< 1.17.2",
       "datasource": "rubygems",
       "depName": "sqreen",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
       ],
@@ -134,6 +147,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "airbrake",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
       ],
@@ -162,6 +176,7 @@ Object {
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "pkg-config",
+      "depType": "dependencies",
       "lockedVersion": "1.4.0",
       "managerData": Object {
         "lineNumber": 5,
@@ -171,6 +186,7 @@ Object {
       "currentValue": "~> 4.3",
       "datasource": "rubygems",
       "depName": "puma",
+      "depType": "dependencies",
       "lockedVersion": "4.3.1",
       "managerData": Object {
         "lineNumber": 7,
@@ -180,6 +196,7 @@ Object {
       "currentValue": "~> 5.2.4",
       "datasource": "rubygems",
       "depName": "rails",
+      "depType": "dependencies",
       "lockedVersion": "5.2.4.1",
       "managerData": Object {
         "lineNumber": 8,
@@ -189,6 +206,7 @@ Object {
       "currentValue": "~> 3.7.2",
       "datasource": "rubygems",
       "depName": "sprockets",
+      "depType": "dependencies",
       "lockedVersion": "3.7.2",
       "managerData": Object {
         "lineNumber": 9,
@@ -198,6 +216,7 @@ Object {
       "currentValue": "~> 0.20",
       "datasource": "rubygems",
       "depName": "thor",
+      "depType": "dependencies",
       "lockedVersion": "0.20.3",
       "managerData": Object {
         "lineNumber": 10,
@@ -207,6 +226,7 @@ Object {
       "currentValue": "~> 0.2",
       "datasource": "rubygems",
       "depName": "hamlit-rails",
+      "depType": "dependencies",
       "lockedVersion": "0.2.3",
       "managerData": Object {
         "lineNumber": 12,
@@ -216,6 +236,7 @@ Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "pg",
+      "depType": "dependencies",
       "lockedVersion": "1.2.0",
       "managerData": Object {
         "lineNumber": 13,
@@ -225,6 +246,7 @@ Object {
       "currentValue": "~> 0.4",
       "datasource": "rubygems",
       "depName": "makara",
+      "depType": "dependencies",
       "lockedVersion": "0.4.1",
       "managerData": Object {
         "lineNumber": 14,
@@ -234,6 +256,7 @@ Object {
       "currentValue": "~> 2.4",
       "datasource": "rubygems",
       "depName": "pghero",
+      "depType": "dependencies",
       "lockedVersion": "2.4.1",
       "managerData": Object {
         "lineNumber": 15,
@@ -243,6 +266,7 @@ Object {
       "currentValue": "~> 2.7",
       "datasource": "rubygems",
       "depName": "dotenv-rails",
+      "depType": "dependencies",
       "lockedVersion": "2.7.5",
       "managerData": Object {
         "lineNumber": 16,
@@ -252,6 +276,7 @@ Object {
       "currentValue": "~> 1.59",
       "datasource": "rubygems",
       "depName": "aws-sdk-s3",
+      "depType": "dependencies",
       "lockedVersion": "1.59.0",
       "managerData": Object {
         "lineNumber": 18,
@@ -261,6 +286,7 @@ Object {
       "currentValue": "<= 2.1.0",
       "datasource": "rubygems",
       "depName": "fog-core",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 19,
@@ -270,6 +296,7 @@ Object {
       "currentValue": "~> 0.3",
       "datasource": "rubygems",
       "depName": "fog-openstack",
+      "depType": "dependencies",
       "lockedVersion": "0.3.7",
       "managerData": Object {
         "lineNumber": 20,
@@ -279,6 +306,7 @@ Object {
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "paperclip",
+      "depType": "dependencies",
       "lockedVersion": "6.0.0",
       "managerData": Object {
         "lineNumber": 21,
@@ -288,6 +316,7 @@ Object {
       "currentValue": "~> 0.6",
       "datasource": "rubygems",
       "depName": "paperclip-av-transcoder",
+      "depType": "dependencies",
       "lockedVersion": "0.6.4",
       "managerData": Object {
         "lineNumber": 22,
@@ -297,6 +326,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "streamio-ffmpeg",
+      "depType": "dependencies",
       "lockedVersion": "3.0.2",
       "managerData": Object {
         "lineNumber": 23,
@@ -306,6 +336,7 @@ Object {
       "currentValue": "~> 0.1",
       "datasource": "rubygems",
       "depName": "blurhash",
+      "depType": "dependencies",
       "lockedVersion": "0.1.3",
       "managerData": Object {
         "lineNumber": 24,
@@ -315,6 +346,7 @@ Object {
       "currentValue": "~> 0.10",
       "datasource": "rubygems",
       "depName": "active_model_serializers",
+      "depType": "dependencies",
       "lockedVersion": "0.10.10",
       "managerData": Object {
         "lineNumber": 26,
@@ -324,6 +356,7 @@ Object {
       "currentValue": "~> 2.7",
       "datasource": "rubygems",
       "depName": "addressable",
+      "depType": "dependencies",
       "lockedVersion": "2.7.0",
       "managerData": Object {
         "lineNumber": 27,
@@ -333,6 +366,7 @@ Object {
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "bootsnap",
+      "depType": "dependencies",
       "lockedVersion": "1.4.5",
       "managerData": Object {
         "lineNumber": 28,
@@ -341,6 +375,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "browser",
+      "depType": "dependencies",
       "lockedVersion": "2.7.1",
       "managerData": Object {
         "lineNumber": 29,
@@ -350,6 +385,7 @@ Object {
       "currentValue": "~> 0.7.7",
       "datasource": "rubygems",
       "depName": "charlock_holmes",
+      "depType": "dependencies",
       "lockedVersion": "0.7.7",
       "managerData": Object {
         "lineNumber": 30,
@@ -358,6 +394,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "iso-639",
+      "depType": "dependencies",
       "lockedVersion": "0.2.8",
       "managerData": Object {
         "lineNumber": 31,
@@ -367,6 +404,7 @@ Object {
       "currentValue": "~> 5.1",
       "datasource": "rubygems",
       "depName": "chewy",
+      "depType": "dependencies",
       "lockedVersion": "5.1.0",
       "managerData": Object {
         "lineNumber": 32,
@@ -376,6 +414,7 @@ Object {
       "currentValue": "~> 3.2.6",
       "datasource": "rubygems",
       "depName": "cld3",
+      "depType": "dependencies",
       "lockedVersion": "3.2.6",
       "managerData": Object {
         "lineNumber": 33,
@@ -385,6 +424,7 @@ Object {
       "currentValue": "~> 4.7",
       "datasource": "rubygems",
       "depName": "devise",
+      "depType": "dependencies",
       "lockedVersion": "4.7.1",
       "managerData": Object {
         "lineNumber": 34,
@@ -394,6 +434,7 @@ Object {
       "currentValue": "~> 3.1",
       "datasource": "rubygems",
       "depName": "devise-two-factor",
+      "depType": "dependencies",
       "lockedVersion": "3.1.0",
       "managerData": Object {
         "lineNumber": 35,
@@ -403,6 +444,7 @@ Object {
       "currentValue": "~> 9.2",
       "datasource": "rubygems",
       "depName": "devise_pam_authenticatable2",
+      "depType": "dependencies",
       "depTypes": Array [
         "pam_authentication",
         "optional: true",
@@ -416,6 +458,7 @@ Object {
       "currentValue": "~> 0.16",
       "datasource": "rubygems",
       "depName": "net-ldap",
+      "depType": "dependencies",
       "lockedVersion": "0.16.2",
       "managerData": Object {
         "lineNumber": 41,
@@ -425,6 +468,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "omniauth-cas",
+      "depType": "dependencies",
       "lockedVersion": "1.1.1",
       "managerData": Object {
         "lineNumber": 42,
@@ -434,6 +478,7 @@ Object {
       "currentValue": "~> 1.10",
       "datasource": "rubygems",
       "depName": "omniauth-saml",
+      "depType": "dependencies",
       "lockedVersion": "1.10.1",
       "managerData": Object {
         "lineNumber": 43,
@@ -443,6 +488,7 @@ Object {
       "currentValue": "~> 1.9",
       "datasource": "rubygems",
       "depName": "omniauth",
+      "depType": "dependencies",
       "lockedVersion": "1.9.0",
       "managerData": Object {
         "lineNumber": 44,
@@ -452,6 +498,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "discard",
+      "depType": "dependencies",
       "lockedVersion": "1.1.0",
       "managerData": Object {
         "lineNumber": 46,
@@ -461,6 +508,7 @@ Object {
       "currentValue": "~> 5.2",
       "datasource": "rubygems",
       "depName": "doorkeeper",
+      "depType": "dependencies",
       "lockedVersion": "5.2.3",
       "managerData": Object {
         "lineNumber": 47,
@@ -470,6 +518,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "fast_blank",
+      "depType": "dependencies",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 48,
@@ -478,6 +527,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "fastimage",
+      "depType": "dependencies",
       "lockedVersion": "2.1.7",
       "managerData": Object {
         "lineNumber": 49,
@@ -487,6 +537,7 @@ Object {
       "currentValue": "~> 2.1",
       "datasource": "rubygems",
       "depName": "goldfinger",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 50,
@@ -496,6 +547,7 @@ Object {
       "currentValue": "~> 0.6",
       "datasource": "rubygems",
       "depName": "hiredis",
+      "depType": "dependencies",
       "lockedVersion": "0.6.3",
       "managerData": Object {
         "lineNumber": 51,
@@ -505,6 +557,7 @@ Object {
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "redis-namespace",
+      "depType": "dependencies",
       "lockedVersion": "1.7.0",
       "managerData": Object {
         "lineNumber": 52,
@@ -521,6 +574,7 @@ Object {
       "currentValue": "~> 4.3",
       "datasource": "rubygems",
       "depName": "htmlentities",
+      "depType": "dependencies",
       "lockedVersion": "4.3.4",
       "managerData": Object {
         "lineNumber": 54,
@@ -530,6 +584,7 @@ Object {
       "currentValue": "~> 3.3",
       "datasource": "rubygems",
       "depName": "http",
+      "depType": "dependencies",
       "lockedVersion": "3.3.0",
       "managerData": Object {
         "lineNumber": 55,
@@ -539,6 +594,7 @@ Object {
       "currentValue": "~> 2.1",
       "datasource": "rubygems",
       "depName": "http_accept_language",
+      "depType": "dependencies",
       "lockedVersion": "2.1.1",
       "managerData": Object {
         "lineNumber": 56,
@@ -556,6 +612,7 @@ Object {
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "httplog",
+      "depType": "dependencies",
       "lockedVersion": "1.3.3",
       "managerData": Object {
         "lineNumber": 58,
@@ -564,6 +621,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "idn-ruby",
+      "depType": "dependencies",
       "lockedVersion": "0.1.0",
       "managerData": Object {
         "lineNumber": 59,
@@ -573,6 +631,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "kaminari",
+      "depType": "dependencies",
       "lockedVersion": "1.1.1",
       "managerData": Object {
         "lineNumber": 60,
@@ -582,6 +641,7 @@ Object {
       "currentValue": "~> 0.0",
       "datasource": "rubygems",
       "depName": "link_header",
+      "depType": "dependencies",
       "lockedVersion": "0.0.8",
       "managerData": Object {
         "lineNumber": 61,
@@ -591,6 +651,7 @@ Object {
       "currentValue": "~> 3.3.1",
       "datasource": "rubygems",
       "depName": "mime-types",
+      "depType": "dependencies",
       "lockedVersion": "3.3.1",
       "managerData": Object {
         "lineNumber": 62,
@@ -607,6 +668,7 @@ Object {
       "currentValue": "~> 1.10",
       "datasource": "rubygems",
       "depName": "nokogiri",
+      "depType": "dependencies",
       "lockedVersion": "1.10.7",
       "managerData": Object {
         "lineNumber": 64,
@@ -616,6 +678,7 @@ Object {
       "currentValue": "~> 0.2",
       "datasource": "rubygems",
       "depName": "nsa",
+      "depType": "dependencies",
       "lockedVersion": "0.2.7",
       "managerData": Object {
         "lineNumber": 65,
@@ -625,6 +688,7 @@ Object {
       "currentValue": "~> 3.10",
       "datasource": "rubygems",
       "depName": "oj",
+      "depType": "dependencies",
       "lockedVersion": "3.10.0",
       "managerData": Object {
         "lineNumber": 66,
@@ -634,6 +698,7 @@ Object {
       "currentValue": "~> 2.0",
       "datasource": "rubygems",
       "depName": "ostatus2",
+      "depType": "dependencies",
       "lockedVersion": "2.0.3",
       "managerData": Object {
         "lineNumber": 67,
@@ -643,6 +708,7 @@ Object {
       "currentValue": "~> 2.11",
       "datasource": "rubygems",
       "depName": "ox",
+      "depType": "dependencies",
       "lockedVersion": "2.11.0",
       "managerData": Object {
         "lineNumber": 68,
@@ -651,6 +717,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "parslet",
+      "depType": "dependencies",
       "lockedVersion": "1.8.2",
       "managerData": Object {
         "lineNumber": 69,
@@ -660,6 +727,7 @@ Object {
       "currentValue": "~> 1.19",
       "datasource": "rubygems",
       "depName": "parallel",
+      "depType": "dependencies",
       "lockedVersion": "1.19.1",
       "managerData": Object {
         "lineNumber": 70,
@@ -676,6 +744,7 @@ Object {
       "currentValue": "~> 2.1",
       "datasource": "rubygems",
       "depName": "pundit",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 72,
@@ -684,6 +753,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "premailer-rails",
+      "depType": "dependencies",
       "lockedVersion": "1.10.3",
       "managerData": Object {
         "lineNumber": 73,
@@ -693,6 +763,7 @@ Object {
       "currentValue": "~> 6.2",
       "datasource": "rubygems",
       "depName": "rack-attack",
+      "depType": "dependencies",
       "lockedVersion": "6.2.2",
       "managerData": Object {
         "lineNumber": 74,
@@ -702,6 +773,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "rack-cors",
+      "depType": "dependencies",
       "lockedVersion": "1.1.1",
       "managerData": Object {
         "lineNumber": 75,
@@ -711,6 +783,7 @@ Object {
       "currentValue": "~> 5.1",
       "datasource": "rubygems",
       "depName": "rails-i18n",
+      "depType": "dependencies",
       "lockedVersion": "5.1.3",
       "managerData": Object {
         "lineNumber": 76,
@@ -720,6 +793,7 @@ Object {
       "currentValue": "~> 0.6",
       "datasource": "rubygems",
       "depName": "rails-settings-cached",
+      "depType": "dependencies",
       "lockedVersion": "0.6.6",
       "managerData": Object {
         "lineNumber": 77,
@@ -729,6 +803,7 @@ Object {
       "currentValue": "~> 4.1",
       "datasource": "rubygems",
       "depName": "redis",
+      "depType": "dependencies",
       "lockedVersion": "4.1.3",
       "managerData": Object {
         "lineNumber": 78,
@@ -738,6 +813,7 @@ Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "mario-redis-lock",
+      "depType": "dependencies",
       "lockedVersion": "1.2.1",
       "managerData": Object {
         "lineNumber": 79,
@@ -747,6 +823,7 @@ Object {
       "currentValue": "~> 0.10",
       "datasource": "rubygems",
       "depName": "rqrcode",
+      "depType": "dependencies",
       "lockedVersion": "0.10.1",
       "managerData": Object {
         "lineNumber": 80,
@@ -756,6 +833,7 @@ Object {
       "currentValue": "~> 1.10",
       "datasource": "rubygems",
       "depName": "ruby-progressbar",
+      "depType": "dependencies",
       "lockedVersion": "1.10.1",
       "managerData": Object {
         "lineNumber": 81,
@@ -765,6 +843,7 @@ Object {
       "currentValue": "~> 5.1",
       "datasource": "rubygems",
       "depName": "sanitize",
+      "depType": "dependencies",
       "lockedVersion": "5.1.0",
       "managerData": Object {
         "lineNumber": 82,
@@ -774,6 +853,7 @@ Object {
       "currentValue": "~> 5.2",
       "datasource": "rubygems",
       "depName": "sidekiq",
+      "depType": "dependencies",
       "lockedVersion": "5.2.7",
       "managerData": Object {
         "lineNumber": 83,
@@ -783,6 +863,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "sidekiq-scheduler",
+      "depType": "dependencies",
       "lockedVersion": "3.0.0",
       "managerData": Object {
         "lineNumber": 84,
@@ -792,6 +873,7 @@ Object {
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "sidekiq-unique-jobs",
+      "depType": "dependencies",
       "lockedVersion": "6.0.18",
       "managerData": Object {
         "lineNumber": 85,
@@ -801,6 +883,7 @@ Object {
       "currentValue": "~>0.2.0",
       "datasource": "rubygems",
       "depName": "sidekiq-bulk",
+      "depType": "dependencies",
       "lockedVersion": "0.2.0",
       "managerData": Object {
         "lineNumber": 86,
@@ -810,6 +893,7 @@ Object {
       "currentValue": "~> 4.1",
       "datasource": "rubygems",
       "depName": "simple-navigation",
+      "depType": "dependencies",
       "lockedVersion": "4.1.0",
       "managerData": Object {
         "lineNumber": 87,
@@ -819,6 +903,7 @@ Object {
       "currentValue": "~> 5.0",
       "datasource": "rubygems",
       "depName": "simple_form",
+      "depType": "dependencies",
       "lockedVersion": "5.0.1",
       "managerData": Object {
         "lineNumber": 88,
@@ -828,6 +913,7 @@ Object {
       "currentValue": "~> 3.2",
       "datasource": "rubygems",
       "depName": "sprockets-rails",
+      "depType": "dependencies",
       "lockedVersion": "3.2.1",
       "managerData": Object {
         "lineNumber": 89,
@@ -837,6 +923,7 @@ Object {
       "currentValue": "~> 2.2.0",
       "datasource": "rubygems",
       "depName": "stoplight",
+      "depType": "dependencies",
       "lockedVersion": "2.2.0",
       "managerData": Object {
         "lineNumber": 90,
@@ -846,6 +933,7 @@ Object {
       "currentValue": "~> 0.5",
       "datasource": "rubygems",
       "depName": "strong_migrations",
+      "depType": "dependencies",
       "lockedVersion": "0.5.1",
       "managerData": Object {
         "lineNumber": 91,
@@ -855,6 +943,7 @@ Object {
       "currentValue": "~> 0.9",
       "datasource": "rubygems",
       "depName": "tty-command",
+      "depType": "dependencies",
       "lockedVersion": "0.9.0",
       "managerData": Object {
         "lineNumber": 92,
@@ -864,6 +953,7 @@ Object {
       "currentValue": "~> 0.20",
       "datasource": "rubygems",
       "depName": "tty-prompt",
+      "depType": "dependencies",
       "lockedVersion": "0.20.0",
       "managerData": Object {
         "lineNumber": 93,
@@ -873,6 +963,7 @@ Object {
       "currentValue": "~> 1.14",
       "datasource": "rubygems",
       "depName": "twitter-text",
+      "depType": "dependencies",
       "lockedVersion": "1.14.7",
       "managerData": Object {
         "lineNumber": 94,
@@ -882,6 +973,7 @@ Object {
       "currentValue": "~> 1.2019",
       "datasource": "rubygems",
       "depName": "tzinfo-data",
+      "depType": "dependencies",
       "lockedVersion": "1.2019.3",
       "managerData": Object {
         "lineNumber": 95,
@@ -891,6 +983,7 @@ Object {
       "currentValue": "~> 4.2",
       "datasource": "rubygems",
       "depName": "webpacker",
+      "depType": "dependencies",
       "lockedVersion": "4.2.2",
       "managerData": Object {
         "lineNumber": 96,
@@ -899,6 +992,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "webpush",
+      "depType": "dependencies",
       "lockedVersion": "0.3.8",
       "managerData": Object {
         "lineNumber": 97,
@@ -915,6 +1009,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "json-ld-preloaded",
+      "depType": "dependencies",
       "lockedVersion": "3.0.6",
       "managerData": Object {
         "lineNumber": 100,
@@ -924,6 +1019,7 @@ Object {
       "currentValue": "~> 0.3",
       "datasource": "rubygems",
       "depName": "rdf-normalize",
+      "depType": "dependencies",
       "lockedVersion": "0.3.3",
       "managerData": Object {
         "lineNumber": 101,
@@ -933,6 +1029,7 @@ Object {
       "currentValue": "~> 2.21",
       "datasource": "rubygems",
       "depName": "fabrication",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -946,6 +1043,7 @@ Object {
       "currentValue": "~> 2.5",
       "datasource": "rubygems",
       "depName": "fuubar",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -959,6 +1057,7 @@ Object {
       "currentValue": "~> 0.9",
       "datasource": "rubygems",
       "depName": "i18n-tasks",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -972,6 +1071,7 @@ Object {
       "currentValue": "~> 3.7",
       "datasource": "rubygems",
       "depName": "pry-byebug",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -985,6 +1085,7 @@ Object {
       "currentValue": "~> 0.3",
       "datasource": "rubygems",
       "depName": "pry-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -998,6 +1099,7 @@ Object {
       "currentValue": "~> 3.9",
       "datasource": "rubygems",
       "depName": "rspec-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -1011,6 +1113,7 @@ Object {
       "currentValue": "~> 0.5",
       "datasource": "rubygems",
       "depName": "private_address_check",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
         "test",
@@ -1024,6 +1127,7 @@ Object {
       "currentValue": "~> 3.29",
       "datasource": "rubygems",
       "depName": "capybara",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1036,6 +1140,7 @@ Object {
       "currentValue": "~> 0.2",
       "datasource": "rubygems",
       "depName": "climate_control",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1048,6 +1153,7 @@ Object {
       "currentValue": "~> 2.10",
       "datasource": "rubygems",
       "depName": "faker",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1060,6 +1166,7 @@ Object {
       "currentValue": "~> 4.2",
       "datasource": "rubygems",
       "depName": "microformats",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1072,6 +1179,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "rails-controller-testing",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1084,6 +1192,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "rspec-sidekiq",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1096,6 +1205,7 @@ Object {
       "currentValue": "~> 0.17",
       "datasource": "rubygems",
       "depName": "simplecov",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1108,6 +1218,7 @@ Object {
       "currentValue": "~> 3.7",
       "datasource": "rubygems",
       "depName": "webmock",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1120,6 +1231,7 @@ Object {
       "currentValue": "~> 2.30",
       "datasource": "rubygems",
       "depName": "parallel_tests",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1132,6 +1244,7 @@ Object {
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "active_record_query_trace",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1144,6 +1257,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "annotate",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1156,6 +1270,7 @@ Object {
       "currentValue": "~> 2.5",
       "datasource": "rubygems",
       "depName": "better_errors",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1168,6 +1283,7 @@ Object {
       "currentValue": "~> 0.7",
       "datasource": "rubygems",
       "depName": "binding_of_caller",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1180,6 +1296,7 @@ Object {
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "bullet",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1192,6 +1309,7 @@ Object {
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "letter_opener",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1204,6 +1322,7 @@ Object {
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "letter_opener_web",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1215,6 +1334,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "memory_profiler",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1227,6 +1347,7 @@ Object {
       "currentValue": "~> 0.78",
       "datasource": "rubygems",
       "depName": "rubocop",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1239,6 +1360,7 @@ Object {
       "currentValue": "~> 2.4",
       "datasource": "rubygems",
       "depName": "rubocop-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1251,6 +1373,7 @@ Object {
       "currentValue": "~> 4.7",
       "datasource": "rubygems",
       "depName": "brakeman",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1263,6 +1386,7 @@ Object {
       "currentValue": "~> 0.6",
       "datasource": "rubygems",
       "depName": "bundler-audit",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1275,6 +1399,7 @@ Object {
       "currentValue": "~> 3.11",
       "datasource": "rubygems",
       "depName": "capistrano",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1287,6 +1412,7 @@ Object {
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "capistrano-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1299,6 +1425,7 @@ Object {
       "currentValue": "~> 2.1",
       "datasource": "rubygems",
       "depName": "capistrano-rbenv",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1311,6 +1438,7 @@ Object {
       "currentValue": "~> 2.0",
       "datasource": "rubygems",
       "depName": "capistrano-yarn",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1322,6 +1450,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "derailed_benchmarks",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1333,6 +1462,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "stackprof",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -1345,6 +1475,7 @@ Object {
       "currentValue": "~> 0.11",
       "datasource": "rubygems",
       "depName": "lograge",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
       ],
@@ -1357,6 +1488,7 @@ Object {
       "currentValue": "~> 5.0",
       "datasource": "rubygems",
       "depName": "redis-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "production",
       ],
@@ -1368,6 +1500,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "concurrent-ruby",
+      "depType": "dependencies",
       "lockedVersion": "1.1.5",
       "managerData": Object {
         "lineNumber": 156,
@@ -1376,6 +1509,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "connection_pool",
+      "depType": "dependencies",
       "lockedVersion": "2.2.2",
       "managerData": Object {
         "lineNumber": 157,
@@ -1400,6 +1534,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rails",
+      "depType": "dependencies",
       "lockedVersion": "6.0.1",
       "managerData": Object {
         "lineNumber": 4,
@@ -1409,6 +1544,7 @@ Object {
       "currentValue": ">= 11.1",
       "datasource": "rubygems",
       "depName": "rake",
+      "depType": "dependencies",
       "lockedVersion": "13.0.0",
       "managerData": Object {
         "lineNumber": 5,
@@ -1417,6 +1553,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rack-proxy",
+      "depType": "dependencies",
       "lockedVersion": "0.6.5",
       "managerData": Object {
         "lineNumber": 6,
@@ -1426,6 +1563,7 @@ Object {
       "currentValue": "~> 5.0",
       "datasource": "rubygems",
       "depName": "minitest",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1437,6 +1575,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "byebug",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1465,6 +1604,7 @@ Object {
       "currentValue": ">= 11.1",
       "datasource": "rubygems",
       "depName": "rake",
+      "depType": "dependencies",
       "lockedVersion": "12.3.1",
       "managerData": Object {
         "lineNumber": 9,
@@ -1474,6 +1614,7 @@ Object {
       "currentValue": ">= 2.15",
       "datasource": "rubygems",
       "depName": "capybara",
+      "depType": "dependencies",
       "lockedVersion": "3.10.1",
       "managerData": Object {
         "lineNumber": 11,
@@ -1483,6 +1624,7 @@ Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "rack-cache",
+      "depType": "dependencies",
       "lockedVersion": "1.8.0",
       "managerData": Object {
         "lineNumber": 13,
@@ -1491,6 +1633,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sass-rails",
+      "depType": "dependencies",
       "lockedVersion": "5.0.7",
       "managerData": Object {
         "lineNumber": 14,
@@ -1500,6 +1643,7 @@ Object {
       "currentValue": "~> 5",
       "datasource": "rubygems",
       "depName": "turbolinks",
+      "depType": "dependencies",
       "lockedVersion": "5.2.0",
       "managerData": Object {
         "lineNumber": 15,
@@ -1516,6 +1660,7 @@ Object {
       "currentValue": "~> 3.1.11",
       "datasource": "rubygems",
       "depName": "bcrypt",
+      "depType": "dependencies",
       "lockedVersion": "3.1.12",
       "managerData": Object {
         "lineNumber": 20,
@@ -1525,6 +1670,7 @@ Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "uglifier",
+      "depType": "dependencies",
       "lockedVersion": "4.1.19",
       "managerData": Object {
         "lineNumber": 24,
@@ -1534,6 +1680,7 @@ Object {
       "currentValue": ">= 2.0.0",
       "datasource": "rubygems",
       "depName": "json",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 27,
@@ -1543,6 +1690,7 @@ Object {
       "currentValue": ">= 0.47",
       "datasource": "rubygems",
       "depName": "rubocop",
+      "depType": "dependencies",
       "lockedVersion": "0.61.1",
       "managerData": Object {
         "lineNumber": 29,
@@ -1552,6 +1700,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "sdoc",
+      "depType": "dependencies",
       "depTypes": Array [
         "doc",
       ],
@@ -1564,6 +1713,7 @@ Object {
       "currentValue": "~> 3.2.3",
       "datasource": "rubygems",
       "depName": "redcarpet",
+      "depType": "dependencies",
       "depTypes": Array [
         "doc",
       ],
@@ -1575,6 +1725,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "w3c_validators",
+      "depType": "dependencies",
       "depTypes": Array [
         "doc",
       ],
@@ -1587,6 +1738,7 @@ Object {
       "currentValue": "~> 1.2.0",
       "datasource": "rubygems",
       "depName": "kindlerb",
+      "depType": "dependencies",
       "depTypes": Array [
         "doc",
       ],
@@ -1598,6 +1750,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "dalli",
+      "depType": "dependencies",
       "lockedVersion": "2.7.9",
       "managerData": Object {
         "lineNumber": 39,
@@ -1607,6 +1760,7 @@ Object {
       "currentValue": "\\">= 3.0.5\\", \\"< 3.2\\"",
       "datasource": "rubygems",
       "depName": "listen",
+      "depType": "dependencies",
       "lockedVersion": "3.1.5",
       "managerData": Object {
         "lineNumber": 40,
@@ -1615,6 +1769,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "libxml-ruby",
+      "depType": "dependencies",
       "lockedVersion": "3.1.0",
       "managerData": Object {
         "lineNumber": 41,
@@ -1623,6 +1778,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "connection_pool",
+      "depType": "dependencies",
       "lockedVersion": "2.2.2",
       "managerData": Object {
         "lineNumber": 42,
@@ -1632,6 +1788,7 @@ Object {
       "currentValue": ">= 1.1.0",
       "datasource": "rubygems",
       "depName": "bootsnap",
+      "depType": "dependencies",
       "lockedVersion": "1.3.2",
       "managerData": Object {
         "lineNumber": 45,
@@ -1640,6 +1797,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "resque",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1651,6 +1809,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "resque-scheduler",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1662,6 +1821,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sidekiq",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1673,6 +1833,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sucker_punch",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1684,6 +1845,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "delayed_job",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1705,6 +1867,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sneakers",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1716,6 +1879,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "que",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1727,6 +1891,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "backburner",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1738,6 +1903,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "delayed_job_active_record",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1749,6 +1915,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sequel",
+      "depType": "dependencies",
       "depTypes": Array [
         "job",
       ],
@@ -1760,6 +1927,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "puma",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1771,6 +1939,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "hiredis",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1783,6 +1952,7 @@ Object {
       "currentValue": "~> 4.0",
       "datasource": "rubygems",
       "depName": "redis",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1794,6 +1964,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "redis-namespace",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1815,6 +1986,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "blade",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1826,6 +1998,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "blade-sauce_labs_plugin",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1837,6 +2010,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "sprockets-export",
+      "depType": "dependencies",
       "depTypes": Array [
         "cable",
       ],
@@ -1848,6 +2022,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "aws-sdk-s3",
+      "depType": "dependencies",
       "depTypes": Array [
         "storage",
       ],
@@ -1860,6 +2035,7 @@ Object {
       "currentValue": "~> 1.11",
       "datasource": "rubygems",
       "depName": "google-cloud-storage",
+      "depType": "dependencies",
       "depTypes": Array [
         "storage",
       ],
@@ -1871,6 +2047,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "azure-storage",
+      "depType": "dependencies",
       "depTypes": Array [
         "storage",
       ],
@@ -1883,6 +2060,7 @@ Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "image_processing",
+      "depType": "dependencies",
       "depTypes": Array [
         "storage",
       ],
@@ -1894,6 +2072,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "aws-sdk-sns",
+      "depType": "dependencies",
       "lockedVersion": "1.8.1",
       "managerData": Object {
         "lineNumber": 88,
@@ -1902,6 +2081,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "webmock",
+      "depType": "dependencies",
       "lockedVersion": "3.4.2",
       "managerData": Object {
         "lineNumber": 89,
@@ -1910,6 +2090,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "qunit-selenium",
+      "depType": "dependencies",
       "depTypes": Array [
         "ujs",
       ],
@@ -1921,6 +2102,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "chromedriver-helper",
+      "depType": "dependencies",
       "depTypes": Array [
         "ujs",
       ],
@@ -1932,6 +2114,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "minitest-bisect",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1943,6 +2126,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "minitest-retry",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1954,6 +2138,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "stackprof",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1965,6 +2150,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "byebug",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1976,6 +2162,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "benchmark-ips",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -1988,6 +2175,7 @@ Object {
       "currentValue": ">= 1.8.1",
       "datasource": "rubygems",
       "depName": "nokogiri",
+      "depType": "dependencies",
       "lockedVersion": "1.9.1",
       "managerData": Object {
         "lineNumber": 113,
@@ -1997,6 +2185,7 @@ Object {
       "currentValue": ">=1.4.6",
       "datasource": "rubygems",
       "depName": "racc",
+      "depType": "dependencies",
       "lockedVersion": "1.4.14",
       "managerData": Object {
         "lineNumber": 116,
@@ -2006,6 +2195,7 @@ Object {
       "currentValue": "~> 1.3.6",
       "datasource": "rubygems",
       "depName": "sqlite3",
+      "depType": "dependencies",
       "lockedVersion": "1.3.13",
       "managerData": Object {
         "lineNumber": 119,
@@ -2015,6 +2205,7 @@ Object {
       "currentValue": ">= 0.18.0",
       "datasource": "rubygems",
       "depName": "pg",
+      "depType": "dependencies",
       "depTypes": Array [
         "db",
       ],
@@ -2027,6 +2218,7 @@ Object {
       "currentValue": ">= 0.4.10",
       "datasource": "rubygems",
       "depName": "mysql2",
+      "depType": "dependencies",
       "depTypes": Array [
         "db",
       ],
@@ -2038,6 +2230,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
+      "depType": "dependencies",
       "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 129,
@@ -2046,6 +2239,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "activerecord-jdbcmysql-adapter",
+      "depType": "dependencies",
       "depTypes": Array [
         "db",
       ],
@@ -2057,6 +2251,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "activerecord-jdbcpostgresql-adapter",
+      "depType": "dependencies",
       "depTypes": Array [
         "db",
       ],
@@ -2069,6 +2264,7 @@ Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
+      "depType": "dependencies",
       "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 135,
@@ -2078,6 +2274,7 @@ Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcmysql-adapter",
+      "depType": "dependencies",
       "depTypes": Array [
         "db",
       ],
@@ -2090,6 +2287,7 @@ Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcpostgresql-adapter",
+      "depType": "dependencies",
       "depTypes": Array [
         "db",
       ],
@@ -2102,6 +2300,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "psych",
+      "depType": "dependencies",
       "lockedVersion": "3.0.3",
       "managerData": Object {
         "lineNumber": 146,
@@ -2132,6 +2331,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "tzinfo-data",
+      "depType": "dependencies",
       "lockedVersion": "1.2018.7",
       "managerData": Object {
         "lineNumber": 159,
@@ -2141,6 +2341,7 @@ Object {
       "currentValue": ">= 0.1.0",
       "datasource": "rubygems",
       "depName": "wdm",
+      "depType": "dependencies",
       "lockedVersion": "0.1.1",
       "managerData": Object {
         "lineNumber": 160,
@@ -2236,6 +2437,7 @@ Object {
       "currentValue": "5.2.3",
       "datasource": "rubygems",
       "depName": "rails",
+      "depType": "dependencies",
       "lockedVersion": "5.2.3",
       "managerData": Object {
         "lineNumber": 2,
@@ -2245,6 +2447,7 @@ Object {
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "bootsnap",
+      "depType": "dependencies",
       "lockedVersion": "1.4.5",
       "managerData": Object {
         "lineNumber": 4,
@@ -2254,6 +2457,7 @@ Object {
       "currentValue": "~> 0.0.4",
       "datasource": "rubygems",
       "depName": "nakayoshi_fork",
+      "depType": "dependencies",
       "lockedVersion": "0.0.4",
       "managerData": Object {
         "lineNumber": 7,
@@ -2263,6 +2467,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "responders",
+      "depType": "dependencies",
       "lockedVersion": "3.0.0",
       "managerData": Object {
         "lineNumber": 10,
@@ -2272,6 +2477,7 @@ Object {
       "currentValue": "~> 3.7.0",
       "datasource": "rubygems",
       "depName": "sprockets",
+      "depType": "dependencies",
       "lockedVersion": "3.7.2",
       "managerData": Object {
         "lineNumber": 12,
@@ -2281,6 +2487,7 @@ Object {
       "currentValue": "~> 3.3.0",
       "datasource": "rubygems",
       "depName": "default_value_for",
+      "depType": "dependencies",
       "lockedVersion": "3.3.0",
       "managerData": Object {
         "lineNumber": 15,
@@ -2290,6 +2497,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "pg",
+      "depType": "dependencies",
       "lockedVersion": "1.1.4",
       "managerData": Object {
         "lineNumber": 18,
@@ -2299,6 +2507,7 @@ Object {
       "currentValue": "~> 0.28",
       "datasource": "rubygems",
       "depName": "rugged",
+      "depType": "dependencies",
       "lockedVersion": "0.28.4.1",
       "managerData": Object {
         "lineNumber": 20,
@@ -2308,6 +2517,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "grape-path-helpers",
+      "depType": "dependencies",
       "lockedVersion": "1.1.0",
       "managerData": Object {
         "lineNumber": 21,
@@ -2317,6 +2527,7 @@ Object {
       "currentValue": "~> 0.12",
       "datasource": "rubygems",
       "depName": "faraday",
+      "depType": "dependencies",
       "lockedVersion": "0.12.2",
       "managerData": Object {
         "lineNumber": 23,
@@ -2326,6 +2537,7 @@ Object {
       "currentValue": "~> 1.8.0",
       "datasource": "rubygems",
       "depName": "marginalia",
+      "depType": "dependencies",
       "lockedVersion": "1.8.0",
       "managerData": Object {
         "lineNumber": 24,
@@ -2335,6 +2547,7 @@ Object {
       "currentValue": "~> 4.6",
       "datasource": "rubygems",
       "depName": "devise",
+      "depType": "dependencies",
       "lockedVersion": "4.7.1",
       "managerData": Object {
         "lineNumber": 27,
@@ -2344,6 +2557,7 @@ Object {
       "currentValue": "~> 4.3",
       "datasource": "rubygems",
       "depName": "doorkeeper",
+      "depType": "dependencies",
       "lockedVersion": "4.3.2",
       "managerData": Object {
         "lineNumber": 28,
@@ -2353,6 +2567,7 @@ Object {
       "currentValue": "~> 1.5",
       "datasource": "rubygems",
       "depName": "doorkeeper-openid_connect",
+      "depType": "dependencies",
       "lockedVersion": "1.5.0",
       "managerData": Object {
         "lineNumber": 29,
@@ -2362,6 +2577,7 @@ Object {
       "currentValue": "~> 1.8",
       "datasource": "rubygems",
       "depName": "omniauth",
+      "depType": "dependencies",
       "lockedVersion": "1.9.0",
       "managerData": Object {
         "lineNumber": 30,
@@ -2371,6 +2587,7 @@ Object {
       "currentValue": "~> 2.0.0",
       "datasource": "rubygems",
       "depName": "omniauth-auth0",
+      "depType": "dependencies",
       "lockedVersion": "2.0.0",
       "managerData": Object {
         "lineNumber": 31,
@@ -2380,6 +2597,7 @@ Object {
       "currentValue": "~> 0.0.9",
       "datasource": "rubygems",
       "depName": "omniauth-azure-oauth2",
+      "depType": "dependencies",
       "lockedVersion": "0.0.10",
       "managerData": Object {
         "lineNumber": 32,
@@ -2389,6 +2607,7 @@ Object {
       "currentValue": "~> 1.1.4",
       "datasource": "rubygems",
       "depName": "omniauth-cas3",
+      "depType": "dependencies",
       "lockedVersion": "1.1.4",
       "managerData": Object {
         "lineNumber": 33,
@@ -2398,6 +2617,7 @@ Object {
       "currentValue": "~> 4.0.0",
       "datasource": "rubygems",
       "depName": "omniauth-facebook",
+      "depType": "dependencies",
       "lockedVersion": "4.0.0",
       "managerData": Object {
         "lineNumber": 34,
@@ -2407,6 +2627,7 @@ Object {
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "omniauth-github",
+      "depType": "dependencies",
       "lockedVersion": "1.3.0",
       "managerData": Object {
         "lineNumber": 35,
@@ -2416,6 +2637,7 @@ Object {
       "currentValue": "~> 1.0.2",
       "datasource": "rubygems",
       "depName": "omniauth-gitlab",
+      "depType": "dependencies",
       "lockedVersion": "1.0.3",
       "managerData": Object {
         "lineNumber": 36,
@@ -2425,6 +2647,7 @@ Object {
       "currentValue": "~> 0.6.0",
       "datasource": "rubygems",
       "depName": "omniauth-google-oauth2",
+      "depType": "dependencies",
       "lockedVersion": "0.6.0",
       "managerData": Object {
         "lineNumber": 37,
@@ -2434,6 +2657,7 @@ Object {
       "currentValue": "~> 0.3.0",
       "datasource": "rubygems",
       "depName": "omniauth-kerberos",
+      "depType": "dependencies",
       "lockedVersion": "0.3.0",
       "managerData": Object {
         "lineNumber": 38,
@@ -2443,6 +2667,7 @@ Object {
       "currentValue": "~> 0.2.2",
       "datasource": "rubygems",
       "depName": "omniauth-oauth2-generic",
+      "depType": "dependencies",
       "lockedVersion": "0.2.2",
       "managerData": Object {
         "lineNumber": 39,
@@ -2452,6 +2677,7 @@ Object {
       "currentValue": "~> 1.10",
       "datasource": "rubygems",
       "depName": "omniauth-saml",
+      "depType": "dependencies",
       "lockedVersion": "1.10.0",
       "managerData": Object {
         "lineNumber": 40,
@@ -2461,6 +2687,7 @@ Object {
       "currentValue": "~> 1.3.0",
       "datasource": "rubygems",
       "depName": "omniauth-shibboleth",
+      "depType": "dependencies",
       "lockedVersion": "1.3.0",
       "managerData": Object {
         "lineNumber": 41,
@@ -2470,6 +2697,7 @@ Object {
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "omniauth-twitter",
+      "depType": "dependencies",
       "lockedVersion": "1.4.0",
       "managerData": Object {
         "lineNumber": 42,
@@ -2479,6 +2707,7 @@ Object {
       "currentValue": "~> 2.2.0",
       "datasource": "rubygems",
       "depName": "omniauth_crowd",
+      "depType": "dependencies",
       "lockedVersion": "2.2.3",
       "managerData": Object {
         "lineNumber": 43,
@@ -2488,6 +2717,7 @@ Object {
       "currentValue": "~> 0.3.3",
       "datasource": "rubygems",
       "depName": "omniauth-authentiq",
+      "depType": "dependencies",
       "lockedVersion": "0.3.3",
       "managerData": Object {
         "lineNumber": 44,
@@ -2497,6 +2727,7 @@ Object {
       "currentValue": "~> 0.3.3",
       "datasource": "rubygems",
       "depName": "omniauth_openid_connect",
+      "depType": "dependencies",
       "lockedVersion": "0.3.3",
       "managerData": Object {
         "lineNumber": 45,
@@ -2506,6 +2737,7 @@ Object {
       "currentValue": "~> 0.0.2",
       "datasource": "rubygems",
       "depName": "omniauth-ultraauth",
+      "depType": "dependencies",
       "lockedVersion": "0.0.2",
       "managerData": Object {
         "lineNumber": 46,
@@ -2515,6 +2747,7 @@ Object {
       "currentValue": "~> 1.0.5",
       "datasource": "rubygems",
       "depName": "omniauth-salesforce",
+      "depType": "dependencies",
       "lockedVersion": "1.0.5",
       "managerData": Object {
         "lineNumber": 47,
@@ -2524,6 +2757,7 @@ Object {
       "currentValue": "~> 1.9.3",
       "datasource": "rubygems",
       "depName": "rack-oauth2",
+      "depType": "dependencies",
       "lockedVersion": "1.9.3",
       "managerData": Object {
         "lineNumber": 48,
@@ -2533,6 +2767,7 @@ Object {
       "currentValue": "~> 2.1.0",
       "datasource": "rubygems",
       "depName": "jwt",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 49,
@@ -2541,6 +2776,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "gssapi",
+      "depType": "dependencies",
       "lockedVersion": "1.2.0",
       "managerData": Object {
         "lineNumber": 52,
@@ -2550,6 +2786,7 @@ Object {
       "currentValue": "~> 4.11",
       "datasource": "rubygems",
       "depName": "recaptcha",
+      "depType": "dependencies",
       "lockedVersion": "4.13.1",
       "managerData": Object {
         "lineNumber": 55,
@@ -2559,6 +2796,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "akismet",
+      "depType": "dependencies",
       "lockedVersion": "3.0.0",
       "managerData": Object {
         "lineNumber": 56,
@@ -2568,6 +2806,7 @@ Object {
       "currentValue": "~> 0.12.1",
       "datasource": "rubygems",
       "depName": "invisible_captcha",
+      "depType": "dependencies",
       "lockedVersion": "0.12.1",
       "managerData": Object {
         "lineNumber": 57,
@@ -2577,6 +2816,7 @@ Object {
       "currentValue": "~> 3.0.0",
       "datasource": "rubygems",
       "depName": "devise-two-factor",
+      "depType": "dependencies",
       "lockedVersion": "3.0.0",
       "managerData": Object {
         "lineNumber": 60,
@@ -2586,6 +2826,7 @@ Object {
       "currentValue": "~> 0.1.7",
       "datasource": "rubygems",
       "depName": "rqrcode-rails3",
+      "depType": "dependencies",
       "lockedVersion": "0.1.7",
       "managerData": Object {
         "lineNumber": 61,
@@ -2595,6 +2836,7 @@ Object {
       "currentValue": "~> 3.1.0",
       "datasource": "rubygems",
       "depName": "attr_encrypted",
+      "depType": "dependencies",
       "lockedVersion": "3.1.0",
       "managerData": Object {
         "lineNumber": 62,
@@ -2604,6 +2846,7 @@ Object {
       "currentValue": "~> 0.2.1",
       "datasource": "rubygems",
       "depName": "u2f",
+      "depType": "dependencies",
       "lockedVersion": "0.2.1",
       "managerData": Object {
         "lineNumber": 63,
@@ -2613,6 +2856,7 @@ Object {
       "currentValue": "~> 1.0.6",
       "datasource": "rubygems",
       "depName": "validates_hostname",
+      "depType": "dependencies",
       "lockedVersion": "1.0.6",
       "managerData": Object {
         "lineNumber": 66,
@@ -2622,6 +2866,7 @@ Object {
       "currentValue": "~> 1.3.0",
       "datasource": "rubygems",
       "depName": "rubyzip",
+      "depType": "dependencies",
       "lockedVersion": "1.3.0",
       "managerData": Object {
         "lineNumber": 67,
@@ -2631,6 +2876,7 @@ Object {
       "currentValue": "~> 2.0.2",
       "datasource": "rubygems",
       "depName": "acme-client",
+      "depType": "dependencies",
       "lockedVersion": "2.0.2",
       "managerData": Object {
         "lineNumber": 69,
@@ -2640,6 +2886,7 @@ Object {
       "currentValue": "~> 2.5",
       "datasource": "rubygems",
       "depName": "browser",
+      "depType": "dependencies",
       "lockedVersion": "2.5.3",
       "managerData": Object {
         "lineNumber": 72,
@@ -2649,6 +2896,7 @@ Object {
       "currentValue": "~> 2.0.19",
       "datasource": "rubygems",
       "depName": "gpgme",
+      "depType": "dependencies",
       "lockedVersion": "2.0.19",
       "managerData": Object {
         "lineNumber": 75,
@@ -2658,6 +2906,7 @@ Object {
       "currentValue": "~> 2.1.1",
       "datasource": "rubygems",
       "depName": "gitlab_omniauth-ldap",
+      "depType": "dependencies",
       "lockedVersion": "2.1.1",
       "managerData": Object {
         "lineNumber": 80,
@@ -2666,6 +2915,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "net-ldap",
+      "depType": "dependencies",
       "lockedVersion": "0.16.0",
       "managerData": Object {
         "lineNumber": 81,
@@ -2675,6 +2925,7 @@ Object {
       "currentValue": "~> 1.1.0",
       "datasource": "rubygems",
       "depName": "grape",
+      "depType": "dependencies",
       "lockedVersion": "1.1.0",
       "managerData": Object {
         "lineNumber": 84,
@@ -2684,6 +2935,7 @@ Object {
       "currentValue": "~> 0.7.1",
       "datasource": "rubygems",
       "depName": "grape-entity",
+      "depType": "dependencies",
       "lockedVersion": "0.7.1",
       "managerData": Object {
         "lineNumber": 85,
@@ -2693,6 +2945,7 @@ Object {
       "currentValue": "~> 1.0.0",
       "datasource": "rubygems",
       "depName": "rack-cors",
+      "depType": "dependencies",
       "lockedVersion": "1.0.2",
       "managerData": Object {
         "lineNumber": 86,
@@ -2702,6 +2955,7 @@ Object {
       "currentValue": "~> 1.9.11",
       "datasource": "rubygems",
       "depName": "graphql",
+      "depType": "dependencies",
       "lockedVersion": "1.9.11",
       "managerData": Object {
         "lineNumber": 89,
@@ -2711,6 +2965,7 @@ Object {
       "currentValue": "~> 1.4.10",
       "datasource": "rubygems",
       "depName": "graphiql-rails",
+      "depType": "dependencies",
       "lockedVersion": "1.4.10",
       "managerData": Object {
         "lineNumber": 93,
@@ -2720,6 +2975,7 @@ Object {
       "currentValue": "~> 2.0.0.beta3",
       "datasource": "rubygems",
       "depName": "apollo_upload_server",
+      "depType": "dependencies",
       "lockedVersion": "2.0.0.beta.3",
       "managerData": Object {
         "lineNumber": 94,
@@ -2729,6 +2985,7 @@ Object {
       "currentValue": "~> 1.6.0",
       "datasource": "rubygems",
       "depName": "graphql-docs",
+      "depType": "dependencies",
       "lockedVersion": "1.6.0",
       "managerData": Object {
         "lineNumber": 95,
@@ -2737,6 +2994,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "hashie-forbidden_attributes",
+      "depType": "dependencies",
       "lockedVersion": "0.1.1",
       "managerData": Object {
         "lineNumber": 98,
@@ -2746,6 +3004,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "kaminari",
+      "depType": "dependencies",
       "lockedVersion": "1.0.1",
       "managerData": Object {
         "lineNumber": 101,
@@ -2755,6 +3014,7 @@ Object {
       "currentValue": "~> 2.11.0",
       "datasource": "rubygems",
       "depName": "hamlit",
+      "depType": "dependencies",
       "lockedVersion": "2.11.0",
       "managerData": Object {
         "lineNumber": 104,
@@ -2764,6 +3024,7 @@ Object {
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "carrierwave",
+      "depType": "dependencies",
       "lockedVersion": "1.3.1",
       "managerData": Object {
         "lineNumber": 107,
@@ -2772,6 +3033,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "mini_magick",
+      "depType": "dependencies",
       "lockedVersion": "4.9.5",
       "managerData": Object {
         "lineNumber": 108,
@@ -2781,6 +3043,7 @@ Object {
       "currentValue": "~> 3.5",
       "datasource": "rubygems",
       "depName": "fog-aws",
+      "depType": "dependencies",
       "lockedVersion": "3.5.2",
       "managerData": Object {
         "lineNumber": 111,
@@ -2790,6 +3053,7 @@ Object {
       "currentValue": "= 2.1.0",
       "datasource": "rubygems",
       "depName": "fog-core",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 114,
@@ -2799,6 +3063,7 @@ Object {
       "currentValue": "~> 1.9",
       "datasource": "rubygems",
       "depName": "fog-google",
+      "depType": "dependencies",
       "lockedVersion": "1.9.1",
       "managerData": Object {
         "lineNumber": 115,
@@ -2808,6 +3073,7 @@ Object {
       "currentValue": "~> 0.6",
       "datasource": "rubygems",
       "depName": "fog-local",
+      "depType": "dependencies",
       "lockedVersion": "0.6.0",
       "managerData": Object {
         "lineNumber": 116,
@@ -2817,6 +3083,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "fog-openstack",
+      "depType": "dependencies",
       "lockedVersion": "1.0.8",
       "managerData": Object {
         "lineNumber": 117,
@@ -2826,6 +3093,7 @@ Object {
       "currentValue": "~> 0.1.1",
       "datasource": "rubygems",
       "depName": "fog-rackspace",
+      "depType": "dependencies",
       "lockedVersion": "0.1.1",
       "managerData": Object {
         "lineNumber": 118,
@@ -2835,6 +3103,7 @@ Object {
       "currentValue": "~> 0.3",
       "datasource": "rubygems",
       "depName": "fog-aliyun",
+      "depType": "dependencies",
       "lockedVersion": "0.3.3",
       "managerData": Object {
         "lineNumber": 119,
@@ -2844,6 +3113,7 @@ Object {
       "currentValue": "~> 0.23",
       "datasource": "rubygems",
       "depName": "google-api-client",
+      "depType": "dependencies",
       "lockedVersion": "0.23.4",
       "managerData": Object {
         "lineNumber": 122,
@@ -2853,6 +3123,7 @@ Object {
       "currentValue": "~> 0.1.4",
       "datasource": "rubygems",
       "depName": "unf",
+      "depType": "dependencies",
       "lockedVersion": "0.1.4",
       "managerData": Object {
         "lineNumber": 125,
@@ -2862,6 +3133,7 @@ Object {
       "currentValue": "~> 2.3.7",
       "datasource": "rubygems",
       "depName": "seed-fu",
+      "depType": "dependencies",
       "lockedVersion": "2.3.7",
       "managerData": Object {
         "lineNumber": 128,
@@ -2871,6 +3143,7 @@ Object {
       "currentValue": "~> 0.1.9",
       "datasource": "rubygems",
       "depName": "elasticsearch-model",
+      "depType": "dependencies",
       "lockedVersion": "0.1.9",
       "managerData": Object {
         "lineNumber": 131,
@@ -2880,6 +3153,7 @@ Object {
       "currentValue": "~> 0.1.9",
       "datasource": "rubygems",
       "depName": "elasticsearch-rails",
+      "depType": "dependencies",
       "lockedVersion": "0.1.9",
       "managerData": Object {
         "lineNumber": 132,
@@ -2889,6 +3163,7 @@ Object {
       "currentValue": "5.0.3",
       "datasource": "rubygems",
       "depName": "elasticsearch-api",
+      "depType": "dependencies",
       "lockedVersion": "5.0.3",
       "managerData": Object {
         "lineNumber": 133,
@@ -2897,6 +3172,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "aws-sdk",
+      "depType": "dependencies",
       "lockedVersion": "2.11.374",
       "managerData": Object {
         "lineNumber": 134,
@@ -2905,6 +3181,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "faraday_middleware-aws-signers-v4",
+      "depType": "dependencies",
       "lockedVersion": "0.1.7",
       "managerData": Object {
         "lineNumber": 135,
@@ -2914,6 +3191,7 @@ Object {
       "currentValue": "~> 2.12",
       "datasource": "rubygems",
       "depName": "html-pipeline",
+      "depType": "dependencies",
       "lockedVersion": "2.12.2",
       "managerData": Object {
         "lineNumber": 138,
@@ -2923,6 +3201,7 @@ Object {
       "currentValue": "2.3.1",
       "datasource": "rubygems",
       "depName": "deckar01-task_list",
+      "depType": "dependencies",
       "lockedVersion": "2.3.1",
       "managerData": Object {
         "lineNumber": 139,
@@ -2932,6 +3211,7 @@ Object {
       "currentValue": "~> 1.7.0",
       "datasource": "rubygems",
       "depName": "gitlab-markup",
+      "depType": "dependencies",
       "lockedVersion": "1.7.0",
       "managerData": Object {
         "lineNumber": 140,
@@ -2941,6 +3221,7 @@ Object {
       "currentValue": "~> 1.7.0",
       "datasource": "rubygems",
       "depName": "github-markup",
+      "depType": "dependencies",
       "lockedVersion": "1.7.0",
       "managerData": Object {
         "lineNumber": 141,
@@ -2950,6 +3231,7 @@ Object {
       "currentValue": "~> 0.20",
       "datasource": "rubygems",
       "depName": "commonmarker",
+      "depType": "dependencies",
       "lockedVersion": "0.20.1",
       "managerData": Object {
         "lineNumber": 142,
@@ -2959,6 +3241,7 @@ Object {
       "currentValue": "~> 4.3.2",
       "datasource": "rubygems",
       "depName": "RedCloth",
+      "depType": "dependencies",
       "lockedVersion": "4.3.2",
       "managerData": Object {
         "lineNumber": 143,
@@ -2968,6 +3251,7 @@ Object {
       "currentValue": "~> 6.1.2",
       "datasource": "rubygems",
       "depName": "rdoc",
+      "depType": "dependencies",
       "lockedVersion": "6.1.2",
       "managerData": Object {
         "lineNumber": 144,
@@ -2977,6 +3261,7 @@ Object {
       "currentValue": "~> 0.9.12",
       "datasource": "rubygems",
       "depName": "org-ruby",
+      "depType": "dependencies",
       "lockedVersion": "0.9.12",
       "managerData": Object {
         "lineNumber": 145,
@@ -2986,6 +3271,7 @@ Object {
       "currentValue": "~> 0.5.0",
       "datasource": "rubygems",
       "depName": "creole",
+      "depType": "dependencies",
       "lockedVersion": "0.5.0",
       "managerData": Object {
         "lineNumber": 146,
@@ -2995,6 +3281,7 @@ Object {
       "currentValue": "0.8.1",
       "datasource": "rubygems",
       "depName": "wikicloth",
+      "depType": "dependencies",
       "lockedVersion": "0.8.1",
       "managerData": Object {
         "lineNumber": 147,
@@ -3004,6 +3291,7 @@ Object {
       "currentValue": "~> 2.0.10",
       "datasource": "rubygems",
       "depName": "asciidoctor",
+      "depType": "dependencies",
       "lockedVersion": "2.0.10",
       "managerData": Object {
         "lineNumber": 148,
@@ -3013,6 +3301,7 @@ Object {
       "currentValue": "~> 0.3.1",
       "datasource": "rubygems",
       "depName": "asciidoctor-include-ext",
+      "depType": "dependencies",
       "lockedVersion": "0.3.1",
       "managerData": Object {
         "lineNumber": 149,
@@ -3022,6 +3311,7 @@ Object {
       "currentValue": "0.0.10",
       "datasource": "rubygems",
       "depName": "asciidoctor-plantuml",
+      "depType": "dependencies",
       "lockedVersion": "0.0.10",
       "managerData": Object {
         "lineNumber": 150,
@@ -3031,6 +3321,7 @@ Object {
       "currentValue": "~> 3.11.0",
       "datasource": "rubygems",
       "depName": "rouge",
+      "depType": "dependencies",
       "lockedVersion": "3.11.0",
       "managerData": Object {
         "lineNumber": 151,
@@ -3040,6 +3331,7 @@ Object {
       "currentValue": "~> 0.7.11",
       "datasource": "rubygems",
       "depName": "truncato",
+      "depType": "dependencies",
       "lockedVersion": "0.7.11",
       "managerData": Object {
         "lineNumber": 152,
@@ -3049,6 +3341,7 @@ Object {
       "currentValue": "~> 4.2.0",
       "datasource": "rubygems",
       "depName": "bootstrap_form",
+      "depType": "dependencies",
       "lockedVersion": "4.2.0",
       "managerData": Object {
         "lineNumber": 153,
@@ -3058,6 +3351,7 @@ Object {
       "currentValue": "~> 1.10.5",
       "datasource": "rubygems",
       "depName": "nokogiri",
+      "depType": "dependencies",
       "lockedVersion": "1.10.7",
       "managerData": Object {
         "lineNumber": 154,
@@ -3067,6 +3361,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "escape_utils",
+      "depType": "dependencies",
       "lockedVersion": "1.2.1",
       "managerData": Object {
         "lineNumber": 155,
@@ -3075,6 +3370,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "icalendar",
+      "depType": "dependencies",
       "lockedVersion": "2.4.1",
       "managerData": Object {
         "lineNumber": 158,
@@ -3084,6 +3380,7 @@ Object {
       "currentValue": "~> 3.1.0",
       "datasource": "rubygems",
       "depName": "diffy",
+      "depType": "dependencies",
       "lockedVersion": "3.1.0",
       "managerData": Object {
         "lineNumber": 161,
@@ -3093,6 +3390,7 @@ Object {
       "currentValue": "~> 0.1.0",
       "datasource": "rubygems",
       "depName": "diff_match_patch",
+      "depType": "dependencies",
       "lockedVersion": "0.1.0",
       "managerData": Object {
         "lineNumber": 162,
@@ -3102,6 +3400,7 @@ Object {
       "currentValue": "~> 2.0.7",
       "datasource": "rubygems",
       "depName": "rack",
+      "depType": "dependencies",
       "lockedVersion": "2.0.7",
       "managerData": Object {
         "lineNumber": 165,
@@ -3111,6 +3410,7 @@ Object {
       "currentValue": "~> 5.4.1",
       "datasource": "rubygems",
       "depName": "unicorn",
+      "depType": "dependencies",
       "depTypes": Array [
         "unicorn",
       ],
@@ -3123,6 +3423,7 @@ Object {
       "currentValue": "~> 0.4.4",
       "datasource": "rubygems",
       "depName": "unicorn-worker-killer",
+      "depType": "dependencies",
       "depTypes": Array [
         "unicorn",
       ],
@@ -3135,6 +3436,7 @@ Object {
       "currentValue": "~> 4.3.1.gitlab.2",
       "datasource": "rubygems",
       "depName": "gitlab-puma",
+      "depType": "dependencies",
       "depTypes": Array [
         "puma",
       ],
@@ -3147,6 +3449,7 @@ Object {
       "currentValue": "~> 0.1.1.gitlab.1",
       "datasource": "rubygems",
       "depName": "gitlab-puma_worker_killer",
+      "depType": "dependencies",
       "depTypes": Array [
         "puma",
       ],
@@ -3158,6 +3461,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rack-timeout",
+      "depType": "dependencies",
       "depTypes": Array [
         "puma",
       ],
@@ -3170,6 +3474,7 @@ Object {
       "currentValue": "~> 0.6.0",
       "datasource": "rubygems",
       "depName": "state_machines-activerecord",
+      "depType": "dependencies",
       "lockedVersion": "0.6.0",
       "managerData": Object {
         "lineNumber": 179,
@@ -3179,6 +3484,7 @@ Object {
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "acts-as-taggable-on",
+      "depType": "dependencies",
       "lockedVersion": "6.5.0",
       "managerData": Object {
         "lineNumber": 182,
@@ -3188,6 +3494,7 @@ Object {
       "currentValue": "~> 5.2.7",
       "datasource": "rubygems",
       "depName": "sidekiq",
+      "depType": "dependencies",
       "lockedVersion": "5.2.7",
       "managerData": Object {
         "lineNumber": 185,
@@ -3197,6 +3504,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "sidekiq-cron",
+      "depType": "dependencies",
       "lockedVersion": "1.0.4",
       "managerData": Object {
         "lineNumber": 186,
@@ -3206,6 +3514,7 @@ Object {
       "currentValue": "~> 1.6.0",
       "datasource": "rubygems",
       "depName": "redis-namespace",
+      "depType": "dependencies",
       "lockedVersion": "1.6.0",
       "managerData": Object {
         "lineNumber": 187,
@@ -3215,6 +3524,7 @@ Object {
       "currentValue": "0.5.2",
       "datasource": "rubygems",
       "depName": "gitlab-sidekiq-fetcher",
+      "depType": "dependencies",
       "lockedVersion": "0.5.2",
       "managerData": Object {
         "lineNumber": 188,
@@ -3224,6 +3534,7 @@ Object {
       "currentValue": "~> 1.2.1",
       "datasource": "rubygems",
       "depName": "fugit",
+      "depType": "dependencies",
       "lockedVersion": "1.2.1",
       "managerData": Object {
         "lineNumber": 191,
@@ -3233,6 +3544,7 @@ Object {
       "currentValue": "~> 0.16.4",
       "datasource": "rubygems",
       "depName": "httparty",
+      "depType": "dependencies",
       "lockedVersion": "0.16.4",
       "managerData": Object {
         "lineNumber": 194,
@@ -3242,6 +3554,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "rainbow",
+      "depType": "dependencies",
       "lockedVersion": "3.0.0",
       "managerData": Object {
         "lineNumber": 197,
@@ -3250,6 +3563,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "ruby-progressbar",
+      "depType": "dependencies",
       "lockedVersion": "1.10.1",
       "managerData": Object {
         "lineNumber": 200,
@@ -3259,6 +3573,7 @@ Object {
       "currentValue": "~> 2.0.9",
       "datasource": "rubygems",
       "depName": "settingslogic",
+      "depType": "dependencies",
       "lockedVersion": "2.0.9",
       "managerData": Object {
         "lineNumber": 203,
@@ -3268,6 +3583,7 @@ Object {
       "currentValue": "~> 1.1.1",
       "datasource": "rubygems",
       "depName": "re2",
+      "depType": "dependencies",
       "lockedVersion": "1.1.1",
       "managerData": Object {
         "lineNumber": 206,
@@ -3277,6 +3593,7 @@ Object {
       "currentValue": "~> 2.2.4",
       "datasource": "rubygems",
       "depName": "version_sorter",
+      "depType": "dependencies",
       "lockedVersion": "2.2.4",
       "managerData": Object {
         "lineNumber": 210,
@@ -3286,6 +3603,7 @@ Object {
       "currentValue": "~> 3.1",
       "datasource": "rubygems",
       "depName": "js_regex",
+      "depType": "dependencies",
       "lockedVersion": "3.1.1",
       "managerData": Object {
         "lineNumber": 213,
@@ -3294,6 +3612,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "device_detector",
+      "depType": "dependencies",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 216,
@@ -3303,6 +3622,7 @@ Object {
       "currentValue": "~> 4.0",
       "datasource": "rubygems",
       "depName": "redis",
+      "depType": "dependencies",
       "lockedVersion": "4.1.3",
       "managerData": Object {
         "lineNumber": 219,
@@ -3312,6 +3632,7 @@ Object {
       "currentValue": "~> 2.0",
       "datasource": "rubygems",
       "depName": "connection_pool",
+      "depType": "dependencies",
       "lockedVersion": "2.2.2",
       "managerData": Object {
         "lineNumber": 220,
@@ -3321,6 +3642,7 @@ Object {
       "currentValue": "~> 5.0.2",
       "datasource": "rubygems",
       "depName": "redis-rails",
+      "depType": "dependencies",
       "lockedVersion": "5.0.2",
       "managerData": Object {
         "lineNumber": 223,
@@ -3330,6 +3652,7 @@ Object {
       "currentValue": "~> 3.3",
       "datasource": "rubygems",
       "depName": "discordrb-webhooks-blackst0ne",
+      "depType": "dependencies",
       "lockedVersion": "3.3.0",
       "managerData": Object {
         "lineNumber": 226,
@@ -3339,6 +3662,7 @@ Object {
       "currentValue": "~> 1.5.0",
       "datasource": "rubygems",
       "depName": "hipchat",
+      "depType": "dependencies",
       "lockedVersion": "1.5.2",
       "managerData": Object {
         "lineNumber": 229,
@@ -3348,6 +3672,7 @@ Object {
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "jira-ruby",
+      "depType": "dependencies",
       "lockedVersion": "1.7.1",
       "managerData": Object {
         "lineNumber": 232,
@@ -3357,6 +3682,7 @@ Object {
       "currentValue": "~> 0.2.0",
       "datasource": "rubygems",
       "depName": "atlassian-jwt",
+      "depType": "dependencies",
       "lockedVersion": "0.2.0",
       "managerData": Object {
         "lineNumber": 233,
@@ -3366,6 +3692,7 @@ Object {
       "currentValue": "~> 0.7",
       "datasource": "rubygems",
       "depName": "flowdock",
+      "depType": "dependencies",
       "lockedVersion": "0.7.1",
       "managerData": Object {
         "lineNumber": 236,
@@ -3375,6 +3702,7 @@ Object {
       "currentValue": "~> 1.5.1",
       "datasource": "rubygems",
       "depName": "slack-notifier",
+      "depType": "dependencies",
       "lockedVersion": "1.5.1",
       "managerData": Object {
         "lineNumber": 239,
@@ -3384,6 +3712,7 @@ Object {
       "currentValue": "~> 0.0.5",
       "datasource": "rubygems",
       "depName": "hangouts-chat",
+      "depType": "dependencies",
       "lockedVersion": "0.0.5",
       "managerData": Object {
         "lineNumber": 242,
@@ -3393,6 +3722,7 @@ Object {
       "currentValue": "~> 0.9",
       "datasource": "rubygems",
       "depName": "asana",
+      "depType": "dependencies",
       "lockedVersion": "0.9.3",
       "managerData": Object {
         "lineNumber": 245,
@@ -3402,6 +3732,7 @@ Object {
       "currentValue": "~> 0.2.1",
       "datasource": "rubygems",
       "depName": "ruby-fogbugz",
+      "depType": "dependencies",
       "lockedVersion": "0.2.1",
       "managerData": Object {
         "lineNumber": 248,
@@ -3411,6 +3742,7 @@ Object {
       "currentValue": "~> 4.4.0",
       "datasource": "rubygems",
       "depName": "kubeclient",
+      "depType": "dependencies",
       "lockedVersion": "4.4.0",
       "managerData": Object {
         "lineNumber": 251,
@@ -3420,6 +3752,7 @@ Object {
       "currentValue": "~> 4.6",
       "datasource": "rubygems",
       "depName": "sanitize",
+      "depType": "dependencies",
       "lockedVersion": "4.6.6",
       "managerData": Object {
         "lineNumber": 254,
@@ -3429,6 +3762,7 @@ Object {
       "currentValue": "~> 1.0.2",
       "datasource": "rubygems",
       "depName": "babosa",
+      "depType": "dependencies",
       "lockedVersion": "1.0.2",
       "managerData": Object {
         "lineNumber": 255,
@@ -3438,6 +3772,7 @@ Object {
       "currentValue": "~> 2.2",
       "datasource": "rubygems",
       "depName": "loofah",
+      "depType": "dependencies",
       "lockedVersion": "2.4.0",
       "managerData": Object {
         "lineNumber": 258,
@@ -3447,6 +3782,7 @@ Object {
       "currentValue": "~> 8.9",
       "datasource": "rubygems",
       "depName": "licensee",
+      "depType": "dependencies",
       "lockedVersion": "8.9.2",
       "managerData": Object {
         "lineNumber": 261,
@@ -3456,6 +3792,7 @@ Object {
       "currentValue": "~> 4.1.0",
       "datasource": "rubygems",
       "depName": "ace-rails-ap",
+      "depType": "dependencies",
       "lockedVersion": "4.1.2",
       "managerData": Object {
         "lineNumber": 264,
@@ -3465,6 +3802,7 @@ Object {
       "currentValue": "~> 0.7.5",
       "datasource": "rubygems",
       "depName": "charlock_holmes",
+      "depType": "dependencies",
       "lockedVersion": "0.7.6",
       "managerData": Object {
         "lineNumber": 267,
@@ -3474,6 +3812,7 @@ Object {
       "currentValue": "~> 0.3.2",
       "datasource": "rubygems",
       "depName": "mimemagic",
+      "depType": "dependencies",
       "lockedVersion": "0.3.2",
       "managerData": Object {
         "lineNumber": 270,
@@ -3482,6 +3821,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "fast_blank",
+      "depType": "dependencies",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 273,
@@ -3491,6 +3831,7 @@ Object {
       "currentValue": "~> 0.10.5",
       "datasource": "rubygems",
       "depName": "gitlab-chronic",
+      "depType": "dependencies",
       "lockedVersion": "0.10.5",
       "managerData": Object {
         "lineNumber": 276,
@@ -3500,6 +3841,7 @@ Object {
       "currentValue": "~> 0.10.6.2",
       "datasource": "rubygems",
       "depName": "gitlab_chronic_duration",
+      "depType": "dependencies",
       "lockedVersion": "0.10.6.2",
       "managerData": Object {
         "lineNumber": 277,
@@ -3509,6 +3851,7 @@ Object {
       "currentValue": "~> 0.9.10",
       "datasource": "rubygems",
       "depName": "webpack-rails",
+      "depType": "dependencies",
       "lockedVersion": "0.9.11",
       "managerData": Object {
         "lineNumber": 279,
@@ -3518,6 +3861,7 @@ Object {
       "currentValue": "~> 0.6.0",
       "datasource": "rubygems",
       "depName": "rack-proxy",
+      "depType": "dependencies",
       "lockedVersion": "0.6.0",
       "managerData": Object {
         "lineNumber": 280,
@@ -3527,6 +3871,7 @@ Object {
       "currentValue": "~> 2.1.0",
       "datasource": "rubygems",
       "depName": "sassc-rails",
+      "depType": "dependencies",
       "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 282,
@@ -3536,6 +3881,7 @@ Object {
       "currentValue": "~> 2.7.2",
       "datasource": "rubygems",
       "depName": "uglifier",
+      "depType": "dependencies",
       "lockedVersion": "2.7.2",
       "managerData": Object {
         "lineNumber": 283,
@@ -3545,6 +3891,7 @@ Object {
       "currentValue": "~> 2.5.2",
       "datasource": "rubygems",
       "depName": "addressable",
+      "depType": "dependencies",
       "lockedVersion": "2.5.2",
       "managerData": Object {
         "lineNumber": 285,
@@ -3554,6 +3901,7 @@ Object {
       "currentValue": "~> 4.7",
       "datasource": "rubygems",
       "depName": "font-awesome-rails",
+      "depType": "dependencies",
       "lockedVersion": "4.7.0.5",
       "managerData": Object {
         "lineNumber": 286,
@@ -3563,6 +3911,7 @@ Object {
       "currentValue": "~> 3.3",
       "datasource": "rubygems",
       "depName": "gemojione",
+      "depType": "dependencies",
       "lockedVersion": "3.3.0",
       "managerData": Object {
         "lineNumber": 287,
@@ -3572,6 +3921,7 @@ Object {
       "currentValue": "~> 6.2",
       "datasource": "rubygems",
       "depName": "gon",
+      "depType": "dependencies",
       "lockedVersion": "6.2.0",
       "managerData": Object {
         "lineNumber": 288,
@@ -3581,6 +3931,7 @@ Object {
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "request_store",
+      "depType": "dependencies",
       "lockedVersion": "1.3.1",
       "managerData": Object {
         "lineNumber": 289,
@@ -3590,6 +3941,7 @@ Object {
       "currentValue": "~> 0.3.0",
       "datasource": "rubygems",
       "depName": "base32",
+      "depType": "dependencies",
       "lockedVersion": "0.3.2",
       "managerData": Object {
         "lineNumber": 290,
@@ -3599,6 +3951,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "gitlab-license",
+      "depType": "dependencies",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 292,
@@ -3608,6 +3961,7 @@ Object {
       "currentValue": "~> 6.2.0",
       "datasource": "rubygems",
       "depName": "rack-attack",
+      "depType": "dependencies",
       "lockedVersion": "6.2.0",
       "managerData": Object {
         "lineNumber": 295,
@@ -3617,6 +3971,7 @@ Object {
       "currentValue": "~> 2.9",
       "datasource": "rubygems",
       "depName": "sentry-raven",
+      "depType": "dependencies",
       "lockedVersion": "2.9.0",
       "managerData": Object {
         "lineNumber": 298,
@@ -3626,6 +3981,7 @@ Object {
       "currentValue": "~> 1.10.3",
       "datasource": "rubygems",
       "depName": "premailer-rails",
+      "depType": "dependencies",
       "lockedVersion": "1.10.3",
       "managerData": Object {
         "lineNumber": 300,
@@ -3635,6 +3991,7 @@ Object {
       "currentValue": "0.8.0",
       "datasource": "rubygems",
       "depName": "gitlab-labkit",
+      "depType": "dependencies",
       "lockedVersion": "0.8.0",
       "managerData": Object {
         "lineNumber": 303,
@@ -3644,6 +4001,7 @@ Object {
       "currentValue": "~> 3.8",
       "datasource": "rubygems",
       "depName": "ruby_parser",
+      "depType": "dependencies",
       "lockedVersion": "3.13.1",
       "managerData": Object {
         "lineNumber": 306,
@@ -3653,6 +4011,7 @@ Object {
       "currentValue": "~> 5.1",
       "datasource": "rubygems",
       "depName": "rails-i18n",
+      "depType": "dependencies",
       "lockedVersion": "5.1.1",
       "managerData": Object {
         "lineNumber": 307,
@@ -3662,6 +4021,7 @@ Object {
       "currentValue": "~> 1.8.0",
       "datasource": "rubygems",
       "depName": "gettext_i18n_rails",
+      "depType": "dependencies",
       "lockedVersion": "1.8.0",
       "managerData": Object {
         "lineNumber": 308,
@@ -3671,6 +4031,7 @@ Object {
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "gettext_i18n_rails_js",
+      "depType": "dependencies",
       "lockedVersion": "1.3.0",
       "managerData": Object {
         "lineNumber": 309,
@@ -3680,6 +4041,7 @@ Object {
       "currentValue": "~> 3.2.2",
       "datasource": "rubygems",
       "depName": "gettext",
+      "depType": "dependencies",
       "lockedVersion": "3.2.9",
       "managerData": Object {
         "lineNumber": 310,
@@ -3689,6 +4051,7 @@ Object {
       "currentValue": "~> 1.4.0",
       "datasource": "rubygems",
       "depName": "batch-loader",
+      "depType": "dependencies",
       "lockedVersion": "1.4.0",
       "managerData": Object {
         "lineNumber": 312,
@@ -3698,6 +4061,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "peek",
+      "depType": "dependencies",
       "lockedVersion": "1.1.0",
       "managerData": Object {
         "lineNumber": 315,
@@ -3707,6 +4071,7 @@ Object {
       "currentValue": "~> 0.6.1",
       "datasource": "rubygems",
       "depName": "snowplow-tracker",
+      "depType": "dependencies",
       "lockedVersion": "0.6.1",
       "managerData": Object {
         "lineNumber": 318,
@@ -3715,6 +4080,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "derailed_benchmarks",
+      "depType": "dependencies",
       "lockedVersion": "1.3.5",
       "managerData": Object {
         "lineNumber": 321,
@@ -3724,6 +4090,7 @@ Object {
       "currentValue": "~> 0.8",
       "datasource": "rubygems",
       "depName": "method_source",
+      "depType": "dependencies",
       "depTypes": Array [
         "metrics",
       ],
@@ -3736,6 +4103,7 @@ Object {
       "currentValue": "~> 0.2",
       "datasource": "rubygems",
       "depName": "influxdb",
+      "depType": "dependencies",
       "depTypes": Array [
         "metrics",
       ],
@@ -3748,6 +4116,7 @@ Object {
       "currentValue": "~> 0.9.10",
       "datasource": "rubygems",
       "depName": "prometheus-client-mmap",
+      "depType": "dependencies",
       "depTypes": Array [
         "metrics",
       ],
@@ -3760,6 +4129,7 @@ Object {
       "currentValue": "~> 0.18",
       "datasource": "rubygems",
       "depName": "raindrops",
+      "depType": "dependencies",
       "depTypes": Array [
         "metrics",
       ],
@@ -3772,6 +4142,7 @@ Object {
       "currentValue": "~> 4.2",
       "datasource": "rubygems",
       "depName": "brakeman",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3784,6 +4155,7 @@ Object {
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "danger",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3796,6 +4168,7 @@ Object {
       "currentValue": "~> 1.3.4",
       "datasource": "rubygems",
       "depName": "letter_opener_web",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3808,6 +4181,7 @@ Object {
       "currentValue": "~> 0.3.6",
       "datasource": "rubygems",
       "depName": "rblineprof",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3820,6 +4194,7 @@ Object {
       "currentValue": "~> 2.5.0",
       "datasource": "rubygems",
       "depName": "better_errors",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3832,6 +4207,7 @@ Object {
       "currentValue": "~> 0.8.0",
       "datasource": "rubygems",
       "depName": "binding_of_caller",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3844,6 +4220,7 @@ Object {
       "currentValue": "~> 1.7.0",
       "datasource": "rubygems",
       "depName": "thin",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
       ],
@@ -3856,6 +4233,7 @@ Object {
       "currentValue": "~> 6.0.2",
       "datasource": "rubygems",
       "depName": "bullet",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3869,6 +4247,7 @@ Object {
       "currentValue": "~> 3.5.1",
       "datasource": "rubygems",
       "depName": "pry-byebug",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3882,6 +4261,7 @@ Object {
       "currentValue": "~> 0.3.4",
       "datasource": "rubygems",
       "depName": "pry-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3894,6 +4274,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "awesome_print",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3907,6 +4288,7 @@ Object {
       "currentValue": "~> 1.7.0",
       "datasource": "rubygems",
       "depName": "database_cleaner",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3920,6 +4302,7 @@ Object {
       "currentValue": "~> 5.1.0",
       "datasource": "rubygems",
       "depName": "factory_bot_rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3933,6 +4316,7 @@ Object {
       "currentValue": "~> 4.0.0.beta3",
       "datasource": "rubygems",
       "depName": "rspec-rails",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3946,6 +4330,7 @@ Object {
       "currentValue": "~> 5.11.0",
       "datasource": "rubygems",
       "depName": "minitest",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3959,6 +4344,7 @@ Object {
       "currentValue": "~> 2.10",
       "datasource": "rubygems",
       "depName": "ffaker",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3972,6 +4358,7 @@ Object {
       "currentValue": "~> 2.0.0",
       "datasource": "rubygems",
       "depName": "spring",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3985,6 +4372,7 @@ Object {
       "currentValue": "~> 1.0.4",
       "datasource": "rubygems",
       "depName": "spring-commands-rspec",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -3998,6 +4386,7 @@ Object {
       "currentValue": "~> 3.1.0",
       "datasource": "rubygems",
       "depName": "gitlab-styles",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4011,6 +4400,7 @@ Object {
       "currentValue": "~> 0.74.0",
       "datasource": "rubygems",
       "depName": "rubocop",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4024,6 +4414,7 @@ Object {
       "currentValue": "~> 1.4.1",
       "datasource": "rubygems",
       "depName": "rubocop-performance",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4037,6 +4428,7 @@ Object {
       "currentValue": "~> 1.37.0",
       "datasource": "rubygems",
       "depName": "rubocop-rspec",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4050,6 +4442,7 @@ Object {
       "currentValue": "~> 0.56.0",
       "datasource": "rubygems",
       "depName": "scss_lint",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4063,6 +4456,7 @@ Object {
       "currentValue": "~> 0.34.0",
       "datasource": "rubygems",
       "depName": "haml_lint",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4076,6 +4470,7 @@ Object {
       "currentValue": "~> 0.16.1",
       "datasource": "rubygems",
       "depName": "simplecov",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4089,6 +4484,7 @@ Object {
       "currentValue": "~> 0.5.0",
       "datasource": "rubygems",
       "depName": "bundler-audit",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4102,6 +4498,7 @@ Object {
       "currentValue": "~> 2.3.0",
       "datasource": "rubygems",
       "depName": "benchmark-ips",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4115,6 +4512,7 @@ Object {
       "currentValue": "~> 1.17",
       "datasource": "rubygems",
       "depName": "knapsack",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4128,6 +4526,7 @@ Object {
       "currentValue": "~> 0.2.13",
       "datasource": "rubygems",
       "depName": "stackprof",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4141,6 +4540,7 @@ Object {
       "currentValue": "~> 1.1.2",
       "datasource": "rubygems",
       "depName": "simple_po_parser",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4154,6 +4554,7 @@ Object {
       "currentValue": "~> 0.8.0",
       "datasource": "rubygems",
       "depName": "timecop",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4167,6 +4568,7 @@ Object {
       "currentValue": "~> 0.2.1",
       "datasource": "rubygems",
       "depName": "png_quantizator",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4180,6 +4582,7 @@ Object {
       "currentValue": "~> 1.17.0",
       "datasource": "rubygems",
       "depName": "parallel",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4193,6 +4596,7 @@ Object {
       "currentValue": "~> 5.4",
       "datasource": "rubygems",
       "depName": "license_finder",
+      "depType": "dependencies",
       "depTypes": Array [
         "development",
         "test",
@@ -4207,6 +4611,7 @@ Object {
       "currentValue": "~> 2.2.0",
       "datasource": "rubygems",
       "depName": "fuubar",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4219,6 +4624,7 @@ Object {
       "currentValue": "~> 0.6.1",
       "datasource": "rubygems",
       "depName": "rspec-retry",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4231,6 +4637,7 @@ Object {
       "currentValue": "~> 0.0.5",
       "datasource": "rubygems",
       "depName": "rspec_profiling",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4243,6 +4650,7 @@ Object {
       "currentValue": "~> 0.1.3",
       "datasource": "rubygems",
       "depName": "rspec-set",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4254,6 +4662,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rspec-parameterized",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4266,6 +4675,7 @@ Object {
       "currentValue": "~> 3.22.0",
       "datasource": "rubygems",
       "depName": "capybara",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4278,6 +4688,7 @@ Object {
       "currentValue": "~> 1.0.22",
       "datasource": "rubygems",
       "depName": "capybara-screenshot",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4290,6 +4701,7 @@ Object {
       "currentValue": "~> 3.142",
       "datasource": "rubygems",
       "depName": "selenium-webdriver",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4302,6 +4714,7 @@ Object {
       "currentValue": "~> 4.0.1",
       "datasource": "rubygems",
       "depName": "shoulda-matchers",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4314,6 +4727,7 @@ Object {
       "currentValue": "~> 2.2.0",
       "datasource": "rubygems",
       "depName": "email_spec",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4326,6 +4740,7 @@ Object {
       "currentValue": "~> 2.8.0",
       "datasource": "rubygems",
       "depName": "json-schema",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4338,6 +4753,7 @@ Object {
       "currentValue": "~> 3.5.1",
       "datasource": "rubygems",
       "depName": "webmock",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4349,6 +4765,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rails-controller-testing",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4361,6 +4778,7 @@ Object {
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "concurrent-ruby",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4373,6 +4791,7 @@ Object {
       "currentValue": "~> 0.10.0",
       "datasource": "rubygems",
       "depName": "test-prof",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4384,6 +4803,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rspec_junit_formatter",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4395,6 +4815,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "guard-rspec",
+      "depType": "dependencies",
       "depTypes": Array [
         "test",
       ],
@@ -4407,6 +4828,7 @@ Object {
       "currentValue": "~> 4.9",
       "datasource": "rubygems",
       "depName": "octokit",
+      "depType": "dependencies",
       "lockedVersion": "4.9.0",
       "managerData": Object {
         "lineNumber": 421,
@@ -4416,6 +4838,7 @@ Object {
       "currentValue": "~> 0.10.0",
       "datasource": "rubygems",
       "depName": "mail_room",
+      "depType": "dependencies",
       "lockedVersion": "0.10.0",
       "managerData": Object {
         "lineNumber": 423,
@@ -4425,6 +4848,7 @@ Object {
       "currentValue": "~> 0.1",
       "datasource": "rubygems",
       "depName": "email_reply_trimmer",
+      "depType": "dependencies",
       "lockedVersion": "0.1.6",
       "managerData": Object {
         "lineNumber": 425,
@@ -4433,6 +4857,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "html2text",
+      "depType": "dependencies",
       "lockedVersion": "0.2.0",
       "managerData": Object {
         "lineNumber": 426,
@@ -4442,6 +4867,7 @@ Object {
       "currentValue": "~> 1.0.0",
       "datasource": "rubygems",
       "depName": "ruby-prof",
+      "depType": "dependencies",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 428,
@@ -4451,6 +4877,7 @@ Object {
       "currentValue": "~> 0.4",
       "datasource": "rubygems",
       "depName": "rbtrace",
+      "depType": "dependencies",
       "lockedVersion": "0.4.11",
       "managerData": Object {
         "lineNumber": 429,
@@ -4460,6 +4887,7 @@ Object {
       "currentValue": "~> 0.9",
       "datasource": "rubygems",
       "depName": "memory_profiler",
+      "depType": "dependencies",
       "lockedVersion": "0.9.13",
       "managerData": Object {
         "lineNumber": 430,
@@ -4469,6 +4897,7 @@ Object {
       "currentValue": "~> 0.1",
       "datasource": "rubygems",
       "depName": "benchmark-memory",
+      "depType": "dependencies",
       "lockedVersion": "0.1.2",
       "managerData": Object {
         "lineNumber": 431,
@@ -4478,6 +4907,7 @@ Object {
       "currentValue": "~> 0.1",
       "datasource": "rubygems",
       "depName": "activerecord-explain-analyze",
+      "depType": "dependencies",
       "lockedVersion": "0.1.0",
       "managerData": Object {
         "lineNumber": 432,
@@ -4487,6 +4917,7 @@ Object {
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "oauth2",
+      "depType": "dependencies",
       "lockedVersion": "1.4.1",
       "managerData": Object {
         "lineNumber": 435,
@@ -4496,6 +4927,7 @@ Object {
       "currentValue": "~> 2.6.0",
       "datasource": "rubygems",
       "depName": "health_check",
+      "depType": "dependencies",
       "lockedVersion": "2.6.0",
       "managerData": Object {
         "lineNumber": 438,
@@ -4505,6 +4937,7 @@ Object {
       "currentValue": "~> 2.3.0",
       "datasource": "rubygems",
       "depName": "vmstat",
+      "depType": "dependencies",
       "lockedVersion": "2.3.0",
       "managerData": Object {
         "lineNumber": 441,
@@ -4514,6 +4947,7 @@ Object {
       "currentValue": "~> 1.1.6",
       "datasource": "rubygems",
       "depName": "sys-filesystem",
+      "depType": "dependencies",
       "lockedVersion": "1.1.6",
       "managerData": Object {
         "lineNumber": 442,
@@ -4522,6 +4956,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "net-ntp",
+      "depType": "dependencies",
       "lockedVersion": "2.1.3",
       "managerData": Object {
         "lineNumber": 445,
@@ -4531,6 +4966,7 @@ Object {
       "currentValue": "~> 5.2",
       "datasource": "rubygems",
       "depName": "net-ssh",
+      "depType": "dependencies",
       "lockedVersion": "5.2.0",
       "managerData": Object {
         "lineNumber": 448,
@@ -4540,6 +4976,7 @@ Object {
       "currentValue": "~> 2.0",
       "datasource": "rubygems",
       "depName": "sshkey",
+      "depType": "dependencies",
       "lockedVersion": "2.0.0",
       "managerData": Object {
         "lineNumber": 449,
@@ -4549,6 +4986,7 @@ Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "ed25519",
+      "depType": "dependencies",
       "depTypes": Array [
         "ed25519",
       ],
@@ -4561,6 +4999,7 @@ Object {
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "bcrypt_pbkdf",
+      "depType": "dependencies",
       "depTypes": Array [
         "ed25519",
       ],
@@ -4573,6 +5012,7 @@ Object {
       "currentValue": "~> 1.73.0",
       "datasource": "rubygems",
       "depName": "gitaly",
+      "depType": "dependencies",
       "lockedVersion": "1.73.0",
       "managerData": Object {
         "lineNumber": 458,
@@ -4582,6 +5022,7 @@ Object {
       "currentValue": "~> 1.24.0",
       "datasource": "rubygems",
       "depName": "grpc",
+      "depType": "dependencies",
       "lockedVersion": "1.24.0",
       "managerData": Object {
         "lineNumber": 460,
@@ -4591,6 +5032,7 @@ Object {
       "currentValue": "~> 3.8.0",
       "datasource": "rubygems",
       "depName": "google-protobuf",
+      "depType": "dependencies",
       "lockedVersion": "3.8.0",
       "managerData": Object {
         "lineNumber": 462,
@@ -4600,6 +5042,7 @@ Object {
       "currentValue": "~> 1.0.0",
       "datasource": "rubygems",
       "depName": "toml-rb",
+      "depType": "dependencies",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 464,
@@ -4609,6 +5052,7 @@ Object {
       "currentValue": "~> 0.17.1",
       "datasource": "rubygems",
       "depName": "flipper",
+      "depType": "dependencies",
       "lockedVersion": "0.17.1",
       "managerData": Object {
         "lineNumber": 467,
@@ -4618,6 +5062,7 @@ Object {
       "currentValue": "~> 0.17.1",
       "datasource": "rubygems",
       "depName": "flipper-active_record",
+      "depType": "dependencies",
       "lockedVersion": "0.17.1",
       "managerData": Object {
         "lineNumber": 468,
@@ -4627,6 +5072,7 @@ Object {
       "currentValue": "~> 0.17.1",
       "datasource": "rubygems",
       "depName": "flipper-active_support_cache_store",
+      "depType": "dependencies",
       "lockedVersion": "0.17.1",
       "managerData": Object {
         "lineNumber": 469,
@@ -4636,6 +5082,7 @@ Object {
       "currentValue": "~> 0.1.5",
       "datasource": "rubygems",
       "depName": "unleash",
+      "depType": "dependencies",
       "lockedVersion": "0.1.5",
       "managerData": Object {
         "lineNumber": 470,
@@ -4645,6 +5092,7 @@ Object {
       "currentValue": "~> 0.5",
       "datasource": "rubygems",
       "depName": "lograge",
+      "depType": "dependencies",
       "lockedVersion": "0.10.0",
       "managerData": Object {
         "lineNumber": 473,
@@ -4654,6 +5102,7 @@ Object {
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "grape_logging",
+      "depType": "dependencies",
       "lockedVersion": "1.7.0",
       "managerData": Object {
         "lineNumber": 474,
@@ -4663,6 +5112,7 @@ Object {
       "currentValue": "~> 0.9.1",
       "datasource": "rubygems",
       "depName": "gitlab-net-dns",
+      "depType": "dependencies",
       "lockedVersion": "0.9.1",
       "managerData": Object {
         "lineNumber": 477,
@@ -4672,6 +5122,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "countries",
+      "depType": "dependencies",
       "lockedVersion": "3.0.0",
       "managerData": Object {
         "lineNumber": 480,
@@ -4681,6 +5132,7 @@ Object {
       "currentValue": "~> 3.1.2",
       "datasource": "rubygems",
       "depName": "retriable",
+      "depType": "dependencies",
       "lockedVersion": "3.1.2",
       "managerData": Object {
         "lineNumber": 482,
@@ -4690,6 +5142,7 @@ Object {
       "currentValue": "~> 4.0",
       "datasource": "rubygems",
       "depName": "liquid",
+      "depType": "dependencies",
       "lockedVersion": "4.0.3",
       "managerData": Object {
         "lineNumber": 484,
@@ -4747,6 +5200,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "rubocop",
+      "depType": "dependencies",
       "lockedVersion": "0.68.1",
       "managerData": Object {
         "lineNumber": 3,
@@ -4758,6 +5212,7 @@ Object {
     Object {
       "datasource": "rubygems",
       "depName": "brakeman",
+      "depType": "dependencies",
       "lockedVersion": "4.4.0",
       "managerData": Object {
         "lineNumber": 5,
