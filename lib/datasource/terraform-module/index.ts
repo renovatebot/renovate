@@ -31,6 +31,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const { registry, repository } =
       TerraformModuleDatasource.getRegistryRepository(lookupName, registryUrl);
     logger.trace(
@@ -58,14 +63,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      releases: null,
+      releases: res.versions.map((version) => ({
+        version,
+      })),
     };
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    dep.releases = res.versions.map((version) => ({
-      version,
-    }));
     if (pkgUrl.startsWith('https://registry.terraform.io/')) {
       dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     }
@@ -83,7 +87,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   private static getRegistryRepository(
     lookupName: string,
-    registryUrl: string
+    registryUrl = ''
   ): RegistryRepository {
     let registry: string;
     const split = lookupName.split('/');
