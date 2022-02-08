@@ -63,6 +63,7 @@ import * as terraform from './terraform';
 import * as terraformVersion from './terraform-version';
 import * as terragrunt from './terragrunt';
 import * as terragruntVersion from './terragrunt-version';
+import * as toolVersions from './tool-versions';
 import * as travis from './travis';
 import type { ManagerApi } from './types';
 
@@ -134,4 +135,5 @@ api.set('terraform', terraform);
 api.set('terraform-version', terraformVersion);
 api.set('terragrunt', terragrunt);
 api.set('terragrunt-version', terragruntVersion);
+api.set('tool-versions', toolVersions);
 api.set('travis', travis);
