@@ -17,12 +17,9 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
-  override readonly registryStrategy = 'first';
 
   @cache({
-    ttlMinutes: 10,
     namespace: `datasource-${GitlabTagsDatasource.id}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
       `${getDepHost(registryUrl)}:${lookupName}`,
@@ -63,7 +60,6 @@ export class GitlabTagsDatasource extends Datasource {
   }
 
   @cache({
-    ttlMinutes: 10,
     namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
       `${getDepHost(registryUrl)}:${lookupName}`,
