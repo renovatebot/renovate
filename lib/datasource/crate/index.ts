@@ -8,6 +8,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { simpleGitConfig } from '../../util/git/config';
 import { newlineRegex, regEx } from '../../util/regex';
+import { parseUrl } from '../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -163,10 +164,13 @@ export class CrateDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    let url: URL;
-    try {
-      url = new URL(registryUrl);
-    } catch (err) {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
+    const url = parseUrl(registryUrl);
+    if (!url) {
       logger.debug({ registryUrl }, 'could not parse registry URL');
       return null;
     }
@@ -256,7 +260,9 @@ export class CrateDatasource extends Datasource {
     return registry;
   }
 
-  private static areReleasesCacheable(registryUrl: string): boolean {
+  private static areReleasesCacheable(
+    registryUrl: string | undefined
+  ): boolean {
     // We only cache public releases, we don't want to cache private
     // cloned data between runs.
     return registryUrl === 'https://crates.io';

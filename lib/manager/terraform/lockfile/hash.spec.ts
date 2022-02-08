@@ -5,7 +5,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { getFixturePath, logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
-import { Logger } from '../../../logger/types';
+import type { Logger } from '../../../logger/types';
 import { TerraformProviderHash } from './hash';
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
