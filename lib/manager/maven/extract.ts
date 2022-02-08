@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
@@ -56,7 +57,7 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
     const datasource = datasourceMaven.id;
-    const registryUrls = [];
+    const registryUrls = [MAVEN_REPO];
     const result: PackageDependency = {
       datasource,
       depName,

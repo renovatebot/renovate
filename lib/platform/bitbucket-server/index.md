@@ -14,7 +14,7 @@
 
 If you want a test Bitbucket server locally rather than with your production server, [Atlassian's Bitbucket Server Docker image](https://hub.docker.com/r/atlassian/bitbucket-server) is really convenient.
 
-As per their instructions, the following commands bring up a new server:
+In line with their instructions, the following commands bring up a new server:
 
 ```
 docker volume create --name bitbucketVolume
@@ -47,7 +47,7 @@ export LOG_LEVEL=debug
 yarn start --autodiscover=true
 ```
 
-You should then receive a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
+You should then get a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
 
 ## Supported versions
 
