@@ -3,7 +3,7 @@
 exports[`manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-tags",
@@ -14,7 +14,7 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentDigest": "c308fdd69d26ed66f4506ebd74b180abe5362145",
     "currentValue": "v1.1.0",
@@ -25,7 +25,7 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "1.0.0",
     "datasource": "github-tags",
@@ -35,7 +35,7 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentDigest": "c308fdd69d26ed66f4506ebd74b180abe5362145",
     "currentValue": undefined,
@@ -46,7 +46,7 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "v2",
     "datasource": "github-tags",
@@ -61,7 +61,7 @@ Array [
 exports[`manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-tags",
@@ -82,7 +82,7 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}}  # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-tags",
