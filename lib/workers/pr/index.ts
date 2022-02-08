@@ -358,6 +358,7 @@ export async function ensurePr(
         !existingPr.hasAssignees &&
         !existingPr.hasReviewers &&
         config.automerge &&
+        !config.assignAutomerge &&
         (await getBranchStatus()) === BranchStatus.red
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);

@@ -66,7 +66,7 @@ Read more about this in the [GitHub docs, Re-requesting a review](https://docs.g
 
 ## Slack collaboration with maintainers
 
-Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
+The codebase can be difficult to navigate, especially for a first-time contributor.
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
