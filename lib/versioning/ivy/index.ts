@@ -76,8 +76,11 @@ function matches(a: string, b: string): boolean {
   return mavenMatches(a, value);
 }
 
-function getSatisfyingVersion(versions: string[], range: string): string {
-  return versions.reduce((result, version) => {
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;

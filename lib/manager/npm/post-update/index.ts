@@ -25,7 +25,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import type { FileChange } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
@@ -377,7 +377,7 @@ async function updateYarnOffline(
     } else if (yarnrc) {
       // Yarn 1 (offline mirror)
       const mirrorLine = yarnrc
-        .split('\n')
+        .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
       if (mirrorLine) {
         const mirrorPath = ensureTrailingSlash(

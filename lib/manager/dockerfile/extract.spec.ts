@@ -665,5 +665,53 @@ Object {
         }
       `);
     });
+
+    it('skips depName containing a non default variable at start', () => {
+      const res = getDep('$CI_REGISTRY/alpine:3.15');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "$CI_REGISTRY/alpine:3.15",
+          "skipReason": "contains-variable",
+        }
+      `);
+    });
+
+    it('skips depName containing a non default variable with brackets at start', () => {
+      const res = getDep('${CI_REGISTRY}/alpine:3.15');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "\${CI_REGISTRY}/alpine:3.15",
+          "skipReason": "contains-variable",
+        }
+      `);
+    });
+
+    it('skips depName containing a non default variable', () => {
+      const res = getDep('docker.io/$PREFIX/alpine:3.15');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "docker.io/$PREFIX/alpine:3.15",
+          "skipReason": "contains-variable",
+        }
+      `);
+    });
+
+    it('skips depName containing a non default variable with brackets', () => {
+      const res = getDep('docker.io/${PREFIX}/alpine:3.15');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "docker.io/\${PREFIX}/alpine:3.15",
+          "skipReason": "contains-variable",
+        }
+      `);
+    });
   });
 });

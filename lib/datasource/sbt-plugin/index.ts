@@ -23,7 +23,7 @@ async function resolvePluginReleases(
   rootUrl: string,
   artifact: string,
   scalaVersion: string
-): Promise<string[]> {
+): Promise<string[] | null> {
   const searchRoot = `${rootUrl}/${artifact}`;
   const parse = (content: string): string[] =>
     parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
@@ -72,6 +72,11 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // istanbul ignore if
+  if (!registryUrl) {
+    return null;
+  }
+
   const [groupId, artifactId] = lookupName.split(':');
   const groupIdSplit = groupId.split('.');
   const artifactIdSplit = artifactId.split('_');

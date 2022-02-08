@@ -25,12 +25,14 @@ The only choice you need to make is whether to run Renovate on all repositories 
 
 Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
-Unfortunately GitHub doesn't offer a "select all except X,Y,Z" option, so you must select each repository where you want Renovate to run.
+Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
 Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
-Note: if you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
-If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+<!-- prettier-ignore -->
+!!! note
+    If you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
+    If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
 
 ### Hosted GitLab.com App
 
@@ -39,7 +41,7 @@ For more details on GitLab security for bots, please see the [GitLab Bot Securit
 
 ## Repository onboarding
 
-Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:
+Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
 ![Onboarding](../assets/images/onboarding.png)
 
@@ -52,7 +54,7 @@ You can edit your Renovate configuration **within the `renovate/configure` branc
 
 ### Check for warnings
 
-If you have any Warnings or Errors listed, see if you need or want to make any changes to address them.
+If you have any Warnings or Errors listed, see if you need or want to make any changes to fix them.
 Warnings and errors should be fixed on the base branch (e.g. `main`) so that Renovate can recreate its Configure Renovate PR on its next cycle.
 
 ### Configuration location
@@ -71,7 +73,9 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 
 #### package.json
 
-Note: this approach has been deprecated and will be removed in a future release.
+<!-- prettier-ignore -->
+!!! warning
+    This approach has been deprecated and will be removed in a future release.
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
 The `package.json` file must be located at the root of your repository.
@@ -130,4 +134,4 @@ Any existing Renovate PRs will be closed after you've completed these steps.
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the hosted WhiteSource Renovate App and you don't receive a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you're using the hosted WhiteSource Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

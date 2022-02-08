@@ -1,8 +1,11 @@
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
-import * as githubReleases from '../github-releases';
-import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
+import {
+  getApiBaseUrl,
+  getSourceUrl,
+  getReleases as githubGetReleases,
+} from '../github-releases';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitHubTag, TagResponse } from './types';
 
@@ -158,7 +161,7 @@ export async function getReleases(
 
   try {
     // Fetch additional data from releases endpoint when possible
-    const releasesResult = await githubReleases.getReleases(config);
+    const releasesResult = await githubGetReleases(config);
     const releaseByVersion = {};
     releasesResult?.releases?.forEach((release) => {
       const key = release.version;
