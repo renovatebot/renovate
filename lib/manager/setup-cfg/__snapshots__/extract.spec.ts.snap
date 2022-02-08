@@ -10,6 +10,25 @@ Object {
       "depType": "install",
     },
     Object {
+      "currentValue": "~=1.0",
+      "datasource": "pypi",
+      "depName": "first",
+      "depType": "install",
+    },
+    Object {
+      "currentValue": "==2.2",
+      "currentVersion": "2.2",
+      "datasource": "pypi",
+      "depName": "second",
+      "depType": "install",
+    },
+    Object {
+      "currentValue": ">=3.0",
+      "datasource": "pypi",
+      "depName": "third",
+      "depType": "install",
+    },
+    Object {
       "currentValue": ">=5.5.5",
       "datasource": "pypi",
       "depName": "quux",

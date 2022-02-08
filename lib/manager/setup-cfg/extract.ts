@@ -94,7 +94,7 @@ export function extractPackageFile(
 
   content
     .split(newlineRegex)
-    .map((line) => line.replace(regEx(/[;#].*$/), '').trimEnd())
+    .map((line) => line.replace(regEx(/#.*$/), '').trimEnd())
     .forEach((rawLine) => {
       let line = rawLine;
       const newSectionName = getSectionName(line);
@@ -104,8 +104,15 @@ export function extractPackageFile(
       }
       if (newSectionRecord) {
         sectionRecord = newSectionRecord;
-        // Propably there are also requirements in this line. Strip the sectionRecord.
+        // Propably there are also requirements in this line.
         line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
+        line.split(';').forEach((part) => {
+          const dep = parseDep(part, sectionName, sectionRecord);
+          if (dep) {
+            deps.push(dep);
+          }
+        });
+        return;
       }
 
       const dep = parseDep(line, sectionName, sectionRecord);

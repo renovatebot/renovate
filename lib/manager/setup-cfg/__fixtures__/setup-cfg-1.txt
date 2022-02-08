@@ -5,6 +5,7 @@ python_requires = >= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.5.1
 packages = find:
 test_suite = tests
 install_requires = coloredlogs ~=14.0
+install_requires = first ~=1.0;second==2.2 ; third>=3.0  # 1,2 and 3
 install_requires =
     quux >=5.5.5
     python-dateutil ~=2.1

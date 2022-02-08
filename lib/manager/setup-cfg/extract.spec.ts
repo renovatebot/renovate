@@ -11,6 +11,9 @@ describe('manager/setup-cfg/extract', () => {
       expect(res).toMatchSnapshot({
         deps: [
           { depName: 'coloredlogs', currentValue: '~=14.0' },
+          { depName: 'first', currentValue: '~=1.0' },
+          { depName: 'second', currentValue: '==2.2' },
+          { depName: 'third', currentValue: '>=3.0' },
           { depName: 'quux', currentValue: '>=5.5.5' },
           { depName: 'python-dateutil', currentValue: '~=2.1' },
           { depName: 'foo', currentValue: '>=1.1.1' },
