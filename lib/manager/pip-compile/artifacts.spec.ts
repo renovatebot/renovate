@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
-import { git, mocked } from '../../../test/util';
+import { git, loadFixture, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
@@ -31,6 +31,15 @@ const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
+
+const requirementsNoHeaders = loadFixture('requirementsNoHeaders.txt');
+const requirementsWithHashes = loadFixture('requirementsWithHashes.txt');
+const requirementsWithUnknownArguments = loadFixture(
+  'requirementsWithUnknownArguments.txt'
+);
+const requirementsWithExploitingArguments = loadFixture(
+  'requirementsWithExploitingArguments.txt'
+);
 
 describe('manager/pip-compile/artifacts', () => {
   beforeEach(() => {
@@ -159,5 +168,51 @@ describe('manager/pip-compile/artifacts', () => {
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  describe('constructPipCompileCmd()', () => {
+    it('returns default cmd for garbish', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          requirementsNoHeaders,
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe('pip-compile requirements.in');
+    });
+
+    it('returns extracts common arguments (like featured in README)', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          requirementsWithHashes,
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe(
+        'pip-compile --allow-unsafe --generate-hashes --output-file=requirements.txt requirements.in'
+      );
+    });
+
+    it('skips unknown arguments', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          requirementsWithUnknownArguments,
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe('pip-compile --generate-hashes requirements.in');
+    });
+
+    it('skips exploitable subcommands and files', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          requirementsWithExploitingArguments,
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe(
+        'pip-compile --generate-hashes --output-file=requirements.txt requirements.in'
+      );
+    });
   });
 });

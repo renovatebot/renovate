@@ -40,3 +40,7 @@ To get Renovate to use another version of Python, add a contraints` rule to the 
   }
 }
 ```
+
+### `pip-compile` arguments
+
+Renovate parses the original `requirements.txt` file and extract some `pip-compile` arguments to be used. At the moment only common usages like `--generate-hashes`, `--allow-unsafe` are supported.
