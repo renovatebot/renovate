@@ -11,7 +11,7 @@ export function sanitizeMarkdown(markdown: string): string {
 
   if (markdownLinks) {
     markdownLinks.forEach((ml) => {
-      res = res.replace(ml, ml.replace(' ', '%20'));
+      res = res.replace(ml, ml.replace(regEx(/\s/g), '%20'));
     });
   }
 
