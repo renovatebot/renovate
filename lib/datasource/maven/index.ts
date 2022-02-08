@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
-import { XmlDocument } from 'xmldoc';
+import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { newlineRegex, regEx } from '../../util/regex';
