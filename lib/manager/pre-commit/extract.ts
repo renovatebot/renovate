@@ -4,7 +4,7 @@ import { PlatformId } from '../../constants';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { find } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -12,7 +12,7 @@ import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
 } from './parsing';
-import { PreCommitConfig } from './types';
+import type { PreCommitConfig } from './types';
 
 function isEmptyObject(obj: any): boolean {
   return Object.keys(obj).length === 0 && obj.constructor === Object;

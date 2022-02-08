@@ -1,4 +1,4 @@
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { DartResult } from './types';
@@ -35,10 +35,12 @@ export class DartDatasource extends Datasource {
     const body = raw?.body;
     if (body) {
       const { versions, latest } = body;
-      const releases = versions?.map(({ version, published }) => ({
-        version,
-        releaseTimestamp: published,
-      }));
+      const releases = versions
+        ?.filter(({ retracted }) => !retracted)
+        ?.map(({ version, published }) => ({
+          version,
+          releaseTimestamp: published,
+        }));
       if (releases && latest) {
         result = { releases };
 

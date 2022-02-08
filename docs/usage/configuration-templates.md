@@ -30,7 +30,7 @@ Be careful, and consider creating a new "config help" post at the [discussions t
 ## Commit Message
 
 Renovate will use one commit per branch, this makes it easy for you to merge.
-As such, the `commitMessage` reflects the contents of the branch and is usually the same as the PR title.
+Therefore, the `commitMessage` reflects the contents of the branch and is usually the same as the PR title.
 
 `commitMessage` has a default value of `{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}`, with the intention that you only edit some of those subcomponents.
 

@@ -28,6 +28,10 @@ export class NodeDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
     const result: ReleaseResult = {
       homepage: 'https://nodejs.org',
       sourceUrl: 'https://github.com/nodejs/node',
