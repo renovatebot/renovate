@@ -4,12 +4,6 @@ exports[`manager/setup-cfg/extract extractPackageFile() extracts dependencies 1`
 Object {
   "deps": Array [
     Object {
-      "currentValue": ">=4.4.4",
-      "datasource": "pypi",
-      "depName": "qux",
-      "depType": "extra",
-    },
-    Object {
       "currentValue": "~=14.0",
       "datasource": "pypi",
       "depName": "coloredlogs",
@@ -31,6 +25,13 @@ Object {
       "currentValue": "~=2.1",
       "datasource": "pypi",
       "depName": "fs",
+      "depType": "install",
+    },
+    Object {
+      "currentValue": "==1.0",
+      "currentVersion": "1.0",
+      "datasource": "pypi",
+      "depName": "nmspc.pkg",
       "depType": "install",
     },
     Object {
@@ -70,6 +71,18 @@ Object {
       "depType": "test",
     },
     Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "piexif",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "Pillow",
+      "depType": "extra",
+    },
+    Object {
       "currentValue": "~=0.1",
       "datasource": "pypi",
       "depName": "contexter",
@@ -94,6 +107,24 @@ Object {
       "depType": "extra",
     },
     Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "coverage",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "codecov",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "codacy-coverage",
+      "depType": "extra",
+    },
+    Object {
       "currentValue": "~=1.7",
       "datasource": "pypi",
       "depName": "sphinx",
@@ -109,6 +140,18 @@ Object {
       "currentValue": "~=2.6",
       "datasource": "pypi",
       "depName": "semantic-version",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "docutils",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "Pygments",
       "depType": "extra",
     },
     Object {

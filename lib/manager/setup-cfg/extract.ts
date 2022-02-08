@@ -1,7 +1,9 @@
+// based on https://www.python.org/dev/peps/pep-0508/#names
+import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { PypiDatasource } from '../../datasource/pypi';
+import { logger } from '../../logger';
 import { newlineRegex, regEx } from '../../util/regex';
-import pep440 from '../../versioning/pep440';
-import type { PackageDependency, PackageFile, Result } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 
 function getSectionName(str: string): string {
   const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || [];
@@ -25,64 +27,80 @@ function getDepType(section: string, record: string): null | string {
       return 'test';
     }
   }
-  return 'extra';
-}
-
-function parseDep(
-  line: string,
-  section: string,
-  record: string
-): PackageDependency | null {
-  const [, depName, , currentValue] =
-    regEx(/\s+([-_a-zA-Z0-9]*)(\[.*\])?\s*(.*)/).exec(line) || [];
-  if (
-    section &&
-    record &&
-    depName &&
-    currentValue &&
-    pep440.isValid(currentValue)
-  ) {
-    const dep: PackageDependency = {
-      datasource: PypiDatasource.id,
-      depName,
-      currentValue,
-    };
-    const depType = getDepType(section, record);
-    if (depType) {
-      dep.depType = depType;
-    }
-    return dep;
+  if (section === 'options.extras_require') {
+    return 'extra';
   }
-  return null;
+  return undefined;
 }
 
-export function extractPackageFile(
-  content: string
-): Result<PackageFile | null> {
+export const packagePattern =
+  '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
+const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
+
+const rangePattern: string = RANGE_PATTERN;
+const specifierPartPattern = `\\s*${rangePattern.replace(
+  regEx(/\?<\w+>/g),
+  '?:'
+)}`;
+const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
+export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+
+export function extractPackageFile(content: string): PackageFile | null {
+  logger.trace('setup-cfg.extractPackageFile()');
+
   let sectionName = null;
   let sectionRecord = null;
 
-  const deps: PackageDependency[] = [];
-  content
+  const pkgRegex = regEx(`^(${packagePattern})$`);
+  const pkgValRegex = regEx(`^${dependencyPattern}$`);
+
+  const deps = content
     .split(newlineRegex)
-    .map((line) => line.replace(regEx(/[;#].*$/), '').trimRight())
-    .forEach((rawLine) => {
+    .map((rawLine) => {
+      let dep: PackageDependency = {};
       let line = rawLine;
       const newSectionName = getSectionName(line);
       const newSectionRecord = getSectionRecord(line);
       if (newSectionName) {
         sectionName = newSectionName;
-      } else {
-        if (newSectionRecord) {
-          sectionRecord = newSectionRecord;
-          line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
-        }
-        const dep = parseDep(line, sectionName, sectionRecord);
-        if (dep) {
-          deps.push(dep);
-        }
       }
-    });
+      if (newSectionRecord) {
+        sectionRecord = newSectionRecord;
+        // Propably there are also requirements in this line. Strip the sectionRecord.
+        line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
+      }
 
-  return deps.length > 0 ? { deps } : null;
+      const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
+      const packageMatches =
+        pkgValRegex.exec(lineNoEnvMarkers) || pkgRegex.exec(lineNoEnvMarkers);
+
+      if (!packageMatches) {
+        return null;
+      }
+
+      const depType = getDepType(sectionName, sectionRecord);
+      if (!depType) {
+        return null;
+      }
+
+      const [, depName, , currVal] = packageMatches;
+      const currentValue = currVal?.trim();
+
+      dep = {
+        ...dep,
+        depName,
+        currentValue,
+        datasource: PypiDatasource.id,
+        depType: depType,
+      };
+
+      if (currentValue?.startsWith('==')) {
+        dep.currentVersion = currentValue.replace(/^==\s*/, '');
+      }
+
+      return dep;
+    })
+    .filter(Boolean);
+
+  return deps.length ? { deps } : null;
 }

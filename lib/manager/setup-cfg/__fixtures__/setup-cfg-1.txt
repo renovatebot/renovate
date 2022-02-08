@@ -15,6 +15,7 @@ install_requires =
     python-dateutil ~=2.1
     docopt ~=0.4
     fs ~=2.1
+    nmspc.pkg ==1.0
 
     requests[security] ~=2.18
 
