@@ -43,6 +43,11 @@ export const customRegistrySupport = true;
 export const defaultVersioning = dockerVersioningId;
 export const registryStrategy = 'first';
 
+function isDockerHost(host: string): boolean {
+  const regex = regEx(/(?:^|\.)docker\.io$/);
+  return regex.test(host);
+}
+
 async function getECRAuthToken(
   region: string,
   opts: HostRule
@@ -200,14 +205,12 @@ export async function getAuthHeaders(
       logger.debug({ err });
       return null;
     }
-    // prettier-ignore
-    if (err.name === 'RequestError' && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-        throw new ExternalHostError(err);
-      }
-    // prettier-ignore
-    if (err.statusCode === 429 && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-        throw new ExternalHostError(err);
-      }
+    if (err.name === 'RequestError' && isDockerHost(registryHost)) {
+      throw new ExternalHostError(err);
+    }
+    if (err.statusCode === 429 && isDockerHost(registryHost)) {
+      throw new ExternalHostError(err);
+    }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
@@ -337,8 +340,7 @@ export async function getManifestResponse(
       );
       return null;
     }
-    // prettier-ignore
-    if (err.statusCode === 429 && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (err.statusCode === 429 && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
@@ -491,10 +493,7 @@ export async function getLabels(
         },
         'Config Manifest is unknown'
       );
-    } else if (
-      err.statusCode === 429 &&
-      registryHost.endsWith('docker.io') // lgtm [js/incomplete-url-substring-sanitization]
-    ) {
+    } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.debug(
@@ -677,7 +676,7 @@ async function getTags(
       return getTags(registryHost, 'library/' + dockerRepository);
     }
     // prettier-ignore
-    if (err.statusCode === 429 && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (err.statusCode === 429 && isDockerHost(registryHost)) {
       logger.warn(
         { registryHost, dockerRepository, err },
         'docker registry failure: too many requests'
@@ -685,7 +684,7 @@ async function getTags(
       throw new ExternalHostError(err);
     }
     // prettier-ignore
-    if (err.statusCode === 401 && registryHost.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (err.statusCode === 401 && isDockerHost(registryHost)) {
       logger.warn(
         { registryHost, dockerRepository, err },
         'docker registry failure: unauthorized'
