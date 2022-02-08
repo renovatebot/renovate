@@ -11,7 +11,10 @@ describe('manager/setup-cfg/extract', () => {
       expect(res).toMatchSnapshot({
         deps: [
           { depName: 'coloredlogs', currentValue: '~=14.0' },
+          { depName: 'quux', currentValue: '>=5.5.5' },
           { depName: 'python-dateutil', currentValue: '~=2.1' },
+          { depName: 'foo', currentValue: '>=1.1.1' },
+          { depName: 'baz', currentValue: '>=3.3.3.' },
           { depName: 'docopt', currentValue: '~=0.4' },
           { depName: 'fs', currentValue: '~=2.1' },
           { depName: 'nmspc.pkg', currentValue: '==1.0' },
@@ -23,6 +26,8 @@ describe('manager/setup-cfg/extract', () => {
           { depName: 'verboselogs', currentValue: '~=1.7' },
           { depName: 'piexif', currentValue: undefined },
           { depName: 'Pillow', currentValue: undefined },
+          { depName: 'bar', currentValue: '>=2.2.2' },
+          { depName: 'qux', currentValue: '>=4.4.4' },
           { depName: 'contexter', currentValue: '~=0.1' },
           { depName: 'mock', currentValue: '~=2.0' },
           { depName: 'parameterized', currentValue: '~=0.6' },

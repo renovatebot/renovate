@@ -91,24 +91,28 @@ export function extractPackageFile(
   let sectionRecord = null;
 
   const deps: PackageDependency[] = [];
-  content.split(newlineRegex).map((rawLine) => {
-    let line = rawLine;
-    const newSectionName = getSectionName(line);
-    const newSectionRecord = getSectionRecord(line);
-    if (newSectionName) {
-      sectionName = newSectionName;
-    }
-    if (newSectionRecord) {
-      sectionRecord = newSectionRecord;
-      // Propably there are also requirements in this line. Strip the sectionRecord.
-      line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
-    }
 
-    const dep = parseDep(line, sectionName, sectionRecord);
-    if (dep) {
-      deps.push(dep);
-    }
-  });
+  content
+    .split(newlineRegex)
+    .map((line) => line.replace(regEx(/[;#].*$/), '').trimEnd())
+    .forEach((rawLine) => {
+      let line = rawLine;
+      const newSectionName = getSectionName(line);
+      const newSectionRecord = getSectionRecord(line);
+      if (newSectionName) {
+        sectionName = newSectionName;
+      }
+      if (newSectionRecord) {
+        sectionRecord = newSectionRecord;
+        // Propably there are also requirements in this line. Strip the sectionRecord.
+        line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
+      }
+
+      const dep = parseDep(line, sectionName, sectionRecord);
+      if (dep) {
+        deps.push(dep);
+      }
+    });
 
   return deps.length ? { deps } : null;
 }

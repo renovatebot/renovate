@@ -10,9 +10,27 @@ Object {
       "depType": "install",
     },
     Object {
+      "currentValue": ">=5.5.5",
+      "datasource": "pypi",
+      "depName": "quux",
+      "depType": "install",
+    },
+    Object {
       "currentValue": "~=2.1",
       "datasource": "pypi",
       "depName": "python-dateutil",
+      "depType": "install",
+    },
+    Object {
+      "currentValue": ">=1.1.1",
+      "datasource": "pypi",
+      "depName": "foo",
+      "depType": "install",
+    },
+    Object {
+      "currentValue": ">=3.3.3.",
+      "datasource": "pypi",
+      "depName": "baz",
       "depType": "install",
     },
     Object {
@@ -80,6 +98,18 @@ Object {
       "currentValue": undefined,
       "datasource": "pypi",
       "depName": "Pillow",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": ">=2.2.2",
+      "datasource": "pypi",
+      "depName": "bar",
+      "depType": "extra",
+    },
+    Object {
+      "currentValue": ">=4.4.4",
+      "datasource": "pypi",
+      "depName": "qux",
       "depType": "extra",
     },
     Object {
