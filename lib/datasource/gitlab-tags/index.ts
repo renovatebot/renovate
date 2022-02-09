@@ -59,16 +59,16 @@ export class GitlabTagsDatasource extends Datasource {
     return dependency;
   }
 
+  /**
+   * gitlab.getDigest
+   *
+   * Returs the latest commit hash of the repository.
+   */
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
       `${getDepHost(registryUrl)}:${lookupName}`,
   })
-  /**
-   * gitlab.getDigest
-   *
-   * This function will simply return the latest commit hash for the configured repository.
-   */
   override async getDigest(
     { lookupName: repo, registryUrl }: Partial<DigestConfig>,
     newValue?: string
