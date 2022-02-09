@@ -8,7 +8,7 @@ describe('datasource/gitlab-tags/util', () => {
         'https://gitlab.domain.test'
       );
       expect(getDepHost('https://domain.test/gitlab/api/v4')).toBe(
-        'https://domain.test/gitlab/'
+        'https://domain.test/gitlab'
       );
     });
   });
