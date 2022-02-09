@@ -14,7 +14,7 @@ function getFutureVersion(
   const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
   let found = false;
   const futureRelease = baseRelease.map((basePart, index) => {
-    if (found) {
+    if (found && toRelease[index] < 1) {
       return 0;
     }
     const toPart = toRelease[index] || 0;
@@ -146,8 +146,8 @@ export function getNewValue({
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
   }
-
-  if (!satisfies(newVersion, result)) {
+  const checkedResult = checkRangeAndRemoveUnnecessaryRangeLimit(result);
+  if (!satisfies(newVersion, checkedResult)) {
     // we failed at creating the range
     logger.warn(
       { result, newVersion, currentValue },
@@ -155,8 +155,59 @@ export function getNewValue({
     );
     return null;
   }
-
+  if (checkedResult) {
+    return checkedResult;
+  }
   return result;
+}
+
+export function checkRangeAndRemoveUnnecessaryRangeLimit(
+  rangeInput: string
+): string {
+  `this function checks if contains 2 ranges with operator '==' and '>=='
+  if yes the function will compare the 2 ranges and if one ranges contains the second range
+  the function will exclude the unnecessary range.`;
+  let firstRangePart;
+  let secondRangePart;
+  let futureRelease;
+  let found = false;
+  if (rangeInput.includes(',')) {
+    const newRes = rangeInput.split(',');
+    if (newRes[0].includes('==') || newRes[0].includes('>=')) {
+      firstRangePart = parseRange(newRes[0]);
+    }
+    if (newRes[1].includes('==') || newRes[1].includes('>=')) {
+      secondRangePart = parseRange(newRes[1]);
+    }
+    if (firstRangePart === undefined || secondRangePart === undefined) {
+      return rangeInput;
+    }
+    if (firstRangePart) {
+      const first: number[] =
+        parseVersion(firstRangePart[0].version)?.release ?? [];
+      const second: number[] =
+        parseVersion(secondRangePart[0].version)?.release ?? [];
+      futureRelease = first.map((basePart, index) => {
+        const toPart = second[index];
+        if (found) {
+          return basePart;
+        }
+        if (toPart < basePart) {
+          found = true;
+          return basePart;
+        }
+        return toPart;
+      });
+    }
+  }
+  if (futureRelease) {
+    if (futureRelease.length === 2) {
+      return firstRangePart[0].operator.concat(futureRelease.join('.'), '.*');
+    } else {
+      return firstRangePart[0].operator.concat(futureRelease.join('.'));
+    }
+  }
+  return rangeInput;
 }
 
 export function isLessThanRange(input: string, range: string): boolean {

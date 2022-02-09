@@ -191,4 +191,35 @@ describe('versioning/pep440/index', () => {
       expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
+
+  test.each`
+    currentValue         | rangeStrategy | currentVersion | newVersion | expected
+    ${'==3.2.*,>=3.2.2'} | ${'replace'}  | ${'3.2.2'}     | ${'4.1.1'} | ${'==4.1.*'}
+    ${'==3.2.*,>=3.2.2'} | ${'replace'}  | ${'3.2.2'}     | ${'4.0.0'} | ${'==4.0.*'}
+    ${'>=1.0.0,<1.1.0'}  | ${'replace'}  | ${'1.0.0'}     | ${'1.2.0'} | ${'>=1.0.0,<1.3.0'}
+  `(
+    'getNewValueBug("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      const res = pep440.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+      expect(res).toEqual(expected);
+    }
+  );
+
+  test.each`
+    rangeInput           | expected
+    ${'==4.1.*,>=3.2.2'} | ${'==4.1.*'}
+    ${'==4.0.*,>=3.2.2'} | ${'==4.0.*'}
+    ${'~=1.2.3,!=1.1.1'} | ${'~=1.2.3,!=1.1.1'}
+    ${'==7.2.*'}         | ${'==7.2.*'}
+    ${'==7.2.8'}         | ${'==7.2.8'}
+    ${'==7.2.8,>=7.2.2'} | ${'==7.2.8'}
+  `('checkRange("rangeInput") === "$expected"', ({ rangeInput, expected }) => {
+    const res = pep440.checkRange(rangeInput);
+    expect(res).toEqual(expected);
+  });
 });

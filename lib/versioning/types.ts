@@ -32,6 +32,8 @@ export interface VersioningApi {
   matches(version: string, range: string | Range): boolean;
 
   valueToVersion?(version: string): string;
+
+  checkRange(rangeInput: string): string;
 }
 
 export interface VersioningApiConstructor {
