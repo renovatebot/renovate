@@ -1,10 +1,6 @@
 import * as pep440 from '@renovatebot/pep440';
 import type { VersioningApi } from '../types';
-import {
-  checkRangeAndRemoveUnnecessaryRangeLimit,
-  getNewValue,
-  isLessThanRange,
-} from './range';
+import { getNewValue, isLessThanRange } from './range';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';
@@ -87,7 +83,6 @@ export const api: VersioningApi = {
   getNewValue,
   sortVersions,
   isLessThanRange,
-  checkRange: checkRangeAndRemoveUnnecessaryRangeLimit,
 };
 
 export default api;

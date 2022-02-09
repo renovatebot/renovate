@@ -194,17 +194,4 @@ describe('versioning/pep440/index', () => {
       expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
-
-  test.each`
-    rangeInput           | expected
-    ${'==4.1.*,>=3.2.2'} | ${'==4.1.*'}
-    ${'==4.0.*,>=3.2.2'} | ${'==4.0.*'}
-    ${'~=1.2.3,!=1.1.1'} | ${'~=1.2.3,!=1.1.1'}
-    ${'==7.2.*'}         | ${'==7.2.*'}
-    ${'==7.2.8'}         | ${'==7.2.8'}
-    ${'==7.2.8,>=7.2.2'} | ${'==7.2.8'}
-  `('checkRange("rangeInput") === "$expected"', ({ rangeInput, expected }) => {
-    const res = pep440.checkRange(rangeInput);
-    expect(res).toEqual(expected);
-  });
 });

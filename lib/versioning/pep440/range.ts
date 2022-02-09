@@ -161,12 +161,12 @@ export function getNewValue({
   return result;
 }
 
+/*this function checks if contains 2 ranges with operator '==' and '>='
+  if yes the function will compare the 2 ranges and if one ranges contains the second range
+  the function will exclude the unnecessary range.*/
 export function checkRangeAndRemoveUnnecessaryRangeLimit(
   rangeInput: string
 ): string {
-  `this function checks if contains 2 ranges with operator '==' and '>=='
-  if yes the function will compare the 2 ranges and if one ranges contains the second range
-  the function will exclude the unnecessary range.`;
   let firstRangePart;
   let secondRangePart;
   let futureRelease;
