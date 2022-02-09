@@ -6,7 +6,7 @@ import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
-import { parseIndexDir } from '../sbt-plugin/util';
+import { normalizeRootRelativeUrls, parseIndexDir } from '../sbt-plugin/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'sbt-package';
@@ -20,10 +20,8 @@ export async function getArtifactSubdirs(
   artifact: string,
   scalaVersion: string
 ): Promise<string[] | null> {
-  const { body: indexContent } = await downloadHttpProtocol(
-    ensureTrailingSlash(searchRoot),
-    'sbt'
-  );
+  const pkgUrl = ensureTrailingSlash(searchRoot);
+  const { body: indexContent } = await downloadHttpProtocol(pkgUrl, 'sbt');
   if (indexContent) {
     const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, (x) => {
@@ -38,7 +36,8 @@ export async function getArtifactSubdirs(
         }
         return x.startsWith(`${artifact}_`);
       });
-    let artifactSubdirs = parseSubdirs(indexContent);
+    const normalizedContent = normalizeRootRelativeUrls(indexContent, pkgUrl);
+    let artifactSubdirs = parseSubdirs(normalizedContent);
     if (
       scalaVersion &&
       artifactSubdirs.includes(`${artifact}_${scalaVersion}`)
@@ -60,12 +59,11 @@ export async function getPackageReleases(
     const parseReleases = (content: string): string[] =>
       parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
     for (const searchSubdir of artifactSubdirs) {
-      const { body: content } = await downloadHttpProtocol(
-        ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
-        'sbt'
-      );
+      const pkgUrl = ensureTrailingSlash(`${searchRoot}/${searchSubdir}`);
+      const { body: content } = await downloadHttpProtocol(pkgUrl, 'sbt');
       if (content) {
-        const subdirReleases = parseReleases(content);
+        const normalizedContent = normalizeRootRelativeUrls(content, pkgUrl);
+        const subdirReleases = parseReleases(normalizedContent);
         subdirReleases.forEach((x) => releases.push(x));
       }
     }
