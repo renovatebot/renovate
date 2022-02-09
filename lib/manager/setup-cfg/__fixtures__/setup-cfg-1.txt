@@ -16,6 +16,7 @@ install_requires =
     nmspc.pkg ==1.0
 
     requests[security] ~=2.18
+    compact~=1.2.3;python>'3.10'
 
 setup_requires =
     six ~=1.4

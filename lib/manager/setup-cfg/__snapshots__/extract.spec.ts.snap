@@ -78,6 +78,12 @@ Object {
       "depType": "install",
     },
     Object {
+      "currentValue": "~=1.2.3",
+      "datasource": "pypi",
+      "depName": "compact",
+      "depType": "install",
+    },
+    Object {
       "currentValue": "~=1.4",
       "datasource": "pypi",
       "depName": "six",
