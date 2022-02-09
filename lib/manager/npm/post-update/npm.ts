@@ -96,10 +96,7 @@ export async function generateLockFile(
     }
 
     // TODO: don't assume package-lock.json is in the same directory
-    const localDir = GlobalConfig.get('localDir');
-    // Get lockFileName relative to localDir
-    const subDir = cwd.replace(localDir, '');
-    const lockFileName = upath.join(subDir, filename);
+    const lockFileName = upath.join(cwd, filename);
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(

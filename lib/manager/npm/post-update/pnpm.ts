@@ -15,8 +15,7 @@ export async function generateLockFile(
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const subDir = cwd.replace(GlobalConfig.get('localDir'), '');
-  const lockFileName = upath.join(subDir, 'pnpm-lock.yaml');
+  const lockFileName = upath.join(cwd, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
