@@ -94,7 +94,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/drewm/mailchimp-api.json",
+    "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
   },
 ]
 `;
@@ -119,7 +119,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/vendor/package-name.json",
+    "url": "https://packagist.org/p2/vendor/package-name.json",
   },
 ]
 `;
@@ -144,7 +144,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/drewm/mailchip-api.json",
+    "url": "https://packagist.org/p2/drewm/mailchip-api.json",
   },
 ]
 `;
@@ -179,7 +179,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/some/other.json",
+    "url": "https://packagist.org/p2/some/other.json",
   },
 ]
 `;
@@ -204,7 +204,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/some/other.json",
+    "url": "https://packagist.org/p2/some/other.json",
   },
 ]
 `;
@@ -229,7 +229,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/vendor/package-name2.json",
+    "url": "https://packagist.org/p2/vendor/package-name2.json",
   },
 ]
 `;
@@ -328,7 +328,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p/drewm/mailchimp-api.json",
+    "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
   },
 ]
 `;
