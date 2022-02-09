@@ -2,7 +2,8 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
-import { git, loadFixture, mocked } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
+import { git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
@@ -31,15 +32,6 @@ const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
-
-const requirementsNoHeaders = loadFixture('requirementsNoHeaders.txt');
-const requirementsWithHashes = loadFixture('requirementsWithHashes.txt');
-const requirementsWithUnknownArguments = loadFixture(
-  'requirementsWithUnknownArguments.txt'
-);
-const requirementsWithExploitingArguments = loadFixture(
-  'requirementsWithExploitingArguments.txt'
-);
 
 describe('manager/pip-compile/artifacts', () => {
   beforeEach(() => {
@@ -171,20 +163,20 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   describe('constructPipCompileCmd()', () => {
-    it('returns default cmd for garbish', () => {
+    it('returns default cmd for garbage', () => {
       expect(
         pipCompile.constructPipCompileCmd(
-          requirementsNoHeaders,
+          Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
         )
       ).toBe('pip-compile requirements.in');
     });
 
-    it('returns extracts common arguments (like featured in README)', () => {
+    it('returns extracted common arguments (like those featured in the README)', () => {
       expect(
         pipCompile.constructPipCompileCmd(
-          requirementsWithHashes,
+          Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
         )
@@ -196,7 +188,7 @@ describe('manager/pip-compile/artifacts', () => {
     it('skips unknown arguments', () => {
       expect(
         pipCompile.constructPipCompileCmd(
-          requirementsWithUnknownArguments,
+          Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
         )
@@ -206,7 +198,7 @@ describe('manager/pip-compile/artifacts', () => {
     it('skips exploitable subcommands and files', () => {
       expect(
         pipCompile.constructPipCompileCmd(
-          requirementsWithExploitingArguments,
+          Fixtures.get('requirementsWithExploitingArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
         )
