@@ -1,5 +1,5 @@
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
-import { getSourceUrl as githubSourceUrl } from '../github-releases/common';
+import { getSourceUrl as githubSourceUrl } from '../github-releases';
 import { id as githubDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
