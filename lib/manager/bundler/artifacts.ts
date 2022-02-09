@@ -5,7 +5,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';

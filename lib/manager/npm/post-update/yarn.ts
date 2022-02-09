@@ -21,7 +21,7 @@ import {
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
-import { GenerateLockFileResult } from './types';
+import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
   cwd: string

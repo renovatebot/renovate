@@ -1,7 +1,11 @@
 import url from 'url';
 import type { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
-import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
+import type {
+  HttpOptions,
+  HttpPostOptions,
+  HttpResponse,
+} from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';

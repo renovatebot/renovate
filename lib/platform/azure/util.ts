@@ -6,9 +6,9 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../logger';
 import { HostRule, PrState } from '../../types';
-import { GitOptions } from '../../types/git';
+import type { GitOptions } from '../../types/git';
 import { addSecretForSanitizing } from '../../util/sanitize';
-import { AzurePr } from './types';
+import type { AzurePr } from './types';
 
 export function getNewBranchName(branchName?: string): string {
   if (branchName && !branchName.startsWith('refs/heads/')) {
