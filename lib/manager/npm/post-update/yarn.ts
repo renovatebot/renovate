@@ -13,10 +13,10 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { exists, readFile, remove, writeFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
-import { GenerateLockFileResult } from './types';
+import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
   cwd: string
@@ -27,11 +27,11 @@ export async function checkYarnrc(
     const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
-        .split('\n')
+        .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
       offlineMirror = !!mirrorLine;
       const pathLine = yarnrc
-        .split('\n')
+        .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');

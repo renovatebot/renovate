@@ -152,10 +152,37 @@ export async function updateArtifacts({
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
-    const massagedGoMod = newGoModContent.replace(
-      regEx(/\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g),
-      '\n// renovate-replace $1'
+    // Regex match inline replace directive, example:
+    // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+    // https://go.dev/ref/mod#go-mod-file-replace
+    const inlineReplaceRegEx = regEx(
+      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
     );
+
+    // $1 will be matched with the (\r?n) group
+    // $2 will be matched with the inline replace match, example
+    // "// renovate-replace replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5"
+    const inlineCommentOut = '$1// renovate-replace $2';
+
+    // Regex match replace directive block, example:
+    // replace (
+    //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+    // )
+    const blockReplaceRegEx = regEx(/(\r?\n)replace\s*\([^)]+\s*\)/g);
+
+    /**
+     * replacerFunction for commenting out replace blocks
+     * @param match A string representing a golang replace directive block
+     * @returns A commented out block with // renovate-replace
+     */
+    const blockCommentOut = (match): string =>
+      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+
+    // Comment out golang replace directives
+    const massagedGoMod = newGoModContent
+      .replace(inlineReplaceRegEx, inlineCommentOut)
+      .replace(blockReplaceRegEx, blockCommentOut);
+
     if (massagedGoMod !== newGoModContent) {
       logger.debug('Removed some relative replace statements from go.mod');
     }
@@ -184,7 +211,7 @@ export async function updateArtifacts({
 
     const execCommands = [];
 
-    let args = 'get -d ./...';
+    let args = 'get -d -t ./...';
     logger.debug({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 

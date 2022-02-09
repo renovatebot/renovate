@@ -444,10 +444,6 @@ export function migrateConfig(
         }
       }
     }
-    if (migratedConfig.endpoints) {
-      migratedConfig.hostRules = migratedConfig.endpoints;
-      delete migratedConfig.endpoints;
-    }
     if (is.array(migratedConfig.packageRules)) {
       const renameMap = {
         paths: 'matchPaths',

@@ -4,7 +4,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
@@ -73,6 +73,7 @@ export function generateBranchConfig(
   const depNames: string[] = [];
   const newValue: string[] = [];
   const toVersions: string[] = [];
+  const toValues = new Set<string>();
   branchUpgrades.forEach((upg) => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
@@ -80,6 +81,7 @@ export function generateBranchConfig(
     if (!toVersions.includes(upg.newVersion)) {
       toVersions.push(upg.newVersion);
     }
+    toValues.add(upg.newValue);
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
@@ -146,8 +148,9 @@ export function generateBranchConfig(
     delete upgrade.group;
 
     // istanbul ignore else
-    if (toVersions.length > 1 && !typesGroup) {
+    if (toVersions.length > 1 && toValues.size > 1 && !typesGroup) {
       logger.trace({ toVersions });
+      logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
     } else if (newValue.length > 1 && upgrade.isDigest) {
@@ -195,7 +198,7 @@ export function generateBranchConfig(
     );
     if (upgrade.toLowerCase) {
       // We only need to lowercase the first line
-      const splitMessage = upgrade.commitMessage.split('\n');
+      const splitMessage = upgrade.commitMessage.split(newlineRegex);
       splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');
     }
@@ -225,7 +228,7 @@ export function generateBranchConfig(
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
-      [upgrade.prTitle] = upgrade.commitMessage.split('\n');
+      [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
     }
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {

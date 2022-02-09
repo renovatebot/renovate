@@ -1,5 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/npm/update/locked-dependency/package-lock/get-locked getLockedDependencies() finds bundled dependency 1`] = `
+Array [
+  Object {
+    "bundled": true,
+    "dev": true,
+    "integrity": "sha1-7QMXwyIGT3lGbAKWa922Bas32Zg=",
+    "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-3.0.0.tgz",
+    "version": "3.0.0",
+  },
+]
+`;
+
 exports[`manager/npm/update/locked-dependency/package-lock/get-locked getLockedDependencies() finds direct dependency 1`] = `
 Array [
   Object {

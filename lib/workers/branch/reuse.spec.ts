@@ -1,5 +1,5 @@
 import { git, platform } from '../../../test/util';
-import { Pr } from '../../platform';
+import type { Pr } from '../../platform';
 import { PrState } from '../../types';
 import type { BranchConfig } from '../types';
 import { shouldReuseExistingBranch } from './reuse';
@@ -52,6 +52,11 @@ describe('workers/branch/reuse', () => {
         {
           packageFile: 'package.json',
           rangeStrategy: 'update-lockfile',
+          branchName: 'current',
+        },
+        {
+          packageFile: 'package.json',
+          rangeStrategy: 'in-range-only',
           branchName: 'current',
         },
       ];

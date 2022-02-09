@@ -39,11 +39,11 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$');
   // * matches the versioning approach used by the Bitnami images on DockerHub:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$');
-  private _config: RegExp = null;
+  private _config: RegExp | null = null;
 
-  constructor(_new_config: string) {
+  constructor(_new_config: string | undefined) {
     super();
-    const new_config = _new_config || '^(?<major>\\d+)?$';
+    const new_config = _new_config ?? '^(?<major>\\d+)?$';
 
     // without at least one of {major, minor, patch} specified in the regex,
     // this versioner will not work properly
@@ -66,39 +66,46 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   // convenience method for passing a string into a Version given current config.
   protected _parse(version: string): RegExpVersion | null {
-    const match = this._config.exec(version);
-    if (match === null) {
+    const groups = this._config?.exec(version)?.groups;
+    if (!groups) {
       return null;
     }
 
-    const groups = match.groups;
+    const { major, minor, patch, build, prerelease, compatibility } = groups;
     const release = [
-      typeof groups.major === 'undefined' ? 0 : Number(groups.major),
-      typeof groups.minor === 'undefined' ? 0 : Number(groups.minor),
-      typeof groups.patch === 'undefined' ? 0 : Number(groups.patch),
+      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
     ];
 
-    if (groups.build) {
-      release.push(Number(groups.build));
+    if (build) {
+      release.push(Number.parseInt(build, 10));
     }
 
     return {
       release,
-      prerelease: groups.prerelease,
-      compatibility: groups.compatibility,
+      prerelease: prerelease,
+      compatibility: compatibility,
     };
   }
 
   override isCompatible(version: string, current: string): boolean {
-    return (
-      this._parse(version).compatibility === this._parse(current).compatibility
+    const parsedVersion = this._parse(version);
+    const parsedCurrent = this._parse(current);
+    return !!(
+      parsedVersion &&
+      parsedCurrent &&
+      parsedVersion.compatibility === parsedCurrent.compatibility
     );
   }
 
   override isLessThanRange(version: string, range: string): boolean {
-    return semver.ltr(
-      asSemver(this._parse(version)),
-      asSemver(this._parse(range))
+    const parsedVersion = this._parse(version);
+    const parsedRange = this._parse(range);
+    return !!(
+      parsedVersion &&
+      parsedRange &&
+      semver.ltr(asSemver(parsedVersion), asSemver(parsedRange))
     );
   }
 
@@ -106,26 +113,41 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     versions: string[],
     range: string
   ): string | null {
-    return semver.maxSatisfying(
-      versions.map((v) => asSemver(this._parse(v))),
-      asSemver(this._parse(range))
-    );
+    const parsedRange = this._parse(range);
+    return parsedRange
+      ? semver.maxSatisfying(
+          versions
+            .map((v) => this._parse(v))
+            .filter(is.truthy)
+            .map(asSemver),
+          asSemver(parsedRange)
+        )
+      : null;
   }
 
   override minSatisfyingVersion(
     versions: string[],
     range: string
   ): string | null {
-    return semver.minSatisfying(
-      versions.map((v) => asSemver(this._parse(v))),
-      asSemver(this._parse(range))
-    );
+    const parsedRange = this._parse(range);
+    return parsedRange
+      ? semver.minSatisfying(
+          versions
+            .map((v) => this._parse(v))
+            .filter(is.truthy)
+            .map(asSemver),
+          asSemver(parsedRange)
+        )
+      : null;
   }
 
   override matches(version: string, range: string): boolean {
-    return semver.satisfies(
-      asSemver(this._parse(version)),
-      asSemver(this._parse(range))
+    const parsedVersion = this._parse(version);
+    const parsedRange = this._parse(range);
+    return !!(
+      parsedVersion &&
+      parsedRange &&
+      semver.satisfies(asSemver(parsedVersion), asSemver(parsedRange))
     );
   }
 }

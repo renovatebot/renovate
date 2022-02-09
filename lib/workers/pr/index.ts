@@ -328,8 +328,12 @@ export async function ensurePr(
 
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
-    const notesSourceUrl =
-      upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl || upgrade.sourceUrl;
+    let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
+    if (!notesSourceUrl) {
+      notesSourceUrl = `${upgrade.sourceUrl}${
+        upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+      }`;
+    }
 
     if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {
@@ -354,6 +358,7 @@ export async function ensurePr(
         !existingPr.hasAssignees &&
         !existingPr.hasReviewers &&
         config.automerge &&
+        !config.assignAutomerge &&
         (await getBranchStatus()) === BranchStatus.red
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);

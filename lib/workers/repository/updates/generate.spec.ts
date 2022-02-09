@@ -224,6 +224,86 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
+    it('groups multiple upgrades different version but same value', () => {
+      const branch = [
+        {
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0',
+          newVersion: '6.0.3',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+        },
+        {
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0',
+          newVersion: '6.0.1',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeUndefined();
+      expect(res.recreateClosed).toBeUndefined();
+      expect(res.groupName).toBeDefined();
+      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
+    });
+    it('groups multiple upgrades different value but same version', () => {
+      const branch = [
+        {
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0.1',
+          newVersion: '6.0.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+        },
+        {
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0.0',
+          newVersion: '6.0.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeUndefined();
+      expect(res.recreateClosed).toBeUndefined();
+      expect(res.groupName).toBeDefined();
+      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
+    });
     it('groups multiple digest updates', () => {
       const branch = [
         {

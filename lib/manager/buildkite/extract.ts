@@ -1,14 +1,14 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
-import { regEx } from '../../util/regex';
+import type { SkipReason } from '../../types';
+import { newlineRegex, regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     let isPluginsSection = false;
     let pluginsIndent = '';
     for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {
