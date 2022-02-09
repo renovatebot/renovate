@@ -15,14 +15,20 @@ export function findDepConstraints(
 ): ParentDependency[] {
   let parents: ParentDependency[] = [];
   let packageJsonConstraint = packageJson.dependencies?.[depName];
-  if (packageJsonConstraint) {
+  if (
+    packageJsonConstraint &&
+    semver.matches(currentVersion, packageJsonConstraint)
+  ) {
     parents.push({
       depType: 'dependencies',
       constraint: packageJsonConstraint,
     });
   }
   packageJsonConstraint = packageJson.devDependencies?.[depName];
-  if (packageJsonConstraint) {
+  if (
+    packageJsonConstraint &&
+    semver.matches(currentVersion, packageJsonConstraint)
+  ) {
     parents.push({
       depType: 'devDependencies',
       constraint: packageJsonConstraint,
