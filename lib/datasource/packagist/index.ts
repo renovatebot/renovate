@@ -190,23 +190,21 @@ function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
-  //check in apiv2 subdirectory first
   const cacheNamespace = 'datasource-packagist-org-v2';
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     name
   );
-  //if found return result
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
-  //else fetch new result + store in apiv2 sub-dir + return result
+
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p2/${name}.json`);
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
-    //might need to update this
     dep = extractDepReleases(res);
     logger.trace({ dep }, 'dep');
   }
