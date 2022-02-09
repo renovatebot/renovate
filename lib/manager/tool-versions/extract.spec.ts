@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../test/util';
+import { Fixture } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
 const toolVersions = loadFixture('.tool-versions');
