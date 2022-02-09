@@ -1,19 +1,5 @@
-import { Fixture } from '../../../test/fixtures';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
-
-const toolVersions = loadFixture('.tool-versions');
-const toolVersionsInvalid = loadFixture('.tool-versions-invalid');
-const toolVersionsUnsupportedDatasource = loadFixture(
-  '.tool-versions-unsupported-datasource'
-);
-const toolVersionsUnsupportedVersion = loadFixture(
-  '.tool-versions-unsupported-version'
-);
-const toolVersionsWithComments = loadFixture('.tool-versions-with-comments');
-const toolVersionsMultiple = loadFixture('.tool-versions-multiple');
-const toolVersionsWithIgnoreComments = loadFixture(
-  '.tool-versions-with-ignore-comments'
-);
 
 describe('manager/tool-versions/extract', () => {
   describe('extractPackageFile()', () => {
@@ -21,8 +7,12 @@ describe('manager/tool-versions/extract', () => {
       expect(extractPackageFile('', '.tool-versions', {})).toBeNull();
     });
 
-    it('extracts dependencies', () => {
-      const res = extractPackageFile(toolVersions, 'unused_file_name', {});
+    it('extracts dependencies for supported tools', () => {
+      const res = extractPackageFile(
+        Fixtures.get('.tool-versions'),
+        'unused_file_name',
+        {}
+      );
       expect(res).toEqual({
         deps: [
           {
@@ -46,9 +36,9 @@ describe('manager/tool-versions/extract', () => {
       });
     });
 
-    it('handles multiple version dependencies', () => {
+    it('handles multiple version fallback dependencies', () => {
       const res = extractPackageFile(
-        toolVersionsMultiple,
+        Fixtures.get('.tool-versions-multiple'),
         'unused_file_name',
         {}
       );
@@ -65,7 +55,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('handles unsupported datasources', () => {
       const res = extractPackageFile(
-        toolVersionsUnsupportedDatasource,
+        Fixtures.get('.tool-versions-unsupported-datasource'),
         'unused_file_name',
         {}
       );
@@ -81,7 +71,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('skips unsupported versions', () => {
       const res = extractPackageFile(
-        toolVersionsUnsupportedVersion,
+        Fixtures.get('.tool-versions-unsupported-version'),
         'unused_file_name',
         {}
       );
@@ -105,7 +95,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('handles invalid deps', () => {
       const res = extractPackageFile(
-        toolVersionsInvalid,
+        Fixtures.get('.tool-versions-invalid'),
         'unused_file_name',
         {}
       );
@@ -114,7 +104,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('handles comments', () => {
       const res = extractPackageFile(
-        toolVersionsWithComments,
+        Fixtures.get('.tool-versions-with-comments'),
         'unused_file_name',
         {}
       ).deps;
@@ -132,9 +122,9 @@ describe('manager/tool-versions/extract', () => {
       ]);
     });
 
-    it('ignores deps with ignore comments', () => {
+    it('skips deps with ignore comments', () => {
       const res = extractPackageFile(
-        toolVersionsWithIgnoreComments,
+        Fixtures.get('.tool-versions-with-ignore-comments'),
         'unused_file_name',
         {}
       ).deps;

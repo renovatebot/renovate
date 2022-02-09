@@ -41,7 +41,7 @@ export function extractPackageFile(
       if (parts.length < 2) {
         // Wrong line format
         logger.debug({ line }, 'Wrong/unsupported line format');
-        return false;
+        return null;
       }
 
       const depName = parts[0];

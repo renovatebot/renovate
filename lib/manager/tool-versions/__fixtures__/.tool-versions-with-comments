@@ -1,3 +1,4 @@
 ruby 2.5.3 # This is a comment
 # This is another comment
 nodejs 10.15.0
+# Full line comment
