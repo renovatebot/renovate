@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
 import type { BranchConfig } from '../../types';
 
@@ -43,7 +44,9 @@ export function getPrUpdatesTable(config: BranchConfig): string {
       try {
         // istanbul ignore else
         if (value) {
-          res[header] = template.compile(value, upgrade).replace(/^``$/, '');
+          res[header] = template
+            .compile(value, upgrade)
+            .replace(regEx(/^``$/), '');
         } else {
           res[header] = '';
         }
@@ -62,7 +65,9 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     let val = '|';
     for (const column of tableColumns) {
       const content = row[column]
-        ? row[column].replace(/^@/, '@&#8203;').replace(/\|/g, '\\|')
+        ? row[column]
+            .replace(regEx(/^@/), '@&#8203;')
+            .replace(regEx(/\|/g), '\\|')
         : '';
       val += ` ${content} |`;
     }

@@ -3,12 +3,11 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../../test/exec-util';
-import { getName } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import type { VolumeOption } from '../common';
+import type { VolumeOption } from '../types';
 import {
   generateDockerCommand,
   getDockerTag,
@@ -24,7 +23,7 @@ const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
 jest.mock('../../../datasource');
 
-describe(getName(), () => {
+describe('util/exec/docker/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -96,6 +95,16 @@ describe(getName(), () => {
       getPkgReleases.mockResolvedValueOnce({ releases } as never);
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
+    it('filters out node unstable', async () => {
+      const releases = [
+        { version: '12.0.0' },
+        { version: '13.0.1' },
+        { version: '14.0.2' },
+        { version: '15.0.2' },
+      ];
+      getPkgReleases.mockResolvedValueOnce({ releases } as never);
+      expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');
+    });
   });
 
   describe('removeDockerContainer', () => {
@@ -132,12 +141,12 @@ describe(getName(), () => {
 
   describe('removeDanglingContainers', () => {
     beforeEach(() => {
-      setAdminConfig({ binarySource: 'docker' });
+      GlobalConfig.set({ binarySource: 'docker' });
     });
 
     it('short-circuits in non-Docker environment', async () => {
       const execSnapshots = mockExecAll(exec);
-      setAdminConfig({ binarySource: 'global' });
+      GlobalConfig.set({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
     });
@@ -200,12 +209,9 @@ describe(getName(), () => {
   describe('generateDockerCommand', () => {
     const preCommands = [null, 'foo', undefined];
     const commands = ['bar'];
-    const postCommands = [undefined, 'baz', null];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';
     const dockerOptions = {
-      preCommands,
-      postCommands,
       image,
       cwd: '/tmp/foobar',
       envVars,
@@ -219,15 +225,19 @@ describe(getName(), () => {
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
       `renovate/${img} ` +
-      `bash -l -c "foo && bar && baz"`;
+      `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
-      setAdminConfig({ dockerUser: 'some-user' });
+      GlobalConfig.set({ dockerUser: 'some-user' });
     });
 
     it('returns executable command', async () => {
       mockExecAll(exec);
-      const res = await generateDockerCommand(commands, dockerOptions);
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        dockerOptions
+      );
       expect(res).toBe(command(image));
     });
 
@@ -238,7 +248,7 @@ describe(getName(), () => {
         ['/tmp/bar', `/tmp/bar`],
         ['/tmp/baz', `/home/baz`],
       ];
-      const res = await generateDockerCommand(commands, {
+      const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         volumes: [...volumes, ...volumes],
       });
@@ -252,7 +262,7 @@ describe(getName(), () => {
 
     it('handles tag parameter', async () => {
       mockExecAll(exec);
-      const res = await generateDockerCommand(commands, {
+      const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         tag: '1.2.3',
       });
@@ -268,7 +278,7 @@ describe(getName(), () => {
           { version: '2.0.0' },
         ],
       } as never);
-      const res = await generateDockerCommand(commands, {
+      const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         tagScheme: 'npm',
         tagConstraint: '^1.2.3',

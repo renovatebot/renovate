@@ -1,10 +1,16 @@
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { deleteBranch, isBranchModified } from '../../util/git';
-import { BranchConfig } from '../types';
+import {
+  deleteBranch,
+  isBranchConflicted,
+  isBranchModified,
+} from '../../util/git';
+import { resolveBranchStatus } from '../branch/status-checks';
+import type { BranchConfig } from '../types';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum PrAutomergeBlockReason {
   BranchModified = 'BranchModified',
   BranchNotGreen = 'BranchNotGreen',
@@ -30,30 +36,32 @@ export async function checkAutoMerge(
     automergeType,
     automergeStrategy,
     automergeComment,
-    requiredStatusChecks,
+    ignoreTests,
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
-  if (pr.isConflicted) {
+  const isConflicted =
+    config.isConflicted ??
+    (await isBranchConflicted(config.baseBranch, config.branchName));
+  if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.Conflicted,
     };
   }
-  if (requiredStatusChecks && pr.canMerge !== true) {
+  if (!ignoreTests && pr.cannotMergeReason) {
     logger.debug(
-      { canMergeReason: pr.canMergeReason },
-      'PR is not ready for merge'
+      `Platform reported that PR is not ready for merge. Reason: [${pr.cannotMergeReason}]`
     );
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.PlatformNotReady,
     };
   }
-  const branchStatus = await platform.getBranchStatus(
-    branchName,
-    requiredStatusChecks
+  const branchStatus = await resolveBranchStatus(
+    config.branchName,
+    config.ignoreTests
   );
   if (branchStatus !== BranchStatus.green) {
     logger.debug(
@@ -75,7 +83,7 @@ export async function checkAutoMerge(
   if (automergeType === 'pr-comment') {
     logger.debug(`Applying automerge comment: ${automergeComment}`);
     // istanbul ignore if
-    if (getAdminConfig().dryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
       );
@@ -99,7 +107,7 @@ export async function checkAutoMerge(
   }
   // Let's merge this
   // istanbul ignore if
-  if (getAdminConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
       `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
     );

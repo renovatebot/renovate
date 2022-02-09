@@ -13,19 +13,18 @@ export default function configSerializer(
   ];
   const arrayFields = ['packageFiles', 'upgrades'];
 
-  return traverse(config).map(
-    // eslint-disable-next-line array-callback-return
-    function scrub(val: string) {
-      if (val && templateFields.includes(this.key)) {
+  return traverse(config).map(function scrub(val: string) {
+    if (this.key && val) {
+      if (templateFields.includes(this.key)) {
         this.update('[Template]');
       }
-      if (val && contentFields.includes(this.key)) {
+      if (contentFields.includes(this.key)) {
         this.update('[content]');
       }
       // istanbul ignore if
-      if (val && arrayFields.includes(this.key)) {
+      if (arrayFields.includes(this.key)) {
         this.update('[Array]');
       }
     }
-  );
+  });
 }

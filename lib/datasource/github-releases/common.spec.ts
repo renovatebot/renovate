@@ -1,8 +1,7 @@
-import { getName } from '../../../test/util';
-import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from './common';
 import { GitHubReleaseMocker } from './test';
+import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from '.';
 
-describe(getName(), () => {
+describe('datasource/github-releases/common', () => {
   describe('getSourceUrlBase', () => {
     it('ensures trailing slash', () => {
       const sourceUrl = getSourceUrlBase('https://gh.my-company.com');

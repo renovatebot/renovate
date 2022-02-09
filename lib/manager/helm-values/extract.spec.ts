@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const helmDefaultChartInitValues = loadFixture(
@@ -9,7 +9,7 @@ const helmMultiAndNestedImageValues = loadFixture(
   'multi_and_nested_image_values.yaml'
 );
 
-describe(getName(), () => {
+describe('manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -28,13 +28,19 @@ describe(getName(), () => {
     });
     it('extracts from values.yaml correctly with same structure as "helm create"', () => {
       const result = extractPackageFile(helmDefaultChartInitValues);
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          {
+            currentValue: '1.16.1',
+            depName: 'nginx',
+          },
+        ],
+      });
     });
     it('extracts from complex values file correctly"', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
-      expect(result.deps).toHaveLength(4);
+      expect(result.deps).toHaveLength(5);
     });
   });
 });

@@ -1,20 +1,21 @@
 import { id as npmId } from '../../datasource/npm';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   let deps: PackageDependency[] = [];
-  const npmDepends = /\nNpm\.depends\({([\s\S]*?)}\);/.exec(content);
+  const npmDepends = regEx(/\nNpm\.depends\({([\s\S]*?)}\);/).exec(content);
   if (!npmDepends) {
     return null;
   }
   try {
     deps = npmDepends[1]
-      .replace(/(\s|\\n|\\t|'|")/g, '')
+      .replace(regEx(/(\s|\\n|\\t|'|")/g), '')
       .split(',')
       .map((dep) => dep.trim())
       .filter((dep) => dep.length)
-      .map((dep) => dep.split(/:(.*)/))
+      .map((dep) => dep.split(regEx(/:(.*)/)))
       .map((arr) => {
         const [depName, currentValue] = arr;
         // istanbul ignore if

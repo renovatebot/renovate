@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import type { FetchPresetConfig, Preset } from './types';
 import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util';
 
@@ -11,7 +10,7 @@ const config: FetchPresetConfig = {
 
 const fetch = jest.fn(() => Promise.resolve<Preset>({}));
 
-describe(getName(), () => {
+describe('config/presets/util', () => {
   beforeEach(() => {
     fetch.mockReset();
   });

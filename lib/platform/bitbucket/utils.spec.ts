@@ -6,7 +6,7 @@ const range = (count: number) => [...Array(count).keys()];
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe('accumulateValues()', () => {
+describe('platform/bitbucket/utils', () => {
   beforeEach(() => {
     setBaseUrl(baseUrl);
   });
@@ -33,11 +33,5 @@ describe('accumulateValues()', () => {
     expect(res).toHaveLength(25);
     expect(httpMock.getTrace()).toHaveLength(3);
     expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-
-  it('isConflicted', () => {
-    expect(
-      utils.isConflicted([{ chunks: [{ changes: [{ content: '+=======' }] }] }])
-    ).toBe(true);
   });
 });

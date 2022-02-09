@@ -1,11 +1,17 @@
-export interface Config {
+import type { ModuleApi } from '../types';
+
+export interface GetDigestInputConfig {
   datasource?: string;
-  depName?: string;
   lookupName?: string;
+  depName: string;
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  currentValue?: string;
+  currentDigest?: string;
 }
 
-export interface DigestConfig extends Config {
+export interface DigestConfig {
+  lookupName: string;
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
@@ -13,6 +19,7 @@ export interface DigestConfig extends Config {
 
 export interface ReleasesConfigBase {
   npmrc?: string;
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 }
 
@@ -28,6 +35,8 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   versioning?: string;
   extractVersion?: string;
   constraints?: Record<string, string>;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface Release {
@@ -44,6 +53,8 @@ export interface Release {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
+  sourceUrl?: string;
+  sourceDirectory?: string;
 }
 
 export interface ReleaseResult {
@@ -58,9 +69,11 @@ export interface ReleaseResult {
   sourceUrl?: string;
   sourceDirectory?: string;
   registryUrl?: string;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
-export interface DatasourceApi {
+export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
@@ -87,4 +100,7 @@ export interface DatasourceApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean;
+
+  /** optional URLs to add to docs as references */
+  urls?: string[];
 }

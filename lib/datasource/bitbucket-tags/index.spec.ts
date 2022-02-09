@@ -1,11 +1,10 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { BitBucketTagsDatasource } from '.';
 
 const datasource = BitBucketTagsDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/bitbucket-tags/index', () => {
   describe('getReleases', () => {
     it('returns tags from bitbucket cloud', async () => {
       const body = {
@@ -74,7 +73,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
-      expect(res).toEqual('123');
+      expect(res).toBe('123');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -124,7 +123,7 @@ describe(getName(), () => {
       );
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
-      expect(res).toEqual('123');
+      expect(res).toBe('123');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

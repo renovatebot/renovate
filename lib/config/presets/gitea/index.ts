@@ -16,11 +16,14 @@ export const Endpoint = 'https://gitea.com/api/v1/';
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
-  endpoint: string
+  endpoint: string,
+  packageTag?: string
 ): Promise<Preset> {
   let res: RepoContents;
   try {
-    res = await getRepoContents(repo, fileName, null, { baseUrl: endpoint });
+    res = await getRepoContents(repo, fileName, packageTag, {
+      baseUrl: endpoint,
+    });
   } catch (err) {
     // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
@@ -45,13 +48,15 @@ export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
   presetPath: string,
-  endpoint = Endpoint
+  endpoint = Endpoint,
+  packageTag?: string
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset,
     presetPath,
     endpoint,
+    packageTag,
     fetch: fetchJSONFile,
   });
 }
@@ -60,6 +65,13 @@ export function getPreset({
   packageName: pkgName,
   presetName = 'default',
   presetPath,
+  packageTag = null,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(pkgName, presetName, presetPath, Endpoint);
+  return getPresetFromEndpoint(
+    pkgName,
+    presetName,
+    presetPath,
+    Endpoint,
+    packageTag
+  );
 }

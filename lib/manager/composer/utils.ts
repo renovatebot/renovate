@@ -1,47 +1,45 @@
-import { getPkgReleases } from '../../datasource';
+import { quote } from 'shlex';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import type { ToolConstraint } from '../../util/exec/types';
 import { api, id as composerVersioningId } from '../../versioning/composer';
+import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
 
-export async function getComposerConstraint(
-  constraints: Record<string, string>
-): Promise<string> {
-  const { composer } = constraints;
+const depRequireInstall = new Set(['symfony/flex']);
 
-  if (api.isSingleVersion(composer)) {
-    logger.debug(
-      { version: composer },
-      'Using composer constraint from config'
-    );
-    return composer;
+export function getComposerArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint
+): string {
+  let args = '';
+
+  if (config.composerIgnorePlatformReqs) {
+    if (config.composerIgnorePlatformReqs.length === 0) {
+      const major = api.getMajor(toolConstraint.constraint);
+      const minor = api.getMinor(toolConstraint.constraint);
+      args += api.matches(`${major}.${minor}`, '^2.2')
+        ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
+        : ' --ignore-platform-reqs';
+    } else {
+      config.composerIgnorePlatformReqs.forEach((req) => {
+        args += ' --ignore-platform-req ' + quote(req);
+      });
+    }
   }
 
-  const release = await getPkgReleases({
-    depName: 'composer/composer',
-    datasource: 'github-releases',
-    versioning: composerVersioningId,
-  });
-
-  if (!release?.releases?.length) {
-    throw new Error('No composer releases found.');
-  }
-  let versions = release.releases.map((r) => r.version);
-
-  if (composer) {
-    versions = versions.filter(
-      (v) => api.isValid(v) && api.matches(v, composer)
-    );
+  args += ' --no-ansi --no-interaction';
+  if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+    args += ' --no-scripts --no-autoloader';
   }
 
-  if (!versions.length) {
-    throw new Error('No compatible composer releases found.');
+  if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
+    args += ' --no-plugins';
   }
 
-  const version = versions.pop();
-  logger.debug({ range: composer, version }, 'Using composer constraint');
-  return version;
+  return args;
 }
 
 export function getPhpConstraint(constraints: Record<string, string>): string {
@@ -55,6 +53,15 @@ export function getPhpConstraint(constraints: Record<string, string>): string {
   return null;
 }
 
+export function requireComposerDependencyInstallation(
+  lock: ComposerLock
+): boolean {
+  return (
+    lock.packages?.some((p) => depRequireInstall.has(p.name)) === true ||
+    lock['packages-dev']?.some((p) => depRequireInstall.has(p.name)) === true
+  );
+}
+
 export function extractContraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock
@@ -62,8 +69,10 @@ export function extractContraints(
   const res: Record<string, string> = { composer: '1.*' };
 
   // extract php
-  if (composerJson.require?.php) {
-    res.php = composerJson.require?.php;
+  if (composerJson.config?.platform?.php) {
+    res.php = composerJson.config.platform.php;
+  } else if (composerJson.require?.php) {
+    res.php = composerJson.require.php;
   }
 
   // extract direct composer dependency
@@ -72,15 +81,23 @@ export function extractContraints(
   } else if (composerJson['require-dev']?.['composer/composer']) {
     res.composer = composerJson['require-dev']?.['composer/composer'];
   }
+  // composer platform package
+  else if (composerJson.require?.['composer']) {
+    res.composer = composerJson.require?.['composer'];
+  } else if (composerJson['require-dev']?.['composer']) {
+    res.composer = composerJson['require-dev']?.['composer'];
+  }
   // check last used composer version
   else if (lockParsed?.['plugin-api-version']) {
     const major = api.getMajor(lockParsed?.['plugin-api-version']);
-    res.composer = `${major}.*`;
+    const minor = api.getMinor(lockParsed?.['plugin-api-version']);
+    res.composer = `^${major}.${minor}`;
   }
   // check composer api dependency
   else if (composerJson.require?.['composer-runtime-api']) {
     const major = api.getMajor(composerJson.require?.['composer-runtime-api']);
-    res.composer = `${major}.*`;
+    const minor = api.getMinor(composerJson.require?.['composer-runtime-api']);
+    res.composer = `^${major}.${minor}`;
   }
   return res;
 }

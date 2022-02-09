@@ -1,14 +1,15 @@
 import { PypiDatasource } from '../../datasource/pypi';
+import { newlineRegex, regEx } from '../../util/regex';
 import pep440 from '../../versioning/pep440';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
-  const [, sectionName] = /^\[\s*([^\s]+)\s*]\s*$/.exec(str) || [];
+  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || [];
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = /^([^\s]+)\s+=/.exec(str) || [];
+  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) || [];
   return sectionRecord;
 }
 
@@ -33,7 +34,7 @@ function parseDep(
   record: string
 ): PackageDependency | null {
   const [, depName, , currentValue] =
-    /\s+([-_a-zA-Z0-9]*)(\[.*\])?\s*(.*)/.exec(line) || [];
+    regEx(/\s+([-_a-zA-Z0-9]*)(\[.*\])?\s*(.*)/).exec(line) || [];
   if (
     section &&
     record &&
@@ -63,8 +64,8 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
   content
-    .split('\n')
-    .map((line) => line.replace(/[;#].*$/, '').trimRight())
+    .split(newlineRegex)
+    .map((line) => line.replace(regEx(/[;#].*$/), '').trimRight())
     .forEach((rawLine) => {
       let line = rawLine;
       const newSectionName = getSectionName(line);
@@ -74,7 +75,7 @@ export function extractPackageFile(
       } else {
         if (newSectionRecord) {
           sectionRecord = newSectionRecord;
-          line = rawLine.replace(/^[^=]*=\s*/, '\t');
+          line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
         }
         const dep = parseDep(line, sectionName, sectionRecord);
         if (dep) {

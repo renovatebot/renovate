@@ -1,12 +1,14 @@
 import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
-import { getAdminConfig } from '../../config/admin';
-import * as datasourceGitRefs from '../../datasource/git-refs';
+import { GlobalConfig } from '../../config/global';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { logger } from '../../logger';
+import { simpleGitConfig } from '../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
-import type { ManagerConfig, PackageFile } from '../types';
-import { GitModule } from './types';
+import { regEx } from '../../util/regex';
+import type { ExtractConfig, PackageFile } from '../types';
+import type { GitModule } from './types';
 
 async function getUrl(
   git: SimpleGit,
@@ -14,7 +16,7 @@ async function getUrl(
   submoduleName: string
 ): Promise<string> {
   const path = (
-    await Git().raw([
+    await Git(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -31,7 +33,7 @@ async function getUrl(
   return URL.resolve(`${remoteUrl}/`, path);
 }
 
-const headRefRe = /ref: refs\/heads\/(?<branch>\w+)\s/;
+const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
   const val = await Git().listRemote(['--symref', subModuleUrl, 'HEAD']);
@@ -70,11 +72,11 @@ async function getModules(
       ])) ?? /* istanbul ignore next: should never happen */ ''
     )
       .trim()
-      .split(/\n/)
+      .split(regEx(/\n/))
       .filter((s) => !!s);
 
     for (const line of modules) {
-      const [, name, path] = line.split(/submodule\.(.+?)\.path\s(.+)/);
+      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/));
       res.push({ name, path });
     }
   } catch (err) /* istanbul ignore next */ {
@@ -86,9 +88,9 @@ async function getModules(
 export default async function extractPackageFile(
   _content: string,
   fileName: string,
-  config: ManagerConfig
+  config: ExtractConfig
 ): Promise<PackageFile | null> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = GlobalConfig.get();
   const git = Git(localDir);
   const gitModulesPath = upath.join(localDir, fileName);
 
@@ -98,40 +100,33 @@ export default async function extractPackageFile(
     return null;
   }
 
-  const deps = (
-    await Promise.all(
-      depNames.map(async ({ name, path }) => {
-        try {
-          const [currentDigest] = (await git.subModule(['status', path]))
-            .trim()
-            .replace(/^[-+]/, '')
-            .split(/\s/);
-          const subModuleUrl = await getUrl(git, gitModulesPath, name);
-          // hostRules only understands HTTP URLs
-          // Find HTTP URL, then apply token
-          let httpSubModuleUrl = getHttpUrl(subModuleUrl);
-          httpSubModuleUrl = getRemoteUrlWithToken(httpSubModuleUrl);
-          const currentValue = await getBranch(
-            gitModulesPath,
-            name,
-            httpSubModuleUrl
-          );
-          return {
-            depName: path,
-            lookupName: getHttpUrl(subModuleUrl),
-            currentValue,
-            currentDigest,
-          };
-        } catch (err) /* istanbul ignore next */ {
-          logger.warn(
-            { err },
-            'Error mapping git submodules during extraction'
-          );
-          return null;
-        }
-      })
-    )
-  ).filter(Boolean);
+  const deps = [];
+  for (const { name, path } of depNames) {
+    try {
+      const [currentDigest] = (await git.subModule(['status', path]))
+        .trim()
+        .replace(regEx(/^[-+]/), '')
+        .split(regEx(/\s/));
+      const subModuleUrl = await getUrl(git, gitModulesPath, name);
+      // hostRules only understands HTTP URLs
+      // Find HTTP URL, then apply token
+      let httpSubModuleUrl = getHttpUrl(subModuleUrl);
+      httpSubModuleUrl = getRemoteUrlWithToken(httpSubModuleUrl);
+      const currentValue = await getBranch(
+        gitModulesPath,
+        name,
+        httpSubModuleUrl
+      );
+      deps.push({
+        depName: path,
+        lookupName: getHttpUrl(subModuleUrl),
+        currentValue,
+        currentDigest,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ err }, 'Error mapping git submodules during extraction');
+    }
+  }
 
-  return { deps, datasource: datasourceGitRefs.id };
+  return { deps, datasource: GitRefsDatasource.id };
 }

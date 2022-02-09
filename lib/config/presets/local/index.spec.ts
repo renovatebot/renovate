@@ -1,4 +1,4 @@
-import { getName, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import * as _azure from '../azure';
 import * as _bitbucket from '../bitbucket';
 import * as _bitbucketServer from '../bitbucket-server';
@@ -21,7 +21,7 @@ const gitea = mocked(_gitea);
 const github = mocked(_github);
 const gitlab = mocked(_gitlab);
 
-describe(getName(), () => {
+describe('config/presets/local/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     const preset = { resolved: 'preset' };
@@ -140,6 +140,30 @@ describe(getName(), () => {
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+    it('forwards to github with a tag', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        packageTag: 'someTag',
+        baseConfig: {
+          platform: 'github',
+        },
+      });
+      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+    it('forwards to custom github with a tag', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: 'default',
+        packageTag: 'someTag',
+        baseConfig: {
+          platform: 'github',
+          endpoint: 'https://api.github.example.com',
+        },
+      });
+      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
+    });
 
     it('forwards to gitlab', async () => {
       const content = await local.getPreset({
@@ -156,6 +180,31 @@ describe(getName(), () => {
       const content = await local.getPreset({
         packageName: 'some/repo',
         presetName: 'default',
+        baseConfig: {
+          platform: 'gitlab',
+          endpoint: 'https://gitlab.example.com/api/v4',
+        },
+      });
+      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+    it('forwards to gitlab with a tag', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: 'default',
+        packageTag: 'someTag',
+        baseConfig: {
+          platform: 'GitLab',
+        },
+      });
+      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+    it('forwards to custom gitlab with a tag', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: 'default',
+        packageTag: 'someTag',
         baseConfig: {
           platform: 'gitlab',
           endpoint: 'https://gitlab.example.com/api/v4',

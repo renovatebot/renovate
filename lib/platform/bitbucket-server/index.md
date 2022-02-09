@@ -3,7 +3,7 @@
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
-- Adding/removing labels (Bitbucket limitation?)
+- Adding/removing labels (Bitbucket limitation)
 
 ## Features awaiting implementation
 
@@ -14,7 +14,7 @@
 
 If you want a test Bitbucket server locally rather than with your production server, [Atlassian's Bitbucket Server Docker image](https://hub.docker.com/r/atlassian/bitbucket-server) is really convenient.
 
-As per their instructions, the following commands bring up a new server:
+In line with their instructions, the following commands bring up a new server:
 
 ```
 docker volume create --name bitbucketVolume
@@ -26,7 +26,7 @@ Once it's running and initialized, the quickest way to testing with Renovate is:
 1. Create the admin user as prompted
 2. Create a new project and a repository for that project
 3. Make sure the repository has a package file in it for Renovate to find, e.g. `.nvmrc` or `package.json`
-4. Create a dedicated REnovate user `@renovate-bot` and grant it write access to the project
+4. Create a dedicated Renovate user `@renovate-bot` and grant it write access to the project
 5. Note down the password for `@renovate-bot` and use it in the Renovate CLI
 
 At this point you should have a project ready for Renovate, and the `@renovate-bot` account ready to run on it. You can then run like this:
@@ -47,7 +47,7 @@ export LOG_LEVEL=debug
 yarn start --autodiscover=true
 ```
 
-You should then receive a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
+You should then get a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
 
 ## Supported versions
 

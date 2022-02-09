@@ -1,5 +1,5 @@
-import * as semver from 'semver';
-import { is as isStable } from 'semver-stable';
+import semver from 'semver';
+import stable from 'semver-stable';
 import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
@@ -30,12 +30,15 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): string => validRange(input);
-export const isVersion = (input: string): string => valid(input);
+export const isValid = (input: string): boolean => !!validRange(input);
+export const isVersion = (input: string): boolean => !!valid(input);
 
-const isSingleVersion = (constraint: string): string =>
-  isVersion(constraint) ||
-  (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
+function isSingleVersion(constraint: string): boolean {
+  return (
+    isVersion(constraint) ||
+    (constraint?.startsWith('=') && isVersion(constraint.substring(1).trim()))
+  );
+}
 
 export const api: VersioningApi = {
   equals,
@@ -47,7 +50,7 @@ export const api: VersioningApi = {
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,
-  isStable,
+  isStable: stable.is,
   isValid,
   isVersion,
   matches,

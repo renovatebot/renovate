@@ -31,8 +31,9 @@ Object {
     "Use <code>renovate/</code> as prefix for all branch names",
     "If semantic commits detected, use semantic commit type <code>fix</code> for dependencies and <code>chore</code> for all others",
     "Require all status checks to pass before any automerging",
-    "Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others",
+    "Pin dependency versions for <code>devDependencies</code> and retain SemVer ranges for others",
   ],
+  "ignoreTests": false,
   "ignoreUnstable": true,
   "labels": Array [
     "dependencies",
@@ -65,6 +66,20 @@ Object {
       "semanticCommitType": "fix",
     },
     Object {
+      "matchDatasources": Array [
+        "maven",
+      ],
+      "matchDepTypes": Array [
+        "compile",
+        "provided",
+        "runtime",
+        "system",
+        "import",
+        "parent",
+      ],
+      "semanticCommitType": "fix",
+    },
+    Object {
       "matchPackagePatterns": Array [
         "*",
       ],
@@ -85,7 +100,6 @@ Object {
   ],
   "prCreation": "immediate",
   "rebaseWhen": "behind-base-branch",
-  "requiredStatusChecks": Array [],
   "respectLatest": true,
   "schedule": Array [
     "before 8am",

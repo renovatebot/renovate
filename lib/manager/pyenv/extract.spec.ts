@@ -1,22 +1,24 @@
-import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-describe(getName(), () => {
+describe('manager/pyenv/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('3.7.1\n');
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        { depName: 'python', currentValue: '3.7.1', datasource: 'docker' },
+      ]);
     });
     it('supports ranges', () => {
       const res = extractPackageFile('3.8\n');
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        { depName: 'python', currentValue: '3.8', datasource: 'docker' },
+      ]);
     });
     it('skips non ranges', () => {
       const res = extractPackageFile('latestn');
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        { depName: 'python', currentValue: 'latestn', datasource: 'docker' },
+      ]);
     });
   });
 });

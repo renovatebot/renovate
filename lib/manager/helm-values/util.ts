@@ -1,7 +1,8 @@
 import { hasKey } from '../../util/object';
-import { HelmDockerImageDependency } from './types';
+import { regEx } from '../../util/regex';
+import type { HelmDockerImageDependency } from './types';
 
-const parentKeyRe = /image$/i;
+const parentKeyRe = regEx(/image$/i);
 
 /**
  * Type guard to determine whether a given partial Helm values.yaml object potentially
@@ -22,11 +23,18 @@ export function matchesHelmValuesDockerHeuristic(
   parentKey: string,
   data: unknown
 ): data is HelmDockerImageDependency {
-  return (
+  return !!(
     parentKeyRe.test(parentKey) &&
     data &&
     typeof data === 'object' &&
     hasKey('repository', data) &&
     hasKey('tag', data)
   );
+}
+
+export function matchesHelmValuesInlineImage(
+  parentKey: string,
+  data: unknown
+): data is string {
+  return !!(parentKeyRe.test(parentKey) && data && typeof data === 'string');
 }

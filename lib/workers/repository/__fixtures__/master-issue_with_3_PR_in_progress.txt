@@ -1,4 +1,4 @@
-This issue contains a list of Renovate updates and their statuses.
+This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
 
 ## Open
 

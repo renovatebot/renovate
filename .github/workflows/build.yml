@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-      - v24
+      - v25
+
+  pull_request:
 
   workflow_dispatch:
     inputs:
@@ -12,6 +14,10 @@ on:
         description: 'Dry-Run'
         default: 'true'
         required: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   # Currently no way to detect automatically (#8153)
@@ -21,6 +27,7 @@ env:
 
 jobs:
   test:
+    name: ${{ matrix.node-version == 14 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
@@ -28,45 +35,47 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [14]
-        python-version: [3.9]
+        os: [ubuntu-latest]
+        node-version: [14, 16]
         java-version: [11]
+        # skip macOS and Windows test on pull requests without 'ci:fulltest' label
+        include: >-
+          ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
+            "os": "macos-latest",
+            "node-version": 14,
+            "java-version": 11
+          }, {
+            "os": "windows-latest",
+            "node-version": 14,
+            "java-version": 11
+          }]' || '[]') }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
-      PYTHON_VERSION: ${{ matrix.python-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
+      # skip Java tests on pull requests without 'ci:fulltest' label
+      SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
 
     steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954 # renovate: tag=v2.4.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@dc73133d4da04e56a135ae2246682783cc7c7cb6 # renovate: tag=v2.2.2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.NODE_VERSION == '14'
-        uses: actions/setup-java@4b1b3d4a82f726de9ba1945f8c6967b67caf5dcd # renovate: tag=v2.2.0
+        if: env.SKIP_JAVA_TESTS == 'false'
+        uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # renovate: tag=v2.5.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
           java-package: jre
           check-latest: false
-
-      - name: Skip Java tests
-        if: env.NODE_VERSION != '14'
-        run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
 
       - name: Init platform
         shell: bash
@@ -76,24 +85,23 @@ jobs:
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
+          git --version
           echo "Node $(node --version)"
-          python --version
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      # build before tests to for static file check
+      - name: Build
+        run: yarn build
+
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@51d810878be5422784e86451c0e7c14e5860ec47 # renovate: tag=v2.0.2
+        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
         if: always() && env.coverage == 'true'
-
-      # build after tests to exclude build files from tests
-      # TODO: check if build before test speeds up tests
-      - name: Build
-        run: yarn build
 
       - name: E2E Test
         run: yarn test-e2e
@@ -105,12 +113,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954 # renovate: tag=v2.4.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -131,9 +139,11 @@ jobs:
       - name: Lint
         run: |
           yarn ls-lint
-          yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
+          yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
+          yarn git-check
+          yarn doc-fence-check
 
       - name: Test schema
         run: yarn test-schema
@@ -141,20 +151,24 @@ jobs:
       - name: Type check
         run: yarn type-check
 
+      - name: Null check
+        run: yarn null-check
+
   release:
     needs: [lint, test]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954 # renovate: tag=v2.4.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -189,3 +203,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Upload docs
+        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # renovate: tag=v2.3.1
+        with:
+          name: docs
+          path: tmp/docs/

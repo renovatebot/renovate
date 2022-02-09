@@ -2,7 +2,7 @@
 
 exports[`datasource/repology/index getReleases returns correct version for api package 1`] = `
 Object {
-  "registryUrl": "https://repology.org/",
+  "registryUrl": "https://repology.org",
   "releases": Array [
     Object {
       "version": "1.181",
@@ -38,7 +38,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for binary package 1`] = `
 Object {
-  "registryUrl": "https://repology.org/",
+  "registryUrl": "https://repology.org",
   "releases": Array [
     Object {
       "version": "1.14.2-2+deb10u1",
@@ -64,7 +64,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for multi-package project with different name 1`] = `
 Object {
-  "registryUrl": "https://repology.org/",
+  "registryUrl": "https://repology.org",
   "releases": Array [
     Object {
       "version": "12.2-4+deb10u1",
@@ -90,7 +90,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for multi-package project with same name 1`] = `
 Object {
-  "registryUrl": "https://repology.org/",
+  "registryUrl": "https://repology.org",
   "releases": Array [
     Object {
       "version": "9.3.0-r2",
@@ -116,7 +116,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns correct version for source package 1`] = `
 Object {
-  "registryUrl": "https://repology.org/",
+  "registryUrl": "https://repology.org",
   "releases": Array [
     Object {
       "version": "1.181",
@@ -152,7 +152,7 @@ Array [
 
 exports[`datasource/repology/index getReleases returns multiple versions if they are present in repository 1`] = `
 Object {
-  "registryUrl": "https://repology.org/",
+  "registryUrl": "https://repology.org",
   "releases": Array [
     Object {
       "version": "1:11.0.7.10-1.el8_1",
@@ -272,6 +272,21 @@ Array [
     },
     "method": "GET",
     "url": "https://repology.org/tools/project-by?repo=dummy&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=example",
+  },
+]
+`;
+
+exports[`datasource/repology/index getReleases returns null on Resolver ambiguous binary package 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repology.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repology.org/tools/project-by?repo=ubuntu_20_04&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=git",
   },
 ]
 `;

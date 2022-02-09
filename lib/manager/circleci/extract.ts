@@ -1,5 +1,6 @@
 import { OrbDatasource } from '../../datasource/orb';
 import { logger } from '../../logger';
+import { newlineRegex, regEx } from '../../util/regex';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -7,10 +8,10 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const orbs = /^\s*orbs:\s*$/.exec(line);
+      const orbs = regEx(/^\s*orbs:\s*$/).exec(line);
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
         let foundOrbOrNoop: boolean;
@@ -18,14 +19,14 @@ export function extractPackageFile(content: string): PackageFile | null {
           foundOrbOrNoop = false;
           const orbLine = lines[lineNumber + 1];
           logger.trace(`orbLine: "${orbLine}"`);
-          const yamlNoop = /^\s*(#|$)/.exec(orbLine);
+          const yamlNoop = regEx(/^\s*(#|$)/).exec(orbLine);
           if (yamlNoop) {
             logger.debug('orbNoop');
             foundOrbOrNoop = true;
             lineNumber += 1;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
-          const orbMatch = /^\s+([^:]+):\s(.+)$/.exec(orbLine);
+          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine);
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrbOrNoop = true;
@@ -46,7 +47,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         } while (foundOrbOrNoop);
       }
-      const match = /^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
+      const match = regEx(/^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);

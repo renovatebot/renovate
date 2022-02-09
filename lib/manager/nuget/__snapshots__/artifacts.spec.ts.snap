@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`updateArtifacts aborts if lock file is unchanged 1`] = `
+exports[`manager/nuget/artifacts aborts if lock file is unchanged 1`] = `
 Array [
   Object {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
@@ -23,9 +23,9 @@ Array [
 ]
 `;
 
-exports[`updateArtifacts aborts if no lock file found 1`] = `Array []`;
+exports[`manager/nuget/artifacts aborts if no lock file found 1`] = `Array []`;
 
-exports[`updateArtifacts authenticates at registries 1`] = `
+exports[`manager/nuget/artifacts authenticates at registries 1`] = `
 Array [
   Object {
     "cmd": "dotnet nuget add source https://my-registry.example.org/ --configfile others/nuget/not-so-random/nuget.config --name myRegistry --username some-username --password some-password --store-password-in-clear-text",
@@ -66,22 +66,11 @@ Array [
 ]
 `;
 
-exports[`updateArtifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "packages.lock.json",
-      "stderr": "not found",
-    },
-  },
-]
-`;
+exports[`manager/nuget/artifacts does not update lock file when no deps changed 1`] = `Array []`;
 
-exports[`updateArtifacts does not update lock file when no deps changed 1`] = `Array []`;
+exports[`manager/nuget/artifacts does not update lock file when non-proj file is changed 1`] = `Array []`;
 
-exports[`updateArtifacts does not update lock file when non-proj file is changed 1`] = `Array []`;
-
-exports[`updateArtifacts performs lock file maintenance 1`] = `
+exports[`manager/nuget/artifacts performs lock file maintenance 1`] = `
 Array [
   Object {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
@@ -104,7 +93,7 @@ Array [
 ]
 `;
 
-exports[`updateArtifacts strips protocol version from feed url 1`] = `
+exports[`manager/nuget/artifacts strips protocol version from feed url 1`] = `
 Array [
   Object {
     "cmd": "dotnet nuget add source https://my-registry.example.org/ --configfile others/nuget/not-so-random/nuget.config --name myRegistry",
@@ -145,7 +134,7 @@ Array [
 ]
 `;
 
-exports[`updateArtifacts supports docker mode 1`] = `
+exports[`manager/nuget/artifacts supports docker mode 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/dotnet",
@@ -180,7 +169,7 @@ Array [
 ]
 `;
 
-exports[`updateArtifacts supports global mode 1`] = `
+exports[`manager/nuget/artifacts supports global mode 1`] = `
 Array [
   Object {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
@@ -203,7 +192,7 @@ Array [
 ]
 `;
 
-exports[`updateArtifacts updates lock file 1`] = `
+exports[`manager/nuget/artifacts updates lock file 1`] = `
 Array [
   Object {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",

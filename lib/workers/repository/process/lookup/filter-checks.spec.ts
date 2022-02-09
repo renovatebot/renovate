@@ -1,4 +1,4 @@
-import { getConfig, getName, mocked } from '../../../../../test/util';
+import { getConfig, mocked } from '../../../../../test/util';
 import type { Release } from '../../../../datasource';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
@@ -36,7 +36,7 @@ const releases: Release[] = [
   },
 ];
 
-describe(getName(), () => {
+describe('workers/repository/process/lookup/filter-checks', () => {
   let sortedReleases: Release[];
   beforeEach(() => {
     config = getConfig();
@@ -58,9 +58,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toEqual('1.0.4');
+      expect(res.release.version).toBe('1.0.4');
     });
 
     it('returns non-pending latest release if internalChecksFilter=flexible and none pass checks', async () => {
@@ -73,9 +73,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toEqual('1.0.4');
+      expect(res.release.version).toBe('1.0.4');
     });
 
     it('returns pending latest release if internalChecksFilter=strict and none pass checks', async () => {
@@ -88,9 +88,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(true);
+      expect(res.pendingChecks).toBeTrue();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toEqual('1.0.4');
+      expect(res.release.version).toBe('1.0.4');
     });
 
     it('returns non-latest release if internalChecksFilter=strict and some pass checks', async () => {
@@ -103,9 +103,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
-      expect(res.release.version).toEqual('1.0.2');
+      expect(res.release.version).toBe('1.0.2');
     });
 
     it('returns non-latest release if internalChecksFilter=flexible and some pass checks', async () => {
@@ -118,9 +118,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
-      expect(res.release.version).toEqual('1.0.2');
+      expect(res.release.version).toBe('1.0.2');
     });
 
     it('picks up stabilityDays settings from hostRules', async () => {
@@ -134,9 +134,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toEqual('1.0.4');
+      expect(res.release.version).toBe('1.0.4');
     });
 
     it('picks up stabilityDays settings from updateType', async () => {
@@ -149,9 +149,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(1);
-      expect(res.release.version).toEqual('1.0.3');
+      expect(res.release.version).toBe('1.0.3');
     });
 
     it('picks up minimumConfidence settings from updateType', async () => {
@@ -169,9 +169,9 @@ describe(getName(), () => {
         sortedReleases
       );
       expect(res).toMatchSnapshot();
-      expect(res.pendingChecks).toBe(false);
+      expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
-      expect(res.release.version).toEqual('1.0.1');
+      expect(res.release.version).toBe('1.0.1');
     });
   });
 });

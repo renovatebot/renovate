@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`manager/terraform/extract extractPackageFile() extracts 1`] = `
+exports[`manager/terraform/extract extractPackageFile() extracts  modules 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -106,42 +106,11 @@ Object {
       "depType": "module",
     },
     Object {
-      "currentValue": "v0.1.0",
-      "datasource": "github-tags",
-      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
-      "depType": "module",
-      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
-    },
-    Object {
-      "currentValue": "v0.1.0",
-      "datasource": "github-tags",
-      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
-      "depType": "module",
-      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
-    },
-    Object {
       "currentValue": "v2.0.0",
       "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depType": "module",
       "lookupName": "hashicorp/example",
-    },
-    Object {
-      "datasource": "terraform-module",
-      "depName": "terraform-aws-modules/security-group/aws",
-      "depType": "module",
-    },
-    Object {
-      "currentValue": "<= 2.4.0",
-      "datasource": "terraform-module",
-      "depName": "terraform-aws-modules/security-group/aws",
-      "depType": "module",
-    },
-    Object {
-      "currentValue": "1.28.3",
-      "datasource": "terraform-module",
-      "depName": "particuleio/addons/kubernetes",
-      "depType": "module",
     },
     Object {
       "currentValue": "~> 1.1.0",
@@ -177,40 +146,49 @@ Object {
       "depType": "module",
     },
     Object {
+      "currentValue": "v0.1.0",
+      "datasource": "github-tags",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depType": "module",
+      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
+    },
+    Object {
+      "currentValue": "v0.1.0",
+      "datasource": "github-tags",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depType": "module",
+      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
+    },
+    Object {
+      "datasource": "terraform-module",
+      "depName": "terraform-aws-modules/security-group/aws",
+      "depType": "module",
+    },
+    Object {
+      "currentValue": "<= 2.4.0",
+      "datasource": "terraform-module",
+      "depName": "terraform-aws-modules/security-group/aws",
+      "depType": "module",
+    },
+    Object {
+      "currentValue": "1.28.3",
+      "datasource": "terraform-module",
+      "depName": "particuleio/addons/kubernetes",
+      "depType": "module",
+    },
+    Object {
       "skipReason": "local",
     },
     Object {
       "skipReason": "no-source",
     },
-    Object {
-      "currentValue": "1.36.1",
-      "datasource": "terraform-provider",
-      "depName": "azurerm",
-      "depType": "provider",
-    },
-    Object {
-      "currentValue": "=2.4",
-      "datasource": "terraform-provider",
-      "depName": "gitlab",
-      "depType": "provider",
-    },
-    Object {
-      "currentValue": "=1.3",
-      "datasource": "terraform-provider",
-      "depName": "gitlab",
-      "depType": "provider",
-    },
-    Object {
-      "datasource": "terraform-provider",
-      "depName": "helm",
-      "depType": "provider",
-    },
-    Object {
-      "currentValue": "V1.9",
-      "datasource": "terraform-provider",
-      "depName": "newrelic",
-      "depType": "provider",
-    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() extracts bitbucket modules 1`] = `
+Object {
+  "deps": Array [
     Object {
       "currentValue": "v1.0.0",
       "datasource": "git-tags",
@@ -254,71 +232,47 @@ Object {
       "lookupName": "ssh://git@bitbucket.com/hashicorp/example",
     },
     Object {
-      "currentValue": ">= 2.7.0",
-      "datasource": "terraform-provider",
-      "depName": "aws",
-      "depType": "required_provider",
+      "currentValue": "v1.0.0",
+      "datasource": "bitbucket-tags",
+      "depName": "hashicorp/example",
+      "depType": "module",
+      "lookupName": "hashicorp/example",
     },
     Object {
-      "currentValue": ">= 2.0.0",
-      "datasource": "terraform-provider",
-      "depName": "azurerm",
-      "depType": "required_provider",
+      "currentValue": "v1.0.0",
+      "datasource": "bitbucket-tags",
+      "depName": "hashicorp/example",
+      "depType": "module",
+      "lookupName": "hashicorp/example",
     },
     Object {
-      "currentValue": ">= 0.13",
-      "datasource": "github-tags",
-      "depName": "hashicorp/terraform",
-      "depType": "required_version",
-      "extractVersion": "v(?<version>.*)$",
-      "lineNumber": 230,
+      "currentValue": "v1.0.0",
+      "datasource": "bitbucket-tags",
+      "depName": "hashicorp/example",
+      "depType": "module",
+      "lookupName": "hashicorp/example",
     },
     Object {
-      "currentValue": "2.7.2",
-      "datasource": "terraform-provider",
-      "depName": "docker",
-      "depType": "required_provider",
-      "registryUrls": Array [
-        "https://releases.hashicorp.com",
-      ],
+      "currentValue": "v1.0.0",
+      "datasource": "bitbucket-tags",
+      "depName": "hashicorp/example",
+      "depType": "module",
+      "lookupName": "hashicorp/example",
     },
     Object {
-      "currentValue": "2.7.0",
-      "datasource": "terraform-provider",
-      "depName": "aws",
-      "depType": "required_provider",
-      "lookupName": "aws",
+      "currentValue": "v1.0.0",
+      "datasource": "bitbucket-tags",
+      "depName": "hashicorp/example",
+      "depType": "module",
+      "lookupName": "hashicorp/example",
     },
-    Object {
-      "currentValue": "=2.27.0",
-      "datasource": "terraform-provider",
-      "depName": "azurerm",
-      "depType": "required_provider",
-    },
-    Object {
-      "currentValue": "1.2.4",
-      "datasource": "terraform-provider",
-      "depName": "invalid",
-      "depType": "required_provider",
-      "skipReason": "unsupported-url",
-    },
-    Object {
-      "currentValue": "1.2.4",
-      "datasource": "terraform-provider",
-      "depName": "helm",
-      "depType": "required_provider",
-      "lookupName": "hashicorp/helm",
-    },
-    Object {
-      "currentValue": ">= 1.0",
-      "datasource": "terraform-provider",
-      "depName": "kubernetes",
-      "depType": "required_provider",
-      "lookupName": "hashicorp/kubernetes",
-      "registryUrls": Array [
-        "https://terraform.example.com",
-      ],
-    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() extracts docker resources 1`] = `
+Object {
+  "deps": Array [
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
@@ -364,6 +318,179 @@ Object {
     },
     Object {
       "skipReason": "invalid-value",
+    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() extracts providers 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.36.1",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
+    },
+    Object {
+      "currentValue": "=2.4",
+      "datasource": "terraform-provider",
+      "depName": "gitlab",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/gitlab",
+    },
+    Object {
+      "currentValue": "=1.3",
+      "datasource": "terraform-provider",
+      "depName": "gitlab1",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/gitlab1",
+    },
+    Object {
+      "datasource": "terraform-provider",
+      "depName": "helm",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/helm",
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "V1.9",
+      "datasource": "terraform-provider",
+      "depName": "newrelic",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/newrelic",
+    },
+    Object {
+      "currentValue": ">= 2.7.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/aws",
+    },
+    Object {
+      "currentValue": ">= 2.0.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
+    },
+    Object {
+      "currentValue": ">= 0.13",
+      "datasource": "github-tags",
+      "depName": "hashicorp/terraform",
+      "depType": "required_version",
+      "extractVersion": "v(?<version>.*)$",
+      "lineNumber": 72,
+    },
+    Object {
+      "currentValue": "2.7.2",
+      "datasource": "terraform-provider",
+      "depName": "docker",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/docker",
+      "registryUrls": Array [
+        "https://releases.hashicorp.com",
+      ],
+    },
+    Object {
+      "currentValue": "2.7.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/aws",
+    },
+    Object {
+      "currentValue": "=2.27.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
+    },
+    Object {
+      "currentValue": "1.2.4",
+      "datasource": "terraform-provider",
+      "depName": "invalid",
+      "depType": "required_provider",
+      "skipReason": "unsupported-url",
+    },
+    Object {
+      "currentValue": "1.2.4",
+      "datasource": "terraform-provider",
+      "depName": "helm",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/helm",
+    },
+    Object {
+      "currentValue": ">= 1.0",
+      "datasource": "terraform-provider",
+      "depName": "kubernetes",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/kubernetes",
+      "registryUrls": Array [
+        "https://terraform.example.com",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() test terraform block with only requirement_terraform_version 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "github-tags",
+      "depName": "hashicorp/terraform",
+      "depType": "required_version",
+      "extractVersion": "v(?<version>.*)$",
+      "lineNumber": 1,
+    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() update lockfile constraints with range strategy update-lockfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depType": "required_provider",
+      "lockedVersion": "3.1.0",
+      "lookupName": "hashicorp/aws",
+    },
+    Object {
+      "currentValue": "~> 2.50.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depType": "required_provider",
+      "lockedVersion": "2.50.0",
+      "lookupName": "hashicorp/azurerm",
+    },
+    Object {
+      "currentValue": ">= 1.0",
+      "datasource": "terraform-provider",
+      "depName": "kubernetes",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "example/kubernetes",
+      "registryUrls": Array [
+        "https://terraform.example.com",
+      ],
     },
   ],
 }

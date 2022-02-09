@@ -5,14 +5,21 @@
     [
       "@semantic-release/github",
       {
-        "releasedLabels": false
+        "releasedLabels": false,
+        "assets": [
+          {
+            "path": "tmp/docs.tgz",
+            "label": "docs.tgz"
+          }
+        ]
       }
     ],
     [
       "@semantic-release/exec",
       {
         "verifyConditionsCmd": "run-s verify",
-        "publishCmd": "run-s \"release -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
+        "prepareCmd": "run-s \"release:prepare -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}",
+        "publishCmd": "run-s \"release:publish -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
       }
     ]
   ],
@@ -85,9 +92,9 @@
   "tagFormat": "${version}",
   "branches": [
     {
-      "name": "v24",
-      "range": "24.x",
-      "channel": "v24"
+      "name": "v25",
+      "range": "25.x",
+      "channel": "version25"
     },
     {
       "name": "main"

@@ -15,6 +15,7 @@ export const CONFIG_VALIDATION = 'config-validation';
 export const CONFIG_PRESETS_INVALID = 'config-presets-invalid';
 export const CONFIG_SECRETS_EXPOSED = 'config-secrets-exposed';
 export const CONFIG_SECRETS_INVALID = 'config-secrets-invalid';
+export const CONFIG_GIT_URL_UNAVAILABLE = 'config-git-url-unavailable';
 
 // Repository Errors - causes repo to be considered as disabled
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';

@@ -1,43 +1,18 @@
-import {
-  LANGUAGE_DART,
-  LANGUAGE_DOCKER,
-  LANGUAGE_DOT_NET,
-  LANGUAGE_ELIXIR,
-  LANGUAGE_GOLANG,
-  LANGUAGE_JAVASCRIPT,
-  LANGUAGE_NODE,
-  LANGUAGE_PHP,
-  LANGUAGE_PYTHON,
-  LANGUAGE_RUBY,
-  LANGUAGE_RUST,
-} from '../constants/languages';
+import { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy } from '../types';
 import managers from './api';
 import type {
   ExtractConfig,
+  GlobalManagerConfig,
   ManagerApi,
   PackageFile,
-  PackageUpdateConfig,
-  PackageUpdateResult,
   RangeConfig,
   Result,
 } from './types';
 
 const managerList = Array.from(managers.keys());
 
-const languageList = [
-  LANGUAGE_DART,
-  LANGUAGE_DOCKER,
-  LANGUAGE_DOT_NET,
-  LANGUAGE_ELIXIR,
-  LANGUAGE_GOLANG,
-  LANGUAGE_JAVASCRIPT,
-  LANGUAGE_NODE,
-  LANGUAGE_PHP,
-  LANGUAGE_PYTHON,
-  LANGUAGE_RUBY,
-  LANGUAGE_RUST,
-];
+const languageList = Object.values(ProgrammingLanguage);
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
@@ -48,6 +23,18 @@ export function get<T extends keyof ManagerApi>(
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
+
+export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
+  let config: GlobalManagerConfig = {};
+  for (const managerName of managerList) {
+    const manager = managers.get(managerName);
+    if (manager.detectGlobalConfig) {
+      // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
+      config = { ...config, ...(await manager.detectGlobalConfig()) };
+    }
+  }
+  return config;
+}
 
 export async function extractAllPackageFiles(
   manager: string,
@@ -67,17 +54,6 @@ export async function extractAllPackageFiles(
     return res;
   }
   return null;
-}
-
-export function getPackageUpdates(
-  manager: string,
-  config: PackageUpdateConfig
-): Result<PackageUpdateResult> | null {
-  if (!managers.has(manager)) {
-    return null;
-  }
-  const m = managers.get(manager);
-  return m.getPackageUpdates ? m.getPackageUpdates(config) : null;
 }
 
 export function extractPackageFile(
@@ -103,11 +79,19 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const m = managers.get(manager);
   if (m.getRangeStrategy) {
     // Use manager's own function if it exists
-    return m.getRangeStrategy(config);
+    const managerRangeStrategy = m.getRangeStrategy(config);
+    if (managerRangeStrategy === 'in-range-only') {
+      return 'update-lockfile';
+    }
+    return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
     // default to 'replace' for auto
     return 'replace';
   }
+  if (rangeStrategy === 'in-range-only') {
+    return 'update-lockfile';
+  }
+
   return config.rangeStrategy;
 }

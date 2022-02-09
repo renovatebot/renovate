@@ -1,5 +1,5 @@
 import { hasKey } from '../../util/object';
-import { PreCommitConfig, PreCommitDependency } from './types';
+import type { PreCommitConfig, PreCommitDependency } from './types';
 
 /**
  * Type guard to determine whether the file matches pre-commit configuration format
@@ -12,7 +12,7 @@ import { PreCommitConfig, PreCommitDependency } from './types';
 export function matchesPrecommitConfigHeuristic(
   data: unknown
 ): data is PreCommitConfig {
-  return data && typeof data === 'object' && hasKey('repos', data);
+  return !!(data && typeof data === 'object' && hasKey('repos', data));
 }
 
 /**
@@ -25,7 +25,7 @@ export function matchesPrecommitConfigHeuristic(
 export function matchesPrecommitDependencyHeuristic(
   data: unknown
 ): data is PreCommitDependency {
-  return (
+  return !!(
     data &&
     typeof data === 'object' &&
     hasKey('repo', data) &&

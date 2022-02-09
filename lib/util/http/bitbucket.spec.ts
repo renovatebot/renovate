@@ -1,12 +1,11 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
-import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import * as hostRules from '../host-rules';
 import { BitbucketHttp, setBaseUrl } from './bitbucket';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe(getName(), () => {
+describe('util/http/bitbucket', () => {
   let api: BitbucketHttp;
   beforeEach(() => {
     api = new BitbucketHttp();
@@ -17,7 +16,7 @@ describe(getName(), () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
-      hostType: PLATFORM_TYPE_BITBUCKET,
+      hostType: PlatformId.Bitbucket,
       matchHost: baseUrl,
       token: 'token',
     });
@@ -42,13 +41,6 @@ describe(getName(), () => {
     setBaseUrl(customBaseUrl);
     await api.postJson('some-url');
 
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-  it('returns cached', async () => {
-    httpMock.scope(baseUrl).get('/projects/foo').reply(200, {});
-    const { body } = await api.getJson('projects/foo');
-    // FIXME: explicit assert condition
-    expect(body).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

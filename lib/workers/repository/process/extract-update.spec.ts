@@ -1,5 +1,5 @@
 import hasha from 'hasha';
-import { getName, git, mocked } from '../../../../test/util';
+import { git, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
@@ -21,7 +21,7 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
   branchList: ['branchName'],
 });
 
-describe(getName(), () => {
+describe('workers/repository/process/extract-update', () => {
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
       const config = {
@@ -29,11 +29,19 @@ describe(getName(), () => {
         suppressNotifications: ['deprecationWarningIssues'],
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      git.checkoutBranch.mockResolvedValueOnce('abc123');
+      git.checkoutBranch.mockResolvedValueOnce('123test');
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchList: ['branchName'],
+        branches: [
+          {
+            branchName: 'some-branch',
+            upgrades: [],
+          },
+        ],
+        packageFiles: undefined,
+      });
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });
     it('runs with baseBranches', async () => {
@@ -42,11 +50,10 @@ describe(getName(), () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      git.checkoutBranch.mockResolvedValueOnce('abc123');
+      git.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toBeUndefined();
     });
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
@@ -58,14 +65,14 @@ describe(getName(), () => {
       repositoryCache.getCache.mockReturnValueOnce({
         scan: {
           master: {
-            sha: 'abc123',
+            sha: '123test',
             configHash: hasha(JSON.stringify(config)),
             packageFiles,
           },
         },
       });
-      git.getBranchCommit.mockReturnValueOnce('abc123');
-      git.checkoutBranch.mockResolvedValueOnce('abc123');
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      git.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
     });

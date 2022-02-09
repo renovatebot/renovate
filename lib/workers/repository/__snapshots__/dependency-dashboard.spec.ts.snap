@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
 
 ## Repository problems
 
@@ -23,7 +23,7 @@ These updates await pending status checks. To force their creation now, click th
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This is a header
 
 This repository currently has no open or pending branches.
 
@@ -33,17 +33,17 @@ And this is a footer
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when rules contain approvals 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This is a header for platform:github
 
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer
+And this is a footer for repository:test
 "
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `
-"This issue contains a list of Renovate updates and their statuses.
+"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
 
 ## Pending Approval
 
@@ -55,19 +55,8 @@ These branches will be created by Renovate only once you click their checkbox be
 ## Awaiting Schedule
 
 These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
  - [x] <!-- unschedule-branch=branchName3 -->pr3
 
 "
-`;
-
-exports[`workers/repository/dependency-dashboard readDashboardBody() reads dashboard body 1`] = `
-Object {
-  "dependencyDashboardChecks": Object {
-    "branchName1": "approve",
-  },
-  "dependencyDashboardIssue": 1,
-  "dependencyDashboardRebaseAllOpen": true,
-  "dependencyDashboardTitle": "Dependency Dashboard",
-  "prCreation": "approval",
-}
 `;

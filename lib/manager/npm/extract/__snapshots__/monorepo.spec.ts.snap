@@ -43,20 +43,24 @@ Array [
     "lernaClient": undefined,
     "managerData": Object {
       "lernaJsonFile": "lerna.json",
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
+    "skipInstalls": undefined,
     "yarnLock": undefined,
   },
   Object {
     "lernaClient": undefined,
     "managerData": Object {
       "lernaJsonFile": "lerna.json",
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
+    "skipInstalls": undefined,
     "yarnLock": undefined,
   },
 ]
@@ -108,20 +112,24 @@ Array [
     "lernaClient": undefined,
     "managerData": Object {
       "lernaJsonFile": "lerna.json",
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
+    "skipInstalls": undefined,
     "yarnLock": undefined,
   },
   Object {
     "lernaClient": undefined,
     "managerData": Object {
       "lernaJsonFile": "lerna.json",
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
+    "skipInstalls": undefined,
     "yarnLock": undefined,
   },
 ]
@@ -146,20 +154,24 @@ Array [
     "lernaClient": "yarn",
     "managerData": Object {
       "lernaJsonFile": "lerna.json",
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
+    "skipInstalls": undefined,
     "yarnLock": undefined,
   },
   Object {
     "lernaClient": "yarn",
     "managerData": Object {
       "lernaJsonFile": "lerna.json",
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
+    "skipInstalls": undefined,
     "yarnLock": undefined,
   },
 ]
@@ -178,22 +190,68 @@ Array [
     "lernaClient": undefined,
     "managerData": Object {
       "lernaJsonFile": undefined,
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "npmrc": "@org:registry=//registry.some.org
 ",
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
+    "skipInstalls": undefined,
     "yarnLock": "yarn.lock",
   },
   Object {
     "lernaClient": undefined,
     "managerData": Object {
       "lernaJsonFile": undefined,
+      "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
+    "skipInstalls": undefined,
+    "yarnLock": undefined,
+  },
+]
+`;
+
+exports[`manager/npm/extract/monorepo .extractPackageFile() uses yarnZeroInstall and skipInstalls from yarn workspaces package settings 1`] = `
+Array [
+  Object {
+    "managerData": Object {
+      "yarnZeroInstall": true,
+    },
+    "npmrc": "@org:registry=//registry.some.org
+",
+    "packageFile": "package.json",
+    "skipInstalls": false,
+    "yarnWorkspacesPackages": "packages/*",
+  },
+  Object {
+    "hasYarnWorkspaces": true,
+    "lernaClient": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+      "yarnZeroInstall": true,
+    },
+    "npmLock": undefined,
+    "npmrc": "@org:registry=//registry.some.org
+",
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "skipInstalls": false,
+    "yarnLock": "yarn.lock",
+  },
+  Object {
+    "lernaClient": undefined,
+    "managerData": Object {
+      "lernaJsonFile": undefined,
+      "yarnZeroInstall": true,
+    },
+    "npmLock": undefined,
+    "packageFile": "packages/b/package.json",
+    "packageJsonName": "@org/b",
+    "skipInstalls": false,
     "yarnLock": undefined,
   },
 ]

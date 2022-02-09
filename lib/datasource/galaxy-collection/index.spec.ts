@@ -1,20 +1,20 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { GalaxyCollectionDatasource } from '.';
 
-const communityKubernetesBase = loadFixture('community_kubernetes_base.json');
-const communityKubernetesVersions = loadFixture(
+const communityKubernetesBase = Fixtures.get('community_kubernetes_base.json');
+const communityKubernetesVersions = Fixtures.get(
   'community_kubernetes_versions.json'
 );
-const communityKubernetesDetails121 = loadFixture(
+const communityKubernetesDetails121 = Fixtures.get(
   'community_kubernetes_version_details_1.2.1.json'
 );
-const communityKubernetesDetails120 = loadFixture(
+const communityKubernetesDetails120 = Fixtures.get(
   'community_kubernetes_version_details_1.2.0.json'
 );
-const communityKubernetesDetails0111 = loadFixture(
+const communityKubernetesDetails0111 = Fixtures.get(
   'community_kubernetes_version_details_0.11.1.json'
 );
 
@@ -22,7 +22,7 @@ const baseUrl = 'https://galaxy.ansible.com';
 
 const datasource = GalaxyCollectionDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/galaxy-collection/index', () => {
   describe('getReleases', () => {
     it('returns null for 404 result', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(404);

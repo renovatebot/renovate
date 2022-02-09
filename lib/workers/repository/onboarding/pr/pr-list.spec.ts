@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -12,8 +12,13 @@ describe(getName(), () => {
     it('handles empty', () => {
       const branches: BranchConfig[] = [];
       const res = getPrList(config, branches);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### What to Expect
+
+        It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.
+        "
+      `);
     });
     it('has special lock file maintenance description', () => {
       const branches = [
@@ -29,8 +34,23 @@ describe(getName(), () => {
         },
       ];
       const res = getPrList(config, branches);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### What to Expect
+
+        With your current configuration, Renovate will create 1 Pull Request:
+
+        <details>
+        <summary>Lock file maintenance</summary>
+
+          - Schedule: [\\"before 5am\\"]
+          - Branch name: \`renovate/lock-file-maintenance\`
+          - Regenerate lock files to use latest dependency versions
+
+        </details>
+
+        "
+      `);
     });
     it('handles multiple', () => {
       const branches = [
@@ -70,8 +90,38 @@ describe(getName(), () => {
       ];
       config.prHourlyLimit = 1;
       const res = getPrList(config, branches);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### What to Expect
+
+        With your current configuration, Renovate will create 2 Pull Requests:
+
+        <details>
+        <summary>Pin dependencies</summary>
+
+          - Branch name: \`renovate/pin-dependencies\`
+          - Merge into: \`some-other\`
+          - Pin [a](https://a) to \`1.1.0\`
+          - Pin b to \`1.5.3\`
+
+
+        </details>
+
+        <details>
+        <summary>Update a to v2</summary>
+
+          - Branch name: \`renovate/a-2.x\`
+          - Upgrade [a](https://a) to \`undefined\`
+
+
+        </details>
+
+        <br />
+
+        🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.
+
+        "
+      `);
     });
   });
 });

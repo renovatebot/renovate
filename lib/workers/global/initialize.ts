@@ -6,6 +6,7 @@ import { logger } from '../../logger';
 import { initPlatform } from '../../platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
+import { validateGitVersion } from '../../util/git';
 import { Limit, setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -34,18 +35,26 @@ function limitCommitsPerRun(config: RenovateConfig): void {
   setMaxLimit(Limit.Commits, limit);
 }
 
+async function checkVersions(): Promise<void> {
+  const validGitVersion = await validateGitVersion();
+  if (!validGitVersion) {
+    throw new Error('Init: git version needs upgrading');
+  }
+}
+
 export async function globalInitialize(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
   let config = config_;
+  await checkVersions();
   config = await initPlatform(config);
   config = await setDirectories(config);
-  packageCache.init(config);
+  await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   return config;
 }
 
-export function globalFinalize(config: RenovateConfig): void {
-  packageCache.cleanup(config);
+export async function globalFinalize(config: RenovateConfig): Promise<void> {
+  await packageCache.cleanup(config);
 }

@@ -3,15 +3,16 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import type { ArtifactError, PackageDependency } from '../../manager/types';
-import { File, getFile } from '../../util/git';
+import { getFile } from '../../util/git';
+import type { FileAddition, FileChange } from '../../util/git/types';
 import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
   reuseExistingBranch?: boolean;
-  updatedPackageFiles: File[];
-  updatedArtifacts: File[];
+  updatedPackageFiles: FileChange[];
+  updatedArtifacts: FileChange[];
 }
 
 export async function getUpdatedPackageFiles(
@@ -28,7 +29,8 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { manager, packageFile, lockFile, depName } = upgrade;
+    const { manager, packageFile, depName, newVersion } = upgrade;
+    const updateLockedDependency = get(manager, 'updateLockedDependency');
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -40,8 +42,22 @@ export async function getUpdatedPackageFiles(
         reuseExistingBranch ? config.branchName : config.baseBranch
       );
     }
+    let lockFileContent: string;
+    const lockFile = upgrade.lockFile || upgrade.lockFiles?.[0] || '';
+    if (lockFile) {
+      lockFileContent = updatedFileContents[lockFile];
+      if (!lockFileContent) {
+        lockFileContent = await getFile(
+          lockFile,
+          reuseExistingBranch ? config.branchName : config.baseBranch
+        );
+      }
+    }
     // istanbul ignore if
-    if (reuseExistingBranch && !packageFileContent) {
+    if (
+      reuseExistingBranch &&
+      (!packageFileContent || (lockFile && !lockFileContent))
+    ) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found'
@@ -54,43 +70,67 @@ export async function getUpdatedPackageFiles(
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
-      let lockFileContent = updatedFileContents[lockFile];
-      if (!lockFileContent) {
-        lockFileContent = await getFile(
-          lockFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch
-        );
-      }
-      // istanbul ignore if: to hard to test
-      if (reuseExistingBranch && !lockFileContent) {
+      const { status, files } = await updateLockedDependency({
+        ...upgrade,
+        packageFileContent,
+        lockFileContent,
+        allowParentUpdates: true,
+        allowHigherOrRemoved: true,
+      });
+      if (reuseExistingBranch && status !== 'already-updated') {
         logger.debug(
-          { lockFile, depName },
-          'Rebasing branch after lock file not found'
+          { lockFile, depName, status },
+          'Need to retry branch as it is not already up-to-date'
         );
         return getUpdatedPackageFiles({
           ...config,
           reuseExistingBranch: false,
         });
       }
-      const updateLockedDependency = get(manager, 'updateLockedDependency');
-      const files = await updateLockedDependency({
-        ...upgrade,
-        packageFileContent,
-        lockFileContent,
-      });
       if (files) {
-        if (reuseExistingBranch) {
-          // This ensure it's always 1 commit from the bot
-          logger.debug(
-            { lockFile, depName },
-            'Need to update file(s) so will rebase first'
-          );
-          return getUpdatedPackageFiles({
-            ...config,
-            reuseExistingBranch: false,
-          });
-        }
         updatedFileContents = { ...updatedFileContents, ...files };
+      }
+      if (status === 'update-failed' || status === 'unsupported') {
+        upgrade.remediationNotPossible = true;
+      }
+    } else if (upgrade.isLockfileUpdate) {
+      if (updateLockedDependency) {
+        const { status, files } = await updateLockedDependency({
+          ...upgrade,
+          lockFile,
+          packageFileContent,
+          lockFileContent,
+          allowParentUpdates: false,
+        });
+        if (status === 'unsupported') {
+          // incompatible lock file
+          nonUpdatedFileContents[packageFile] = packageFileContent;
+        } else if (status === 'already-updated') {
+          logger.debug(
+            `Upgrade of ${depName} to ${newVersion} is already done in existing branch`
+          );
+        } else {
+          // something changed
+          if (reuseExistingBranch) {
+            logger.debug(
+              { lockFile, depName, status },
+              'Need to retry branch as upgrade requirements are not mets'
+            );
+            return getUpdatedPackageFiles({
+              ...config,
+              reuseExistingBranch: false,
+            });
+          }
+          if (files) {
+            updatedFileContents = { ...updatedFileContents, ...files };
+          }
+        }
+      } else {
+        logger.debug(
+          { manager },
+          'isLockFileUpdate without updateLockedDependency'
+        );
+        nonUpdatedFileContents[packageFile] = packageFileContent;
       }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
@@ -112,15 +152,11 @@ export async function getUpdatedPackageFiles(
           }
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
-            if (upgrade.rangeStrategy === 'update-lockfile') {
-              logger.debug({ packageFile, depName }, 'update-lockfile add');
-              nonUpdatedFileContents[packageFile] = res;
-            }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
           }
-          continue; // eslint-disable-line no-continue
+          continue;
         } else if (reuseExistingBranch) {
           return getUpdatedPackageFiles({
             ...config,
@@ -175,30 +211,30 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
       }
       if (newContent === packageFileContent) {
-        // istanbul ignore else
         if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
-        } else if (upgrade.rangeStrategy === 'update-lockfile') {
-          nonUpdatedFileContents[packageFile] = newContent;
         }
       }
     }
   }
-  const updatedPackageFiles = Object.keys(updatedFileContents).map((name) => ({
-    name,
+  const updatedPackageFiles: FileAddition[] = Object.keys(
+    updatedFileContents
+  ).map((name) => ({
+    type: 'addition',
+    path: name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts: File[] = [];
+  const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   for (const packageFile of updatedPackageFiles) {
-    const manager = packageFileManagers[packageFile.name];
-    const updatedDeps = packageFileUpdatedDeps[packageFile.name];
+    const manager = packageFileManagers[packageFile.path];
+    const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const updateArtifacts = get(manager, 'updateArtifacts');
     if (updateArtifacts) {
       const results = await updateArtifacts({
-        packageFileName: packageFile.name,
+        packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents,
+        newPackageFileContent: packageFile.contents.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
@@ -213,21 +249,22 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
-  const nonUpdatedPackageFiles = Object.keys(nonUpdatedFileContents).map(
-    (name) => ({
-      name,
-      contents: nonUpdatedFileContents[name],
-    })
-  );
+  const nonUpdatedPackageFiles: FileAddition[] = Object.keys(
+    nonUpdatedFileContents
+  ).map((name) => ({
+    type: 'addition',
+    path: name,
+    contents: nonUpdatedFileContents[name],
+  }));
   for (const packageFile of nonUpdatedPackageFiles) {
-    const manager = packageFileManagers[packageFile.name];
-    const updatedDeps = packageFileUpdatedDeps[packageFile.name];
+    const manager = packageFileManagers[packageFile.path];
+    const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const updateArtifacts = get(manager, 'updateArtifacts');
     if (updateArtifacts) {
       const results = await updateArtifacts({
-        packageFileName: packageFile.name,
+        packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents,
+        newPackageFileContent: packageFile.contents.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {

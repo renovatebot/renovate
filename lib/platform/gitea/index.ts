@@ -1,6 +1,8 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import { lt } from 'semver';
+import JSON5 from 'json5';
+import semver from 'semver';
+import { PlatformId } from '../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -9,7 +11,6 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -50,7 +51,7 @@ interface GiteaRepoConfig {
 }
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITEA,
+  hostType: PlatformId.Gitea,
   endpoint: 'https://gitea.com/api/v1/',
   version: '0.0.0',
 };
@@ -101,8 +102,9 @@ function toRenovatePR(data: helper.PR): Pr | null {
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
-    canMerge: data.mergeable,
-    isConflicted: !data.mergeable,
+    cannotMergeReason: data.mergeable
+      ? undefined
+      : `pr.mergeable="${data.mergeable}"`,
     hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
@@ -210,17 +212,23 @@ const platform: Platform = {
 
   async getRawFile(
     fileName: string,
-    repo: string = config.repository
+    repoName?: string,
+    branchOrTag?: string
   ): Promise<string | null> {
-    const contents = await helper.getRepoContents(repo, fileName);
+    const repo = repoName ?? config.repository;
+    const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
     return contents.contentString;
   },
 
   async getJsonFile(
     fileName: string,
-    repo: string = config.repository
+    repoName?: string,
+    branchOrTag?: string
   ): Promise<any | null> {
-    const raw = await platform.getRawFile(fileName, repo);
+    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
+    if (fileName.endsWith('.json5')) {
+      return JSON5.parse(raw);
+    }
     return JSON.parse(raw);
   },
 
@@ -287,7 +295,7 @@ const platform: Platform = {
 
     // Find options for current host and determine Git endpoint
     const opts = hostRules.find({
-      hostType: PLATFORM_TYPE_GITEA,
+      hostType: PlatformId.Gitea,
       url: defaults.endpoint,
     });
     const gitEndpoint = URL.parse(repo.clone_url);
@@ -297,8 +305,6 @@ const platform: Platform = {
     await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
     });
 
     // Reset cached resources
@@ -352,19 +358,7 @@ const platform: Platform = {
     }
   },
 
-  async getBranchStatus(
-    branchName: string,
-    requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus> {
-    if (!requiredStatusChecks) {
-      return BranchStatus.green;
-    }
-
-    if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-      logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BranchStatus.red;
-    }
-
+  async getBranchStatus(branchName: string): Promise<BranchStatus> {
     let ccs: helper.CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
@@ -768,34 +762,34 @@ const platform: Platform = {
       const commentList = await helper.getComments(config.repository, issue);
 
       // Search comment by either topic or exact body
-      let comment: helper.Comment = null;
+      let comment: helper.Comment | null = null;
       if (topic) {
         comment = findCommentByTopic(commentList, topic);
         body = `### ${topic}\n\n${body}`;
       } else {
-        comment = commentList.find((c) => c.body === body);
+        comment = findCommentByContent(commentList, body);
       }
 
       // Create a new comment if no match has been found, otherwise update if necessary
       if (!comment) {
-        const c = await helper.createComment(config.repository, issue, body);
+        comment = await helper.createComment(config.repository, issue, body);
         logger.info(
-          { repository: config.repository, issue, comment: c.id },
+          { repository: config.repository, issue, comment: comment.id },
           'Comment added'
         );
       } else if (comment.body === body) {
         logger.debug(`Comment #${comment.id} is already up-to-date`);
       } else {
-        const c = await helper.updateComment(config.repository, issue, body);
+        await helper.updateComment(config.repository, comment.id, body);
         logger.debug(
-          { repository: config.repository, issue, comment: c.id },
+          { repository: config.repository, issue, comment: comment.id },
           'Comment updated'
         );
       }
 
       return true;
     } catch (err) {
-      logger.warn({ err }, 'Error ensuring comment');
+      logger.warn({ err, issue, subject: topic }, 'Error ensuring comment');
       return false;
     }
   },
@@ -810,11 +804,12 @@ const platform: Platform = {
     );
     const commentList = await helper.getComments(config.repository, issue);
     let comment: helper.Comment | null = null;
+    const body = sanitize(content);
 
     if (topic) {
       comment = findCommentByTopic(commentList, topic);
-    } else if (content) {
-      comment = findCommentByContent(commentList, content);
+    } else if (body) {
+      comment = findCommentByContent(commentList, body);
     }
 
     // Abort and do nothing if no matching comment was found
@@ -847,7 +842,7 @@ const platform: Platform = {
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
-    if (lt(defaults.version, '1.14.0')) {
+    if (semver.lt(defaults.version, '1.14.0')) {
       logger.debug(
         { version: defaults.version },
         'Adding reviewer not yet supported.'

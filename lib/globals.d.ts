@@ -9,17 +9,11 @@ declare interface Error {
   validationMessage?: string;
 }
 
-declare namespace NodeJS {
-  interface Global {
-    gitAuthor?: { name: string; email: string };
-  }
-}
-
 // can't use `resolveJsonModule` because it will copy json files and change dist path
 
 declare module '*/package.json' {
-  import { PackageJson } from 'type-fest';
-  const value: PackageJson & { 'engines-next': Record<string, string> };
+  type RenovatePackageJson = import('./types').RenovatePackageJson;
+  const value: RenovatePackageJson;
   export = value;
 }
 

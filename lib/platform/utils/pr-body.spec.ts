@@ -1,14 +1,14 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { smartTruncate } from './pr-body';
 
-const prBody = loadFixture('pr-body.txt');
+const prBody = Fixtures.get('pr-body.txt');
 
-describe(getName(), () => {
+describe('platform/utils/pr-body', () => {
   describe('.smartTruncate', () => {
     it('truncates to 1000', () => {
       const body = smartTruncate(prBody, 1000);
       expect(body).toMatchSnapshot();
-      expect(body.length < prBody.length).toEqual(true);
+      expect(body.length < prBody.length).toBe(true);
     });
 
     it('truncates to 300 not smart', () => {
@@ -19,7 +19,7 @@ describe(getName(), () => {
 
     it('truncates to 10', () => {
       const body = smartTruncate('Lorem ipsum dolor sit amet', 10);
-      expect(body).toEqual('Lorem ipsu');
+      expect(body).toBe('Lorem ipsu');
     });
 
     it('does not truncate', () => {

@@ -1,4 +1,4 @@
-import { getAdminConfig } from '../../../config/admin';
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -31,7 +31,7 @@ async function cleanUpBranches(
             { prNo: pr.number, prTitle: pr.title },
             'Branch is modified - skipping PR autoclosing'
           );
-          if (getAdminConfig().dryRun) {
+          if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
             await platform.ensureComment({
@@ -41,7 +41,7 @@ async function cleanUpBranches(
                 'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
-        } else if (getAdminConfig().dryRun) {
+        } else if (GlobalConfig.get('dryRun')) {
           logger.info(
             { prNo: pr.number, prTitle: pr.title },
             `DRY-RUN: Would autoclose PR`
@@ -62,14 +62,18 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
-      } else if (getAdminConfig().dryRun) {
+      } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message?.includes("bad revision 'origin/")) {
+      if (err.message === 'config-validation') {
+        logger.debug(
+          'Cannot prune branch due to collision between tags and branch names'
+        );
+      } else if (err.message?.includes("bad revision 'origin/")) {
         logger.debug(
           { branchName },
           'Branch not found on origin when attempting to prune'

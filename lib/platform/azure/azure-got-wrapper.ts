@@ -1,14 +1,14 @@
 import * as azure from 'azure-devops-node-api';
 import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
-import { ICoreApi } from 'azure-devops-node-api/CoreApi';
-import { IGitApi } from 'azure-devops-node-api/GitApi';
-import { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
-import { HostRule } from '../../types';
+import type { ICoreApi } from 'azure-devops-node-api/CoreApi';
+import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
+import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
+import { PlatformId } from '../../constants';
+import type { HostRule } from '../../types';
 import * as hostRules from '../../util/host-rules';
 
-const hostType = PLATFORM_TYPE_AZURE;
+const hostType = PlatformId.Azure;
 let endpoint: string;
 
 function getAuthenticationHandler(config: HostRule): IRequestHandler {

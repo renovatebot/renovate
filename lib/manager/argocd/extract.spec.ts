@@ -1,11 +1,11 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const validApplication = loadFixture('validApplication.yml');
-const malformedApplication = loadFixture('malformedApplications.yml');
-const randomManifest = loadFixture('randomManifest.yml');
+const validApplication = Fixtures.get('validApplication.yml');
+const malformedApplication = Fixtures.get('malformedApplications.yml');
+const randomManifest = Fixtures.get('randomManifest.yml');
 
-describe(getName(), () => {
+describe('manager/argocd/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'applications.yml')).toBeNull();

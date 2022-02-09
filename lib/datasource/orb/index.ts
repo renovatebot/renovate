@@ -24,9 +24,9 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  defaultRegistryUrls = ['https://circleci.com/'];
+  override readonly defaultRegistryUrls = ['https://circleci.com/'];
 
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,
@@ -36,6 +36,10 @@ export class OrbDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
     const url = `${registryUrl}graphql-unstable`;
     const body = {
       query,
@@ -51,19 +55,15 @@ export class OrbDatasource extends Datasource {
       return null;
     }
     // Simplify response before caching and returning
-    const dep: ReleaseResult = {
-      releases: null,
-    };
-    if (res.homeUrl?.length) {
-      dep.homepage = res.homeUrl;
-    }
-    dep.homepage =
-      dep.homepage || `https://circleci.com/developer/orbs/orb/${lookupName}`;
-    dep.releases = res.versions.map(({ version, createdAt }) => ({
+    const homepage = res.homeUrl?.length
+      ? res.homeUrl
+      : `https://circleci.com/developer/orbs/orb/${lookupName}`;
+    const releases = res.versions.map(({ version, createdAt }) => ({
       version,
-      releaseTimestamp: createdAt || null,
+      releaseTimestamp: createdAt ?? null,
     }));
 
+    const dep = { homepage, releases };
     logger.trace({ dep }, 'dep');
     return dep;
   }

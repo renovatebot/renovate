@@ -1,6 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
@@ -30,7 +29,7 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-describe(getName(), () => {
+describe('workers/pr/changelog/github', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
@@ -40,7 +39,7 @@ describe(getName(), () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
@@ -84,41 +83,105 @@ describe(getName(), () => {
     });
 
     it('works without Github', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('uses GitHub tags', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('filters unnecessary warns', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           depName: '@renovate/no',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: '@renovate/no',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('supports node engines', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           depType: 'engines',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('handles no sourceUrl', async () => {
@@ -168,34 +231,66 @@ describe(getName(), () => {
 
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           endpoint: 'https://github-enterprise.example.com/',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
           endpoint: 'https://github-enterprise.example.com/',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+          baseUrl: 'https://github-enterprise.example.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
   });
 });

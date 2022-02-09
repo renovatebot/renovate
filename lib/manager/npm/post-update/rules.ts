@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { validateUrl } from '../../../util/url';
 
 export interface HostRulesResult {
@@ -18,7 +19,10 @@ export function processHostRules(): HostRulesResult {
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
       let uri = hostRule.matchHost;
-      uri = validateUrl(uri) ? uri.replace(/^https?:/, '') : `//${uri}/`;
+      uri =
+        is.string(uri) && validateUrl(uri)
+          ? uri.replace(regEx(/^https?:/), '')
+          : `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
         additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
@@ -38,9 +42,7 @@ export function processHostRules(): HostRulesResult {
         additionalNpmrcContent.push(`${uri}:_password=${password}`);
         additionalYarnRcYml ||= { npmRegistries: {} };
         additionalYarnRcYml.npmRegistries[uri] = {
-          npmAuthIdent: Buffer.from(
-            `${hostRule.username}:${hostRule.password}`
-          ).toString('base64'),
+          npmAuthIdent: `${hostRule.username}:${hostRule.password}`,
         };
       }
     }

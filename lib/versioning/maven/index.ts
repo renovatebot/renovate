@@ -105,7 +105,7 @@ const getPatch = (version: string): number | null => {
 
 const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 
-const isStable = (version: string): boolean | null => {
+const isStable = (version: string): boolean => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     for (const token of tokens) {
@@ -118,12 +118,15 @@ const isStable = (version: string): boolean | null => {
     }
     return true;
   }
-  return null;
+  return false;
 };
 
 // istanbul ignore next
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  versions.reduce((result, version) => {
+const getSatisfyingVersion = (
+  versions: string[],
+  range: string
+): string | null =>
+  versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -139,11 +142,11 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   newVersion,
-}: NewValueConfig): string | null {
+}: NewValueConfig): string {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return newVersion;
   }
-  return autoExtendMavenRange(currentValue, newVersion);
+  return autoExtendMavenRange(currentValue, newVersion) ?? currentValue;
 }
 
 export { isValid };

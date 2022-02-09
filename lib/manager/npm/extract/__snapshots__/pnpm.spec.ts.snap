@@ -1,33 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract/pnpm .detectPnpmWorkspaces() filters none matching packages 1`] = `
-Array [
-  Object {
-    "packageFile": "package.json",
-    "pnpmShrinkwrap": "pnpm-lock.yaml",
-  },
-  Object {
-    "packageFile": "nested-packages/group/a/package.json",
-    "packageJsonName": "@demo/nested-group-a",
-    "pnpmShrinkwrap": "pnpm-lock.yaml",
-  },
-  Object {
-    "packageFile": "not-matching/b/package.json",
-    "packageJsonName": "@not-matching/b",
-    "pnpmShrinkwrap": undefined,
-  },
-]
-`;
-
-exports[`manager/npm/extract/pnpm .detectPnpmWorkspaces() skips when pnpm shrinkwrap file has already been provided 1`] = `
-Array [
-  Object {
-    "packageFile": "package.json",
-    "pnpmShrinkwrap": "pnpm-lock.yaml",
-  },
-]
-`;
-
 exports[`manager/npm/extract/pnpm .detectPnpmWorkspaces() uses pnpm workspaces 1`] = `
 Array [
   Object {
@@ -60,17 +32,19 @@ Array [
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
+    "packageFile": "solo-package-leading-dot-slash/package.json",
+    "packageJsonName": "@demo/solo-leading-dot-slash",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "solo-package-leading-double-dot-slash/package.json",
+    "packageJsonName": "@demo/solo-leading-double-dot-slash",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
     "packageFile": "solo-package-trailing-slash/package.json",
     "packageJsonName": "@demo/solo-trailing-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
 ]
 `;
-
-exports[`manager/npm/extract/pnpm .extractPnpmFilters() detects errors in pnpm-workspace.yml file structure 1`] = `null`;
-
-exports[`manager/npm/extract/pnpm .extractPnpmFilters() detects errors when opening pnpm-workspace.yml file 1`] = `null`;
-
-exports[`manager/npm/extract/pnpm .findPnpmWorkspace() detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found 1`] = `null`;
-
-exports[`manager/npm/extract/pnpm .findPnpmWorkspace() detects missing pnpm-workspace.yaml 1`] = `null`;

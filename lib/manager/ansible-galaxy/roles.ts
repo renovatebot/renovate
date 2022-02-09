@@ -1,6 +1,6 @@
 import { GalaxyDatasource } from '../../datasource/galaxy';
-import * as datasourceGitTags from '../../datasource/git-tags';
-import { SkipReason } from '../../types';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
   blockLineRegEx,
@@ -16,7 +16,7 @@ function interpretLine(
 ): PackageDependency {
   const localDependency: PackageDependency = dependency;
   const key = lineMatch[2];
-  const value = lineMatch[3].replace(/["']/g, '');
+  const value = lineMatch[3].replace(regEx(/["']/g), '');
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;
@@ -46,17 +46,17 @@ function interpretLine(
 function finalize(dependency: PackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
     return false;
   }
 
   const source: string = dep.managerData.src;
   const sourceMatch = nameMatchRegex.exec(source);
   if (sourceMatch) {
-    dep.datasource = datasourceGitTags.id;
-    dep.depName = sourceMatch.groups.depName.replace(/.git$/, '');
+    dep.datasource = GitTagsDatasource.id;
+    dep.depName = sourceMatch.groups.depName.replace(regEx(/.git$/), '');
     // remove leading `git+` from URLs like `git+https://...`
-    dep.lookupName = source.replace(/git\+/, '');
+    dep.lookupName = source.replace(regEx(/git\+/), '');
   } else if (galaxyDepRegex.exec(source)) {
     dep.datasource = GalaxyDatasource.id;
     dep.depName = dep.managerData.src;
@@ -66,7 +66,7 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = dep.managerData.name;
     dep.lookupName = dep.managerData.name;
   } else {
-    dep.skipReason = SkipReason.NoSourceMatch;
+    dep.skipReason = 'no-source-match';
     return false;
   }
   if (dep.managerData.name !== null) {
@@ -93,7 +93,7 @@ export function extractRoles(lines: string[]): PackageDependency[] {
       };
       do {
         const localdep = interpretLine(lineMatch, lineNumber, dep);
-        if (localdep == null) {
+        if (!localdep) {
           break;
         }
         const line = lines[lineNumber + 1];

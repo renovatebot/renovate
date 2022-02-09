@@ -1,6 +1,7 @@
-import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement';
-import { Version, create } from '@renovatebot/ruby-semver/dist/ruby/version';
+import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement.js';
+import { Version, create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';
 
 export interface Range {
@@ -10,31 +11,32 @@ export interface Range {
 }
 
 const parse = (range: string): Range => {
-  const regExp =
-    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/;
+  const regExp = regEx(
+    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/
+  );
 
   const value = (range || '').trim();
 
   const match = regExp.exec(value);
-  if (match) {
-    const { version = null, operator = null, delimiter = ' ' } = match.groups;
+  if (match?.groups) {
+    const { version = '', operator = '', delimiter = ' ' } = match.groups;
     return { version, operator, delimiter };
   }
 
   return {
-    version: null,
-    operator: null,
+    version: '',
+    operator: '',
     delimiter: ' ',
   };
 };
 
 type GemRequirement = [string, Version];
 
-const ltr = (version: string, range: string): boolean | null => {
+const ltr = (version: string, range: string): boolean => {
   const gemVersion = create(version);
   if (!gemVersion) {
     logger.warn(`Invalid ruby version '${version}'`);
-    return null;
+    return false;
   }
   const requirements: GemRequirement[] = range.split(',').map(_parse);
 
@@ -56,7 +58,7 @@ const ltr = (version: string, range: string): boolean | null => {
       // istanbul ignore next
       default:
         logger.warn(`Unsupported operator '${operator}'`);
-        return null;
+        return false;
     }
   });
 

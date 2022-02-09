@@ -18,9 +18,11 @@ This way Renovate can commit and push Git LFS objects.
 
 **Note** `allowGitLfs` does not work in the official Renovate docker images, see issue [containerbase/buildpack#13](https://github.com/containerbase/buildpack/issues/13) for more information.
 
+## allowPlugins
+
 ## allowPostUpgradeCommandTemplating
 
-Set to true to allow templating of dependency level post-upgrade commands.
+Set to `true` to allow templating of dependency level post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
@@ -35,7 +37,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
 
 ```json
 {
@@ -84,13 +86,31 @@ If you want Renovate to run on only a subset of those, use the `autodiscoverFilt
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
-It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern.
+It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
-e.g.
+**Minimatch**:
 
 ```json
 {
   "autodiscoverFilter": "project/*"
+}
+```
+
+**Regex**:
+
+All text inside the start and end `/` will be treated as a regular expression.
+
+```json
+{
+  "autodiscoverFilter": "/project/.*/"
+}
+```
+
+You can negate the regex by putting a `!` in front:
+
+```json
+{
+  "autodiscoverFilter": "!/project/.*/"
 }
 ```
 
@@ -109,12 +129,24 @@ e.g.
 
 ## binarySource
 
-Renovate often needs to use third party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
+Renovate often needs to use third-party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
 By default, Renovate will use a child process to run such tools, so they need to be pre-installed before running Renovate and available in the path.
 
-As an alternative, Renovate can use "sidecar" containers for third party tools.
+Renovate can instead use "sidecar" containers for third-party tools when `binarySource=docker`.
 If configured, Renovate will use `docker run` to create containers such as Node.js or Python to run tools within as-needed.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
+
+Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+This mode means that Renovate will dynamically install the version of tools available, if supported.
+
+Supported tools for dynamic install are:
+
+- `composer`
+- `flux`
+- `jb`
+- `npm`
+
+Unsupported tools will fall back to `binarySource=global`.
 
 ## cacheDir
 
@@ -133,13 +165,86 @@ e.g.
 }
 ```
 
-## composerIgnorePlatformReqs
-
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.s
-
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
+
+## detectGlobalManagerConfig
+
+The purpose of this capability is to allow a bot admin to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
+
+This feature is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+
+Currently this capability is supported for the `npm` manager only - specifically the `~/.npmrc` file.
+If found, it will be imported into `config.npmrc` with `config.npmrcMerge` will be set to `true`.
+
+## detectHostRulesFromEnv
+
+The format of the environment variables must follow:
+
+- Datasource name (e.g. `NPM`, `PYPI`)
+- Underscore (`_`)
+- `matchHost`
+- Underscore (`_`)
+- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
+
+Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
+Periods (`.`) in host names must be replaced with a single underscore (`_`).
+
+<!-- prettier-ignore -->
+!!! note
+    The following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+
+### npmjs registry token example
+
+`NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "npm",
+      "matchHost": "registry.npmjs.org",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+### GitLab Tags username/password example
+
+`GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "gitlab-tags",
+      "matchHost": "code-host.company.com",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
+
+### Datasource and credentials only
+
+You can skip the host part, and use just the datasource and credentials.
+
+`DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
 
 ## dockerChildPrefix
 
@@ -147,7 +252,9 @@ Adds a custom prefix to the default Renovate sidecar Docker containers name and 
 
 If this is set to `myprefix_` the final container created from `renovate/node` image would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
 
-Note that dangling containers will not be removed until Renovate is run with the same prefix again.
+<!-- prettier-ignore -->
+!!! note
+    Dangling containers will only be removed when Renovate runs again with the same prefix.
 
 ## dockerImagePrefix
 
@@ -184,6 +291,11 @@ e.g.
 
 ## endpoint
 
+## executionTimeout
+
+Default execution timeout in minutes for child processes Renovate creates.
+If this option is not set, Renovate will fallback to 15 minutes.
+
 ## exposeAllEnv
 
 By default, Renovate only passes a limited set of environment variables to package managers.
@@ -216,14 +328,6 @@ This should be set to a Personal Access Token (GitHub only) when `forkMode` is s
 Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
-## gitAuthor
-
-You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
-
-**Note** We strongly recommend that the Git author email you use is unique to Renovate.
-Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
-
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
@@ -244,6 +348,17 @@ Before the first commit in a repository, Renovate will:
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
+
+## gitUrl
+
+Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
+Currently works for GitLab only.
+
+Possible values:
+
+- `default`: use HTTPS URLs provided by the platform for Git
+- `ssh`: use SSH URLs provided by the platform for Git
+- `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
 ## logContext
 
@@ -282,13 +397,16 @@ Set this to `false` only if all three statements are true:
 
 ## onboardingBranch
 
-Note that this setting is independent of `branchPrefix`.
+<!-- prettier-ignore -->
+!!! note
+    This setting is independent of `branchPrefix`.
+
 For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
 If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## onboardingCommitMessage
 
-Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
+If `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## onboardingConfig
 
@@ -296,6 +414,11 @@ Note that if `commitMessagePrefix` or `semanticCommits` values are defined then 
 
 If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
+
+## onboardingNoDeps
+
+Set this to true if you want Renovate to create an onboarding PR even if no dependencies are found.
+Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
 
 ## onboardingPrTitle
 
@@ -330,28 +453,98 @@ e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved c
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
+If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
-To create the key pair with OpenSSL use the following commands:
+To create the key pair with GPG use the following commands:
 
-- `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
-- `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
+- `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
 
-To encrypt a secret with OpenSSL use the following command:
+<details><summary>key generation log</summary>
 
-```bash
-echo 'actual-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base64
+```
+❯ gpg --full-generate-key
+gpg (GnuPG) 2.2.24; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+  (14) Existing key from card
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0)
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Renovate Bot
+Email address: renovate@whitesourcesoftware.com
+Comment:
+You selected this USER-ID:
+    "Renovate Bot <renovate@whitesourcesoftware.com>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+
+gpg: key 0649CC3899F22A66 marked as ultimately trusted
+gpg: revocation certificate stored as '/Users/rhys/.gnupg/openpgp-revocs.d/794B820F34B34A8DF32AADB20649CC3899F22A66.rev'
+public and secret key created and signed.
+
+pub   rsa4096 2021-09-10 [SC]
+      794B820F34B34A8DF32AADB20649CEXAMPLEONLY
+uid                      Renovate Bot <renovate@whitesourcesoftware.com>
+sub   rsa4096 2021-09-10 [E]
 ```
 
-Replace `actual-secret` with the secret to encrypt.
+</details>
+
+- Copy the key ID from the output (`794B820F34B34A8DF32AADB20649CEXAMPLEONLY` in the above example) or run `gpg --list-secret-keys` if you forgot to take a copy
+- Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
+- Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
+
+The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
+The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
+
+Any encrypted secrets using GPG must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
+The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
+Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
+
+<!-- prettier-ignore -->
+!!! note
+    Simple public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
+
+## privateKeyOld
+
+Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
+Decryption with this key will be attempted after `privateKey`.
+
+If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
+Doing so will mean that Renovate will first attempt to decrypt using the GPG key but fall back to the legacy key and try that next.
+
+You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
 
 ## privateKeyPath
 
-Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
+Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
+
+## privateKeyPathOld
+
+Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
 ## productLinks
 
-Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
 ## redisUrl
 
@@ -367,7 +560,9 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
-Warning: this is an experimental feature and may be modified or removed in a future non-major release.
+<!-- prettier-ignore -->
+!!! warning
+    This is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
 
@@ -414,7 +609,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
+Secret names must start with an upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 
@@ -427,3 +622,13 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## username
 
 Mandatory if a GitHub app token is in use using the CLI.
+
+## writeDiscoveredRepos
+
+Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+
+Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+```json
+["myOrg/myRepo", "myOrg/anotherRepo"]
+```

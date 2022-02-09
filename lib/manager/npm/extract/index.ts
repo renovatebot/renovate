@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getAdminConfig } from '../../../config/admin';
+import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { newlineRegex, regEx } from '../../../util/regex';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -19,15 +19,20 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
+import { isZeroInstall } from './yarn';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
     return key;
   }
 
-  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key) ?? [];
+  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
   return depName;
 }
+
+const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
+  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
+);
 
 export async function extractPackageFile(
   content: string,
@@ -44,7 +49,7 @@ export async function extractPackageFile(
     logger.debug({ fileName }, 'Invalid JSON');
     return null;
   }
-  // eslint-disable-next-line no-underscore-dangle
+
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug('Ignoring vendorised package.json');
     return null;
@@ -92,36 +97,43 @@ export async function extractPackageFile(
 
   let npmrc: string;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  const npmrcContent = await readLocalFile(npmrcFileName, 'utf8');
-  if (is.string(npmrcContent)) {
-    if (is.string(config.npmrc)) {
+  let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+  if (is.string(repoNpmrc)) {
+    if (is.string(config.npmrc) && !config.npmrcMerge) {
       logger.debug(
         { npmrcFileName },
-        'Repo .npmrc file is ignored due to presence of config.npmrc'
+        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
     } else {
-      npmrc = npmrcContent;
-      if (npmrc?.includes('package-lock')) {
-        logger.debug('Stripping package-lock setting from .npmrc');
-        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      npmrc = config.npmrc || '';
+      if (npmrc.length) {
+        if (!npmrc.endsWith('\n')) {
+          npmrc += '\n';
+        }
       }
-      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
+      if (repoNpmrc?.includes('package-lock')) {
+        logger.debug('Stripping package-lock setting from .npmrc');
+        repoNpmrc = repoNpmrc.replace(
+          regEx(/(^|\n)package-lock.*?(\n|$)/g),
+          '\n'
+        );
+      }
+      if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'
         );
-        npmrc = npmrc
-          .split('\n')
+        repoNpmrc = repoNpmrc
+          .split(newlineRegex)
           .filter((line) => !line.includes('=${'))
           .join('\n');
       }
+      npmrc += repoNpmrc;
     }
   }
-  const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  let yarnrc;
-  if (!is.string(config.yarnrc)) {
-    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
-  }
+
+  const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
+  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
   let lernaJsonFile: string;
   let lernaPackages: string[];
@@ -154,6 +166,7 @@ export async function extractPackageFile(
     engines: 'engine',
     volta: 'volta',
     resolutions: 'resolutions',
+    packageManager: 'packageManager',
   };
 
   const constraints: Record<string, any> = {};
@@ -165,15 +178,15 @@ export async function extractPackageFile(
   ): PackageDependency {
     const dep: PackageDependency = {};
     if (!validateNpmPackageName(depName).validForOldPackages) {
-      dep.skipReason = SkipReason.InvalidName;
+      dep.skipReason = 'invalid-name';
       return dep;
     }
     if (typeof input !== 'string') {
-      dep.skipReason = SkipReason.InvalidValue;
+      dep.skipReason = 'invalid-value';
       return dep;
     }
     dep.currentValue = input.trim();
-    if (depType === 'engines') {
+    if (depType === 'engines' || depType === 'packageManager') {
       if (depName === 'node') {
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
@@ -183,6 +196,12 @@ export async function extractPackageFile(
         dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
+        if (
+          dep.currentValue.startsWith('2') ||
+          dep.currentValue.startsWith('3')
+        ) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       } else if (depName === 'npm') {
         dep.datasource = npmId;
         dep.commitMessageTopic = 'npm';
@@ -196,10 +215,10 @@ export async function extractPackageFile(
         dep.lookupName = 'microsoft/vscode';
         constraints.vscode = dep.currentValue;
       } else {
-        dep.skipReason = SkipReason.UnknownEngines;
+        dep.skipReason = 'unknown-engines';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = SkipReason.UnknownVersion;
+        dep.skipReason = 'unknown-version';
       }
       return dep;
     }
@@ -216,10 +235,10 @@ export async function extractPackageFile(
       } else if (depName === 'npm') {
         dep.datasource = npmId;
       } else {
-        dep.skipReason = SkipReason.UnknownVolta;
+        dep.skipReason = 'unknown-volta';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = SkipReason.UnknownVersion;
+        dep.skipReason = 'unknown-version';
       }
       return dep;
     }
@@ -239,43 +258,54 @@ export async function extractPackageFile(
       }
     }
     if (dep.currentValue.startsWith('file:')) {
-      dep.skipReason = SkipReason.File;
+      dep.skipReason = 'file';
       hasFancyRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = npmId;
       if (dep.currentValue === '*') {
-        dep.skipReason = SkipReason.AnyVersion;
+        dep.skipReason = 'any-version';
       }
       if (dep.currentValue === '') {
-        dep.skipReason = SkipReason.Empty;
+        dep.skipReason = 'empty';
       }
       return dep;
     }
     const hashSplit = dep.currentValue.split('#');
     if (hashSplit.length !== 2) {
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
-    const githubOwnerRepo = depNamePart
-      .replace(/^github:/, '')
-      .replace(/^git\+/, '')
-      .replace(/^https:\/\/github\.com\//, '')
-      .replace(/\.git$/, '');
-    const githubRepoSplit = githubOwnerRepo.split('/');
-    if (githubRepoSplit.length !== 2) {
-      dep.skipReason = SkipReason.UnknownVersion;
-      return dep;
+
+    let githubOwnerRepo: string;
+    let githubOwner: string;
+    let githubRepo: string;
+    const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(depNamePart);
+    if (matchUrlSshFormat === null) {
+      githubOwnerRepo = depNamePart
+        .replace(regEx(/^github:/), '')
+        .replace(regEx(/^git\+/), '')
+        .replace(regEx(/^https:\/\/github\.com\//), '')
+        .replace(regEx(/\.git$/), '');
+      const githubRepoSplit = githubOwnerRepo.split('/');
+      if (githubRepoSplit.length !== 2) {
+        dep.skipReason = 'unknown-version';
+        return dep;
+      }
+      [githubOwner, githubRepo] = githubRepoSplit;
+    } else {
+      githubOwner = matchUrlSshFormat[1];
+      githubRepo = matchUrlSshFormat[2];
+      githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const [githubOwner, githubRepo] = githubRepoSplit;
-    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/;
+    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/; // TODO #12872 lookahead
     if (
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
     ) {
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
       return dep;
     }
     if (isVersion(depRefPart)) {
@@ -285,8 +315,8 @@ export async function extractPackageFile(
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
-      /^[0-9a-f]{7}$/.test(depRefPart) ||
-      /^[0-9a-f]{40}$/.test(depRefPart)
+      regEx(/^[0-9a-f]{7}$/).test(depRefPart) ||
+      regEx(/^[0-9a-f]{40}$/).test(depRefPart)
     ) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
@@ -294,7 +324,7 @@ export async function extractPackageFile(
       dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
     } else {
-      dep.skipReason = SkipReason.UnversionedReference;
+      dep.skipReason = 'unversioned-reference';
       return dep;
     }
     dep.githubRepo = githubOwnerRepo;
@@ -304,10 +334,19 @@ export async function extractPackageFile(
   }
 
   for (const depType of Object.keys(depTypes)) {
-    if (packageJson[depType]) {
+    let dependencies = packageJson[depType];
+    if (dependencies) {
       try {
+        if (depType === 'packageManager') {
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(dependencies);
+          // istanbul ignore next
+          if (!match) {
+            break;
+          }
+          dependencies = { [match.groups.name]: match.groups.range };
+        }
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependency
+          dependencies as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           let dep: PackageDependency = {
@@ -348,11 +387,12 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if (hasFancyRefs && lockFiles.npmLock) {
+    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
       //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
+      //  - Also, do not skip install if Yarn zero-install is used
       logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
     } else {
@@ -366,10 +406,10 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
-    yarnrc,
     ...lockFiles,
     managerData: {
       lernaJsonFile,
+      yarnZeroInstall,
     },
     lernaClient,
     lernaPackages,

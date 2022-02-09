@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`workers/repository/init/index initRepo runs 1`] = `Object {}`;

@@ -9,39 +9,47 @@ Renovate supports upgrading dependencies in `.csproj`, `.fsproj`, and `.vbproj` 
 
 ## Version Support
 
-Only SDK-style `.csproj`/`.fsproj`/`.vbproj`files are currently supported. By default, this includes:
+Only SDK-style `.csproj`/`.fsproj`/`.vbproj` files are currently supported.
+By default, this includes:
 
 - .NET Core 1.0 and above
 - .NET Standard class libraries
 - Any `.csproj`/`.fsproj`/`.vbproj` in the SDK-style syntax
 
-To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style project, one can follow the [following guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
+To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style project, follow the steps in this [guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
 
-## How It Works
+## How it works
 
 1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
 1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to determine if any upgrades are available
-1. If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version are embedded in the generated PR
+1. If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then release notes for each version are embedded in the generated PR
+
+If your project file references a `packages.config` file, no dependencies will be extracted.
+Find out here how to [migrate from `packages.config` to `PackageReference`](https://docs.microsoft.com/en-us/nuget/consume-packages/migrate-packages-config-to-package-reference).
 
 ## Alternate feeds
 
-Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative NuGet feeds.
+By default Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can configure alternative NuGet feeds.
 Alternative feeds can be specified either [in a `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository) or in Renovate configuration options:
 
 ```json
-"nuget": {
-  "registryUrls": [
-    "https://api.nuget.org/v3/index.json",
-    "https://example1.com/nuget/",
-    "https://example2.com/nuget/v3/index.json"
-  ]
+{
+  "nuget": {
+    "registryUrls": [
+      "https://api.nuget.org/v3/index.json",
+      "https://example1.com/nuget/",
+      "https://example2.com/nuget/v3/index.json"
+    ]
+  }
 }
 ```
 
 In this example we defined 3 NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the 3 feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged/joined together into a single dependency update.
+
+If your project uses lockfiles (a `package.lock.json` exists), alternate feed settings must be defined in a `NuGet.config` only, as `registryUrls` are not passed through to the NuGet commands used.
 
 ### Protocol versions
 
@@ -50,10 +58,10 @@ Renovate as a NuGet client supports both versions and will use `v2` unless the c
 If you have a `v3` feed that does not match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
 
 ```json
-"nuget": {
-  "registryUrls": [
-    "http://myV3feed#protocolVersion=3"
-  ]
+{
+  "nuget": {
+    "registryUrls": ["http://myV3feed#protocolVersion=3"]
+  }
 }
 ```
 
@@ -62,17 +70,21 @@ If you have a `v3` feed that does not match this pattern (e.g. JFrog Artifactory
 Credentials for authenticated/private feeds can be provided via host rules in the configuration options (file or command line parameter).
 
 ```json
-"hostRules": [
-  {
-    "hostType": "nuget",
-    "matchHost": "http://example1.com/nuget",
-    "username": "root",
-    "password": "p4$$w0rd"
-  }
-]
+{
+  "hostRules": [
+    {
+      "hostType": "nuget",
+      "matchHost": "http://example1.com/nuget",
+      "username": "root",
+      "password": "p4$$w0rd"
+    }
+  ]
+}
 ```
 
-Please note that at the moment only Basic HTTP authentication (via username and password) is supported.
+<!-- prettier-ignore -->
+!!! note
+    At the moment only Basic HTTP authentication (via username and password) is supported.
 
 ## Future work
 

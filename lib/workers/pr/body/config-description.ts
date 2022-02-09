@@ -1,6 +1,6 @@
-import { platform } from '../../../platform';
 import { BranchStatus } from '../../../types';
 import { emojify } from '../../../util/emoji';
+import { resolveBranchStatus } from '../../branch/status-checks';
 import type { BranchConfig } from '../../types';
 
 export async function getPrConfigDescription(
@@ -26,9 +26,9 @@ export async function getPrConfigDescription(
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
   if (config.automerge) {
-    const branchStatus = await platform.getBranchStatus(
+    const branchStatus = await resolveBranchStatus(
       config.branchName,
-      config.requiredStatusChecks
+      config.ignoreTests
     );
     // istanbul ignore if
     if (branchStatus === BranchStatus.red) {
@@ -44,7 +44,7 @@ export async function getPrConfigDescription(
   prBody += emojify(':recycle: **Rebasing**: ');
   if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
-  } else if (config.rebaseWhen === 'never') {
+  } else if (config.rebaseWhen === 'never' || config.stopUpdating) {
     prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';

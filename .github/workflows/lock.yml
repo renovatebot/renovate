@@ -12,13 +12,17 @@ permissions:
   issues: write
   pull-requests: write
 
+# Ensure only one lock action can run at a time
+concurrency:
+  group: lock
+
 jobs:
   lock:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/lock-threads@1621939cecf8586399a6b60d2a7af9469232b5b6 # renovate: tag=v2.1.1
+      - uses: dessant/lock-threads@e460dfeb36e731f3aeb214be6b0c9a9d9a67eda6 # renovate: tag=v3.0.0
         if: github.repository == 'renovatebot/renovate'
         with:
           github-token: ${{ github.token }}
-          issue-lock-inactive-days: 30
-          pr-lock-inactive-days: 30
+          issue-inactive-days: 30
+          pr-inactive-days: 30

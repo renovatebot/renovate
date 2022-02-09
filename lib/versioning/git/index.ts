@@ -1,4 +1,5 @@
-import * as generic from '../loose/generic';
+import { regEx } from '../../util/regex';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'git';
@@ -6,21 +7,21 @@ export const displayName = 'git';
 export const urls = ['https://git-scm.com/'];
 export const supportsRanges = false;
 
-const parse = (version: string): any => ({ release: [parseInt(version, 10)] });
+const regex = regEx('^[0-9a-f]{7,40}$', 'i');
 
-const isCompatible = (version: string, range: string): boolean => true;
+class GitVersioningApi extends GenericVersioningApi {
+  protected _parse(version: string): GenericVersion | null {
+    if (version?.match(regex)) {
+      return { release: [1, 0, 0], suffix: version };
+    }
+    return null;
+  }
 
-const compare = (version1: string, version2: string): number => -1;
+  protected override _compare(_version: string, _other: string): number {
+    return -1;
+  }
+}
 
-const valueToVersion = (value: string): string => value;
-
-export const api: VersioningApi = {
-  ...generic.create({
-    parse,
-    compare,
-  }),
-  isCompatible,
-  valueToVersion,
-};
+export const api: VersioningApi = new GitVersioningApi();
 
 export default api;

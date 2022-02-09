@@ -1,10 +1,13 @@
 import { CdnJsDatasource } from '../../datasource/cdnjs';
+import { regEx } from '../../util/regex';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
-const regex = /<\s*(script|link)\s+[^>]*?\/?>/i;
+const regex = regEx(/<\s*(script|link)\s+[^>]*?\/?>/i);
 
-const integrityRegex = /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/;
+const integrityRegex = regEx(
+  /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/
+);
 
 export function extractDep(tag: string): PackageDependency | null {
   const match = cloudflareUrlRegex.exec(tag);

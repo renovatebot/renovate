@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractCollections } from './collections';
 import { extractCollectionsMetaDataFile } from './collections-metadata';
@@ -21,14 +22,14 @@ export function getSliceEndNumber(
   return nearestEnd;
 }
 
-export default function extractPackageFile(
+export function extractPackageFile(
   content: string,
   fileName: string
 ): PackageFile | null {
   logger.trace('ansible-galaxy.extractPackageFile()');
-  const galaxyFileNameRegEx = /galaxy\.ya?ml$/;
+  const galaxyFileNameRegEx = regEx(/galaxy\.ya?ml$/);
   const deps: PackageDependency[] = [];
-  const lines = content.split('\n');
+  const lines = content.split(newlineRegex);
 
   try {
     // if this is a galaxy.yml file we have to interpret the dependencies differently
@@ -44,10 +45,10 @@ export default function extractPackageFile(
       };
       // find role and collection block
       lines.forEach((line, index) => {
-        if (/^collections:/.exec(line)) {
+        if (regEx(/^collections:/).exec(line)) {
           positions.collections = index;
         }
-        if (/^roles:/.exec(line)) {
+        if (regEx(/^roles:/).exec(line)) {
           positions.roles = index;
         }
       });

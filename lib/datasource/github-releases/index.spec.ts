@@ -1,6 +1,5 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { GitHubReleaseMocker } from './test';
 import { id as datasource } from '.';
@@ -16,7 +15,8 @@ const responseBody = [
   { tag_name: 'a', published_at: '2020-03-09T13:00:00Z' },
   { tag_name: 'v', published_at: '2020-03-09T12:00:00Z' },
   { tag_name: '1.0.0', published_at: '2020-03-09T11:00:00Z' },
-  { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
+  { tag_name: 'v1.1.0', draft: false, published_at: '2020-03-09T10:00:00Z' },
+  { tag_name: '1.2.0', draft: true, published_at: '2020-03-09T10:00:00Z' },
   {
     tag_name: '2.0.0',
     published_at: '2020-04-09T10:00:00Z',
@@ -24,7 +24,7 @@ const responseBody = [
   },
 ];
 
-describe(getName(), () => {
+describe('datasource/github-releases/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
@@ -49,8 +49,11 @@ describe(getName(), () => {
         res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();
       expect(
+        res.releases.find((release) => release.version === '1.2.0')
+      ).toBeUndefined();
+      expect(
         res.releases.find((release) => release.version === '2.0.0').isStable
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports ghe', async () => {
@@ -70,14 +73,14 @@ describe(getName(), () => {
   });
 
   describe('getDigest', () => {
-    const lookupName = 'some/dep';
+    const depName = 'some/dep';
     const currentValue = 'v1.0.0';
     const currentDigest = 'v1.0.0-digest';
 
-    const releaseMock = new GitHubReleaseMocker(githubApiHost, lookupName);
+    const releaseMock = new GitHubReleaseMocker(githubApiHost, depName);
 
     it('requires currentDigest', async () => {
-      const digest = await getDigest({ datasource, lookupName }, currentValue);
+      const digest = await getDigest({ datasource, depName }, currentValue);
       expect(digest).toBeNull();
     });
 
@@ -85,7 +88,7 @@ describe(getName(), () => {
       const digest = await getDigest(
         {
           datasource,
-          lookupName,
+          depName,
           currentDigest,
         },
         currentValue
@@ -104,7 +107,7 @@ describe(getName(), () => {
       const digest = await getDigest(
         {
           datasource,
-          lookupName,
+          depName,
           currentValue,
           currentDigest,
         },
@@ -120,7 +123,7 @@ describe(getName(), () => {
       const digest = await getDigest(
         {
           datasource,
-          lookupName,
+          depName,
           currentValue,
           currentDigest,
         },

@@ -9,6 +9,17 @@ export interface Repo {
 export interface ComposerConfig {
   type?: string;
   /**
+   * Setting a fixed PHP version (e.g. {"php": "7.0.3"}) will let you fake the
+   * platform version so that you can emulate a production env or define your
+   * target platform in the config.
+   * See https://getcomposer.org/doc/06-config.md#platform
+   */
+  config?: {
+    platform?: {
+      php?: string;
+    };
+  };
+  /**
    * A repositories field can be an array of Repo objects or an object of repoName: Repo
    * Also it can be a boolean (usually false) to disable packagist.
    * (Yes this can be confusing, as it is also not properly documented in the composer docs)
@@ -41,6 +52,7 @@ export interface UserPass {
 }
 
 export interface AuthJson {
+  bearer?: Record<string, string>;
   'github-oauth'?: Record<string, string>;
   'gitlab-token'?: Record<string, string>;
   'gitlab-domains'?: string[];

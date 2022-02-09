@@ -1,10 +1,13 @@
-import * as datasourceRubygems from '../../datasource/rubygems';
+import { RubyGemsDatasource } from '../../datasource/rubygems';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
+
+function formatContent(input: string): string {
+  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading witespace and add a new line at the end
+}
 
 export async function extractPackageFile(
   content: string,
@@ -14,7 +17,7 @@ export async function extractPackageFile(
     registryUrls: [],
     deps: [],
   };
-  const lines = content.split('\n');
+  const lines = content.split(newlineRegex);
   const delimiters = ['"', "'"];
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
@@ -38,8 +41,9 @@ export async function extractPackageFile(
     if (rubyMatch) {
       res.constraints = { ruby: rubyMatch[1] };
     }
-    const gemMatchRegex =
-      /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
+    const gemMatchRegex = regEx(
+      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
+    );
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
       const dep: PackageDependency = {
@@ -48,23 +52,19 @@ export async function extractPackageFile(
       };
       if (gemMatch.groups.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
-        dep.currentValue = /\s*,\s*/.test(currentValue)
+        dep.currentValue = regEx(/\s*,\s*/).test(currentValue)
           ? currentValue
           : currentValue.slice(1, -1);
-      } else {
-        dep.skipReason = SkipReason.NoVersion;
       }
-      if (!dep.skipReason) {
-        dep.datasource = datasourceRubygems.id;
-      }
+      dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);
     }
-    const groupMatch = /^group\s+(.*?)\s+do/.exec(line);
+    const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
     if (groupMatch) {
       const depTypes = groupMatch[1]
         .split(',')
         .map((group) => group.trim())
-        .map((group) => group.replace(/^:/, ''));
+        .map((group) => group.replace(regEx(/^:/), ''));
       const groupLineNumber = lineNumber;
       let groupContent = '';
       let groupLine = '';
@@ -72,7 +72,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         groupLine = lines[lineNumber];
         if (groupLine !== 'end') {
-          groupContent += (groupLine || '').replace(/^ {2}/, '') + '\n';
+          groupContent += formatContent(groupLine || '');
         }
       }
       const groupRes = await extractPackageFile(groupContent);
@@ -107,7 +107,7 @@ export async function extractPackageFile(
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {
-            sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
+            sourceContent += formatContent(sourceLine);
           }
         }
         const sourceRes = await extractPackageFile(sourceContent);
@@ -125,7 +125,7 @@ export async function extractPackageFile(
         }
       }
     }
-    const platformsMatch = /^platforms\s+(.*?)\s+do/.test(line);
+    const platformsMatch = regEx(/^platforms\s+(.*?)\s+do/).test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -134,13 +134,12 @@ export async function extractPackageFile(
         lineNumber += 1;
         platformsLine = lines[lineNumber];
         if (platformsLine !== 'end') {
-          platformsContent += platformsLine.replace(/^ {2}/, '') + '\n';
+          platformsContent += formatContent(platformsLine);
         }
       }
       const platformsRes = await extractPackageFile(platformsContent);
       if (platformsRes) {
         res.deps = res.deps.concat(
-          // eslint-disable-next-line no-loop-func
           platformsRes.deps.map((dep) => ({
             ...dep,
             managerData: {
@@ -151,7 +150,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = /^if\s+(.*?)/.test(line);
+    const ifMatch = regEx(/^if\s+(.*?)/).test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
@@ -160,13 +159,12 @@ export async function extractPackageFile(
         lineNumber += 1;
         ifLine = lines[lineNumber];
         if (ifLine !== 'end') {
-          ifContent += ifLine.replace(/^ {2}/, '') + '\n';
+          ifContent += formatContent(ifLine);
         }
       }
       const ifRes = await extractPackageFile(ifContent);
       if (ifRes) {
         res.deps = res.deps.concat(
-          // eslint-disable-next-line no-loop-func
           ifRes.deps.map((dep) => ({
             ...dep,
             managerData: {
@@ -194,7 +192,9 @@ export async function extractPackageFile(
           dep.lockedVersion = lockedDepValue;
         }
       }
-      const bundledWith = /\nBUNDLED WITH\n\s+(.*?)(\n|$)/.exec(lockContent);
+      const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
+        lockContent
+      );
       if (bundledWith) {
         res.constraints = res.constraints || {};
         res.constraints.bundler = bundledWith[1];

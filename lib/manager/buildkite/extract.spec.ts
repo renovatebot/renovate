@@ -1,35 +1,35 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const pipeline1 = loadFixture('pipeline1.yml');
-const pipeline2 = loadFixture('pipeline2.yml');
-const pipeline3 = loadFixture('pipeline3.yml');
-const pipeline4 = loadFixture('pipeline4.yml');
-
-describe(getName(), () => {
+describe('manager/buildkite/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts simple single plugin', () => {
-      const res = extractPackageFile(pipeline1).deps;
+      const res = extractPackageFile(Fixtures.get('pipeline1.yml')).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
     it('extracts multiple plugins in same file', () => {
-      const res = extractPackageFile(pipeline2).deps;
+      const res = extractPackageFile(Fixtures.get('pipeline2.yml')).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
     it('adds skipReason', () => {
-      const res = extractPackageFile(pipeline3).deps;
+      const res = extractPackageFile(Fixtures.get('pipeline3.yml')).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toHaveLength(2);
     });
     it('extracts arrays of plugins', () => {
-      const res = extractPackageFile(pipeline4).deps;
+      const res = extractPackageFile(Fixtures.get('pipeline4.yml')).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
+    });
+    it('extracts git-based plugins', () => {
+      const res = extractPackageFile(Fixtures.get('pipeline5.yml')).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
   });
 });

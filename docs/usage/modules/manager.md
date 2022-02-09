@@ -1,13 +1,17 @@
+---
+title: Managers
+---
+
 # Managers
 
 Renovate is based around the concept of "package managers", or "managers" for short.
 These range from traditional package managers like npm, Bundler and Composer through to less traditional concepts like CircleCI or Travis config files.
 
-The goal of Renovate is to detect and maintain all third party dependencies in your repositories, through the use of managers.
+The goal of Renovate is to detect and maintain all third-party dependencies in your repositories, through the use of managers.
 
 ## Supported Managers
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
 
 ## Configuring Managers

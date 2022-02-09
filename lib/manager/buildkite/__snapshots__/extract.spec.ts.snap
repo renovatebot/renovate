@@ -9,11 +9,6 @@ Array [
   },
   Object {
     "currentValue": "v1.3.2",
-    "depName": "https://github.com/buildkite/plugin-docker-compose",
-    "skipReason": "git-plugin",
-  },
-  Object {
-    "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
     "skipReason": "invalid-dependency-specification",
   },
@@ -49,6 +44,27 @@ Array [
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "skipReason": undefined,
+  },
+]
+`;
+
+exports[`manager/buildkite/extract extractPackageFile() extracts git-based plugins 1`] = `
+Array [
+  Object {
+    "currentValue": "v3.2.7",
+    "datasource": "github-tags",
+    "depName": "some-org/some-plugin",
+    "registryUrls": Array [
+      "https://github.company.com",
+    ],
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "some-third-org/some-third-plugin",
+    "registryUrls": Array [
+      "https://github.company.com",
+    ],
   },
 ]
 `;

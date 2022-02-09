@@ -1,4 +1,4 @@
-import { getName, loadJsonFixture, mocked } from '../../../test/util';
+import { loadJsonFixture, mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -39,7 +39,7 @@ npm.getPreset = jest.fn(({ packageName, presetName }) => {
   return null;
 });
 
-describe(getName(), () => {
+describe('config/presets/index', () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -63,9 +63,7 @@ describe(getName(), () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
-        "Cannot find preset's package (notfound)"
-      );
+      expect(e.validationError).toBe("Cannot find preset's package (notfound)");
       expect(e.validationMessage).toBeUndefined();
     });
     it('throws if invalid preset', async () => {
@@ -79,7 +77,7 @@ describe(getName(), () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -96,9 +94,7 @@ describe(getName(), () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
-        'Preset is invalid (github>user/repo//)'
-      );
+      expect(e.validationError).toBe('Preset is invalid (github>user/repo//)');
       expect(e.validationMessage).toBeUndefined();
     });
 
@@ -113,7 +109,7 @@ describe(getName(), () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -130,7 +126,7 @@ describe(getName(), () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Preset package is missing a renovate-config entry (noconfig:base)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -161,7 +157,7 @@ describe(getName(), () => {
         ignoreDeps: [],
         rangeStrategy: 'pin',
       });
-      expect(res.rangeStrategy).toEqual('pin');
+      expect(res.rangeStrategy).toBe('pin');
     });
     it('throws if valid and invalid', async () => {
       config.foo = 1;
@@ -174,7 +170,7 @@ describe(getName(), () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -224,7 +220,7 @@ describe(getName(), () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toBe(true);
+      expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(4);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
@@ -233,8 +229,8 @@ describe(getName(), () => {
       config.extends = ['ikatyang:library'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.automerge).not.toBeDefined();
-      expect(res.minor.automerge).toBe(true);
+      expect(res.automerge).toBeUndefined();
+      expect(res.minor.automerge).toBeTrue();
     });
 
     it('ignores presets', async () => {
@@ -243,7 +239,7 @@ describe(getName(), () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
-      expect(res).toEqual({});
+      expect(res).toBeEmptyObject();
     });
 
     it('resolves self-hosted presets without baseConfig', async () => {
@@ -256,7 +252,7 @@ describe(getName(), () => {
 
       expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
-      expect(local.getPreset.mock.calls[0][0].baseConfig).not.toBeUndefined();
+      expect(local.getPreset.mock.calls[0][0].baseConfig).toBeDefined();
       expect(res).toMatchSnapshot();
     });
   });
@@ -269,12 +265,12 @@ describe(getName(), () => {
     it('replaces args in strings', () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
-      expect(res).toEqual('c foo ab');
+      expect(res).toBe('c foo ab');
     });
     it('replaces args twice in same string', () => {
       const str = '{{arg2}}{{arg0}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
-      expect(res).toEqual('ca foo ab');
+      expect(res).toBe('ca foo ab');
     });
     it('replaces objects', () => {
       const obj = {
@@ -318,6 +314,15 @@ describe(getName(), () => {
         packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
+    });
+    it('handles special chars', () => {
+      expect(presets.parsePreset('github>some/repo:foo+bar')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'foo+bar',
         presetPath: undefined,
         presetSource: 'github',
       });
@@ -402,6 +407,15 @@ describe(getName(), () => {
         presetSource: 'local',
       });
     });
+    it('parses local with spaces', () => {
+      expect(presets.parsePreset('local>A2B CD/A2B_Renovate')).toEqual({
+        packageName: 'A2B CD/A2B_Renovate',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
     it('parses local with subdirectory', () => {
       expect(
         presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
@@ -413,9 +427,86 @@ describe(getName(), () => {
         presetSource: 'local',
       });
     });
+    it('parses local with sub preset and tag', () => {
+      expect(
+        presets.parsePreset(
+          'local>some-group/some-repo:some-file/subpreset#1.2.3'
+        )
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: '1.2.3',
+      });
+    });
+    it('parses local with subdirectory and tag', () => {
+      expect(
+        presets.parsePreset(
+          'local>some-group/some-repo//some-dir/some-file#1.2.3'
+        )
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file',
+        presetPath: 'some-dir',
+        presetSource: 'local',
+        packageTag: '1.2.3',
+      });
+    });
+
+    it('parses local with subdirectory and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository//path/to/preset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset',
+        presetPath: 'path/to',
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
+    it('parses local with sub preset and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository:preset/subpreset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toEqual({
         packageName: 'some/repo',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo with preset name', () => {
+      expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
+        packageName: '~john_doe/repo',
+        params: undefined,
+        presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/renovate-config')).toEqual({
+        packageName: '~john_doe/renovate-config',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -559,17 +650,12 @@ describe(getName(), () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
         extends: [
-          ':separateMajorReleases',
-          ':combinePatchMinorReleases',
-          ':ignoreUnstable',
-          ':prImmediately',
+          ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
-          ':updateNotScheduled',
-          ':automergeDisabled',
           ':ignoreModulesAndTests',
           ':autodetectPinVersions',
           ':prHourlyLimit2',
-          ':prConcurrentLimit20',
+          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
           'workarounds:all',
@@ -579,6 +665,43 @@ describe(getName(), () => {
     it('handles removed presets with no migration', async () => {
       const res = await presets.getPreset('helpers:oddIsUnstable', {});
       expect(res).toEqual({});
+    });
+    it('handles renamed monorepos', async () => {
+      const res = await presets.getPreset('monorepo:opentelemetry', {});
+      expect(res).toMatchInlineSnapshot(`
+Object {
+  "description": Array [
+    "opentelemetry-js monorepo",
+  ],
+  "matchSourceUrlPrefixes": Array [
+    "https://github.com/open-telemetry/opentelemetry-js",
+  ],
+}
+`);
+    });
+    it('handles renamed monorepo groups', async () => {
+      const res = await presets.getPreset('group:opentelemetryMonorepo', {});
+      expect(res).toMatchInlineSnapshot(`
+Object {
+  "packageRules": Array [
+    Object {
+      "description": Array [
+        "Group packages from opentelemetry-js monorepo together",
+      ],
+      "extends": Array [
+        "monorepo:opentelemetry-js",
+      ],
+      "groupName": "opentelemetry-js monorepo",
+      "matchUpdateTypes": Array [
+        "digest",
+        "patch",
+        "minor",
+        "major",
+      ],
+    },
+  ],
+}
+`);
     });
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
@@ -617,7 +740,7 @@ describe(getName(), () => {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not semver ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges)',
         ],
         rangeStrategy: 'pin',
       });

@@ -1,9 +1,28 @@
-import { getName } from '../../test/util';
+import { getDatasourceList } from '../datasource';
 import { loadModules } from '../util/modules';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
-describe(getName(), () => {
+jest.mock('../util/fs');
+
+const datasources = getDatasourceList();
+
+describe('manager/index', () => {
+  describe('supportedDatasources', () => {
+    for (const m of manager.getManagerList()) {
+      if (m === 'regex') {
+        // regex supports any
+        continue;
+      }
+      const supportedDatasources = manager.get(m, 'supportedDatasources');
+      it(`has valid supportedDatasources for ${m}`, () => {
+        expect(supportedDatasources).toBeNonEmptyArray();
+        supportedDatasources.every((d) => {
+          expect(datasources.includes(d)).toBeTrue();
+        });
+      });
+    }
+  });
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
@@ -40,14 +59,21 @@ describe(getName(), () => {
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name);
-      expect(validate(mgr)).toBe(true);
+      expect(validate(mgr)).toBeTrue();
     }
+  });
+
+  describe('detectGlobalConfig()', () => {
+    it('iterates through managers', async () => {
+      expect(await manager.detectAllGlobalConfig()).toEqual({});
+    });
   });
 
   describe('extractAllPackageFiles()', () => {
     it('returns null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         await manager.extractAllPackageFiles('unknown', {} as any, [])
@@ -59,6 +85,7 @@ describe(getName(), () => {
     it('returns non-null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
@@ -74,6 +101,7 @@ describe(getName(), () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(manager.extractPackageFile('unknown', null)).toBeNull();
       expect(manager.extractPackageFile('dummy', null)).toBeNull();
@@ -81,6 +109,7 @@ describe(getName(), () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
 
@@ -91,30 +120,11 @@ describe(getName(), () => {
     });
   });
 
-  describe('getPackageUpdates', () => {
-    it('returns null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-      });
-      expect(manager.getPackageUpdates('unknown', null)).toBeNull();
-      expect(manager.getPackageUpdates('dummy', null)).toBeNull();
-    });
-    it('returns non-null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        getPackageUpdates: () => Promise.resolve({ updates: [] }),
-      });
-      expect(manager.getPackageUpdates('dummy', {} as any)).not.toBeNull();
-    });
-    afterEach(() => {
-      manager.getManagers().delete('dummy');
-    });
-  });
-
   describe('getRangeStrategy', () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' })
@@ -123,6 +133,7 @@ describe(getName(), () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         getRangeStrategy: () => 'replace',
       });
       expect(
@@ -131,6 +142,7 @@ describe(getName(), () => {
 
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })
@@ -140,6 +152,34 @@ describe(getName(), () => {
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'bump' })
       ).not.toBeNull();
     });
+
+    it('returns update-lockfile for in-range-only', () => {
+      manager.getManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+      });
+      expect(
+        manager.getRangeStrategy({
+          manager: 'dummy',
+          rangeStrategy: 'in-range-only',
+        })
+      ).toBe('update-lockfile');
+    });
+
+    it('returns update-lockfile for in-range-only if it is proposed my manager', () => {
+      manager.getManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+        getRangeStrategy: () => 'in-range-only',
+      });
+      expect(
+        manager.getRangeStrategy({
+          manager: 'dummy',
+          rangeStrategy: 'in-range-only',
+        })
+      ).toBe('update-lockfile');
+    });
+
     afterEach(() => {
       manager.getManagers().delete('dummy');
     });

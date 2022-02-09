@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { readOnlyIssueBody } from './read-only-issue-body';
 
-const issueBody = loadFixture('issue-body.txt');
+const issueBody = Fixtures.get('issue-body.txt');
 
-describe(getName(), () => {
+describe('platform/utils/read-only-issue-body', () => {
   describe('.readOnlyIssueBody', () => {
     it('removes all checkbox formatting', () => {
       expect(readOnlyIssueBody(issueBody)).toEqual(

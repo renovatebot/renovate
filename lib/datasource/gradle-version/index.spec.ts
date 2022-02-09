@@ -1,6 +1,6 @@
 import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture, partial } from '../../../test/util';
+import { loadJsonFixture, partial } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { GradleVersionDatasource } from '.';
@@ -11,7 +11,7 @@ let config: GetPkgReleasesConfig;
 
 const datasource = GradleVersionDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/gradle-version/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       config = {

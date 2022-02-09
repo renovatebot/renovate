@@ -1,11 +1,11 @@
-import { defaultConfig, getName, git, partial } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { defaultConfig, git, partial, platform } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
 
 jest.mock('../../util/git');
 
-describe(getName(), () => {
+describe('workers/branch/commit', () => {
   describe('commitFilesToBranch', () => {
     let config: BranchConfig;
     beforeEach(() => {
@@ -20,8 +20,9 @@ describe(getName(), () => {
         updatedArtifacts: [],
       });
       jest.resetAllMocks();
-      git.commitFiles.mockResolvedValueOnce('abc123');
-      setAdminConfig();
+      git.commitFiles.mockResolvedValueOnce('123test');
+      platform.commitFiles = jest.fn();
+      GlobalConfig.reset();
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
@@ -29,17 +30,30 @@ describe(getName(), () => {
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
-        name: 'package.json',
+        type: 'addition',
+        path: 'package.json',
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
       expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
-    it('dry runs', async () => {
-      setAdminConfig({ dryRun: true });
+    it('commits via platform', async () => {
       config.updatedPackageFiles.push({
-        name: 'package.json',
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.platformCommit = true;
+      await commitFilesToBranch(config);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
+    });
+    it('dry runs', async () => {
+      GlobalConfig.set({ dryRun: true });
+      config.updatedPackageFiles.push({
+        type: 'addition',
+        path: 'package.json',
         contents: 'some contents',
       });
       await commitFilesToBranch(config);

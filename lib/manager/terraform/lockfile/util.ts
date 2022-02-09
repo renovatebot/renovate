@@ -1,4 +1,5 @@
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
@@ -8,13 +9,16 @@ import type {
   ProviderSlice,
 } from './types';
 
-const providerStartLineRegex =
-  /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
-const versionLineRegex =
-  /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;
-const constraintLineRegex =
-  /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/;
-const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
+const providerStartLineRegex = regEx(
+  `^provider "(?<registryUrl>[^/]*)\\/(?<namespace>[^/]*)\\/(?<depName>[^/]*)"`
+);
+const versionLineRegex = regEx(
+  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`
+);
+const constraintLineRegex = regEx(
+  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`
+);
+const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
 const lockFile = '.terraform.lock.hcl';
 
@@ -27,7 +31,7 @@ export function readLockFile(lockFilePath: string): Promise<string> {
 }
 
 export function extractLocks(lockFileContent: string): ProviderLock[] {
-  const lines = lockFileContent.split('\n');
+  const lines = lockFileContent.split(newlineRegex);
   const blockStarts: number[] = [];
   // get first lines of blocks
   lines.forEach((line, index) => {
@@ -130,9 +134,12 @@ export function writeLockUpdates(
   lockFilePath: string,
   oldLockFileContent: string
 ): UpdateArtifactsResult {
-  const lines = oldLockFileContent.split('\n');
+  const lines = oldLockFileContent.split(newlineRegex);
 
   const sections: string[][] = [];
+
+  // sort updates in order of appearance in the lockfile
+  updates.sort((a, b) => a.lineNumbers.block.start - b.lineNumbers.block.start);
   updates.forEach((update, index, array) => {
     // re add leading whitespace
     let startWhitespace;
@@ -156,7 +163,7 @@ export function writeLockUpdates(
     providerBlockLines.forEach((providerBlockLine, providerBlockIndex) => {
       const versionLine = providerBlockLine.replace(
         versionLineRegex,
-        `$1${update.newVersion}$3`
+        `$<prefix>${update.newVersion}$<suffix>`
       );
       if (versionLine !== providerBlockLine) {
         newProviderBlockLines.push(versionLine);
@@ -165,7 +172,7 @@ export function writeLockUpdates(
 
       const constraintLine = providerBlockLine.replace(
         constraintLineRegex,
-        `$1${update.newConstraint}$3`
+        `$<prefix>${update.newConstraint}$<suffix>`
       );
       if (constraintLine !== providerBlockLine) {
         newProviderBlockLines.push(constraintLine);
@@ -204,7 +211,8 @@ export function writeLockUpdates(
 
   return {
     file: {
-      name: lockFilePath,
+      type: 'addition',
+      path: lockFilePath,
       contents: newContent,
     },
   };

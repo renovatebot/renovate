@@ -31,6 +31,11 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
       "hostType": "packagist",
       "username": "<your-username>",
       "password": "<your-password>"
+    },
+    {
+      "matchHost": "bearer-auth.for.vendor.com",
+      "hostType": "packagist",
+      "token": "abcdef0123456789"
     }
   ]
 }
@@ -39,7 +44,7 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 This host rule is best added to the bot's `config.js` config so that it is not visible to users of the repository.
 If you are using the hosted WhiteSource Renovate App then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste in the secret string you wish to encrypt, click _Encrypt_, then copy the encrypted result.
+Go to [https://app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt), paste in the secret string you wish to encrypt, click _Encrypt_, then copy the encrypted result.
 You may encrypt your `password` only, but you can encrypt your `username` as well.
 
 ```json
@@ -49,8 +54,15 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
       "matchHost": "some.vendor.com",
       "hostType": "packagist",
       "encrypted": {
-        "username": "<your-encrypted-password",
-        "password": "<your-encrypted-password"
+        "username": "<your-encrypted-password>",
+        "password": "<your-encrypted-password>"
+      }
+    },
+    {
+      "matchHost": "bearer-auth.for.vendor.com",
+      "hostType": "packagist",
+      "encrypted": {
+        "token": "<your-encrypted-token>"
       }
     }
   ]

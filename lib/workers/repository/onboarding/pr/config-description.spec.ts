@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import type { PackageFile } from '../../../../manager/types';
 import { getConfigDesc } from './config-description';
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -12,8 +12,7 @@ describe(getName(), () => {
     it('returns empty', () => {
       delete config.description;
       const res = getConfigDesc(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBe('');
     });
     it('returns a full list', () => {
       const packageFiles: Record<string, PackageFile[]> = {
@@ -37,8 +36,20 @@ describe(getName(), () => {
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
       const res = getConfigDesc(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### Configuration Summary
+
+        Based on the default config's presets, Renovate will:
+
+          - Start dependency updates only once this onboarding PR is merged
+          - Run Renovate on following schedule: before 5am
+
+        🔡 Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch with your custom config and the list of Pull Requests in the \\"What to Expect\\" section below will be updated the next time Renovate runs.
+
+        ---
+        "
+      `);
     });
     it('contains the onboardingConfigFileName if set', () => {
       delete config.description;

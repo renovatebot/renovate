@@ -41,12 +41,12 @@ export default async function handleError(
 ): Promise<string> {
   if (err.message === REPOSITORY_UNINITIATED) {
     logger.info('Repository is uninitiated - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === REPOSITORY_EMPTY) {
     logger.info('Repository is empty - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   const disabledMessages = [
@@ -61,31 +61,31 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_ARCHIVED) {
     logger.info('Repository is archived - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === REPOSITORY_MIRRORED) {
     logger.info('Repository is a mirror - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === REPOSITORY_RENAMED) {
     logger.info('Repository has been renamed - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === REPOSITORY_BLOCKED) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     logger.info('Repository is blocked - skipping');
     return err.message;
   }
   if (err.message === REPOSITORY_ACCESS_FORBIDDEN) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     logger.info('Repository is forbidden');
     return err.message;
   }
   if (err.message === REPOSITORY_NOT_FOUND) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     logger.error('Repository is not found');
     return err.message;
   }
@@ -107,17 +107,17 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_CHANGED) {
     logger.info('Repository has changed during renovation - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === CONFIG_VALIDATION) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     logger.info({ error: err }, 'Repository has invalid config');
     await raiseConfigWarningIssue(config, err);
     return err.message;
   }
   if (err.message === CONFIG_SECRETS_EXPOSED) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     logger.warn(
       { error: err },
       'Repository aborted due to potential secrets exposure'
@@ -130,7 +130,7 @@ export default async function handleError(
       'Host error'
     );
     logger.info('External host error causing abort - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (
@@ -138,48 +138,48 @@ export default async function handleError(
     err.message === SYSTEM_INSUFFICIENT_DISK_SPACE
   ) {
     logger.error('Disk space error - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
     logger.warn('Rate limit exceeded - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === SYSTEM_INSUFFICIENT_MEMORY) {
     logger.warn('Insufficient memory - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === PLATFORM_BAD_CREDENTIALS) {
     logger.warn('Bad credentials - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
     logger.warn('Integration unauthorized - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === PLATFORM_AUTHENTICATION_ERROR) {
     logger.warn('Authentication error - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === TEMPORARY_ERROR) {
     logger.info('Temporary error - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message === MANAGER_LOCKFILE_ERROR) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     logger.info('Lock file error - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return err.message;
   }
   if (err.message.includes('The requested URL returned error: 5')) {
     logger.warn({ err }, 'Git error - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     // rewrite this error
     return EXTERNAL_HOST_ERROR;
   }
@@ -188,18 +188,18 @@ export default async function handleError(
     err.message.includes('access denied or repository not exported')
   ) {
     logger.warn({ err }, 'Git error - aborting');
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     // rewrite this error
     return EXTERNAL_HOST_ERROR;
   }
   if (err.message.includes('fatal: not a git repository')) {
-    delete config.branchList; // eslint-disable-line no-param-reassign
+    delete config.branchList;
     return TEMPORARY_ERROR;
   }
   // Swallow this error so that other repositories can be processed
   logger.error({ err }, `Repository has unknown error`);
   // delete branchList to avoid cleaning up branches
-  delete config.branchList; // eslint-disable-line no-param-reassign
-  // eslint-disable-next-line no-undef
+  delete config.branchList;
+
   return UNKNOWN_ERROR;
 }

@@ -1,18 +1,16 @@
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
-import { getPackageUpdates } from '../../../manager';
 import type { PackageDependency, PackageFile } from '../../../manager/types';
-import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
-  packageFileConfig: ManagerConfig & PackageFile,
+  packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
   let dep = clone(indep);
@@ -28,20 +26,15 @@ async function fetchDepUpdates(
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');
-    dep.skipReason = SkipReason.Ignored;
+    dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: depName }, 'Dependency is disabled');
-    dep.skipReason = SkipReason.Disabled;
+    dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
       dep = {
         ...dep,
         ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-      };
-    } else {
-      dep = {
-        ...dep,
-        ...(await getPackageUpdates(packageFileConfig.manager, depConfig)),
       };
     }
     dep.updates = dep.updates || [];
@@ -51,7 +44,7 @@ async function fetchDepUpdates(
 
 async function fetchManagerPackagerFileUpdates(
   config: RenovateConfig,
-  managerConfig: ManagerConfig,
+  managerConfig: RenovateConfig,
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
@@ -65,7 +58,7 @@ async function fetchManagerPackagerFileUpdates(
     { manager, packageFile, queueLength: queue.length },
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
-  // eslint-disable-next-line no-param-reassign
+
   pFile.deps = await pAll(queue, { concurrency: 5 });
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }

@@ -1,18 +1,20 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerragruntDependencyTypes } from './common';
 import { extractTerragruntProvider } from './providers';
 import type { ExtractionResult } from './types';
 
-export const githubRefMatchRegex =
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
-export const gitTagsRefMatchRegex =
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
-const hostnameMatchRegex = /^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
+export const githubRefMatchRegex = regEx(
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
+);
+export const gitTagsRefMatchRegex = regEx(
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
+);
+const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export function extractTerragruntModule(
   startingLine: number,
@@ -21,7 +23,6 @@ export function extractTerragruntModule(
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line no-param-reassign
     dep.managerData.terragruntDependencyType =
       TerragruntDependencyTypes.terragrunt;
   });
@@ -31,10 +32,10 @@ export function extractTerragruntModule(
 export function analyseTerragruntModule(dep: PackageDependency): void {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
-  /* eslint-disable no-param-reassign */
+
   if (githubRefMatch) {
     dep.depType = 'github';
-    dep.lookupName = githubRefMatch.groups.project.replace(/\.git$/, '');
+    dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
     dep.depName = 'github.com/' + dep.lookupName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = datasourceGithubTags.id;
@@ -50,11 +51,11 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
       dep.lookupName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = datasourceGitTags.id;
+    dep.datasource = GitTagsDatasource.id;
   } else if (dep.managerData.source) {
     const moduleParts = dep.managerData.source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
-      dep.skipReason = SkipReason.Local;
+      dep.skipReason = 'local';
     } else if (moduleParts.length >= 3) {
       const hostnameMatch = hostnameMatchRegex.exec(dep.managerData.source);
       if (hostnameMatch) {
@@ -66,7 +67,6 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
     }
   } else {
     logger.debug({ dep }, 'terragrunt dep has no source');
-    dep.skipReason = SkipReason.NoSource;
+    dep.skipReason = 'no-source';
   }
-  /* eslint-enable no-param-reassign */
 }

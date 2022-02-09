@@ -1,22 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logger/err-serializer expands errors 1`] = `
-Object {
-  "a": 1,
-  "b": 2,
-  "message": "some message",
-  "options": Object {
-    "headers": Object {
-      "authorization": "Bearer abc",
-    },
-  },
-  "response": Object {
-    "body": "some response body",
-    "url": "some/path",
-  },
-}
-`;
-
 exports[`logger/err-serializer got handles http error 1`] = `
 Array [
   Object {
@@ -51,7 +34,7 @@ Array [
 
 exports[`logger/err-serializer got sanitize http error 2`] = `
 Object {
-  "code": undefined,
+  "code": "ERR_NON_2XX_3XX_RESPONSE",
   "message": "Response code 412 (Precondition Failed)",
   "name": "HTTPError",
   "options": Object {
@@ -60,6 +43,7 @@ Object {
       "accept-encoding": "gzip, deflate, br",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "hostType": "any",
     "http2": false,
     "method": "POST",
     "password": "***********",
@@ -79,13 +63,5 @@ Object {
     "statusCode": 412,
     "statusMessage": "Precondition Failed",
   },
-}
-`;
-
-exports[`logger/err-serializer handles missing fields 1`] = `
-Object {
-  "a": 1,
-  "body": "some body",
-  "stack": "foo",
 }
 `;

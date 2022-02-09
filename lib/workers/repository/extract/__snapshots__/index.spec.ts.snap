@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`workers/repository/extract/index extractAllDependencies() skips non-enabled managers 1`] = `
-Object {
-  "npm": Array [
-    Object {},
-  ],
-}
-`;

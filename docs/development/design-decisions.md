@@ -2,6 +2,14 @@
 
 This file documents the design choices as well as configuration options.
 
+## Intended use by end-users
+
+The Renovate repository/package is intended to be used as a CLI-based application.
+It should not be used downstream as a library, because it lacks a stable API.
+
+End users should only depend on the CLI or on the official hosted app.
+The Renovate npm package should only be used as a CLI tool.
+
 ## Stateless
 
 A key feature of Renovate is that it does not require any state storage (e.g. on disk or in a database).
@@ -65,7 +73,7 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 
 We do this because:
 
-- Branches often receive updates (e.g. new patches) before they're merged
+- Branches often get updates (e.g. new patches) before they're merged
 - Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.

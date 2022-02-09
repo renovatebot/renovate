@@ -42,9 +42,15 @@
         <version>0.0.1</version>
       </dependency>
       <dependency>
-        <groupId>org.example</groupId>
-        <artifactId>bar</artifactId>
-        <version>1.0.0</version>
+        <groupId>
+          org.example
+        </groupId>
+        <artifactId>
+          bar
+        </artifactId>
+        <version>
+          1.0.0
+        </version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -79,6 +85,13 @@
         </configuration>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.example</groupId>
+        <artifactId>extension-artefact</artifactId>
+        <version>1.0</version>
+      </extension>
+    </extensions>
   </build>
 
 
@@ -121,6 +134,15 @@
     </dependency>
   </dependencies>
 
+  <distributionManagement>
+    <relocation>
+      <groupId>org.example</groupId>
+      <artifactId>relocation-artifact</artifactId>
+      <version>1.0</version>
+      <message>We have moved the Project under Apache</message>
+    </relocation>
+  </distributionManagement>
+
   <profiles>
     <profile>
       <id>profile-id</id>
@@ -131,6 +153,18 @@
           <version>${profile-placeholder}</version>
         </dependency>
       </dependencies>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.example</groupId>
+            <artifactId>profile-build-artefact</artifactId>
+            <version>2.17</version>
+            <configuration>
+              <configLocation>google_checks.xml</configLocation>
+            </configuration>
+          </plugin>
+        </plugins>
+      </reporting>
     </profile>
   </profiles>
 

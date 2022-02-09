@@ -1,229 +1,96 @@
-import { getName } from '../../../test/util';
 import { api as hexScheme } from '.';
 
-describe(getName(), () => {
-  describe('hexScheme.matches()', () => {
-    it('handles tilde greater than', () => {
-      expect(hexScheme.matches('4.2.0', '~> 4.0')).toBe(true);
-      expect(hexScheme.matches('2.1.0', '~> 2.0.0')).toBe(false);
-      expect(hexScheme.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBe(true);
-      expect(hexScheme.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBe(false);
-      expect(hexScheme.matches('1.9.4', '== 1.9.4')).toBe(true);
-      expect(hexScheme.matches('1.9.5', '== 1.9.4')).toBe(false);
-    });
+describe('versioning/hex/index', () => {
+  test.each`
+    version    | range                     | expected
+    ${'4.2.0'} | ${'~> 4.0'}               | ${true}
+    ${'2.1.0'} | ${'~> 2.0.0'}             | ${false}
+    ${'2.0.0'} | ${'>= 2.0.0 and < 2.1.0'} | ${true}
+    ${'2.1.0'} | ${'== 2.0.0 or < 2.1.0'}  | ${false}
+    ${'1.9.4'} | ${'== 1.9.4'}             | ${true}
+    ${'1.9.5'} | ${'== 1.9.4'}             | ${false}
+  `(
+    'matches("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(hexScheme.matches(version, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    versions                                         | range         | expected
+    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
+    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${'4.0.0'}
+  `(
+    'getSatisfyingVersion($versions, "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(hexScheme.getSatisfyingVersion(versions, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    input                      | expected
+    ${'>= 1.0.0 and <= 2.0.0'} | ${true}
+    ${'>= 1.0.0 or <= 2.0.0'}  | ${true}
+    ${'!= 1.0.0'}              | ${true}
+    ${'== 1.0.0'}              | ${true}
+  `('isValid("$input") === $expected', ({ input, expected }) => {
+    const res = !!hexScheme.isValid(input);
+    expect(res).toBe(expected);
   });
-  it('handles tilde greater than', () => {
-    expect(
-      hexScheme.getSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
-        '~> 4.0'
-      )
-    ).toBe('4.2.0');
-    expect(
-      hexScheme.getSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
-        '~> 4.0.0'
-      )
-    ).toBe('4.0.0');
-  });
-  describe('hexScheme.isValid()', () => {
-    it('handles and', () => {
-      expect(hexScheme.isValid('>= 1.0.0 and <= 2.0.0')).toBeTruthy();
-    });
-    it('handles or', () => {
-      expect(hexScheme.isValid('>= 1.0.0 or <= 2.0.0')).toBeTruthy();
-    });
-    it('handles !=', () => {
-      expect(hexScheme.isValid('!= 1.0.0')).toBeTruthy();
-    });
-    it('handles ==', () => {
-      expect(hexScheme.isValid('== 1.0.0')).toBeTruthy();
-    });
-  });
-  describe('hexScheme.isLessThanRange()', () => {
-    it('handles and', () => {
-      expect(hexScheme.isLessThanRange('0.1.0', '>= 1.0.0 and <= 2.0.0')).toBe(
-        true
-      );
-      expect(hexScheme.isLessThanRange('1.9.0', '>= 1.0.0 and <= 2.0.0')).toBe(
-        false
-      );
-    });
-    it('handles or', () => {
-      expect(hexScheme.isLessThanRange('0.9.0', '>= 1.0.0 or >= 2.0.0')).toBe(
-        true
-      );
-      expect(hexScheme.isLessThanRange('1.9.0', '>= 1.0.0 or >= 2.0.0')).toBe(
-        false
-      );
-    });
-  });
-  describe('hexScheme.minSatisfyingVersion()', () => {
-    it('handles tilde greater than', () => {
-      expect(
-        hexScheme.minSatisfyingVersion(
-          ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-          '~> 4.0'
-        )
-      ).toBe('4.2.0');
-      expect(
-        hexScheme.minSatisfyingVersion(
-          ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-          '~> 4.0.0'
-        )
-      ).toBeNull();
-    });
-  });
-  describe('hexScheme.getNewValue()', () => {
-    it('handles exact pin', () => {
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '== 1.2.3',
-          rangeStrategy: 'pin',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('== 2.0.7');
-    });
-    it('handles exact bump', () => {
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '== 3.6.1',
-          rangeStrategy: 'bump',
-          currentVersion: '3.6.1',
-          newVersion: '3.6.2',
-        })
-      ).toEqual('== 3.6.2');
-    });
-    it('handles exact replace', () => {
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '== 3.6.1',
-          rangeStrategy: 'replace',
-          currentVersion: '3.6.1',
-          newVersion: '3.6.2',
-        })
-      ).toEqual('== 3.6.2');
-    });
-    it('handles tilde greater than', () => {
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2',
-          rangeStrategy: 'replace',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('~> 2.0');
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2',
-          rangeStrategy: 'pin',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('== 2.0.7');
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2',
-          rangeStrategy: 'bump',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('~> 2.0');
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2',
-          rangeStrategy: 'bump',
-          currentVersion: '1.2.3',
-          newVersion: '1.3.1',
-        })
-      ).toEqual('~> 1.3');
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2.0',
-          rangeStrategy: 'replace',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('~> 2.0.0');
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2.0',
-          rangeStrategy: 'pin',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('== 2.0.7');
-      expect(
-        hexScheme.getNewValue({
-          currentValue: '~> 1.2.0',
-          rangeStrategy: 'bump',
-          currentVersion: '1.2.3',
-          newVersion: '2.0.7',
-        })
-      ).toEqual('~> 2.0.7');
-    });
-  });
-  it('handles and', () => {
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '>= 1.0.0 and <= 2.0.0',
-        rangeStrategy: 'widen',
-        currentVersion: '1.2.3',
-        newVersion: '2.0.7',
-      })
-    ).toEqual('>= 1.0.0 and <= 2.0.7');
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '>= 1.0.0 and <= 2.0.0',
-        rangeStrategy: 'replace',
-        currentVersion: '1.2.3',
-        newVersion: '2.0.7',
-      })
-    ).toEqual('<= 2.0.7');
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '>= 1.0.0 and <= 2.0.0',
-        rangeStrategy: 'pin',
-        currentVersion: '1.2.3',
-        newVersion: '2.0.7',
-      })
-    ).toEqual('== 2.0.7');
-  });
-  it('handles or', () => {
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '>= 1.0.0 or <= 2.0.0',
-        rangeStrategy: 'widen',
-        currentVersion: '1.2.3',
-        newVersion: '2.0.7',
-      })
-    ).toEqual('>= 1.0.0 or <= 2.0.0');
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '>= 1.0.0 or <= 2.0.0',
-        rangeStrategy: 'replace',
-        currentVersion: '1.2.3',
-        newVersion: '2.0.7',
-      })
-    ).toEqual('<= 2.0.7');
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '>= 1.0.0 or <= 2.0.0',
-        rangeStrategy: 'pin',
-        currentVersion: '1.2.3',
-        newVersion: '2.0.7',
-      })
-    ).toEqual('== 2.0.7');
-  });
-  it('handles short range replace', () => {
-    expect(
-      hexScheme.getNewValue({
-        currentValue: '~> 0.4',
-        rangeStrategy: 'replace',
-        currentVersion: '0.4.2',
-        newVersion: '0.6.0',
-      })
-    ).toEqual('~> 0.6');
-  });
+
+  test.each`
+    version    | range                      | expected
+    ${'0.1.0'} | ${'>= 1.0.0 and <= 2.0.0'} | ${true}
+    ${'1.9.0'} | ${'>= 1.0.0 and <= 2.0.0'} | ${false}
+    ${'0.9.0'} | ${'>= 1.0.0 or >= 2.0.0'}  | ${true}
+    ${'1.9.0'} | ${'>= 1.0.0 or >= 2.0.0'}  | ${false}
+  `(
+    'isLessThanRange($version, $range) === $expected',
+    ({ version, range, expected }) => {
+      expect(hexScheme.isLessThanRange?.(version, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    versions                                | range         | expected
+    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
+    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${null}
+  `(
+    'minSatisfyingVersion($versions, "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(hexScheme.minSatisfyingVersion(versions, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    currentValue               | rangeStrategy | currentVersion | newVersion | expected
+    ${'== 1.2.3'}              | ${'pin'}      | ${'1.2.3'}     | ${'2.0.7'} | ${'== 2.0.7'}
+    ${'== 3.6.1'}              | ${'bump'}     | ${'3.6.1'}     | ${'3.6.2'} | ${'== 3.6.2'}
+    ${'== 3.6.1'}              | ${'replace'}  | ${'3.6.1'}     | ${'3.6.2'} | ${'== 3.6.2'}
+    ${'~> 1.2'}                | ${'replace'}  | ${'1.2.3'}     | ${'2.0.7'} | ${'~> 2.0'}
+    ${'~> 1.2'}                | ${'pin'}      | ${'1.2.3'}     | ${'2.0.7'} | ${'== 2.0.7'}
+    ${'~> 1.2'}                | ${'bump'}     | ${'1.2.3'}     | ${'2.0.7'} | ${'~> 2.0'}
+    ${'~> 1.2'}                | ${'bump'}     | ${'1.2.3'}     | ${'1.3.1'} | ${'~> 1.3'}
+    ${'~> 1.2.0'}              | ${'replace'}  | ${'1.2.3'}     | ${'2.0.7'} | ${'~> 2.0.0'}
+    ${'~> 1.2.0'}              | ${'pin'}      | ${'1.2.3'}     | ${'2.0.7'} | ${'== 2.0.7'}
+    ${'~> 1.2.0'}              | ${'bump'}     | ${'1.2.3'}     | ${'2.0.7'} | ${'~> 2.0.7'}
+    ${'>= 1.0.0 and <= 2.0.0'} | ${'widen'}    | ${'1.2.3'}     | ${'2.0.7'} | ${'>= 1.0.0 and <= 2.0.7'}
+    ${'>= 1.0.0 and <= 2.0.0'} | ${'replace'}  | ${'1.2.3'}     | ${'2.0.7'} | ${'<= 2.0.7'}
+    ${'>= 1.0.0 and <= 2.0.0'} | ${'pin'}      | ${'1.2.3'}     | ${'2.0.7'} | ${'== 2.0.7'}
+    ${'>= 1.0.0 or <= 2.0.0'}  | ${'widen'}    | ${'1.2.3'}     | ${'2.0.7'} | ${'>= 1.0.0 or <= 2.0.0'}
+    ${'>= 1.0.0 or <= 2.0.0'}  | ${'replace'}  | ${'1.2.3'}     | ${'2.0.7'} | ${'<= 2.0.7'}
+    ${'>= 1.0.0 or <= 2.0.0'}  | ${'pin'}      | ${'1.2.3'}     | ${'2.0.7'} | ${'== 2.0.7'}
+    ${'~> 0.4'}                | ${'replace'}  | ${'0.4.2'}     | ${'0.6.0'} | ${'~> 0.6'}
+  `(
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      const res = hexScheme.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+      expect(res).toEqual(expected);
+    }
+  );
 });

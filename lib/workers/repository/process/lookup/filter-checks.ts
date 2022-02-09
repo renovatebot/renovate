@@ -66,7 +66,7 @@ export async function filterInternalChecks(
             `Release ${candidateRelease.version} is pending status checks`
           );
           pendingReleases.unshift(candidateRelease);
-          continue; // eslint-disable-line no-continue
+          continue;
         }
       }
       if (isActiveConfidenceLevel(minimumConfidence)) {
@@ -83,7 +83,7 @@ export async function filterInternalChecks(
             `Release ${candidateRelease.version} is pending status checks`
           );
           pendingReleases.unshift(candidateRelease);
-          continue; // eslint-disable-line no-continue
+          continue;
         }
       }
       // If we get to here, then the release is OK and we can stop iterating

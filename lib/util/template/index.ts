@@ -1,15 +1,40 @@
 import is from '@sindresorhus/is';
-import * as handlebars from 'handlebars';
-import { getAdminConfig } from '../../config/admin';
+import handlebars from 'handlebars';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-// istanbul ignore next
-handlebars.registerHelper('replace', (find, replace, context) =>
-  context.replace(new RegExp(find, 'g'), replace)
+handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
+  JSON.stringify(JSON.parse(input), null, 2)
 );
+
+// istanbul ignore next
+handlebars.registerHelper(
+  'replace',
+  (find, replace, context) =>
+    (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
+);
+
+handlebars.registerHelper('containsString', (str, subStr, options) =>
+  str.includes(subStr)
+);
+
+handlebars.registerHelper({
+  and(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.every(Boolean);
+  },
+  or(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.some(Boolean);
+  },
+});
 
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
@@ -52,6 +77,7 @@ export const allowedFields = {
     'The depName field sanitized for use in branches after removing spaces and special characters',
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
+  displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
   isLockfileUpdate: 'true if the branch is a lock file update',
@@ -59,6 +85,7 @@ export const allowedFields = {
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
   isRollback: 'true if the upgrade is a rollback PR',
+  isReplacement: 'true if the upgrade is a replacement',
   isRange: 'true if the new value is a range',
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
@@ -71,6 +98,8 @@ export const allowedFields = {
     'The major version of the new version. e.g. "3" if the new version if "3.1.0"',
   newMinor:
     'The minor version of the new version. e.g. "1" if the new version if "3.1.0"',
+  newName:
+    'The name of the new dependency that replaces the current deprecated dependency',
   newValue:
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
@@ -88,9 +117,12 @@ export const allowedFields = {
   releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
+  sourceRepo: 'The repository in the sourceUrl, if present',
+  sourceRepoName: 'The repository name in the sourceUrl, if present',
+  sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
-  updateType: 'One of digest, pin, rollback, patch, minor, major',
+  updateType: 'One of digest, pin, rollback, patch, minor, major, replacement',
   upgrades: 'An array of upgrade objects in the branch',
   url: 'The url of the release notes',
   version: 'The version number of the changelog',
@@ -117,9 +149,11 @@ const allowedFieldsList = Object.keys(allowedFields)
 
 type CompileInput = Record<string, unknown>;
 
-function getFilteredObject(input: CompileInput): any {
+type FilteredObject = Record<string, CompileInput | CompileInput[] | unknown>;
+
+function getFilteredObject(input: CompileInput): FilteredObject {
   const obj = clone(input);
-  const res = {};
+  const res: FilteredObject = {};
   const allAllowed = [
     ...Object.keys(allowedFields),
     ...exposedConfigOptions,
@@ -139,14 +173,14 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g;
+const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12873
 
 export function compile(
   template: string,
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...getAdminConfig(), ...input };
+  const data = { ...GlobalConfig.get(), ...input };
   const filteredInput = filterFields ? getFilteredObject(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {

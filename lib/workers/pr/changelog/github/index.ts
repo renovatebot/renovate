@@ -1,4 +1,6 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
+import type { GithubRelease } from '../../../../datasource/github-releases/types';
+import type { GitHubTag } from '../../../../datasource/github-tags/types';
 import { logger } from '../../../../logger';
 import type {
   GithubGitBlob,
@@ -9,7 +11,8 @@ import { GithubHttp } from '../../../../util/http/github';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
-const http = new GithubHttp();
+export const id = 'github-changelog';
+const http = new GithubHttp(id);
 
 export async function getTags(
   endpoint: string,
@@ -18,7 +21,7 @@ export async function getTags(
   logger.trace('github.getTags()');
   const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
-    const res = await http.getJson<{ name: string }[]>(url, {
+    const res = await http.getJson<GitHubTag[]>(url, {
       paginate: true,
     });
 
@@ -30,8 +33,10 @@ export async function getTags(
 
     return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
-    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
-    logger.debug({ err });
+    logger.debug(
+      { sourceRepo: repository, err },
+      'Failed to fetch Github tags'
+    );
     // istanbul ignore if
     if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
@@ -48,7 +53,7 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogFile> | null {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
-  const { default_branch: defaultBranch = 'master' } = (
+  const { default_branch: defaultBranch = 'HEAD' } = (
     await http.getJson<{ default_branch: string }>(apiPrefix)
   ).body;
 
@@ -105,20 +110,13 @@ export async function getReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const url = `${ensureTrailingSlash(
-    apiBaseUrl
-  )}repos/${repository}/releases?per_page=100`;
-  const res = await http.getJson<
-    {
-      html_url: string;
-      id: number;
-      tag_name: string;
-      name: string;
-      body: string;
-    }[]
-  >(url, { paginate: true });
+  const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
+  const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
+    paginate: true,
+  });
   return res.body.map((release) => ({
     url: release.html_url,
+    notesSourceUrl: url,
     id: release.id,
     tag: release.tag_name,
     name: release.name,

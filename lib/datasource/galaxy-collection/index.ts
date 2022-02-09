@@ -17,9 +17,9 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
@@ -109,7 +109,7 @@ export class GalaxyCollectionDatasource extends Datasource {
       { concurrency: 5 } // allow 5 requests at maximum in parallel
     );
     // filter failed versions
-    const filteredReleases = enrichedReleases.filter((value) => value != null);
+    const filteredReleases = enrichedReleases.filter(Boolean);
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
       releases: filteredReleases,

@@ -1,7 +1,7 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
   blockLineRegEx,
@@ -17,7 +17,7 @@ function interpretLine(
 ): void {
   const localDependency = dependency;
   const key = lineMatch[2];
-  const value = lineMatch[3].replace(/["']/g, '');
+  const value = lineMatch[3].replace(regEx(/["']/g), '');
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;
@@ -39,7 +39,7 @@ function interpretLine(
     }
     default: {
       // fail if we find an unexpected key
-      localDependency.skipReason = SkipReason.Unsupported;
+      localDependency.skipReason = 'unsupported';
     }
   }
 }
@@ -48,22 +48,24 @@ function handleGitDep(
   dep: PackageDependency,
   nameMatch: RegExpExecArray
 ): void {
-  /* eslint-disable no-param-reassign */
-  dep.datasource = datasourceGitTags.id;
+  dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
       dep.datasource = datasourceGithubTags.id;
     } else {
-      dep.datasource = datasourceGitTags.id;
+      dep.datasource = GitTagsDatasource.id;
     }
     // source definition without version appendix
     const source = nameMatch.groups.source;
-    const massagedDepName = nameMatch.groups.depName.replace(/.git$/, '');
+    const massagedDepName = nameMatch.groups.depName.replace(
+      regEx(/.git$/),
+      ''
+    );
     dep.depName = `${nameMatch.groups.hostname}/${massagedDepName}`;
     // remove leading `git+` from URLs like `git+https://...`
-    dep.lookupName = source.replace(/git\+/, '');
+    dep.lookupName = source.replace(regEx(/git\+/), '');
 
     // if version is declared using version appendix `<source url>,v1.2.0`, use it
     if (nameMatch.groups.version) {
@@ -72,16 +74,13 @@ function handleGitDep(
       dep.currentValue = dep.managerData.version;
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function handleGalaxyDep(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
-  /* eslint-enable no-param-reassign */
 }
 
 function finalize(dependency: PackageDependency): boolean {
@@ -100,7 +99,7 @@ function finalize(dependency: PackageDependency): boolean {
       handleGitDep(dep, nameMatch);
       break;
     case 'file':
-      dep.skipReason = SkipReason.LocalDependency;
+      dep.skipReason = 'local-dependency';
       break;
     case null:
       // try to find out type based on source
@@ -113,15 +112,15 @@ function finalize(dependency: PackageDependency): boolean {
         dep.depName = dep.managerData.name;
         break;
       }
-      dep.skipReason = SkipReason.NoSourceMatch;
+      dep.skipReason = 'no-source-match';
       break;
     default:
-      dep.skipReason = SkipReason.Unsupported;
+      dep.skipReason = 'unsupported';
       return true;
   }
 
-  if (dependency.currentValue == null && dep.skipReason == null) {
-    dep.skipReason = SkipReason.NoVersion;
+  if (!dependency.currentValue && !dep.skipReason) {
+    dep.skipReason = 'no-version';
   }
   return true;
 }

@@ -1,4 +1,6 @@
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
+import type { HttpError } from '../../util/http/types';
 import { ensureTrailingSlash } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { ServiceDiscoveryResult } from './types';
@@ -25,5 +27,17 @@ export abstract class TerraformDatasource extends Datasource {
 
   private static getDiscoveryUrl(registryUrl: string): string {
     return `${ensureTrailingSlash(registryUrl)}.well-known/terraform.json`;
+  }
+
+  override handleSpecificErrors(err: HttpError): void {
+    const failureCodes = ['EAI_AGAIN'];
+    // istanbul ignore if
+    if (failureCodes.includes(err.code)) {
+      throw new ExternalHostError(err);
+    }
+    // istanbul ignore if
+    if (err.response?.statusCode === 503) {
+      throw new ExternalHostError(err);
+    }
   }
 }

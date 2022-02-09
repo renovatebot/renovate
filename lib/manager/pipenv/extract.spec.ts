@@ -1,4 +1,4 @@
-import { fs as fsutil, getName, loadFixture } from '../../../test/util';
+import { fs as fsutil, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -9,7 +9,7 @@ const pipfile3 = loadFixture('Pipfile3');
 const pipfile4 = loadFixture('Pipfile4');
 const pipfile5 = loadFixture('Pipfile5');
 
-describe(getName(), () => {
+describe('manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('[packages]\r\n', 'Pipfile')).toBeNull();
@@ -18,7 +18,7 @@ describe(getName(), () => {
       expect(await extractPackageFile('nothing here', 'Pipfile')).toBeNull();
     });
     it('extracts dependencies', async () => {
-      fsutil.localPathExists.mockResolvedValue(true);
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile1, 'Pipfile');
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
@@ -30,6 +30,7 @@ describe(getName(), () => {
       expect(res.deps.filter((r) => r.skipReason)).toHaveLength(6);
     });
     it('extracts multiple dependencies', async () => {
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile2, 'Pipfile');
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(5);
@@ -66,11 +67,37 @@ describe(getName(), () => {
       expect(res.registryUrls).toEqual(['source-url', 'other-source-url']);
     });
     it('extracts example pipfile', async () => {
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile4, 'Pipfile');
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        constraints: { python: '== 2.7.*' },
+        deps: [
+          { depName: 'requests', skipReason: 'any-version' },
+          {
+            currentValue: '>0.5.0',
+            datasource: 'pypi',
+            depName: 'records',
+            depType: 'packages',
+          },
+          { depName: 'django', skipReason: 'git-dependency' },
+          { depName: 'e682b37', skipReason: 'file-dependency' },
+          { depName: 'e1839a8', skipReason: 'local-dependency' },
+          { depName: 'pywinusb', skipReason: 'any-version' },
+          { currentValue: '*', skipReason: 'any-version' },
+          {
+            currentValue: '>=1.0,<3.0',
+            datasource: 'pypi',
+            depName: 'unittest2',
+            depType: 'dev-packages',
+            managerData: { nestedVersion: true },
+          },
+        ],
+        lockFiles: ['Pipfile.lock'],
+        registryUrls: ['https://pypi.python.org/simple'],
+      });
     });
     it('supports custom index', async () => {
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile5, 'Pipfile');
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toBeDefined();
@@ -83,24 +110,24 @@ describe(getName(), () => {
         '[packages]\r\nfoo = "==1.0.0"\r\n' +
         '[requires]\r\npython_version = "3.8"';
       const res = await extractPackageFile(content, 'Pipfile');
-      expect(res.constraints.python).toEqual('== 3.8.*');
+      expect(res.constraints.python).toBe('== 3.8.*');
     });
     it('gets python constraint from python_full_version', async () => {
       const content =
         '[packages]\r\nfoo = "==1.0.0"\r\n' +
         '[requires]\r\npython_full_version = "3.8.6"';
       const res = await extractPackageFile(content, 'Pipfile');
-      expect(res.constraints.python).toEqual('== 3.8.6');
+      expect(res.constraints.python).toBe('== 3.8.6');
     });
     it('gets pipenv constraint from packages', async () => {
       const content = '[packages]\r\npipenv = "==2020.8.13"';
       const res = await extractPackageFile(content, 'Pipfile');
-      expect(res.constraints.pipenv).toEqual('==2020.8.13');
+      expect(res.constraints.pipenv).toBe('==2020.8.13');
     });
     it('gets pipenv constraint from dev-packages', async () => {
       const content = '[dev-packages]\r\npipenv = "==2020.8.13"';
       const res = await extractPackageFile(content, 'Pipfile');
-      expect(res.constraints.pipenv).toEqual('==2020.8.13');
+      expect(res.constraints.pipenv).toBe('==2020.8.13');
     });
   });
 });

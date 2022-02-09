@@ -1,5 +1,4 @@
 import * as httpMock from '../../test/http-mock';
-import { getName } from '../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../constants/error-messages';
 import { Datasource } from './datasource';
 import type { GetReleasesConfig, ReleaseResult } from './types';
@@ -23,7 +22,7 @@ class TestDatasource extends Datasource {
   }
 }
 
-describe(getName(), () => {
+describe('datasource/datasource', () => {
   it('should throw on 429', async () => {
     const testDatasource = new TestDatasource();
 

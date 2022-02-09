@@ -2,33 +2,27 @@
 
 ## Configuration Methods
 
-Renovate's bot admin settings can be configured via any of these methods:
+Renovate global config can be defined via any of these methods:
 
 - Configuration file
 - Environment variables
 - CLI parameters
-- Configuration file in target repository at one of the following paths:
-  - `renovate.json`
-  - `renovate.json5`
-  - `.github/renovate.json`
-  - `.github/renovate.json5`
-  - `.gitlab/renovate.json`
-  - `.gitlab/renovate.json5`
-  - `.renovaterc.json`
-  - `.renovaterc`
-  - `renovate` field of `package.json` in target repository
 
 The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.
 
 ### Default Configuration
 
-The default configuration values can be found in [lib/config/definitions.ts](../../lib/config/definitions.ts).
-Options which have `"admin": true` are reserved only for bot admin configuration and cannot be configured within repository config files.
+The default configuration values can be found in [lib/config/options/index.ts](../../lib/config/options/index.ts).
+Options which have `"globalOnly": true` are reserved only for bot global configuration and cannot be configured within repository config files.
 
 ### Configuration File
 
 You can override default configuration using a configuration file, with default name `config.js` in the working directory.
 If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
+
+**Note:** `RENOVATE_CONFIG_FILE` must be provided with an explicit file extension.
+For example `RENOVATE_CONFIG_FILE=myconfig.js` or `RENOVATE_CONFIG_FILE=myconfig.json` and not `RENOVATE_CONFIG_FILE=myconfig`.
+If none is provided, or the file type is invalid, Renovate will fail.
 
 Using a configuration file gives you very granular configuration options.
 For instance, you can override most settings at the global (file), repository, or package level.
@@ -63,11 +57,10 @@ If you add a `renovate.json` file to the root of your repository, you can use th
 If you add configuration options to your `package.json` then these will override any other settings above.
 
 ```json
-"renovate": {
-  "labels": [
-    "upgrade",
-    "bot"
-  ]
+{
+  "renovate": {
+    "labels": ["upgrade", "bot"]
+  }
 }
 ```
 
@@ -75,4 +68,4 @@ If you add configuration options to your `package.json` then these will override
 
 Please see [https://docs.renovatebot.com/configuration-options/](https://docs.renovatebot.com/configuration-options/) for a list of user-facing configuration options.
 
-For further options when running your own instance of Renovate, please see the full config definitions file at `lib/config/definitions.ts`.
+For further options when running your own instance of Renovate, please see the full config options file at `lib/config/options/index.ts`.

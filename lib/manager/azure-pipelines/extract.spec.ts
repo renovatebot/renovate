@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import {
   extractContainer,
   extractPackageFile,
@@ -6,15 +6,15 @@ import {
   parseAzurePipelines,
 } from './extract';
 
-const azurePipelines = loadFixture('azure-pipelines.yaml');
+const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 
-const azurePipelinesInvalid = loadFixture('azure-pipelines-invalid.yaml');
+const azurePipelinesInvalid = Fixtures.get('azure-pipelines-invalid.yaml');
 
-const azurePipelinesNoDependency = loadFixture(
+const azurePipelinesNoDependency = Fixtures.get(
   'azure-pipelines-no-dependency.yaml'
 );
 
-describe(getName(), () => {
+describe('manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, 'some-file');
     expect(file).not.toBeNull();
@@ -27,14 +27,16 @@ describe(getName(), () => {
 
   describe('extractRepository()', () => {
     it('should extract repository information', () => {
-      // FIXME: explicit assert condition
       expect(
         extractRepository({
           type: 'github',
           name: 'user/repo',
           ref: 'refs/tags/v1.0.0',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        depName: 'user/repo',
+        lookupName: 'https://github.com/user/repo.git',
+      });
     });
 
     it('should return null when repository type is not github', () => {
@@ -70,12 +72,15 @@ describe(getName(), () => {
 
   describe('extractContainer()', () => {
     it('should extract container information', () => {
-      // FIXME: explicit assert condition
       expect(
         extractContainer({
           image: 'ubuntu:16.04',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        depName: 'ubuntu',
+        currentValue: '16.04',
+        datasource: 'docker',
+      });
     });
     it('should return null if image field is missing', () => {
       expect(extractContainer({ image: null })).toBeNull();

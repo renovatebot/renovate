@@ -1,9 +1,9 @@
-import { fs, getName, loadFixture } from '../../../../test/util';
+import { fs, loadFixture } from '../../../../test/util';
 import { getNpmLock } from './npm';
 
 jest.mock('../../../util/fs');
 
-describe(getName(), () => {
+describe('manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {
     it('returns empty if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
@@ -23,7 +23,7 @@ describe(getName(), () => {
       const res = await getNpmLock('package.json');
       expect(res).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
-      expect(res.lockfileVersion).toEqual(2);
+      expect(res.lockfileVersion).toBe(2);
     });
     it('returns empty if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');

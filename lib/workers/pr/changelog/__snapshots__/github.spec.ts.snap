@@ -7,9 +7,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "@renovate/no",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -33,6 +34,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -44,6 +46,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -59,9 +62,10 @@ Object {
     "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github-enterprise.example.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github-enterprise.example.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -85,6 +89,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -96,6 +101,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -111,9 +117,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -137,6 +144,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -148,6 +156,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -163,9 +172,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -189,6 +199,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -200,6 +211,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -215,9 +227,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -241,6 +254,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -252,6 +266,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -267,9 +282,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -293,6 +309,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -304,6 +321,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",

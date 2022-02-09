@@ -1,18 +1,22 @@
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
-  /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
-  /^\s*pod\s+(['"])[^'"]+\1\s*,\s*(['"])(?<currentValue>[^'"]+)\2\s*$/,
-  /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/,
-  /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/,
-  /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/,
-  /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
+  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(\\/(?<subspec>[^'"]+))?(['"])`),
+  regEx(
+    `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`
+  ),
+  regEx(`,\\s*:git\\s*=>\\s*(['"])(?<git>[^'"]+)(['"])`),
+  regEx(`,\\s*:tag\\s*=>\\s*(['"])(?<tag>[^'"]+)(['"])`),
+  regEx(`,\\s*:path\\s*=>\\s*(['"])(?<path>[^'"]+)(['"])`),
+  regEx(`^\\s*source\\s*(['"])(?<source>[^'"]+)(['"])`),
 ];
 
 export function parseLine(line: string): ParsedLine {
@@ -21,7 +25,7 @@ export function parseLine(line: string): ParsedLine {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
-    const match = regex.exec(line.replace(/#.*$/, ''));
+    const match = regex.exec(line.replace(regEx(/#.*$/), ''));
     if (match?.groups) {
       result = { ...result, ...match.groups };
     }
@@ -47,21 +51,33 @@ export function parseLine(line: string): ParsedLine {
 
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
-  if (git?.startsWith('https://github.com/')) {
-    const githubMatch =
-      /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(git);
-    const { account, repo } = githubMatch?.groups || {};
+
+  const platformMatch = regEx(
+    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/
+  ).exec(git);
+
+  if (platformMatch) {
+    const { account, repo, platform } = platformMatch?.groups || {};
     if (account && repo) {
+      const datasource =
+        platform === 'github'
+          ? datasourceGithubTags.id
+          : datasourceGitlabTags.id;
       return {
-        datasource: datasourceGithubTags.id,
+        datasource,
         depName,
-        lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
+        lookupName: `${account}/${repo.replace(regEx(/\.git$/), '')}`,
         currentValue: tag,
       };
     }
   }
 
-  return null;
+  return {
+    datasource: GitTagsDatasource.id,
+    depName,
+    lookupName: git,
+    currentValue: tag,
+  };
 }
 
 export async function extractPackageFile(
@@ -70,7 +86,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const lines: string[] = content.split('\n');
+  const lines: string[] = content.split(newlineRegex);
 
   const registryUrls: string[] = [];
 
@@ -88,7 +104,7 @@ export async function extractPackageFile(
     }: ParsedLine = parsedLine;
 
     if (source) {
-      registryUrls.push(source.replace(/\/*$/, ''));
+      registryUrls.push(source.replace(regEx(/\/*$/), ''));
     }
 
     if (depName) {
@@ -96,7 +112,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: SkipReason.UnknownVersion,
+        skipReason: 'unknown-version',
       };
 
       if (currentValue) {
@@ -115,14 +131,14 @@ export async function extractPackageFile(
           dep = {
             depName,
             groupName,
-            skipReason: SkipReason.GitDependency,
+            skipReason: 'git-dependency',
           };
         }
       } else if (path) {
         dep = {
           depName,
           groupName,
-          skipReason: SkipReason.PathDependency,
+          skipReason: 'path-dependency',
         };
       }
 

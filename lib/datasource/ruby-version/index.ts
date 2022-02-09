@@ -1,7 +1,7 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
-import { HttpError } from '../../util/http/types';
+import type { HttpError } from '../../util/http/types';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -13,11 +13,11 @@ export class RubyVersionDatasource extends Datasource {
     super(RubyVersionDatasource.id);
   }
 
-  readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+  override readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
 
-  readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  readonly defaultVersioning = rubyVersioningId;
+  override readonly defaultVersioning = rubyVersioningId;
 
   @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
   async getReleases({
@@ -56,7 +56,6 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override handleSpecificErrors(err: HttpError): never | void {
     throw new ExternalHostError(err);
   }

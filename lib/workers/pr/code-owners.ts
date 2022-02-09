@@ -1,8 +1,9 @@
 import ignore from 'ignore';
 import { logger } from '../../logger';
-import { Pr } from '../../platform';
+import type { Pr } from '../../platform';
 import { readLocalFile } from '../../util/fs';
 import { getBranchFiles } from '../../util/git';
+import { newlineRegex, regEx } from '../../util/regex';
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
@@ -22,11 +23,11 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
 
     const prFiles = await getBranchFiles(pr.sourceBranch);
     const rules = codeOwnersFile
-      .split('\n')
+      .split(newlineRegex)
       .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => {
-        const [pattern, ...usernames] = line.split(/\s+/);
+        const [pattern, ...usernames] = line.split(regEx(/\s+/));
         return {
           usernames,
           match: (path: string) => {

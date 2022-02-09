@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
@@ -16,7 +16,7 @@ git_repository(
 )
 */
 
-describe(getName(), () => {
+describe('manager/bazel/update', () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();

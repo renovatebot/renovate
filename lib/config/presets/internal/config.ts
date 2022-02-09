@@ -4,17 +4,12 @@ export const presets: Record<string, Preset> = {
   base: {
     description: 'Default base configuration for all languages',
     extends: [
-      ':separateMajorReleases',
-      ':combinePatchMinorReleases',
-      ':ignoreUnstable',
-      ':prImmediately',
+      ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
-      ':updateNotScheduled',
-      ':automergeDisabled',
       ':ignoreModulesAndTests',
       ':autodetectPinVersions',
       ':prHourlyLimit2',
-      ':prConcurrentLimit20',
+      ':prConcurrentLimit10',
       'group:monorepos',
       'group:recommended',
       'workarounds:all',
@@ -30,7 +25,7 @@ export const presets: Record<string, Preset> = {
   },
   semverAllMonthly: {
     description:
-      'Preserve semver ranges and update everything together once a month',
+      'Preserve SemVer ranges and update everything together once a month',
     separateMajorMinor: false,
     extends: [
       ':preserveSemverRanges',

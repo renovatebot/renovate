@@ -14,9 +14,11 @@ import type {
   PackageFile,
 } from '../manager/types';
 import type { PlatformPrOptions } from '../platform/types';
-import type { File } from '../util/git';
+import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence';
-import type { ChangeLogResult } from './pr/changelog/types';
+import type { ChangeLogRelease, ChangeLogResult } from './pr/changelog/types';
+
+export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -43,6 +45,7 @@ export interface BranchUpgradeConfig
   manager?: string;
   packageFile?: string;
   lockFile?: string;
+  lockFiles?: string[];
   reuseExistingBranch?: boolean;
   prHeader?: string;
   prFooter?: string;
@@ -50,21 +53,25 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
-  releases?: Release[];
+  releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
   minimumConfidence?: MergeConfidence;
   sourceDirectory?: string;
 
-  updatedPackageFiles?: File[];
-  updatedArtifacts?: File[];
+  updatedPackageFiles?: FileChange[];
+  updatedArtifacts?: FileChange[];
 
   logJSON?: ChangeLogResult;
 
+  hasReleaseNotes?: boolean;
   homepage?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   sourceUrl?: string;
+  sourceRepo?: string;
+  sourceRepoOrg?: string;
+  sourceRepoName?: string;
 }
 
 export type PrBlockedBy =
@@ -74,6 +81,7 @@ export type PrBlockedBy =
   | 'RateLimited'
   | 'Error';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum BranchResult {
   AlreadyExisted = 'already-existed',
   Automerged = 'automerged',
@@ -111,4 +119,6 @@ export interface BranchConfig
   packageFiles?: Record<string, PackageFile[]>;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
+  stopUpdating?: boolean;
+  isConflicted?: boolean;
 }

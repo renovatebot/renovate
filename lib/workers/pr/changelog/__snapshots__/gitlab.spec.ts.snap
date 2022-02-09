@@ -7,8 +7,10 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceDirectory": undefined,
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -54,7 +56,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100",
   },
   Object {
     "headers": Object {
@@ -65,7 +67,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -76,7 +78,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -87,7 +89,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -98,7 +100,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -109,7 +111,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -120,7 +122,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -131,7 +133,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -142,7 +144,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
 ]
 `;
@@ -154,8 +156,10 @@ Object {
     "apiBaseUrl": "https://gitlab-enterprise.example.com/api/v4/",
     "baseUrl": "https://gitlab-enterprise.example.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab-enterprise.example.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceDirectory": undefined,
+    "sourceUrl": "https://gitlab-enterprise.example.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -197,8 +201,10 @@ Object {
     "apiBaseUrl": "https://git.test.com/api/v4/",
     "baseUrl": "https://git.test.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://git.test.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceDirectory": undefined,
+    "sourceUrl": "https://git.test.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -240,8 +246,10 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceDirectory": undefined,
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -251,6 +259,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
       },
       "version": "5.6.1",
@@ -262,6 +271,7 @@ Object {
       },
       "date": "2020-02-13T15:37:00.000Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
       },
       "version": "5.6.0",
@@ -273,6 +283,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
       },
       "version": "5.5.0",
@@ -284,6 +295,7 @@ Object {
       },
       "date": "2018-08-24T14:23:00.000Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
       },
       "version": "5.4.0",
@@ -303,7 +315,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100",
   },
   Object {
     "headers": Object {
@@ -314,7 +326,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -325,7 +337,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -336,7 +348,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -347,7 +359,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -358,7 +370,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -369,7 +381,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -380,7 +392,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -391,7 +403,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
 ]
 `;
@@ -403,8 +415,10 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceDirectory": undefined,
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -450,7 +464,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100",
   },
   Object {
     "headers": Object {
@@ -461,7 +475,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -472,7 +486,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -483,7 +497,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -494,7 +508,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -505,7 +519,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -516,7 +530,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -527,7 +541,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -538,7 +552,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
   },
 ]
 `;
@@ -550,8 +564,10 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceDirectory": undefined,
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {

@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
-import * as semver from 'semver';
+import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { HttpError } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import { id, removeBuildMeta } from './common';
@@ -116,7 +117,7 @@ export async function getReleases(
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {
-  const baseUrl = feedUrl.replace(/\/*$/, '');
+  const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
   const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];

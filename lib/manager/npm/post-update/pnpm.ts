@@ -1,10 +1,9 @@
-import { validRange } from 'semver';
-import { quote } from 'shlex';
-import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -16,19 +15,21 @@ export async function generateLockFile(
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = join(cwd, 'pnpm-lock.yaml');
+  const lockFileName = upath.join(cwd, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    let installPnpm = 'npm i -g pnpm';
-    const pnpmCompatibility = config.constraints?.pnpm;
-    if (validRange(pnpmCompatibility)) {
-      installPnpm += `@${quote(pnpmCompatibility)}`;
-    }
-    const preCommands = [installPnpm];
+    const pnpmUpdate = upgrades.find(
+      (upgrade) =>
+        upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
+    );
+    const pnpmToolConstraint: ToolConstraint = {
+      toolName: 'pnpm',
+      constraint: pnpmUpdate ? pnpmUpdate.newValue : config.constraints?.pnpm,
+    };
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
@@ -38,19 +39,19 @@ export async function generateLockFile(
       },
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
+      toolConstraints: [pnpmToolConstraint],
     };
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }

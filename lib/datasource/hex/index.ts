@@ -27,13 +27,21 @@ export class HexDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     // Get dependency name from lookupName.
     // If the dependency is private lookupName contains organization name as following:
     // hexPackageName:organizationName
     // hexPackageName is used to pass it in hex dep url
     // organizationName is used for accessing to private deps
-    const hexPackageName = lookupName.split(':')[0];
-    const hexUrl = `${registryUrl}api/packages/${hexPackageName}`;
+    const [hexPackageName, organizationName] = lookupName.split(':');
+    const organizationUrlPrefix = organizationName
+      ? `repos/${organizationName}/`
+      : '';
+    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
 
     let response: HttpResponse<HexRelease>;
     try {
@@ -72,7 +80,7 @@ export class HexDatasource extends Datasource {
     }
 
     if (meta?.links?.Github) {
-      result.sourceUrl = hexRelease.meta.links.Github;
+      result.sourceUrl = meta?.links?.Github;
     }
 
     return result;

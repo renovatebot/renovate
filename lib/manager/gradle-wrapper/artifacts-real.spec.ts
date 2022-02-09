@@ -1,20 +1,20 @@
-import { readFile, readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
-import { getName, git, partial } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import type { StatusResult } from '../../util/git';
-import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import { git, partial } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
+import type { StatusResult } from '../../util/git/types';
+import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
 import type { UpdateArtifactsConfig } from '../types';
-import * as dcUpdate from '.';
+import * as gradleWrapper from '.';
 
 jest.mock('../../util/git');
 
 const fixtures = resolve(__dirname, './__fixtures__');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: resolve(fixtures, './testFiles'),
 };
 
@@ -26,28 +26,28 @@ function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
-function readBinSync(...paths: string[]): Buffer {
-  return readFileSync(resolve(fixtures, ...paths));
+async function readBin(...paths: string[]): Promise<Buffer> {
+  return await readFile(resolve(fixtures, ...paths));
 }
 
-function compareFile(file: string, path: string) {
-  expect(readBinSync(`./testFiles/${file}`)).toEqual(
-    readBinSync(`./${path}/${file}`)
+async function compareFile(file: string, path: string): Promise<void> {
+  expect(await readBin(`./testFiles/${file}`)).toEqual(
+    await readBin(`./${path}/${file}`)
   );
 }
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/artifacts-real', () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
     jest.setTimeout(60 * 1000);
 
     beforeEach(() => {
       jest.resetAllMocks();
-      setAdminConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
 
     afterEach(async () => {
       await Git(fixtures).checkout(['HEAD', '--', '.']);
-      setAdminConfig();
+      GlobalConfig.reset();
     });
 
     it('replaces existing value', async () => {
@@ -60,7 +60,7 @@ describe(getName(), () => {
         ],
       } as StatusResult);
 
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -70,27 +70,30 @@ describe(getName(), () => {
       });
 
       expect(res).toEqual(
-        [
-          'gradle/wrapper/gradle-wrapper.properties',
-          'gradle/wrapper/gradle-wrapper.jar',
-          'gradlew',
-          'gradlew.bat',
-        ].map((fileProjectPath) => ({
-          file: {
-            name: fileProjectPath,
-            contents: readBinSync(`./testFiles/${fileProjectPath}`),
-          },
-        }))
+        await Promise.all(
+          [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradle/wrapper/gradle-wrapper.jar',
+            'gradlew',
+            'gradlew.bat',
+          ].map(async (fileProjectPath) => ({
+            file: {
+              contents: await readBin(`./testFiles/${fileProjectPath}`),
+              path: fileProjectPath,
+              type: 'addition',
+            },
+          }))
+        )
       );
 
-      [
+      for (const file of [
         'gradle/wrapper/gradle-wrapper.properties',
         'gradle/wrapper/gradle-wrapper.jar',
         'gradlew',
         'gradlew.bat',
-      ].forEach((file) => {
-        compareFile(file, 'expectedFiles');
-      });
+      ]) {
+        await compareFile(file, 'expectedFiles');
+      }
     });
 
     it('updates from version', async () => {
@@ -100,7 +103,7 @@ describe(getName(), () => {
         })
       );
 
-      const result = await dcUpdate.updateArtifacts({
+      const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: ``,
@@ -110,7 +113,10 @@ describe(getName(), () => {
       expect(result).toHaveLength(1);
       expect(result[0].artifactError).toBeUndefined();
 
-      compareFile('gradle/wrapper/gradle-wrapper.properties', 'expectedFiles');
+      await compareFile(
+        'gradle/wrapper/gradle-wrapper.properties',
+        'expectedFiles'
+      );
     });
 
     it('up to date', async () => {
@@ -118,7 +124,7 @@ describe(getName(), () => {
         modified: [],
       } as StatusResult);
 
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -127,14 +133,14 @@ describe(getName(), () => {
         config,
       });
 
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
 
       // 5.6.4 => 5.6.4 (updates execs)
       // 6.3 => (5.6.4) (downgrades execs)
       // looks like a bug in Gradle
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        compareFile(file, 'testFiles-copy');
-      });
+      for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
+        await compareFile(file, 'testFiles-copy');
+      }
     });
 
     it('getRepoStatus fails', async () => {
@@ -142,7 +148,7 @@ describe(getName(), () => {
         throw new Error('failed');
       });
 
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -151,15 +157,15 @@ describe(getName(), () => {
         config,
       });
 
-      expect(res[0].artifactError.lockFile).toEqual(
+      expect(res[0].artifactError.lockFile).toBe(
         'gradle/wrapper/gradle-wrapper.properties'
       );
-      expect(res[0].artifactError.stderr).toEqual('failed');
+      expect(res[0].artifactError.stderr).toBe('failed');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        compareFile(file, 'testFiles-copy');
-      });
+      for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
+        await compareFile(file, 'testFiles-copy');
+      }
     });
 
     it('gradlew failed', async () => {
@@ -168,8 +174,8 @@ describe(getName(), () => {
         localDir: resolve(fixtures, './wrongCmd'),
       };
 
-      setAdminConfig(wrongCmdConfig);
-      const res = await dcUpdate.updateArtifacts({
+      GlobalConfig.set(wrongCmdConfig);
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -178,21 +184,21 @@ describe(getName(), () => {
         config,
       });
 
-      expect(res[0].artifactError.lockFile).toEqual(
+      expect(res[0].artifactError.lockFile).toBe(
         'gradle/wrapper/gradle-wrapper.properties'
       );
       expect(res[0].artifactError.stderr).not.toBeNull();
-      expect(res[0].artifactError.stderr).not.toEqual('');
+      expect(res[0].artifactError.stderr).not.toBe('');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        compareFile(file, 'testFiles-copy');
-      });
+      for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
+        await compareFile(file, 'testFiles-copy');
+      }
     });
 
     it('gradlew not found', async () => {
-      setAdminConfig({ localDir: 'some-dir' });
-      const res = await dcUpdate.updateArtifacts({
+      GlobalConfig.set({ localDir: 'some-dir' });
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: undefined,
@@ -219,7 +225,7 @@ describe(getName(), () => {
 
       const newContent = await readString(`./gradle-wrapper-sum.properties`);
 
-      const result = await dcUpdate.updateArtifacts({
+      const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: newContent.replace(
@@ -239,7 +245,7 @@ describe(getName(), () => {
       expect(
         await readString(
           adminConfig.localDir,
-          `./gradle/wrapper/gradle-wrapper.properties`
+          `gradle/wrapper/gradle-wrapper.properties`
         )
       ).toEqual(newContent);
 
@@ -263,7 +269,7 @@ describe(getName(), () => {
         .get('/distributions/gradle-6.3-bin.zip.sha256')
         .reply(404);
 
-      const result = await dcUpdate.updateArtifacts({
+      const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,

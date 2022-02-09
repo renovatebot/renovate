@@ -1,33 +1,29 @@
-/* eslint jest/no-standalone-expect: 0 */
-import { exec as _exec } from 'child_process';
-import { readFile } from 'fs-extra';
+import { readFile, stat } from 'fs-extra';
 import { resolve } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import * as httpMock from '../../../test/http-mock';
 import {
   addReplacingSerializer,
   env,
   fs,
-  getName,
   git,
   partial,
 } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import { resetPrefetchedImages } from '../../util/exec/docker';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
-import * as dcUpdate from '.';
+import * as gradleWrapper from '.';
 
 jest.mock('child_process');
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
 jest.mock('../../util/exec/env');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: resolve(fixtures, './testFiles'),
 };
 
@@ -44,7 +40,7 @@ function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
@@ -54,14 +50,15 @@ describe(getName(), () => {
       LC_ALL: 'en_US',
     });
 
-    setAdminConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
+    fs.stat.mockImplementation((p) => stat(p));
   });
 
   afterEach(() => {
-    setAdminConfig();
+    GlobalConfig.reset();
   });
 
   it('replaces existing value', async () => {
@@ -75,7 +72,7 @@ describe(getName(), () => {
 
     const execSnapshots = mockExecAll(exec);
 
-    const res = await dcUpdate.updateArtifacts({
+    const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: await readString(
@@ -91,7 +88,8 @@ describe(getName(), () => {
         'gradlew.bat',
       ].map((fileProjectPath) => ({
         file: {
-          name: fileProjectPath,
+          type: 'addition',
+          path: fileProjectPath,
           contents: 'test',
         },
       }))
@@ -100,8 +98,8 @@ describe(getName(), () => {
   });
 
   it('gradlew not found', async () => {
-    setAdminConfig({ ...adminConfig, localDir: 'some-dir' });
-    const res = await dcUpdate.updateArtifacts({
+    GlobalConfig.set({ ...adminConfig, localDir: 'some-dir' });
+    const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: undefined,
@@ -118,7 +116,7 @@ describe(getName(), () => {
         modified: [],
       })
     );
-    const res = await dcUpdate.updateArtifacts({
+    const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: '',
@@ -126,7 +124,7 @@ describe(getName(), () => {
     });
 
     expect(execSnapshots).toMatchSnapshot();
-    expect(res).toEqual([]);
+    expect(res).toBeEmptyArray();
   });
 
   it('updates distributionSha256Sum', async () => {
@@ -146,7 +144,7 @@ describe(getName(), () => {
 
     const execSnapshots = mockExecAll(exec);
 
-    const result = await dcUpdate.updateArtifacts({
+    const result = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
@@ -180,7 +178,7 @@ describe(getName(), () => {
       .get('/distributions/gradle-6.3-bin.zip.sha256')
       .reply(404);
 
-    const result = await dcUpdate.updateArtifacts({
+    const result = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,

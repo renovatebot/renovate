@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import type { RenovateConfig } from '../../../config/types';
 import * as memCache from '../../../util/cache/memory';
 import * as repositoryCache from '../../../util/cache/repository';

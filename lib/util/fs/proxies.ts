@@ -1,5 +1,5 @@
-import * as fs from 'fs-extra';
-import { MoveOptions, WriteFileOptions } from 'fs-extra';
+import fs from 'fs-extra';
+import type { MoveOptions, WriteFileOptions } from 'fs-extra';
 
 // istanbul ignore next
 export function stat(path: string | Buffer): Promise<fs.Stats> {
@@ -23,7 +23,7 @@ export function readFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer> {
-  return fs.readFile(fileName, encoding);
+  return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
 
 // istanbul ignore next

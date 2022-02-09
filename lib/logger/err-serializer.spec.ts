@@ -1,11 +1,11 @@
 import * as httpMock from '../../test/http-mock';
-import { getName, partial } from '../../test/util';
+import { partial } from '../../test/util';
 import * as hostRules from '../util/host-rules';
 import { Http } from '../util/http';
 import errSerializer from './err-serializer';
 import { sanitizeValue } from './utils';
 
-describe(getName(), () => {
+describe('logger/err-serializer', () => {
   it('expands errors', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,
@@ -17,12 +17,24 @@ describe(getName(), () => {
       },
       options: {
         headers: {
-          authorization: 'Bearer abc',
+          authorization: 'Bearer testtoken',
         },
       },
     });
-    // FIXME: explicit assert condition
-    expect(errSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toEqual({
+      a: 1,
+      b: 2,
+      message: 'some message',
+      response: {
+        body: 'some response body',
+        url: 'some/path',
+      },
+      options: {
+        headers: {
+          authorization: 'Bearer testtoken',
+        },
+      },
+    });
   });
   it('handles missing fields', () => {
     const err = partial<Error & Record<string, unknown>>({
@@ -30,8 +42,11 @@ describe(getName(), () => {
       stack: 'foo',
       body: 'some body',
     });
-    // FIXME: explicit assert condition
-    expect(errSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toEqual({
+      a: 1,
+      stack: 'foo',
+      body: 'some body',
+    });
   });
 
   describe('got', () => {

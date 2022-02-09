@@ -1,20 +1,25 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
+import { regEx } from '../../../../util/regex';
 import type { VersioningApi } from '../../../../versioning/types';
-import type { LookupUpdateConfig } from './types';
 
 export function getCurrentVersion(
-  config: LookupUpdateConfig,
+  currentValue: string,
+  lockedVersion: string,
   versioning: VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
   allVersions: string[]
 ): string | null {
-  const { currentValue, lockedVersion } = config;
+  // istanbul ignore if
+  if (!is.string(currentValue)) {
+    return null;
+  }
   if (versioning.isVersion(currentValue)) {
     return currentValue;
   }
   if (versioning.isSingleVersion(currentValue)) {
-    return currentValue.replace(/=/g, '').trim();
+    return currentValue.replace(regEx(/=/g), '').trim();
   }
   logger.trace(`currentValue ${currentValue} is range`);
   let useVersions = allVersions.filter((v) =>

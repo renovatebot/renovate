@@ -1,22 +1,24 @@
 import toml from '@iarna/toml';
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { localPathExists } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { PipFile } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
-const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
+const packageRegex = regEx(/^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i);
 const rangePattern: string = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
-  /\?<\w+>/g,
+  regEx(/\?<\w+>/g),
   '?:'
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
+const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   pipfile: PipFile,
   section: 'packages' | 'dev-packages'
@@ -24,7 +26,7 @@ function extractFromSection(
   if (!(section in pipfile)) {
     return [];
   }
-  const specifierRegex = new RegExp(`^${specifierPattern}$`);
+
   const pipfileSection = pipfile[section];
 
   const deps = Object.entries(pipfileSection)
@@ -34,21 +36,21 @@ function extractFromSection(
       let nestedVersion: boolean;
       let skipReason: SkipReason;
       if (requirements.git) {
-        skipReason = SkipReason.GitDependency;
+        skipReason = 'git-dependency';
       } else if (requirements.file) {
-        skipReason = SkipReason.FileDependency;
+        skipReason = 'file-dependency';
       } else if (requirements.path) {
-        skipReason = SkipReason.LocalDependency;
+        skipReason = 'local-dependency';
       } else if (requirements.version) {
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = SkipReason.AnyVersion;
+        skipReason = 'any-version';
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = SkipReason.AnyVersion;
+        skipReason = 'any-version';
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
@@ -56,14 +58,14 @@ function extractFromSection(
           logger.debug(
             `Skipping dependency with malformed package name "${depName}".`
           );
-          skipReason = SkipReason.InvalidName;
+          skipReason = 'invalid-name';
         }
         const specifierMatches = specifierRegex.exec(currentValue);
         if (!specifierMatches) {
           logger.debug(
             `Skipping dependency with malformed version specifier "${currentValue}".`
           );
-          skipReason = SkipReason.InvalidVersion;
+          skipReason = 'invalid-version';
         }
       }
       const dep: PackageDependency = {

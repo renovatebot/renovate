@@ -1,12 +1,14 @@
 import * as defaultsParser from '../../../../config/defaults';
-import { AllConfig } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
+import { detectAllGlobalConfig } from '../../../../manager';
 import { ensureDir, getSubDirectory, readFile } from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
 import * as envParser from './env';
 import * as fileParser from './file';
+import { hostRulesFromEnv } from './host-rules-from-env';
 
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
@@ -16,7 +18,7 @@ export async function parseConfigs(
 
   // Get configs
   const defaultConfig = defaultsParser.getConfig();
-  const fileConfig = fileParser.getConfig(env);
+  const fileConfig = await fileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = envParser.getConfig(env);
 
@@ -39,8 +41,13 @@ export async function parseConfigs(
   }
 
   if (!config.privateKey && config.privateKeyPath) {
-    config.privateKey = await readFile(config.privateKeyPath);
+    config.privateKey = await readFile(config.privateKeyPath, 'utf8');
     delete config.privateKeyPath;
+  }
+
+  if (!config.privateKeyOld && config.privateKeyPathOld) {
+    config.privateKey = await readFile(config.privateKeyPathOld, 'utf8');
+    delete config.privateKeyPathOld;
   }
 
   if (config.logContext) {
@@ -68,6 +75,17 @@ export async function parseConfigs(
   logger.debug({ config: envConfig }, 'Env config');
   logger.debug({ config: combinedConfig }, 'Combined config');
 
+  if (config.detectGlobalManagerConfig) {
+    logger.debug('Detecting global manager config');
+    const globalManagerConfig = await detectAllGlobalConfig();
+    logger.debug({ config: globalManagerConfig }, 'Global manager config');
+    config = mergeChildConfig(config, globalManagerConfig);
+  }
+
+  if (config.detectHostRulesFromEnv) {
+    const hostRules = hostRulesFromEnv(env);
+    config.hostRules = [...config.hostRules, ...hostRules];
+  }
   // Get global config
   logger.trace({ config }, 'Full config');
 

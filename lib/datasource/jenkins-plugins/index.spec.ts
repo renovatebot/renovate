@@ -1,35 +1,25 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { loadJsonFixture } from '../../../test/util';
 import * as versioning from '../../versioning/docker';
-import { resetCache } from './get';
-import * as jenkins from '.';
+import { JenkinsPluginsDatasource } from '.';
 
 const jenkinsPluginsVersions = loadJsonFixture('plugin-versions.json');
 const jenkinsPluginsInfo = loadJsonFixture('update-center.actual.json');
 
-describe(getName(), () => {
+describe('datasource/jenkins-plugins/index', () => {
   describe('getReleases', () => {
-    const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
-
     const params = {
       versioning: versioning.id,
-      datasource: jenkins.id,
+      datasource: JenkinsPluginsDatasource.id,
       depName: 'email-ext',
       registryUrls: ['https://updates.jenkins.io/'],
     };
-
-    beforeEach(() => {
-      resetCache();
-      process.env.RENOVATE_SKIP_CACHE = 'true';
-      jest.resetAllMocks();
-    });
 
     afterEach(() => {
       if (!httpMock.allUsed()) {
         throw new Error('Not all http mocks have been used!');
       }
-      process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 
     it('returns null for a package miss', async () => {
@@ -40,11 +30,6 @@ describe(getName(), () => {
         .scope('https://updates.jenkins.io')
         .get('/current/update-center.actual.json')
         .reply(200, jenkinsPluginsInfo);
-
-      httpMock
-        .scope('https://updates.jenkins.io')
-        .get('/current/plugin-versions.json')
-        .reply(200, jenkinsPluginsVersions);
 
       expect(await getPkgReleases(newparams)).toBeNull();
     });
@@ -60,7 +45,7 @@ describe(getName(), () => {
         .get('/current/plugin-versions.json')
         .reply(200, jenkinsPluginsVersions);
 
-      let res = await getPkgReleases(params);
+      const res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(75);
       expect(res).toMatchSnapshot();
 
@@ -74,10 +59,6 @@ describe(getName(), () => {
       expect(
         res.releases.find((release) => release.version === '12.98')
       ).toBeUndefined();
-
-      // check that caching is working and no http requests are done after the first call to getPkgReleases
-      res = await getPkgReleases(params);
-      expect(res.releases).toHaveLength(75);
     });
 
     it('returns package releases for a hit for info and miss for releases', async () => {
@@ -104,11 +85,6 @@ describe(getName(), () => {
       httpMock
         .scope('https://updates.jenkins.io')
         .get('/current/update-center.actual.json')
-        .reply(200, '{}');
-
-      httpMock
-        .scope('https://updates.jenkins.io')
-        .get('/current/plugin-versions.json')
         .reply(200, '{}');
 
       expect(await getPkgReleases(params)).toBeNull();

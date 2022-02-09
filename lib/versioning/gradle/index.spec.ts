@@ -1,281 +1,291 @@
-import { getName } from '../../../test/util';
 import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
-describe(getName(), () => {
-  it('returns equality', () => {
-    expect(compare('1', '1')).toEqual(0);
-    expect(compare('a', 'a')).toEqual(0);
-
-    expect(compare('1a1', '1.a.1')).toEqual(0);
-    expect(compare('1a1', '1-a-1')).toEqual(0);
-    expect(compare('1a1', '1_a_1')).toEqual(0);
-    expect(compare('1a1', '1+a+1')).toEqual(0);
-    expect(compare('1.a.1', '1a1')).toEqual(0);
-    expect(compare('1-a-1', '1a1')).toEqual(0);
-    expect(compare('1_a_1', '1a1')).toEqual(0);
-    expect(compare('1+a+1', '1a1')).toEqual(0);
-
-    expect(compare('1.a.1', '1-a+1')).toEqual(0);
-    expect(compare('1-a+1', '1.a-1')).toEqual(0);
-    expect(compare('1.a-1', '1a1')).toEqual(0);
-
-    expect(compare('dev', 'dev')).toEqual(0);
-    expect(compare('rc', 'rc')).toEqual(0);
-    expect(compare('release', 'release')).toEqual(0);
-    expect(compare('final', 'final')).toEqual(0);
-    expect(compare('snapshot', 'SNAPSHOT')).toEqual(0);
-    expect(compare('SNAPSHOT', 'snapshot')).toEqual(0);
-    expect(compare('Hoxton.SR1', 'Hoxton.sr-1')).toEqual(0);
-  });
-  it('returns less than', () => {
-    expect(compare('1.1', '1.2')).toEqual(-1);
-    expect(compare('1.a', '1.1')).toEqual(-1);
-    expect(compare('1.A', '1.B')).toEqual(-1);
-    expect(compare('1.B', '1.a')).toEqual(-1);
-    expect(compare('1.a', '1.b')).toEqual(-1);
-    expect(compare('1.1', '1.1.0')).toEqual(-1);
-    expect(compare('1.1.a', '1.1')).toEqual(-1);
-    expect(compare('1.0-dev', '1.0-alpha')).toEqual(-1);
-    expect(compare('1.0-alpha', '1.0-rc')).toEqual(-1);
-    expect(compare('1.0-zeta', '1.0-rc')).toEqual(-1);
-    expect(compare('1.0-rc', '1.0-final')).toEqual(-1);
-    expect(compare('1.0-final', '1.0-ga')).toEqual(-1);
-    expect(compare('1.0-ga', '1.0-release')).toEqual(-1);
-    expect(compare('1.0-rc', '1.0-release')).toEqual(-1);
-    expect(compare('1.0-final', '1.0')).toEqual(-1);
-    expect(compare('1.0-alpha', '1.0-SNAPSHOT')).toEqual(-1);
-    expect(compare('1.0-zeta', '1.0-SNAPSHOT')).toEqual(-1);
-    expect(compare('1.0-zeta', '1.0-rc')).toEqual(-1);
-    expect(compare('1.0-rc', '1.0')).toEqual(-1);
-    expect(compare('1.0', '1.0-20150201.121010-123')).toEqual(-1);
-    expect(compare('1.0-20150201.121010-123', '1.1')).toEqual(-1);
-    expect(compare('Hoxton.RELEASE', 'Hoxton.SR1')).toEqual(-1);
-    expect(compare('1.0-release', '1.0-sp-1')).toEqual(-1);
-    expect(compare('1.0-sp-1', '1.0-sp-2')).toEqual(-1);
-  });
-  it('returns greater than', () => {
-    expect(compare('1.2', '1.1')).toEqual(1);
-    expect(compare('1.1', '1.1.a')).toEqual(1);
-    expect(compare('1.B', '1.A')).toEqual(1);
-    expect(compare('1.a', '1.B')).toEqual(1);
-    expect(compare('1.b', '1.a')).toEqual(1);
-    expect(compare('1.1.0', '1.1')).toEqual(1);
-    expect(compare('1.1', '1.a')).toEqual(1);
-    expect(compare('1.0-alpha', '1.0-dev')).toEqual(1);
-    expect(compare('1.0-rc', '1.0-alpha')).toEqual(1);
-    expect(compare('1.0-rc', '1.0-zeta')).toEqual(1);
-    expect(compare('1.0-release', '1.0-rc')).toEqual(1);
-    expect(compare('1.0-final', '1.0-rc')).toEqual(1);
-    expect(compare('1.0-ga', '1.0-final')).toEqual(1);
-    expect(compare('1.0-release', '1.0-ga')).toEqual(1);
-    expect(compare('1.0-release', '1.0-final')).toEqual(1);
-    expect(compare('1.0', '1.0-final')).toEqual(1);
-    expect(compare('1.0-SNAPSHOT', '1.0-alpha')).toEqual(1);
-    expect(compare('1.0-SNAPSHOT', '1.0-zeta')).toEqual(1);
-    expect(compare('1.0-rc', '1.0-zeta')).toEqual(1);
-    expect(compare('1.0', '1.0-rc')).toEqual(1);
-    expect(compare('1.0-20150201.121010-123', '1.0')).toEqual(1);
-    expect(compare('1.1', '1.0-20150201.121010-123')).toEqual(1);
-    expect(compare('Hoxton.SR1', 'Hoxton.RELEASE')).toEqual(1);
-    expect(compare('1.0-sp-1', '1.0-release')).toEqual(1);
-    expect(compare('1.0-sp-2', '1.0-sp-1')).toEqual(1);
-  });
-
-  const invalidPrefixRanges = [
-    '',
-    '1.2.3-SNAPSHOT', // versions should be handled separately
-    '1.2..+',
-    '1.2.++',
-  ];
-  it('filters out incorrect prefix ranges', () => {
-    invalidPrefixRanges.forEach((rangeStr) => {
-      const range = parsePrefixRange(rangeStr);
-      expect(range).toBeNull();
-    });
+describe('versioning/gradle/index', () => {
+  test.each`
+    a                            | b                            | expected
+    ${'1'}                       | ${'1'}                       | ${0}
+    ${'a'}                       | ${'a'}                       | ${0}
+    ${'1a1'}                     | ${'1.a.1'}                   | ${0}
+    ${'1a1'}                     | ${'1-a-1'}                   | ${0}
+    ${'1a1'}                     | ${'1_a_1'}                   | ${0}
+    ${'1a1'}                     | ${'1+a+1'}                   | ${0}
+    ${'1.a.1'}                   | ${'1a1'}                     | ${0}
+    ${'1-a-1'}                   | ${'1a1'}                     | ${0}
+    ${'1_a_1'}                   | ${'1a1'}                     | ${0}
+    ${'1+a+1'}                   | ${'1a1'}                     | ${0}
+    ${'1.a.1'}                   | ${'1-a+1'}                   | ${0}
+    ${'1-a+1'}                   | ${'1.a-1'}                   | ${0}
+    ${'1.a-1'}                   | ${'1a1'}                     | ${0}
+    ${'dev'}                     | ${'dev'}                     | ${0}
+    ${'rc'}                      | ${'rc'}                      | ${0}
+    ${'preview'}                 | ${'preview'}                 | ${0}
+    ${'release'}                 | ${'release'}                 | ${0}
+    ${'final'}                   | ${'final'}                   | ${0}
+    ${'snapshot'}                | ${'SNAPSHOT'}                | ${0}
+    ${'SNAPSHOT'}                | ${'snapshot'}                | ${0}
+    ${'Hoxton.SR1'}              | ${'Hoxton.sr-1'}             | ${0}
+    ${'1.1'}                     | ${'1.2'}                     | ${-1}
+    ${'1.a'}                     | ${'1.1'}                     | ${-1}
+    ${'1.A'}                     | ${'1.B'}                     | ${-1}
+    ${'1.B'}                     | ${'1.a'}                     | ${-1}
+    ${'1.a'}                     | ${'1.b'}                     | ${-1}
+    ${'1.1'}                     | ${'1.1.0'}                   | ${-1}
+    ${'1.1.a'}                   | ${'1.1'}                     | ${-1}
+    ${'1.0-dev'}                 | ${'1.0-alpha'}               | ${-1}
+    ${'1.0-alpha'}               | ${'1.0-rc'}                  | ${-1}
+    ${'1.0-zeta'}                | ${'1.0-rc'}                  | ${-1}
+    ${'1.0-rc'}                  | ${'1.0-final'}               | ${-1}
+    ${'1.0-final'}               | ${'1.0-ga'}                  | ${-1}
+    ${'1.0-ga'}                  | ${'1.0-release'}             | ${-1}
+    ${'1.0-rc'}                  | ${'1.0-release'}             | ${-1}
+    ${'1.0-final'}               | ${'1.0'}                     | ${-1}
+    ${'1.0-alpha'}               | ${'1.0-SNAPSHOT'}            | ${-1}
+    ${'1.0-zeta'}                | ${'1.0-SNAPSHOT'}            | ${-1}
+    ${'1.0-zeta'}                | ${'1.0-rc'}                  | ${-1}
+    ${'1.0-rc'}                  | ${'1.0'}                     | ${-1}
+    ${'1.0-preview'}             | ${'1.0'}                     | ${-1}
+    ${'1.0'}                     | ${'1.0-20150201.121010-123'} | ${-1}
+    ${'1.0-20150201.121010-123'} | ${'1.1'}                     | ${-1}
+    ${'Hoxton.RELEASE'}          | ${'Hoxton.SR1'}              | ${-1}
+    ${'1.0-release'}             | ${'1.0-sp-1'}                | ${-1}
+    ${'1.0-sp-1'}                | ${'1.0-sp-2'}                | ${-1}
+    ${'1.2'}                     | ${'1.1'}                     | ${1}
+    ${'1.1'}                     | ${'1.1.a'}                   | ${1}
+    ${'1.B'}                     | ${'1.A'}                     | ${1}
+    ${'1.a'}                     | ${'1.B'}                     | ${1}
+    ${'1.b'}                     | ${'1.a'}                     | ${1}
+    ${'1.1.0'}                   | ${'1.1'}                     | ${1}
+    ${'1.1'}                     | ${'1.a'}                     | ${1}
+    ${'1.0-alpha'}               | ${'1.0-dev'}                 | ${1}
+    ${'1.0-rc'}                  | ${'1.0-alpha'}               | ${1}
+    ${'1.0-rc'}                  | ${'1.0-zeta'}                | ${1}
+    ${'1.0-release'}             | ${'1.0-rc'}                  | ${1}
+    ${'1.0-final'}               | ${'1.0-rc'}                  | ${1}
+    ${'1.0-ga'}                  | ${'1.0-final'}               | ${1}
+    ${'1.0-release'}             | ${'1.0-ga'}                  | ${1}
+    ${'1.0-release'}             | ${'1.0-final'}               | ${1}
+    ${'1.0'}                     | ${'1.0-final'}               | ${1}
+    ${'1.0-SNAPSHOT'}            | ${'1.0-alpha'}               | ${1}
+    ${'1.0-SNAPSHOT'}            | ${'1.0-zeta'}                | ${1}
+    ${'1.0-rc'}                  | ${'1.0-zeta'}                | ${1}
+    ${'1.0'}                     | ${'1.0-rc'}                  | ${1}
+    ${'1.0'}                     | ${'1.0-preview'}             | ${1}
+    ${'1.0-20150201.121010-123'} | ${'1.0'}                     | ${1}
+    ${'1.1'}                     | ${'1.0-20150201.121010-123'} | ${1}
+    ${'Hoxton.SR1'}              | ${'Hoxton.RELEASE'}          | ${1}
+    ${'1.0-sp-1'}                | ${'1.0-release'}             | ${1}
+    ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
+  `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(compare(a, b)).toEqual(expected);
   });
 
-  const invalidMavenBasedRanges = [
-    '',
-    '1.2.3-SNAPSHOT', // versions should be handled separately
-    '[]',
-    '(',
-    '[',
-    ',',
-    '[1.0',
-    '1.0]',
-    '[1.0],',
-    ',[1.0]',
-    '[2.0,1.0)',
-    '[1.2,1.3],1.4',
-    '[1.2,,1.3]',
-    '[1,[2,3],4]',
-    '[1.3,1.2]',
-  ];
-  it('filters out incorrect maven-based ranges', () => {
-    invalidMavenBasedRanges.forEach((rangeStr) => {
-      const range = parseMavenBasedRange(rangeStr);
-      expect(range).toBeNull();
-    });
-  });
-});
-
-describe(getName(), () => {
-  it('isValid', () => {
-    expect(api.isValid('1.0.0')).toBe(true);
-    expect(api.isValid('[1.12.6,1.18.6]')).toBe(true);
-    expect(api.isValid(undefined)).toBe(false);
+  test.each`
+    rangeStr
+    ${''}
+    ${'1.2.3-SNAPSHOT'}
+    ${'1.2..+'}
+    ${'1.2.++'}
+  `('parsePrefixRange("$rangeStr") is null', ({ rangeStr }) => {
+    const range = parsePrefixRange(rangeStr);
+    expect(range).toBeNull();
   });
 
-  it('isVersion', () => {
-    expect(api.isVersion('')).toBe(false);
+  test.each`
+    rangeStr
+    ${''}
+    ${'1.2.3-SNAPSHOT'}
+    ${'[]'}
+    ${'('}
+    ${'['}
+    ${','}
+    ${'[1.0'}
+    ${'1.0]'}
+    ${'[1.0],'}
+    ${',[1.0]'}
+    ${'[2.0,1.0)'}
+    ${'[1.2,1.3],1.4'}
+    ${'[1.2,,1.3]'}
+    ${'[1,[2,3],4]'}
+    ${'[1.3,1.2]'}
+  `('parseMavenBasedRange("$rangeStr") is null', ({ rangeStr }) => {
+    const range = parseMavenBasedRange(rangeStr);
+    expect(range).toBeNull();
+  });
 
-    expect(api.isVersion('latest.integration')).toBe(false);
-    expect(api.isVersion('latest.release')).toBe(false);
-    expect(api.isVersion('latest')).toBe(false);
+  test.each`
+    input                | expected
+    ${'1.0.0'}           | ${true}
+    ${'[1.12.6,1.18.6]'} | ${true}
+    ${undefined}         | ${false}
+  `('isValid("$input") === $expected', ({ input, expected }) => {
+    expect(api.isValid(input)).toBe(expected);
+  });
 
-    expect(api.isVersion('1')).toBe(true);
-    expect(api.isVersion('a')).toBe(true);
-    expect(api.isVersion('A')).toBe(true);
-    expect(api.isVersion('1a1')).toBe(true);
-    expect(api.isVersion('1.a.1')).toBe(true);
-    expect(api.isVersion('1-a-1')).toBe(true);
-    expect(api.isVersion('1_a_1')).toBe(true);
-    expect(api.isVersion('1+a+1')).toBe(true);
-    expect(api.isVersion('1!a!1')).toBe(false);
+  test.each`
+    input                        | expected
+    ${''}                        | ${false}
+    ${'latest.integration'}      | ${false}
+    ${'latest.release'}          | ${false}
+    ${'latest'}                  | ${false}
+    ${'1'}                       | ${true}
+    ${'a'}                       | ${true}
+    ${'A'}                       | ${true}
+    ${'1a1'}                     | ${true}
+    ${'1.a.1'}                   | ${true}
+    ${'1-a-1'}                   | ${true}
+    ${'1_a_1'}                   | ${true}
+    ${'1+a+1'}                   | ${true}
+    ${'1!a!1'}                   | ${false}
+    ${'1.0-20150201.121010-123'} | ${true}
+    ${'dev'}                     | ${true}
+    ${'rc'}                      | ${true}
+    ${'release'}                 | ${true}
+    ${'final'}                   | ${true}
+    ${'SNAPSHOT'}                | ${true}
+    ${'1.2'}                     | ${true}
+    ${'1..2'}                    | ${false}
+    ${'1++2'}                    | ${false}
+    ${'1--2'}                    | ${false}
+    ${'1__2'}                    | ${false}
+  `('isVersion("$input") === $expected', ({ input, expected }) => {
+    expect(api.isVersion(input)).toBe(expected);
+  });
 
-    expect(api.isVersion('1.0-20150201.121010-123')).toBe(true);
-    expect(api.isVersion('dev')).toBe(true);
-    expect(api.isVersion('rc')).toBe(true);
-    expect(api.isVersion('release')).toBe(true);
-    expect(api.isVersion('final')).toBe(true);
-    expect(api.isVersion('SNAPSHOT')).toBe(true);
+  test.each`
+    input                                   | expected
+    ${''}                                   | ${false}
+    ${'latest'}                             | ${false}
+    ${'foobar'}                             | ${true}
+    ${'final'}                              | ${true}
+    ${'1'}                                  | ${true}
+    ${'1..2'}                               | ${false}
+    ${'1.2'}                                | ${true}
+    ${'1.2.3'}                              | ${true}
+    ${'1.2.3.4 s'}                          | ${false}
+    ${'1.2.3.4'}                            | ${true}
+    ${'v1.2.3.4'}                           | ${true}
+    ${'1-alpha-1'}                          | ${false}
+    ${'1-b1'}                               | ${false}
+    ${'1-foo'}                              | ${true}
+    ${'1-final-1.0.0'}                      | ${true}
+    ${'1-release'}                          | ${true}
+    ${'1.final'}                            | ${true}
+    ${'1.0milestone1'}                      | ${false}
+    ${'1-sp'}                               | ${true}
+    ${'1-ga-1'}                             | ${true}
+    ${'1.3-groovy-2.5'}                     | ${true}
+    ${'1.3-RC1-groovy-2.5'}                 | ${false}
+    ${'1-preview'}                          | ${false}
+    ${'Hoxton.RELEASE'}                     | ${true}
+    ${'Hoxton.SR'}                          | ${true}
+    ${'Hoxton.SR1'}                         | ${true}
+    ${'1.3.5-native-mt-1.3.71-release-429'} | ${false}
+  `('isStable("$input") === $expected', ({ input, expected }) => {
+    expect(api.isStable(input)).toBe(expected);
+  });
 
-    expect(api.isVersion('1.2')).toBe(true);
-    expect(api.isVersion('1..2')).toBe(false);
-    expect(api.isVersion('1++2')).toBe(false);
-    expect(api.isVersion('1--2')).toBe(false);
-    expect(api.isVersion('1__2')).toBe(false);
-  });
-  it('checks if version is stable', () => {
-    expect(api.isStable('')).toBeNull();
-    expect(api.isStable('foobar')).toBe(true);
-    expect(api.isStable('final')).toBe(true);
-    expect(api.isStable('1')).toBe(true);
-    expect(api.isStable('1.2')).toBe(true);
-    expect(api.isStable('1.2.3')).toBe(true);
-    expect(api.isStable('1.2.3.4')).toBe(true);
-    expect(api.isStable('v1.2.3.4')).toBe(true);
-    expect(api.isStable('1-alpha-1')).toBe(false);
-    expect(api.isStable('1-b1')).toBe(false);
-    expect(api.isStable('1-foo')).toBe(true);
-    expect(api.isStable('1-final-1.0.0')).toBe(true);
-    expect(api.isStable('1-release')).toBe(true);
-    expect(api.isStable('1.final')).toBe(true);
-    expect(api.isStable('1.0milestone1')).toBe(false);
-    expect(api.isStable('1-sp')).toBe(true);
-    expect(api.isStable('1-ga-1')).toBe(true);
-    expect(api.isStable('1.3-groovy-2.5')).toBe(true);
-    expect(api.isStable('1.3-RC1-groovy-2.5')).toBe(false);
-    expect(api.isStable('Hoxton.RELEASE')).toBe(true);
-    expect(api.isStable('Hoxton.SR')).toBe(true);
-    expect(api.isStable('Hoxton.SR1')).toBe(true);
+  test.each`
+    input         | major   | minor   | patch
+    ${''}         | ${null} | ${null} | ${null}
+    ${'1'}        | ${1}    | ${0}    | ${0}
+    ${'1.2'}      | ${1}    | ${2}    | ${0}
+    ${'1.2.3'}    | ${1}    | ${2}    | ${3}
+    ${'v1.2.3'}   | ${1}    | ${2}    | ${3}
+    ${'1.2.3.4'}  | ${1}    | ${2}    | ${3}
+    ${'1rc42'}    | ${1}    | ${0}    | ${0}
+    ${'1-rc10'}   | ${1}    | ${0}    | ${0}
+    ${'1-rc42'}   | ${1}    | ${0}    | ${0}
+    ${'1-rc42-1'} | ${1}    | ${0}    | ${0}
+  `(
+    '"$input" is represented as [$major, $minor, $patch]',
+    ({ input, major, minor, patch }) => {
+      expect(api.getMajor(input)).toBe(major);
+      expect(api.getMinor(input)).toBe(minor);
+      expect(api.getPatch(input)).toBe(patch);
+    }
+  );
 
-    // https://github.com/renovatebot/renovate/pull/5789
-    expect(api.isStable('1.3.5-native-mt-1.3.71-release-429')).toBe(false);
+  test.each`
+    version          | range      | expected
+    ${'1'}           | ${'[[]]'}  | ${false}
+    ${'0'}           | ${'[0,1]'} | ${true}
+    ${'1'}           | ${'[0,1]'} | ${true}
+    ${'0'}           | ${'(0,1)'} | ${false}
+    ${'1'}           | ${'(0,1)'} | ${false}
+    ${'1'}           | ${'(0,2)'} | ${true}
+    ${'1'}           | ${'[0,2]'} | ${true}
+    ${'1'}           | ${'(,1]'}  | ${true}
+    ${'1'}           | ${'(,1)'}  | ${false}
+    ${'1'}           | ${'[1,)'}  | ${true}
+    ${'1'}           | ${'(1,)'}  | ${false}
+    ${'0'}           | ${''}      | ${false}
+    ${'1'}           | ${'1'}     | ${true}
+    ${'1.2.3'}       | ${'1.2.+'} | ${true}
+    ${'1.2.3.4'}     | ${'1.2.+'} | ${true}
+    ${'1.3.0'}       | ${'1.2.+'} | ${false}
+    ${'foo'}         | ${'+'}     | ${true}
+    ${'1'}           | ${'+'}     | ${true}
+    ${'99999999999'} | ${'+'}     | ${true}
+  `(
+    'matches("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(api.matches(version, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    a        | b      | expected
+    ${'1.1'} | ${'1'} | ${true}
+  `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(api.isGreaterThan(a, b)).toBe(expected);
   });
-  it('returns major version', () => {
-    expect(api.getMajor('')).toBeNull();
-    expect(api.getMajor('1')).toEqual(1);
-    expect(api.getMajor('1.2')).toEqual(1);
-    expect(api.getMajor('1.2.3')).toEqual(1);
-    expect(api.getMajor('v1.2.3')).toEqual(1);
-    expect(api.getMajor('1rc42')).toEqual(1);
-  });
-  it('returns minor version', () => {
-    expect(api.getMinor('')).toBeNull();
-    expect(api.getMinor('1')).toEqual(0);
-    expect(api.getMinor('1.2')).toEqual(2);
-    expect(api.getMinor('1.2.3')).toEqual(2);
-    expect(api.getMinor('v1.2.3')).toEqual(2);
-    expect(api.getMinor('1.2.3.4')).toEqual(2);
-    expect(api.getMinor('1-rc42')).toEqual(0);
-  });
-  it('returns patch version', () => {
-    expect(api.getPatch('')).toBeNull();
-    expect(api.getPatch('1')).toEqual(0);
-    expect(api.getPatch('1.2')).toEqual(0);
-    expect(api.getPatch('1.2.3')).toEqual(3);
-    expect(api.getPatch('v1.2.3')).toEqual(3);
-    expect(api.getPatch('1.2.3.4')).toEqual(3);
-    expect(api.getPatch('1-rc10')).toEqual(0);
-    expect(api.getPatch('1-rc42-1')).toEqual(0);
-  });
-  it('matches against maven ranges', () => {
-    expect(api.matches('0', '[0,1]')).toBe(true);
-    expect(api.matches('1', '[0,1]')).toBe(true);
-    expect(api.matches('0', '(0,1)')).toBe(false);
-    expect(api.matches('1', '(0,1)')).toBe(false);
-    expect(api.matches('1', '(0,2)')).toBe(true);
-    expect(api.matches('1', '[0,2]')).toBe(true);
-    expect(api.matches('1', '(,1]')).toBe(true);
-    expect(api.matches('1', '(,1)')).toBe(false);
-    expect(api.matches('1', '[1,)')).toBe(true);
-    expect(api.matches('1', '(1,)')).toBe(false);
-    expect(api.matches('1', '[[]]')).toBeNull();
-    expect(api.matches('0', '')).toBe(false);
-    expect(api.matches('1', '1')).toBe(true);
-    expect(api.matches('1.2.3', '1.2.+')).toBe(true);
-    expect(api.matches('1.2.3.4', '1.2.+')).toBe(true);
-    expect(api.matches('1.3.0', '1.2.+')).toBe(false);
-    expect(api.matches('foo', '+')).toBe(true);
-    expect(api.matches('1', '+')).toBe(true);
-    expect(api.matches('99999999999', '+')).toBe(true);
-  });
-  it('api', () => {
-    expect(api.isGreaterThan('1.1', '1')).toBe(true);
-    expect(api.minSatisfyingVersion(['0', '1.5', '1', '2'], '1.+')).toBe('1');
-    expect(api.getSatisfyingVersion(['0', '1', '1.5', '2'], '1.+')).toBe('1.5');
-    expect(
-      api.getNewValue({
-        currentValue: '1',
-        rangeStrategy: null,
-        currentVersion: null,
-        newVersion: '1.1',
-      })
-    ).toBe('1.1');
-    expect(
-      api.getNewValue({
-        currentValue: '[1.2.3,]',
-        rangeStrategy: null,
-        currentVersion: null,
-        newVersion: '1.2.4',
-      })
-    ).toBeNull();
-  });
-  it('pins maven ranges', () => {
-    const sample = [
-      ['[1.2.3]', '1.2.3', '1.2.4'],
-      ['[1.0.0,1.2.3]', '1.0.0', '1.2.4'],
-      ['[1.0.0,1.2.23]', '1.0.0', '1.2.23'],
-      ['(,1.0]', '0.0.1', '2.0'],
-      ['],1.0]', '0.0.1', '2.0'],
-      ['(,1.0)', '0.1', '2.0'],
-      ['],1.0[', '2.0', '],2.0['],
-      ['[1.0,1.2],[1.3,1.5)', '1.0', '1.2.4'],
-      ['[1.0,1.2],[1.3,1.5[', '1.0', '1.2.4'],
-      ['[1.2.3,)', '1.2.3', '1.2.4'],
-      ['[1.2.3,[', '1.2.3', '1.2.4'],
-    ];
-    sample.forEach(([currentValue, currentVersion, newVersion]) => {
-      expect(
-        api.getNewValue({
-          currentValue,
-          rangeStrategy: 'pin',
-          currentVersion,
-          newVersion,
-        })
-      ).toEqual(newVersion);
-    });
-  });
+
+  test.each`
+    versions                  | range    | expected
+    ${['0', '1.5', '1', '2']} | ${'1.+'} | ${'1'}
+  `(
+    'minSatisfyingVersion($versions, "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(api.minSatisfyingVersion(versions, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    versions                  | range    | expected
+    ${['0', '1', '1.5', '2']} | ${'1.+'} | ${'1.5'}
+  `(
+    'getSatisfyingVersion($versions, "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(api.getSatisfyingVersion(versions, range)).toBe(expected);
+    }
+  );
+
+  test.each`
+    currentValue             | rangeStrategy | currentVersion | newVersion  | expected
+    ${'1'}                   | ${null}       | ${null}        | ${'1.1'}    | ${'1.1'}
+    ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'[1.2.3]'}             | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'[1.0.0,1.2.3]'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'[1.0.0,1.2.23]'}      | ${'pin'}      | ${'1.0.0'}     | ${'1.2.23'} | ${'1.2.23'}
+    ${'(,1.0]'}              | ${'pin'}      | ${'0.0.1'}     | ${'2.0'}    | ${'2.0'}
+    ${'],1.0]'}              | ${'pin'}      | ${'0.0.1'}     | ${'2.0'}    | ${'2.0'}
+    ${'(,1.0)'}              | ${'pin'}      | ${'0.1'}       | ${'2.0'}    | ${'2.0'}
+    ${'],1.0['}              | ${'pin'}      | ${'2.0'}       | ${'],2.0['} | ${'],2.0['}
+    ${'[1.0,1.2],[1.3,1.5)'} | ${'pin'}      | ${'1.0'}       | ${'1.2.4'}  | ${'1.2.4'}
+    ${'[1.0,1.2],[1.3,1.5['} | ${'pin'}      | ${'1.0'}       | ${'1.2.4'}  | ${'1.2.4'}
+    ${'[1.2.3,)'}            | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'[1.2.3,['}            | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
+  `(
+    'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      const res = api.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+      expect(res).toBe(expected);
+    }
+  );
 });

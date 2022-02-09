@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
-import { getFixturePath, getName, logger } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { getFixturePath, logger } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as fs from '../../../util/fs';
 import {
   detectPnpmWorkspaces,
@@ -8,9 +8,9 @@ import {
   findPnpmWorkspace,
 } from './pnpm';
 
-describe(getName(), () => {
+describe('manager/npm/extract/pnpm', () => {
   beforeAll(() => {
-    setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+    GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });
 
   describe('.extractPnpmFilters()', () => {
@@ -24,8 +24,7 @@ describe(getName(), () => {
         '..'
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
           fileName: expect.any(String),
@@ -40,8 +39,7 @@ describe(getName(), () => {
       });
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           fileName: expect.any(String),
@@ -58,8 +56,7 @@ describe(getName(), () => {
 
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
         'Failed to locate pnpm-workspace.yaml in a parent directory.'
@@ -71,8 +68,7 @@ describe(getName(), () => {
 
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           workspaceYamlPath: 'pnpm-workspace.yaml',
@@ -116,6 +112,16 @@ describe(getName(), () => {
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
+          packageFile: 'solo-package-leading-dot-slash/package.json',
+          packageJsonName: '@demo/solo-leading-dot-slash',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'solo-package-leading-double-dot-slash/package.json',
+          packageJsonName: '@demo/solo-leading-double-dot-slash',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
           packageFile: 'solo-package-trailing-slash/package.json',
           packageJsonName: '@demo/solo-trailing-slash',
           pnpmShrinkwrap: undefined as undefined | string,
@@ -126,7 +132,7 @@ describe(getName(), () => {
       expect(packageFiles).toMatchSnapshot();
       expect(
         packageFiles.every((packageFile) => packageFile.pnpmShrinkwrap)
-      ).toBe(true);
+      ).toBeTrue();
     });
 
     it('skips when pnpm shrinkwrap file has already been provided', async () => {
@@ -138,8 +144,12 @@ describe(getName(), () => {
       ];
 
       await detectPnpmWorkspaces(packageFiles);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual([
+        {
+          packageFile: 'package.json',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+      ]);
     });
 
     it('filters none matching packages', async () => {
@@ -161,14 +171,28 @@ describe(getName(), () => {
       ];
 
       await detectPnpmWorkspaces(packageFiles);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual([
+        {
+          packageFile: 'package.json',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+        {
+          packageFile: 'nested-packages/group/a/package.json',
+          packageJsonName: '@demo/nested-group-a',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+        {
+          packageFile: 'not-matching/b/package.json',
+          packageJsonName: '@not-matching/b',
+          pnpmShrinkwrap: undefined,
+        },
+      ]);
       expect(
         packageFiles.find(
           (packageFile) =>
             packageFile.packageFile === 'not-matching/b/package.json'
         ).pnpmShrinkwrap
-      ).not.toBeDefined();
+      ).toBeUndefined();
     });
   });
 });

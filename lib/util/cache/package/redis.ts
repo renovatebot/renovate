@@ -1,17 +1,18 @@
 /* istanbul ignore file */
-import { WrappedNodeRedisClient, createNodeRedisClient } from 'handy-redis';
 import { DateTime } from 'luxon';
+import { createClient } from 'redis';
 import { logger } from '../../../logger';
 
-let client: WrappedNodeRedisClient | undefined;
+let client: ReturnType<typeof createClient> | undefined;
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
 }
 
-export function end(): void {
+export async function end(): Promise<void> {
   try {
-    client?.nodeRedis?.end(true); // TODO: Why is this not supported by client directly? (#9714)
+    // https://github.com/redis/node-redis#disconnecting
+    await client?.disconnect();
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
@@ -25,14 +26,14 @@ async function rm(namespace: string, key: string): Promise<void> {
 export async function get<T = never>(
   namespace: string,
   key: string
-): Promise<T> {
+): Promise<T | undefined> {
   if (!client) {
     return undefined;
   }
   logger.trace(`cache.get(${namespace}, ${key})`);
   try {
     const res = await client?.get(getKey(namespace, key));
-    const cachedValue = JSON.parse(res);
+    const cachedValue = res && JSON.parse(res);
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');
@@ -60,23 +61,23 @@ export async function set(
       value,
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     }),
-    ['EX', ttlMinutes * 60]
+    { EX: ttlMinutes * 60 }
   );
 }
 
-export function init(url: string): void {
+export async function init(url: string): Promise<void> {
   if (!url) {
     return;
   }
   logger.debug('Redis cache init');
-  client = createNodeRedisClient({
+  client = createClient({
     url,
-    retry_strategy: (options) => {
-      if (options.error) {
-        logger.error({ err: options.error }, 'Redis cache error');
-      }
-      // Reconnect after this time
-      return Math.min(options.attempt * 100, 3000);
+    socket: {
+      reconnectStrategy: (retries) => {
+        // Reconnect after this time
+        return Math.min(retries * 100, 3000);
+      },
     },
   });
+  await client.connect();
 }

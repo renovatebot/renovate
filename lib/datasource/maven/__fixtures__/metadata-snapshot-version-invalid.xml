@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <version>1.0.4-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <buildNumber>4</buildNumber>
+      <!-- Missing timestamp -->
+    </snapshot>
+    <lastUpdated>20130301200000</lastUpdated>
+  </versioning>
+</metadata>

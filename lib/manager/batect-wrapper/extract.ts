@@ -1,9 +1,10 @@
 import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
-const VERSION_REGEX = /^\s+VERSION="(.*)"$/m;
+const VERSION_REGEX = regEx(/^\s+VERSION="(.*)"$/m);
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.trace('batect.extractPackageFile()');

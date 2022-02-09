@@ -1,6 +1,8 @@
 import fs from 'fs-extra';
-import { getAdminConfig, setAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
+import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
+import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -16,28 +18,22 @@ import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
 
-let renovateVersion = 'unknown';
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-} catch (err) /* istanbul ignore next */ {
-  logger.debug({ err }, 'Error getting renovate version');
-}
-
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = setAdminConfig(repoConfig);
+  let config = GlobalConfig.set(
+    applySecretsToConfig(repoConfig, undefined, false)
+  );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
-  logger.info({ renovateVersion }, 'Repository started');
+  logger.info({ renovateVersion: pkg.version }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
-  const { localDir } = getAdminConfig();
+  const { localDir } = GlobalConfig.get();
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);

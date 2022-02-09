@@ -1,13 +1,14 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import parseDiff from 'parse-diff';
+import JSON5 from 'json5';
+import { PlatformId } from '../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -30,7 +31,13 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
+import {
+  PrResponse,
+  PrReviewer,
+  RepoInfoBody,
+  UserResponse,
+  mergeBodyTransformer,
+} from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -40,7 +47,13 @@ let config: utils.Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
+const pathSeparator = '/';
+
 let renovateUserUuid: string;
+
+const inactiveReviewersMessage = 'reviewers: Malformed reviewers list';
+const notMemberReviewersMessage =
+  'is not a member of this workspace and cannot be added to this pull request';
 
 export async function initPlatform({
   endpoint,
@@ -102,20 +115,36 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
+  const repo = repoName ?? config.repository;
   const path = fileName;
-  const url = `/2.0/repositories/${repo}/src/HEAD/${path}`;
+
+  let finalBranchOrTag = branchOrTag;
+  if (branchOrTag?.includes(pathSeparator)) {
+    // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    finalBranchOrTag = await getBranchCommit(branchOrTag);
+  }
+
+  const url =
+    `/2.0/repositories/${repo}/src/` +
+    (finalBranchOrTag || `HEAD`) +
+    `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
 }
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -127,7 +156,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PLATFORM_TYPE_BITBUCKET,
+    hostType: PlatformId.Bitbucket,
     url: defaults.endpoint,
   });
   config = {
@@ -167,7 +196,7 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)[1];
 
   const url = git.getUrl({
     protocol: 'https',
@@ -179,8 +208,6 @@ export async function initRepo({
   await git.initRepo({
     ...config,
     url,
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
@@ -242,16 +269,6 @@ export async function findPr({
   return pr;
 }
 
-async function isPrConflicted(prNo: number): Promise<boolean> {
-  const diff = (
-    await bitbucketHttp.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`
-    )
-  ).body;
-
-  return utils.isConflicted(parseDiff(diff));
-}
-
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
@@ -270,19 +287,13 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     ...utils.prInfo(pr),
   };
 
-  if (utils.prStates.open.includes(pr.state)) {
-    res.isConflicted = await isPrConflicted(prNo);
-
-    // TODO: Is that correct? Should we check getBranchStatus like gitlab? (#9618)
-    res.canMerge = !res.isConflicted;
-  }
   res.hasReviewers = is.nonEmptyArray(pr.reviewers);
 
   return res;
 }
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 interface BranchResponse {
   target: {
@@ -330,20 +341,9 @@ async function getStatus(
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[]
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
@@ -469,10 +469,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
 }
 
 export async function ensureIssue({
@@ -584,7 +584,6 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function addAssignees(
   _prNr: number,
   _assignees: string[]
@@ -725,16 +724,87 @@ export async function updatePr({
     )
   ).body;
 
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        reviewers: pr.reviewers,
-      },
+  try {
+    await bitbucketHttp.putJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      {
+        body: {
+          title,
+          description: sanitize(description),
+          reviewers: pr.reviewers,
+        },
+      }
+    );
+  } catch (err) {
+    if (
+      err.statusCode === 400 &&
+      [inactiveReviewersMessage, notMemberReviewersMessage].some((m) =>
+        err.body?.error?.message.includes(m)
+      )
+    ) {
+      const sanitizedReviewers: PrReviewer[] = [];
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      if (err.body?.error?.message.includes(inactiveReviewersMessage)) {
+        logger.warn(
+          { err },
+          'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+        );
+
+        // Validate that each previous PR reviewer account is still active
+        for (const reviewer of pr.reviewers) {
+          const reviewerUser = (
+            await bitbucketHttp.getJson<UserResponse>(
+              `/2.0/users/${reviewer.account_id}`
+            )
+          ).body;
+
+          if (reviewerUser.account_status === 'active') {
+            sanitizedReviewers.push(reviewer);
+          }
+        }
+      }
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
+      if (err.body?.error?.message.includes(notMemberReviewersMessage)) {
+        logger.warn(
+          { err },
+          'PR contains reviewer accounts which are no longer member of this workspace.  Will try setting only member reviewers'
+        );
+
+        const workspace = config.repository.split('/')[0];
+
+        // Validate that each previous PR reviewer account is still a member of this workspace
+        for (const reviewer of pr.reviewers) {
+          try {
+            await bitbucketHttp.head(
+              `/2.0/workspaces/${workspace}/members/${reviewer.account_id}`
+            );
+
+            sanitizedReviewers.push(reviewer);
+          } catch (err) {
+            // HTTP 404: User cannot be found, or the user is not a member of this workspace.
+            if (err.response?.statusCode !== 404) {
+              throw err;
+            }
+          }
+        }
+      }
+
+      await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        {
+          body: {
+            title,
+            description: sanitize(description),
+            reviewers: sanitizedReviewers,
+          },
+        }
+      );
+    } else {
+      throw err;
     }
-  );
+  }
 
   if (state === PrState.Closed && pr) {
     await bitbucketHttp.postJson(
@@ -765,6 +835,8 @@ export async function mergePr({
     );
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, `PR merge error`);
+    logger.info({ pr: prNo }, 'PR automerge failed');
     return false;
   }
   return true;

@@ -5,9 +5,10 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -16,7 +17,8 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { add } from '../../util/sanitize';
+import { regEx } from '../../util/regex';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
@@ -46,8 +48,8 @@ async function getRubyConstraint(
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
       rubyConstraint = rubyVersionFileContent
-        .replace(/^ruby-/, '')
-        .replace(/\n/g, '')
+        .replace(regEx(/^ruby-/), '')
+        .replace(regEx(/\n/g), '')
         .trim();
     }
   }
@@ -99,30 +101,13 @@ export async function updateArtifacts(
     let cmd;
 
     if (config.isLockFileMaintenance) {
-      cmd = 'bundle lock';
+      cmd = 'bundler lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps
+      cmd = `bundler lock --update ${updatedDeps
         .map((dep) => dep.depName)
         .map(quote)
         .join(' ')}`;
     }
-
-    let bundlerVersion = '';
-    const { bundler } = constraints;
-    if (bundler) {
-      if (isValid(bundler)) {
-        logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
-        bundlerVersion = ` -v ${quote(bundler)}`;
-      } else {
-        logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
-      }
-    } else {
-      logger.debug('No bundler version constraint found - will use latest');
-    }
-    const preCommands = [
-      'ruby --version',
-      `gem install bundler${bundlerVersion}`,
-    ];
 
     const bundlerHostRules = findAllAuthenticatable({
       hostType: 'rubygems',
@@ -145,12 +130,15 @@ export async function updateArtifacts(
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
           // sanitize the authentication
-          add(creds);
+          addSecretForSanitizing(creds);
         }
         return authCommands;
       },
       []
     );
+
+    const { bundler } = constraints || {};
+    const preCommands = ['ruby --version'];
 
     // Bundler < 2 has a different config option syntax than >= 2
     if (
@@ -172,20 +160,24 @@ export async function updateArtifacts(
       );
     }
 
-    const cacheDir = await ensureCacheDir('./others/gem', 'GEM_HOME');
-
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
-        GEM_HOME: cacheDir,
+        GEM_HOME: await ensureCacheDir('bundler'),
       },
       docker: {
         image: 'ruby',
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
-        preCommands,
       },
+      toolConstraints: [
+        {
+          toolName: 'bundler',
+          constraint: bundler,
+        },
+      ],
+      preCommands,
     };
     await exec(cmd, execOptions);
 
@@ -198,7 +190,8 @@ export async function updateArtifacts(
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: lockFileContent,
         },
       },
@@ -236,7 +229,7 @@ export async function updateArtifacts(
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
+    const resolveMatchRe = regEx('\\s+(.*) was resolved to', 'g');
     if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
       logger.debug({ err }, 'Bundler has a resolve error');
       const resolveMatches = [];

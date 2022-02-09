@@ -1,8 +1,9 @@
 import { quote } from 'shlex';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -10,13 +11,14 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
+const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();
-  const lines: string[] = content.split('\n');
+  const lines: string[] = content.split(newlineRegex);
   lines.forEach((line) => {
     const match = pluginRegex.exec(line);
     if (match) {
@@ -62,18 +64,16 @@ export async function updateArtifacts({
     return null;
   }
 
-  const match = new RegExp(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
+  const match = regEx(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
     existingLockFileContent
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
-
-  const cacheDir = await ensureCacheDir('./others/cocoapods', 'CP_HOME_DIR');
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      CP_HOME_DIR: cacheDir,
+      CP_HOME_DIR: await ensureCacheDir('cocoapods'),
     },
     docker: {
       image: 'cocoapods',
@@ -108,20 +108,22 @@ export async function updateArtifacts({
   const res: UpdateArtifactsResult[] = [
     {
       file: {
-        name: lockFileName,
+        type: 'addition',
+        path: lockFileName,
         contents: lockFileContent,
       },
     },
   ];
 
-  const podsDir = join(dirname(packageFileName), 'Pods');
-  const podsManifestFileName = join(podsDir, 'Manifest.lock');
+  const podsDir = upath.join(upath.dirname(packageFileName), 'Pods');
+  const podsManifestFileName = upath.join(podsDir, 'Manifest.lock');
   if (await readLocalFile(podsManifestFileName, 'utf8')) {
     for (const f of status.modified.concat(status.not_added)) {
       if (f.startsWith(podsDir)) {
         res.push({
           file: {
-            name: f,
+            type: 'addition',
+            path: f,
             contents: await readLocalFile(f),
           },
         });
@@ -130,12 +132,11 @@ export async function updateArtifacts({
     for (const f of status.deleted || []) {
       res.push({
         file: {
-          name: '|delete|',
-          contents: f,
+          type: 'deletion',
+          path: f,
         },
       });
     }
   }
-
   return res;
 }

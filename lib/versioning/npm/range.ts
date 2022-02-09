@@ -1,15 +1,19 @@
-import {
-  inc as increment,
-  valid as isVersion,
+import is from '@sindresorhus/is';
+import semver from 'semver';
+import semverUtils from 'semver-utils';
+import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
+import type { NewValueConfig } from '../types';
+
+const {
+  inc: increment,
+  valid: isVersion,
   major,
   minor,
   patch,
   prerelease,
   satisfies,
-} from 'semver';
-import { parseRange } from 'semver-utils';
-import { logger } from '../../logger';
-import type { NewValueConfig } from '../types';
+} = semver;
 
 function replaceCaretValue(oldValue: string, newValue: string): string {
   const toVersionMajor = major(newValue);
@@ -57,7 +61,7 @@ export function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }
@@ -72,7 +76,7 @@ export function getNewValue({
       newVersion,
     });
   }
-  const parsedRange = parseRange(currentValue);
+  const parsedRange = semverUtils.parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
     if (satisfies(newVersion, currentValue)) {
@@ -107,9 +111,8 @@ export function getNewValue({
   const toVersionMajor = major(newVersion);
   const toVersionMinor = minor(newVersion);
   const toVersionPatch = patch(newVersion);
-  const suffix = prerelease(newVersion)
-    ? '-' + String(prerelease(newVersion)[0])
-    : '';
+  const toNewVersion = prerelease(newVersion);
+  const suffix = toNewVersion ? `-${toNewVersion[0]}` : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
@@ -163,26 +166,30 @@ export function getNewValue({
         return currentValue;
       }
     } else {
-      const newRange = parseRange(currentValue);
-      const versions = newRange.map((x) => {
-        const subRange = x.semver;
-        const bumpedSubRange = getNewValue({
-          currentValue: subRange,
-          rangeStrategy: 'bump',
-          currentVersion,
-          newVersion,
-        });
-        if (satisfies(newVersion, bumpedSubRange)) {
-          return bumpedSubRange;
-        }
-        return getNewValue({
-          currentValue: subRange,
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
-        });
-      });
-      return versions.filter((x) => x !== null && x !== '').join(' ');
+      return semverUtils
+        .parseRange(currentValue)
+        .map((x) => x.semver)
+        .filter(is.string)
+        .map((subRange) => {
+          const bumpedSubRange = getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'bump',
+            currentVersion,
+            newVersion,
+          });
+          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+            return bumpedSubRange;
+          }
+
+          return getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
+        })
+        .filter((x) => x !== null && x !== '')
+        .join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue
@@ -234,7 +241,7 @@ export function getNewValue({
       res = `<${toVersionMajor + 1}`;
     }
     if (currentValue.includes('< ')) {
-      res = res.replace(/</g, '< ');
+      res = res.replace(regEx(/</g), '< ');
     }
     return res;
   }

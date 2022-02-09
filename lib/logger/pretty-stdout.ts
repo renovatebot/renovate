@@ -37,7 +37,7 @@ const levels: Record<number, string> = {
 
 export function indent(str: string, leading = false): string {
   const prefix = leading ? '       ' : '';
-  return prefix + str.split(/\r?\n/).join('\n       ');
+  return prefix + str.split(/\r?\n/).join('\n       '); // TODO #12874
 }
 
 export function getMeta(rec: BunyanRecord): string {

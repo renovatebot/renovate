@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import { basename, dirname, join, normalize } from 'upath';
+import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
@@ -33,16 +33,20 @@ export function parsePom(raw: string): XmlDocument | null {
 }
 
 function containsPlaceholder(str: string): boolean {
-  return /\${.*?}/g.test(str);
+  return regEx(/\${.*?}/g).test(str);
 }
 
-function depFromNode(node: XmlElement): PackageDependency | null {
+function depFromNode(
+  node: XmlElement,
+  underBuildSettingsElement = false
+): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
   }
-  let groupId = node.valueWithPath('groupId');
-  const artifactId = node.valueWithPath('artifactId');
-  const currentValue = node.valueWithPath('version');
+  let groupId = node.valueWithPath('groupId')?.trim();
+  const artifactId = node.valueWithPath('artifactId')?.trim();
+  const currentValue = node.valueWithPath('version')?.trim();
+  let depType: string;
 
   if (!groupId && node.name === 'plugin') {
     groupId = 'org.apache.maven.plugins';
@@ -62,7 +66,23 @@ function depFromNode(node: XmlElement): PackageDependency | null {
       registryUrls,
     };
 
-    const depType = node.valueWithPath('scope');
+    switch (node.name) {
+      case 'plugin':
+      case 'extension':
+        depType = 'build';
+        break;
+      case 'parent':
+        depType = 'parent';
+        break;
+      case 'dependency':
+        if (underBuildSettingsElement) {
+          depType = 'build';
+        } else {
+          depType = node.valueWithPath('scope')?.trim() ?? 'compile'; // maven default scope is compile
+        }
+        break;
+    }
+
     if (depType) {
       result.depType = depType;
     }
@@ -75,15 +95,23 @@ function depFromNode(node: XmlElement): PackageDependency | null {
 function deepExtract(
   node: XmlElement,
   result: PackageDependency[] = [],
-  isRoot = true
+  isRoot = true,
+  underBuildSettingsElement = false
 ): PackageDependency[] {
-  const dep = depFromNode(node);
+  const dep = depFromNode(node, underBuildSettingsElement);
   if (dep && !isRoot) {
     result.push(dep);
   }
   if (node.children) {
     for (const child of node.children) {
-      deepExtract(child as XmlElement, result, false);
+      deepExtract(
+        child as XmlElement,
+        result,
+        false,
+        node.name === 'build' ||
+          node.name === 'reporting' ||
+          underBuildSettingsElement
+      );
     }
   }
   return result;
@@ -95,7 +123,7 @@ function applyProps(
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
   const replaceAll = (str: string): string =>
-    str.replace(/\${.*?}/g, (substr) => {
+    str.replace(regEx(/\${.*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];
       return propValue ? propValue.val : substr;
@@ -107,19 +135,22 @@ function applyProps(
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = null;
   let groupName = null;
-  const currentValue = dep.currentValue.replace(/^\${.*?}$/, (substr) => {
-    const propKey = substr.slice(2, -1).trim();
-    const propValue = props[propKey];
-    if (propValue) {
-      if (!groupName) {
-        groupName = propKey;
+  const currentValue = dep.currentValue.replace(
+    regEx(/^\${.*?}$/),
+    (substr) => {
+      const propKey = substr.slice(2, -1).trim();
+      const propValue = props[propKey];
+      if (propValue) {
+        if (!groupName) {
+          groupName = propKey;
+        }
+        fileReplacePosition = propValue.fileReplacePosition;
+        propSource = propValue.packageFile;
+        return propValue.val;
       }
-      fileReplacePosition = propValue.fileReplacePosition;
-      propSource = propValue.packageFile;
-      return propValue.val;
+      return substr;
     }
-    return substr;
-  });
+  );
 
   const result: PackageDependency = {
     ...dep,
@@ -135,9 +166,9 @@ function applyProps(
   }
 
   if (containsPlaceholder(depName)) {
-    result.skipReason = SkipReason.NamePlaceholder;
+    result.skipReason = 'name-placeholder';
   } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = SkipReason.VersionPlaceholder;
+    result.skipReason = 'version-placeholder';
   }
 
   if (propSource && depPackageFile !== propSource) {
@@ -150,13 +181,13 @@ function applyProps(
 function resolveParentFile(packageFile: string, parentPath: string): string {
   let parentFile = 'pom.xml';
   let parentDir = parentPath;
-  const parentBasename = basename(parentPath);
+  const parentBasename = upath.basename(parentPath);
   if (parentBasename === 'pom.xml' || parentBasename.endsWith('.pom.xml')) {
     parentFile = parentBasename;
-    parentDir = dirname(parentPath);
+    parentDir = upath.dirname(parentPath);
   }
-  const dir = dirname(packageFile);
-  return normalize(join(dir, parentDir, parentFile));
+  const dir = upath.dirname(packageFile);
+  return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
 export function extractPackage(
@@ -198,7 +229,7 @@ export function extractPackage(
   if (repositories?.children) {
     const repoUrls = [];
     for (const repo of repositories.childrenNamed('repository')) {
-      const repoUrl = repo.valueWithPath('url');
+      const repoUrl = repo.valueWithPath('url')?.trim();
       if (repoUrl) {
         repoUrls.push(repoUrl);
       }
@@ -212,11 +243,66 @@ export function extractPackage(
 
   if (packageFile && project.childNamed('parent')) {
     const parentPath =
-      project.valueWithPath('parent.relativePath') || '../pom.xml';
+      project.valueWithPath('parent.relativePath')?.trim() || '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
   return result;
+}
+
+export function extractRegistries(rawContent: string): string[] {
+  if (!rawContent) {
+    return [];
+  }
+
+  const settings = parseSettings(rawContent);
+  if (!settings) {
+    return [];
+  }
+
+  const urls = [];
+
+  const mirrorUrls = parseUrls(settings, 'mirrors');
+  urls.push(...mirrorUrls);
+
+  settings.childNamed('profiles')?.eachChild((profile) => {
+    const repositoryUrls = parseUrls(profile, 'repositories');
+    urls.push(...repositoryUrls);
+  });
+
+  // filter out duplicates
+  return [...new Set(urls)];
+}
+
+function parseUrls(xmlNode: XmlElement, path: string): string[] {
+  const children = xmlNode.descendantWithPath(path);
+  const urls = [];
+  if (children?.children) {
+    children.eachChild((child) => {
+      const url = child.valueWithPath('url');
+      if (url) {
+        urls.push(url);
+      }
+    });
+  }
+  return urls;
+}
+
+export function parseSettings(raw: string): XmlDocument | null {
+  let settings: XmlDocument;
+  try {
+    settings = new XmlDocument(raw);
+  } catch (e) {
+    return null;
+  }
+  const { name, attr } = settings;
+  if (name !== 'settings') {
+    return null;
+  }
+  if (attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0') {
+    return settings;
+  }
+  return null;
 }
 
 export function resolveParents(packages: PackageFile[]): PackageFile[] {
@@ -269,7 +355,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
-      rawDep.registryUrls = [...urlsSet]; // eslint-disable-line no-param-reassign
+      rawDep.registryUrls = [...urlsSet];
     });
   });
 
@@ -293,9 +379,9 @@ function cleanResult(
   packageFiles: PackageFile<Record<string, any>>[]
 ): PackageFile<Record<string, any>>[] {
   packageFiles.forEach((packageFile) => {
-    delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
+    delete packageFile.mavenProps;
     packageFile.deps.forEach((dep) => {
-      delete dep.propSource; // eslint-disable-line no-param-reassign
+      delete dep.propSource;
     });
   });
   return packageFiles;
@@ -306,17 +392,42 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
+  const additionalRegistryUrls = [];
+
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    if (content) {
+    if (!content) {
+      logger.trace({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    if (packageFile.endsWith('settings.xml')) {
+      const registries = extractRegistries(content);
+      if (registries) {
+        logger.debug(
+          { registries, packageFile },
+          'Found registryUrls in settings.xml'
+        );
+        additionalRegistryUrls.push(...registries);
+      }
+    } else {
       const pkg = extractPackage(content, packageFile);
       if (pkg) {
         packages.push(pkg);
       } else {
-        logger.debug({ packageFile }, 'can not read dependencies');
+        logger.trace({ packageFile }, 'can not read dependencies');
       }
-    } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+    }
+  }
+  if (additionalRegistryUrls) {
+    for (const pkgFile of packages) {
+      for (const dep of pkgFile.deps) {
+        /* istanbul ignore else */
+        if (dep.registryUrls) {
+          dep.registryUrls.push(...additionalRegistryUrls);
+        } else {
+          dep.registryUrls = [...additionalRegistryUrls];
+        }
+      }
     }
   }
   return cleanResult(resolveParents(packages));

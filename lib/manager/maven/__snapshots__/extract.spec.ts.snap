@@ -8,6 +8,7 @@ Object {
       "currentValue": "42",
       "datasource": "maven",
       "depName": "org.example:parent",
+      "depType": "parent",
       "fileReplacePosition": 186,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -18,6 +19,7 @@ Object {
       "currentValue": "0.0.1",
       "datasource": "maven",
       "depName": "org.example:foo",
+      "depType": "compile",
       "fileReplacePosition": 905,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -28,7 +30,8 @@ Object {
       "currentValue": "1.0.0",
       "datasource": "maven",
       "depName": "org.example:bar",
-      "fileReplacePosition": 1053,
+      "depType": "compile",
+      "fileReplacePosition": 1093,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -38,7 +41,8 @@ Object {
       "currentValue": "2.4.2",
       "datasource": "maven",
       "depName": "org.apache.maven.plugins:maven-release-plugin",
-      "fileReplacePosition": 1287,
+      "depType": "build",
+      "fileReplacePosition": 1347,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -48,7 +52,19 @@ Object {
       "currentValue": "1.8.1",
       "datasource": "maven",
       "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
-      "fileReplacePosition": 1485,
+      "depType": "build",
+      "fileReplacePosition": 1545,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
+      ],
+    },
+    Object {
+      "currentValue": "1.0",
+      "datasource": "maven",
+      "depName": "org.example:extension-artefact",
+      "depType": "build",
+      "fileReplacePosition": 2276,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -58,7 +74,8 @@ Object {
       "currentValue": "0.0.1",
       "datasource": "maven",
       "depName": "org.example:\${artifact-id-placeholder}",
-      "fileReplacePosition": 2230,
+      "depType": "compile",
+      "fileReplacePosition": 2484,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -68,7 +85,8 @@ Object {
       "currentValue": "0.0.1",
       "datasource": "maven",
       "depName": "\${group-id-placeholder}:baz",
-      "fileReplacePosition": 2380,
+      "depType": "compile",
+      "fileReplacePosition": 2634,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -78,7 +96,8 @@ Object {
       "currentValue": "\${quuxVersion}",
       "datasource": "maven",
       "depName": "\${quuxGroup}:\${quuxId}",
-      "fileReplacePosition": 2525,
+      "depType": "compile",
+      "fileReplacePosition": 2779,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -88,7 +107,8 @@ Object {
       "currentValue": "\${quuxVersion}",
       "datasource": "maven",
       "depName": "\${quuxGroup}:\${quuxId}-test",
-      "fileReplacePosition": 2684,
+      "depType": "compile",
+      "fileReplacePosition": 2938,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -99,7 +119,7 @@ Object {
       "datasource": "maven",
       "depName": "org.example:quuz",
       "depType": "test",
-      "fileReplacePosition": 2832,
+      "fileReplacePosition": 3086,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -109,7 +129,8 @@ Object {
       "currentValue": "it's not a version",
       "datasource": "maven",
       "depName": "org.example:quuuz",
-      "fileReplacePosition": 2998,
+      "depType": "compile",
+      "fileReplacePosition": 3252,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -119,7 +140,18 @@ Object {
       "currentValue": "[1.0.0]",
       "datasource": "maven",
       "depName": "org.example:hard-range",
-      "fileReplacePosition": 3156,
+      "depType": "compile",
+      "fileReplacePosition": 3410,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
+      ],
+    },
+    Object {
+      "currentValue": "1.0",
+      "datasource": "maven",
+      "depName": "org.example:relocation-artifact",
+      "fileReplacePosition": 3612,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -129,7 +161,19 @@ Object {
       "currentValue": "\${profile-placeholder}",
       "datasource": "maven",
       "depName": "org.example:profile-artifact",
-      "fileReplacePosition": 3418,
+      "depType": "compile",
+      "fileReplacePosition": 3944,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
+      ],
+    },
+    Object {
+      "currentValue": "2.17",
+      "datasource": "maven",
+      "depName": "org.example:profile-build-artefact",
+      "depType": "build",
+      "fileReplacePosition": 4200,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -139,7 +183,8 @@ Object {
       "currentValue": "2.17",
       "datasource": "maven",
       "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
-      "fileReplacePosition": 3694,
+      "depType": "build",
+      "fileReplacePosition": 4594,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -163,15 +208,6 @@ Object {
       "val": "1.2.3.4",
     },
   },
-  "packageFile": null,
-}
-`;
-
-exports[`manager/maven/extract extractDependencies tries minimum manifests 1`] = `
-Object {
-  "datasource": "maven",
-  "deps": Array [],
-  "mavenProps": Object {},
   "packageFile": null,
 }
 `;

@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
@@ -9,23 +9,45 @@ const pomContent = loadFixture('simple.pom.xml');
 const pomParent = loadFixture('parent.pom.xml');
 const pomChild = loadFixture('child.pom.xml');
 const origContent = loadFixture('grouping.pom.xml');
+const settingsContent = loadFixture('mirror.settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
 }
 
-describe(getName(), () => {
+describe('manager/maven/index', () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
     });
 
     it('should return empty for packages with invalid content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
+    });
+
+    it('should return packages with urls from a settings file', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(settingsContent)
+        .mockResolvedValueOnce(pomContent);
+      const packages = await extractAllPackageFiles({}, [
+        'settings.xml',
+        'simple.pom.xml',
+      ]);
+      const urls = [
+        'https://repo.maven.apache.org/maven2',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+      ];
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          const depUrls = [...dep.registryUrls];
+          expect(depUrls).toEqual(urls);
+        }
+      }
     });
 
     it('should return package files info', async () => {
@@ -37,8 +59,73 @@ describe(getName(), () => {
           p.parent = p.parent.replace(/\\/g, '/');
         }
       }
-      // FIXME: explicit assert condition
-      expect(packages).toMatchSnapshot();
+      expect(packages).toMatchSnapshot([
+        {
+          deps: [
+            { depName: 'org.example:parent', currentValue: '42' },
+            { depName: 'org.example:foo', currentValue: '0.0.1' },
+            { depName: 'org.example:bar', currentValue: '1.0.0' },
+            {
+              depName: 'org.apache.maven.plugins:maven-release-plugin',
+              currentValue: '2.4.2',
+            },
+            {
+              depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
+              currentValue: '1.8.1',
+            },
+            {
+              depName: 'org.example:extension-artefact',
+              currentValue: '1.0',
+            },
+            {
+              depName: 'org.example:${artifact-id-placeholder}',
+              skipReason: 'name-placeholder',
+            },
+            {
+              depName: '${group-id-placeholder}:baz',
+              skipReason: 'name-placeholder',
+            },
+            {
+              depName: 'org.example:quux',
+              currentValue: '1.2.3.4',
+              groupName: 'quuxVersion',
+            },
+            {
+              depName: 'org.example:quux-test',
+              currentValue: '1.2.3.4',
+              groupName: 'quuxVersion',
+            },
+            {
+              depName: 'org.example:quuz',
+              currentValue: '1.2.3',
+            },
+            {
+              depName: 'org.example:quuuz',
+              currentValue: "it's not a version",
+            },
+            { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
+            {
+              depName: 'org.example:relocation-artifact',
+              currentValue: '1.0',
+            },
+            {
+              depName: 'org.example:profile-artifact',
+              currentValue: '${profile-placeholder}',
+              skipReason: 'version-placeholder',
+            },
+            {
+              depName: 'org.example:profile-build-artefact',
+              currentValue: '2.17',
+            },
+            {
+              depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
+              currentValue: '2.17',
+            },
+          ],
+          packageFile: 'random.pom.xml',
+          parent: '../pom.xml',
+        },
+      ]);
     });
   });
 
@@ -103,7 +190,6 @@ describe(getName(), () => {
           expect(depUrls).toEqual(urls);
         });
       });
-      // FIXME: explicit assert condition
       expect(packages).toMatchSnapshot();
     });
 
@@ -215,6 +301,13 @@ describe(getName(), () => {
       expect(updateDependency({ fileContent: pomContent, upgrade })).toEqual(
         pomContent
       );
+    });
+    it('should return null for replacement', () => {
+      const res = updateDependency({
+        fileContent: undefined,
+        upgrade: { updateType: 'replacement' },
+      });
+      expect(res).toBeNull();
     });
   });
 });

@@ -1,28 +1,32 @@
 import { Command } from 'commander';
-import { version } from '../../../../../package.json';
-import { getOptions } from '../../../../config/definitions';
+import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import { pkg } from '../../../../expose.cjs';
+import { regEx } from '../../../../util/regex';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(/([A-Z])/g, '-$1');
+  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
 export function getConfig(input: string[]): AllConfig {
   // massage migrated configuration keys
   const argv = input
-    .map((a) =>
-      a
-        .replace('--endpoints=', '--host-rules=')
-        .replace('--expose-env=true', '--trust-level=high')
-        .replace('--expose-env', '--trust-level=high')
-        .replace('--renovate-fork', '--include-forks')
-        .replace('"platform":"', '"hostType":"')
-        .replace('"endpoint":"', '"matchHost":"')
-        .replace('"host":"', '"matchHost":"')
+    .map(
+      (a) =>
+        a
+          .replace('--endpoints=', '--host-rules=')
+          .replace('--expose-env=true', '--trust-level=high')
+          .replace('--expose-env', '--trust-level=high')
+          .replace('--renovate-fork', '--include-forks')
+          .replace('"platform":"', '"hostType":"')
+          .replace('"endpoint":"', '"matchHost":"')
+          .replace('"host":"', '"matchHost":"')
+          .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
+          .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -81,12 +85,12 @@ export function getConfig(input: string[]): AllConfig {
     }
   });
 
+  /* eslint-disable no-console */
   /* istanbul ignore next */
   function helpConsole(): void {
-    /* eslint-disable no-console */
     console.log('  Examples:');
     console.log('');
-    console.log('    $ renovate --token abc123 singapore/lint-condo');
+    console.log('    $ renovate --token 123test singapore/lint-condo');
     console.log(
       '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo'
     );
@@ -98,7 +102,7 @@ export function getConfig(input: string[]): AllConfig {
   }
 
   program = program
-    .version(version, '-v, --version')
+    .version(pkg.version, '-v, --version')
     .on('--help', helpConsole)
     .action((repositories: string[], opts: Record<string, unknown>) => {
       if (repositories?.length) {

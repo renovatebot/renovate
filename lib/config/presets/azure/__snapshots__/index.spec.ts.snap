@@ -5,6 +5,13 @@ Array [
   Array [
     "123456",
     "some-filename.json",
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
   ],
 ]
 `;

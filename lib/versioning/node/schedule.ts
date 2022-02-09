@@ -1,4 +1,5 @@
 import dataFiles from '../../data-files.generated';
+import semver from '../semver';
 
 interface NodeJsSchedule {
   lts?: string;
@@ -10,52 +11,32 @@ interface NodeJsSchedule {
 
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
-export const nodeSchedule: NodeJsData = JSON.parse(
-  dataFiles.get('data/node-js-schedule.json')
+const nodeSchedule: NodeJsData = JSON.parse(
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  dataFiles.get('data/node-js-schedule.json')!
 );
 
-export interface NodeJsPolicies {
-  all: number[];
-  lts: number[];
-  active: number[];
-  lts_active: number[];
-  lts_latest: number[];
-  current: number[];
+export type NodeJsScheduleWithVersion = { version: string } & NodeJsSchedule;
+
+const nodeCodenames = new Map<string, NodeJsScheduleWithVersion>();
+for (const version of Object.keys(nodeSchedule)) {
+  const schedule = nodeSchedule[version];
+  if (schedule.codename) {
+    nodeCodenames.set(schedule.codename.toUpperCase(), {
+      version: version,
+      ...schedule,
+    });
+  }
 }
 
-export function getPolicies(): NodeJsPolicies {
-  const policies = {
-    all: [],
-    lts: [],
-    active: [],
-    lts_active: [],
-    lts_latest: [],
-    current: [],
-  };
+export function findScheduleForCodename(
+  codename: string
+): NodeJsScheduleWithVersion | null {
+  return nodeCodenames.get(codename?.toUpperCase()) || null;
+}
 
-  const now = new Date();
-
-  for (const [vRelease, data] of Object.entries(nodeSchedule)) {
-    const isAlive = new Date(data.start) < now && new Date(data.end) > now;
-    if (isAlive) {
-      const release = parseInt(vRelease.replace(/^v/, ''), 10);
-      policies.all.push(release);
-      const isMaintenance =
-        data.maintenance && new Date(data.maintenance) < now;
-      if (!isMaintenance) {
-        policies.active.push(release);
-      }
-      const isLts = data.lts && new Date(data.lts) < now;
-      if (isLts) {
-        policies.lts.push(release);
-        if (!isMaintenance) {
-          policies.lts_active.push(release);
-        }
-      }
-    }
-  }
-  policies.current.push(policies.active[policies.active.length - 1]);
-  policies.lts_latest.push(policies.lts[policies.lts.length - 1]);
-
-  return policies;
+export function findScheduleForVersion(version: string): NodeJsSchedule | null {
+  const major = semver.getMajor(version);
+  const schedule = nodeSchedule[`v${major}`];
+  return schedule;
 }

@@ -1,5 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/helm-requirements/extract extractPackageFile() ensure that currentValue is string 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.9",
+      "depName": "redis",
+      "registryUrls": Array [
+        "@placeholder",
+      ],
+      "skipReason": "placeholder-url",
+    },
+  ],
+}
+`;
+
 exports[`manager/helm-requirements/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
 Object {
   "datasource": "helm",

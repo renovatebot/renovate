@@ -1,0 +1,24 @@
+image: node:10.15.1
+
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        image: node:10.15.2
+        script:
+          - npm install
+          - npm test
+          - npm run dist
+        artifacts:
+          - dist/**
+    - step:
+        name: Deploy
+        deployment: production
+        script:
+          - pipe: atlassian/aws-s3-deploy:0.2.1
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: "us-east-1"
+              S3_BUCKET: "my-bucket-name"
+              LOCAL_PATH: "dist"

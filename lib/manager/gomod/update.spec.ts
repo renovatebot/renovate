@@ -1,11 +1,11 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const gomod1 = loadFixture('1/go.mod');
-const gomod2 = loadFixture('2/go.mod');
+const gomod1 = Fixtures.get('1/go.mod');
+const gomod2 = Fixtures.get('2/go.mod');
 
-describe(getName(), () => {
+describe('manager/gomod/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
@@ -185,7 +185,7 @@ describe(getName(), () => {
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).not.toEqual(gomod2);
-      expect(res).not.toContain(upgrade.newDigest);
+      expect(res).toContain('github.com/spf13/jwalterweatherman 123456123456');
       expect(res).toContain(upgrade.newDigest.substring(0, 12));
     });
     it('skips already-updated multiline digest', () => {
@@ -278,6 +278,13 @@ describe(getName(), () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
+    });
+    it('should return null for replacement', () => {
+      const res = updateDependency({
+        fileContent: undefined,
+        upgrade: { updateType: 'replacement' },
+      });
+      expect(res).toBeNull();
     });
   });
 });

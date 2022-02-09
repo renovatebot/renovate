@@ -1,17 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`bundler.updateArtifacts() Docker .ruby-version 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker .ruby-version 2`] = `
+exports[`manager/bundler/artifacts Docker .ruby-version 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -26,7 +15,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -47,18 +36,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker constraints options 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker constraints options 2`] = `
+exports[`manager/bundler/artifacts Docker constraints options 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
@@ -73,7 +51,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 3.2.1 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -94,18 +72,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler < 2 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler < 2 2`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler < 2 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -120,7 +87,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler -v 1.2 && bundler config --local gems-private.com some-user:some-password && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 1.2 && ruby --version && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -141,18 +108,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler == latest 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler == latest 2`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler == latest 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -167,7 +123,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundler config set --local gems-private.com some-user:some-password && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -188,18 +144,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler >= 2 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler >= 2 2`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler >= 2 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -214,7 +159,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler -v 2.1 && bundler config set --local gems-private.com some-user:some-password && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.1 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -235,18 +180,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 2`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration environment variables 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -261,7 +195,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -283,18 +217,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker invalid constraints options 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() Docker invalid constraints options 2`] = `
+exports[`manager/bundler/artifacts Docker invalid constraints options 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
@@ -309,7 +232,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -330,10 +253,10 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() performs lockFileMaintenance 1`] = `
+exports[`manager/bundler/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
-    "cmd": "bundle lock",
+    "cmd": "bundler lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -354,7 +277,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 1`] = `
+exports[`manager/bundler/artifacts returns error when failing in lockFileMaintenance true 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -366,10 +289,10 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 2`] = `
+exports[`manager/bundler/artifacts returns error when failing in lockFileMaintenance true 2`] = `
 Array [
   Object {
-    "cmd": "bundle lock",
+    "cmd": "bundler lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -390,12 +313,10 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 1`] = `null`;
-
-exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `
+exports[`manager/bundler/artifacts returns null if Gemfile.lock was not changed 1`] = `
 Array [
   Object {
-    "cmd": "bundle lock --update foo bar",
+    "cmd": "bundler lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -416,21 +337,10 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() works explicit global binarySource 1`] = `
+exports[`manager/bundler/artifacts works explicit global binarySource 1`] = `
 Array [
   Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() works explicit global binarySource 2`] = `
-Array [
-  Object {
-    "cmd": "bundle lock --update foo bar",
+    "cmd": "bundler lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -451,21 +361,10 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() works for default binarySource 1`] = `
+exports[`manager/bundler/artifacts works for default binarySource 1`] = `
 Array [
   Object {
-    "file": Object {
-      "contents": "Updated Gemfile.lock",
-      "name": "Gemfile.lock",
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() works for default binarySource 2`] = `
-Array [
-  Object {
-    "cmd": "bundle lock --update foo bar",
+    "cmd": "bundler lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

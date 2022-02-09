@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { ltr, maxSatisfying, minSatisfying, satisfies } from 'semver';
+import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { regEx } from '../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApiConstructor } from '../types';
 
 export const id = 'regex';
@@ -39,14 +39,11 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$');
   // * matches the versioning approach used by the Bitnami images on DockerHub:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$');
-  private _config: RegExp = null;
+  private _config: RegExp | null = null;
 
-  constructor(new_config: string) {
+  constructor(_new_config: string | undefined) {
     super();
-    if (!new_config) {
-      // eslint-disable-next-line no-param-reassign
-      new_config = '^(?<major>\\d+)?$';
-    }
+    const new_config = _new_config ?? '^(?<major>\\d+)?$';
 
     // without at least one of {major, minor, patch} specified in the regex,
     // this versioner will not work properly
@@ -69,57 +66,88 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   // convenience method for passing a string into a Version given current config.
   protected _parse(version: string): RegExpVersion | null {
-    const match = this._config.exec(version);
-    if (match === null) {
+    const groups = this._config?.exec(version)?.groups;
+    if (!groups) {
       return null;
     }
 
-    const groups = match.groups;
+    const { major, minor, patch, build, prerelease, compatibility } = groups;
     const release = [
-      typeof groups.major === 'undefined' ? 0 : Number(groups.major),
-      typeof groups.minor === 'undefined' ? 0 : Number(groups.minor),
-      typeof groups.patch === 'undefined' ? 0 : Number(groups.patch),
+      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
     ];
 
-    if (groups.build) {
-      release.push(Number(groups.build));
+    if (build) {
+      release.push(Number.parseInt(build, 10));
     }
 
     return {
       release,
-      prerelease: groups.prerelease,
-      compatibility: groups.compatibility,
+      prerelease: prerelease,
+      compatibility: compatibility,
     };
   }
 
-  isCompatible(version: string, range: string): boolean {
-    return (
-      this._parse(version).compatibility === this._parse(range).compatibility
+  override isCompatible(version: string, current: string): boolean {
+    const parsedVersion = this._parse(version);
+    const parsedCurrent = this._parse(current);
+    return !!(
+      parsedVersion &&
+      parsedCurrent &&
+      parsedVersion.compatibility === parsedCurrent.compatibility
     );
   }
 
-  isLessThanRange(version: string, range: string): boolean {
-    return ltr(asSemver(this._parse(version)), asSemver(this._parse(range)));
-  }
-
-  getSatisfyingVersion(versions: string[], range: string): string | null {
-    return maxSatisfying(
-      versions.map((v) => asSemver(this._parse(v))),
-      asSemver(this._parse(range))
+  override isLessThanRange(version: string, range: string): boolean {
+    const parsedVersion = this._parse(version);
+    const parsedRange = this._parse(range);
+    return !!(
+      parsedVersion &&
+      parsedRange &&
+      semver.ltr(asSemver(parsedVersion), asSemver(parsedRange))
     );
   }
 
-  minSatisfyingVersion(versions: string[], range: string): string | null {
-    return minSatisfying(
-      versions.map((v) => asSemver(this._parse(v))),
-      asSemver(this._parse(range))
-    );
+  override getSatisfyingVersion(
+    versions: string[],
+    range: string
+  ): string | null {
+    const parsedRange = this._parse(range);
+    return parsedRange
+      ? semver.maxSatisfying(
+          versions
+            .map((v) => this._parse(v))
+            .filter(is.truthy)
+            .map(asSemver),
+          asSemver(parsedRange)
+        )
+      : null;
   }
 
-  matches(version: string, range: string): boolean {
-    return satisfies(
-      asSemver(this._parse(version)),
-      asSemver(this._parse(range))
+  override minSatisfyingVersion(
+    versions: string[],
+    range: string
+  ): string | null {
+    const parsedRange = this._parse(range);
+    return parsedRange
+      ? semver.minSatisfying(
+          versions
+            .map((v) => this._parse(v))
+            .filter(is.truthy)
+            .map(asSemver),
+          asSemver(parsedRange)
+        )
+      : null;
+  }
+
+  override matches(version: string, range: string): boolean {
+    const parsedVersion = this._parse(version);
+    const parsedRange = this._parse(range);
+    return !!(
+      parsedVersion &&
+      parsedRange &&
+      semver.satisfies(asSemver(parsedVersion), asSemver(parsedRange))
     );
   }
 }

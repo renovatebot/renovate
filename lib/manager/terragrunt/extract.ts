@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { TerragruntDependencyTypes } from './common';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
@@ -8,7 +9,7 @@ import {
   getTerragruntDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+{\s*$/;
+const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
 
 export function extractPackageFile(content: string): PackageFile | null {
@@ -18,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
   let deps: PackageDependency<TerraformManagerData>[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
       const terragruntDependency = dependencyBlockExtractionRegex.exec(line);
@@ -60,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       /* istanbul ignore next */
       default:
     }
-    // eslint-disable-next-line no-param-reassign
+
     delete dep.managerData;
   });
   return { deps };

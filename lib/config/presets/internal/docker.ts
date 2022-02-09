@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   disable: {
-    description: 'Disable docker updates',
+    description: 'Disable Docker updates',
     docker: {
       enabled: false,
     },
@@ -14,7 +14,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   enableMajor: {
-    description: 'Enable docker major updates',
+    description: 'Enable Docker major updates',
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -24,7 +24,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableMajor: {
-    description: 'Disable docker major updates',
+    description: 'Disable Docker major updates',
     packageRules: [
       {
         matchDatasources: ['docker'],

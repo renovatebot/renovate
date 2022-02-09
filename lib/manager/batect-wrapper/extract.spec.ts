@@ -1,13 +1,10 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { extractPackageFile } from './extract';
 
-const validWrapperContent = loadFixture('valid-wrapper');
-const malformedWrapperContent = loadFixture('malformed-wrapper');
-
-describe(getName(), () => {
+describe('manager/batect-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty wrapper file', () => {
       expect(extractPackageFile('')).toBeNull();
@@ -18,7 +15,7 @@ describe(getName(), () => {
     });
 
     it('extracts the current version from a valid wrapper script', () => {
-      const res = extractPackageFile(validWrapperContent);
+      const res = extractPackageFile(Fixtures.get('valid-wrapper'));
 
       const expectedDependency: PackageDependency = {
         depName: 'batect/batect',
@@ -32,7 +29,7 @@ describe(getName(), () => {
     });
 
     it('returns the first version from a wrapper script with multiple versions', () => {
-      const res = extractPackageFile(malformedWrapperContent);
+      const res = extractPackageFile(Fixtures.get('malformed-wrapper'));
 
       const expectedDependency: PackageDependency = {
         depName: 'batect/batect',

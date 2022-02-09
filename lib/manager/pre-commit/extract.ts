@@ -1,14 +1,10 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import {
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { find } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -16,7 +12,7 @@ import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
 } from './parsing';
-import { PreCommitConfig } from './types';
+import type { PreCommitConfig } from './types';
 
 function isEmptyObject(obj: any): boolean {
   return Object.keys(obj).length === 0 && obj.constructor === Object;
@@ -52,12 +48,12 @@ function determineDatasource(
       { repository, hostUrl },
       'Provided hostname does not match any hostRules. Ignoring'
     );
-    return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
+    return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    [PLATFORM_TYPE_GITEA, gitlabTagsId],
-    [PLATFORM_TYPE_GITHUB, githubTagsId],
-    [PLATFORM_TYPE_GITLAB, gitlabTagsId],
+    [PlatformId.Gitea, gitlabTagsId],
+    [PlatformId.Github, githubTagsId],
+    [PlatformId.Gitlab, gitlabTagsId],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
@@ -71,7 +67,7 @@ function determineDatasource(
     { repository, registry: hostUrl },
     'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
   );
-  return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
+  return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
 
 function extractDependency(
@@ -93,13 +89,13 @@ function extractDependency(
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
-    /^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/,
+    regEx(/^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/),
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
       const hostname = match.groups.hostname;
-      const depName = match.groups.depName.replace(/\.git$/i, '');
+      const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
       const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,
@@ -119,7 +115,7 @@ function extractDependency(
     depType: 'repository',
     datasource: undefined,
     lookupName: undefined,
-    skipReason: SkipReason.InvalidUrl,
+    skipReason: 'invalid-url',
     currentValue: tag,
   };
 }
@@ -185,7 +181,7 @@ export function extractPackageFile(
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ filename, err }, 'Error scanning parsed pre-commit config');
+    logger.warn({ filename, err }, 'Error scanning parsed pre-commit config');
   }
   return null;
 }

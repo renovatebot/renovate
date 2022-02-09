@@ -2,14 +2,13 @@ import {
   GitPullRequest,
   GitRepository,
   GitStatusContext,
-  PullRequestAsyncStatus,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../logger';
 import { HostRule, PrState } from '../../types';
-import { GitOptions } from '../../types/git';
-import { add } from '../../util/sanitize';
-import { AzurePr } from './types';
+import type { GitOptions } from '../../types/git';
+import { addSecretForSanitizing } from '../../util/sanitize';
+import type { AzurePr } from './types';
 
 export function getNewBranchName(branchName?: string): string {
   if (branchName && !branchName.startsWith('refs/heads/')) {
@@ -103,8 +102,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   const sourceRefName = azurePr.sourceRefName;
 
-  const isConflicted = azurePr.mergeStatus === PullRequestAsyncStatus.Conflicts;
-
   return {
     ...azurePr,
     sourceBranch,
@@ -115,7 +112,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     sourceRefName,
     targetBranch,
     createdAt,
-    ...(isConflicted && { isConflicted }),
   } as AzurePr;
 }
 
@@ -123,7 +119,7 @@ export async function streamToString(
   stream: NodeJS.ReadableStream
 ): Promise<string> {
   const chunks: Uint8Array[] = [];
-  /* eslint-disable promise/avoid-new */
+
   const p = await new Promise<string>((resolve, reject) => {
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
@@ -149,7 +145,7 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
     authType = 'bearer';
     authValue = config.token;
   }
-  add(authValue);
+  addSecretForSanitizing(authValue);
   return {
     '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
   };

@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { processHostRules } from './rules';
 
-describe(getName(), () => {
+describe('manager/npm/post-update/rules', () => {
   describe('processHostRules()', () => {
     beforeEach(() => {
       hostRules.clear();
@@ -13,7 +12,7 @@ describe(getName(), () => {
       expect(res.additionalYarnRcYml).toBeUndefined();
     });
     it('returns empty if no resolvedHost', () => {
-      hostRules.add({ hostType: 'npm', token: 'abc123' });
+      hostRules.add({ hostType: 'npm', token: '123test' });
       const res = processHostRules();
       expect(res.additionalNpmrcContent).toHaveLength(0);
       expect(res.additionalYarnRcYml).toBeUndefined();
@@ -26,8 +25,37 @@ describe(getName(), () => {
         password: 'pass123',
       });
       const res = processHostRules();
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(
+        {
+          additionalNpmrcContent: [
+            '//registry.company.com/:username=user123',
+            '//registry.company.com/:_password=cGFzczEyMw==',
+          ],
+
+          additionalYarnRcYml: {
+            npmRegistries: {
+              '//registry.company.com/': {
+                npmAuthIdent: 'user123:pass123',
+              },
+            },
+          },
+        },
+        `
+        Object {
+          "additionalNpmrcContent": Array [
+            "//registry.company.com/:username=user123",
+            "//registry.company.com/:_password=cGFzczEyMw==",
+          ],
+          "additionalYarnRcYml": Object {
+            "npmRegistries": Object {
+              "//registry.company.com/": Object {
+                "npmAuthIdent": "user123:pass123",
+              },
+            },
+          },
+        }
+      `
+      );
     });
     it('returns mixed rules content', () => {
       hostRules.add({
@@ -48,8 +76,55 @@ describe(getName(), () => {
         password: 'pass123',
       });
       const res = processHostRules();
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(
+        {
+          additionalNpmrcContent: [
+            '//registry.npmjs.org:_authToken=token123',
+            '//registry.other.org:_auth=basictoken123',
+            '//registry.company.com/:username=user123',
+            '//registry.company.com/:_password=cGFzczEyMw==',
+          ],
+
+          additionalYarnRcYml: {
+            npmRegistries: {
+              '//registry.company.com/': {
+                npmAuthIdent: 'user123:pass123',
+              },
+
+              '//registry.npmjs.org': {
+                npmAuthToken: 'token123',
+              },
+
+              '//registry.other.org': {
+                npmAuthIdent: 'basictoken123',
+              },
+            },
+          },
+        },
+        `
+        Object {
+          "additionalNpmrcContent": Array [
+            "//registry.npmjs.org:_authToken=token123",
+            "//registry.other.org:_auth=basictoken123",
+            "//registry.company.com/:username=user123",
+            "//registry.company.com/:_password=cGFzczEyMw==",
+          ],
+          "additionalYarnRcYml": Object {
+            "npmRegistries": Object {
+              "//registry.company.com/": Object {
+                "npmAuthIdent": "user123:pass123",
+              },
+              "//registry.npmjs.org": Object {
+                "npmAuthToken": "token123",
+              },
+              "//registry.other.org": Object {
+                "npmAuthIdent": "basictoken123",
+              },
+            },
+          },
+        }
+      `
+      );
     });
   });
 });

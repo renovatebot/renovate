@@ -1,0 +1,8 @@
+include:
+  project: mikebryant/include-source-example
+  file: /template.yaml
+  ref: 1.0.0
+
+script:
+- !reference [.setup, script]
+- !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]

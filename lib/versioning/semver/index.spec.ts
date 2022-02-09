@@ -1,53 +1,53 @@
 import semver from '.';
 
-describe('semver.isValid(input)', () => {
-  it('should return null for irregular versions', () => {
-    expect(semver.isValid('17.04.0')).toBeFalsy();
+describe('versioning/semver/index', () => {
+  test.each`
+    version                                          | expected
+    ${'17.04.0'}                                     | ${false}
+    ${'1.2.3'}                                       | ${true}
+    ${'1.2.3-foo'}                                   | ${true}
+    ${'1.2.3foo'}                                    | ${false}
+    ${'~1.2.3'}                                      | ${false}
+    ${'^1.2.3'}                                      | ${false}
+    ${'>1.2.3'}                                      | ${false}
+    ${'renovatebot/renovate'}                        | ${false}
+    ${'renovatebot/renovate#master'}                 | ${false}
+    ${'https://github.com/renovatebot/renovate.git'} | ${false}
+  `('isValid("$version") === $expected', ({ version, expected }) => {
+    expect(!!semver.isValid(version)).toBe(expected);
   });
-  it('should support simple semver', () => {
-    expect(semver.isValid('1.2.3')).toBeTruthy();
+
+  test.each`
+    version            | expected
+    ${'1.2.3'}         | ${true}
+    ${'1.2.3-alpha.1'} | ${true}
+    ${'=1.2.3'}        | ${false}
+    ${'= 1.2.3'}       | ${false}
+    ${'1.x'}           | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(!!semver.isSingleVersion(version)).toBe(expected);
   });
-  it('should support semver with dash', () => {
-    expect(semver.isValid('1.2.3-foo')).toBeTruthy();
-  });
-  it('should reject semver without dash', () => {
-    expect(semver.isValid('1.2.3foo')).toBeFalsy();
-  });
-  it('should reject ranges', () => {
-    expect(semver.isValid('~1.2.3')).toBeFalsy();
-    expect(semver.isValid('^1.2.3')).toBeFalsy();
-    expect(semver.isValid('>1.2.3')).toBeFalsy();
-  });
-  it('should reject github repositories', () => {
-    expect(semver.isValid('renovatebot/renovate')).toBeFalsy();
-    expect(semver.isValid('renovatebot/renovate#master')).toBeFalsy();
-    expect(
-      semver.isValid('https://github.com/renovatebot/renovate.git')
-    ).toBeFalsy();
-  });
-});
-describe('semver.isSingleVersion()', () => {
-  it('returns true if naked version', () => {
-    expect(semver.isSingleVersion('1.2.3')).toBeTruthy();
-    expect(semver.isSingleVersion('1.2.3-alpha.1')).toBeTruthy();
-  });
-  it('returns false if equals', () => {
-    expect(semver.isSingleVersion('=1.2.3')).toBeFalsy();
-    expect(semver.isSingleVersion('= 1.2.3')).toBeFalsy();
-  });
-  it('returns false when not version', () => {
-    expect(semver.isSingleVersion('1.x')).toBeFalsy();
-  });
-});
-describe('semver.getNewValue()', () => {
-  it('uses newVersion', () => {
-    expect(
-      semver.getNewValue({
-        currentValue: '=1.0.0',
-        rangeStrategy: 'bump',
-        currentVersion: '1.0.0',
-        newVersion: '1.1.0',
-      })
-    ).toEqual('1.1.0');
+
+  test.each`
+    currentValue | rangeStrategy | currentVersion | newVersion | expected
+    ${'=1.0.0'}  | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'} | ${'1.1.0'}
+  `(
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      const res = semver.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+      expect(res).toEqual(expected);
+    }
+  );
+
+  test.each`
+    version    | expected
+    ${'1.2.0'} | ${true}
+  `('isCompatible("$version") === $expected', ({ version, expected }) => {
+    expect(semver.isCompatible(version)).toBe(expected);
   });
 });

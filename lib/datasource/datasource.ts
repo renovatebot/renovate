@@ -31,9 +31,9 @@ export abstract class Datasource implements DatasourceApi {
     getReleasesConfig: GetReleasesConfig
   ): Promise<ReleaseResult | null>;
 
-  getDigest?(config: DigestConfig, newValue?: string): Promise<string>;
+  getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   handleSpecificErrors(err: HttpError): void {}
 
   protected handleGenericErrors(err: HttpError): never {

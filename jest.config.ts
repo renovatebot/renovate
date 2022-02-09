@@ -18,20 +18,27 @@ const config: InitialOptionsTsJest = {
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 94,
+      branches: 98,
       functions: 100,
       lines: 100,
       statements: 100,
     },
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
-  reporters: ['default', './tmp/tools/jest-gh-reporter.js'],
-  setupFilesAfterEnv: ['jest-extended', '<rootDir>/test/setup.ts'],
+  reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
+  setupFilesAfterEnv: [
+    'jest-extended/all',
+    'expect-more-jest',
+    '<rootDir>/test/setup.ts',
+    '<rootDir>/test/to-migrate.ts',
+  ],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
+  watchPathIgnorePatterns: ['<rootDir>/.cache/', '<rootDir>/coverage/'],
   globals: {
     'ts-jest': {
+      tsconfig: '<rootDir>/tsconfig.spec.json',
       diagnostics: false,
       isolatedModules: true,
     },

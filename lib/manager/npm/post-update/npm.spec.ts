@@ -16,7 +16,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
 
-describe('generateLockFile', () => {
+describe('manager/npm/post-update/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -39,7 +39,7 @@ describe('generateLockFile', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file updates', async () => {
@@ -58,7 +58,7 @@ describe('generateLockFile', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -87,7 +87,7 @@ describe('generateLockFile', () => {
       'utf8'
     );
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
@@ -112,7 +112,7 @@ describe('generateLockFile', () => {
       'utf8'
     );
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs full install', async () => {
@@ -128,7 +128,7 @@ describe('generateLockFile', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('runs twice if remediating', async () => {
@@ -144,7 +144,7 @@ describe('generateLockFile', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
   });
   it('catches errors', async () => {
@@ -158,8 +158,8 @@ describe('generateLockFile', () => {
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBe(true);
-    expect(res.lockFile).not.toBeDefined();
+    expect(res.error).toBeTrue();
+    expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('finds npm globally', async () => {
@@ -171,7 +171,7 @@ describe('generateLockFile', () => {
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses docker npm', async () => {
@@ -184,7 +184,7 @@ describe('generateLockFile', () => {
       { binarySource: 'docker', constraints: { npm: '^6.0.0' } }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file maintenance', async () => {
@@ -199,7 +199,7 @@ describe('generateLockFile', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
 });

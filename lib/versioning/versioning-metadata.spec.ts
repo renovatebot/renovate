@@ -1,6 +1,6 @@
 import { readFile, readdir } from 'fs-extra';
 
-describe('versioning metadata', () => {
+describe('versioning/versioning-metadata', () => {
   it('readme no markdown headers', async () => {
     const allVersioning = (await readdir('lib/versioning')).filter(
       (item) => !item.includes('.')

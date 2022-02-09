@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules';
 
-describe(getName(), () => {
+describe('manager/terragrunt/modules', () => {
   describe('githubRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const { project, tag } = githubRefMatchRegex.exec(

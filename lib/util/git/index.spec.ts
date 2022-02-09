@@ -1,13 +1,21 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
-import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { mocked } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import * as _conflictsCache from './conflicts-cache';
+import type { FileChange } from './types';
 import * as git from '.';
-import { GitNoVerifyOption, setNoVerify } from '.';
+import { setNoVerify } from '.';
 
-describe(getName(), () => {
+jest.mock('./conflicts-cache');
+const conflictsCache = mocked(_conflictsCache);
+
+// Class is no longer exported
+const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
+
+describe('util/git/index', () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();
@@ -71,13 +79,12 @@ describe(getName(), () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setAdminConfig({ localDir: tmpDir.path });
+    GlobalConfig.set({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
-      gitAuthorName: 'Jest',
-      gitAuthorEmail: 'Jest@example.com',
     });
-    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setGitAuthor('Jest <Jest@example.com>');
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -95,6 +102,13 @@ describe(getName(), () => {
     await base.cleanup();
   });
 
+  describe('validateGitVersion()', () => {
+    it('has a git version greater or equal to the minimum required', async () => {
+      const res = await git.validateGitVersion();
+      expect(res).toBeTrue();
+    });
+  });
+
   describe('checkoutBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
       await expect(git.checkoutBranch(defaultBranch)).resolves.not.toThrow();
@@ -105,8 +119,11 @@ describe(getName(), () => {
   });
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
-      // FIXME: explicit assert condition
-      expect(await git.getFileList()).toMatchSnapshot();
+      expect(await git.getFileList()).toEqual([
+        'file_to_delete',
+        'master_file',
+        'past_file',
+      ]);
     });
     it('should exclude submodules', async () => {
       const repo = Git(base.path);
@@ -117,18 +134,22 @@ describe(getName(), () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
-      // FIXME: explicit assert condition
-      expect(await git.getFileList()).toMatchSnapshot();
+      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await git.getFileList()).toEqual([
+        '.gitmodules',
+        'file_to_delete',
+        'master_file',
+        'past_file',
+      ]);
       await repo.reset(['--hard', 'HEAD^']);
     });
   });
   describe('branchExists(branchName)', () => {
     it('should return true if found', () => {
-      expect(git.branchExists('renovate/future_branch')).toBe(true);
+      expect(git.branchExists('renovate/future_branch')).toBeTrue();
     });
     it('should return false if not found', () => {
-      expect(git.branchExists('not_found')).toBe(false);
+      expect(git.branchExists('not_found')).toBeFalse();
     });
   });
   describe('getBranchList()', () => {
@@ -141,32 +162,32 @@ describe(getName(), () => {
   });
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
     });
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
+      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
     });
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBe(true);
-      expect(await git.isBranchStale('develop')).toBe(true); // cache
+      expect(await git.isBranchStale('develop')).toBeTrue();
+      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
     });
   });
   describe('isBranchModified()', () => {
     it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBe(false);
+      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
     it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
-      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
     });
     it('should return false when author is ignored', async () => {
-      await git.setUserRepoConfig({
+      git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
+      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
     });
     it('should return true when custom author is unknown', async () => {
-      expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
+      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
     });
   });
 
@@ -192,8 +213,9 @@ describe(getName(), () => {
   });
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
-      const file = {
-        name: 'some-new-file',
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
         contents: 'some new-contents',
       };
       await git.commitFiles({
@@ -204,8 +226,7 @@ describe(getName(), () => {
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
       );
-      // FIXME: explicit assert condition
-      expect(branchFiles).toMatchSnapshot();
+      expect(branchFiles).toEqual(['some-new-file']);
     });
   });
 
@@ -255,8 +276,9 @@ describe(getName(), () => {
   });
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
-      const file = {
-        name: 'some-new-file',
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
         contents: 'some new-contents',
       };
       const commit = await git.commitFiles({
@@ -267,9 +289,9 @@ describe(getName(), () => {
       expect(commit).not.toBeNull();
     });
     it('deletes file', async () => {
-      const file = {
-        name: '|delete|',
-        contents: 'file_to_delete',
+      const file: FileChange = {
+        type: 'deletion',
+        path: 'file_to_delete',
       };
       const commit = await git.commitFiles({
         branchName: 'renovate/something',
@@ -279,13 +301,15 @@ describe(getName(), () => {
       expect(commit).not.toBeNull();
     });
     it('updates multiple files', async () => {
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-existing-file',
+          type: 'addition',
+          path: 'some-existing-file',
           contents: 'updated content',
         },
         {
-          name: 'some-other-existing-file',
+          type: 'addition',
+          path: 'some-other-existing-file',
           contents: 'other updated content',
         },
       ];
@@ -297,9 +321,10 @@ describe(getName(), () => {
       expect(commit).not.toBeNull();
     });
     it('updates git submodules', async () => {
-      const files = [
+      const files: FileChange[] = [
         {
-          name: '.',
+          type: 'addition',
+          path: '.',
           contents: 'some content',
         },
       ];
@@ -311,9 +336,10 @@ describe(getName(), () => {
       expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'future_file',
+          type: 'addition',
+          path: 'future_file',
           contents: 'future',
         },
       ];
@@ -329,9 +355,10 @@ describe(getName(), () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -358,13 +385,14 @@ describe(getName(), () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Commit]);
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -388,13 +416,14 @@ describe(getName(), () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Push]);
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -413,12 +442,33 @@ describe(getName(), () => {
         expect.objectContaining({ '--no-verify': null })
       );
     });
+
+    it('creates file with the executable bit', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-executable',
+        contents: 'some new-contents',
+        isExecutable: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+      });
+      expect(commit).not.toBeNull();
+
+      const repo = Git(tmpDir.path);
+      const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
+      expect(result).toStartWith('100755');
+    });
   });
 
   describe('getCommitMessages()', () => {
     it('returns commit messages', async () => {
-      // FIXME: explicit assert condition
-      expect(await git.getCommitMessages()).toMatchSnapshot();
+      expect(await git.getCommitMessages()).toEqual([
+        'master message',
+        'past message',
+      ]);
     });
   });
 
@@ -432,14 +482,14 @@ describe(getName(), () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
       expect(
         getUrl({
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
     });
 
     it('returns ssh url', () => {
@@ -450,7 +500,7 @@ describe(getName(), () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('git@host:some/repo.git');
+      ).toBe('git@host:some/repo.git');
     });
   });
 
@@ -465,8 +515,10 @@ describe(getName(), () => {
 
       expect(git.branchExists('test')).toBeFalsy();
 
-      // FIXME: explicit assert condition
-      expect(await git.getCommitMessages()).toMatchSnapshot();
+      expect(await git.getCommitMessages()).toEqual([
+        'master message',
+        'past message',
+      ]);
 
       await git.checkoutBranch('develop');
 
@@ -479,7 +531,7 @@ describe(getName(), () => {
       await git.checkoutBranch('test');
 
       const msg = await git.getCommitMessages();
-      expect(msg).toMatchSnapshot();
+      expect(msg).toEqual(['past message2', 'master message', 'past message']);
       expect(msg).toContain('past message2');
     });
 
@@ -495,8 +547,8 @@ describe(getName(), () => {
         url: base.path,
       });
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
-      expect(git.branchExists('renovate/test')).toBe(true);
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      expect(git.branchExists('renovate/test')).toBeTrue();
 
       await git.initRepo({
         url: base.path,
@@ -505,8 +557,8 @@ describe(getName(), () => {
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
-      expect(git.branchExists('renovate/test')).toBe(true);
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      expect(git.branchExists('renovate/test')).toBeTrue();
     });
 
     it('should fail clone ssh submodule', async () => {
@@ -530,7 +582,7 @@ describe(getName(), () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });
 
@@ -541,12 +593,164 @@ describe(getName(), () => {
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',
         },
+        fullClone: true,
       });
       git.getBranchCommit(defaultBranch);
       await git.syncGit();
       const repo = Git(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
+    });
+  });
+  describe('setGitAuthor()', () => {
+    it('throws for invalid', () => {
+      expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
+    });
+  });
+
+  describe('isBranchConflicted', () => {
+    beforeAll(async () => {
+      const repo = Git(base.path);
+      await repo.init();
+
+      await repo.checkout(['-b', 'renovate/conflicted_branch', defaultBranch]);
+      await repo.checkout([
+        '-b',
+        'renovate/non_conflicted_branch',
+        defaultBranch,
+      ]);
+
+      await repo.checkout(defaultBranch);
+      await fs.writeFile(base.path + '/one_file', 'past (updated)');
+      await repo.add(['one_file']);
+      await repo.commit('past (updated) message');
+
+      await repo.checkout('renovate/conflicted_branch');
+      await fs.writeFile(base.path + '/one_file', 'past (updated branch)');
+      await repo.add(['one_file']);
+      await repo.commit('past (updated branch) message');
+
+      await repo.checkout('renovate/non_conflicted_branch');
+      await fs.writeFile(base.path + '/another_file', 'other');
+      await repo.add(['another_file']);
+      await repo.commit('other (updated branch) message');
+
+      await repo.checkout(defaultBranch);
+
+      conflictsCache.getCachedConflictResult.mockReturnValue(null);
+    });
+
+    it('returns true for non-existing source branch', async () => {
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_existing_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('returns true for non-existing target branch', async () => {
+      const res = await git.isBranchConflicted(
+        'renovate/non_existing_branch',
+        'renovate/non_conflicted_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('detects conflicted branch', async () => {
+      const branchBefore = 'renovate/non_conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/conflicted_branch'
+      );
+
+      expect(res).toBeTrue();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
+    });
+
+    it('detects non-conflicted branch', async () => {
+      const branchBefore = 'renovate/conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_conflicted_branch'
+      );
+
+      expect(res).toBeFalse();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
+    });
+
+    describe('cache', () => {
+      beforeEach(() => {
+        jest.resetAllMocks();
+      });
+      it('returns cached values', async () => {
+        conflictsCache.getCachedConflictResult.mockReturnValue(true);
+
+        const res = await git.isBranchConflicted(
+          defaultBranch,
+          'renovate/conflicted_branch'
+        );
+
+        expect(res).toBeTrue();
+        expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
+          [
+            defaultBranch,
+            expect.any(String),
+            'renovate/conflicted_branch',
+            expect.any(String),
+          ],
+        ]);
+        expect(conflictsCache.setCachedConflictResult).not.toHaveBeenCalled();
+      });
+
+      it('caches truthy return value', async () => {
+        conflictsCache.getCachedConflictResult.mockReturnValue(null);
+
+        const res = await git.isBranchConflicted(
+          defaultBranch,
+          'renovate/conflicted_branch'
+        );
+
+        expect(res).toBeTrue();
+        expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
+          [
+            defaultBranch,
+            expect.any(String),
+            'renovate/conflicted_branch',
+            expect.any(String),
+            true,
+          ],
+        ]);
+      });
+
+      it('caches falsy return value', async () => {
+        conflictsCache.getCachedConflictResult.mockReturnValue(null);
+
+        const res = await git.isBranchConflicted(
+          defaultBranch,
+          'renovate/non_conflicted_branch'
+        );
+
+        expect(res).toBeFalse();
+        expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
+          [
+            defaultBranch,
+            expect.any(String),
+            'renovate/non_conflicted_branch',
+            expect.any(String),
+            false,
+          ],
+        ]);
+      });
     });
   });
 });

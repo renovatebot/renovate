@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -25,7 +24,7 @@ function artifactForPath(
   };
 }
 
-describe(getName(), () => {
+describe('manager/batect-wrapper/artifacts', () => {
   beforeEach(() => {
     httpMock
       .scope('https://github.com')
@@ -59,13 +58,15 @@ describe(getName(), () => {
       expect(result).toEqual([
         {
           file: {
-            name: 'batect',
+            type: 'addition',
+            path: 'batect',
             contents: newUnixWrapperContent,
           },
         },
         {
           file: {
-            name: 'batect.cmd',
+            type: 'addition',
+            path: 'batect.cmd',
             contents: newWindowsWrapperContent,
           },
         },
@@ -79,13 +80,15 @@ describe(getName(), () => {
       expect(result).toEqual([
         {
           file: {
-            name: 'some/sub/dir/batect',
+            type: 'addition',
+            path: 'some/sub/dir/batect',
             contents: newUnixWrapperContent,
           },
         },
         {
           file: {
-            name: 'some/sub/dir/batect.cmd',
+            type: 'addition',
+            path: 'some/sub/dir/batect.cmd',
             contents: newWindowsWrapperContent,
           },
         },

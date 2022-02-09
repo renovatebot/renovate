@@ -1,23 +1,17 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { range } from '../../util/range';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
-const res1 = loadFixture('page.json');
-
-function getPath(page: number): string {
-  return `/v3/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
-}
-function* range(start: number, end: number): Generator<number, number, number> {
-  yield start;
-  if (start === end) {
-    return;
-  }
-  yield* range(start + 1, end);
+function getPath(page: number, imageType = 'jdk'): string {
+  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
 
-describe(getName(), () => {
+const depName = 'java';
+
+describe('datasource/adoptium-java/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock
@@ -27,10 +21,9 @@ describe(getName(), () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for 404', async () => {
@@ -38,10 +31,19 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns null for empty result', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName,
+        })
+      ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -52,10 +54,9 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for 5xx', async () => {
@@ -63,39 +64,53 @@ describe(getName(), () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real data', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, res1);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'adoptium-java',
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('pages', async () => {
       httpMock
         .scope(defaultRegistryUrl)
         .get(getPath(0))
-        .reply(200, {
-          versions: [...range(1, 50)].map((v) => ({ semver: `1.${v}.0` })),
-        })
+        .reply(200, Fixtures.get('page.json'));
+      const res = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(3);
+    });
+
+    it('processes real data (jre)', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0, 'jre'))
+        .reply(200, Fixtures.get('jre.json'));
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'java-jre',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(2);
+    });
+
+    it('pages', async () => {
+      const versions = [...range(1, 50)].map((v: number) => ({
+        semver: `1.${v}.0`,
+      }));
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0))
+        .reply(200, { versions })
         .get(getPath(1))
         .reply(404);
       const res = await getPkgReleases({
         datasource,
-        depName: 'adoptium-java',
+        depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(50);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(50);
     });
   });
 });

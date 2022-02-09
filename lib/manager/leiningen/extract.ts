@@ -1,15 +1,16 @@
 import { ClojureDatasource } from '../../datasource/clojure';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
-  const regex = new RegExp(`:${kwName}(?=\\s)`);
+  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12872 lookahead
   const keyOffset = str.search(regex);
   if (keyOffset < 0) {
     return null;
   }
   const withSpaces = str.slice(keyOffset + kwName.length + 1);
-  const valueOffset = withSpaces.search(/[^\s]/);
+  const valueOffset = withSpaces.search(regEx(/[^\s]/));
   if (valueOffset < 0) {
     return null;
   }
@@ -35,22 +36,24 @@ export function extractFromVectors(
   let artifactId = '';
   let version = '';
 
-  const isSpace = (ch: string): boolean => ch && /[\s,]/.test(ch);
+  const isSpace = (ch: string): boolean => ch && regEx(/[\s,]/).test(ch);
 
   const cleanStrLiteral = (s: string): string =>
-    s.replace(/^"/, '').replace(/"$/, '');
+    s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
 
   const yieldDep = (): void => {
     if (artifactId && version) {
       const depName = expandDepName(cleanStrLiteral(artifactId));
       if (version.startsWith('~')) {
-        const currentValue = vars[version.replace(/^~\s*/, '')];
+        const varName = version.replace(regEx(/^~\s*/), '');
+        const currentValue = vars[varName];
         if (currentValue) {
           result.push({
             ...ctx,
             datasource: ClojureDatasource.id,
             depName,
             currentValue,
+            groupName: varName,
           });
         }
       } else {
@@ -102,7 +105,7 @@ function extractLeinRepos(content: string): string[] {
   const result = [];
 
   const repoContent = trimAtKey(
-    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments
+    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
     'repositories'
   );
 
@@ -122,20 +125,24 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || [];
-    const urls = matches.map((x) => x.replace(/^"/, '').replace(/"$/, ''));
+    const matches =
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) || [];
+    const urls = matches.map((x) =>
+      x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
+    );
     urls.forEach((url) => result.push(url));
   }
 
   return result;
 }
 
-const defRegex =
-  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/;
+const defRegex = regEx(
+  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/
+);
 
 export function extractVariables(content: string): ExtractedVariables {
   const result: ExtractedVariables = {};
-  const lines = content.split('\n');
+  const lines = content.split(newlineRegex);
   for (let idx = 0; idx < lines.length; idx += 1) {
     const line = lines[idx];
     const match = defRegex.exec(line);
@@ -147,33 +154,34 @@ export function extractVariables(content: string): ExtractedVariables {
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
-  const collect = (
-    key: string,
-    registryUrls: string[],
-    vars: ExtractedVariables
-  ): PackageDependency[] => {
-    const ctx = {
-      depType: key,
-      registryUrls,
-    };
-    let result: PackageDependency[] = [];
-    let restContent = trimAtKey(content, key);
-    while (restContent) {
-      result = [...result, ...extractFromVectors(restContent, ctx, vars)];
-      restContent = trimAtKey(restContent, key);
-    }
-    return result;
+function collectDeps(
+  content: string,
+  key: string,
+  registryUrls: string[],
+  vars: ExtractedVariables
+): PackageDependency[] {
+  const ctx = {
+    depType: key,
+    registryUrls,
   };
+  let result: PackageDependency[] = [];
+  let restContent = trimAtKey(content, key);
+  while (restContent) {
+    result = [...result, ...extractFromVectors(restContent, ctx, vars)];
+    restContent = trimAtKey(restContent, key);
+  }
+  return result;
+}
 
+export function extractPackageFile(content: string): PackageFile {
   const registryUrls = extractLeinRepos(content);
   const vars = extractVariables(content);
 
   const deps: PackageDependency[] = [
-    ...collect('dependencies', registryUrls, vars),
-    ...collect('managed-dependencies', registryUrls, vars),
-    ...collect('plugins', registryUrls, vars),
-    ...collect('pom-plugins', registryUrls, vars),
+    ...collectDeps(content, 'dependencies', registryUrls, vars),
+    ...collectDeps(content, 'managed-dependencies', registryUrls, vars),
+    ...collectDeps(content, 'plugins', registryUrls, vars),
+    ...collectDeps(content, 'pom-plugins', registryUrls, vars),
   ];
 
   return { deps };

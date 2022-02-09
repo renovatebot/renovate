@@ -1,9 +1,7 @@
-import { getName, loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractLocks } from './util';
 
-const validLockfile = loadFixture('validLockfile.hcl');
-
-describe(getName(), () => {
+describe('manager/terraform/lockfile/util', () => {
   describe('extractLocks()', () => {
     it('returns null for empty', () => {
       const result = extractLocks('nothing here');
@@ -11,7 +9,7 @@ describe(getName(), () => {
     });
 
     it('extracts', () => {
-      const res = extractLocks(validLockfile);
+      const res = extractLocks(Fixtures.get('validLockfile.hcl'));
       expect(res).toHaveLength(3);
       expect(res).toMatchSnapshot();
     });

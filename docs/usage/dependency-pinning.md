@@ -8,7 +8,7 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
 The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you.
 
-If you do not want to read the in-depth discussion, and just want our recommendations, you can skip to the bottom.
+If you do not want to read the in-depth discussion, and just want our recommendations, skip ahead to the ["So what's best?" section](#so-whats-best).
 
 ## What is Dependency Pinning?
 
@@ -52,7 +52,10 @@ e.g. there might be a space of 30 minutes where your package specifies foobar `1
 You mainly pin versions for certainty, and visibility.
 When you have a pinned version of each dependency in your `package.json`, you know exactly which version of each dependency is installed at any time.
 This benefits when upgrading versions as well as when rolling back in case of problems.
-Note: we'll cover lock files later, don't worry.
+
+<!-- prettier-ignore -->
+!!! note
+    We'll cover lock files later, don't worry.
 
 ### Upgrading pinned versions
 
@@ -72,7 +75,7 @@ This is more common and more dangerous.
 If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realise you need to fix it.
 Like before, you need to manually work out which dependency caused it - assuming you guess correctly that it was a new dependency version at fault - and pin it manually by editing `package.json` one dependency at a time.
 
-Alternatively, if you were instead pinning `foobar` then you would receive a PR for `foobar@1.2.0` which awaits your approval.
+Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
 So first of all, you can choose to read the release notes and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
 
 If you did not catch the fault before merging, you are still better off with a pinned version.
@@ -85,7 +88,7 @@ As you can see in the above, pinning dependencies makes your build more consiste
 ### Downside of pinned dependencies - upgrade "noise"
 
 The one major downside to your development workflow of pinning dependencies is the potential for increased "noise" in your repository.
-As mentioned above, you can expect to receive Pull Requests whenever there is a new version of your dependencies available.
+As mentioned above, you can expect to get Pull Requests whenever there is a new version of your dependencies available.
 Depending on how many repositories you maintain, and how many dependencies are in each, you may find this default approach to be overwhelming (e.g. waking up to 10 new Pull Requests each day).
 
 ## Reducing the "noise" of dependency updates
@@ -106,7 +109,7 @@ In that case if the `pg` package has a minor or patch update and passes all test
 
 ### Branch automerging
 
-In the above suggestion of Pull Request automerging, you might still find it annoying if you receive GitHub Notifications for every PR that is created and merged.
+In the above suggestion of Pull Request automerging, you might still find it annoying if you get GitHub Notifications for every PR that is created and merged.
 In that case, you could set `automergeType` to `branch`, which means Renovate will:
 
 - Create a new branch for testing
@@ -118,13 +121,15 @@ With this approach, updates will be essentially "silent" - causing no notificati
 
 ### Scheduling
 
-Although it can feel satisfying to receive updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
+Although it can feel satisfying to get updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
 And worse still, npm package versions that are less than 24 hours [can be unpublished](https://blog.npmjs.org/post/141905368000/changes-to-npms-unpublish-policy), which would really break your build if you've pinned to a version that no longer exists.
 
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
 - Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
+
+To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
 
 ### Grouping related packages
 

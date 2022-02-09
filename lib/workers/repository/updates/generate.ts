@@ -4,10 +4,11 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { formatCommitMessagePrefix } from '../util/commit-message';
+import { CommitMessage } from '../model/commit-message';
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
@@ -72,6 +73,7 @@ export function generateBranchConfig(
   const depNames: string[] = [];
   const newValue: string[] = [];
   const toVersions: string[] = [];
+  const toValues = new Set<string>();
   branchUpgrades.forEach((upg) => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
@@ -79,6 +81,7 @@ export function generateBranchConfig(
     if (!toVersions.includes(upg.newVersion)) {
       toVersions.push(upg.newVersion);
     }
+    toValues.add(upg.newValue);
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
@@ -91,7 +94,6 @@ export function generateBranchConfig(
     toVersions.length > 1 ||
     (!toVersions[0] && newValue.length > 1);
   if (newValue.length > 1 && !groupEligible) {
-    // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
   const typesGroup =
@@ -124,6 +126,15 @@ export function generateBranchConfig(
     }
     upgrade.displayFrom ??= '';
     upgrade.displayTo ??= '';
+    const pendingVersionsLength = upgrade.pendingVersions?.length;
+    if (pendingVersionsLength) {
+      upgrade.displayPending = `\`${upgrade.pendingVersions.slice(-1).pop()}\``;
+      if (pendingVersionsLength > 1) {
+        upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
+      }
+    } else {
+      upgrade.displayPending = '';
+    }
     upgrade.prettyDepType =
       upgrade.prettyDepType || upgrade.depType || 'dependency';
     if (useGroupSettings) {
@@ -137,8 +148,9 @@ export function generateBranchConfig(
     delete upgrade.group;
 
     // istanbul ignore else
-    if (toVersions.length > 1 && !typesGroup) {
+    if (toVersions.length > 1 && toValues.size > 1 && !typesGroup) {
       logger.trace({ toVersions });
+      logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
     } else if (newValue.length > 1 && upgrade.isDigest) {
@@ -158,10 +170,9 @@ export function generateBranchConfig(
           upgrade
         )})`;
       }
-      upgrade.commitMessagePrefix = formatCommitMessagePrefix(semanticPrefix);
+      upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
       upgrade.toLowerCase =
-        // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-        upgrade.semanticCommitType.match(/[A-Z]/) === null &&
+        regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null &&
         !upgrade.semanticCommitType.startsWith(':');
     }
     // Compile a few times in case there are nested templates
@@ -173,17 +184,21 @@ export function generateBranchConfig(
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
+      logger.debug(
+        { branchName: config.branchName },
+        'Secrets exposed in commit message'
+      );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
-    upgrade.commitMessage = upgrade.commitMessage.replace(/\s+/g, ' '); // Trim extra whitespace inside string
+    upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
-      /to vv(\d)/,
+      regEx(/to vv(\d)/),
       'to v$1'
     );
     if (upgrade.toLowerCase) {
       // We only need to lowercase the first line
-      const splitMessage = upgrade.commitMessage.split('\n');
+      const splitMessage = upgrade.commitMessage.split(newlineRegex);
       splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');
     }
@@ -200,16 +215,20 @@ export function generateBranchConfig(
       upgrade.prTitle = template
         .compile(upgrade.prTitle, upgrade)
         .trim()
-        .replace(/\s+/g, ' ');
+        .replace(regEx(/\s+/g), ' ');
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
+        logger.debug(
+          { branchName: config.branchName },
+          'Secrets were exposed in PR title'
+        );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
       if (upgrade.toLowerCase) {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
-      [upgrade.prTitle] = upgrade.commitMessage.split('\n');
+      [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
     }
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
@@ -235,10 +254,10 @@ export function generateBranchConfig(
         const existingStamp = DateTime.fromISO(releaseTimestamp);
         const upgradeStamp = DateTime.fromISO(upgrade.releaseTimestamp);
         if (upgradeStamp > existingStamp) {
-          releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+          releaseTimestamp = upgrade.releaseTimestamp;
         }
       } else {
-        releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+        releaseTimestamp = upgrade.releaseTimestamp;
       }
     }
   }

@@ -1,28 +1,29 @@
-import _simpleGit from 'simple-git';
-import { dir } from 'tmp-promise';
+import _simpleGit, { Response, SimpleGit } from 'simple-git';
+import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
-import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import type { Upgrade } from '../types';
 import updateDependency from './update';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
-describe(getName(), () => {
+describe('manager/git-submodules/update', () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
-    let adminConfig: RepoAdminConfig;
+    let adminConfig: RepoGlobalConfig;
+    let tmpDir: DirectoryResult;
     beforeAll(async () => {
       upgrade = { depName: 'renovate' };
 
-      const tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = { localDir: join(tmpDir.path) };
-      setAdminConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
-    afterAll(() => {
-      setAdminConfig();
+    afterAll(async () => {
+      await tmpDir.cleanup();
+      GlobalConfig.reset();
     });
     it('returns null on error', async () => {
       simpleGit.mockReturnValue({
@@ -39,17 +40,17 @@ describe(getName(), () => {
     it('returns content on update', async () => {
       simpleGit.mockReturnValue({
         submoduleUpdate() {
-          return Promise.resolve();
+          return Promise.resolve(null) as Response<string>;
         },
         checkout() {
-          return Promise.resolve();
+          return Promise.resolve(null) as Response<string>;
         },
       });
       const update = await updateDependency({
         fileContent: '',
         upgrade,
       });
-      expect(update).toEqual('');
+      expect(update).toBe('');
     });
   });
 });

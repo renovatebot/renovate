@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
+import { regEx } from '../../../../util/regex';
 import type { BranchConfig } from '../../../types';
 
 export function getPrList(
@@ -17,7 +18,7 @@ export function getPrList(
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {
-    const prTitleRe = /@([a-z]+\/[a-z]+)/;
+    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
     prDesc += `<details>\n<summary>${branch.prTitle.replace(
       prTitleRe,
       '@&#8203;$1'

@@ -1,7 +1,7 @@
-import { getConfig, getName, git, mocked, partial } from '../../../test/util';
+import { getConfig, git, mocked, partial } from '../../../test/util';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { BranchConfig } from '../types';
+import type { BranchConfig } from '../types';
 import * as prAutomerge from './automerge';
 
 jest.mock('../../util/git');
@@ -9,7 +9,7 @@ jest.mock('../../util/git');
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
-describe(getName(), () => {
+describe('workers/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;
@@ -17,9 +17,7 @@ describe(getName(), () => {
       config = partial<BranchConfig>({
         ...defaultConfig,
       });
-      pr = partial<Pr>({
-        canMerge: true,
-      });
+      pr = partial<Pr>({});
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -29,8 +27,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ automerged: true, branchRemoved: true });
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should indicate if automerge failed', async () => {
@@ -38,8 +35,10 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(false);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'PlatformRejection',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should automerge comment', async () => {
@@ -49,8 +48,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -62,8 +60,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -72,32 +69,40 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'BranchModified',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'BranchNotGreen',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.canMerge = undefined;
+      pr.cannotMergeReason = 'some reason';
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'PlatformNotReady',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.isConflicted = true;
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'Conflicted',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });

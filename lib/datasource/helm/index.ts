@@ -3,9 +3,11 @@ import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
+import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { HelmRepository, RepositoryData } from './types';
+import { findSourceUrl } from './common';
+import type { HelmRepository, HelmRepositoryData } from './types';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
@@ -14,27 +16,34 @@ export class HelmDatasource extends Datasource {
     super(HelmDatasource.id);
   }
 
-  readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
+  override readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 
-  readonly defaultConfig = {
+  override readonly defaultConfig = {
     commitMessageTopic: 'Helm release {{depName}}',
     group: {
       commitMessageTopic: '{{{groupName}}} Helm releases',
     },
   };
 
+  override readonly defaultVersioning = helmVersioning.id;
+
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,
-    key: (repository: string) => repository,
+    key: (helmRepository: string) => helmRepository,
   })
-  async getRepositoryData(repository: string): Promise<RepositoryData | null> {
+  async getRepositoryData(
+    helmRepository: string
+  ): Promise<HelmRepositoryData | null> {
     let res: any;
     try {
       res = await this.http.get('index.yaml', {
-        baseUrl: ensureTrailingSlash(repository),
+        baseUrl: ensureTrailingSlash(helmRepository),
       });
       if (!res || !res.body) {
-        logger.warn(`Received invalid response from ${repository}`);
+        logger.warn(
+          { helmRepository },
+          `Received invalid response from helm repository`
+        );
         return null;
       }
     } catch (err) {
@@ -45,24 +54,32 @@ export class HelmDatasource extends Datasource {
         json: true,
       }) as HelmRepository;
       if (!is.plainObject<HelmRepository>(doc)) {
-        logger.warn(`Failed to parse index.yaml from ${repository}`);
+        logger.warn(
+          { helmRepository },
+          `Failed to parse index.yaml from helm repository`
+        );
         return null;
       }
-      const result: RepositoryData = {};
+      const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
+        const { sourceUrl, sourceDirectory } = findSourceUrl(releases[0]);
         result[name] = {
           homepage: releases[0].home,
-          sourceUrl: releases[0].sources ? releases[0].sources[0] : undefined,
+          sourceUrl,
+          sourceDirectory,
           releases: releases.map((release) => ({
             version: release.version,
-            releaseTimestamp: release.created ? release.created : null,
+            releaseTimestamp: release.created ?? null,
           })),
         };
       }
 
       return result;
     } catch (err) {
-      logger.warn(`Failed to parse index.yaml from ${repository}`);
+      logger.warn(
+        { helmRepository },
+        `Failed to parse index.yaml from helm repository`
+      );
       logger.debug(err);
       return null;
     }
@@ -72,6 +89,11 @@ export class HelmDatasource extends Datasource {
     lookupName,
     registryUrl: helmRepository,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!helmRepository) {
+      return null;
+    }
+
     const repositoryData = await this.getRepositoryData(helmRepository);
     if (!repositoryData) {
       logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);

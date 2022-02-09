@@ -2,38 +2,44 @@ import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
+import { regEx } from '../../util/regex';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParseContext, ParseOptions } from './types';
 
-const stripComment = (str: string): string => str.replace(/(^|\s+)\/\/.*$/, '');
+const stripComment = (str: string): string =>
+  str.replace(regEx(/(^|\s+)\/\/.*$/), '');
 
 const isSingleLineDep = (str: string): boolean =>
-  /^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/.test(str);
+  regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/).test(str);
 
 const isDepsBegin = (str: string): boolean =>
-  /^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/.test(str);
+  regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/).test(str);
 
 const isPluginDep = (str: string): boolean =>
-  /^\s*addSbtPlugin\s*\(.*\)\s*$/.test(str);
+  regEx(/^\s*addSbtPlugin\s*\(.*\)\s*$/).test(str);
 
-const isStringLiteral = (str: string): boolean => /^"[^"]*"$/.test(str);
+const isStringLiteral = (str: string): boolean => regEx(/^"[^"]*"$/).test(str);
 
 const isScalaVersion = (str: string): boolean =>
-  /^\s*scalaVersion\s*:=\s*"[^"]*"[\s,]*$/.test(str);
+  regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*"[^"]*"[\s,]*$/).test(
+    str
+  );
 
 const getScalaVersion = (str: string): string =>
-  str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"[\s,]*$/, '');
+  str
+    .replace(regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*"/), '')
+    .replace(regEx(/"[\s,]*$/), '');
 
 const isPackageFileVersion = (str: string): boolean =>
-  /^(version\s*:=\s*).*$/.test(str);
+  regEx(/^(version\s*:=\s*).*$/).test(str);
 
 const getPackageFileVersion = (str: string): string =>
   str
-    .replace(/^\s*version\s*:=\s*/, '')
-    .replace(/[\s,]*$/, '')
-    .replace(/"/g, '');
+    .replace(regEx(/^\s*version\s*:=\s*/), '')
+    .replace(regEx(/[\s,]*$/), '')
+    .replace(regEx(/"/g), '');
 
 /*
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
@@ -54,62 +60,71 @@ const normalizeScalaVersion = (str: string): string => {
       return str;
     }
   }
-  if (/^\d+\.\d+\.\d+$/.test(str)) {
-    return str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2');
+  if (regEx(/^\d+\.\d+\.\d+$/).test(str)) {
+    return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
   }
   // istanbul ignore next
   return str;
 };
 
 const isScalaVersionVariable = (str: string): boolean =>
-  /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/.test(str);
+  regEx(
+    /^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/
+  ).test(str);
 
 const getScalaVersionVariable = (str: string): string =>
-  str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/[\s,]*$/, '');
+  str
+    .replace(regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*/), '')
+    .replace(regEx(/[\s,]*$/), '');
 
 const isResolver = (str: string): boolean =>
-  /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/.test(
-    str
-  );
+  regEx(
+    /^\s*(resolvers\s*\+\+?=\s*((Seq|List|Stream)\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/
+  ).test(str);
 const getResolverUrl = (str: string): string =>
   str
-    .replace(/^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"/, '')
-    .replace(/"[\s,)]*$/, '');
+    .replace(
+      regEx(
+        /^\s*(resolvers\s*\+\+?=\s*((Seq|List|Stream)\()?)?"[^"]*"\s*at\s*"/
+      ),
+      ''
+    )
+    .replace(regEx(/"[\s,)]*$/), '');
 
 const isVarDependency = (str: string): boolean =>
-  /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(
-    str
-  );
+  regEx(
+    /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/
+  ).test(str);
 
 const isVarDef = (str: string): boolean =>
-  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(
-    str
-  );
+  regEx(
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/
+  ).test(str);
 
 const isVarSeqSingleLine = (str: string): boolean =>
-  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*\).*\s*$/.test(
-    str
-  );
+  regEx(
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*\).*\s*$/
+  ).test(str);
 
 const isVarSeqMultipleLine = (str: string): boolean =>
-  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*[^)]*.*$/.test(
-    str
-  );
+  regEx(
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*[^)]*.*$/
+  ).test(str);
 
 const getVarName = (str: string): string =>
   str
-    .replace(/^\s*(private\s*)?(lazy\s*)?val\s+/, '')
-    .replace(/\s*=\s*"[^"]*"\s*$/, '');
+    .replace(regEx(/^\s*(private\s*)?(lazy\s*)?val\s+/), '')
+    .replace(regEx(/\s*=\s*"[^"]*"\s*$/), '');
 
 const isVarName = (str: string): boolean =>
-  /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
+  regEx(/^[_a-zA-Z][_a-zA-Z0-9]*$/).test(str);
 
 const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
   const rightPart = str.replace(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
+    regEx(/^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/),
     ''
   );
-  const val = rightPart.replace(/"\s*$/, '');
+  const val = rightPart.replace(regEx(/"\s*$/), '');
   return { val };
 };
 
@@ -125,15 +140,15 @@ function parseDepExpr(
 
   const resolveToken = (str: string): string =>
     isStringLiteral(str)
-      ? str.replace(/^"/, '').replace(/"$/, '')
+      ? str.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
       : variables[str].val;
 
   const tokens = expr
     .trim()
-    .split(/("[^"]*")/g)
-    .map((x) => (/"[^"]*"/.test(x) ? x : x.replace(/[()]+/g, '')))
+    .split(regEx(/("[^"]*")/g))
+    .map((x) => (regEx(/"[^"]*"/).test(x) ? x : x.replace(regEx(/[()]+/g), '')))
     .join('')
-    .split(/\s*(%%?)\s*|\s*classifier\s*/);
+    .split(regEx(/\s*(%%?)\s*|\s*classifier\s*/));
 
   const [
     rawGroupId,
@@ -183,7 +198,7 @@ function parseDepExpr(
   const currentValue = resolveToken(rawVersion);
 
   if (!depType && rawScope) {
-    depType = rawScope.replace(/^"/, '').replace(/"$/, '');
+    depType = rawScope.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
   }
 
   const result: PackageDependency = {
@@ -243,13 +258,15 @@ function parseSbtLine(
       registryUrls.push(url);
     } else if (isVarSeqSingleLine(line)) {
       isMultiDeps = false;
-      const depExpr = line.replace(/^.*Seq\(\s*/, '').replace(/\).*$/, '');
+      const depExpr = line
+        .replace(regEx(/^.*(Seq|List|Stream)\(\s*/), '')
+        .replace(regEx(/\).*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
     } else if (isVarSeqMultipleLine(line)) {
       isMultiDeps = true;
-      const depExpr = line.replace(/^.*Seq\(\s*/, '');
+      const depExpr = line.replace(regEx(/^.*(Seq|List|Stream)\(\s*/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
@@ -258,7 +275,7 @@ function parseSbtLine(
     } else if (isVarDependency(line)) {
       isMultiDeps = false;
       const depExpr = line.replace(
-        /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
+        regEx(/^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/),
         ''
       );
       dep = parseDepExpr(depExpr, {
@@ -266,14 +283,14 @@ function parseSbtLine(
       });
     } else if (isSingleLineDep(line)) {
       isMultiDeps = false;
-      const depExpr = line.replace(/^.*\+=\s*/, '');
+      const depExpr = line.replace(regEx(/^.*\+=\s*/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
     } else if (isPluginDep(line)) {
       isMultiDeps = false;
-      const rightPart = line.replace(/^\s*addSbtPlugin\s*\(/, '');
-      const depExpr = rightPart.replace(/\)\s*$/, '');
+      const rightPart = line.replace(regEx(/^\s*addSbtPlugin\s*\(/), '');
+      const depExpr = rightPart.replace(regEx(/\)\s*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
         depType: 'plugin',
@@ -281,8 +298,8 @@ function parseSbtLine(
     } else if (isDepsBegin(line)) {
       isMultiDeps = true;
     } else if (isMultiDeps) {
-      const rightPart = line.replace(/^[\s,]*/, '');
-      const depExpr = rightPart.replace(/[\s,]*$/, '');
+      const rightPart = line.replace(regEx(/^[\s,]*/), '');
+      const depExpr = rightPart.replace(regEx(/[\s,]*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
@@ -332,7 +349,7 @@ export function extractPackageFile(content: string): PackageFile {
   if (!content) {
     return null;
   }
-  const lines = content.split(/\n/).map(stripComment);
+  const lines = content.split(regEx(/\n/)).map(stripComment);
   return lines.reduce(parseSbtLine, {
     registryUrls: [MAVEN_REPO],
     deps: [],

@@ -1,5 +1,6 @@
-import { ReleaseType, inc } from 'semver';
+import semver, { ReleaseType } from 'semver';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { BumpPackageVersionResult } from '../types';
 
 export function bumpPackageVersion(
@@ -12,13 +13,13 @@ export function bumpPackageVersion(
     'Checking if we should bump build.sbt version'
   );
   let bumpedContent = content;
-  const bumpedVersion = inc(currentValue, bumpVersion as ReleaseType);
+  const bumpedVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
   if (!bumpedVersion) {
     logger.warn('Version incremental failed');
     return { bumpedContent };
   }
   bumpedContent = content.replace(
-    /^(version\s*:=\s*).*$/m,
+    regEx(/^(version\s*:=\s*).*$/m),
     `$1"${bumpedVersion}"`
   );
 

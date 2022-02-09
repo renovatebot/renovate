@@ -1,6 +1,6 @@
-import { getName, git, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
+import { GlobalConfig } from '../../../config/global';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
@@ -28,10 +28,10 @@ hostRules.find = jest.fn((_) => ({
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
-describe(getName(), () => {
+describe('workers/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
-      setAdminConfig({
+      GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
       fs.outputFile = jest.fn();
@@ -44,7 +44,8 @@ describe(getName(), () => {
     it('returns if no updated packageFiles are package.json', async () => {
       config.updatedPackageFiles = [
         {
-          name: 'Dockerfile',
+          type: 'addition',
+          path: 'Dockerfile',
           contents: 'some-contents',
         },
       ];
@@ -54,13 +55,19 @@ describe(getName(), () => {
     it('writes updated packageFiles', async () => {
       config.updatedPackageFiles = [
         {
-          name: 'package.json',
+          type: 'addition',
+          path: 'package.json',
           contents: '{ "name": "{{some-template}}" }',
         },
         {
-          name: 'backend/package.json',
+          type: 'addition',
+          path: 'backend/package.json',
           contents:
             '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
+        },
+        {
+          type: 'deletion',
+          path: 'frontent/package.json',
         },
       ];
       config.upgrades = [];
@@ -70,7 +77,7 @@ describe(getName(), () => {
   });
   describe('getAdditionalFiles', () => {
     beforeEach(() => {
-      setAdminConfig({
+      GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');

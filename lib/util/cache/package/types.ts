@@ -1,5 +1,5 @@
 export interface PackageCache {
-  get<T = any>(namespace: string, key: string): Promise<T>;
+  get<T = any>(namespace: string, key: string): Promise<T | undefined>;
 
   set<T = any>(
     namespace: string,

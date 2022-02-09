@@ -1,24 +1,33 @@
-import { defaultConfig, getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
+import { defaultConfig } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
-const sampleHtml = loadFixture('sample.html', `../../manager/html`);
+const sampleHtml = Fixtures.get('sample.html', `../../manager/html`);
 
-jest.mock('../../util/fs');
+jest.mock('fs-extra', () => Fixtures.fsExtra());
 
-describe(getName(), () => {
+describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
+    beforeAll(() => {
+      GlobalConfig.set({
+        localDir: '/temp',
+      });
+    });
     beforeEach(() => {
       upgrade = {
         ...JSON.parse(JSON.stringify(defaultConfig)),
         manager: 'html',
+        packageFile: 'test',
       };
       reuseExistingBranch = false;
     });
+
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
       reuseExistingBranch = true;
@@ -48,8 +57,7 @@ describe(getName(), () => {
       upgrade.newDigest = 'some-digest';
       upgrade.depIndex = 0;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual(src.replace('7.1.0', '7.1.1'));
     });
     it('handles a double attempt', async () => {
       const script =
@@ -62,8 +70,7 @@ describe(getName(), () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBe(`     ${script}  ${script.replace('7.1.0', '7.1.1')} `);
     });
     it('handles already updated', async () => {
       const script =
@@ -83,8 +90,7 @@ describe(getName(), () => {
         srcAlreadyUpdated,
         reuseExistingBranch
       );
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual(srcAlreadyUpdated);
     });
     it('returns existing content if replaceString mismatch', async () => {
       const script =
@@ -102,14 +108,12 @@ describe(getName(), () => {
         'wrong source',
         reuseExistingBranch
       );
-      // FIXME: explicit assert condition
-      expect(res).toEqual('wrong source');
+      expect(res).toBe('wrong source');
     });
     it('updates version and integrity', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous">';
-      const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.baseDeps = extractPackageFile(script).deps;
       upgrade.depName = 'KaTeX';
       upgrade.lookupName = 'KaTeX/0.10.0/katex.min.js';
       upgrade.currentValue = '0.10.0';
@@ -119,9 +123,10 @@ describe(getName(), () => {
       upgrade.newDigest = 'sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
-      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
+      expect(res).toBe(
+        `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`
+      );
     });
     it('updates with autoReplaceNewString', async () => {
       const dockerfile =
@@ -140,8 +145,9 @@ describe(getName(), () => {
       upgrade.autoReplaceStringTemplate =
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBe(
+        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+      );
     });
     it('fails with oldversion in depname', async () => {
       const yml =

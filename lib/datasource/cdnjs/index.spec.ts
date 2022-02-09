@@ -1,18 +1,15 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { CdnJsDatasource } from '.';
-
-const res1 = loadFixture('d3-force.json');
-const res2 = loadFixture('bulma.json');
 
 const baseUrl = 'https://api.cdnjs.com/';
 
 const pathFor = (s: string): string =>
   `/libraries/${s.split('/').shift()}?fields=homepage,repository,assets`;
 
-describe(getName(), () => {
+describe('datasource/cdnjs/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -105,7 +102,7 @@ describe(getName(), () => {
       httpMock
         .scope(baseUrl)
         .get(pathFor('d3-force/d3-force.js'))
-        .reply(200, res1);
+        .reply(200, Fixtures.get('d3-force.json'));
       const res = await getPkgReleases({
         datasource: CdnJsDatasource.id,
         depName: 'd3-force/d3-force.js',
@@ -117,7 +114,7 @@ describe(getName(), () => {
       httpMock
         .scope(baseUrl)
         .get(pathFor('bulma/only/0.7.5/style.css'))
-        .reply(200, res2);
+        .reply(200, Fixtures.get('bulma.json'));
       const res = await getPkgReleases({
         datasource: CdnJsDatasource.id,
         depName: 'bulma/only/0.7.5/style.css',

@@ -1,15 +1,14 @@
 import { fromCodepointToUnicode, fromHexcodeToCodepoint } from 'emojibase';
-import { getName } from '../../test/util';
 import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji';
 
-describe(getName(), () => {
+describe('util/emoji', () => {
   beforeEach(() => {
     setEmojiConfig({ unicodeEmoji: true });
   });
 
   describe('emojify', () => {
     it('encodes known shortcodes', () => {
-      expect(emojify('Let it :bee:')).toEqual('Let it 🐝');
+      expect(emojify('Let it :bee:')).toBe('Let it 🐝');
     });
 
     it('encodes aliases', () => {
@@ -19,12 +18,12 @@ describe(getName(), () => {
     });
 
     it('omits unknown shortcodes', () => {
-      expect(emojify(':foo: :bar: :bee:')).toEqual(':foo: :bar: 🐝');
+      expect(emojify(':foo: :bar: :bee:')).toBe(':foo: :bar: 🐝');
     });
 
     it('does not encode when config option is disabled', () => {
       setEmojiConfig({ unicodeEmoji: false });
-      expect(emojify('Let it :bee:')).toEqual('Let it :bee:');
+      expect(emojify('Let it :bee:')).toBe('Let it :bee:');
     });
   });
 
@@ -48,11 +47,11 @@ describe(getName(), () => {
     });
 
     describe('unsupported characters', () => {
-      const unsupported = '🪆';
+      const unsupported = '🫠';
 
       it('uses replacement character', () => {
         setEmojiConfig({ unicodeEmoji: false });
-        expect(unemojify(unsupported)).toEqual('�');
+        expect(unemojify(unsupported)).toBe('�');
       });
     });
   });
@@ -78,10 +77,10 @@ describe(getName(), () => {
       const y: string = makeEmoji('26A0');
 
       setEmojiConfig({ unicodeEmoji: true });
-      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
+      expect(stripEmojis(`foo ${x} bar`)).toBe(`foo ${y} bar`);
 
       setEmojiConfig({ unicodeEmoji: false });
-      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
+      expect(stripEmojis(`foo ${x} bar`)).toBe(`foo ${y} bar`);
     });
   });
 });

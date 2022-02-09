@@ -1,17 +1,17 @@
 import later from '@breejs/later';
+import { parseCron } from '@cheap-glitch/mi-cron';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { fixShortHours } from '../../config/migration';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
+
+const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 3am on the first day of the month',
   monthly: 'before 3am on the first day of the month',
 };
-
-function fixShortHours(input: string): string {
-  return input.replace(/( \d?\d)((a|p)m)/g, '$1:00$2');
-}
 
 export function hasValidTimezone(
   timezone: string
@@ -35,9 +35,24 @@ export function hasValidSchedule(
   }
   // check if any of the schedules fail to parse
   const hasFailedSchedules = schedule.some((scheduleText) => {
+    const parsedCron = parseCron(scheduleText);
+    if (parsedCron !== undefined) {
+      if (
+        parsedCron.minutes.length !== 60 ||
+        scheduleText.indexOf(minutesChar) !== 0
+      ) {
+        message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
+        return true;
+      }
+
+      // It was valid cron syntax and * as minutes
+      return false;
+    }
+
     const massagedText = fixShortHours(
       scheduleMappings[scheduleText] || scheduleText
     );
+
     const parsedSchedule = later.parse.text(massagedText);
     if (parsedSchedule.error !== -1) {
       message = `Invalid schedule: Failed to parse "${scheduleText}"`;
@@ -64,6 +79,33 @@ export function hasValidSchedule(
     return [false, message];
   }
   return [true, ''];
+}
+
+function cronMatches(cron: string, now: DateTime): boolean {
+  const parsedCron = parseCron(cron);
+
+  if (parsedCron.hours.indexOf(now.hour) === -1) {
+    // Hours mismatch
+    return false;
+  }
+
+  if (parsedCron.days.indexOf(now.day) === -1) {
+    // Days mismatch
+    return false;
+  }
+
+  if (parsedCron.weekDays.indexOf(now.weekday) === -1) {
+    // Weekdays mismatch
+    return false;
+  }
+
+  if (parsedCron.months.indexOf(now.month) === -1) {
+    // Months mismatch
+    return false;
+  }
+
+  // Match
+  return true;
 }
 
 export function isScheduledNow(config: RenovateConfig): boolean {
@@ -122,13 +164,23 @@ export function isScheduledNow(config: RenovateConfig): boolean {
 
   // We run if any schedule matches
   const isWithinSchedule = configSchedule.some((scheduleText) => {
-    const massagedText = scheduleMappings[scheduleText] || scheduleText;
-    const parsedSchedule = later.parse.text(fixShortHours(massagedText));
-    logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
+    const cronSchedule = parseCron(scheduleText);
+    if (cronSchedule) {
+      // We have Cron syntax
+      if (cronMatches(scheduleText, now)) {
+        logger.debug(`Matches schedule ${scheduleText}`);
+        return true;
+      }
+    } else {
+      // We have Later syntax
+      const massagedText = scheduleMappings[scheduleText] || scheduleText;
+      const parsedSchedule = later.parse.text(fixShortHours(massagedText));
+      logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
 
-    if (later.schedule(parsedSchedule).isValid(jsNow)) {
-      logger.debug(`Matches schedule ${scheduleText}`);
-      return true;
+      if (later.schedule(parsedSchedule).isValid(jsNow)) {
+        logger.debug(`Matches schedule ${scheduleText}`);
+        return true;
+      }
     }
 
     return false;

@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare';
 
 const REV_TYPE_LATEST = 'REV_TYPE_LATEST';
@@ -10,7 +11,7 @@ export interface Revision {
   value: string;
 }
 
-export const LATEST_REGEX = /^latest\.|^latest$/i;
+export const LATEST_REGEX = regEx(/^latest\.|^latest$/i);
 
 function parseDynamicRevision(str: string): Revision | null {
   if (!str) {
@@ -18,14 +19,14 @@ function parseDynamicRevision(str: string): Revision | null {
   }
 
   if (LATEST_REGEX.test(str)) {
-    const value = str.replace(LATEST_REGEX, '').toLowerCase() || null;
+    const value = str.replace(LATEST_REGEX, '').toLowerCase() || '';
     return {
       type: REV_TYPE_LATEST,
-      value: value === 'integration' ? null : value,
+      value: value === 'integration' ? '' : value,
     };
   }
 
-  const SUBREV_REGEX = /\.\+$/;
+  const SUBREV_REGEX = regEx(/\.\+$/);
   if (str.endsWith('.+')) {
     const value = str.replace(SUBREV_REGEX, '');
     if (isSingleVersion(value)) {
@@ -38,10 +39,13 @@ function parseDynamicRevision(str: string): Revision | null {
 
   const range = parseRange(str);
   if (range && range.length === 1) {
-    return {
-      type: REV_TYPE_RANGE,
-      value: rangeToStr(range),
-    };
+    const rangeValue = rangeToStr(range);
+    if (rangeValue) {
+      return {
+        type: REV_TYPE_RANGE,
+        value: rangeValue,
+      };
+    }
   }
 
   return null;

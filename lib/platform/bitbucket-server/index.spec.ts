@@ -1,12 +1,11 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
+import type * as _git from '../../util/git';
 import type { Platform } from '../types';
 
 function sshLink(projectKey: string, repositorySlug: string): string {
@@ -168,7 +167,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe(getName(), () => {
+describe('platform/bitbucket-server/index', () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -411,7 +410,7 @@ describe(getName(), () => {
               mergeConfig: null,
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -428,7 +427,7 @@ describe(getName(), () => {
               },
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -449,7 +448,7 @@ describe(getName(), () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(true);
+            expect(actual).toBeTrue();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -471,7 +470,7 @@ describe(getName(), () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(false);
+            expect(actual).toBeFalse();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -487,11 +486,6 @@ describe(getName(), () => {
         it('does not throw', async () => {
           const scope = await initRepo();
           scope
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .twice()
-            .reply(200, { conflicted: false })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -510,11 +504,6 @@ describe(getName(), () => {
           expect.assertions(1);
           const scope = await initRepo();
           scope
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .twice()
-            .reply(200, { conflicted: false })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -560,10 +549,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -583,10 +568,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -604,10 +585,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -644,10 +621,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -678,7 +651,7 @@ describe(getName(), () => {
             topic: 'topic',
             content: 'content',
           });
-          expect(res).toBe(false);
+          expect(res).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -722,7 +695,7 @@ describe(getName(), () => {
               topic: 'topic',
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -766,7 +739,7 @@ describe(getName(), () => {
               topic: null,
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -816,7 +789,7 @@ describe(getName(), () => {
               topic: 'some-subject',
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -860,7 +833,7 @@ describe(getName(), () => {
               topic: null,
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -900,7 +873,7 @@ describe(getName(), () => {
               topic: 'some-subject',
               content: 'blablabla',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -939,7 +912,7 @@ describe(getName(), () => {
             topic: null,
             content: '!merge',
           });
-          expect(res).toBe(true);
+          expect(res).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1137,11 +1110,7 @@ describe(getName(), () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(
             await bitbucket.getBranchPr('userName1/pullRequest5')
@@ -1280,11 +1249,7 @@ describe(getName(), () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1298,32 +1263,18 @@ describe(getName(), () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge`
-            )
-            .reply(200, { conflicted: false })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .twice()
-            .reply(200, { conflicted: false });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
-          const author = global.gitAuthor;
-          try {
-            expect(await bitbucket.getPr(3)).toMatchSnapshot();
+          expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          } finally {
-            global.gitAuthor = author;
-          }
+          expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('gets a closed PR', async () => {
@@ -1354,10 +1305,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1378,10 +1325,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1407,10 +1350,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1463,10 +1402,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1486,10 +1421,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1516,10 +1447,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
               (body) => body.reviewers.length === 0
@@ -1543,10 +1470,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1565,10 +1488,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1589,10 +1508,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1603,7 +1518,7 @@ describe(getName(), () => {
               branchName: 'branch',
               id: 5,
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1641,10 +1556,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1666,10 +1577,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1691,10 +1598,6 @@ describe(getName(), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1705,7 +1608,7 @@ describe(getName(), () => {
               branchName: 'branch',
               id: 5,
             })
-          ).resolves.toBe(false);
+          ).resolves.toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1722,7 +1625,7 @@ describe(getName(), () => {
         it('sanitizes HTML comments in the body', () => {
           const prBody = bitbucket.massageMarkdown(`---
 
-- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---
@@ -1755,10 +1658,6 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
-            BranchStatus.green
-          );
-
           expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.green
           );
@@ -1778,7 +1677,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1792,7 +1691,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1811,7 +1710,7 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1821,7 +1720,7 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1831,9 +1730,9 @@ Followed by some information.
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(
-            bitbucket.getBranchStatus('somebranch', [])
-          ).rejects.toThrow(REPOSITORY_CHANGED);
+          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
+            REPOSITORY_CHANGED
+          );
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -2119,6 +2018,67 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+
+        it('returns file content in json5 format', async () => {
+          const json5Data = `
+          {
+            // json5 comment
+            foo: 'bar'
+          }
+        `;
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: json5Data }],
+            });
+          const res = await bitbucket.getJsonFile('file.json5');
+          expect(res).toEqual({ foo: 'bar' });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('returns file content from given repo', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/DIFFERENT/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile(
+            'file.json',
+            'DIFFERENT/repo'
+          );
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('returns file content from branch or tag', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile(
+            'file.json',
+            'SOME/repo',
+            'dev'
+          );
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
         it('throws on malformed JSON', async () => {
           const scope = await initRepo();
           scope

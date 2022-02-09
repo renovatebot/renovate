@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gradle/deep/gradle-updates-report createRenovateGradlePlugin generates a report for Gradle version 5 1`] = `
+Array [
+  Object {
+    "dependencies": Array [
+      Object {
+        "group": "org.apache.commons",
+        "name": "commons-collections4",
+        "version": "4.4",
+      },
+    ],
+    "project": "minimal-test",
+    "repositories": Array [
+      "https://jcenter.bintray.com/",
+      "https://plugins.gradle.org/m2",
+    ],
+  },
+]
+`;
+
+exports[`manager/gradle/deep/gradle-updates-report createRenovateGradlePlugin generates a report for Gradle version 6 1`] = `
+Array [
+  Object {
+    "dependencies": Array [
+      Object {
+        "group": "org.apache.commons",
+        "name": "commons-collections4",
+        "version": "4.4",
+      },
+    ],
+    "project": "minimal-test",
+    "repositories": Array [
+      "https://jcenter.bintray.com/",
+      "https://plugins.gradle.org/m2",
+    ],
+  },
+]
+`;

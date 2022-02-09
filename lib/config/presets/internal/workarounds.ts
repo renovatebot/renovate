@@ -8,12 +8,14 @@ export const presets: Record<string, Preset> = {
     extends: [
       'workarounds:mavenCommonsAncientVersion',
       'workarounds:ignoreSpringCloudNumeric',
+      'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
     ],
   },
   mavenCommonsAncientVersion: {
+    description: 'Fix some problems with very old Maven commons versions',
     packageRules: [
       {
         matchDatasources: ['maven', 'sbt-package'],
@@ -31,6 +33,16 @@ export const presets: Record<string, Preset> = {
           'org.springframework.cloud:spring-cloud-starter-parent',
         ],
         allowedVersions: '/^[A-Z]/',
+      },
+    ],
+  },
+  ignoreWeb3jCoreWithOldReleaseTimestamp: {
+    description: 'Ignore web3j 5.0.0 release',
+    packageRules: [
+      {
+        matchDatasources: ['maven'],
+        matchPackageNames: ['org.web3j:core'],
+        allowedVersions: '!/^5\\.0\\.0/',
       },
     ],
   },

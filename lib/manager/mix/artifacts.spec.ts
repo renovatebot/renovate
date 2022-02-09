@@ -1,8 +1,8 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { env, fs, hostRules } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
@@ -10,25 +10,26 @@ import { updateArtifacts } from '.';
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
+jest.mock('../../util/host-rules');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
 };
 
 const config: UpdateArtifactsConfig = {};
 
-describe(getName(), () => {
+describe('manager/mix/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
 
   afterEach(() => {
-    setAdminConfig();
+    GlobalConfig.reset();
   });
 
   it('returns null if no mix.lock found', async () => {
@@ -81,12 +82,11 @@ describe(getName(), () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -94,13 +94,58 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('authenticates to private repositories', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
+    hostRules.find.mockReturnValueOnce({});
+
+    const result = await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [
+        {
+          depName: 'private_package',
+          lookupName: 'private_package:renovate_test',
+        },
+        {
+          depName: 'other_package',
+          lookupName: 'other_package:unauthorized_organization',
+        },
+      ],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(result).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+
+    const [updateResult] = result;
+    expect(updateResult).toEqual({
+      file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+    });
+
+    const [, packageUpdateCommand] = execSnapshots;
+    expect(packageUpdateCommand.cmd).toInclude(
+      'mix hex.organization auth renovate_test --key valid_test_token && ' +
+        'mix deps.update private_package other_package'
+    );
+  });
+
   it('returns updated mix.lock in subdir', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
-    fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
     mockExecAll(exec);
     expect(
       await updateArtifacts({
@@ -115,11 +160,10 @@ describe(getName(), () => {
 
   it('catches write errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -127,16 +171,17 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
+    ]);
   });
 
   it('catches exec errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -144,6 +189,8 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
+    ]);
   });
 });

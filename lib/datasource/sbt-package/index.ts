@@ -1,10 +1,12 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
+import { ensureTrailingSlash } from '../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
-import { parseIndexDir } from '../sbt-plugin/util';
+import { normalizeRootRelativeUrls, parseIndexDir } from '../sbt-plugin/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'sbt-package';
@@ -13,17 +15,13 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
-
 export async function getArtifactSubdirs(
   searchRoot: string,
   artifact: string,
   scalaVersion: string
-): Promise<string[]> {
-  const { body: indexContent } = await downloadHttpProtocol(
-    ensureTrailingSlash(searchRoot),
-    'sbt'
-  );
+): Promise<string[] | null> {
+  const pkgUrl = ensureTrailingSlash(searchRoot);
+  const { body: indexContent } = await downloadHttpProtocol(pkgUrl, 'sbt');
   if (indexContent) {
     const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, (x) => {
@@ -38,7 +36,8 @@ export async function getArtifactSubdirs(
         }
         return x.startsWith(`${artifact}_`);
       });
-    let artifactSubdirs = parseSubdirs(indexContent);
+    const normalizedContent = normalizeRootRelativeUrls(indexContent, pkgUrl);
+    let artifactSubdirs = parseSubdirs(normalizedContent);
     if (
       scalaVersion &&
       artifactSubdirs.includes(`${artifact}_${scalaVersion}`)
@@ -53,19 +52,18 @@ export async function getArtifactSubdirs(
 
 export async function getPackageReleases(
   searchRoot: string,
-  artifactSubdirs: string[]
-): Promise<string[]> {
+  artifactSubdirs: string[] | null
+): Promise<string[] | null> {
   if (artifactSubdirs) {
     const releases: string[] = [];
     const parseReleases = (content: string): string[] =>
-      parseIndexDir(content, (x) => !/^\.+$/.test(x));
+      parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
     for (const searchSubdir of artifactSubdirs) {
-      const { body: content } = await downloadHttpProtocol(
-        ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
-        'sbt'
-      );
+      const pkgUrl = ensureTrailingSlash(`${searchRoot}/${searchSubdir}`);
+      const { body: content } = await downloadHttpProtocol(pkgUrl, 'sbt');
       if (content) {
-        const subdirReleases = parseReleases(content);
+        const normalizedContent = normalizeRootRelativeUrls(content, pkgUrl);
+        const subdirReleases = parseReleases(normalizedContent);
         subdirReleases.forEach((x) => releases.push(x));
       }
     }
@@ -77,7 +75,7 @@ export async function getPackageReleases(
   return null;
 }
 
-export function getLatestVersion(versions: string[]): string | null {
+export function getLatestVersion(versions: string[] | null): string | null {
   if (versions?.length) {
     return versions.reduce((latestVersion, version) =>
       compare(version, latestVersion) === 1 ? version : latestVersion
@@ -88,8 +86,8 @@ export function getLatestVersion(versions: string[]): string | null {
 
 export async function getUrls(
   searchRoot: string,
-  artifactDirs: string[],
-  version: string
+  artifactDirs: string[] | null,
+  version: string | null
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
 
@@ -123,10 +121,10 @@ export async function getUrls(
         const sourceUrl = pomXml.valueWithPath('scm.url');
         if (sourceUrl) {
           result.sourceUrl = sourceUrl
-            .replace(/^scm:/, '')
-            .replace(/^git:/, '')
-            .replace(/^git@github.com:/, 'https://github.com/')
-            .replace(/\.git$/, '');
+            .replace(regEx(/^scm:/), '')
+            .replace(regEx(/^git:/), '')
+            .replace(regEx(/^git@github.com:/), 'https://github.com/')
+            .replace(regEx(/\.git$/), '');
         }
 
         return result;
@@ -141,6 +139,11 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // istanbul ignore if
+  if (!registryUrl) {
+    return null;
+  }
+
   const [groupId, artifactId] = lookupName.split(':');
   const groupIdSplit = groupId.split('.');
   const artifactIdSplit = artifactId.split('_');

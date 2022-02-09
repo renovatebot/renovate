@@ -3,13 +3,12 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   loadFixture,
   logger,
   platform,
 } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { GlobalConfig } from '../../config/global';
+import { PlatformId } from '../../constants';
 import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
@@ -20,20 +19,20 @@ let config: RenovateConfig;
 beforeEach(() => {
   jest.clearAllMocks();
   config = getConfig();
-  config.platform = PLATFORM_TYPE_GITHUB;
+  config.platform = PlatformId.Github;
   config.errors = [];
   config.warnings = [];
 });
 
 async function dryRun(
   branches: BranchConfig[],
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+
   platform: jest.Mocked<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0
 ) {
   jest.clearAllMocks();
-  setAdminConfig({ dryRun: true });
+  GlobalConfig.set({ dryRun: true });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -41,7 +40,7 @@ async function dryRun(
   expect(platform.ensureIssue).toHaveBeenCalledTimes(ensureIssueCalls);
 }
 
-describe(getName(), () => {
+describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
@@ -54,19 +53,26 @@ describe(getName(), () => {
           '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
-      // FIXME: explicit assert condition
-      expect(conf).toMatchSnapshot();
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName1: 'approve',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: true,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
     });
   });
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
-      setAdminConfig();
+      GlobalConfig.reset();
     });
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
@@ -86,7 +92,7 @@ describe(getName(), () => {
         },
       ];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
@@ -138,6 +144,7 @@ describe(getName(), () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
+      config.dependencyDashboardHeader = 'This is a header';
       config.dependencyDashboardFooter = 'And this is a footer';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
@@ -153,18 +160,28 @@ describe(getName(), () => {
 
     it('open or update Dependency Dashboard when rules contain approvals', async () => {
       const branches: BranchConfig[] = [];
+      config.repository = 'test';
       config.packageRules = [
         {
           dependencyDashboardApproval: true,
         },
         {},
       ];
-      config.dependencyDashboardFooter = 'And this is a footer';
+      config.dependencyDashboardHeader =
+        'This is a header for platform:{{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for repository:{{repository}}';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        /platform:github/
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        /repository:test/
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -510,6 +527,7 @@ describe(getName(), () => {
         ## Awaiting Schedule
 
         These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 
          - [x] <!-- rebase-all-open-prs -->'

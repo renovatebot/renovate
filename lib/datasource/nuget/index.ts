@@ -1,5 +1,6 @@
 import urlApi from 'url';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import * as nugetVersioning from '../../versioning/nuget';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as v2 from './v2';
@@ -19,7 +20,7 @@ export function parseRegistryUrl(registryUrl: string): {
   try {
     const parsedUrl = urlApi.parse(registryUrl);
     let protocolVersion = 2;
-    const protocolVersionRegExp = /#protocolVersion=(2|3)/;
+    const protocolVersionRegExp = regEx(/#protocolVersion=(2|3)/);
     const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
     if (protocolVersionMatch) {
       parsedUrl.hash = '';

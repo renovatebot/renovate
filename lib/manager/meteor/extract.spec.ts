@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const input01Content = loadFixture('package-1.js');
+const input01Content = Fixtures.get('package-1.js');
 
-describe(getName(), () => {
+describe('manager/meteor/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

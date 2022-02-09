@@ -1,15 +1,20 @@
 import type { ReleaseResult } from '../types';
 
-export interface HelmRepository {
-  entries: Record<
-    string,
-    {
-      home?: string;
-      sources?: string[];
-      version: string;
-      created: string;
-    }[]
-  >;
+export interface HelmRelease {
+  home?: string;
+  sources?: string[];
+  version: string;
+  created: string;
+  urls: string[];
 }
 
-export type RepositoryData = Record<string, ReleaseResult>;
+export interface HelmRepository {
+  entries: Record<string, HelmRelease[]>;
+}
+
+export type HelmRepositoryData = Record<string, ReleaseResult>;
+
+export interface RepoSource {
+  sourceUrl?: string;
+  sourceDirectory?: string;
+}

@@ -1,5 +1,6 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
+import { mocked } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -7,8 +8,14 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
+import * as _repositoryCache from '../../util/cache/repository';
+import type { Cache } from '../../util/cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
+
+jest.mock('../../util/cache/repository');
+const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
@@ -38,12 +45,16 @@ query(
 }
 `;
 
-describe(getName(), () => {
+describe('util/http/github', () => {
   let githubApi: GithubHttp;
+  let repoCache: Cache = {};
+
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
+    repoCache = {};
+    repositoryCache.getCache.mockReturnValue(repoCache);
   });
 
   afterEach(() => {
@@ -52,7 +63,7 @@ describe(getName(), () => {
 
   describe('HTTP', () => {
     it('supports app mode', async () => {
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
       await githubApi.get('/some-url', {
         headers: { accept: 'some-accept' },
@@ -62,23 +73,39 @@ describe(getName(), () => {
       expect(req.headers.accept).toBe(
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
+      expect(req.headers.authorization).toBe('token 123test');
     });
+
+    it('supports different datasources', async () => {
+      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      hostRules.add({ hostType: 'github', token: 'abc' });
+      hostRules.add({
+        hostType: GITHUB_RELEASES_ID,
+        token: 'def',
+      });
+      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      await githubApiDatasource.get('/some-url');
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.headers.authorization).toBe('token def');
+    });
+
     it('paginates', async () => {
-      const url = '/some-url';
+      const url = '/some-url?per_page=2';
       httpMock
         .scope(githubApiHost)
         .get(url)
-        .reply(200, ['a'], {
-          link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
         })
-        .get(`${url}?page=2`)
-        .reply(200, ['b', 'c'], {
-          link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
         })
-        .get(`${url}?page=3`)
-        .reply(200, ['d']);
-      const res = await githubApi.getJson('some-url', { paginate: true });
-      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(3);
     });
@@ -130,7 +157,7 @@ describe(getName(), () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: httpMock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = {}
       ) {
         const url = '/some-url';
         httpMock
@@ -149,6 +176,7 @@ describe(getName(), () => {
           );
         await githubApi.getJson(url);
       }
+
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
         httpMock.scope(githubApiHost).get(url).replyWithError(error);
@@ -172,6 +200,14 @@ describe(getName(), () => {
           fail(403, {
             message:
               'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+          })
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      });
+      it('should throw secondary rate limit exceeded', async () => {
+        await expect(
+          fail(403, {
+            message:
+              'You have exceeded a secondary rate limit and have been temporarily blocked from content creation. Please retry your request again later.',
           })
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
@@ -255,6 +291,7 @@ describe(getName(), () => {
           })
         ).rejects.toThrow('Validation error');
       });
+
       it('should throw original error of unknown type', async () => {
         await expect(
           fail(418, {
@@ -336,13 +373,13 @@ describe(getName(), () => {
         .scope('https://ghe.mycompany.com')
         .post('/api/graphql')
         .reply(200, { data: { repository } });
-      await githubApi.queryRepo(graphqlQuery);
+      await githubApi.requestGraphql(graphqlQuery);
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
+      expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
     });
     it('supports app mode', async () => {
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -415,9 +452,9 @@ describe(getName(), () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const result = await githubApi.queryRepo(graphqlQuery);
+      const res = await githubApi.requestGraphql(graphqlQuery);
       expect(httpMock.getTrace()).toHaveLength(1);
-      expect(result).toStrictEqual(repository);
+      expect(res?.data).toStrictEqual({ repository });
     });
     it('queryRepoField', async () => {
       httpMock
@@ -448,6 +485,15 @@ describe(getName(), () => {
       expect(items).toHaveLength(2);
     });
     it('shrinks items count on 50x', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local().toISO(),
+          pageSize: 50,
+        },
+      };
+
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -462,9 +508,90 @@ describe(getName(), () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+      ).toBe(25);
+
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(4);
       expect(trace).toMatchSnapshot();
+    });
+    it('expands items count on timeout', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 42,
+        },
+      };
+
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+      ).toBe(84);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('continues to iterate with a lower page size on error 502', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(502)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(4);
+    });
+    it('removes cache record once expanded to the maximum', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 50,
+        },
+      };
+
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem
+      ).toBeUndefined();
+
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(3);
     });
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);

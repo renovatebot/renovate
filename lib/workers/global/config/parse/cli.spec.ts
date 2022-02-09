@@ -1,10 +1,9 @@
-import { getName } from '../../../../../test/util';
 import type { RenovateOptions } from '../../../../config/types';
 import * as datasourceDocker from '../../../../datasource/docker';
 import getArgv from './__fixtures__/argv';
 import * as cli from './cli';
 
-describe(getName(), () => {
+describe('workers/global/config/parse/cli', () => {
   let argv: string[];
   beforeEach(() => {
     argv = getArgv();
@@ -14,14 +13,14 @@ describe(getName(), () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
-      expect(cli.getCliName(option)).toEqual('--one-two-three');
+      expect(cli.getCliName(option)).toBe('--one-two-three');
     });
     it('generates returns empty if CLI false', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
         cli: false,
       };
-      expect(cli.getCliName(option)).toEqual('');
+      expect(cli.getCliName(option)).toBe('');
     });
   });
   describe('.getConfig(argv)', () => {
@@ -104,11 +103,18 @@ describe(getName(), () => {
         hostRules: [],
       });
     });
-    it('migrates --endpoints', () => {
-      argv.push(`--endpoints=`);
-      expect(cli.getConfig(argv)).toEqual({
-        hostRules: [],
-      });
+    test.each`
+      arg                              | config
+      ${'--endpoints='}                | ${{ hostRules: [] }}
+      ${'--azure-auto-complete=false'} | ${{ platformAutomerge: false }}
+      ${'--azure-auto-complete=true'}  | ${{ platformAutomerge: true }}
+      ${'--azure-auto-complete'}       | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge=false'}   | ${{ platformAutomerge: false }}
+      ${'--git-lab-automerge=true'}    | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge'}         | ${{ platformAutomerge: true }}
+    `('"$arg" -> $config', ({ arg, config }) => {
+      argv.push(arg);
+      expect(cli.getConfig(argv)).toMatchObject(config);
     });
     it('parses json object correctly when empty', () => {
       argv.push(`--onboarding-config=`);

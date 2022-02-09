@@ -1,6 +1,8 @@
 import type { Preset } from '../types';
 import * as monorepos from './monorepo';
 
+const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
+
 const staticGroups = {
   all: {
     description: 'Group all updates together',
@@ -37,7 +39,7 @@ const staticGroups = {
         matchDatasources: ['docker'],
         matchPackageNames: ['node'],
         matchPackagePatterns: ['/node$'],
-        excludePackageNames: ['calico/node'],
+        excludePackageNames: ['calico/node', 'kindest/node'],
         commitMessageTopic: 'Node.js',
       },
     ],
@@ -48,6 +50,7 @@ const staticGroups = {
     extends: [
       'group:nodeJs',
       'group:allApollographql',
+      'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
       'group:glimmer',
@@ -59,6 +62,8 @@ const staticGroups = {
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
+      'group:jestPlusTypes',
+      'group:kubernetes',
       'group:polymer',
       'group:resilience4j',
       'group:rubyOmniauth',
@@ -99,6 +104,15 @@ const staticGroups = {
       },
     ],
   },
+  codemirror: {
+    description: 'Group CodeMirror packages together',
+    packageRules: [
+      {
+        groupName: 'CodeMirror',
+        matchPackagePrefixes: ['@codemirror/'],
+      },
+    ],
+  },
   definitelyTyped: {
     description: 'Group all @types packages together',
     packageRules: [
@@ -128,7 +142,7 @@ const staticGroups = {
     ],
   },
   fusionjs: {
-    description: 'Fusion.js packages',
+    description: 'Group Fusion.js packages together',
     matchPackageNames: [
       'fusion-cli',
       'fusion-core',
@@ -148,7 +162,7 @@ const staticGroups = {
     ],
   },
   illuminate: {
-    description: 'Group PHP illuminate packages together',
+    description: 'Group PHP Illuminate packages together',
     packageRules: [
       {
         matchPackagePrefixes: ['illuminate/'],
@@ -158,7 +172,7 @@ const staticGroups = {
     ],
   },
   symfony: {
-    description: 'Group PHP symfony packages together',
+    description: 'Group PHP Symfony packages together',
     packageRules: [
       {
         matchPackagePrefixes: ['symfony/'],
@@ -254,6 +268,7 @@ const staticGroups = {
       {
         groupName: 'spring boot',
         matchPackagePrefixes: ['org.springframework.boot:'],
+        matchPackageNames: ['org.springframework.boot'],
       },
     ],
   },
@@ -438,7 +453,7 @@ const staticGroups = {
     ],
   },
   postcss: {
-    description: 'Group postcss packages together',
+    description: 'Group PostCSS packages together',
     packageRules: [
       {
         extends: 'packages:postcss',
@@ -447,7 +462,7 @@ const staticGroups = {
     ],
   },
   jekyllEcosystem: {
-    description: 'Group jekyll and related ruby packages together',
+    description: 'Group Jekyll and related Ruby packages together',
     packageRules: [
       {
         matchSourceUrlPrefixes: [
@@ -459,7 +474,7 @@ const staticGroups = {
     ],
   },
   rubyOmniauth: {
-    description: 'Group omniauth packages together',
+    description: 'Group OmniAuth packages together',
     packageRules: [
       {
         matchDatasources: ['rubygems'],
@@ -476,6 +491,45 @@ const staticGroups = {
         groupName: 'go-openapi packages',
         groupSlug: 'go-openapi',
         matchPackagePrefixes: ['github.com/go-openapi/'],
+      },
+    ],
+  },
+  kubernetes: {
+    description: 'Group kubernetes packages together',
+    packageRules: [
+      {
+        matchDatasources: ['go'],
+        groupName: 'kubernetes packages',
+        groupSlug: 'kubernetes-go',
+        matchPackagePrefixes: [
+          'k8s.io/api',
+          'k8s.io/apiextensions-apiserver',
+          'k8s.io/apimachinery',
+          'k8s.io/apiserver',
+          'k8s.io/cli-runtime',
+          'k8s.io/client-go',
+          'k8s.io/cloud-provider',
+          'k8s.io/cluster-bootstrap',
+          'k8s.io/code-generator',
+          'k8s.io/component-base',
+          'k8s.io/controller-manager',
+          'k8s.io/cri-api',
+          // 'k8s.io/csi-api', has not go.mod set up and does not follow the versioning of other repos
+          'k8s.io/csi-translation-lib',
+          'k8s.io/kube-aggregator',
+          'k8s.io/kube-controller-manager',
+          'k8s.io/kube-proxy',
+          'k8s.io/kube-scheduler',
+          'k8s.io/kubectl',
+          'k8s.io/kubelet',
+          'k8s.io/legacy-cloud-providers',
+          'k8s.io/metrics',
+          'k8s.io/mount-utils',
+          'k8s.io/pod-security-admission',
+          'k8s.io/sample-apiserver',
+          'k8s.io/sample-cli-plugin',
+          'k8s.io/sample-controller',
+        ],
       },
     ],
   },
@@ -574,11 +628,20 @@ const staticGroups = {
     ],
   },
   jestPlusTSJest: {
-    description: 'Add ts-jest major update to jest monorepo',
+    description: 'Add ts-jest major update to Jest monorepo',
     packageRules: [
       {
         matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
         matchUpdateTypes: ['major'],
+        groupName: 'jest monorepo',
+      },
+    ],
+  },
+  jestPlusTypes: {
+    description: 'Add @types/jest update to Jest monorepo',
+    packageRules: [
+      {
+        matchPackageNames: ['@types/jest'],
         groupName: 'jest monorepo',
       },
     ],
@@ -596,6 +659,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
       {
         description: `Group packages from ${monorepo} monorepo together`,
         extends: `monorepo:${monorepo}`,
+        matchUpdateTypes: nonPinUpdateTypes,
         groupName: `${monorepo} monorepo`,
       },
     ],

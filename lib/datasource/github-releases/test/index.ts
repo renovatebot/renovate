@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { GithubRelease } from '../types';
+import type { GithubRelease } from '../types';
 
 export class GitHubReleaseMocker {
   constructor(
@@ -20,7 +20,7 @@ export class GitHubReleaseMocker {
       published_at: '2020-03-09T11:00:00Z',
       prerelease: false,
       assets: [],
-    };
+    } as GithubRelease;
     for (const assetFn of Object.keys(assets)) {
       const assetPath = `/repos/${this.lookupName}/releases/download/${version}/${assetFn}`;
       const assetData = assets[assetFn];

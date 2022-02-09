@@ -1,8 +1,14 @@
 export type GithubRelease = {
+  id: number;
   tag_name: string;
   published_at: string;
   prerelease: boolean;
+  draft?: boolean;
   assets: GithubReleaseAsset[];
+
+  html_url: string;
+  name: string;
+  body: string;
 };
 
 export interface GithubReleaseAsset {

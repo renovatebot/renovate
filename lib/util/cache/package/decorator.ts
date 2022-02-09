@@ -34,6 +34,7 @@ function decorate<T>(fn: Handler<T>): Decorator<T> {
   const result: Decorator<T> = (
     target,
     key,
+    /* TODO: Can descriptor be undefined ? */
     descriptor = Object.getOwnPropertyDescriptor(target, key) ?? {
       enumerable: true,
       configurable: true,
@@ -57,6 +58,7 @@ function decorate<T>(fn: Handler<T>): Decorator<T> {
 }
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
+type BooleanFunction<T extends any[] = any[]> = (...args: T) => boolean;
 
 /**
  * The cache decorator parameters.
@@ -75,6 +77,12 @@ interface CacheParameters {
   key: string | HashFunction;
 
   /**
+   * A function that returns true if a result is cacheable
+   * Used to prevent caching of private, sensitive, results
+   */
+  cacheable?: BooleanFunction;
+
+  /**
    * The TTL (or expiry) of the key in minutes
    */
   ttlMinutes?: number;
@@ -86,21 +94,31 @@ interface CacheParameters {
 export function cache<T>({
   namespace,
   key,
+  cacheable = () => true,
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback }) => {
-    let finalNamespace: string;
+    if (!cacheable.apply(instance, args)) {
+      return callback();
+    }
+
+    let finalNamespace: string | undefined;
     if (is.string(namespace)) {
       finalNamespace = namespace;
     } else if (is.function_(namespace)) {
       finalNamespace = namespace.apply(instance, args);
     }
 
-    let finalKey: string;
+    let finalKey: string | undefined;
     if (is.string(key)) {
       finalKey = key;
     } else if (is.function_(key)) {
       finalKey = key.apply(instance, args);
+    }
+
+    // istanbul ignore if
+    if (!finalNamespace || !finalKey) {
+      return callback();
     }
 
     const cachedResult = await packageCache.get<unknown>(
@@ -114,7 +132,10 @@ export function cache<T>({
 
     const result = await callback();
 
-    await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+    // only cache if we got a valid result
+    if (result !== undefined) {
+      await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+    }
     return result;
   });
 }

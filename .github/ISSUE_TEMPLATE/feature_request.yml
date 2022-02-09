@@ -24,6 +24,7 @@ body:
       label: Is this a feature you are interested in implementing yourself?
       options:
         - 'Yes'
+        - 'Maybe'
         - 'No'
     validations:
       required: true

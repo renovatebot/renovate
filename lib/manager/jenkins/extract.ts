@@ -1,17 +1,18 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceJenkins from '../../datasource/jenkins-plugins';
+import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
+import { newlineRegex, regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
 
-const YamlExtension = /\.ya?ml$/;
+const YamlExtension = regEx(/\.ya?ml$/);
 
 function getDependency(plugin: JenkinsPlugin): PackageDependency {
   const dep: PackageDependency = {
-    datasource: datasourceJenkins.id,
+    datasource: JenkinsPluginsDatasource.id,
     versioning: dockerVersioning.id,
     depName: plugin.artifactId,
   };
@@ -19,14 +20,14 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
   if (plugin.source?.version) {
     dep.currentValue = plugin.source.version.toString();
     if (typeof plugin.source.version !== 'string') {
-      dep.skipReason = SkipReason.InvalidVersion;
+      dep.skipReason = 'invalid-version';
       logger.warn(
         { dep },
         'Jenkins plugin dependency version is not a string and will be ignored'
       );
     }
   } else {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
   }
 
   if (
@@ -34,15 +35,15 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
     plugin.source?.version === 'experimental' ||
     plugin.groupId
   ) {
-    dep.skipReason = SkipReason.UnsupportedVersion;
+    dep.skipReason = 'unsupported-version';
   }
 
   if (plugin.source?.url) {
-    dep.skipReason = SkipReason.InternalPackage;
+    dep.skipReason = 'internal-package';
   }
 
   if (!dep.skipReason && plugin.renovate?.ignore) {
-    dep.skipReason = SkipReason.Ignored;
+    dep.skipReason = 'ignored';
   }
 
   logger.debug({ dep }, 'Jenkins plugin dependency');
@@ -54,7 +55,7 @@ function extractYaml(content: string): PackageDependency[] {
 
   try {
     const doc = load(content, { json: true }) as JenkinsPlugins;
-    if (doc?.plugins) {
+    if (is.nonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
           const dep = getDependency(plugin);
@@ -70,10 +71,11 @@ function extractYaml(content: string): PackageDependency[] {
 
 function extractText(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const regex =
-    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/;
+  const regex = regEx(
+    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/
+  );
 
-  for (const line of content.split('\n')) {
+  for (const line of content.split(newlineRegex)) {
     const match = regex.exec(line);
     if (match) {
       const { depName, currentValue, comment } = match.groups;

@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   RangeBound,
@@ -5,9 +6,9 @@ import {
   compare,
   isValid,
   isVersion,
+  parse,
   parseMavenBasedRange,
   parsePrefixRange,
-  tokenize,
 } from './compare';
 
 export const id = 'gradle';
@@ -21,19 +22,19 @@ export const supportedRangeStrategies = ['pin'];
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 const getMajor = (version: string): number | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version.replace(/^v/i, ''));
-    const majorToken = tokens[0];
+  const tokens = parse(version?.replace(regEx(/^v/i), ''));
+  if (tokens) {
+    const majorToken = tokens?.[0];
     if (majorToken && majorToken.type === TokenType.Number) {
-      return +majorToken.val;
+      return majorToken.val as number;
     }
   }
   return null;
 };
 
 const getMinor = (version: string): number | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version.replace(/^v/i, ''));
+  const tokens = parse(version?.replace(regEx(/^v/i), ''));
+  if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     if (
@@ -42,7 +43,7 @@ const getMinor = (version: string): number | null => {
       minorToken &&
       minorToken.type === TokenType.Number
     ) {
-      return +minorToken.val;
+      return minorToken.val as number;
     }
     return 0;
   }
@@ -50,8 +51,8 @@ const getMinor = (version: string): number | null => {
 };
 
 const getPatch = (version: string): number | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version.replace(/^v/i, ''));
+  const tokens = parse(version?.replace(regEx(/^v/i), ''));
+  if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     const patchToken = tokens[2];
@@ -63,7 +64,7 @@ const getPatch = (version: string): number | null => {
       patchToken &&
       patchToken.type === TokenType.Number
     ) {
-      return +patchToken.val;
+      return patchToken.val as number;
     }
     return 0;
   }
@@ -82,12 +83,13 @@ const unstable = new Set([
   'milestone',
   'rc',
   'cr',
+  'preview',
   'snapshot',
 ]);
 
-const isStable = (version: string): boolean | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version);
+const isStable = (version: string): boolean => {
+  const tokens = parse(version);
+  if (tokens) {
     for (const token of tokens) {
       if (token.type === TokenType.String) {
         const val = token.val.toString().toLowerCase();
@@ -98,11 +100,12 @@ const isStable = (version: string): boolean | null => {
     }
     return true;
   }
-  return null;
+  return false;
 };
 
 const matches = (a: string, b: string): boolean => {
-  if (!a || !isVersion(a) || !b) {
+  const versionTokens = parse(a);
+  if (!a || !versionTokens || !b) {
     return false;
   }
   if (isVersion(b)) {
@@ -115,7 +118,6 @@ const matches = (a: string, b: string): boolean => {
     if (tokens.length === 0) {
       return true;
     }
-    const versionTokens = tokenize(a);
     const x = versionTokens
       .slice(0, tokens.length)
       .map(({ val }) => val)
@@ -126,7 +128,7 @@ const matches = (a: string, b: string): boolean => {
 
   const mavenBasedRange = parseMavenBasedRange(b);
   if (!mavenBasedRange) {
-    return null;
+    return false;
   }
 
   const { leftBound, leftVal, rightBound, rightVal } = mavenBasedRange;
@@ -150,8 +152,11 @@ const matches = (a: string, b: string): boolean => {
   return leftResult && rightResult;
 };
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  versions.reduce((result, version) => {
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -162,9 +167,13 @@ const getSatisfyingVersion = (versions: string[], range: string): string =>
     }
     return result;
   }, null);
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  versions.reduce((result, version) => {
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -175,6 +184,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
     }
     return result;
   }, null);
+}
 
 function getNewValue({
   currentValue,

@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from './util';
@@ -9,7 +9,7 @@ import * as sbtPlugin from '.';
 const mavenIndexHtml = loadFixture(`maven-index.html`);
 const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
 
-describe(getName(), () => {
+describe('datasource/sbt-plugin/index', () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });

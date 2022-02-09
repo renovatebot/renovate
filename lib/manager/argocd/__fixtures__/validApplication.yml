@@ -7,6 +7,15 @@ spec:
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 2.4.1
 ---
+# application with helm values
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: {{ .Values.chart }}
+    repoURL: {{ .Values.repoUrl}}
+    targetRevision: {{ .Values.targetRevision }}
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 spec:

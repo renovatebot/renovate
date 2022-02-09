@@ -67,6 +67,15 @@ Array [
         "depType": "image-name",
         "replaceString": "image-name-test:1.15",
       },
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.15",
+        "datasource": "docker",
+        "depName": "image-name-test",
+        "depType": "image-name",
+        "replaceString": "image-name-test:1.15",
+      },
     ],
     "packageFile": "lib/manager/gitlabci/__fixtures__/gitlab-ci.yaml",
   },
@@ -171,6 +180,43 @@ Array [
       },
     ],
     "packageFile": "lib/manager/gitlabci/__fixtures__/include.yml",
+  },
+]
+`;
+
+exports[`manager/gitlabci/extract extractAllPackageFiles() extracts multiple named services 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "19.70.8-slim",
+        "datasource": "docker",
+        "depName": "renovate/renovate",
+        "depType": "image-name",
+        "replaceString": "renovate/renovate:19.70.8-slim",
+      },
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image1",
+        "depType": "service-image",
+        "replaceString": "other/image1:1.0.0",
+      },
+      Object {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image2",
+        "depType": "service-image",
+        "replaceString": "other/image2:1.0.0",
+      },
+    ],
+    "packageFile": "lib/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml",
   },
 ]
 `;

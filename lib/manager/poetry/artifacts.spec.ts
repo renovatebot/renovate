@@ -3,8 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { loadFixture, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
@@ -12,6 +12,7 @@ import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
+const pyproject1toml = loadFixture('pyproject.1.toml');
 const pyproject10toml = loadFixture('pyproject.10.toml');
 
 jest.mock('fs-extra');
@@ -26,17 +27,17 @@ const env = mocked(_env);
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
 };
 
 const config: UpdateArtifactsConfig = {};
 
-describe('.updateArtifacts()', () => {
+describe('manager/poetry/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {
@@ -130,10 +131,20 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    // poetry.lock
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.2.0' },
+      ],
+    });
+    // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
     });
@@ -142,12 +153,11 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
         updatedDeps,
-        newPackageFileContent: '{}',
+        newPackageFileContent: pyproject1toml,
         config: {
           ...config,
           constraints: {
             python: '~2.7 || ^3.4',
-            poetry: 'poetry>=1.1.2 setuptools poetry-dynamic-versioning>1',
           },
         },
       })
@@ -155,12 +165,22 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker (constraints)', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    // poetry.lock
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.2.0' },
+      ],
+    });
+    // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
     });
@@ -169,10 +189,10 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
         updatedDeps,
-        newPackageFileContent: '{}',
+        newPackageFileContent: pyproject1toml,
         config: {
           ...config,
-          constraints: { poetry: 'poetry>=1.0' },
+          constraints: {},
         },
       })
     ).not.toBeNull();
@@ -184,7 +204,6 @@ describe('.updateArtifacts()', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -192,7 +211,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ artifactError: { lockFile: 'poetry.lock' } }]);
   });
   it('returns updated poetry.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);

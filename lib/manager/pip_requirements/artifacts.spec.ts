@@ -1,5 +1,5 @@
 import _fs from 'fs-extra';
-import { setAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -15,11 +15,11 @@ const newPackageFileContent = `atomicwrites==1.4.0 \
 --hash=sha256:03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4 \
 --hash=sha256:75a9445bac02d8d058d5e1fe689654ba5a6556a1dfd8ce6ec55a0ed79866cfa6`;
 
-describe('.updateArtifacts()', () => {
+describe('manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setAdminConfig({ localDir: '' });
+    GlobalConfig.set({ localDir: '' });
   });
   it('returns null if no updatedDeps were provided', async () => {
     expect(

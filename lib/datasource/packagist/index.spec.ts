@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { loadJsonFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
@@ -16,7 +16,7 @@ const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
 
 const baseUrl = 'https://packagist.org';
 
-describe(getName(), () => {
+describe('datasource/packagist/index', () => {
   describe('getReleases', () => {
     let config: any;
     beforeEach(() => {
@@ -304,6 +304,34 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('supports providers without a hash', async () => {
+      const packagesJson = {
+        packages: [],
+        'providers-url': '/p/%package%.json',
+        providers: {
+          'wpackagist-plugin/1337-rss-feed-made-for-sharing': {
+            sha256: null,
+          },
+          'wpackagist-plugin/1beyt': {
+            sha256: null,
+          },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(200, packagesJson)
+        .get('/p/wpackagist-plugin/1beyt.json')
+        .reply(200, beytJson);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'wpackagist-plugin/1beyt',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
     });
     it('handles providers miss', async () => {
       const packagesJson = {

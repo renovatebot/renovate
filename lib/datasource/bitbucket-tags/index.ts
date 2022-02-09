@@ -1,13 +1,13 @@
-import * as utils from '../../platform/bitbucket/utils';
+import type * as utils from '../../platform/bitbucket/utils';
 import { cache } from '../../util/cache/package/decorator';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { BitbucketCommit, BitbucketTag } from './types';
+import type { BitbucketCommit, BitbucketTag } from './types';
 
 export class BitBucketTagsDatasource extends Datasource {
-  bitbucketHttp = new BitbucketHttp();
+  bitbucketHttp = new BitbucketHttp(BitBucketTagsDatasource.id);
 
   static readonly id = 'bitbucket-tags';
 
@@ -34,6 +34,12 @@ export class BitBucketTagsDatasource extends Datasource {
     )}:${repo}:${type}`;
   }
 
+  static getSourceUrl(lookupName: string, registryUrl?: string): string {
+    const url = BitBucketTagsDatasource.getRegistryURL(registryUrl);
+    const normalizedUrl = ensureTrailingSlash(url);
+    return `${normalizedUrl}${lookupName}`;
+  }
+
   // getReleases fetches list of tags for the repository
   @cache({
     namespace: BitBucketTagsDatasource.cacheNamespace,
@@ -51,9 +57,7 @@ export class BitBucketTagsDatasource extends Datasource {
     ).body;
 
     const dependency: ReleaseResult = {
-      sourceUrl: `${ensureTrailingSlash(
-        BitBucketTagsDatasource.getRegistryURL(registryUrl)
-      )}${repo}`,
+      sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
       registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
       releases: null,
     };
@@ -106,7 +110,7 @@ export class BitBucketTagsDatasource extends Datasource {
     key: ({ registryUrl, lookupName }: DigestConfig) =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'digest'),
   })
-  async getDigest(
+  override async getDigest(
     { lookupName: repo, registryUrl }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {

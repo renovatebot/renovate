@@ -1,16 +1,3 @@
-import type { Release, ReleaseResult } from '../types';
-
-export type JenkinsCacheTypes = ReleaseResult | Release[];
-
-export interface JenkinsCache<T> {
-  name: string;
-  dataUrl: string;
-  lastSync: Date;
-  cacheTimeMin: number;
-  cache: Record<string, T>;
-  updatePromise?: Promise<void> | undefined;
-}
-
 export interface JenkinsPluginInfo {
   name: string;
   scm?: string;

@@ -28,7 +28,7 @@ Object {
       "managerData": Object {
         "lineNumber": 20,
       },
-      "skipReason": "non-hex depTypes",
+      "skipReason": "non-hex-dep-types",
     },
     Object {
       "currentValue": "~> 1.0",
@@ -67,11 +67,5 @@ Object {
       },
     },
   ],
-}
-`;
-
-exports[`manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
-Object {
-  "deps": Array [],
 }
 `;

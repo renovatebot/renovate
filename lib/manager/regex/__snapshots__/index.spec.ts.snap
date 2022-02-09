@@ -41,6 +41,25 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts dependency with autoReplaceStringTemplate 1`] = `
+Object {
+  "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "my.new.registry/aRepository/andImage",
+  "deps": Array [
+    Object {
+      "currentValue": "1.18-alpine",
+      "datasource": "docker",
+      "depName": "my.new.registry/aRepository/andImage",
+      "replaceString": "image: my.old.registry/aRepository/andImage:1.18-alpine",
+    },
+  ],
+  "matchStrings": Array [
+    "image:\\\\s+(?<depName>my\\\\.old\\\\.registry\\\\/aRepository\\\\/andImage):(?<currentValue>[^\\\\s]+)",
+  ],
+}
+`;
+
 exports[`manager/regex/index extracts extractVersion 1`] = `
 Object {
   "deps": Array [
@@ -62,11 +81,13 @@ Object {
 
 exports[`manager/regex/index extracts multiple dependencies 1`] = `
 Object {
+  "depTypeTemplate": "final",
   "deps": Array [
     Object {
       "currentValue": "6.2",
       "datasource": "gradle-version",
       "depName": "gradle",
+      "depType": "final",
       "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
 ",
       "versioning": "maven",
@@ -75,6 +96,7 @@ Object {
       "currentValue": "10.19.0",
       "datasource": "github-tags",
       "depName": "nodejs/node",
+      "depType": "final",
       "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 ",
       "versioning": "node",
@@ -83,6 +105,7 @@ Object {
       "currentValue": "1.9.3",
       "datasource": "github-releases",
       "depName": "composer/composer",
+      "depType": "final",
       "replaceString": "ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer
 ",
       "versioning": "semver",
@@ -91,6 +114,7 @@ Object {
       "currentValue": "1.9.0",
       "datasource": "rubygems",
       "depName": "cocoapods",
+      "depType": "final",
       "replaceString": "ENV COCOAPODS_VERSION=1.9.0 # rubygems/cocoapods&versioning=ruby
 ",
       "versioning": "ruby",
@@ -99,6 +123,7 @@ Object {
       "currentValue": "19.03.1",
       "datasource": "github-releases",
       "depName": "docker/docker-ce",
+      "depType": "final",
       "replaceString": "ENV DOCKER_VERSION=19.03.1 # github-releases/docker/docker-ce&versioning=docker
 ",
       "versioning": "docker",
@@ -107,6 +132,7 @@ Object {
       "currentValue": "1.0.0",
       "datasource": "github-releases",
       "depName": "python-poetry/poetry",
+      "depType": "final",
       "replaceString": "ENV POETRY_VERSION=1.0.0 # github-releases/python-poetry/poetry
 ",
       "versioning": "semver",
@@ -115,6 +141,7 @@ Object {
       "currentValue": "6.10.2",
       "datasource": "npm",
       "depName": "npm",
+      "depType": "final",
       "replaceString": "ENV NPM_VERSION=6.10.2 # npm/npm
 ",
       "versioning": "semver",
@@ -123,6 +150,7 @@ Object {
       "currentValue": "1.19.1",
       "datasource": "npm",
       "depName": "yarn",
+      "depType": "final",
       "replaceString": "ENV YARN_VERSION=1.19.1 # npm/yarn
 ",
       "versioning": "semver",
@@ -229,6 +257,28 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts with combination strategy and non standard capture groups 1`] = `
+Object {
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "{{{ registry }}}/{{{ repository }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "docker.io/prom/prometheus",
+      "replaceString": "prometheus_version: \\"v2.21.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    "prometheus_registry:\\\\s*\\"(?<registry>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_repository:\\\\s*\\"(?<repository>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_tag:\\\\s*\\"(?<tag>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
 exports[`manager/regex/index extracts with combination strategy and registry url 1`] = `
 Object {
   "datasourceTemplate": "helm",
@@ -254,9 +304,80 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts with combination strategy and templates 1`] = `
+Object {
+  "datasourceTemplate": "helm",
+  "depNameTemplate": "helm_repo/{{{ depName }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "0.19.2",
+      "datasource": "helm",
+      "depName": "helm_repo/descheduler",
+      "registryUrls": Array [
+        "https://kubernetes-sigs.github.io/",
+      ],
+      "replaceString": "CHART_VERSION: 0.19.2
+",
+    },
+  ],
+  "matchStrings": Array [
+    "CHART_REPOSITORY_URL: \\"(?<registryUrl>.*)\\\\/(?<depName>[a-z]+)\\\\/\\"",
+    "CHART_VERSION: (?<currentValue>.*?)
+",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
 exports[`manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
 
 exports[`manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;
+
+exports[`manager/regex/index extracts with recursive strategy and merged groups 1`] = `
+Object {
+  "depNameTemplate": "{{{ first }}}/{{{ second }}}/{{{ depName }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "group1/group1/prom/prometheus",
+      "replaceString": "\\"name\\": \\"prom/prometheus\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"v2.19.0\\"",
+    },
+    Object {
+      "currentValue": "7.2.2",
+      "datasource": "docker",
+      "depName": "group2/group2/grafana/grafana",
+      "replaceString": "\\"name\\": \\"grafana/grafana\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"7.2.2\\"",
+    },
+    Object {
+      "currentValue": "1.6.1",
+      "datasource": "docker",
+      "depName": "backup/backup/grafana/loki",
+      "replaceString": "\\"name\\": \\"grafana/loki\\",
+      \\"type\\": \\"docker\\",
+      \\"value\\": \\"1.6.1\\"",
+    },
+    Object {
+      "currentValue": "3.9.0",
+      "datasource": "docker",
+      "depName": "setup/setup/python",
+      "replaceString": "\\"name\\": \\"python\\",
+      \\"type\\": \\"docker\\",
+      \\"value\\": \\"3.9.0\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"(?<first>[^\\"]*)\\":\\\\s*{[^}]*}",
+    "\\"(?<second>[^\\"]*)\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
 
 exports[`manager/regex/index extracts with recursive strategy and multiple layers  1`] = `
 Object {

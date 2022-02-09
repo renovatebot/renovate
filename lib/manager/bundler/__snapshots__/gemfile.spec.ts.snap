@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`extract lib/manager/bundler/gemfile.rails.lock matches the expected output 1`] = `
+exports[`manager/bundler/gemfile matches the expected output 1`] = `
 Map {
   "activerecord-jdbc-adapter" => "52.1-java",
   "activerecord-jdbcmysql-adapter" => "52.1-java",

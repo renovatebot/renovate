@@ -7,12 +7,14 @@ import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
+import { trimTrailingSlash } from '../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
 import type {
   DatasourceApi,
   DigestConfig,
+  GetDigestInputConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
@@ -62,7 +64,7 @@ async function getRegistryReleases(
     );
     // istanbul ignore if
     if (cachedResult) {
-      logger.debug({ cacheKey }, 'Returning cached datasource response');
+      logger.trace({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
     }
   }
@@ -179,33 +181,58 @@ async function mergeRegistries(
   return null;
 }
 
+function massageRegistryUrls(registryUrls: string[]): string[] {
+  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+}
+
 function resolveRegistryUrls(
   datasource: DatasourceApi,
-  extractedUrls: string[]
+  defaultRegistryUrls: string[],
+  registryUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [] } = datasource;
   if (!datasource.customRegistrySupport) {
-    if (is.nonEmptyArray(extractedUrls)) {
+    if (
+      is.nonEmptyArray(registryUrls) ||
+      is.nonEmptyArray(defaultRegistryUrls)
+    ) {
       logger.warn(
-        { datasource: datasource.id, registryUrls: extractedUrls },
+        { datasource: datasource.id, registryUrls, defaultRegistryUrls },
         'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
-    return defaultRegistryUrls;
+    return datasource.defaultRegistryUrls ?? [];
   }
-  const customUrls = extractedUrls?.filter(Boolean);
-  let registryUrls: string[];
+  const customUrls = registryUrls?.filter(Boolean);
+  let resolvedUrls: string[] = [];
   if (is.nonEmptyArray(customUrls)) {
-    registryUrls = [...customUrls];
-  } else {
-    registryUrls = [...defaultRegistryUrls];
+    resolvedUrls = [...customUrls];
+  } else if (is.nonEmptyArray(defaultRegistryUrls)) {
+    resolvedUrls = [...defaultRegistryUrls];
+  } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
+    resolvedUrls = [...datasource.defaultRegistryUrls];
   }
-  return registryUrls.filter(Boolean);
+  return massageRegistryUrls(resolvedUrls);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
   const datasource = getDatasourceFor(datasourceName);
-  return datasource.defaultVersioning || 'semver';
+  // istanbul ignore if: wrong regex manager config?
+  if (!datasource) {
+    logger.warn({ datasourceName }, 'Missing datasource!');
+  }
+  return datasource?.defaultVersioning || 'semver';
+}
+
+function applyReplacements(
+  config: GetReleasesInternalConfig
+): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
+  if (config.replacementName && config.replacementVersion) {
+    return {
+      replacementName: config.replacementName,
+      replacementVersion: config.replacementVersion,
+    };
+  }
+  return undefined;
 }
 
 async function fetchReleases(
@@ -217,7 +244,11 @@ async function fetchReleases(
     return null;
   }
   const datasource = getDatasourceFor(datasourceName);
-  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
+  const registryUrls = resolveRegistryUrls(
+    datasource,
+    config.defaultRegistryUrls,
+    config.registryUrls
+  );
   let dep: ReleaseResult = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
   try {
@@ -245,6 +276,7 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
+  dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }
 
@@ -349,28 +381,35 @@ export async function getPkgReleases(
   }
   // Strip constraints from releases result
   res.releases.forEach((release) => {
-    delete release.constraints; // eslint-disable-line no-param-reassign
+    delete release.constraints;
   });
   return res;
 }
 
-export function supportsDigests(config: DigestConfig): boolean {
-  return 'getDigest' in getDatasourceFor(config.datasource);
+export function supportsDigests(datasource: string | undefined): boolean {
+  return !!datasource && 'getDigest' in getDatasourceFor(datasource);
+}
+
+function getDigestConfig(
+  datasource: DatasourceApi,
+  config: GetDigestInputConfig
+): DigestConfig {
+  const { currentValue, currentDigest } = config;
+  const lookupName = config.lookupName ?? config.depName;
+  const [registryUrl] = resolveRegistryUrls(
+    datasource,
+    config.defaultRegistryUrls,
+    config.registryUrls
+  );
+  return { lookupName, registryUrl, currentValue, currentDigest };
 }
 
 export function getDigest(
-  config: DigestConfig,
+  config: GetDigestInputConfig,
   value?: string
 ): Promise<string | null> {
   const datasource = getDatasourceFor(config.datasource);
-  const lookupName = config.lookupName || config.depName;
-  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  const digestConfig: DigestConfig = {
-    registryUrl: registryUrls[0],
-    currentValue: config.currentValue,
-    currentDigest: config.currentDigest,
-    lookupName,
-  };
+  const digestConfig = getDigestConfig(datasource, config);
   return datasource.getDigest(digestConfig, value);
 }
 

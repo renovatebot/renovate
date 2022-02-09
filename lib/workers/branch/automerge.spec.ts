@@ -1,19 +1,19 @@
-import { defaultConfig, getName, git, platform } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { defaultConfig, git, platform } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { BranchStatus } from '../../types';
 import { tryBranchAutomerge } from './automerge';
 
 jest.mock('../../util/git');
 
-describe(getName(), () => {
+describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
       };
-      setAdminConfig();
+      GlobalConfig.reset();
     });
     it('returns false if not configured for automerge', async () => {
       config.automerge = false;
@@ -63,7 +63,7 @@ describe(getName(), () => {
     it('returns true if automerge succeeds (dry-run)', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      setAdminConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });

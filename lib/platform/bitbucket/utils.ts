@@ -1,7 +1,11 @@
 import url from 'url';
 import type { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
-import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
+import type {
+  HttpOptions,
+  HttpPostOptions,
+  HttpResponse,
+} from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
@@ -70,7 +74,6 @@ export function mergeBodyTransformer(
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,
-    message: 'auto merged',
   };
 
   // The `auto` strategy will use the strategy configured inside Bitbucket.
@@ -149,27 +152,6 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-interface Files {
-  chunks: {
-    changes: {
-      content: string;
-    }[];
-  }[];
-}
-
-export function isConflicted(files: Files[]): boolean {
-  for (const file of files) {
-    for (const chunk of file.chunks) {
-      for (const change of chunk.changes) {
-        if (change.content === '+=======') {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-
 export interface PrResponse {
   id: number;
   title: string;
@@ -190,7 +172,7 @@ export interface PrResponse {
       name: string;
     };
   };
-  reviewers: Array<any>;
+  reviewers: Array<PrReviewer>;
   created_on: string;
 }
 
@@ -207,4 +189,17 @@ export function prInfo(pr: PrResponse): Pr {
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
+}
+
+export interface UserResponse {
+  display_name: string;
+  account_id: string;
+  nickname: string;
+  account_status: string;
+}
+
+export interface PrReviewer {
+  display_name: string;
+  account_id: string;
+  nickname: string;
 }

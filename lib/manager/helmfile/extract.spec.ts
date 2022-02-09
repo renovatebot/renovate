@@ -1,9 +1,7 @@
-import { getName, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const multidocYaml = loadFixture('multidoc.yaml');
-
-describe(getName(), () => {
+describe('manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -81,9 +79,19 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.0.0',
+            skipReason: 'unsupported-chart-type',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+        ],
+      });
     });
 
     it('skip local charts', () => {
@@ -174,14 +182,24 @@ describe(getName(), () => {
 
     it('parses multidoc yaml', () => {
       const fileName = 'helmfile.yaml';
-      const result = extractPackageFile(multidocYaml, fileName, {
-        aliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+      const result = extractPackageFile(
+        Fixtures.get('multidoc.yaml'),
+        fileName,
+        {
+          aliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        }
+      );
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          { skipReason: 'local-chart' },
+          { depName: 'rabbitmq', currentValue: '7.4.3' },
+          { depName: 'kube-prometheus-stack', currentValue: '13.7.2' },
+          { depName: 'invalid', skipReason: 'invalid-name' },
+        ],
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
     });
   });
 });

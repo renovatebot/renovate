@@ -1,4 +1,4 @@
-import * as cacache from 'cacache';
+import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -17,7 +17,7 @@ async function rm(namespace: string, key: string): Promise<void> {
 export async function get<T = never>(
   namespace: string,
   key: string
-): Promise<T> {
+): Promise<T | undefined> {
   if (!cacheFileName) {
     return undefined;
   }

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: minecraft
+  includeCRDs: false
+  valuesInline:
+    minecraftServer:
+      eula: true
+      difficulty: hard
+      rcon:
+        enabled: true
+  releaseName: moria
+  version: 3.1.3
+  repo: https://itzg.github.io/minecraft-server-charts

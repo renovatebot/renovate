@@ -1,7 +1,8 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
@@ -11,11 +12,13 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function cargoUpdate(
   manifestPath: string,
-  packageName?: string
+  isLockFileMaintenance: boolean
 ): Promise<void> {
   let cmd = `cargo update --manifest-path ${quote(manifestPath)}`;
-  if (packageName) {
-    cmd += ` --package ${quote(packageName)}`;
+  // If we're updating a specific crate, `cargo-update` requires `--workspace`
+  // for more information, see: https://github.com/renovatebot/renovate/issues/12332
+  if (!isLockFileMaintenance) {
+    cmd += ` --workspace`;
   }
 
   const execOptions: ExecOptions = {
@@ -23,28 +26,7 @@ async function cargoUpdate(
       image: 'rust',
     },
   };
-  try {
-    await exec(cmd, execOptions);
-  } catch (err) /* istanbul ignore next */ {
-    // Two different versions of one dependency can be present in the same
-    // crate, and when that happens an attempt to update it with --package ${dep}
-    // key results in cargo exiting with error code `101` and an error message:
-    // "error: There are multiple `${dep}` packages in your project".
-    //
-    // If exception `err` was caused by this, we execute `updateAll` function
-    // instead of returning an error. `updateAll` function just executes
-    // "cargo update --manifest-path ${localPackageFileName}" without the `--package` key.
-    //
-    // If exception `err` was not caused by this, we just rethrow it. It will be caught
-    // by the outer try { } catch {} and processed normally.
-    const msgStart = 'error: There are multiple';
-    if (err.code === 101 && err.stderr.startsWith(msgStart)) {
-      cmd = cmd.replace(/ --package.*/, '');
-      await exec(cmd, execOptions);
-    } else {
-      throw err; // this is caught below
-    }
-  }
+  await exec(cmd, execOptions);
 }
 
 export async function updateArtifacts({
@@ -82,15 +64,7 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    for (let i = 0; i < updatedDeps.length; i += 1) {
-      const dep = updatedDeps[i];
-      // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
-      // at ${localPackageFileName} path
-      await cargoUpdate(packageFileName, dep.lookupName ?? dep.depName);
-    }
-    if (isLockFileMaintenance) {
-      await cargoUpdate(packageFileName);
-    }
+    await cargoUpdate(packageFileName, isLockFileMaintenance);
     logger.debug('Returning updated Cargo.lock');
     const newCargoLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newCargoLockContent) {
@@ -100,7 +74,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: newCargoLockContent,
         },
       },

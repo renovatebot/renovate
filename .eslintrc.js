@@ -3,15 +3,15 @@ module.exports = {
   env: {
     node: true,
   },
+  plugins: ['@renovate', 'typescript-enum'],
   extends: [
-    'airbnb-typescript/base',
+    'eslint:recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
     'plugin:jest/recommended',
     'plugin:jest/style',
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
@@ -28,20 +28,25 @@ module.exports = {
      * checks done by typescript.
      *
      * https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/FAQ.md#eslint-plugin-import
+     * required for esm check
      */
-    'import/default': 0,
-    'import/named': 0,
-    'import/namespace': 0,
+    'import/default': 2,
+    'import/named': 2,
+    'import/namespace': 2,
     'import/no-named-as-default-member': 0,
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['test/**/*', '**/*.spec.ts'] },
+    ],
+    'import/prefer-default-export': 0, // no benefit
 
     // other rules
-    'import/prefer-default-export': 0, // no benefit
-    'no-restricted-syntax': 0,
-    'no-await-in-loop': 0,
-    'prefer-destructuring': 0,
-    'prefer-template': 0,
-    'no-underscore-dangle': 0,
+    'consistent-return': 'error',
+    eqeqeq: 'error',
+    'no-console': 'error',
     'no-negated-condition': 'error',
+    'no-param-reassign': 'error',
+    'no-template-curly-in-string': 'error',
     'sort-imports': [
       'error',
       {
@@ -51,6 +56,9 @@ module.exports = {
         memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
       },
     ],
+
+    // mdast is a types only package `@types/mdast`
+    'import/no-unresolved': ['error', { ignore: ['^mdast$'] }],
     'import/order': [
       'error',
       {
@@ -61,7 +69,8 @@ module.exports = {
     ],
 
     // disallow direct `nock` module usage as it causes memory issues.
-    'no-restricted-imports': [2, { paths: ['nock'] }],
+    // disallow `parse-link-header` to allow override ENV https://github.com/thlorenz/parse-link-header#environmental-variables
+    'no-restricted-imports': [2, { paths: ['nock', 'parse-link-header'] }],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
@@ -91,6 +100,7 @@ module.exports = {
     // TODO: fix me
     '@typescript-eslint/no-unsafe-return': 0,
     '@typescript-eslint/no-unsafe-call': 0,
+    '@typescript-eslint/no-unsafe-argument': 0, // thousands of errors :-/
 
     '@typescript-eslint/restrict-template-expressions': [
       1,
@@ -98,23 +108,44 @@ module.exports = {
     ],
     '@typescript-eslint/restrict-plus-operands': 2,
 
-    '@typescript-eslint/naming-convention': 2,
+    '@typescript-eslint/naming-convention': [
+      2,
+      {
+        selector: 'enumMember',
+        format: ['PascalCase'],
+      },
+    ],
 
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
+    '@renovate/jest-root-describe': 2,
+
+    'typescript-enum/no-const-enum': 2,
+    'typescript-enum/no-enum': 2,
   },
   settings: {
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts'],
     },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+        project: 'tsconfig.lint.json',
+      },
+    },
   },
   overrides: [
+    {
+      // files to check, so no `--ext` is required
+      files: ['**/*.{js,mjs,cjs,ts}'],
+    },
     {
       files: ['**/*.spec.ts', 'test/**'],
       env: {
         jest: true,
       },
       rules: {
+        'no-template-curly-in-string': 0,
         'prefer-destructuring': 0,
         'prefer-promise-reject-errors': 0,
         'import/no-dynamic-require': 0,
@@ -131,12 +162,38 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.mjs'],
+      files: ['**/*.{js,mjs,cjs}'],
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/explicit-module-boundary-types': 0,
         '@typescript-eslint/restrict-template-expressions': 0,
+      },
+    },
+    {
+      files: ['tools/**/*.{ts,js,mjs,cjs}'],
+      env: {
+        node: true,
+      },
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          { devDependencies: true },
+        ],
+      },
+    },
+    {
+      files: ['tools/**/*.{js,cjs}', 'bin/*.{js,cjs}'],
+      rules: {
+        // need commonjs
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+    {
+      files: ['*.mjs'],
+      rules: {
+        // esm always requires extensions
+        'import/extensions': 0,
       },
     },
   ],

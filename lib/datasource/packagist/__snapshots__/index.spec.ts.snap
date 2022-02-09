@@ -700,3 +700,33 @@ Array [
   },
 ]
 `;
+
+exports[`datasource/packagist/index getReleases supports providers without a hash 1`] = `
+Object {
+  "homepage": "https://wordpress.org/plugins/1beyt/",
+  "registryUrl": "https://composer.renovatebot.com",
+  "releases": Array [
+    Object {
+      "gitRef": "1.0",
+      "version": "1.0",
+    },
+    Object {
+      "gitRef": "1.1",
+      "version": "1.1",
+    },
+    Object {
+      "gitRef": "1.4",
+      "version": "1.4",
+    },
+    Object {
+      "gitRef": "1.5",
+      "version": "1.5",
+    },
+    Object {
+      "gitRef": "1.5.1",
+      "version": "1.5.1",
+    },
+  ],
+  "sourceUrl": "https://plugins.svn.wordpress.org/1beyt/",
+}
+`;

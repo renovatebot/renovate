@@ -1,6 +1,7 @@
-import { coerce } from 'semver';
+import semver from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -13,7 +14,13 @@ export const urls = [
   'https://semver.mwl.be',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = [
+  'bump',
+  'extend',
+  'pin',
+  'replace',
+  'update-lockfile',
+];
 
 function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');
@@ -43,7 +50,7 @@ function convertStabilityModifier(input: string): string {
 
   // 1.0@beta2 to 1.0-beta.2
   const stability = versionParts[1].replace(
-    /(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi,
+    regEx(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi),
     '$1.$2'
   );
 
@@ -54,7 +61,7 @@ function convertStabilityModifier(input: string): string {
 
 function normalizeVersion(input: string): string {
   let output = input;
-  output = output.replace(/(^|>|>=|\^|~)v/i, '$1');
+  output = output.replace(regEx(/(^|>|>=|\^|~)v/i), '$1');
   return convertStabilityModifier(output);
 }
 
@@ -70,58 +77,92 @@ function composer2npm(input: string): string {
   let output = versionId;
 
   // ~4 to ^4 and ~4.1 to ^4.1
-  output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
+  output = output.replace(
+    regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
+    '^$1'
+  );
   // ~0.4 to >=0.4 <1
-  output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
+  output = output.replace(
+    regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
+    '>=$1 <1'
+  );
 
   return output + stability;
 }
 
-const equals = (a: string, b: string): boolean =>
-  npm.equals(composer2npm(a), composer2npm(b));
+function equals(a: string, b: string): boolean {
+  return npm.equals(composer2npm(a), composer2npm(b));
+}
 
-const getMajor = (version: string): number =>
-  npm.getMajor(coerce(composer2npm(version)));
+function getMajor(version: string): number | null {
+  const semverVersion = semver.coerce(composer2npm(version));
+  return semverVersion ? npm.getMajor(semverVersion) : null;
+}
 
-const getMinor = (version: string): number =>
-  npm.getMinor(coerce(composer2npm(version)));
+function getMinor(version: string): number | null {
+  const semverVersion = semver.coerce(composer2npm(version));
+  return semverVersion ? npm.getMinor(semverVersion) : null;
+}
 
-const getPatch = (version: string): number =>
-  npm.getPatch(coerce(composer2npm(version)));
+function getPatch(version: string): number | null {
+  const semverVersion = semver.coerce(composer2npm(version));
+  return semverVersion ? npm.getPatch(semverVersion) : null;
+}
 
-const isGreaterThan = (a: string, b: string): boolean =>
-  npm.isGreaterThan(composer2npm(a), composer2npm(b));
+function isGreaterThan(a: string, b: string): boolean {
+  return npm.isGreaterThan(composer2npm(a), composer2npm(b));
+}
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(composer2npm(version), composer2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return !!npm.isLessThanRange?.(composer2npm(version), composer2npm(range));
+}
 
-const isSingleVersion = (input: string): string | boolean =>
-  input && npm.isSingleVersion(composer2npm(input));
+function isSingleVersion(input: string): boolean {
+  return !!input && npm.isSingleVersion(composer2npm(input));
+}
 
-const isStable = (version: string): boolean =>
-  version && npm.isStable(composer2npm(version));
+function isStable(version: string): boolean {
+  return !!(version && npm.isStable(composer2npm(version)));
+}
 
-export const isValid = (input: string): string | boolean =>
-  input && npm.isValid(composer2npm(input));
+export function isValid(input: string): boolean {
+  return !!input && npm.isValid(composer2npm(input));
+}
 
-export const isVersion = (input: string): string | boolean =>
-  input && npm.isVersion(composer2npm(input));
+export function isVersion(input: string): boolean {
+  return !!input && npm.isVersion(composer2npm(input));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(composer2npm(version), composer2npm(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(composer2npm(version), composer2npm(range));
+}
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.getSatisfyingVersion(
+    versions.map(composer2npm),
+    composer2npm(range)
+  );
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.minSatisfyingVersion(
+    versions.map(composer2npm),
+    composer2npm(range)
+  );
+}
 
 function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   if (rangeStrategy === 'pin') {
     return newVersion;
   }
@@ -136,12 +177,13 @@ function getNewValue({
       newVersion,
     });
   }
+  const currentMajor = currentVersion ? getMajor(currentVersion) : null;
   const toMajor = getMajor(newVersion);
   const toMinor = getMinor(newVersion);
-  let newValue: string;
+  let newValue: string | null = null;
   if (isVersion(currentValue)) {
     newValue = newVersion;
-  } else if (/^[~^](0\.[1-9][0-9]*)$/.test(currentValue)) {
+  } else if (regEx(/^[~^](0\.[1-9][0-9]*)$/).test(currentValue)) {
     const operator = currentValue.substr(0, 1);
     // handle ~0.4 case first
     if (toMajor === 0) {
@@ -149,19 +191,23 @@ function getNewValue({
     } else {
       newValue = `${operator}${toMajor}.0`;
     }
-  } else if (/^[~^]([0-9]*)$/.test(currentValue)) {
+  } else if (regEx(/^[~^]([0-9]*)$/).test(currentValue)) {
     // handle ~4 case
     const operator = currentValue.substr(0, 1);
     newValue = `${operator}${toMajor}`;
-  } else if (/^[~^]([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
+  } else if (
+    toMajor &&
+    regEx(/^[~^]([0-9]*(?:\.[0-9]*)?)$/).test(currentValue)
+  ) {
     const operator = currentValue.substr(0, 1);
     // handle ~4.1 case
-    if (currentVersion && toMajor > getMajor(currentVersion)) {
+    if ((currentMajor && toMajor > currentMajor) || !toMinor) {
       newValue = `${operator}${toMajor}.0`;
     } else {
       newValue = `${operator}${toMajor}.${toMinor}`;
     }
   } else if (
+    currentVersion &&
     npm.isVersion(padZeroes(normalizeVersion(newVersion))) &&
     npm.isValid(normalizeVersion(currentValue)) &&
     composer2npm(currentValue) === normalizeVersion(currentValue)
@@ -179,18 +225,17 @@ function getNewValue({
   } else {
     const hasOr = currentValue.includes(' || ');
     if (hasOr || rangeStrategy === 'widen') {
-      const lastValue = hasOr
-        ? currentValue.split('||').pop().trim()
-        : currentValue;
+      const splitValues = currentValue.split('||');
+      const lastValue = splitValues[splitValues.length - 1];
       const replacementValue = getNewValue({
-        currentValue: lastValue,
+        currentValue: lastValue.trim(),
         rangeStrategy: 'replace',
         currentVersion,
         newVersion,
       });
       if (rangeStrategy === 'replace') {
         newValue = replacementValue;
-      } else {
+      } else if (replacementValue) {
         const parsedRange = parseRange(replacementValue);
         const element = parsedRange[parsedRange.length - 1];
         if (element.operator?.startsWith('<')) {
@@ -212,7 +257,7 @@ function getNewValue({
     newValue = newVersion;
   }
   if (currentValue.split('.')[0].includes('v')) {
-    newValue = newValue.replace(/([0-9])/, 'v$1');
+    newValue = newValue.replace(regEx(/([0-9])/), 'v$1');
   }
 
   // Preserve original min-stability specifier
@@ -227,12 +272,16 @@ function sortVersions(a: string, b: string): number {
   return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 
+function isCompatible(version: string): boolean {
+  return isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,

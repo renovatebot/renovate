@@ -1,4 +1,4 @@
-import { fromStream } from 'hasha';
+import hasha from 'hasha';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
@@ -12,8 +12,8 @@ function updateWithNewVersion(
   currentValue: string,
   newValue: string
 ): string {
-  const replaceFrom = currentValue.replace(/^v/, '');
-  const replaceTo = newValue.replace(/^v/, '');
+  const replaceFrom = currentValue.replace(regEx(/^v/), '');
+  const replaceTo = newValue.replace(regEx(/^v/), '');
   let newContent = content;
   do {
     newContent = newContent.replace(replaceFrom, replaceTo);
@@ -22,7 +22,7 @@ function updateWithNewVersion(
 }
 
 function extractUrl(flattened: string): string[] | null {
-  const urlMatch = /url="(.*?)"/.exec(flattened);
+  const urlMatch = regEx(/url="(.*?)"/).exec(flattened);
   if (!urlMatch) {
     logger.debug('Cannot locate urls in new definition');
     return null;
@@ -31,16 +31,16 @@ function extractUrl(flattened: string): string[] | null {
 }
 
 function extractUrls(content: string): string[] | null {
-  const flattened = content.replace(/\n/g, '').replace(/\s/g, '');
-  const urlsMatch = /urls?=\[.*?\]/.exec(flattened);
+  const flattened = content.replace(regEx(/\n/g), '').replace(regEx(/\s/g), '');
+  const urlsMatch = regEx(/urls?=\[.*?\]/).exec(flattened);
   if (!urlsMatch) {
     return extractUrl(flattened);
   }
   const urls = urlsMatch[0]
-    .replace(/urls?=\[/, '')
-    .replace(/,?\]$/, '')
+    .replace(regEx(/urls?=\[/), '')
+    .replace(regEx(/,?\]$/), '')
     .split(',')
-    .map((url) => url.replace(/"/g, ''));
+    .map((url) => url.replace(regEx(/"/g), ''));
   return urls;
 }
 
@@ -55,7 +55,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     return cachedResult;
   }
   try {
-    const hash = await fromStream(http.stream(url), {
+    const hash = await hasha.fromStream(http.stream(url), {
       algorithm: 'sha256',
     });
     const cacheMinutes = 3 * 24 * 60; // 3 days
@@ -83,7 +83,7 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
 }
 
 function setNewHash(content: string, hash: string): string {
-  return content.replace(/(sha256\s*=\s*)"[^"]+"/, `$1"${hash}"`);
+  return content.replace(regEx(/(sha256\s*=\s*)"[^"]+"/), `$1"${hash}"`);
 }
 
 export async function updateDependency({
@@ -97,19 +97,19 @@ export async function updateDependency({
     let newDef: string;
     if (upgrade.depType === 'container_pull') {
       newDef = upgrade.managerData.def
-        .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
-        .replace(/(digest\s*=\s*)"[^"]+"/, `$1"${upgrade.newDigest}"`);
+        .replace(regEx(/(tag\s*=\s*)"[^"]+"/), `$1"${upgrade.newValue}"`)
+        .replace(regEx(/(digest\s*=\s*)"[^"]+"/), `$1"${upgrade.newDigest}"`);
     }
     if (
       upgrade.depType === 'git_repository' ||
       upgrade.depType === 'go_repository'
     ) {
       newDef = upgrade.managerData.def
-        .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
-        .replace(/(commit\s*=\s*)"[^"]+"/, `$1"${upgrade.newDigest}"`);
+        .replace(regEx(/(tag\s*=\s*)"[^"]+"/), `$1"${upgrade.newValue}"`)
+        .replace(regEx(/(commit\s*=\s*)"[^"]+"/), `$1"${upgrade.newDigest}"`);
       if (upgrade.currentDigest && upgrade.updateType !== 'digest') {
         newDef = newDef.replace(
-          /(commit\s*=\s*)"[^"]+".*?\n/,
+          regEx(/(commit\s*=\s*)"[^"]+".*?\n/),
           `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
         );
       }

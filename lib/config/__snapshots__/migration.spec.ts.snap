@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration it migrates gradle-lite 1`] = `
+Object {
+  "gradle": Object {
+    "enabled": true,
+    "fileMatch": Array [
+      "foo",
+    ],
+  },
+  "packageRules": Array [
+    Object {
+      "matchManagers": Array [
+        "gradle",
+      ],
+      "separateMinorPatch": true,
+    },
+  ],
+}
+`;
+
 exports[`config/migration it migrates nested packageRules 1`] = `
 Object {
   "packageRules": Array [
@@ -83,6 +102,9 @@ Object {
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "foo",
   "enabled": true,
+  "enabledManagers": Array [
+    "npm",
+  ],
   "exposeAllEnv": true,
   "extends": Array [
     ":automergeBranch",
@@ -91,7 +113,12 @@ Object {
     ":dependencyDashboard",
   ],
   "hostRules": Array [
-    Object {},
+    Object {
+      "hostType": "docker",
+      "matchHost": "https://docker.io",
+      "password": "some-password",
+      "username": "some-username",
+    },
   ],
   "ignorePaths": Array [
     "node_modules/",
@@ -269,9 +296,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates node to t
 Object {
   "node": Object {
     "automerge": false,
-    "supportPolicy": Array [
-      "lts",
-    ],
   },
   "travis": Object {
     "enabled": true,

@@ -16,5 +16,5 @@ object Dependencies {
     "com.abc" % "abc-b" % abcVersion
   )
 
-  val aloneDepInSeq = Seq("com.abc" % "abc-c" % abcVersion)
+  val aloneDepInSeq = List("com.abc" % "abc-c" % abcVersion)
 }

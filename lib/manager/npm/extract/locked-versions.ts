@@ -1,4 +1,4 @@
-import { valid } from 'semver';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../types';
 import { getNpmLock } from './npm';
@@ -22,7 +22,10 @@ export async function getLockedVersions(
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
       if (!isYarn1) {
-        if (lockfileVersion >= 6) {
+        if (lockfileVersion >= 8) {
+          // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
+          packageFile.constraints.yarn = '^3.0.0';
+        } else if (lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
           packageFile.constraints.yarn = '^2.2.0';
         } else {
@@ -34,7 +37,11 @@ export async function getLockedVersions(
           lockFileCache[yarnLock].lockedVersions[
             `${dep.depName}@${dep.currentValue}`
           ];
-        if (dep.depType === 'engines' && dep.depName === 'yarn' && !isYarn1) {
+        if (
+          (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+          dep.depName === 'yarn' &&
+          !isYarn1
+        ) {
           dep.lookupName = '@yarnpkg/cli';
         }
       }
@@ -48,13 +55,16 @@ export async function getLockedVersions(
       const { lockfileVersion } = lockFileCache[npmLock];
       if (lockfileVersion === 1) {
         if (packageFile.constraints.npm) {
-          packageFile.constraints.npm += ' <7';
+          // Add a <7 constraint if it's not already a fixed version
+          if (!semver.valid(packageFile.constraints.npm)) {
+            packageFile.constraints.npm += ' <7';
+          }
         } else {
           packageFile.constraints.npm = '<7';
         }
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion = valid(
+        dep.lockedVersion = semver.valid(
           lockFileCache[npmLock].lockedVersions[dep.depName]
         );
       }

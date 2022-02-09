@@ -1,18 +1,23 @@
-import { stat } from 'fs-extra';
-import { resolve } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { quote } from 'shlex';
+import upath from 'upath';
+import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { StatusResult, getRepoStatus } from '../../util/git';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
+import { readLocalFile, stat, writeLocalFile } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import { Http } from '../../util/http';
+import { newlineRegex } from '../../util/regex';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
+  getJavaContraint,
+  getJavaVersioning,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from '../gradle/utils';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from './utils';
 
 const http = new Http('gradle-wrapper');
 
@@ -23,7 +28,8 @@ async function addIfUpdated(
   if (status.modified.includes(fileProjectPath)) {
     return {
       file: {
-        name: fileProjectPath,
+        type: 'addition',
+        path: fileProjectPath,
         contents: await readLocalFile(fileProjectPath),
       },
     };
@@ -33,7 +39,7 @@ async function addIfUpdated(
 
 function getDistributionUrl(newPackageFileContent: string): string {
   const distributionUrlLine = newPackageFileContent
-    .split('\n')
+    .split(newlineRegex)
     .find((line) => line.startsWith('distributionUrl='));
   if (distributionUrlLine) {
     return distributionUrlLine
@@ -55,10 +61,10 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const { localDir: projectDir } = getAdminConfig();
+    const projectDir = GlobalConfig.get('localDir');
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const gradlew = gradleWrapperFileName(config);
-    const gradlewPath = resolve(projectDir, `./${gradlew}`);
+    const gradlew = gradleWrapperFileName();
+    const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
@@ -79,15 +85,18 @@ export async function updateArtifacts({
           newPackageFileContent.replace(config.newValue, config.currentValue)
         );
         const checksum = await getDistributionChecksum(distributionUrl);
-        cmd += ` --gradle-distribution-sha256-sum ${checksum}`;
+        cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
     } else {
-      cmd += ` --gradle-version ${config.newValue}`;
+      cmd += ` --gradle-version ${quote(config.newValue)}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'gradle',
+        image: 'java',
+        tagConstraint:
+          config.constraints?.java ?? getJavaContraint(config.currentValue),
+        tagScheme: getJavaVersioning(),
       },
       extraEnv,
     };
@@ -121,9 +130,9 @@ export async function updateArtifacts({
           addIfUpdated(status, fileProjectPath)
         )
       )
-    ).filter((e) => e != null);
+    ).filter(Boolean);
     logger.debug(
-      { files: updateArtifactsResult.map((r) => r.file.name) },
+      { files: updateArtifactsResult.map((r) => r.file.path) },
       `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;

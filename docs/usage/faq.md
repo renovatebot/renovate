@@ -18,19 +18,6 @@ Renovate will:
 - Update `yarn.lock` and/or `package-lock.json` files if found
 - Create Pull Requests immediately after branch creation
 
-## What is this `main` branch I see in the documentation?
-
-When you create a new repository with Git, Git creates a base branch for you.
-The default branch name that Git uses is `master` (this will be changed to `main` later).
-
-The Git-hosting ecosystem has settled on using `main` to replace `master`.
-When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
-
-It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
-
-A branch name has no special meaning within the Git program, it's just a name.
-The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
-
 ## Which Renovate versions are officially supported?
 
 The Renovate maintainers only support the latest version of Renovate.
@@ -46,7 +33,7 @@ If you're self hosting Renovate, use the latest release if possible.
 | Dependency Dashboard | BitBucket, BitBucket Server, Azure                | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
 | Hosted app           | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                                                              |
 
-## Major platform features not suported by Renovate
+## Major platform features not supported by Renovate
 
 Some major platform features are not supported at all by Renovate.
 
@@ -54,10 +41,26 @@ Some major platform features are not supported at all by Renovate.
 | --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jira issues                             | BitBucket              | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                                                                                |
 | Merge trains                            | GitLab                 | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                                                                                |
-| Cloning repo over SSH selfhosted        | None                   | [#5406](https://github.com/renovatebot/renovate/issues/5406)                                                                                                                                                                                                |
 | Configurable merge strategy and message | Only BitBucket for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10868](https://github.com/renovatebot/renovate/issues/10868) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
 
+## What is this `main` branch I see in the documentation?
+
+When you create a new repository with Git, Git creates a base branch for you.
+The default branch name that Git uses is `master` (this will be changed to `main` later).
+
+The Git-hosting ecosystem has settled on using `main` to replace `master`.
+When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
+
+It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
+
+A branch name has no special meaning within the Git program, it's just a name.
+The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
+
 ## What if I need to .. ?
+
+### Troubleshoot Renovate
+
+If you have problems with Renovate, or need to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 
@@ -123,58 +126,11 @@ You can set more than one PR target branch in the `baseBranches` array.
 
 ### Support private npm modules
 
-See the dedicated [Private npm module support](./private-modules.md) page.
+See the dedicated [Private npm module support](./getting-started/private-packages.md) page.
 
 ### Control Renovate's schedule
 
-Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc).
-You may want to update certain repositories less often.
-Or you may even want to use different schedules for specific packages.
-
-To control the days of the week or times of day that Renovate updates packages, use the `timezone` and `schedule` configuration options.
-By default, Renovate schedules use the UTC timezone, but you can override this in the global config.
-
-You can set a specific time zone in your local config file as well:
-
-```json
-{
-  "timezone": "America/Los_Angeles"
-}
-```
-
-The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-
-With the timezone set, you can define days of week or hours of the day in which Renovate will make changes.
-Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text.
-Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
-The _@breejs/later_ library also handles the concepts of "days", time_before", and "time_after".
-Renovate does not support scheduled minutes or "at an exact time" granularity.
-
-Examples of the kind of schedules you can create:
-
-```
-every weekend
-before 5:00am
-[after 10pm, before 5:00am]
-[after 10pm every weekday, before 5am every weekday]
-on friday and saturday
-```
-
-The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
-
-To restrict `aws-sdk` to weekly updates, you could add this package rule:
-
-```json
-  "packageRules": [
-    {
-      "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
-    }
-  ]
-```
-
-The "schedule" propery must always be defined in an array, even if you only set a single schedule.
-Multiple entries in the array means "or".
+To learn all about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
 
 ### Disable Renovate for certain dependency types
 
@@ -224,12 +180,14 @@ Set the configuration option `labels` to an array of labels to use.
 e.g.
 
 ```json
-"packageRules": [
-  {
-    "matchPackageNames": ["abc"],
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["abc"],
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Apply a rule, but only for packages starting with `abc`
@@ -237,12 +195,14 @@ e.g.
 Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Group all packages starting with `abc` together in one PR
@@ -250,12 +210,14 @@ Do the same as above, but instead of using `matchPackageNames`, use `matchPackag
 As above, but apply a `groupName`:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "groupName": ["abc packages"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "groupName": ["abc packages"]
+    }
+  ]
+}
 ```
 
 ### Change the default values for branch name, commit message, PR title or PR description

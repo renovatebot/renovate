@@ -12,6 +12,13 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: renovate-version-if-selfhosting
+    attributes:
+      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
+    validations:
+      required: false
+
   - type: dropdown
     id: platform-select
     attributes:
@@ -30,17 +37,27 @@ body:
       required: false
 
   - type: input
-    id: renovate-version-if-selfhosting
+    id: platform-version-if-selfhosting
     attributes:
-      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
+      label: If you're self-hosting Renovate, tell us what version of the platform you run.
     validations:
       required: false
+
+  - type: dropdown
+    id: regression-error
+    attributes:
+      label: Was this something which used to work for you, and then stopped?
+      options:
+        - 'It used to work, and then stopped'
+        - 'I never saw this working'
+    validations:
+      required: true
 
   - type: textarea
     id: describe-bug
     attributes:
       label: Describe the bug
-      description: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
+      description: 'Do not report any security concerns here. Email [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com) instead.'
     validations:
       required: true
 

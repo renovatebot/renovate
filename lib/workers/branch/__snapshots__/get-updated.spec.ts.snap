@@ -8,7 +8,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "version: 0.0.2",
-      "name": "undefined",
+      "path": "Chart.yaml",
+      "type": "addition",
     },
   ],
 }
@@ -22,7 +23,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "new version",
-      "name": "undefined",
+      "path": "package.json",
+      "type": "addition",
     },
   ],
 }
@@ -36,7 +38,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "updated-file",
-      "name": "undefined",
+      "path": "index.html",
+      "type": "addition",
     },
   ],
 }
@@ -50,18 +53,10 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "updated-file",
-      "name": "undefined",
+      "path": "index.html",
+      "type": "addition",
     },
   ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch no update 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
 }
 `;
 
@@ -73,18 +68,10 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
-      "name": "undefined",
+      "path": "package.json",
+      "type": "addition",
     },
   ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() handles empty 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
 }
 `;
 
@@ -96,7 +83,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "existing content",
-      "name": "undefined",
+      "path": ".gitmodules",
+      "type": "addition",
     },
   ],
 }
@@ -110,7 +98,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "new contents",
-      "name": "package-lock.json",
+      "path": "package-lock.json",
+      "type": "addition",
     },
   ],
 }
@@ -124,7 +113,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "new contents",
-      "name": "package-lock.json",
+      "path": "package-lock.json",
+      "type": "addition",
     },
   ],
 }
@@ -143,7 +133,8 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
-      "name": "undefined",
+      "path": "undefined",
+      "type": "addition",
     },
   ],
 }
@@ -156,13 +147,15 @@ Object {
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
-      "name": "composer.json",
+      "path": "composer.json",
+      "type": "addition",
     },
   ],
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
-      "name": "undefined",
+      "path": "composer.json",
+      "type": "addition",
     },
   ],
 }
@@ -175,7 +168,8 @@ Object {
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
-      "name": "composer.json",
+      "path": "composer.json",
+      "type": "addition",
     },
   ],
   "updatedPackageFiles": Array [],
@@ -203,13 +197,36 @@ Object {
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
-      "name": "composer.lock",
+      "path": "composer.lock",
+      "type": "addition",
     },
   ],
   "updatedPackageFiles": Array [
     Object {
       "contents": "existing content",
-      "name": "undefined",
+      "path": "composer.json",
+      "type": "addition",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy with no updateLockedDependency 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "path": "poetry.lock",
+      "type": "addition",
+    },
+  ],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "existing content",
+      "path": "pyproject.toml",
+      "type": "addition",
     },
   ],
 }

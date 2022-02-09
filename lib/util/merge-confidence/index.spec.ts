@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import {
@@ -8,36 +7,36 @@ import {
   satisfiesConfidenceLevel,
 } from '.';
 
-describe(getName(), () => {
+describe('util/merge-confidence/index', () => {
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
-      expect(isActiveConfidenceLevel(null)).toBe(false);
+      expect(isActiveConfidenceLevel(null)).toBeFalse();
     });
 
     it('returns false if low', () => {
-      expect(isActiveConfidenceLevel('low')).toBe(false);
+      expect(isActiveConfidenceLevel('low')).toBeFalse();
     });
 
     it('returns false if nonsense', () => {
-      expect(isActiveConfidenceLevel('nonsense')).toBe(false);
+      expect(isActiveConfidenceLevel('nonsense')).toBeFalse();
     });
 
     it('returns true if valid value (high)', () => {
-      expect(isActiveConfidenceLevel('high')).toBe(true);
+      expect(isActiveConfidenceLevel('high')).toBeTrue();
     });
   });
 
   describe('satisfiesConfidenceLevel()', () => {
     it('returns false if less', () => {
-      expect(satisfiesConfidenceLevel('low', 'high')).toBe(false);
+      expect(satisfiesConfidenceLevel('low', 'high')).toBeFalse();
     });
 
     it('returns true if equal', () => {
-      expect(satisfiesConfidenceLevel('high', 'high')).toBe(true);
+      expect(satisfiesConfidenceLevel('high', 'high')).toBeTrue();
     });
 
     it('returns true if more', () => {
-      expect(satisfiesConfidenceLevel('very high', 'high')).toBe(true);
+      expect(satisfiesConfidenceLevel('very high', 'high')).toBeTrue();
     });
   });
 
@@ -96,7 +95,7 @@ describe(getName(), () => {
     });
 
     it('returns valid confidence level', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '24.3.0';
@@ -119,7 +118,7 @@ describe(getName(), () => {
     });
 
     it('returns neutral if invalid confidence level', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '25.0.0';
@@ -142,7 +141,7 @@ describe(getName(), () => {
     });
 
     it('returns neutral if exception from API', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '25.0.0';

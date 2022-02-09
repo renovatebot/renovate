@@ -1,6 +1,6 @@
 import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
-import { add as addSecret } from '../util/sanitize';
+import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import {
   addMeta,
   addStream,
@@ -19,13 +19,13 @@ jest.unmock('.');
 jest.mock('fs-extra');
 const fs: any = _fs;
 
-describe('logger', () => {
+describe('logger/index', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
   });
   it('sets and gets context', () => {
-    setContext('abc123');
-    expect(getContext()).toEqual('abc123');
+    setContext('123test');
+    expect(getContext()).toBe('123test');
   });
   it('supports logging with metadata', () => {
     expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
@@ -92,10 +92,10 @@ describe('logger', () => {
   });
 
   it('supports file-based logging', () => {
-    let chunk = null;
+    let chunk = '';
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
-      write(x) {
+      write(x: string) {
         chunk = x;
       },
     });
@@ -108,14 +108,14 @@ describe('logger', () => {
 
     logger.error('foo');
 
-    expect(JSON.parse(chunk).msg).toEqual('foo');
+    expect(JSON.parse(chunk).msg).toBe('foo');
   });
 
   it('handles cycles', () => {
-    let logged = null;
+    let logged: Record<string, any> = {};
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
-      write(x) {
+      write(x: string) {
         logged = JSON.parse(x);
       },
     });
@@ -126,21 +126,21 @@ describe('logger', () => {
       level: 'error',
     });
 
-    const meta = { foo: null, bar: [] };
+    const meta: Record<string, any> = { foo: null, bar: [] };
     meta.foo = meta;
     meta.bar.push(meta);
     logger.error(meta, 'foo');
-    expect(logged.msg).toEqual('foo');
-    expect(logged.foo.foo).toEqual('[Circular]');
+    expect(logged.msg).toBe('foo');
+    expect(logged.foo.foo).toBe('[Circular]');
     expect(logged.foo.bar).toEqual(['[Circular]']);
-    expect(logged.bar).toEqual('[Circular]');
+    expect(logged.bar).toBe('[Circular]');
   });
 
   it('sanitizes secrets', () => {
-    let logged = null;
+    let logged: Record<string, any> = {};
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
-      write(x) {
+      write(x: string) {
         logged = JSON.parse(x);
       },
     });
@@ -152,6 +152,10 @@ describe('logger', () => {
     });
     add({ password: 'secret"password' });
 
+    class SomeClass {
+      constructor(public field: string) {}
+    }
+
     logger.error({
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
@@ -162,16 +166,20 @@ describe('logger', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someFn: () => 'secret"password',
+      someObject: new SomeClass('secret"password'),
     });
 
-    expect(logged.foo).not.toEqual('secret"password');
-    expect(logged.bar[0]).toEqual('somethingelse');
+    expect(logged.foo).not.toBe('secret"password');
+    expect(logged.bar[0]).toBe('somethingelse');
     expect(logged.foo).toContain('redacted');
     expect(logged.bar[1]).toContain('redacted');
-    expect(logged.npmToken).not.toEqual('token');
-    expect(logged.buffer).toEqual('[content]');
-    expect(logged.content).toEqual('[content]');
-    expect(logged.prBody).toEqual('[Template]');
-    expect(logged.secrets.foo).toEqual('***********');
+    expect(logged.npmToken).not.toBe('token');
+    expect(logged.buffer).toBe('[content]');
+    expect(logged.content).toBe('[content]');
+    expect(logged.prBody).toBe('[Template]');
+    expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someFn).toBe('[function]');
+    expect(logged.someObject.field).toBe('**redacted**');
   });
 });

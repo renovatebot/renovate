@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   angularJs: {
-    description: 'All angular.js packages',
+    description: 'All AngularJS packages',
     matchPackageNames: [
       'angular',
       'angular-animate',
@@ -11,7 +11,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   react: {
-    description: 'All react packages',
+    description: 'All React packages',
     matchPackageNames: ['@types/react'],
     matchPackagePrefixes: ['react'],
   },
@@ -20,7 +20,7 @@ export const presets: Record<string, Preset> = {
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
   },
   mapbox: {
-    description: 'All mapbox-related packages',
+    description: 'All Mapbox-related packages',
     matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   emberTemplateLint: {
@@ -28,16 +28,16 @@ export const presets: Record<string, Preset> = {
     matchPackagePrefixes: ['ember-template-lint'],
   },
   eslint: {
-    description: 'All eslint packages',
+    description: 'All ESLint packages',
     matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
-    description: 'All stylelint packages',
+    description: 'All Stylelint packages',
     matchPackagePrefixes: ['stylelint'],
   },
   tslint: {
-    description: 'All tslint packages',
+    description: 'All TSLint packages',
     matchPackageNames: ['codelyzer'],
     matchPackagePatterns: ['\\btslint\\b'],
   },
@@ -52,12 +52,12 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['remark-lint'],
   },
   postcss: {
-    description: 'All postcss packages',
+    description: 'All PostCSS packages',
     matchPackageNames: ['postcss'],
     matchPackagePrefixes: ['postcss-'],
   },
   jsUnitTest: {
-    description: 'Unit test packages for javascript',
+    description: 'Unit test packages for JavaScript',
     matchPackageNames: [
       '@types/chai',
       '@types/ember-mocha',

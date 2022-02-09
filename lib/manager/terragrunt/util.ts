@@ -1,6 +1,9 @@
+import { regEx } from '../../util/regex';
 import { TerragruntDependencyTypes } from './common';
 
-export const keyValueExtractionRegex = /^\s*source\s+=\s+"(?<value>[^"]+)"\s*$/;
+export const keyValueExtractionRegex = regEx(
+  /^\s*source\s+=\s+"(?<value>[^"]+)"\s*$/
+);
 
 export function getTerragruntDependencyType(
   value: string

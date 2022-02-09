@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from './extract';
 
@@ -31,7 +31,7 @@ function validateGems(raw, parsed) {
   expect(gemfileGemCount).toEqual(parsedGemCount);
 }
 
-describe(getName(), () => {
+describe('manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
@@ -51,7 +51,7 @@ describe(getName(), () => {
               Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
               isValid(dep.lockedVersion)
           )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(railsGemfile, res);
     });
     it('parses sourceGroups', async () => {
@@ -69,7 +69,7 @@ describe(getName(), () => {
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
             isValid(dep.lockedVersion)
         )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(webPackerGemfile, res);
     });
     it('parse mastodon Gemfile', async () => {
@@ -86,7 +86,7 @@ describe(getName(), () => {
               Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
               isValid(dep.lockedVersion)
           )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(mastodonGemfile, res);
     });
     it('parse Ruby CI Gemfile', async () => {
@@ -99,7 +99,7 @@ describe(getName(), () => {
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
             isValid(dep.lockedVersion)
         )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(rubyCIGemfile, res);
     });
   });
@@ -113,7 +113,7 @@ describe(getName(), () => {
           Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
           isValid(dep.lockedVersion)
       )
-    ).toBe(true);
+    ).toBeTrue();
     validateGems(gitlabFossGemfile, res);
   });
 

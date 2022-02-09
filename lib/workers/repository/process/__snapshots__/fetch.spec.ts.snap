@@ -17,41 +17,6 @@ Object {
       "packageFile": "pom.xml",
     },
   ],
-  "npm": Array [
-    Object {
-      "deps": Array [
-        Object {
-          "datasource": "npm",
-          "depName": "aaa",
-          "depType": "devDependencies",
-          "updates": Array [
-            "a",
-            "b",
-          ],
-        },
-        Object {
-          "0": "a",
-          "1": "b",
-          "depName": "bbb",
-          "depType": "dependencies",
-          "updates": Array [],
-        },
-      ],
-      "packageFile": "package.json",
-      "packageJsonType": "app",
-    },
-  ],
-}
-`;
-
-exports[`workers/repository/process/fetch fetchUpdates() handles empty deps 1`] = `
-Object {
-  "npm": Array [
-    Object {
-      "deps": Array [],
-      "packageFile": "package.json",
-    },
-  ],
 }
 `;
 

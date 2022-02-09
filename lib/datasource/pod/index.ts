@@ -6,6 +6,8 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import type { HttpError } from '../../util/http/types';
+import { newlineRegex, regEx } from '../../util/regex';
+import { massageGithubUrl } from '../metadata';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'pod';
@@ -17,8 +19,16 @@ export const registryStrategy = 'hunt';
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
-const githubHttp = new GithubHttp();
+const githubHttp = new GithubHttp(id);
 const http = new Http(id);
+
+// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
+const enum URLFormatOptions {
+  WithShardWithSpec,
+  WithShardWithoutSpec,
+  WithSpecsWithoutShard,
+  WithoutSpecsWithoutShard,
+}
 
 function shardParts(lookupName: string): string[] {
   return crypto
@@ -31,13 +41,27 @@ function shardParts(lookupName: string): string[] {
 
 function releasesGithubUrl(
   lookupName: string,
-  opts: { account: string; repo: string; useShard: boolean }
+  opts: {
+    hostURL: string;
+    account: string;
+    repo: string;
+    useShard: boolean;
+    useSpecs: boolean;
+  }
 ): string {
-  const { useShard, account, repo } = opts;
-  const prefix = 'https://api.github.com/repos';
+  const { hostURL, account, repo, useShard, useSpecs } = opts;
+  const prefix =
+    hostURL && hostURL !== 'https://github.com'
+      ? `${hostURL}/api/v3/repos`
+      : 'https://api.github.com/repos';
   const shard = shardParts(lookupName).join('/');
-  const suffix = useShard ? `${shard}/${lookupName}` : lookupName;
-  return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
+  // `Specs` in the pods repo URL is a new requirement for legacy support also allow pod repo URL without `Specs`
+  const lookupNamePath = useSpecs ? `Specs/${lookupName}` : lookupName;
+  const shardPath = useSpecs
+    ? `Specs/${shard}/${lookupName}`
+    : `${shard}/${lookupName}`;
+  const suffix = useShard ? shardPath : lookupNamePath;
+  return `${prefix}/${account}/${repo}/contents/${suffix}`;
 }
 
 function handleError(lookupName: string, err: HttpError): void {
@@ -93,29 +117,54 @@ async function requestGithub<T = unknown>(
   return null;
 }
 
-const githubRegex =
-  /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/;
+const githubRegex = regEx(
+  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+);
 
 async function getReleasesFromGithub(
   lookupName: string,
-  registryUrl: string,
-  useShard = false
+  opts: { hostURL: string; account: string; repo: string },
+  useShard = true,
+  useSpecs = true,
+  urlFormatOptions = URLFormatOptions.WithShardWithSpec
 ): Promise<ReleaseResult | null> {
-  const match = githubRegex.exec(registryUrl);
-  const { account, repo } = match?.groups || {};
-  const opts = { account, repo, useShard };
-  const url = releasesGithubUrl(lookupName, opts);
+  const url = releasesGithubUrl(lookupName, { ...opts, useShard, useSpecs });
   const resp = await requestGithub<{ name: string }[]>(url, lookupName);
   if (resp) {
     const releases = resp.map(({ name }) => ({ version: name }));
     return { releases };
   }
 
-  if (!useShard) {
-    return getReleasesFromGithub(lookupName, registryUrl, true);
+  // iterating through enum to support different url formats
+  switch (urlFormatOptions) {
+    case URLFormatOptions.WithShardWithSpec:
+      return getReleasesFromGithub(
+        lookupName,
+        opts,
+        true,
+        false,
+        URLFormatOptions.WithShardWithoutSpec
+      );
+    case URLFormatOptions.WithShardWithoutSpec:
+      return getReleasesFromGithub(
+        lookupName,
+        opts,
+        false,
+        true,
+        URLFormatOptions.WithSpecsWithoutShard
+      );
+    case URLFormatOptions.WithSpecsWithoutShard:
+      return getReleasesFromGithub(
+        lookupName,
+        opts,
+        false,
+        false,
+        URLFormatOptions.WithoutSpecsWithoutShard
+      );
+    case URLFormatOptions.WithoutSpecsWithoutShard:
+    default:
+      return null;
   }
-
-  return null;
 }
 
 function releasesCDNUrl(lookupName: string, registryUrl: string): string {
@@ -130,11 +179,11 @@ async function getReleasesFromCDN(
   const url = releasesCDNUrl(lookupName, registryUrl);
   const resp = await requestCDN(url, lookupName);
   if (resp) {
-    const lines = resp.split('\n');
+    const lines = resp.split(newlineRegex);
     for (let idx = 0; idx < lines.length; idx += 1) {
       const line = lines[idx];
       const [name, ...versions] = line.split('/');
-      if (name === lookupName.replace(/\/.*$/, '')) {
+      if (name === lookupName.replace(regEx(/\/.*$/), '')) {
         const releases = versions.map((version) => ({ version }));
         return { releases };
       }
@@ -158,7 +207,7 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const podName = lookupName.replace(/\/.*$/, '');
+  const podName = lookupName.replace(regEx(/\/.*$/), '');
 
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
@@ -171,16 +220,19 @@ export async function getReleases({
     return cachedResult;
   }
 
-  let baseUrl = registryUrl.replace(/\/+$/, '');
-
+  let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
+  baseUrl = massageGithubUrl(baseUrl);
   // In order to not abuse github API limits, query CDN instead
   if (isDefaultRepo(baseUrl)) {
     [baseUrl] = defaultRegistryUrls;
   }
 
   let result: ReleaseResult | null = null;
-  if (githubRegex.exec(baseUrl)) {
-    result = await getReleasesFromGithub(podName, baseUrl);
+  const match = githubRegex.exec(baseUrl);
+  if (match) {
+    const { hostURL, account, repo } = match?.groups || {};
+    const opts = { hostURL, account, repo };
+    result = await getReleasesFromGithub(podName, opts);
   } else {
     result = await getReleasesFromCDN(podName, baseUrl);
   }

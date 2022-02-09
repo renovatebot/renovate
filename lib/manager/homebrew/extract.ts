@@ -1,6 +1,7 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { UrlPathParsedResult } from './types';
 import { isSpace, removeComments, skip } from './util';
@@ -19,7 +20,7 @@ function parseSha256(idx: number, content: string): string | null {
 }
 
 function extractSha256(content: string): string | null {
-  const sha256RegExp = /(^|\s)sha256(\s)/;
+  const sha256RegExp = regEx(/(^|\s)sha256(\s)/);
   let i = content.search(sha256RegExp);
   if (isSpace(content[i])) {
     i += 1;
@@ -42,7 +43,7 @@ function parseUrl(idx: number, content: string): string | null {
 }
 
 function extractUrl(content: string): string | null {
-  const urlRegExp = /(^|\s)url(\s)/;
+  const urlRegExp = regEx(/(^|\s)url(\s)/);
   let i = content.search(urlRegExp);
   // content.search() returns -1 if not found
   if (i === -1) {
@@ -117,7 +118,7 @@ function parseClassHeader(idx: number, content: string): string | null {
 }
 
 function extractClassName(content: string): string | null {
-  const classRegExp = /(^|\s)class\s/;
+  const classRegExp = regEx(/(^|\s)class\s/);
   let i = content.search(classRegExp);
   if (isSpace(content[i])) {
     i += 1;
@@ -155,12 +156,12 @@ export function extractPackageFile(content: string): PackageFile | null {
     repoName = urlPathResult.repoName;
   } else {
     logger.debug('Error: Unsupported URL field');
-    skipReason = SkipReason.UnsupportedUrl;
+    skipReason = 'unsupported-url';
   }
   const sha256 = extractSha256(cleanContent);
   if (!sha256 || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
-    skipReason = SkipReason.InvalidSha256;
+    skipReason = 'invalid-sha256';
   }
   const dep: PackageDependency = {
     depName: `${ownerName}/${repoName}`,

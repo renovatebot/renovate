@@ -2,7 +2,7 @@
 
 **Did you read our documentation on adding a package manager?**
 
-- [ ] I've read the [adding a package manager](/renovatebot/renovate/blob/HEAD/docs/development/adding-a-package-manager.md) documentation.
+- [ ] I've read the [adding a package manager](adding-a-package-manager.md) documentation.
 
 ## Basics
 

@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { TerraformModuleDatasource } from '.';
 
 const consulData: any = loadFixture('registry-consul.json');
@@ -13,7 +13,7 @@ const datasource = TerraformModuleDatasource.id;
 const baseUrl = 'https://registry.terraform.io';
 const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
-describe(getName(), () => {
+describe('datasource/terraform-module/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

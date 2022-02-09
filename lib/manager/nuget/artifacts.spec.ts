@@ -2,8 +2,8 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
@@ -31,7 +31,7 @@ const getRandomString: jest.Mock<typeof _getRandomString> =
   _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
@@ -39,22 +39,22 @@ const adminConfig: RepoAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe('updateArtifacts', () => {
+describe('manager/nuget/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     getDefaultRegistries.mockReturnValue([] as any);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
-      Promise.resolve(dirName)
+      Promise.resolve(`others/${dirName}`)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    setAdminConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
 
   afterEach(() => {
-    setAdminConfig();
+    GlobalConfig.reset();
   });
 
   it('aborts if no lock file found', async () => {
@@ -150,7 +150,7 @@ describe('updateArtifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -166,7 +166,7 @@ describe('updateArtifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'global' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -187,7 +187,6 @@ describe('updateArtifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -195,7 +194,14 @@ describe('updateArtifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'packages.lock.json',
+          stderr: 'not found',
+        },
+      },
+    ]);
   });
   it('authenticates at registries', async () => {
     const execSnapshots = mockExecAll(exec);

@@ -83,7 +83,7 @@ Array [
 
 exports[`datasource/pypi/index getReleases parses data-requires-python and respects constraints from simple endpoint 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/simple/",
+  "registryUrl": "https://pypi.org/simple",
   "releases": Array [
     Object {
       "version": "0.1.2",
@@ -123,7 +123,7 @@ Array [
 
 exports[`datasource/pypi/index getReleases process data from +simple endpoint 1`] = `
 Object {
-  "registryUrl": "https://some.registry.org/+simple/",
+  "registryUrl": "https://some.registry.org/+simple",
   "releases": Array [
     Object {
       "version": "0.1.2",
@@ -179,7 +179,7 @@ Array [
 
 exports[`datasource/pypi/index getReleases process data from simple endpoint 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/simple/",
+  "registryUrl": "https://pypi.org/simple",
   "releases": Array [
     Object {
       "version": "0.1.2",
@@ -235,7 +235,7 @@ Array [
 
 exports[`datasource/pypi/index getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/simple/",
+  "registryUrl": "https://pypi.org/simple",
   "releases": Array [
     Object {
       "version": "0.0.5",
@@ -260,7 +260,7 @@ Array [
 
 exports[`datasource/pypi/index getReleases processes real data 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/pypi/",
+  "registryUrl": "https://pypi.org/pypi",
   "releases": Array [
     Object {
       "releaseTimestamp": "2017-04-03T16:55:14.000Z",
@@ -373,7 +373,7 @@ Array [
 
 exports[`datasource/pypi/index getReleases respects constraints 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/pypi/",
+  "registryUrl": "https://pypi.org/pypi",
   "releases": Array [
     Object {
       "version": "0.4.0",
@@ -476,21 +476,6 @@ Array [
 `;
 
 exports[`datasource/pypi/index getReleases returns null for empty result 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "pypi.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://pypi.org/pypi/something/json",
-  },
-]
-`;
-
-exports[`datasource/pypi/index getReleases returns null if mismatched name 1`] = `
 Array [
   Object {
     "headers": Object {

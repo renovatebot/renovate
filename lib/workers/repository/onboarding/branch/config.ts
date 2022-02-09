@@ -6,6 +6,7 @@ import type {
 } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
+import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
 async function getOnboardingConfig(
   config: RenovateConfig
@@ -72,10 +73,13 @@ async function getOnboardingConfig(
 }
 
 async function getOnboardingConfigContents(
-  config: RenovateConfig
+  config: RenovateConfig,
+  fileName: string
 ): Promise<string> {
+  const codeFormat = await EditorConfig.getCodeFormat(fileName);
+  const jsonWriter = new JSONWriter(codeFormat);
   const onboardingConfig = await getOnboardingConfig(config);
-  return JSON.stringify(onboardingConfig, null, 2) + '\n';
+  return jsonWriter.write(onboardingConfig);
 }
 
 export { getOnboardingConfig, getOnboardingConfigContents };

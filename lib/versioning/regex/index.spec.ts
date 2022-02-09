@@ -1,428 +1,388 @@
 import { VersioningApi, get } from '..';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
-describe('regex', () => {
-  const regex: VersioningApi = get(
-    'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
-  );
+describe('versioning/regex/index', () => {
+  describe('regex versioning', () => {
+    const regex: VersioningApi = get(
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
+    );
 
-  it('requires a valid configuration to be initialized', () => {
-    expect(() => get('regex:not a regex')).toThrow();
-  });
+    it('requires a valid configuration to be initialized', () => {
+      expect(() => get('regex:not a regex')).toThrow();
+    });
 
-  describe('throws', () => {
-    for (const re of [
-      '^(?<major>\\d+)(',
-      '^(?<major>\\d+)?(?<!y)x$',
-      '^(?<major>\\d+)?(?<=y)x$',
-    ]) {
-      it(re, () => {
-        expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
+    describe('throws', () => {
+      for (const re of [
+        '^(?<major>\\d+)(',
+        '^(?<major>\\d+)?(?<!y)x$',
+        '^(?<major>\\d+)?(?<=y)x$',
+      ]) {
+        it(re, () => {
+          expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
+        });
+      }
+    });
+
+    test.each`
+      version               | expected
+      ${'1'}                | ${false}
+      ${'aardvark'}         | ${false}
+      ${'1.2a1-foo'}        | ${false}
+      ${'1.2.3'}            | ${true}
+      ${'1.2.3a1'}          | ${true}
+      ${'1.2.3b2'}          | ${true}
+      ${'1.2.3-foo'}        | ${true}
+      ${'1.2.3b2-foo'}      | ${true}
+      ${'1.2.3b2-foo-bar'}  | ${true}
+      ${'1'}                | ${false}
+      ${'1-foo'}            | ${false}
+      ${'1.2'}              | ${false}
+      ${'1.2-foo'}          | ${false}
+      ${'1.2.3.4.5.6.7'}    | ${false}
+      ${'1.2.aardvark'}     | ${false}
+      ${'1.2.aardvark-foo'} | ${false}
+      ${'1.2a2.3'}          | ${false}
+    `('isValid("$version") === $expected', ({ version, expected }) => {
+      expect(!!regex.isValid(version)).toBe(expected);
+    });
+
+    test.each`
+      version             | range               | expected
+      ${'1.2.3'}          | ${'2.3.4'}          | ${true}
+      ${'1.2.3a1'}        | ${'2.3.4'}          | ${true}
+      ${'1.2.3'}          | ${'2.3.4b1'}        | ${true}
+      ${'1.2.3-foobar'}   | ${'2.3.4-foobar'}   | ${true}
+      ${'1.2.3a1-foobar'} | ${'2.3.4-foobar'}   | ${true}
+      ${'1.2.3-foobar'}   | ${'2.3.4b1-foobar'} | ${true}
+      ${'1.2.3'}          | ${'2.3.4-foobar'}   | ${false}
+      ${'1.2.3a1'}        | ${'2.3.4-foobar'}   | ${false}
+      ${'1.2.3'}          | ${'2.3.4b1-foobar'} | ${false}
+      ${'1.2.3-foobar'}   | ${'2.3.4'}          | ${false}
+      ${'1.2.3a1-foobar'} | ${'2.3.4'}          | ${false}
+      ${'1.2.3-foobar'}   | ${'2.3.4b1'}        | ${false}
+      ${'1.2.3-foo'}      | ${'2.3.4-bar'}      | ${false}
+      ${'1.2.3a1-foo'}    | ${'2.3.4-bar'}      | ${false}
+      ${'1.2.3-foo'}      | ${'2.3.4b1-bar'}    | ${false}
+    `(
+      'isCompatible("$version") === $expected',
+      ({ version, range, expected }) => {
+        const res = regex.isCompatible(version, range);
+        expect(!!res).toBe(expected);
+      }
+    );
+
+    test.each`
+      version               | expected
+      ${'1.2.3'}            | ${true}
+      ${'1.2.3a1'}          | ${true}
+      ${'1.2.3b2'}          | ${true}
+      ${'1.2.3-foo'}        | ${true}
+      ${'1.2.3b2-foo'}      | ${true}
+      ${'1.2.3b2-foo-bar'}  | ${true}
+      ${'1'}                | ${false}
+      ${'1-foo'}            | ${false}
+      ${'1.2'}              | ${false}
+      ${'1.2-foo'}          | ${false}
+      ${'1.2.3.4.5.6.7'}    | ${false}
+      ${'1.2.aardvark'}     | ${false}
+      ${'1.2.aardvark-foo'} | ${false}
+      ${'1.2a2.3'}          | ${false}
+    `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+      const res = !!regex.isSingleVersion(version);
+      expect(res).toBe(expected);
+    });
+
+    test.each`
+      version          | expected
+      ${'1.2.3'}       | ${true}
+      ${'1.2.3-foo'}   | ${true}
+      ${'1.2.3alpha'}  | ${false}
+      ${'1.2.3b3-foo'} | ${false}
+    `('isStable("$version") === $expected', ({ version, expected }) => {
+      const res = !!regex.isStable(version);
+      expect(res).toBe(expected);
+    });
+
+    test.each`
+      version               | expected
+      ${'1.2.3'}            | ${true}
+      ${'1.2.3a1'}          | ${true}
+      ${'1.2.3b2'}          | ${true}
+      ${'1.2.3-foo'}        | ${true}
+      ${'1.2.3b2-foo'}      | ${true}
+      ${'1.2.3b2-foo-bar'}  | ${true}
+      ${'1'}                | ${false}
+      ${'1-foo'}            | ${false}
+      ${'1.2'}              | ${false}
+      ${'1.2-foo'}          | ${false}
+      ${'1.2.3.4.5.6.7'}    | ${false}
+      ${'1.2.aardvark'}     | ${false}
+      ${'1.2.aardvark-foo'} | ${false}
+      ${'1.2a2.3'}          | ${false}
+    `('isVersion("$version") === $expected', ({ version, expected }) => {
+      expect(!!regex.isVersion(version)).toBe(expected);
+    });
+
+    test.each`
+      version          | major | minor | patch
+      ${'1.2.3'}       | ${1}  | ${2}  | ${3}
+      ${'1.2.3a1'}     | ${1}  | ${2}  | ${3}
+      ${'1.2.3a1-foo'} | ${1}  | ${2}  | ${3}
+    `(
+      'getMajor, getMinor, getPatch for "$version"',
+      ({ version, major, minor, patch }) => {
+        expect(regex.getMajor(version)).toBe(major);
+        expect(regex.getMinor(version)).toBe(minor);
+        expect(regex.getPatch(version)).toBe(patch);
+      }
+    );
+
+    test.each`
+      a                | b                | expected
+      ${'1.2.3'}       | ${'1.2.3'}       | ${true}
+      ${'1.2.3a1'}     | ${'1.2.3a1'}     | ${true}
+      ${'1.2.3a1-foo'} | ${'1.2.3a1-foo'} | ${true}
+      ${'1.2.3'}       | ${'1.2.3-bar'}   | ${true}
+      ${'1.2.3a1'}     | ${'1.2.3a1-bar'} | ${true}
+      ${'1.2.3a1-foo'} | ${'1.2.3a1-bar'} | ${true}
+      ${'1.2.3'}       | ${'1.2.4'}       | ${false}
+      ${'1.2.3'}       | ${'1.3.3'}       | ${false}
+      ${'1.2.3'}       | ${'2.2.3'}       | ${false}
+      ${'1.2.3'}       | ${'1.2.3a1'}     | ${false}
+      ${'1.2.3a1'}     | ${'1.2.3a2'}     | ${false}
+      ${'1.2.3'}       | ${'1.2.4-foo'}   | ${false}
+      ${'1.2.3'}       | ${'1.3.3-foo'}   | ${false}
+      ${'1.2.3'}       | ${'2.2.3-foo'}   | ${false}
+      ${'1.2.3'}       | ${'1.2.3a1-foo'} | ${false}
+      ${'1.2.3a1'}     | ${'1.2.3a2-foo'} | ${false}
+    `('equals($a, $b) === $expected', ({ a, b, expected }) => {
+      expect(regex.equals(a, b)).toBe(expected);
+    });
+
+    test.each`
+      a            | b                | expected
+      ${'2.0.0'}   | ${'1.0.0'}       | ${true}
+      ${'2.2.0'}   | ${'2.1.0'}       | ${true}
+      ${'2.2.1'}   | ${'2.2.0'}       | ${true}
+      ${'3.0.0a2'} | ${'3.0.0a1'}     | ${true}
+      ${'3.0.0b1'} | ${'3.0.0a2'}     | ${true}
+      ${'3.0.0'}   | ${'3.0.0b2'}     | ${true}
+      ${'2.0.0'}   | ${'1.0.0-foo'}   | ${true}
+      ${'2.2.0'}   | ${'2.1.0-foo'}   | ${true}
+      ${'2.2.1'}   | ${'2.2.0-foo'}   | ${true}
+      ${'3.0.0a2'} | ${'3.0.0a1-foo'} | ${true}
+      ${'3.0.0b1'} | ${'3.0.0a2-foo'} | ${true}
+      ${'1.0.0'}   | ${'2.0.0'}       | ${false}
+      ${'2.1.0'}   | ${'2.2.0'}       | ${false}
+      ${'2.2.1'}   | ${'2.2.2'}       | ${false}
+      ${'3.0.0a1'} | ${'3.0.0a2'}     | ${false}
+      ${'3.0.0a2'} | ${'3.0.0b1'}     | ${false}
+      ${'3.0.0b2'} | ${'3.0.0'}       | ${false}
+      ${'1.0.0'}   | ${'1.0.0'}       | ${false}
+      ${'2.1.0'}   | ${'2.1.0'}       | ${false}
+      ${'2.2.0'}   | ${'2.2.0'}       | ${false}
+      ${'3.0.0a1'} | ${'3.0.0a1'}     | ${false}
+      ${'3.0.0b2'} | ${'3.0.0b2'}     | ${false}
+      ${'1.0.0'}   | ${'1.0.0-foo'}   | ${false}
+      ${'2.1.0'}   | ${'2.1.0-foo'}   | ${false}
+      ${'2.2.0'}   | ${'2.2.0-foo'}   | ${false}
+      ${'3.0.0a1'} | ${'3.0.0a1-foo'} | ${false}
+      ${'3.0.0b2'} | ${'3.0.0b2-foo'} | ${false}
+    `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(regex.isGreaterThan(a, b)).toBe(expected);
+    });
+
+    test.each`
+      version          | range            | expected
+      ${'1.2.2'}       | ${'1.2.3'}       | ${true}
+      ${'1.2.2'}       | ${'1.2.3-bar'}   | ${true}
+      ${'1.2.2'}       | ${'1.2.3a1'}     | ${true}
+      ${'1.2.2'}       | ${'1.2.3a1-bar'} | ${true}
+      ${'1.2.2-foo'}   | ${'1.2.3'}       | ${true}
+      ${'1.2.2-foo'}   | ${'1.2.3-bar'}   | ${true}
+      ${'1.2.2-foo'}   | ${'1.2.3a1'}     | ${true}
+      ${'1.2.2-foo'}   | ${'1.2.3a1-bar'} | ${true}
+      ${'1.2.2a1'}     | ${'1.2.3'}       | ${true}
+      ${'1.2.2a1'}     | ${'1.2.3-bar'}   | ${true}
+      ${'1.2.2a1'}     | ${'1.2.3a1'}     | ${true}
+      ${'1.2.2a1'}     | ${'1.2.3a1-bar'} | ${true}
+      ${'1.2.2a1-foo'} | ${'1.2.3'}       | ${true}
+      ${'1.2.2a1-foo'} | ${'1.2.3-bar'}   | ${true}
+      ${'1.2.2a1-foo'} | ${'1.2.3a1'}     | ${true}
+      ${'1.2.2a1-foo'} | ${'1.2.3a1-bar'} | ${true}
+      ${'1.2.2'}       | ${'1.2.2'}       | ${false}
+      ${'1.2.2'}       | ${'1.2.2-bar'}   | ${false}
+      ${'1.2.2-foo'}   | ${'1.2.2'}       | ${false}
+      ${'1.2.2-foo'}   | ${'1.2.2-bar'}   | ${false}
+      ${'1.2.2a1'}     | ${'1.2.2a1'}     | ${false}
+      ${'1.2.2a1'}     | ${'1.2.2a1-bar'} | ${false}
+      ${'1.2.2a1-foo'} | ${'1.2.2a1'}     | ${false}
+      ${'1.2.2a1-foo'} | ${'1.2.2a1-bar'} | ${false}
+      ${'1.2.4'}       | ${'1.2.3'}       | ${false}
+      ${'1.2.4'}       | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4'}       | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4'}       | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3'}       | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3'}       | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3'}       | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3a1-bar'} | ${false}
+    `(
+      'isLessThanRange($version, $range) === $expected',
+      ({ version, range, expected }) => {
+        expect(regex.isLessThanRange(version, range)).toBe(expected);
+      }
+    );
+
+    test.each`
+      versions                                      | range          | expected
+      ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6'}     | ${'2.1.6'}
+      ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6-foo'} | ${'2.1.6'}
+      ${['2.1.5-foo', '2.1.6']}                     | ${'2.1.6-foo'} | ${'2.1.6'}
+      ${['1.2.3', '1.2.4']}                         | ${'3.5.0'}     | ${null}
+      ${['1.2.3', '1.2.4']}                         | ${'!@#'}       | ${null}
+    `(
+      'getSatisfyingVersion($versions, "$range") === $expected',
+      ({ versions, range, expected }) => {
+        expect(regex.getSatisfyingVersion(versions, range)).toBe(expected);
+      }
+    );
+
+    test.each`
+      versions                                      | range          | expected
+      ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6'}     | ${'2.1.6'}
+      ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6-foo'} | ${'2.1.6'}
+      ${['2.1.5', '2.1.6-foo']}                     | ${'2.1.5-foo'} | ${'2.1.5'}
+      ${['1.2.3', '1.2.4']}                         | ${'3.5.0'}     | ${null}
+      ${['1.2.3', '1.2.4']}                         | ${'!@#'}       | ${null}
+    `(
+      'minSatisfyingVersion($versions, "$range") === "$expected"',
+      ({ versions, range, expected }) => {
+        expect(regex.minSatisfyingVersion(versions, range)).toBe(expected);
+      }
+    );
+
+    describe('.getNewValue', () => {
+      it('returns newVersion', () => {
+        expect(
+          regex.getNewValue({
+            currentValue: null,
+            rangeStrategy: null,
+            currentVersion: null,
+            newVersion: '1.2.3',
+          })
+        ).toBe('1.2.3');
       });
-    }
-  });
-
-  describe('.parse()', () => {
-    it('parses invalid matches as invalid', () => {
-      expect(regex.isValid('1')).toBe(false);
-      expect(regex.isValid('aardvark')).toBe(false);
-      expect(regex.isValid('1.2a1-foo')).toBe(false);
-    });
-  });
-
-  describe('.isCompatible', () => {
-    it('returns true when the compatibilities are equal', () => {
-      expect(regex.isCompatible('1.2.3', '2.3.4')).toBe(true);
-      expect(regex.isCompatible('1.2.3a1', '2.3.4')).toBe(true);
-      expect(regex.isCompatible('1.2.3', '2.3.4b1')).toBe(true);
-      expect(regex.isCompatible('1.2.3-foobar', '2.3.4-foobar')).toBe(true);
-      expect(regex.isCompatible('1.2.3a1-foobar', '2.3.4-foobar')).toBe(true);
-      expect(regex.isCompatible('1.2.3-foobar', '2.3.4b1-foobar')).toBe(true);
     });
 
-    it('returns false when the compatibilities are different', () => {
-      expect(regex.isCompatible('1.2.3', '2.3.4-foobar')).toBe(false);
-      expect(regex.isCompatible('1.2.3a1', '2.3.4-foobar')).toBe(false);
-      expect(regex.isCompatible('1.2.3', '2.3.4b1-foobar')).toBe(false);
-      expect(regex.isCompatible('1.2.3-foobar', '2.3.4')).toBe(false);
-      expect(regex.isCompatible('1.2.3a1-foobar', '2.3.4')).toBe(false);
-      expect(regex.isCompatible('1.2.3-foobar', '2.3.4b1')).toBe(false);
-      expect(regex.isCompatible('1.2.3-foo', '2.3.4-bar')).toBe(false);
-      expect(regex.isCompatible('1.2.3a1-foo', '2.3.4-bar')).toBe(false);
-      expect(regex.isCompatible('1.2.3-foo', '2.3.4b1-bar')).toBe(false);
-    });
-  });
-
-  describe('.isSingleVersion', () => {
-    it('returns true when the version is valid', () => {
-      expect(regex.isSingleVersion('1.2.3')).toBe(true);
-      expect(regex.isSingleVersion('1.2.3a1')).toBe(true);
-      expect(regex.isSingleVersion('1.2.3b2')).toBe(true);
-      expect(regex.isSingleVersion('1.2.3-foo')).toBe(true);
-      expect(regex.isSingleVersion('1.2.3b2-foo')).toBe(true);
-      expect(regex.isSingleVersion('1.2.3b2-foo-bar')).toBe(true);
+    describe('.sortVersions', () => {
+      it('sorts versions in an ascending order', () => {
+        expect(
+          ['1.2.3a1', '2.0.1', '1.3.4', '1.2.3'].sort(
+            regex.sortVersions.bind(regex)
+          )
+        ).toEqual(['1.2.3a1', '1.2.3', '1.3.4', '2.0.1']);
+      });
     });
 
-    it('returns false when the version is not valid', () => {
-      expect(regex.isSingleVersion('1')).toBe(false);
-      expect(regex.isSingleVersion('1-foo')).toBe(false);
-      expect(regex.isSingleVersion('1.2')).toBe(false);
-      expect(regex.isSingleVersion('1.2-foo')).toBe(false);
-      expect(regex.isSingleVersion('1.2.3.4.5.6.7')).toBe(false);
-      expect(regex.isSingleVersion('1.2.aardvark')).toBe(false);
-      expect(regex.isSingleVersion('1.2.aardvark-foo')).toBe(false);
-      expect(regex.isSingleVersion('1.2a2.3')).toBe(false);
-    });
-  });
-
-  describe('.isStable', () => {
-    it('returns true when it is not a prerelease', () => {
-      expect(regex.isStable('1.2.3')).toBe(true);
-      expect(regex.isStable('1.2.3-foo')).toBe(true);
-    });
-
-    it('returns false when it is a prerelease', () => {
-      expect(regex.isStable('1.2.3alpha')).toBe(false);
-      expect(regex.isStable('1.2.3b3-foo')).toBe(false);
-    });
-  });
-
-  describe('.isValid', () => {
-    it('returns true when the version is valid', () => {
-      expect(regex.isValid('1.2.3')).toBe(true);
-      expect(regex.isValid('1.2.3a1')).toBe(true);
-      expect(regex.isValid('1.2.3b2')).toBe(true);
-      expect(regex.isValid('1.2.3-foo')).toBe(true);
-      expect(regex.isValid('1.2.3b2-foo')).toBe(true);
-      expect(regex.isValid('1.2.3b2-foo-bar')).toBe(true);
-    });
-
-    it('returns false when the version is not valid', () => {
-      expect(regex.isValid('1')).toBe(false);
-      expect(regex.isValid('1-foo')).toBe(false);
-      expect(regex.isValid('1.2')).toBe(false);
-      expect(regex.isValid('1.2-foo')).toBe(false);
-      expect(regex.isValid('1.2.3.4.5.6.7')).toBe(false);
-      expect(regex.isValid('1.2.aardvark')).toBe(false);
-      expect(regex.isValid('1.2.aardvark-foo')).toBe(false);
-      expect(regex.isValid('1.2a2.3')).toBe(false);
-    });
-  });
-
-  describe('.isVersion', () => {
-    it('returns true when the version is valid', () => {
-      expect(regex.isVersion('1.2.3')).toBe(true);
-      expect(regex.isVersion('1.2.3a1')).toBe(true);
-      expect(regex.isVersion('1.2.3b2')).toBe(true);
-      expect(regex.isVersion('1.2.3-foo')).toBe(true);
-      expect(regex.isVersion('1.2.3b2-foo')).toBe(true);
-      expect(regex.isVersion('1.2.3b2-foo-bar')).toBe(true);
-    });
-
-    it('returns false when the version is not valid', () => {
-      expect(regex.isVersion('1')).toBe(false);
-      expect(regex.isVersion('1-foo')).toBe(false);
-      expect(regex.isVersion('1.2')).toBe(false);
-      expect(regex.isVersion('1.2-foo')).toBe(false);
-      expect(regex.isVersion('1.2.3.4.5.6.7')).toBe(false);
-      expect(regex.isVersion('1.2.aardvark')).toBe(false);
-      expect(regex.isVersion('1.2.aardvark-foo')).toBe(false);
-      expect(regex.isVersion('1.2a2.3')).toBe(false);
-    });
-  });
-
-  describe('.getMajor', () => {
-    it('returns major segment of version', () => {
-      expect(regex.getMajor('1.2.3')).toEqual(1);
-      expect(regex.getMajor('1.2.3a1')).toEqual(1);
-      expect(regex.getMajor('1.2.3a1-foo')).toEqual(1);
-    });
-  });
-
-  describe('.getMinor', () => {
-    it('returns minor segment of version', () => {
-      expect(regex.getMinor('1.2.3')).toEqual(2);
-      expect(regex.getMinor('1.2.3a1')).toEqual(2);
-      expect(regex.getMinor('1.2.3a1-foo')).toEqual(2);
-    });
-  });
-
-  describe('.getPatch', () => {
-    it('returns patch segment of version', () => {
-      expect(regex.getPatch('1.2.3')).toEqual(3);
-      expect(regex.getPatch('1.2.3a1')).toEqual(3);
-      expect(regex.getPatch('1.2.3a1-foo')).toEqual(3);
-    });
-  });
-
-  describe('.equals', () => {
-    it('returns true when versions are exactly equal', () => {
-      expect(regex.equals('1.2.3', '1.2.3')).toBe(true);
-      expect(regex.equals('1.2.3a1', '1.2.3a1')).toBe(true);
-      expect(regex.equals('1.2.3a1-foo', '1.2.3a1-foo')).toBe(true);
-    });
-
-    it('retuns true when only compatibility differs', () => {
-      expect(regex.equals('1.2.3', '1.2.3-bar')).toBe(true);
-      expect(regex.equals('1.2.3a1', '1.2.3a1-bar')).toBe(true);
-      expect(regex.equals('1.2.3a1-foo', '1.2.3a1-bar')).toBe(true);
-    });
-
-    it('returns flase when versions are otherwise different', () => {
-      expect(regex.equals('1.2.3', '1.2.4')).toBe(false);
-      expect(regex.equals('1.2.3', '1.3.3')).toBe(false);
-      expect(regex.equals('1.2.3', '2.2.3')).toBe(false);
-      expect(regex.equals('1.2.3', '1.2.3a1')).toBe(false);
-      expect(regex.equals('1.2.3a1', '1.2.3a2')).toBe(false);
-      expect(regex.equals('1.2.3', '1.2.4-foo')).toBe(false);
-      expect(regex.equals('1.2.3', '1.3.3-foo')).toBe(false);
-      expect(regex.equals('1.2.3', '2.2.3-foo')).toBe(false);
-      expect(regex.equals('1.2.3', '1.2.3a1-foo')).toBe(false);
-      expect(regex.equals('1.2.3a1', '1.2.3a2-foo')).toBe(false);
-    });
-  });
-
-  describe('.isGreaterThan', () => {
-    it('returns true when version is greater than another', () => {
-      expect(regex.isGreaterThan('2.0.0', '1.0.0')).toBe(true);
-      expect(regex.isGreaterThan('2.2.0', '2.1.0')).toBe(true);
-      expect(regex.isGreaterThan('2.2.1', '2.2.0')).toBe(true);
-      expect(regex.isGreaterThan('3.0.0a2', '3.0.0a1')).toBe(true);
-      expect(regex.isGreaterThan('3.0.0b1', '3.0.0a2')).toBe(true);
-      expect(regex.isGreaterThan('3.0.0', '3.0.0b2')).toBe(true);
-    });
-
-    it('ignores compatibility differences', () => {
-      expect(regex.isGreaterThan('2.0.0', '1.0.0-foo')).toBe(true);
-      expect(regex.isGreaterThan('2.2.0', '2.1.0-foo')).toBe(true);
-      expect(regex.isGreaterThan('2.2.1', '2.2.0-foo')).toBe(true);
-      expect(regex.isGreaterThan('3.0.0a2', '3.0.0a1-foo')).toBe(true);
-      expect(regex.isGreaterThan('3.0.0b1', '3.0.0a2-foo')).toBe(true);
-    });
-
-    it('returns false when version is lower than another', () => {
-      expect(regex.isGreaterThan('1.0.0', '2.0.0')).toBe(false);
-      expect(regex.isGreaterThan('2.1.0', '2.2.0')).toBe(false);
-      expect(regex.isGreaterThan('2.2.1', '2.2.2')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0a1', '3.0.0a2')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0a2', '3.0.0b1')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0b2', '3.0.0')).toBe(false);
-    });
-
-    it('returns false when versions are equal', () => {
-      expect(regex.isGreaterThan('1.0.0', '1.0.0')).toBe(false);
-      expect(regex.isGreaterThan('2.1.0', '2.1.0')).toBe(false);
-      expect(regex.isGreaterThan('2.2.0', '2.2.0')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0a1', '3.0.0a1')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0b2', '3.0.0b2')).toBe(false);
-      expect(regex.isGreaterThan('1.0.0', '1.0.0-foo')).toBe(false);
-      expect(regex.isGreaterThan('2.1.0', '2.1.0-foo')).toBe(false);
-      expect(regex.isGreaterThan('2.2.0', '2.2.0-foo')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0a1', '3.0.0a1-foo')).toBe(false);
-      expect(regex.isGreaterThan('3.0.0b2', '3.0.0b2-foo')).toBe(false);
-    });
-  });
-
-  describe('.isLessThanRange', () => {
-    it('returns true when version less than range', () => {
-      expect(regex.isLessThanRange('1.2.2', '1.2.3')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2', '1.2.3-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2', '1.2.3a1')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2', '1.2.3a1-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3a1')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3a1-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1', '1.2.3')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1', '1.2.3-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1', '1.2.3a1')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1', '1.2.3a1-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3-bar')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3a1')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3a1-bar')).toBe(true);
-    });
-
-    it('returns false when version satisfies range', () => {
-      expect(regex.isLessThanRange('1.2.2', '1.2.2')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2', '1.2.2-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2-foo', '1.2.2')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2-foo', '1.2.2-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2a1', '1.2.2a1')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2a1', '1.2.2a1-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.2a1')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.2a1-bar')).toBe(false);
-    });
-
-    it('returns false when version greater than range', () => {
-      expect(regex.isLessThanRange('1.2.4', '1.2.3')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4', '1.2.3-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4', '1.2.3a1')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4', '1.2.3a1-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3a1')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3a1-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1', '1.2.3')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1', '1.2.3-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1', '1.2.3a1')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1', '1.2.3a1-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3-bar')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3a1')).toBe(false);
-      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3a1-bar')).toBe(false);
-    });
-  });
-
-  describe('.getSatisfyingVersion', () => {
-    it('returns greatest version that matches range', () => {
-      expect(
-        regex.getSatisfyingVersion(
-          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
-          '2.1.6'
-        )
-      ).toEqual('2.1.6');
-      expect(
-        regex.getSatisfyingVersion(
-          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
-          '2.1.6-foo'
-        )
-      ).toEqual('2.1.6');
-      expect(
-        regex.getSatisfyingVersion(['2.1.5-foo', '2.1.6'], '2.1.6-foo')
-      ).toEqual('2.1.6');
-    });
-
-    it('returns null if version that matches is absent', () => {
-      expect(
-        regex.getSatisfyingVersion(['1.2.3', '1.2.4'], '3.5.0')
-      ).toBeNull();
-    });
-  });
-
-  describe('.minSatisfyingVersion', () => {
-    it('returns least version that matches range', () => {
-      expect(
-        regex.minSatisfyingVersion(
-          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
-          '2.1.6'
-        )
-      ).toEqual('2.1.6');
-      expect(
-        regex.minSatisfyingVersion(
-          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
-          '2.1.6-foo'
-        )
-      ).toEqual('2.1.6');
-      expect(
-        regex.minSatisfyingVersion(['2.1.5', '2.1.6-foo'], '2.1.5-foo')
-      ).toEqual('2.1.5');
-    });
-
-    it('returns null if version that matches is absent', () => {
-      expect(
-        regex.minSatisfyingVersion(['1.2.3', '1.2.4'], '3.5.0')
-      ).toBeNull();
-    });
-  });
-
-  describe('.getNewValue', () => {
-    it('returns newVersion', () => {
-      expect(
-        regex.getNewValue({
-          currentValue: null,
-          rangeStrategy: null,
-          currentVersion: null,
-          newVersion: '1.2.3',
-        })
-      ).toBe('1.2.3');
-    });
-  });
-
-  describe('.sortVersions', () => {
-    it('sorts versions in an ascending order', () => {
-      expect(
-        ['1.2.3a1', '2.0.1', '1.3.4', '1.2.3'].sort(
-          regex.sortVersions.bind(regex)
-        )
-      ).toEqual(['1.2.3a1', '1.2.3', '1.3.4', '2.0.1']);
-    });
-  });
-
-  describe('.matches', () => {
-    it('returns true when version match range', () => {
-      expect(regex.matches('1.2.2', '1.2.2')).toBe(true);
-      expect(regex.matches('1.2.2', '1.2.2-bar')).toBe(true);
-      expect(regex.matches('1.2.2-foo', '1.2.2')).toBe(true);
-      expect(regex.matches('1.2.2-foo', '1.2.2-bar')).toBe(true);
-      expect(regex.matches('1.2.2a1', '1.2.2a1')).toBe(true);
-      expect(regex.matches('1.2.2a1', '1.2.2a1-bar')).toBe(true);
-      expect(regex.matches('1.2.2a1-foo', '1.2.2a1')).toBe(true);
-      expect(regex.matches('1.2.2a1-foo', '1.2.2a1-bar')).toBe(true);
-    });
-
-    it('returns false when version not match range', () => {
-      expect(regex.matches('1.2.2', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.2', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.2', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.2', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.2-foo', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.2-foo', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.2-foo', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.2-foo', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.2a1', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.2a1', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.2a1', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.2a1', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.2a1-foo', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.2a1-foo', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.2a1-foo', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.2a1-foo', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.4', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.4', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.4', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.4', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.4-foo', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.4-foo', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.4-foo', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.4-foo', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.4a1', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.4a1', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.4a1', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.4a1', '1.2.3a1-bar')).toBe(false);
-      expect(regex.matches('1.2.4a1-foo', '1.2.3')).toBe(false);
-      expect(regex.matches('1.2.4a1-foo', '1.2.3-bar')).toBe(false);
-      expect(regex.matches('1.2.4a1-foo', '1.2.3a1')).toBe(false);
-      expect(regex.matches('1.2.4a1-foo', '1.2.3a1-bar')).toBe(false);
-    });
+    test.each`
+      version          | range            | expected
+      ${'1.2.2'}       | ${'1.2.2'}       | ${true}
+      ${'1.2.2'}       | ${'1.2.2-bar'}   | ${true}
+      ${'1.2.2-foo'}   | ${'1.2.2'}       | ${true}
+      ${'1.2.2-foo'}   | ${'1.2.2-bar'}   | ${true}
+      ${'1.2.2a1'}     | ${'1.2.2a1'}     | ${true}
+      ${'1.2.2a1'}     | ${'1.2.2a1-bar'} | ${true}
+      ${'1.2.2a1-foo'} | ${'1.2.2a1'}     | ${true}
+      ${'1.2.2a1-foo'} | ${'1.2.2a1-bar'} | ${true}
+      ${'1.2.2'}       | ${'1.2.3'}       | ${false}
+      ${'1.2.2'}       | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.2'}       | ${'1.2.3a1'}     | ${false}
+      ${'1.2.2'}       | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.2-foo'}   | ${'1.2.3'}       | ${false}
+      ${'1.2.2-foo'}   | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.2-foo'}   | ${'1.2.3a1'}     | ${false}
+      ${'1.2.2-foo'}   | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.2a1'}     | ${'1.2.3'}       | ${false}
+      ${'1.2.2a1'}     | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.2a1'}     | ${'1.2.3a1'}     | ${false}
+      ${'1.2.2a1'}     | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.2a1-foo'} | ${'1.2.3'}       | ${false}
+      ${'1.2.2a1-foo'} | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.2a1-foo'} | ${'1.2.3a1'}     | ${false}
+      ${'1.2.2a1-foo'} | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4'}       | ${'1.2.3'}       | ${false}
+      ${'1.2.4'}       | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4'}       | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4'}       | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3'}       | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4-foo'}   | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3'}       | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4a1'}     | ${'1.2.3a1-bar'} | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3'}       | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3-bar'}   | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3a1'}     | ${false}
+      ${'1.2.4a1-foo'} | ${'1.2.3a1-bar'} | ${false}
+    `(
+      'matches("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(regex.matches(version, range)).toBe(expected);
+      }
+    );
   });
 
   describe('Supported 4th number as build', () => {
-    it('supports Bitnami docker versioning', () => {
-      const re = get(
-        'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$'
-      );
+    const re = get(
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$'
+    );
 
-      expect(re.isValid('12.7.0-debian-10-r69')).toBe(true);
-      expect(re.isValid('12.7.0-debian-10-r100')).toBe(true);
-
-      expect(
-        re.isCompatible('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
-      ).toBe(true);
-
-      expect(
-        re.isGreaterThan('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
-      ).toBe(false);
-      expect(
-        re.isGreaterThan('12.7.0-debian-10-r169', '12.7.0-debian-10-r100')
-      ).toBe(true);
-
-      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r69')).toBe(
-        true
-      );
-      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r68')).toBe(
-        true
-      );
+    test.each`
+      version                    | expected
+      ${'12.7.0-debian-10-r69'}  | ${true}
+      ${'12.7.0-debian-10-r100'} | ${true}
+    `('isValid("$version") === $expected', ({ version, expected }) => {
+      expect(!!re.isValid(version)).toBe(expected);
     });
+
+    test.each`
+      version                   | range                      | expected
+      ${'12.7.0-debian-10-r69'} | ${'12.7.0-debian-10-r100'} | ${true}
+    `(
+      'isCompatible("$version") === $expected',
+      ({ version, range, expected }) => {
+        const res = re.isCompatible(version, range);
+        expect(!!res).toBe(expected);
+      }
+    );
+
+    test.each`
+      a                          | b                          | expected
+      ${'12.7.0-debian-10-r69'}  | ${'12.7.0-debian-10-r100'} | ${false}
+      ${'12.7.0-debian-10-r169'} | ${'12.7.0-debian-10-r100'} | ${true}
+    `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(re.isGreaterThan(a, b)).toBe(expected);
+    });
+
+    test.each`
+      version                  | range                     | expected
+      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r69'} | ${true}
+      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r68'} | ${true}
+    `(
+      'matches("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(re.matches(version, range)).toBe(expected);
+      }
+    );
   });
 });

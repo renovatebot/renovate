@@ -1,16 +1,13 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import {
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
+import { PlatformId } from '../../constants';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
 import * as docker from '../../util/exec/docker';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from './artifacts';
@@ -24,11 +21,12 @@ jest.mock('../../util/git');
 const datasource = mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
-  composerIgnorePlatformReqs: true,
+  composerIgnorePlatformReqs: [],
   ignoreScripts: false,
 };
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
+  allowPlugins: false,
   allowScripts: false,
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
@@ -41,18 +39,15 @@ const repoStatus = partial<StatusResult>({
   deleted: [],
 });
 
-describe('.updateArtifacts()', () => {
+describe('manager/composer/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    setAdminConfig(adminConfig);
-    fs.ensureCacheDir.mockResolvedValue(
-      join(adminConfig.cacheDir, './others/composer')
-    );
-
+    GlobalConfig.set(adminConfig);
+    fs.ensureCacheDir.mockResolvedValue('/tmp/renovate/cache/others/composer');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
         { version: '1.0.0' },
@@ -67,7 +62,7 @@ describe('.updateArtifacts()', () => {
   });
 
   afterEach(() => {
-    setAdminConfig();
+    GlobalConfig.reset();
   });
 
   it('returns if no composer.lock found', async () => {
@@ -85,8 +80,12 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    git.getRepoStatus.mockResolvedValue(repoStatus);
-    setAdminConfig({ ...adminConfig, allowScripts: true });
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    GlobalConfig.set({
+      ...adminConfig,
+      allowScripts: true,
+      allowPlugins: true,
+    });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -100,12 +99,12 @@ describe('.updateArtifacts()', () => {
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITHUB,
+      hostType: PlatformId.Github,
       matchHost: 'api.github.com',
       token: 'github-token',
     });
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITLAB,
+      hostType: PlatformId.Gitlab,
       matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
@@ -126,6 +125,11 @@ describe('.updateArtifacts()', () => {
       username: 'some-other-username',
       password: 'some-other-password',
     });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      matchHost: 'https://packages-bearer.example.com/',
+      token: 'abcdef0123456789',
+    });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -133,7 +137,7 @@ describe('.updateArtifacts()', () => {
       ...config,
       registryUrls: ['https://packagist.renovatebot.com'],
     };
-    git.getRepoStatus.mockResolvedValue(repoStatus);
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -149,7 +153,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -189,10 +193,10 @@ describe('.updateArtifacts()', () => {
     });
     expect(res).not.toBeNull();
     expect(res?.map(({ file }) => file)).toEqual([
-      { contents: '{  }', name: 'composer.lock' },
-      { contents: 'Foo', name: foo },
-      { contents: 'Bar', name: bar },
-      { contents: baz, name: '|delete|' },
+      { type: 'addition', path: 'composer.lock', contents: '{  }' },
+      { type: 'addition', path: foo, contents: 'Foo' },
+      { type: 'addition', path: bar, contents: 'Bar' },
+      { type: 'deletion', path: baz },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -201,7 +205,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{  }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -220,7 +224,7 @@ describe('.updateArtifacts()', () => {
   });
 
   it('supports docker mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
 
     const execSnapshots = mockExecAll(exec);
@@ -237,7 +241,7 @@ describe('.updateArtifacts()', () => {
       ],
     });
 
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -255,11 +259,11 @@ describe('.updateArtifacts()', () => {
   });
 
   it('supports global mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'global' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -279,7 +283,6 @@ describe('.updateArtifacts()', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -287,17 +290,16 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ artifactError: { lockFile: 'composer.lock' } }]);
   });
 
   it('catches unmet requirements errors', async () => {
+    const stderr =
+      'fooYour requirements could not be resolved to an installable set of packages.bar';
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
-      throw new Error(
-        'fooYour requirements could not be resolved to an installable set of packages.bar'
-      );
+      throw new Error(stderr);
     });
-    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -305,7 +307,9 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      { artifactError: { lockFile: 'composer.lock', stderr } },
+    ]);
   });
 
   it('throws for disk space', async () => {
@@ -329,7 +333,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -340,10 +344,117 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerIgnorePlatformReqs: false,
+          composerIgnorePlatformReqs: null,
         },
       })
     ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('adds all ignorePlatformReq items', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          composerIgnorePlatformReqs: ['ext-posix', 'ext-sodium'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('installs before running the update when symfony flex is installed', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      '{"packages":[{"name":"symfony/flex","version":"1.17.1"}]}'
+    );
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(2);
+  });
+
+  it('installs before running the update when symfony flex is installed as dev', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      '{"packages-dev":[{"name":"symfony/flex","version":"1.17.1"}]}'
+    );
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(2);
+  });
+
+  it('does not disable plugins when configured globally', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    GlobalConfig.set({ ...adminConfig, allowPlugins: true });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('disable plugins when configured locally', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    GlobalConfig.set({ ...adminConfig, allowPlugins: true });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          ignorePlugins: true,
+        },
+      })
+    ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
 });

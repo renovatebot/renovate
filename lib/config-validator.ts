@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 // istanbul ignore file
 import { dequal } from 'dequal';
-import { readFileSync } from 'fs-extra';
-import JSON5 from 'json5';
+import { readFile } from 'fs-extra';
 import { configFileNames } from './config/app-strings';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
 import { logger } from './logger';
-import { getConfig as getFileConfig } from './workers/global/config/parse/file';
-
-/* eslint-disable no-console */
+import {
+  getConfig as getFileConfig,
+  getParsedContent,
+} from './workers/global/config/parse/file';
 
 let returnVal = 0;
+
+/* eslint-disable no-console */
 
 async function validate(
   desc: string,
@@ -52,27 +54,22 @@ type PackageJson = {
     (name) => name !== 'package.json'
   )) {
     try {
-      const rawContent = readFileSync(file, 'utf8');
-      logger.info(`Validating ${file}`);
+      const parsedContent = await getParsedContent(file);
       try {
-        let jsonContent: RenovateConfig;
-        if (file.endsWith('.json5')) {
-          jsonContent = JSON5.parse(rawContent);
-        } else {
-          jsonContent = JSON.parse(rawContent);
-        }
-        await validate(file, jsonContent);
+        logger.info(`Validating ${file}`);
+        await validate(file, parsedContent);
       } catch (err) {
         logger.info({ err }, `${file} is not valid Renovate config`);
         returnVal = 1;
       }
     } catch (err) {
       // file does not exist
+      continue;
     }
   }
   try {
     const pkgJson = JSON.parse(
-      readFileSync('package.json', 'utf8')
+      await readFile('package.json', 'utf8')
     ) as PackageJson;
     if (pkgJson.renovate) {
       logger.info(`Validating package.json > renovate`);
@@ -88,7 +85,7 @@ type PackageJson = {
     // ignore
   }
   try {
-    const fileConfig = getFileConfig(process.env);
+    const fileConfig = await getFileConfig(process.env);
     if (!dequal(fileConfig, {})) {
       const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
       logger.info(`Validating ${file}`);

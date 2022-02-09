@@ -1,25 +1,27 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
+import { PlatformId } from '../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import { GitProtocol } from '../../types/git';
+import type { GitProtocol } from '../../types/git';
 import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
+import { newlineRegex, regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -68,7 +70,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
+  hostType: PlatformId.BitbucketServer,
 };
 
 /* istanbul ignore next */
@@ -121,10 +123,14 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
+  const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
+  const fileUrl =
+    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
+    (branchOrTag ? '&at=' + branchOrTag : '');
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -137,9 +143,13 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -214,9 +224,8 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url: gitUrl,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
       cloneSubmodules,
+      fullClone: true,
     });
 
     config.mergeMethod = 'merge';
@@ -279,18 +288,6 @@ export async function getPr(
   };
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
-
-  if (pr.state === PrState.Open) {
-    const mergeRes = await bitbucketServerHttp.getJson<{
-      conflicted: string;
-      canMerge: string;
-    }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
-      { useCache: !refreshCache }
-    );
-    pr.isConflicted = !!mergeRes.body.conflicted;
-    pr.canMerge = !!mergeRes.body.canMerge;
-  }
 
   return pr;
 }
@@ -398,18 +395,9 @@ async function getStatus(
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
-  logger.debug(
-    `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
-  );
-
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
+  logger.debug(`getBranchStatus(${branchName})`);
 
   if (!git.branchExists(branchName)) {
     logger.debug('Branch does not exist - cannot fetch status');
@@ -795,7 +783,7 @@ export async function ensureCommentRemoval({
 // Pull Request
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 export async function createPr({
   sourceBranch,
@@ -995,17 +983,17 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  logger.debug(`massageMarkdown(${input.split('\n')[0]})`);
+  logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(new RegExp('<!--.*?-->', 'g'), '');
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
+    .replace(regEx('<!--.*?-->', 'g'), '');
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

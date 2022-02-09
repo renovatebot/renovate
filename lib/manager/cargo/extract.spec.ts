@@ -1,8 +1,8 @@
-import { dir } from 'tmp-promise';
+import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
-import { getName, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { loadFixture } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import { writeLocalFile } from '../../util/fs';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
@@ -15,23 +15,25 @@ const cargo5toml = loadFixture('Cargo.5.toml');
 const cargo6configtoml = loadFixture('cargo.6.config.toml');
 const cargo6toml = loadFixture('Cargo.6.toml');
 
-describe(getName(), () => {
+describe('manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
-    let adminConfig: RepoAdminConfig;
+    let adminConfig: RepoGlobalConfig;
+    let tmpDir: DirectoryResult;
 
     beforeEach(async () => {
       config = {};
-      const tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = {
         localDir: join(tmpDir.path, 'local'),
         cacheDir: join(tmpDir.path, 'cache'),
       };
 
-      setAdminConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
-    afterEach(() => {
-      setAdminConfig();
+    afterEach(async () => {
+      await tmpDir.cleanup();
+      GlobalConfig.reset();
     });
     it('returns null for invalid toml', async () => {
       expect(
@@ -129,7 +131,7 @@ describe(getName(), () => {
 
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
-      expect(res.deps[0].lookupName).toEqual('boolector');
+      expect(res.deps[0].lookupName).toBe('boolector');
     });
   });
 });

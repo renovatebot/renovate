@@ -1,15 +1,41 @@
-import { fs, getName } from '../../../test/util';
-import { SkipReason } from '../../types';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       fs.readLocalFile = jest.fn();
     });
+
+    it('ensure that currentValue is string', () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - name: redis
+          version: 0.9
+          repository: '@placeholder'
+      `;
+      const fileName = 'requirements.yaml';
+      const result = extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable/',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(typeof result.deps[0]?.currentValue).toBe('string');
+      expect(result).toMatchSnapshot();
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
+    });
+
     it('skips invalid registry urls', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -37,7 +63,7 @@ describe(getName(), () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
     });
     it('parses simple requirements.yaml correctly', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -62,9 +88,13 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          { currentValue: '0.9.0', depName: 'redis' },
+          { currentValue: '0.8.1', depName: 'postgresql' },
+        ],
+      });
     });
     it('parses simple requirements.yaml but skips if necessary fields missing', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -107,7 +137,7 @@ describe(getName(), () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
     });
     it('skips local dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -132,9 +162,12 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis' },
+          { depName: 'postgresql', skipReason: 'local-dependency' },
+        ],
+      });
     });
     it('returns null if no dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -200,7 +233,7 @@ describe(getName(), () => {
             {
               currentValue: undefined,
               depName: undefined,
-              skipReason: SkipReason.InvalidName,
+              skipReason: 'invalid-name',
             },
           ],
         },
@@ -217,7 +250,7 @@ describe(getName(), () => {
             {
               currentValue: undefined,
               depName: 'postgres',
-              skipReason: SkipReason.InvalidVersion,
+              skipReason: 'invalid-version',
             },
           ],
         },
@@ -235,7 +268,7 @@ describe(getName(), () => {
             {
               currentValue: '0.1.0',
               depName: 'postgres',
-              skipReason: SkipReason.NoRepository,
+              skipReason: 'no-repository',
             },
           ],
         },

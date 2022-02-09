@@ -1,4 +1,3 @@
-import { getName } from '../../test/util';
 import { getConfig } from './defaults';
 
 jest.mock('../datasource/npm');
@@ -10,7 +9,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe(getName(), () => {
+describe('config/index', () => {
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
     it('merges', async () => {
       const parentConfig = { ...defaultConfig };
@@ -23,8 +22,8 @@ describe(getName(), () => {
       };
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
-      expect(config.foo).toEqual('bar');
-      expect(config.rangeStrategy).toEqual('replace');
+      expect(config.foo).toBe('bar');
+      expect(config.rangeStrategy).toBe('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
@@ -58,7 +57,7 @@ describe(getName(), () => {
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.constraints).toMatchSnapshot();
-      expect(config.constraints.node).toEqual('<15');
+      expect(config.constraints.node).toBe('<15');
     });
     it('handles null parent packageRules', async () => {
       const parentConfig = { ...defaultConfig };

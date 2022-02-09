@@ -5,5 +5,5 @@ export function maskToken(str?: string): string {
         new Array(str.length - 3).join('*'),
         str.slice(-2),
       ].join('')
-    : str;
+    : '';
 }

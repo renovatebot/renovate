@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
@@ -17,7 +17,7 @@ function extractDepFromIncludeFile(includeObj: {
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = SkipReason.UnknownVersion;
+    dep.skipReason = 'unknown-version';
     return dep;
   }
   dep.currentValue = includeObj.ref;
@@ -35,15 +35,21 @@ export function extractPackageFile(
     const doc: any = load(replaceReferenceTags(content), {
       json: true,
     });
+    let includes;
     if (doc?.include && is.array(doc.include)) {
-      for (const includeObj of doc.include) {
-        if (includeObj.file && includeObj.project) {
-          const dep = extractDepFromIncludeFile(includeObj);
-          if (config.endpoint) {
-            dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
-          }
-          deps.push(dep);
+      includes = doc.include;
+    } else {
+      includes = [doc.include];
+    }
+    for (const includeObj of includes) {
+      if (includeObj?.file && includeObj.project) {
+        const dep = extractDepFromIncludeFile(includeObj);
+        if (config.endpoint) {
+          dep.registryUrls = [
+            config.endpoint.replace(regEx(/\/api\/v4\/?/), ''),
+          ];
         }
+        deps.push(dep);
       }
     }
   } catch (err) /* istanbul ignore next */ {

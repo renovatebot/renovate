@@ -1,25 +1,34 @@
 import upath from 'upath';
-import { getName } from '../../../../../test/util';
+import { mocked } from '../../../../../test/util';
 import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
+import * as _hostRulesFromEnv from './host-rules-from-env';
 
 jest.mock('../../../../datasource/npm');
+jest.mock('../../../../util/fs');
+jest.mock('./host-rules-from-env');
 try {
   jest.mock('../../config.js');
 } catch (err) {
   // file does not exist
 }
 
-describe(getName(), () => {
+const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
+
+describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
     let defaultEnv: NodeJS.ProcessEnv;
     beforeEach(async () => {
-      jest.resetModules();
       configParser = await import('./index');
       defaultArgv = getArgv();
-      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
+      defaultEnv = {
+        RENOVATE_CONFIG_FILE: upath.resolve(
+          __dirname,
+          './__fixtures__/default.js'
+        ),
+      };
       jest.mock('delay', () => Promise.resolve());
     });
     it('supports token in env', async () => {
@@ -32,7 +41,7 @@ describe(getName(), () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
         '--pr-footer=custom',
-        '--log-context=abc123',
+        '--log-context=123test',
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
@@ -41,7 +50,7 @@ describe(getName(), () => {
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
         ['prFooter', 'custom'],
-        ['logContext', 'abc123'],
+        ['logContext', '123test'],
       ]);
     });
 
@@ -77,16 +86,21 @@ describe(getName(), () => {
     });
     it('reads private key from file', async () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
+      const privateKeyPathOld = upath.join(
+        __dirname,
+        '__fixtures__/private.pem'
+      );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
+        RENOVATE_PRIVATE_KEY_PATH_OLD: privateKeyPathOld,
       };
-      const expected = await readFile(privateKeyPath);
+      const expected = await readFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
-    it('supports Bitbucket username/passwod', async () => {
+    it('supports Bitbucket username/password', async () => {
       defaultArgv = defaultArgv.concat([
         '--platform=bitbucket',
         '--username=user',
@@ -107,7 +121,19 @@ describe(getName(), () => {
         '--endpoint=https://github.renovatebot.com/api/v3',
       ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
-      expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+      expect(parsed.endpoint).toBe('https://github.renovatebot.com/api/v3/');
+    });
+    it('parses global manager config', async () => {
+      defaultArgv = defaultArgv.concat(['--detect-global-manager-config=true']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.npmrc).toBeNull();
+    });
+
+    it('parses host rules from env', async () => {
+      defaultArgv = defaultArgv.concat(['--detect-host-rules-from-env=true']);
+      hostRulesFromEnv.mockReturnValueOnce([{ matchHost: 'example.org' }]);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.hostRules).toContainEqual({ matchHost: 'example.org' });
     });
   });
 });

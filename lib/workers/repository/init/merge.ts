@@ -9,7 +9,7 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
-import { RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -68,6 +68,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     configFileParsed = JSON.parse(
       await readLocalFile('package.json', 'utf8')
     ).renovate;
+    if (is.string(configFileParsed)) {
+      logger.debug('Massaging string renovate config to extends array');
+      configFileParsed = { extends: [configFileParsed] };
+    }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
@@ -195,15 +199,19 @@ export async function mergeRenovateConfig(
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = decryptConfig(migratedConfig);
+  const decryptedConfig = await decryptConfig(
+    migratedConfig,
+    config.repository
+  );
   // istanbul ignore if
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
-  let resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config)
+  let resolvedConfig = await decryptConfig(
+    await presets.resolveConfigPresets(decryptedConfig, config),
+    config.repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);

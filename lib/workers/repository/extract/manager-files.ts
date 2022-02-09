@@ -47,6 +47,7 @@ export async function getManagerPackageFiles(
   const packageFiles: PackageFile[] = [];
   for (const packageFile of fileList) {
     const content = await readLocalFile(packageFile, 'utf8');
+    // istanbul ignore else
     if (content) {
       const res = await extractPackageFile(
         manager,
@@ -64,7 +65,6 @@ export async function getManagerPackageFiles(
         });
       }
     } else {
-      // istanbul ignore next
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }

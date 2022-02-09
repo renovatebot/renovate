@@ -4,12 +4,14 @@ You can create a custom [versioning config](/configuration-options/#versioning) 
 For example, if you want to reference a tag like `module-v1.2.5`, a block like this would work:
 
 ```json
-"terraform": {
- "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+{
+  "terraform": {
+    "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+  }
 }
 ```
 
-Pinned Terragrunt dependencies like the following will receive a PR whenever there is a newer version available:
+Pinned Terragrunt dependencies like the following will get a PR whenever there is a newer version available:
 
 ```hcl
 terraform {

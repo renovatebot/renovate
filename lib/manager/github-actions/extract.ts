@@ -1,23 +1,24 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import { newlineRegex, regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
-const dockerRe = /^\s+uses: docker:\/\/([^"]+)\s*$/;
-const actionRe =
-  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/;
+const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
+const actionRe = regEx(
+  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/
+);
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRe = /^[a-z0-9]{40}|[a-z0-9]{64}$/;
+const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  for (const line of content.split('\n')) {
+  for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     const dockerMatch = dockerRe.exec(line);
@@ -27,7 +28,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
       deps.push(dep);
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     const tagMatch = actionRe.exec(line);
@@ -54,7 +55,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else {
         dep.currentValue = currentValue;
         if (!dockerVersioning.api.isValid(currentValue)) {
-          dep.skipReason = SkipReason.InvalidVersion;
+          dep.skipReason = 'invalid-version';
         }
       }
       deps.push(dep);

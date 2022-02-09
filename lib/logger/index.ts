@@ -1,18 +1,22 @@
 import is from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
-import * as shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { RenovateStream } from './pretty-stdout';
 import type { BunyanRecord, Logger } from './types';
-import { ProblemStream, withSanitizer } from './utils';
+import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
 
-let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
-let curMeta = {};
+let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
+let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
+if (is.string(process.env.LOG_LEVEL)) {
+  process.env.LOG_LEVEL = process.env.LOG_LEVEL.toLowerCase().trim();
+}
+validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',
   level:

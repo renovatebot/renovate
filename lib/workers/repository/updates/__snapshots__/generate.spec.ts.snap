@@ -13,6 +13,7 @@ Object {
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
   "displayFrom": "",
+  "displayPending": "",
   "displayTo": "0.6.0",
   "labels": Array [
     "a",
@@ -30,6 +31,7 @@ Object {
       "commitMessage": "",
       "depName": "some-dep",
       "displayFrom": "",
+      "displayPending": "",
       "displayTo": "0.6.0",
       "labels": Array [
         "a",
@@ -46,6 +48,7 @@ Object {
       "datasource": "npm",
       "depName": "some-dep",
       "displayFrom": "",
+      "displayPending": "",
       "displayTo": "1.0.0",
       "labels": Array [
         "a",
@@ -60,6 +63,7 @@ Object {
       "commitMessage": "",
       "depName": "@types/some-dep",
       "displayFrom": "",
+      "displayPending": "",
       "displayTo": "0.5.7",
       "labels": Array [
         "a",
@@ -85,6 +89,7 @@ Object {
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
   "displayFrom": "",
+  "displayPending": "",
   "displayTo": "0.6.0",
   "hasTypes": true,
   "isRange": false,
@@ -103,6 +108,7 @@ Object {
       "datasource": "npm",
       "depName": "some-dep",
       "displayFrom": "",
+      "displayPending": "",
       "displayTo": "0.6.0",
       "isRange": false,
       "newValue": "0.6.0",
@@ -117,6 +123,7 @@ Object {
       "datasource": "npm",
       "depName": "some-dep",
       "displayFrom": "",
+      "displayPending": "",
       "displayTo": "1.0.0",
       "isRange": false,
       "newValue": "1.0.0",
@@ -132,6 +139,7 @@ Object {
       "datasource": "npm",
       "depName": "@types/some-dep",
       "displayFrom": "0.5.7",
+      "displayPending": "",
       "displayTo": "0.5.8",
       "isRange": false,
       "newValue": "0.5.8",
@@ -153,6 +161,7 @@ Object {
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
   "displayFrom": "",
+  "displayPending": "",
   "displayTo": "",
   "isLockFileMaintenance": true,
   "labels": Array [],
@@ -165,6 +174,7 @@ Object {
       "branchName": "some-branch",
       "commitMessage": "",
       "displayFrom": "",
+      "displayPending": "",
       "displayTo": "",
       "isLockFileMaintenance": true,
       "prTitle": "some-title",
@@ -186,6 +196,7 @@ Object {
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
   "displayFrom": "1.0.0",
+  "displayPending": "",
   "displayTo": "1.0.1",
   "isLockfileUpdate": true,
   "isRange": false,
@@ -204,6 +215,7 @@ Object {
       "currentValue": "^1.0.0",
       "currentVersion": "1.0.0",
       "displayFrom": "1.0.0",
+      "displayPending": "",
       "displayTo": "1.0.1",
       "isLockfileUpdate": true,
       "isRange": false,
@@ -217,6 +229,4 @@ Object {
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title (patch)"`;
-
-exports[`workers/repository/updates/generate generateBranchConfig() supports manual prTitle 1`] = `"upgrade some-dep"`;
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades: some-title (patch) 1`] = `"some-title (patch)"`;

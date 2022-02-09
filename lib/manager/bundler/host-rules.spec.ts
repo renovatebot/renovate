@@ -1,5 +1,4 @@
-import { getName } from '../../../test/util';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import { add, clear } from '../../util/host-rules';
 
 import {
@@ -7,7 +6,7 @@ import {
   getAuthenticationHeaderValue,
 } from './host-rules';
 
-describe(getName(), () => {
+describe('manager/bundler/host-rules', () => {
   beforeEach(() => {
     clear();
   });
@@ -18,14 +17,14 @@ describe(getName(), () => {
           username: 'test',
           password: 'password',
         })
-      ).toEqual('test:password');
+      ).toBe('test:password');
     });
     it('returns the authentication header with the token', () => {
       expect(
         getAuthenticationHeaderValue({
           token: 'token',
         })
-      ).toEqual('token');
+      ).toBe('token');
     });
   });
   describe('findAllAuthenticatable()', () => {
@@ -43,21 +42,27 @@ describe(getName(), () => {
     it('returns an empty array if matchHost is missing', () => {
       delete hostRule.matchHost;
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toBeEmptyArray();
     });
     it('returns an empty array if username is missing and password is present', () => {
       delete hostRule.username;
       delete hostRule.token;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toBeEmptyArray();
     });
     it('returns an empty array if password and token are missing', () => {
       delete hostRule.password;
       delete hostRule.token;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toBeEmptyArray();
     });
     it('returns the hostRule if using matchHost and password', () => {
       delete hostRule.token;

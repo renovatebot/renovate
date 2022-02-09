@@ -1,3 +1,7 @@
+// FIXME #12556
+/* eslint-disable @typescript-eslint/naming-convention */
+
+// eslint-disable-next-line typescript-enum/no-enum
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
   module = 'module',
@@ -7,6 +11,7 @@ export enum TerraformDependencyTypes {
   terraform_version = 'terraform_version',
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum TerraformResourceTypes {
   unknown = 'unknown',
   /**

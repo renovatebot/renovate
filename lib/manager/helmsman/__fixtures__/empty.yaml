@@ -1,0 +1,6 @@
+namespaces:
+
+helmRepos:
+  test:
+apps:
+  test:

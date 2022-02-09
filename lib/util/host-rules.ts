@@ -1,33 +1,48 @@
+import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-const legacyHostFields = ['hostName', 'domainName', 'baseUrl'];
+interface LegacyHostRule {
+  hostName?: string;
+  domainName?: string;
+  baseUrl?: string;
+}
 
-export function add(params: HostRule): void {
-  const rule = clone(params);
-  const matchedFields = legacyHostFields.filter((field) => rule[field]);
-  if (matchedFields.length) {
-    if (rule.matchHost || matchedFields.length > 1) {
-      throw new Error(
-        `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
-      );
-    }
-    const field = matchedFields[0];
-    logger.warn({ field }, 'Legacy hostRules field needs migrating');
-    rule.matchHost = rule[field];
-    delete rule[field];
+function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+  const cloned: LegacyHostRule & HostRule = clone(rule);
+  delete cloned.hostName;
+  delete cloned.domainName;
+  delete cloned.baseUrl;
+  const result: HostRule = cloned;
+
+  const { matchHost } = result;
+  const { hostName, domainName, baseUrl } = rule;
+  const hostValues = [matchHost, hostName, domainName, baseUrl].filter(Boolean);
+  if (hostValues.length === 1) {
+    const [matchHost] = hostValues;
+    result.matchHost = matchHost;
+  } else if (hostValues.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
+    );
   }
 
-  const confidentialFields = ['password', 'token'];
+  return result;
+}
+
+export function add(params: HostRule): void {
+  const rule = migrateRule(params);
+
+  const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
     const parsedUrl = parseUrl(rule.matchHost);
-    rule.resolvedHost = parsedUrl?.hostname || rule.matchHost;
+    rule.resolvedHost = parsedUrl?.hostname ?? rule.matchHost;
     confidentialFields.forEach((field) => {
       if (rule[field]) {
         logger.debug(
@@ -38,15 +53,15 @@ export function add(params: HostRule): void {
   }
   confidentialFields.forEach((field) => {
     const secret = rule[field];
-    if (secret && secret.length > 3) {
-      sanitize.add(secret);
+    if (is.string(secret) && secret.length > 3) {
+      sanitize.addSecretForSanitizing(secret);
     }
   });
   if (rule.username && rule.password) {
     const secret = Buffer.from(`${rule.username}:${rule.password}`).toString(
       'base64'
     );
-    sanitize.add(secret);
+    sanitize.addSecretForSanitizing(secret);
   }
   hostRules.push(rule);
 }
@@ -61,7 +76,7 @@ function isEmptyRule(rule: HostRule): boolean {
 }
 
 function isHostTypeRule(rule: HostRule): boolean {
-  return rule.hostType && !rule.resolvedHost;
+  return !!rule.hostType && !rule.resolvedHost;
 }
 
 function isHostOnlyRule(rule: HostRule): boolean {
@@ -69,7 +84,7 @@ function isHostOnlyRule(rule: HostRule): boolean {
 }
 
 function isMultiRule(rule: HostRule): boolean {
-  return rule.hostType && !!rule.resolvedHost;
+  return !!rule.hostType && !!rule.resolvedHost;
 }
 
 function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
@@ -77,15 +92,22 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
 }
 
 function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
-  if (validateUrl(rule.matchHost)) {
+  // istanbul ignore if
+  if (!rule.matchHost) {
+    return false;
+  }
+  if (search.url && validateUrl(rule.matchHost)) {
     return search.url.startsWith(rule.matchHost);
   }
-  const parsedUrl = parseUrl(search.url);
+  const parsedUrl = search.url ? parseUrl(search.url) : null;
   if (!parsedUrl?.hostname) {
     return false;
   }
   const { hostname } = parsedUrl;
-  return hostname === rule.matchHost || hostname.endsWith(`.${rule.matchHost}`);
+  const dotPrefixedMatchHost = rule.matchHost.startsWith('.')
+    ? rule.matchHost
+    : `.${rule.matchHost}`;
+  return hostname === rule.matchHost || hostname.endsWith(dotPrefixedMatchHost);
 }
 
 export function find(search: HostRuleSearch): HostRule {
@@ -132,15 +154,22 @@ export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
     .map((rule) => rule.resolvedHost)
-    .filter(Boolean);
+    .filter(is.truthy);
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
   return hostRules.filter((rule) => rule.hostType === hostType);
 }
 
+/**
+ * @returns a deep copy of all known host rules without any filtering
+ */
+export function getAll(): HostRule[] {
+  return clone(hostRules);
+}
+
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clear();
+  sanitize.clearSanitizedSecretsList();
 }

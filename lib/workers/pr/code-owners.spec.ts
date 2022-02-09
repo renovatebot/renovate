@@ -1,12 +1,12 @@
 import { mock } from 'jest-mock-extended';
-import { fs, getName, git } from '../../../test/util';
-import { Pr } from '../../platform';
+import { fs, git } from '../../../test/util';
+import type { Pr } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
 
-describe(getName(), () => {
+describe('workers/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
     let pr: Pr;
     beforeEach(() => {
@@ -45,7 +45,7 @@ describe(getName(), () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
-      expect(codeOwners).toEqual([]);
+      expect(codeOwners).toBeEmptyArray();
     });
     it('returns empty array when no code owners match', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
@@ -60,7 +60,7 @@ describe(getName(), () => {
         throw new Error();
       });
       const codeOwners = await codeOwnersForPr(pr);
-      expect(codeOwners).toEqual([]);
+      expect(codeOwners).toBeEmptyArray();
     });
     const codeOwnerFilePaths = [
       'CODEOWNERS',

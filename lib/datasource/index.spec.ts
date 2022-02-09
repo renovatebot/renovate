@@ -1,4 +1,6 @@
-import { getName, logger, mocked } from '../../test/util';
+import fs from 'fs-extra';
+import * as httpMock from '../../test/http-mock';
+import { logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -25,13 +27,19 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe(getName(), () => {
+describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
   it('returns datasources', () => {
     expect(datasource.getDatasources()).toBeDefined();
-    expect(datasource.getDatasourceList()).toBeDefined();
+
+    const managerList = fs
+      .readdirSync(__dirname, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'))
+      .map((dirent) => dirent.name)
+      .sort();
+    expect(datasource.getDatasourceList()).toEqual(managerList);
   });
   it('validates datasource', () => {
     function validateDatasource(module: DatasourceApi, name: string): boolean {
@@ -60,13 +68,11 @@ describe(getName(), () => {
 
     for (const dsName of dss.keys()) {
       const ds = dss.get(dsName);
-      expect(validateDatasource(ds, dsName)).toBe(true);
+      expect(validateDatasource(ds, dsName)).toBeTrue();
     }
   });
   it('returns if digests are supported', () => {
-    expect(
-      datasource.supportsDigests({ datasource: datasourceGithubTags.id })
-    ).toBe(true);
+    expect(datasource.supportsDigests(datasourceGithubTags.id)).toBeTrue();
   });
   it('returns null for no datasource', async () => {
     expect(
@@ -136,7 +142,7 @@ describe(getName(), () => {
       versioning: 'loose',
     });
     expect(res.releases).toHaveLength(1);
-    expect(res.releases[0].version).toEqual('v1.0');
+    expect(res.releases[0].version).toBe('v1.0');
   });
   it('adds sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -151,6 +157,11 @@ describe(getName(), () => {
     });
   });
   it('ignores and warns for registryUrls', async () => {
+    httpMock
+      .scope('https://galaxy.ansible.com')
+      .get('/api/v1/roles/')
+      .query({ owner__username: 'some', name: 'dep' })
+      .reply(200, {});
     await datasource.getPkgReleases({
       datasource: GalaxyDatasource.id,
       depName: 'some.dep',
@@ -218,6 +229,57 @@ describe(getName(), () => {
       })
     ).toBeNull();
   });
+  it('merges custom defaultRegistryUrls and returns success', async () => {
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+    });
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceMaven.id,
+      depName: 'something',
+      defaultRegistryUrls: ['https://reg1.com', 'https://reg2.io'],
+    });
+    expect(res).toEqual({
+      releases: [
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.0.0',
+        },
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.1.0',
+        },
+      ],
+    });
+  });
+  it('ignores custom defaultRegistryUrls if registrUrls are set', async () => {
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+    });
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceMaven.id,
+      depName: 'something',
+      defaultRegistryUrls: ['https://reg3.com'],
+      registryUrls: ['https://reg1.com', 'https://reg2.io'],
+    });
+    expect(res).toEqual({
+      releases: [
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.0.0',
+        },
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.1.0',
+        },
+      ],
+    });
+  });
   it('merges registries and returns success', async () => {
     mavenDatasource.getReleases.mockResolvedValueOnce({
       releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
@@ -279,7 +341,7 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'abc',
     });
-    expect(res.sourceUrl).toEqual('https://abc.com');
+    expect(res.sourceUrl).toBe('https://abc.com');
   });
   it('massages sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -290,6 +352,20 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'cas',
     });
-    expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
+    expect(res.sourceUrl).toBe('https://github.com/Jasig/cas');
+  });
+
+  it('applies replacements', async () => {
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceNpm.id,
+      depName: 'abc',
+      replacementName: 'def',
+      replacementVersion: '2.0.0',
+    });
+    expect(res.replacementName).toBe('def');
+    expect(res.replacementVersion).toBe('2.0.0');
   });
 });

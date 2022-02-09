@@ -6,7 +6,9 @@
       "request": "launch",
       "name": "debug",
       "program": "${workspaceFolder}/lib/renovate.ts",
-      "env": { "LOG_LEVEL": "debug" },
+      "env": {
+        "LOG_LEVEL": "debug"
+      },
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "protocol": "inspector",
@@ -20,10 +22,14 @@
       "args": [
         "--runInBand",
         "--collectCoverage=false",
+        "--testTimeout=100000000",
         "--runTestsByPath",
         "${relativeFile}"
       ],
-      "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
+      "env": {
+        "NODE_ENV": "test",
+        "LOG_LEVEL": "debug"
+      },
       "console": "integratedTerminal",
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
@@ -37,8 +43,15 @@
       "request": "launch",
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand", "--collectCoverage=false"],
-      "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
+      "args": [
+        "--runInBand",
+        "--collectCoverage=false",
+        "--testTimeout=100000000"
+      ],
+      "env": {
+        "NODE_ENV": "test",
+        "LOG_LEVEL": "debug"
+      },
       "console": "integratedTerminal",
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
@@ -46,6 +59,41 @@
       "runtimeArgs": ["--preserve-symlinks"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest Current Folder",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--collectCoverage=false",
+        "--testTimeout=100000000",
+        "--roots=${workspaceFolder}/${relativeFileDirname}"
+      ],
+      "console": "integratedTerminal",
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "runtimeArgs": ["--preserve-symlinks"],
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "name": "vscode-jest-tests",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "yarn",
+      "args": [
+        "jest",
+        "--runInBand",
+        "--watchAll=false",
+        "--testTimeout=100000000"
+      ]
     }
   ]
 }

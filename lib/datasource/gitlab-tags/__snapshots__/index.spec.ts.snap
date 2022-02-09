@@ -2,7 +2,7 @@
 
 exports[`datasource/gitlab-tags/index getReleases returns tags from custom registry 1`] = `
 Object {
-  "registryUrl": "https://gitlab.company.com/api/v4/",
+  "registryUrl": "https://gitlab.company.com/api/v4",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
@@ -18,23 +18,30 @@ Object {
       "version": "v1.1.1",
     },
   ],
-  "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+  "sourceUrl": "https://gitlab.company.com/some/dep2",
 }
 `;
 
-exports[`datasource/gitlab-tags/index getReleases returns tags from custom registry 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.company.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+exports[`datasource/gitlab-tags/index getReleases returns tags from custom registry in sub path 1`] = `
+Object {
+  "registryUrl": "https://my.company.com/gitlab",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "2020-03-04T18:01:37.000Z",
+      "version": "v1.0.0",
     },
-    "method": "GET",
-    "url": "https://gitlab.company.com/api/v4/projects/some%2Fdep2/repository/tags?per_page=100",
-  },
-]
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+    Object {
+      "gitRef": "v1.1.1",
+      "version": "v1.1.1",
+    },
+  ],
+  "sourceUrl": "https://my.company.com/gitlab/some/dep2",
+}
 `;
 
 exports[`datasource/gitlab-tags/index getReleases returns tags with default registry 1`] = `
@@ -52,19 +59,4 @@ Object {
   ],
   "sourceUrl": "https://gitlab.com/some/dep2",
 }
-`;
-
-exports[`datasource/gitlab-tags/index getReleases returns tags with default registry 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Fdep2/repository/tags?per_page=100",
-  },
-]
 `;

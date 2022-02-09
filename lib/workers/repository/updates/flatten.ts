@@ -7,6 +7,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
+import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
@@ -14,26 +15,45 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substr(1);
 
+function sanitizeDepName(depName: string): string {
+  return depName
+    .replace('@types/', '')
+    .replace('@', '')
+    .replace(regEx(/\//g), '-')
+    .replace(regEx(/\s+/g), '-')
+    .replace(regEx(/-+/), '-')
+    .toLowerCase();
+}
+
 export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
   // TODO: Remove next line once #8075 is complete
   updateConfig.depNameSanitized = updateConfig.depName
-    ? updateConfig.depName
-        .replace('@types/', '')
-        .replace('@', '')
-        .replace(/\//g, '-')
-        .replace(/\s+/g, '-')
-        .replace(/-+/, '-')
-        .toLowerCase()
+    ? sanitizeDepName(updateConfig.depName)
+    : undefined;
+  updateConfig.newNameSanitized = updateConfig.newName
+    ? sanitizeDepName(updateConfig.newName)
     : undefined;
   if (updateConfig.sourceUrl) {
     const parsedSourceUrl = parseUrl(updateConfig.sourceUrl);
     if (parsedSourceUrl?.pathname) {
       updateConfig.sourceRepoSlug = parsedSourceUrl.pathname
-        .replace(/^\//, '') // remove leading slash
-        .replace(/\//g, '-') // change slashes to hyphens
-        .replace(/-+/g, '-'); // remove multiple hyphens
+        .replace(regEx(/^\//), '') // remove leading slash
+        .replace(regEx(/\//g), '-') // change slashes to hyphens
+        .replace(regEx(/-+/g), '-'); // remove multiple hyphens
+      updateConfig.sourceRepo = parsedSourceUrl.pathname.replace(
+        regEx(/^\//),
+        ''
+      ); // remove leading slash
+      updateConfig.sourceRepoOrg = updateConfig.sourceRepo.replace(
+        regEx(/\/.*/g),
+        ''
+      ); // remove everything after first slash
+      updateConfig.sourceRepoName = updateConfig.sourceRepo.replace(
+        regEx(/.*\//g),
+        ''
+      ); // remove everything up to the last slash
     }
   }
   generateBranchName(updateConfig);
@@ -52,6 +72,7 @@ export async function flattenUpdates(
     'pin',
     'digest',
     'lockFileMaintenance',
+    'replacement',
   ];
   for (const [manager, files] of Object.entries(packageFiles)) {
     const managerConfig = getManagerConfig(config, manager);
@@ -119,6 +140,7 @@ export async function flattenUpdates(
           packageFileConfig.lockFileMaintenance
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
+        lockFileConfig.isLockFileMaintenance = true;
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(

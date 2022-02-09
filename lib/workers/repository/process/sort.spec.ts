@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import { sortBranches } from './sort';
 
-describe(getName(), () => {
+describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [
@@ -24,8 +23,12 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
-      // FIXME: explicit assert condition
-      expect(branches).toMatchSnapshot();
+      expect(branches).toEqual([
+        { prTitle: 'some other pin', updateType: 'pin' },
+        { prTitle: 'some pin', updateType: 'pin' },
+        { prTitle: 'a minor update', updateType: 'minor' },
+        { prTitle: 'some major update', updateType: 'major' },
+      ]);
     });
     it('sorts based on prPriority', () => {
       const branches = [
@@ -51,8 +54,12 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
-      // FIXME: explicit assert condition
-      expect(branches).toMatchSnapshot();
+      expect(branches).toEqual([
+        { prPriority: 1, prTitle: 'some major update', updateType: 'major' },
+        { prPriority: 0, prTitle: 'some other pin', updateType: 'pin' },
+        { prPriority: -1, prTitle: 'some pin', updateType: 'pin' },
+        { prPriority: -1, prTitle: 'a minor update', updateType: 'minor' },
+      ]);
     });
     it('sorts based on isVulnerabilityAlert', () => {
       const branches = [
@@ -79,8 +86,17 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
-      // FIXME: explicit assert condition
-      expect(branches).toMatchSnapshot();
+      expect(branches).toEqual([
+        {
+          isVulnerabilityAlert: true,
+          prPriority: -1,
+          prTitle: 'a minor update',
+          updateType: 'minor',
+        },
+        { prPriority: 1, prTitle: 'some major update', updateType: 'major' },
+        { prPriority: 0, prTitle: 'some other pin', updateType: 'pin' },
+        { prPriority: -1, prTitle: 'some pin', updateType: 'pin' },
+      ]);
     });
   });
 });

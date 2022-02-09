@@ -1,9 +1,10 @@
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { mergeBranch } from '../../util/git';
+import { resolveBranchStatus } from './status-checks';
 
 export type AutomergeResult =
   | 'automerged'
@@ -25,14 +26,14 @@ export async function tryBranchAutomerge(
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
-  const branchStatus = await platform.getBranchStatus(
+  const branchStatus = await resolveBranchStatus(
     config.branchName,
-    config.requiredStatusChecks
+    config.ignoreTests
   );
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);
     try {
-      if (getAdminConfig().dryRun) {
+      if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would automerge branch' + config.branchName);
       } else {
         await mergeBranch(config.branchName);
@@ -46,9 +47,13 @@ export async function tryBranchAutomerge(
       }
       if (
         err.message.includes('refusing to merge unrelated histories') ||
-        err.message.includes('Not possible to fast-forward')
+        err.message.includes('Not possible to fast-forward') ||
+        err.message.includes(
+          'Updates were rejected because the tip of your current branch is behind'
+        )
       ) {
-        logger.warn({ err }, 'Branch is not up to date - cannot automerge');
+        logger.debug({ err }, 'Branch automerge error');
+        logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
       if (err.message.includes('Protected branch')) {

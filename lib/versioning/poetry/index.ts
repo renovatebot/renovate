@@ -1,8 +1,14 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
-import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
+import { VERSION_PATTERN } from './patterns';
+import {
+  npm2poetry,
+  poetry2npm,
+  poetry2semver,
+  semver2poetry,
+} from './transform';
 
 export const id = 'poetry';
 export const displayName = 'Poetry';
@@ -10,144 +16,121 @@ export const urls = ['https://python-poetry.org/docs/versions/'];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
-function notEmpty(s: string): boolean {
-  return s !== '';
+function equals(a: string, b: string): boolean {
+  const semverA = poetry2semver(a);
+  const semverB = poetry2semver(b);
+  return !!(semverA && semverB && npm.equals(semverA, semverB));
 }
 
-function getVersionParts(input: string): [string, string] {
-  const versionParts = input.split('-');
-  if (versionParts.length === 1) {
-    return [input, ''];
-  }
-
-  return [versionParts[0], '-' + versionParts[1]];
+function getMajor(version: string): number | null {
+  const semverVersion = poetry2semver(version);
+  return semverVersion ? npm.getMajor(semverVersion) : null;
 }
 
-function padZeroes(input: string): string {
-  if (/[~^*]/.test(input)) {
-    // ignore ranges
-    return input;
-  }
-
-  const [output, stability] = getVersionParts(input);
-
-  const sections = output.split('.');
-  while (sections.length < 3) {
-    sections.push('0');
-  }
-  return sections.join('.') + stability;
+function getMinor(version: string): number | null {
+  const semverVersion = poetry2semver(version);
+  return semverVersion ? npm.getMinor(semverVersion) : null;
 }
 
-// This function works like cargo2npm, but it doesn't
-// add a '^', because poetry treats versions without operators as
-// exact versions.
-function poetry2npm(input: string): string {
-  return input
-    .split(',')
-    .map((str) => str.trim())
-    .filter(notEmpty)
-    .join(' ');
+function getPatch(version: string): number | null {
+  const semverVersion = poetry2semver(version);
+  return semverVersion ? npm.getPatch(semverVersion) : null;
 }
 
-// NOTE: This function is copied from cargo versioning code.
-// Poetry uses commas (like in cargo) instead of spaces (like in npm)
-// for AND operation.
-function npm2poetry(input: string): string {
-  // Note: this doesn't remove the ^
-  const res = input
-    .split(' ')
-    .map((str) => str.trim())
-    .filter(notEmpty);
-  const operators = ['^', '~', '=', '>', '<', '<=', '>='];
-  for (let i = 0; i < res.length - 1; i += 1) {
-    if (operators.includes(res[i])) {
-      const newValue = res[i] + ' ' + res[i + 1];
-      res.splice(i, 2, newValue);
+function isVersion(input: string): boolean {
+  return VERSION_PATTERN.test(input);
+}
+
+function isGreaterThan(a: string, b: string): boolean {
+  const semverA = poetry2semver(a);
+  const semverB = poetry2semver(b);
+  return !!(semverA && semverB && npm.isGreaterThan(semverA, semverB));
+}
+
+function isLessThanRange(version: string, range: string): boolean {
+  const semverVersion = poetry2semver(version);
+  return !!(
+    isVersion(version) &&
+    semverVersion &&
+    npm.isLessThanRange?.(semverVersion, poetry2npm(range))
+  );
+}
+
+export function isValid(input: string): boolean {
+  return npm.isValid(poetry2npm(input));
+}
+
+function isStable(version: string): boolean {
+  const semverVersion = poetry2semver(version);
+  return !!(semverVersion && npm.isStable(semverVersion));
+}
+
+function matches(version: string, range: string): boolean {
+  const semverVersion = poetry2semver(version);
+  return !!(
+    isVersion(version) &&
+    semverVersion &&
+    npm.matches(semverVersion, poetry2npm(range))
+  );
+}
+
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  const semverVersions: string[] = [];
+  versions.forEach((version) => {
+    const semverVersion = poetry2semver(version);
+    if (semverVersion) {
+      semverVersions.push(semverVersion);
     }
-  }
-  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
+  });
+  const npmRange = poetry2npm(range);
+  const satisfyingVersion = npm.getSatisfyingVersion(semverVersions, npmRange);
+  return satisfyingVersion ? semver2poetry(satisfyingVersion) : null;
 }
 
-const equals = (a: string, b: string): boolean => {
-  try {
-    return npm.equals(padZeroes(a), padZeroes(b));
-  } catch (err) /* istanbul ignore next */ {
-    return pep440.equals(a, b);
-  }
-};
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  const semverVersions: string[] = [];
+  versions.forEach((version) => {
+    const semverVersion = poetry2semver(version);
+    if (semverVersion) {
+      semverVersions.push(semverVersion);
+    }
+  });
+  const npmRange = poetry2npm(range);
+  const satisfyingVersion = npm.minSatisfyingVersion(semverVersions, npmRange);
+  return satisfyingVersion ? semver2poetry(satisfyingVersion) : null;
+}
 
-const getMajor = (version: string): number => {
-  try {
-    return npm.getMajor(padZeroes(version));
-  } catch (err) /* istanbul ignore next */ {
-    return pep440.getMajor(version);
-  }
-};
-
-const getMinor = (version: string): number => {
-  try {
-    return npm.getMinor(padZeroes(version));
-  } catch (err) /* istanbul ignore next */ {
-    return pep440.getMinor(version);
-  }
-};
-
-const getPatch = (version: string): number => {
-  try {
-    return npm.getPatch(padZeroes(version));
-  } catch (err) /* istanbul ignore next */ {
-    return pep440.getPatch(version);
-  }
-};
-
-const isGreaterThan = (a: string, b: string): boolean => {
-  try {
-    return npm.isGreaterThan(padZeroes(a), padZeroes(b));
-  } catch (err) /* istanbul ignore next */ {
-    return pep440.isGreaterThan(a, b);
-  }
-};
-
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isVersion(padZeroes(version)) &&
-  npm.isLessThanRange(padZeroes(version), poetry2npm(range));
-
-export const isValid = (input: string): string | boolean =>
-  npm.isValid(poetry2npm(input));
-
-const isStable = (version: string): boolean => npm.isStable(padZeroes(version));
-
-const isVersion = (input: string): string | boolean =>
-  npm.isVersion(padZeroes(input));
-
-const matches = (version: string, range: string): boolean =>
-  npm.isVersion(padZeroes(version)) &&
-  npm.matches(padZeroes(version), poetry2npm(range));
-
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions, poetry2npm(range));
-
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions, poetry2npm(range));
-
-const isSingleVersion = (constraint: string): string | boolean =>
-  (constraint.trim().startsWith('=') &&
-    isVersion(constraint.trim().substring(1).trim())) ||
-  isVersion(constraint.trim());
+function isSingleVersion(constraint: string): boolean {
+  return (
+    (constraint.trim().startsWith('=') &&
+      isVersion(constraint.trim().substring(1).trim())) ||
+    isVersion(constraint.trim())
+  );
+}
 
 function handleShort(
   operator: string,
   currentValue: string,
   newVersion: string
-): string {
+): string | null {
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const split = currentValue.split('.');
-  if (split.length === 1) {
+  if (toVersionMajor !== null && split.length === 1) {
     // [^,~]4
     return `${operator}${toVersionMajor}`;
   }
-  if (split.length === 2) {
+  if (
+    toVersionMajor !== null &&
+    toVersionMinor !== null &&
+    split.length === 2
+  ) {
     // [^,~]4.1
     return `${operator}${toVersionMajor}.${toVersionMinor}`;
   }
@@ -163,9 +146,10 @@ function getNewValue({
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     try {
-      const massagedNewVersion = padZeroes(newVersion);
+      const massagedNewVersion = poetry2semver(newVersion);
       if (
-        npm.isVersion(massagedNewVersion) &&
+        massagedNewVersion &&
+        isVersion(massagedNewVersion) &&
         npm.matches(massagedNewVersion, npmCurrentValue)
       ) {
         return currentValue;
@@ -193,32 +177,49 @@ function getNewValue({
       }
     }
   }
-  if (!npm.isVersion(newVersion)) {
+
+  // Explicitly check whether this is a fully-qualified version
+  if (
+    (VERSION_PATTERN.exec(newVersion)?.groups?.release || '').split('.')
+      .length !== 3
+  ) {
     logger.debug(
       'Cannot massage python version to npm - returning currentValue'
     );
     return currentValue;
   }
   try {
-    const newSemver = npm.getNewValue({
-      currentValue: poetry2npm(currentValue),
-      rangeStrategy,
-      currentVersion,
-      newVersion,
-    });
-    const newPoetry = npm2poetry(newSemver);
-    return newPoetry;
+    const currentSemverVersion =
+      currentVersion && poetry2semver(currentVersion);
+
+    const newSemverVersion = poetry2semver(newVersion);
+
+    if (currentSemverVersion && newSemverVersion) {
+      const newSemver = npm.getNewValue({
+        currentValue: poetry2npm(currentValue),
+        rangeStrategy,
+        currentVersion: currentSemverVersion,
+        newVersion: newSemverVersion,
+      });
+      const newPoetry = newSemver && npm2poetry(newSemver);
+      if (newPoetry) {
+        return newPoetry;
+      }
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { currentValue, rangeStrategy, currentVersion, newVersion, err },
       'Could not generate new value using npm.getNewValue()'
     );
-    return currentValue;
   }
+
+  // istanbul ignore next
+  return currentValue;
 }
 
 function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(padZeroes(a), padZeroes(b));
+  // istanbul ignore next
+  return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
 }
 
 export const api: VersioningApi = {

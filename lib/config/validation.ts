@@ -3,8 +3,8 @@ import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { getOptions } from './definitions';
 import { migrateConfig } from './migration';
+import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
@@ -37,10 +37,11 @@ const ignoredNodes = [
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
 ];
-
+const tzRe = regEx(/^:timezone\((.+)\)$/);
+const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 function isManagerPath(parentPath: string): boolean {
   return (
-    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
 }
@@ -78,8 +79,6 @@ function getDeprecationMessage(option: string): string {
     branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
-    yarnrc:
-      'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
   };
   return deprecatedOptions[option];
 }
@@ -87,8 +86,8 @@ function getDeprecationMessage(option: string): string {
 export function getParentName(parentPath: string): string {
   return parentPath
     ? parentPath
-        .replace(/\.?encrypted$/, '')
-        .replace(/\[\d+\]$/, '')
+        .replace(regEx(/\.?encrypted$/), '')
+        .replace(regEx(/\[\d+\]$/), '')
         .split('.')
         .pop()
     : '.';
@@ -124,7 +123,7 @@ export async function validateConfig(
         topic: 'Config security error',
         message: '__proto__',
       });
-      continue; // eslint-disable-line
+      continue;
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
@@ -230,7 +229,7 @@ export async function validateConfig(
             message: `${currentPath}: ${errorMessage}`,
           });
         }
-      } else if (val != null) {
+      } else if (val !== null) {
         const type = optionTypes[key];
         if (type === 'boolean') {
           if (val !== true && val !== false) {
@@ -245,8 +244,8 @@ export async function validateConfig(
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
-                const subValidation = await module.exports.validateConfig(
-                  subval,
+                const subValidation = await validateConfig(
+                  subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -255,7 +254,6 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -390,6 +388,8 @@ export async function validateConfig(
                 'registryUrlTemplate',
                 'currentValueTemplate',
                 'extractVersionTemplate',
+                'autoReplaceStringTemplate',
+                'depTypeTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -408,44 +408,51 @@ export async function validateConfig(
                     )}`,
                   });
                 } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  let validRegex = false;
-                  for (const matchString of regexManager.matchStrings) {
-                    try {
-                      regEx(matchString);
-                      validRegex = true;
-                    } catch (e) {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${String(
-                          matchString
-                        )}\``,
-                      });
-                    }
-                  }
-                  if (validRegex) {
-                    const mandatoryFields = [
-                      'depName',
-                      'currentValue',
-                      'datasource',
-                    ];
-                    for (const field of mandatoryFields) {
-                      if (
-                        !regexManager[`${field}Template`] &&
-                        !regexManager.matchStrings.some((matchString) =>
-                          matchString.includes(`(?<${field}>`)
-                        )
-                      ) {
+                  if (is.nonEmptyArray(regexManager.matchStrings)) {
+                    let validRegex = false;
+                    for (const matchString of regexManager.matchStrings) {
+                      try {
+                        regEx(matchString);
+                        validRegex = true;
+                      } catch (e) {
                         errors.push({
                           topic: 'Configuration Error',
-                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          message: `Invalid regExp for ${currentPath}: \`${String(
+                            matchString
+                          )}\``,
                         });
                       }
                     }
+                    if (validRegex) {
+                      const mandatoryFields = [
+                        'depName',
+                        'currentValue',
+                        'datasource',
+                      ];
+                      for (const field of mandatoryFields) {
+                        if (
+                          !regexManager[`${field}Template`] &&
+                          !regexManager.matchStrings.some((matchString) =>
+                            matchString.includes(`(?<${field}>`)
+                          )
+                        ) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          });
+                        }
+                      }
+                    }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                    });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }
@@ -481,7 +488,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !/p.*Rules\[\d+\]$/.test(parentPath) && // Inside a packageRule
+              !rulesRe.test(parentPath) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
@@ -532,7 +539,7 @@ export async function validateConfig(
                 .filter((option) => option.freeChoice)
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
-                const subValidation = await module.exports.validateConfig(
+                const subValidation = await validateConfig(
                   val,
                   isPreset,
                   currentPath

@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
+import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
 
 interface DependencyDashboard {
@@ -13,10 +15,10 @@ interface DependencyDashboard {
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(new RegExp(checkMatch, 'g'));
+  const checked = issueBody.match(regEx(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
   if (checked?.length) {
-    const re = new RegExp(checkMatch);
+    const re = regEx(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check);
       dependencyDashboardChecks[branchName] = type;
@@ -28,13 +30,11 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   let dependencyDashboardRebaseAllOpen = false;
   if (checkedRebaseAll) {
     dependencyDashboardRebaseAllOpen = true;
-    /* eslint-enable no-param-reassign */
   }
   return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
 }
 
 export async function readDashboardBody(config: RenovateConfig): Promise<void> {
-  /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
@@ -50,7 +50,6 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
       Object.assign(config, parseDashboardIssue(issue.body));
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
@@ -97,10 +96,15 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  allBranches: BranchConfig[]
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
+  const branches = allBranches.filter(
+    (branch) =>
+      branch.result !== BranchResult.Automerged &&
+      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
+  );
   if (
     !(
       config.dependencyDashboard ||
@@ -113,6 +117,15 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        { title: config.dependencyDashboardTitle },
+        'DRY-RUN: Would close Dependency Dashboard'
+      );
+    } else {
+      logger.debug('Closing Dependency Dashboard');
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+    }
     return;
   }
   // istanbul ignore if
@@ -121,14 +134,12 @@ export async function ensureDependencyDashboard(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
-  const hasBranches =
-    is.nonEmptyArray(branches) &&
-    branches.some((branch) => branch.result !== BranchResult.Automerged);
+  const hasBranches = is.nonEmptyArray(branches);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (getAdminConfig().dryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
-        'DRY-RUN: Would close Dependency Dashboard ' +
-          config.dependencyDashboardTitle
+        { title: config.dependencyDashboardTitle },
+        'DRY-RUN: Would close Dependency Dashboard'
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
@@ -138,7 +149,8 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
   if (config.dependencyDashboardHeader?.length) {
-    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+    issueBody +=
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);
@@ -160,7 +172,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -264,14 +276,6 @@ export async function ensureDependencyDashboard(
     issueBody += '## Other Branches\n\n';
     issueBody += `These updates are pending. To force PRs open, click the checkbox below.\n\n`;
     for (const branch of otherBranches) {
-      logger.info(
-        {
-          prBlockedBy: branch.prBlockedBy,
-          prNo: branch.prNo,
-          result: branch.result,
-        },
-        'Blocked PR'
-      );
       issueBody += getListItem(branch, 'other');
     }
     issueBody += '\n';
@@ -313,7 +317,10 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardFooter?.length) {
-    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
+    issueBody +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
   }
 
   if (config.dependencyDashboardIssue) {
@@ -338,10 +345,10 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  if (getAdminConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
-      'DRY-RUN: Would ensure Dependency Dashboard ' +
-        config.dependencyDashboardTitle
+      { title: config.dependencyDashboardTitle },
+      'DRY-RUN: Would ensure Dependency Dashboard'
     );
   } else {
     await platform.ensureIssue({
@@ -349,6 +356,7 @@ export async function ensureDependencyDashboard(
       reuseTitle,
       body: issueBody,
       labels: config.dependencyDashboardLabels,
+      confidential: config.confidential,
     });
   }
 }

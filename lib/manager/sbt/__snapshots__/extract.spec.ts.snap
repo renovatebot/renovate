@@ -428,9 +428,53 @@ Object {
 }
 `;
 
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with ThisBuild scope 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.0.2",
+      "datasource": "sbt-package",
+      "depName": "org.example:bar",
+      "lookupName": "org.example:bar_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
 exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
 Object {
   "deps": Array [
+    Object {
+      "currentValue": "0.0.2",
+      "datasource": "sbt-package",
+      "depName": "org.example:bar",
+      "lookupName": "org.example:bar_2.12",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
+exports[`manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with ThisBuild scope 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.12.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "separateMinorPatch": true,
+    },
     Object {
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
@@ -469,34 +513,5 @@ Object {
     },
   ],
   "packageFileVersion": undefined,
-}
-`;
-
-exports[`manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "3.0.0",
-      "datasource": "sbt-package",
-      "depName": "org.scalatest:scalatest",
-      "lookupName": "org.scalatest:scalatest",
-      "registryUrls": Array [
-        "https://repo.maven.apache.org/maven2",
-      ],
-    },
-    Object {
-      "currentValue": "1.0.11",
-      "datasource": "sbt-plugin",
-      "depName": "com.github.gseitz:sbt-release",
-      "depType": "plugin",
-      "groupName": "sbtReleaseVersion for com.github.gseitz",
-      "lookupName": "com.github.gseitz:sbt-release",
-      "registryUrls": Array [
-        "https://repo.maven.apache.org/maven2",
-        "https://dl.bintray.com/sbt/sbt-plugin-releases",
-      ],
-    },
-  ],
-  "packageFileVersion": "1.0.1",
 }
 `;

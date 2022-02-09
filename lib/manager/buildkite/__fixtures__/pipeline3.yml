@@ -8,14 +8,6 @@ steps:
 
   - wait
 
-  # Use the app image built above to run concurrent tests
-  - name: "Docker Test %n"
-    command: test.sh
-    parallelism: 25
-    plugins:
-      https://github.com/buildkite/plugin-docker-compose#v1.3.2:
-        run: app
-
   - name: "wrong"
     command: test.sh
     parallelism: 25

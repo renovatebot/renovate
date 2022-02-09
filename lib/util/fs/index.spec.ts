@@ -1,8 +1,8 @@
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
-import { getName, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { mocked } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import * as _env from '../exec/env';
 import {
   ensureCacheDir,
@@ -11,6 +11,7 @@ import {
   findLocalSiblingOrParent,
   getSubDirectory,
   localPathExists,
+  localPathIsFile,
   readLocalDirectory,
   readLocalFile,
   writeLocalFile,
@@ -19,10 +20,10 @@ import {
 jest.mock('../../util/exec/env');
 const env = mocked(_env);
 
-describe(getName(), () => {
+describe('util/fs/index', () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
-      setAdminConfig({ localDir: '' });
+      GlobalConfig.set({ localDir: '' });
     });
 
     it('reads buffer', async () => {
@@ -37,15 +38,13 @@ describe(getName(), () => {
       expect(await readLocalFile(__dirname)).toBeNull();
     });
   });
-});
 
-describe(getName(), () => {
   describe('localPathExists', () => {
     it('returns true for file', async () => {
-      expect(await localPathExists(__filename)).toBe(true);
+      expect(await localPathExists(__filename)).toBeTrue();
     });
     it('returns true for directory', async () => {
-      expect(await localPathExists(getSubDirectory(__filename))).toBe(true);
+      expect(await localPathExists(getSubDirectory(__filename))).toBeTrue();
     });
     it('returns false', async () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
@@ -53,14 +52,12 @@ describe(getName(), () => {
       );
     });
   });
-});
 
-describe(getName(), () => {
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          GlobalConfig.set({
             localDir: localDir.path,
           });
 
@@ -114,7 +111,7 @@ describe(getName(), () => {
     it('returns dir content', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          GlobalConfig.set({
             localDir: localDir.path,
           });
           await writeLocalFile('test/Cargo.toml', '');
@@ -142,7 +139,7 @@ describe(getName(), () => {
     it('return empty array for non existing directory', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          GlobalConfig.set({
             localDir: localDir.path,
           });
           await expect(readLocalDirectory('somedir')).rejects.toThrow();
@@ -166,67 +163,51 @@ describe(getName(), () => {
       dirFromEnv: string;
       dirFromConfig: string;
     } {
-      const dirFromEnv = join(root, join('/foo'));
+      const dirFromEnv = join(root, join('/bar/others/bundler'));
       const dirFromConfig = join(root, join('/bar'));
 
       jest.resetAllMocks();
       env.getChildProcessEnv.mockReturnValueOnce({
         ...envMock.basic,
-        CUSTOM_CACHE_DIR: dirFromEnv,
       });
 
-      setAdminConfig({
+      GlobalConfig.set({
         cacheDir: join(dirFromConfig),
       });
 
       return { dirFromEnv, dirFromConfig };
     }
 
-    it('prefers environment variables over admin config', async () => {
+    it('prefers environment variables over global config', async () => {
       await withDir(
         async (tmpDir) => {
-          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
-          const res = await ensureCacheDir(
-            './deeply/nested',
-            'CUSTOM_CACHE_DIR'
-          );
+          const { dirFromEnv } = setupMock(tmpDir.path);
+          const res = await ensureCacheDir('bundler');
           expect(res).toEqual(dirFromEnv);
           expect(await exists(dirFromEnv)).toBeTrue();
-          expect(await exists(dirFromConfig)).toBeFalse();
         },
         { unsafeCleanup: true }
       );
     });
+  });
 
-    it('is optional to pass environment variable', async () => {
-      await withDir(
-        async (tmpDir) => {
-          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
-          const expected = join(`${dirFromConfig}/deeply/nested`);
-          const res = await ensureCacheDir('./deeply/nested');
-          expect(res).toEqual(expected);
-          expect(await exists(expected)).toBeTrue();
-          expect(await exists(dirFromEnv)).toBeFalse();
-        },
-        { unsafeCleanup: true }
-      );
+  describe('localPathIsFile', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir: '' });
     });
 
-    it('falls back to admin config', async () => {
-      await withDir(
-        async (tmpDir) => {
-          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
-          const expected = join(`${dirFromConfig}/deeply/nested`);
-          const res = await ensureCacheDir(
-            './deeply/nested',
-            'NO_SUCH_VARIABLE'
-          );
-          expect(res).toEqual(expected);
-          expect(await exists(expected)).toBeTrue();
-          expect(await exists(dirFromEnv)).toBeFalse();
-        },
-        { unsafeCleanup: true }
-      );
+    it('returns true for file', async () => {
+      expect(await localPathIsFile(__filename)).toBeTrue();
+    });
+
+    it('returns false for directory', async () => {
+      expect(await localPathIsFile(__dirname)).toBeFalse();
+    });
+
+    it('returns false for non-existing path', async () => {
+      expect(
+        await localPathIsFile(__filename.replace('.ts', '.txt'))
+      ).toBeFalse();
     });
   });
 });

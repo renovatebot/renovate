@@ -1,10 +1,10 @@
 import moo from 'moo';
-import { LANGUAGE_DOT_NET } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
 import { id as datasource } from '../../datasource/nuget';
-import { SkipReason } from '../../types';
-import { PackageDependency, PackageFile } from '../types';
+import { regEx } from '../../util/regex';
+import type { PackageDependency, PackageFile } from '../types';
 
-export const language = LANGUAGE_DOT_NET;
+export const language = ProgrammingLanguage.NET;
 
 export const defaultConfig = {
   fileMatch: ['\\.cake$'],
@@ -12,13 +12,13 @@ export const defaultConfig = {
 
 const lexer = moo.states({
   main: {
-    lineComment: { match: /\/\/.*?$/ },
-    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true },
+    lineComment: { match: /\/\/.*?$/ }, // TODO #12870
+    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12870
     dependency: {
-      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/,
+      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/, // TODO #12870
     },
     dependencyQuoted: {
-      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
+      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/, // TODO #12870
       value: (s: string) => s.trim().slice(1, -1),
     },
     unknown: moo.fallback,
@@ -27,7 +27,7 @@ const lexer = moo.states({
 
 function parseDependencyLine(line: string): PackageDependency | null {
   try {
-    let url = line.replace(/^[^:]*:/, '');
+    let url = line.replace(regEx(/^[^:]*:/), '');
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
 
@@ -42,7 +42,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
       if (protocol.startsWith('http')) {
         result.registryUrls = [registryUrl];
       } else {
-        result.skipReason = SkipReason.UnsupportedUrl;
+        result.skipReason = 'unsupported-url';
       }
     }
 
@@ -68,3 +68,5 @@ export function extractPackageFile(content: string): PackageFile {
   }
   return { deps };
 }
+
+export const supportedDatasources = [datasource];

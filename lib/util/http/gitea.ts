@@ -1,10 +1,11 @@
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import is from '@sindresorhus/is';
+import { PlatformId } from '../../constants';
 import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
-let baseUrl;
+let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
-  baseUrl = newBaseUrl.replace(/\/*$/, '/');
+  baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12875
 };
 
 export interface GiteaHttpOptions extends InternalHttpOptions {
@@ -12,12 +13,13 @@ export interface GiteaHttpOptions extends InternalHttpOptions {
   token?: string;
 }
 
-function getPaginationContainer(body: any): any[] {
-  if (Array.isArray(body) && body.length) {
-    return body;
+function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
+  if (is.array(body) && body.length) {
+    return body as T[];
   }
-  if (Array.isArray(body?.data) && body.data.length) {
-    return body.data;
+
+  if (is.plainObject(body) && is.array(body?.data) && body.data.length) {
+    return body.data as T[];
   }
 
   return null;
@@ -30,30 +32,30 @@ function resolveUrl(path: string, base: string): URL {
 
 export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
   constructor(options?: HttpOptions) {
-    super(PLATFORM_TYPE_GITEA, options);
+    super(PlatformId.Gitea, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     path: string,
     options?: InternalHttpOptions & GiteaHttpOptions
-  ): Promise<HttpResponse<T> | null> {
-    const resolvedUrl = resolveUrl(path, options.baseUrl ?? baseUrl);
+  ): Promise<HttpResponse<T>> {
+    const resolvedUrl = resolveUrl(path, options?.baseUrl ?? baseUrl);
     const opts = {
       baseUrl,
       ...options,
     };
     const res = await super.request<T>(resolvedUrl, opts);
-    const pc = getPaginationContainer(res.body);
+    const pc = getPaginationContainer<T>(res.body);
     if (opts.paginate && pc) {
       const total = parseInt(res.headers['x-total-count'] as string, 10);
-      let nextPage = parseInt(resolvedUrl.searchParams.get('page') || '1', 10);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
 
       while (total && pc.length < total) {
         nextPage += 1;
         resolvedUrl.searchParams.set('page', nextPage.toString());
 
         const nextRes = await super.request<T>(resolvedUrl.toString(), opts);
-        const nextPc = getPaginationContainer(nextRes.body);
+        const nextPc = getPaginationContainer<T>(nextRes.body);
         if (nextPc === null) {
           break;
         }

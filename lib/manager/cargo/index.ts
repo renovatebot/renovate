@@ -1,9 +1,10 @@
-import { LANGUAGE_RUST } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
+import { CrateDatasource } from '../../datasource/crate';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 
-const language = LANGUAGE_RUST;
+const language = ProgrammingLanguage.Rust;
 export const supportsLockFileMaintenance = true;
 
 export { extractPackageFile, updateArtifacts, language };
@@ -14,3 +15,5 @@ export const defaultConfig = {
   versioning: cargoVersioning.id,
   rangeStrategy: 'bump',
 };
+
+export const supportedDatasources = [CrateDatasource.id];

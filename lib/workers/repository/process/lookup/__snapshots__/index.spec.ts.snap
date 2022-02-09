@@ -175,12 +175,10 @@ Object {
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles git submodule update 1`] = `
 Object {
-  "currentVersion": undefined,
   "updates": Array [
     Object {
       "newDigest": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
       "newValue": undefined,
-      "newVersion": undefined,
       "updateType": "digest",
     },
   ],
@@ -194,6 +192,26 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles github
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles packagist 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles pypi 404 1`] = `Array []`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles replacements 1`] = `
+Object {
+  "changelogUrl": undefined,
+  "currentVersion": "1.4.1",
+  "dependencyUrl": undefined,
+  "fixedVersion": "1.4.1",
+  "homepage": undefined,
+  "sourceUrl": "https://github.com/kriskowal/q",
+  "updates": Array [
+    Object {
+      "newName": "r",
+      "newValue": "2.0.0",
+      "updateType": "replacement",
+    },
+  ],
+  "versioning": "npm",
+  "warnings": Array [],
+}
+`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 Object {
@@ -218,6 +236,22 @@ Object {
   "versioning": "npm",
   "warnings": Array [],
 }
+`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles the in-range-only strategy and updates lockfile within range 1`] = `
+Array [
+  Object {
+    "bucket": "non-major",
+    "isLockfileUpdate": true,
+    "isRange": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "^1.2.1",
+    "newVersion": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "updateType": "minor",
+  },
+]
 `;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles unknown datasource 1`] = `Array []`;

@@ -1,10 +1,13 @@
 import is from '@sindresorhus/is';
-import { quote as pipCompile } from 'shlex';
+import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { regEx } from '../../util/regex';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -42,7 +45,7 @@ export async function updateArtifacts({
   newPackageFileContent: newInputContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const outputFileName = inputFileName.replace(/(\.in)?$/, '.txt');
+  const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
   logger.debug(
     `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`
   );
@@ -56,7 +59,7 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
-    const cmd = 'pip-compile';
+    const cmd = `pip-compile ${quote(upath.parse(inputFileName).base)}`;
     const tagConstraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
@@ -65,10 +68,10 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: [
-          `pip install --user ${pipCompile(`pip-tools${pipToolsConstraint}`)}`,
-        ],
       },
+      preCommands: [
+        `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
+      ],
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
@@ -80,7 +83,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: outputFileName,
+          type: 'addition',
+          path: outputFileName,
           contents: await readLocalFile(outputFileName, 'utf8'),
         },
       },
