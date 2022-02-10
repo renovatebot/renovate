@@ -7,7 +7,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { regEx } from '../../util/regex';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
@@ -202,7 +202,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
 
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
-  const pkgUrl = URL.resolve(regUrl, `/p2/${name}.json`);
+  const pkgUrl = joinUrlParts(regUrl, `/p2/${name}.json`);
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
