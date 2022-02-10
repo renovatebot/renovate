@@ -22,6 +22,7 @@ export async function updateLockedDependency(
     lockFile,
     lockFileContent,
     allowParentUpdates = true,
+    allowHigherOrRemoved = false,
   } = config;
   logger.debug(
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
@@ -36,10 +37,6 @@ export async function updateLockedDependency(
       packageLockJson = JSON.parse(lockFileContent);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
-      return { status: 'update-failed' };
-    }
-    if (packageLockJson.lockfileVersion === 2) {
-      logger.debug('Only lockfileVersion 1 is supported');
       return { status: 'update-failed' };
     }
     const lockedDeps = getLockedDependencies(
@@ -66,10 +63,47 @@ export async function updateLockedDependency(
         );
         status = 'already-updated';
       } else {
-        logger.debug(
-          `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
-        );
-        status = 'update-failed';
+        if (packageLockJson.lockfileVersion !== 1) {
+          logger.debug(
+            `Found lockfileVersion ${packageLockJson.lockfileVersion}`
+          );
+          status = 'update-failed';
+        } else if (allowHigherOrRemoved) {
+          // it's acceptable if the package is no longer present
+          const anyVersionLocked = getLockedDependencies(
+            packageLockJson,
+            depName,
+            null
+          );
+          if (anyVersionLocked.length) {
+            if (
+              anyVersionLocked.every((dep) =>
+                semver.isGreaterThan(dep.version, newVersion)
+              )
+            ) {
+              logger.debug(
+                `${depName} found in ${lockFile} with higher version - looks like it's already updated`
+              );
+              status = 'already-updated';
+            } else {
+              logger.debug(
+                { anyVersionLocked },
+                `Found alternative versions of qs`
+              );
+              status = 'update-failed';
+            }
+          } else {
+            logger.debug(
+              `${depName} not found in ${lockFile} - looks like it's already removed`
+            );
+            status = 'already-updated';
+          }
+        } else {
+          logger.debug(
+            `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
+          );
+          status = 'update-failed';
+        }
       }
       // Don't return {} if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate

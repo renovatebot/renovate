@@ -120,12 +120,36 @@ describe('manager/npm/update/locked-dependency/index', () => {
       const packageLock = JSON.parse(res.files['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
-    it('returns if already remediated', async () => {
+    it('returns already-updated if already remediated exactly', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.10';
       config.newVersion = '1.2.11';
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('already-updated');
+    });
+    it('returns already-updated if already remediated higher', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.9';
+      config.newVersion = '1.2.10';
+      config.allowHigherOrRemoved = true;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
+    });
+    it('returns already-updated if not found', async () => {
+      config.depName = 'notfound';
+      config.currentVersion = '1.2.9';
+      config.newVersion = '1.2.10';
+      config.allowHigherOrRemoved = true;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
+    });
+    it('returns update-failed if other, lower version found', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.5';
+      config.newVersion = '1.2.15';
+      config.allowHigherOrRemoved = true;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('update-failed');
     });
     it('remediates mime', async () => {
       config.depName = 'mime';
