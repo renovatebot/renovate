@@ -82,7 +82,9 @@ Credentials for authenticated/private feeds can be provided via host rules in th
 }
 ```
 
-At the moment only Basic HTTP authentication (via username and password) is supported.
+<!-- prettier-ignore -->
+!!! note
+    At the moment only Basic HTTP authentication (via username and password) is supported.
 
 ## Future work
 

@@ -3,7 +3,7 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { localPathExists } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';

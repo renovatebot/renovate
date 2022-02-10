@@ -1,7 +1,7 @@
 import { parse } from '@iarna/toml';
 import { CrateDatasource } from '../../datasource/crate';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {

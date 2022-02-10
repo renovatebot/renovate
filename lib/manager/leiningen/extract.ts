@@ -1,5 +1,5 @@
 import { ClojureDatasource } from '../../datasource/clojure';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
@@ -142,7 +142,7 @@ const defRegex = regEx(
 
 export function extractVariables(content: string): ExtractedVariables {
   const result: ExtractedVariables = {};
-  const lines = content.split('\n');
+  const lines = content.split(newlineRegex);
   for (let idx = 0; idx < lines.length; idx += 1) {
     const line = lines[idx];
     const match = defRegex.exec(line);

@@ -11,7 +11,7 @@ For example, if you want to reference a tag like `module-v1.2.5`, a block like t
 }
 ```
 
-Pinned Terragrunt dependencies like the following will receive a PR whenever there is a newer version available:
+Pinned Terragrunt dependencies like the following will get a PR whenever there is a newer version available:
 
 ```hcl
 terraform {

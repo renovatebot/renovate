@@ -73,7 +73,7 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 
 We do this because:
 
-- Branches often receive updates (e.g. new patches) before they're merged
+- Branches often get updates (e.g. new patches) before they're merged
 - Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.

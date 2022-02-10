@@ -3,7 +3,7 @@ import { load } from 'js-yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
@@ -75,7 +75,7 @@ function extractText(content: string): PackageDependency[] {
     /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/
   );
 
-  for (const line of content.split('\n')) {
+  for (const line of content.split(newlineRegex)) {
     const match = regex.exec(line);
     if (match) {
       const { depName, currentValue, comment } = match.groups;

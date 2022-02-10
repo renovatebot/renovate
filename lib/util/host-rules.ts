@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { parseUrl, validateUrl } from './url';
@@ -151,13 +151,10 @@ export function find(search: HostRuleSearch): HostRule {
 }
 
 export function hosts({ hostType }: { hostType: string }): string[] {
-  const result: string[] = [];
-  for (const rule of hostRules) {
-    if (rule.hostType === hostType && rule.resolvedHost) {
-      result.push(rule.resolvedHost);
-    }
-  }
-  return result;
+  return hostRules
+    .filter((rule) => rule.hostType === hostType)
+    .map((rule) => rule.resolvedHost)
+    .filter(is.truthy);
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {

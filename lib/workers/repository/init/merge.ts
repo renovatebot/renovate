@@ -9,7 +9,7 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
-import { RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,

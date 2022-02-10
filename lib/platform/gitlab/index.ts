@@ -21,7 +21,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
@@ -611,15 +611,6 @@ export async function getPr(iid: number): Promise<Pr> {
     sha: mr.sha,
   };
 
-  if (mr.merge_status === 'cannot_be_merged') {
-    logger.debug('pr cannot be merged');
-    pr.canMerge = false;
-  } else if (pr.state === PrState.Open) {
-    const branchStatus = await getBranchStatus(pr.sourceBranch);
-    if (branchStatus === BranchStatus.green) {
-      pr.canMerge = true;
-    }
-  }
   return massagePr(pr);
 }
 

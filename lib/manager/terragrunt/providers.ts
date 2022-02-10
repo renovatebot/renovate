@@ -1,4 +1,4 @@
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerragruntDependencyTypes } from './common';
 import type { ExtractionResult } from './types';
@@ -41,7 +41,7 @@ export function extractTerragruntProvider(
     .slice(lineNumber)
     .join('\n')
     .substring(0, extractBracesContent(lines.slice(lineNumber).join('\n')))
-    .split('\n');
+    .split(newlineRegex);
 
   for (let lineNo = 0; lineNo < teraformContent.length; lineNo += 1) {
     line = teraformContent[lineNo];

@@ -88,7 +88,10 @@ Any repository URLs found within will be added as `registryUrls` to extracted de
 ## Custom registry support, and authentication
 
 Unless using `deepExtract`, Renovate does not make use of authentication credentials available to Gradle.
-Note: the `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
+
+<!-- prettier-ignore -->
+!!! warning
+    The `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 The manager for Gradle makes use of the `maven` datasource.
 Renovate can be configured to access additional repositories and access repositories authenticated.

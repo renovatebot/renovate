@@ -61,6 +61,7 @@ const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
     'google/cloud-sdk': 'https://cloud.google.com/sdk/docs/release-notes',
     neo4j: 'https://neo4j.com/release-notes/',
+    'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
   },
 };
 
@@ -73,6 +74,7 @@ const manualSourceUrls: Record<string, Record<string, string>> = {
       'https://github.com/hyper-expanse/library-release-workflows',
   },
   docker: {
+    'amd64/registry': 'https://github.com/distribution/distribution',
     'amd64/traefik': 'https://github.com/containous/traefik',
     'coredns/coredns': 'https://github.com/coredns/coredns',
     'docker/compose': 'https://github.com/docker/compose',
@@ -90,6 +92,7 @@ const manualSourceUrls: Record<string, Record<string, string>> = {
     'gitea/gitea': 'https://github.com/go-gitea/gitea',
     'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',
+    registry: 'https://github.com/distribution/distribution',
     traefik: 'https://github.com/containous/traefik',
   },
   kubernetes: {

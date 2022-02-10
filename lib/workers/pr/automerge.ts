@@ -8,7 +8,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { resolveBranchStatus } from '../branch/status-checks';
-import { BranchConfig } from '../types';
+import type { BranchConfig } from '../types';
 
 // eslint-disable-next-line typescript-enum/no-enum
 export enum PrAutomergeBlockReason {
@@ -50,10 +50,9 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: PrAutomergeBlockReason.Conflicted,
     };
   }
-  if (!ignoreTests && pr.canMerge !== true) {
+  if (!ignoreTests && pr.cannotMergeReason) {
     logger.debug(
-      { canMergeReason: pr.canMergeReason },
-      'PR is not ready for merge'
+      `Platform reported that PR is not ready for merge. Reason: [${pr.cannotMergeReason}]`
     );
     return {
       automerged: false,
