@@ -132,22 +132,16 @@ describe('workers/branch/index', () => {
     it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
-      config.upgrades = [
+      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
         {
-          releaseTimestamp: new Date('2019-01-01').getTime(),
+          releaseTimestamp: new Date('2019-01-01').getTime().toString(),
           stabilityDays: 1,
         },
         {
-          releaseTimestamp: new Date().getTime(),
+          releaseTimestamp: new Date().toString(),
           stabilityDays: 1,
         },
-        /* TODO: This test is probably broken and needs to be fixed.
-           The type definition for "releaseTimestamp" is a string. But when I change it to
-           one the test starts failing. Once this test has been fixed, the never typing can be removed.
-           And instead replaced with the pattern used on the other places that have a config.upgrades
-           (#9718)
-        */
-      ] as never;
+      ];
 
       git.branchExists.mockReturnValue(false);
       const res = await branchWorker.processBranch(config);
