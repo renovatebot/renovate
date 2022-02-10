@@ -1,4 +1,4 @@
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import { add, clear } from '../../util/host-rules';
 
 import {

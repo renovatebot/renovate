@@ -75,6 +75,7 @@ export async function getUpdatedPackageFiles(
         packageFileContent,
         lockFileContent,
         allowParentUpdates: true,
+        allowHigherOrRemoved: true,
       });
       if (reuseExistingBranch && status !== 'already-updated') {
         logger.debug(
@@ -88,6 +89,9 @@ export async function getUpdatedPackageFiles(
       }
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
+      }
+      if (status === 'update-failed' || status === 'unsupported') {
+        upgrade.remediationNotPossible = true;
       }
     } else if (upgrade.isLockfileUpdate) {
       if (updateLockedDependency) {

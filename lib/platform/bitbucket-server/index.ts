@@ -11,17 +11,17 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import { GitProtocol } from '../../types/git';
+import type { GitProtocol } from '../../types/git';
 import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -983,7 +983,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  logger.debug(`massageMarkdown(${input.split('\n')[0]})`);
+  logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
     .replace(

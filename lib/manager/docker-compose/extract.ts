@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageFile } from '../types';
 import type { DockerComposeConfig } from './types';
@@ -10,7 +10,7 @@ class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];
 
   constructor(content: string, filter: RegExp) {
-    this.imageLines = [...content.split('\n').entries()]
+    this.imageLines = [...content.split(newlineRegex).entries()]
       .filter((entry) => filter.test(entry[1]))
       .map(([lineNumber, line]) => ({ lineNumber, line, used: false }));
   }

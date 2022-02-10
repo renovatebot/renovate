@@ -179,7 +179,7 @@ The format of the environment variables must follow:
 - Underscore (`_`)
 - `matchHost`
 - Underscore (`_`)
-- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
+- Field name (`TOKEN`, `USERNAME`, or `PASSWORD`)
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).

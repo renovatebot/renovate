@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
-import { XmlDocument } from 'xmldoc';
+import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -110,11 +110,11 @@ async function addReleasesFromIndexPage(
         const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
         const res = await downloadHttpProtocol(indexUrl);
         const { body = '' } = res;
-        for (const line of body.split('\n')) {
+        for (const line of body.split(newlineRegex)) {
           const match = line.trim().match(mavenCentralHtmlVersionRegex);
           if (match) {
             const { version, releaseTimestamp: timestamp } =
-              match?.groups || {};
+              match?.groups ?? {};
             if (version && timestamp) {
               const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
                 zone: 'UTC',
@@ -234,19 +234,16 @@ async function addReleasesUsingHeadRequests(
 
   const cacheNs = 'datasource-maven:head-requests';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let workingReleaseMap: ReleaseMap = await packageCache.get<ReleaseMap>(
-    cacheNs,
-    cacheKey
-  );
+  const oldReleaseMap: ReleaseMap | undefined =
+    await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
+  const newReleaseMap: ReleaseMap = oldReleaseMap ?? {};
 
-  if (!workingReleaseMap) {
-    workingReleaseMap = {};
-
+  if (!oldReleaseMap) {
     const unknownVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
         const isDiscoveredOutside = !!release;
         const isDiscoveredInsideAndCached = !is.undefined(
-          workingReleaseMap[version]
+          newReleaseMap[version]
         );
         const isDiscovered = isDiscoveredOutside || isDiscoveredInsideAndCached;
         return !isDiscovered;
@@ -276,26 +273,26 @@ async function addReleasesUsingHeadRequests(
           }
 
           if (res !== 'not-found' && res !== 'error') {
-            workingReleaseMap[version] = release;
+            newReleaseMap[version] = release;
           }
         }
       );
 
       await pAll(queue, { concurrency: 5 });
       const cacheTTL = retryEarlier ? 60 : 24 * 60;
-      await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
+      await packageCache.set(cacheNs, cacheKey, newReleaseMap, cacheTTL);
     }
   }
 
   for (const version of Object.keys(releaseMap)) {
-    releaseMap[version] ||= workingReleaseMap[version] ?? null;
+    releaseMap[version] ||= newReleaseMap[version] ?? null;
   }
 
   return releaseMap;
 }
 
 function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
-  const releases = Object.values(releaseMap).filter(Boolean);
+  const releases = Object.values(releaseMap).filter(is.truthy);
   if (releases.length) {
     return releases;
   }
@@ -306,6 +303,11 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // istanbul ignore if
+  if (!registryUrl) {
+    return null;
+  }
+
   const dependency = getDependencyParts(lookupName);
   const repoUrl = ensureTrailingSlash(registryUrl);
 

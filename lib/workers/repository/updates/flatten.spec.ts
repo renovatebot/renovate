@@ -179,7 +179,10 @@ describe('workers/repository/updates/flatten', () => {
         res.filter((update) => update.sourceRepoName)[2].sourceRepoName
       ).toBe('node');
       expect(
-        res.filter((r) => r.updateType === 'lockFileMaintenance')
+        res.filter(
+          (r) =>
+            r.updateType === 'lockFileMaintenance' && r.isLockFileMaintenance
+        )
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
     });

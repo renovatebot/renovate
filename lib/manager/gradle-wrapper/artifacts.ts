@@ -9,6 +9,7 @@ import { readLocalFile, stat, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import type { StatusResult } from '../../util/git/types';
 import { Http } from '../../util/http';
+import { newlineRegex } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
@@ -38,7 +39,7 @@ async function addIfUpdated(
 
 function getDistributionUrl(newPackageFileContent: string): string {
   const distributionUrlLine = newPackageFileContent
-    .split('\n')
+    .split(newlineRegex)
     .find((line) => line.startsWith('distributionUrl='));
   if (distributionUrlLine) {
     return distributionUrlLine
