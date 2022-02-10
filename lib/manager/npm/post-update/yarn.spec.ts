@@ -6,9 +6,8 @@ import {
   mockExecAll,
 } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { mocked } from '../../../../test/util';
+import { env } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import * as _env from '../../../util/exec/env';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
@@ -17,8 +16,6 @@ jest.mock('fs-extra', () =>
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('./node-version');
-
-const env = mocked(_env);
 
 delete process.env.NPM_CONFIG_CACHE;
 

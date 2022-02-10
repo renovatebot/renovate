@@ -29,8 +29,7 @@ export async function checkYarnrc(
   let offlineMirror = false;
   let yarnPath: string = null;
   try {
-    const subDir = cwd.replace(GlobalConfig.get('localDir'), '');
-    const yarnrc = await readLocalFile(upath.join(subDir, '.yarnrc'), 'utf8');
+    const yarnrc = await readLocalFile(upath.join(cwd, '.yarnrc'), 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
@@ -48,7 +47,7 @@ export async function checkYarnrc(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
-        await writeLocalFile(`${subDir}/.yarnrc`, scrubbedYarnrc);
+        await writeLocalFile(upath.join(cwd, '.yarnrc'), scrubbedYarnrc);
         yarnPath = null;
       }
     }
@@ -74,8 +73,7 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const subDir = cwd.replace(GlobalConfig.get('localDir'), '');
-  const lockFileName = upath.join(subDir, 'yarn.lock');
+  const lockFileName = upath.join(cwd, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
