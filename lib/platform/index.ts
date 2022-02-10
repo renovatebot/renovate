@@ -1,6 +1,8 @@
 import URL from 'url';
 import type { AllConfig } from '../config/types';
+import { PlatformId } from '../constants';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
+import { id as packagistDatasourceId } from '../datasource/packagist';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { setGitAuthor, setNoVerify, setPrivateKey } from '../util/git';
@@ -70,5 +72,13 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   };
   returnConfig.hostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
+  if ([PlatformId.Gitlab].includes(returnConfig.platform)) {
+    const typedPackageRegistryRule = {
+      ...platformRule,
+      hostType: packagistDatasourceId,
+    };
+    returnConfig.hostRules.push(typedPackageRegistryRule);
+    hostRules.add(typedPackageRegistryRule);
+  }
   return returnConfig;
 }

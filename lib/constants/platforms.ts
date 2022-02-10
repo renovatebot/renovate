@@ -22,6 +22,7 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-tags',
   'gitlab-packages',
   'gitlab-changelog',
+  'packagist',
 ];
 
 export const BITBUCKET_API_USING_HOST_TYPES = [
