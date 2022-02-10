@@ -78,7 +78,7 @@ export function extractPackageFile(
         currentValue: dep.version,
         registryUrls: [aliases[repoName]]
           .concat([config.aliases[repoName]])
-          .filter(Boolean),
+          .filter(is.string),
       };
 
       // By definition on helm the chart name should be lowercase letter + number + -
