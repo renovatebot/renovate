@@ -27,6 +27,7 @@ import {
   id as dockerVersioningId,
 } from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { sourceLabels } from './common';
 import { MediaType, RegistryRepository } from './types';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
@@ -814,8 +815,13 @@ export async function getReleases({
 
   const latestTag = tags.includes('latest') ? 'latest' : findLatestStable(tags);
   const labels = await getLabels(registryHost, dockerRepository, latestTag);
-  if (labels && 'org.opencontainers.image.source' in labels) {
-    ret.sourceUrl = labels['org.opencontainers.image.source'];
+  if (labels) {
+    for (const label of sourceLabels) {
+      if (is.nonEmptyString(labels[label])) {
+        ret.sourceUrl = labels[label];
+        break;
+      }
+    }
   }
   return ret;
 }
