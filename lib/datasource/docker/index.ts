@@ -28,7 +28,7 @@ import {
 } from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
-import { MediaType, RegistryRepository } from './types';
+import { Image, ImageList, MediaType, RegistryRepository } from './types';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
 
@@ -385,7 +385,7 @@ async function getConfigDigest(
   if (!manifestResponse) {
     return null;
   }
-  const manifest = JSON.parse(manifestResponse.body);
+  const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
   if (manifest.schemaVersion !== 2) {
     logger.debug(
       { registry, dockerRepository, tag },
@@ -409,8 +409,11 @@ async function getConfigDigest(
     );
   }
 
-  if (manifest.mediaType === MediaType.manifestV2) {
-    return manifest.config?.digest || null;
+  if (
+    manifest.mediaType === MediaType.manifestV2 &&
+    is.string(manifest.config?.digest)
+  ) {
+    return manifest.config?.digest;
   }
 
   logger.debug({ manifest }, 'Invalid manifest - returning');
@@ -610,7 +613,7 @@ async function getDockerApiTags(
   let page = 1;
   let foundMaxResultsError = false;
   do {
-    let res;
+    let res: HttpResponse<{ tags: string[] }>;
     try {
       res = await http.getJson<{ tags: string[] }>(url, {
         headers,
