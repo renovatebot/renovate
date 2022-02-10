@@ -6,6 +6,7 @@ import { Fixtures } from '../../../test/fixtures';
 import { git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
+import { logger } from '../../logger';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git/types';
@@ -193,6 +194,10 @@ describe('manager/pip-compile/artifacts', () => {
           'subdir/requirements.txt'
         )
       ).toBe('pip-compile --generate-hashes requirements.in');
+      expect(logger.trace).toHaveBeenCalledWith(
+        { argument: '--version' },
+        'pip-compile argument is not (yet) supported'
+      );
     });
 
     it('skips exploitable subcommands and files', () => {
@@ -204,6 +209,10 @@ describe('manager/pip-compile/artifacts', () => {
         )
       ).toBe(
         'pip-compile --generate-hashes --output-file=requirements.txt requirements.in'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { argument: '--output-file=/etc/shadow' },
+        'pip-compile was previously executed with an unexpected `--output-file` filename'
       );
     });
   });
