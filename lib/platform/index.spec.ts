@@ -70,4 +70,41 @@ describe('platform/index', () => {
       platform: PlatformId.Bitbucket,
     });
   });
+  it('supports platform packagist', async () => {
+    const endpoint = 'https://gitlab.example.org/api/v4/';
+    const token = 'abc';
+    const user = { name: 'user', email: 'user@example.org' };
+    httpMock
+      .scope('https://gitlab.example.org/api/v4/', {
+        reqheaders: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .get('/user')
+      .reply(200, user)
+      .get('/version')
+      .reply(200, { version: '14.7.2', revision: 'xyz' });
+    const config = {
+      platform: PlatformId.Gitlab,
+      endpoint,
+      token,
+    };
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint,
+      gitAuthor: `${user.name} <${user.email}>`,
+      hostRules: [
+        {
+          hostType: 'gitlab',
+          matchHost: 'gitlab.example.org',
+          token,
+        },
+        {
+          hostType: 'packagist',
+          matchHost: 'gitlab.example.org',
+          token,
+        },
+      ],
+      platform: PlatformId.Gitlab,
+    });
+  });
 });
