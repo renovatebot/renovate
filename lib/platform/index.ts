@@ -1,6 +1,6 @@
 import URL from 'url';
 import type { AllConfig } from '../config/types';
-import { PlatformId } from '../constants';
+import { platformHostTypes } from '../constants';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { id as packagistDatasourceId } from '../datasource/packagist';
 import { logger } from '../logger';
@@ -72,7 +72,9 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   };
   returnConfig.hostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
-  if ([PlatformId.Gitlab].includes(returnConfig.platform)) {
+  // Some platforms additionally provide a private composer package registry
+  const hostTypes = platformHostTypes[returnConfig.platform];
+  if (hostTypes.includes(packagistDatasourceId)) {
     const typedPackageRegistryRule = {
       ...platformRule,
       hostType: packagistDatasourceId,

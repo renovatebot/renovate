@@ -29,3 +29,12 @@ export const BITBUCKET_API_USING_HOST_TYPES = [
   PlatformId.Bitbucket,
   'bitbucket-tags',
 ];
+
+export const platformHostTypes = {
+  [PlatformId.Azure]: [],
+  [PlatformId.Bitbucket]: BITBUCKET_API_USING_HOST_TYPES,
+  [PlatformId.BitbucketServer]: [],
+  [PlatformId.Gitea]: [],
+  [PlatformId.Github]: GITHUB_API_USING_HOST_TYPES,
+  [PlatformId.Gitlab]: GITLAB_API_USING_HOST_TYPES,
+};
