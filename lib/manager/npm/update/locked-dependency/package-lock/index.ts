@@ -39,10 +39,6 @@ export async function updateLockedDependency(
       logger.warn({ err }, 'Failed to parse files');
       return { status: 'update-failed' };
     }
-    if (packageLockJson.lockfileVersion === 2) {
-      logger.debug('Only lockfileVersion 1 is supported');
-      return { status: 'update-failed' };
-    }
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
@@ -67,7 +63,12 @@ export async function updateLockedDependency(
         );
         status = 'already-updated';
       } else {
-        if (allowHigherOrRemoved) {
+        if (packageLockJson.lockfileVersion !== 1) {
+          logger.debug(
+            `Found lockfileVersion ${packageLockJson.lockfileVersion}`
+          );
+          status = 'update-failed';
+        } else if (allowHigherOrRemoved) {
           // it's acceptable if the package is no longer present
           const anyVersionLocked = getLockedDependencies(
             packageLockJson,
