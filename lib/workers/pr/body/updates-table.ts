@@ -10,8 +10,8 @@ type TableDefinition = {
 
 function getTableDefinition(config: BranchConfig): TableDefinition[] {
   const res: TableDefinition[] = [];
-  for (const header of config.prBodyColumns as string[]) {
-    const value = config.prBodyDefinitions?.[header] as string;
+  for (const header of config.prBodyColumns) {
+    const value = config.prBodyDefinitions?.[header];
     res.push({ header, value });
   }
   return res;

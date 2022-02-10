@@ -17,8 +17,8 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     }
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
-    const hostType = splitEnv.shift() as string;
-    if (datasources.has(hostType)) {
+    const hostType = splitEnv.shift();
+    if (hostType && datasources.has(hostType)) {
       const suffix = splitEnv.pop() as keyof HostRule;
       if (fields.includes(suffix)) {
         let matchHost: string | undefined;

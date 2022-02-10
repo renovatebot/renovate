@@ -7,7 +7,6 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
-  PackageRule,
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
@@ -319,7 +318,7 @@ export async function validateConfig(
                         config
                       ),
                     ],
-                  }).migratedConfig.packageRules?.[0] as PackageRule;
+                  }).migratedConfig.packageRules?.[0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );

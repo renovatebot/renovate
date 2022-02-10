@@ -82,10 +82,11 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   options.forEach((option) => {
     if (option.env !== false) {
       const envName = getEnvName(option);
-      if (env[envName]) {
+      const envVal = env[envName];
+      if (envVal) {
         if (option.type === 'array' && option.subType === 'object') {
           try {
-            const parsed = JSON.parse(env[envName] as string);
+            const parsed = JSON.parse(envVal);
             if (is.array(parsed)) {
               config[option.name] = parsed;
             } else {
@@ -102,7 +103,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
           }
         } else {
           const coerce = coersions[option.type];
-          config[option.name] = coerce(env[envName] as string);
+          config[option.name] = coerce(envVal);
         }
       }
     }
