@@ -1,25 +1,30 @@
-import url from 'url';
-import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
+import { parseUrl } from '../../util/url';
 
-export function parseRegistryUrl(registryUrl: string): {
+interface ParsedRegistryUrl {
   feedUrl: string;
-  protocolVersion: number;
-} {
-  try {
-    const parsedUrl = url.parse(registryUrl);
+  protocolVersion: number | null;
+}
+
+const protocolVersionRegExp = regEx(/#protocolVersion=(?<protocol>2|3)/);
+
+export function parseRegistryUrl(registryUrl: string): ParsedRegistryUrl {
+  const parsedUrl = parseUrl(registryUrl);
+  if (parsedUrl) {
+    const protocolVersionMatchGroup = protocolVersionRegExp.exec(
+      parsedUrl.hash
+    )?.groups;
+
     let protocolVersion = 2;
-    const protocolVersionRegExp = regEx(/#protocolVersion=(2|3)/);
-    const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
-    if (protocolVersionMatch) {
+    if (protocolVersionMatchGroup) {
       parsedUrl.hash = '';
-      protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);
+      const { protocol } = protocolVersionMatchGroup;
+      protocolVersion = parseInt(protocol, 10);
     } else if (parsedUrl.pathname.endsWith('.json')) {
       protocolVersion = 3;
     }
-    return { feedUrl: url.format(parsedUrl), protocolVersion };
-  } catch (err) {
-    logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
-    return { feedUrl: registryUrl, protocolVersion: null };
+    const feedUrl = parsedUrl.toString().replace(/\/$/, '');
+    return { feedUrl, protocolVersion };
   }
+  return { feedUrl: registryUrl, protocolVersion: null };
 }

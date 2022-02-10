@@ -6,12 +6,12 @@ import { parseRegistryUrl } from './util';
 import * as v2 from './v2';
 import * as v3 from './v3';
 
+export const defaultRegistryUrls = ['https://api.nuget.org/v3/index.json'];
+
 export class NugetDatasource extends Datasource {
   static readonly id = 'nuget';
 
-  override readonly defaultRegistryUrls = [
-    'https://api.nuget.org/v3/index.json',
-  ];
+  override readonly defaultRegistryUrls = defaultRegistryUrls;
 
   override readonly defaultVersioning = nugetVersioning.id;
 

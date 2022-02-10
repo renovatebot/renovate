@@ -121,11 +121,8 @@ describe('datasource/nuget/index', () => {
     });
 
     it('returns null for unparseable', () => {
-      const parsed = parseRegistryUrl(
-        'https://test:malfor%5Med@test.example.com'
-      );
-
-      expect(parsed.feedUrl).toBe('https://test:malfor%5Med@test.example.com');
+      const parsed = parseRegistryUrl('!@#');
+      expect(parsed.feedUrl).toBe('!@#');
       expect(parsed.protocolVersion).toBeNull();
     });
   });
