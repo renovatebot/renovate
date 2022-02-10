@@ -57,14 +57,15 @@ export function constructPipCompileCmd(
       if (['--allow-unsafe', '--generate-hashes'].includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
-        if (argument !== `--output-file=${upath.parse(outputFileName).base}`) {
+        const file = upath.parse(outputFileName).base;
+        if (argument !== `--output-file=${file}`) {
           // we don't trust the user-supplied output-file argument; use our value here
           logger.warn(
             { argument },
             'pip-compile was previously executed with an unexpected `--output-file` filename'
           );
         }
-        args.push(`--output-file=${upath.parse(outputFileName).base}`);
+        args.push(`--output-file=${file}`);
       } else if (argument.startsWith('--')) {
         logger.trace(
           { argument },
