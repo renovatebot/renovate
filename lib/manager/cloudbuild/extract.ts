@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
   try {
-    // TODO: fix types
+    // TODO: fix types (#9610)
     const doc: any = load(content);
     if (doc?.steps && is.array(doc.steps)) {
       for (const step of doc.steps) {

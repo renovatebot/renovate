@@ -1,4 +1,4 @@
-export const removedPresets: Record<string, string | null> = {
+export const removedPresets: Record<string, string | null | undefined> = {
   ':automergeBranchMergeCommit': ':automergeBranch',
   ':automergeBranchPush': ':automergeBranch',
   ':base': 'config:base',

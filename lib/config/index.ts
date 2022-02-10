@@ -17,9 +17,15 @@ export function getManagerConfig(
   };
   const language = get(manager, 'language');
   if (language) {
-    managerConfig = mergeChildConfig(managerConfig, config[language]);
+    managerConfig = mergeChildConfig(
+      managerConfig,
+      config[language] as RenovateConfig
+    );
   }
-  managerConfig = mergeChildConfig(managerConfig, config[manager]);
+  managerConfig = mergeChildConfig(
+    managerConfig,
+    config[manager] as RenovateConfig
+  );
   for (const i of getLanguageList().concat(getManagerList())) {
     delete managerConfig[i];
   }
@@ -37,7 +43,7 @@ export function filterConfig(
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];
   const targetIndex = stages.indexOf(targetStage);
   for (const option of options.getOptions()) {
-    const optionIndex = stages.indexOf(option.stage);
+    const optionIndex = option.stage ? stages.indexOf(option.stage) : -1;
     if (optionIndex !== -1 && optionIndex < targetIndex) {
       delete outputConfig[option.name];
     }

@@ -13,9 +13,7 @@ const scheduleMappings: Record<string, string> = {
   monthly: 'before 3am on the first day of the month',
 };
 
-export function hasValidTimezone(
-  timezone: string
-): [boolean] | [boolean, string] {
+export function hasValidTimezone(timezone: string): [true] | [false, string] {
   if (!DateTime.local().setZone(timezone).isValid) {
     return [false, `Invalid schedule: Unsupported timezone ${timezone}`];
   }
@@ -24,8 +22,8 @@ export function hasValidTimezone(
 
 export function hasValidSchedule(
   schedule: string[] | null | 'at any time'
-): [boolean] | [boolean, string] {
-  let message: string;
+): [true] | [false, string] {
+  let message = '';
   if (
     !schedule ||
     schedule === 'at any time' ||
@@ -65,7 +63,8 @@ export function hasValidSchedule(
     }
     if (
       !parsedSchedule.schedules.some(
-        (s) => s.M || s.d !== undefined || s.D || s.t_a !== undefined || s.t_b
+        (s) =>
+          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || s.t_b
       )
     ) {
       message = `Invalid schedule: "${scheduleText}" has no months, days of week or time of day`;
@@ -78,11 +77,16 @@ export function hasValidSchedule(
     // If any fail then we invalidate the whole thing
     return [false, message];
   }
-  return [true, ''];
+  return [true];
 }
 
 function cronMatches(cron: string, now: DateTime): boolean {
   const parsedCron = parseCron(cron);
+
+  // istanbul ignore if: doesn't return undefined but type will include undefined
+  if (!parsedCron) {
+    return false;
+  }
 
   if (parsedCron.hours.indexOf(now.hour) === -1) {
     // Hours mismatch
@@ -129,9 +133,9 @@ export function isScheduledNow(config: RenovateConfig): boolean {
     );
     configSchedule = [configSchedule];
   }
-  const [validSchedule, errorMessage] = hasValidSchedule(configSchedule);
-  if (!validSchedule) {
-    logger.warn(errorMessage);
+  const validSchedule = hasValidSchedule(configSchedule);
+  if (!validSchedule[0]) {
+    logger.warn(validSchedule[1]);
     return true;
   }
   let now = DateTime.local();
@@ -139,9 +143,9 @@ export function isScheduledNow(config: RenovateConfig): boolean {
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {
     logger.debug({ timezone: config.timezone }, 'Found timezone');
-    const [validTimezone, error] = hasValidTimezone(config.timezone);
-    if (!validTimezone) {
-      logger.warn(error);
+    const validTimezone = hasValidTimezone(config.timezone);
+    if (!validTimezone[0]) {
+      logger.warn(validTimezone[1]);
       return true;
     }
     logger.debug('Adjusting now for timezone');

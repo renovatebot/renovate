@@ -8,8 +8,8 @@ export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
-  return `--${nameWithHyphens.toLowerCase()}`;
+  const nameWithHyphens = option.name?.replace(regEx(/([A-Z])/g), '-$1');
+  return `--${nameWithHyphens?.toLowerCase()}`;
 }
 
 export function getConfig(input: string[]): AllConfig {

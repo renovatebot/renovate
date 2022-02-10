@@ -19,7 +19,7 @@ async function fetchDepUpdates(
     return dep;
   }
   const { depName } = dep;
-  // TODO: fix types
+  // TODO: fix types (#9610)
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);

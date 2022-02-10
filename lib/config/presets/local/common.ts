@@ -11,9 +11,9 @@ import {
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
-  _endpoint: string = null
+  _endpoint: string | null = null
 ): Promise<Preset> {
-  let raw: string;
+  let raw: string | null;
   try {
     raw = await platform.getRawFile(fileName, repo);
   } catch (err) {
@@ -30,6 +30,11 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
+  // istanbul ignore if: Add test
+  if (!raw) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
+
   try {
     return JSON.parse(raw);
   } catch (err) {
@@ -40,14 +45,16 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
-  presetPath: string,
-  endpoint: string
+  presetPath?: string,
+  endpoint?: string,
+  packageTag?: string
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset,
     presetPath,
     endpoint,
+    packageTag,
     fetch: fetchJSONFile,
   });
 }

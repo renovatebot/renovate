@@ -122,7 +122,7 @@ export async function ensureCommentRemoval(
 ): Promise<void> {
   try {
     logger.debug(
-      `Ensuring comment "${topic || content}" in #${prNo} is removed`
+      `Ensuring comment "${topic ?? content}" in #${prNo} is removed`
     );
     const comments = await getComments(config, prNo);
 
@@ -131,7 +131,7 @@ export async function ensureCommentRemoval(
     const byContent = (comment: Comment): boolean =>
       comment.content.raw.trim() === content;
 
-    let commentId: number | null = null;
+    let commentId: number | undefined;
 
     if (topic) {
       commentId = comments.find(byTopic)?.id;

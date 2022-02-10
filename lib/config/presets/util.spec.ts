@@ -1,14 +1,14 @@
 import type { FetchPresetConfig, Preset } from './types';
 import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util';
 
+const fetch = jest.fn(() => Promise.resolve<Preset>({}));
+
 const config: FetchPresetConfig = {
   pkgName: 'some/repo',
   filePreset: 'default',
   endpoint: 'endpoint',
-  fetch: undefined,
+  fetch,
 };
-
-const fetch = jest.fn(() => Promise.resolve<Preset>({}));
 
 describe('config/presets/util', () => {
   beforeEach(() => {
@@ -16,33 +16,33 @@ describe('config/presets/util', () => {
   });
   it('works', async () => {
     fetch.mockResolvedValue({ sub: { preset: { foo: true } } });
-    expect(await fetchPreset({ ...config, fetch })).toEqual({
+    expect(await fetchPreset({ ...config })).toEqual({
       sub: { preset: { foo: true } },
     });
 
-    expect(
-      await fetchPreset({ ...config, filePreset: 'some/sub', fetch })
-    ).toEqual({ preset: { foo: true } });
+    expect(await fetchPreset({ ...config, filePreset: 'some/sub' })).toEqual({
+      preset: { foo: true },
+    });
 
     expect(
-      await fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch })
+      await fetchPreset({ ...config, filePreset: 'some/sub/preset' })
     ).toEqual({ foo: true });
   });
 
   it('fails', async () => {
     fetch.mockRejectedValueOnce(new Error('fails'));
-    await expect(fetchPreset({ ...config, fetch })).rejects.toThrow('fails');
+    await expect(fetchPreset({ ...config })).rejects.toThrow('fails');
   });
 
   it(PRESET_DEP_NOT_FOUND, async () => {
-    fetch.mockResolvedValueOnce(null);
-    await expect(fetchPreset({ ...config, fetch })).rejects.toThrow(
+    fetch.mockResolvedValueOnce(null as never);
+    await expect(fetchPreset({ ...config })).rejects.toThrow(
       PRESET_DEP_NOT_FOUND
     );
 
     fetch.mockRejectedValueOnce(new Error(PRESET_DEP_NOT_FOUND));
     fetch.mockRejectedValueOnce(new Error(PRESET_DEP_NOT_FOUND));
-    await expect(fetchPreset({ ...config, fetch })).rejects.toThrow(
+    await expect(fetchPreset({ ...config })).rejects.toThrow(
       PRESET_DEP_NOT_FOUND
     );
   });
@@ -50,12 +50,12 @@ describe('config/presets/util', () => {
   it(PRESET_NOT_FOUND, async () => {
     fetch.mockResolvedValueOnce({});
     await expect(
-      fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch })
+      fetchPreset({ ...config, filePreset: 'some/sub/preset' })
     ).rejects.toThrow(PRESET_NOT_FOUND);
 
     fetch.mockResolvedValueOnce({ sub: {} });
     await expect(
-      fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch })
+      fetchPreset({ ...config, filePreset: 'some/sub/preset' })
     ).rejects.toThrow(PRESET_NOT_FOUND);
   });
 });

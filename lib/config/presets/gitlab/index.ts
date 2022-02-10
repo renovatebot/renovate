@@ -32,7 +32,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  packageTag?: string | null
 ): Promise<Preset> {
   let url = endpoint;
   let ref = '';
@@ -66,9 +66,9 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   presetName: string,
-  presetPath: string,
-  endpoint = Endpoint,
-  packageTag?: string
+  presetPath?: string,
+  endpoint: string | undefined = Endpoint,
+  packageTag?: string | null
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
@@ -84,7 +84,7 @@ export function getPreset({
   packageName: pkgName,
   presetPath,
   presetName = 'default',
-  packageTag = null,
+  packageTag,
 }: PresetConfig): Promise<Preset> {
   return getPresetFromEndpoint(
     pkgName,

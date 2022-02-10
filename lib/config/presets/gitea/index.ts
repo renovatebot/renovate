@@ -17,7 +17,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  packageTag?: string | null
 ): Promise<Preset> {
   let res: RepoContents;
   try {
@@ -35,6 +35,12 @@ export async function fetchJSONFile(
     );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
+
+  // istanbul ignore if: add test
+  if (!res.content) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
+
   try {
     const content = Buffer.from(res.content, 'base64').toString();
     const parsed = JSON.parse(content);
@@ -47,8 +53,8 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
-  presetPath: string,
-  endpoint = Endpoint,
+  presetPath?: string,
+  endpoint: string | undefined = Endpoint,
   packageTag?: string
 ): Promise<Preset> {
   return fetchPreset({
@@ -65,7 +71,7 @@ export function getPreset({
   packageName: pkgName,
   presetName = 'default',
   presetPath,
-  packageTag = null,
+  packageTag,
 }: PresetConfig): Promise<Preset> {
   return getPresetFromEndpoint(
     pkgName,

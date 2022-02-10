@@ -25,7 +25,7 @@ export function setMaxLimit(key: Limit, val: unknown): void {
 }
 
 export function incLimitedValue(key: Limit, incBy = 1): void {
-  const limit = limits.get(key) || { max: null, current: 0 };
+  const limit = limits.get(key) ?? { max: null, current: 0 };
   limits.set(key, {
     ...limit,
     current: limit.current + incBy,

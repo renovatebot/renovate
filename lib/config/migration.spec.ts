@@ -185,13 +185,14 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig.major.schedule).toHaveLength(2);
-      expect(migratedConfig.major.schedule[0]).toBe('after 10pm');
-      expect(migratedConfig.major.schedule[1]).toBe('before 7am');
-      expect(migratedConfig.minor.schedule).toMatchSnapshot();
-      expect(migratedConfig.minor.schedule).toHaveLength(2);
-      expect(migratedConfig.minor.schedule[0]).toBe('after 10pm every weekday');
-      expect(migratedConfig.minor.schedule[1]).toBe('before 7am every weekday');
+      expect(migratedConfig.major?.schedule).toStrictEqual([
+        'after 10pm',
+        'before 7am',
+      ]);
+      expect(migratedConfig.minor?.schedule).toStrictEqual([
+        'after 10pm every weekday',
+        'before 7am every weekday',
+      ]);
     });
     it('migrates every friday', () => {
       const config = {
@@ -295,7 +296,7 @@ describe('config/migration', () => {
       );
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.packageRules[0].minor.automerge).toBeFalse();
+      expect(migratedConfig.packageRules?.[0]?.minor?.automerge).toBeFalse();
     });
     it('does not migrate config', () => {
       const config: TestRenovateConfig = {
@@ -325,9 +326,9 @@ describe('config/migration', () => {
       );
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.lockFileMaintenance.packageRules).toHaveLength(1);
+      expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
       expect(
-        migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
+        migratedConfig.lockFileMaintenance?.packageRules[0].respectLatest
       ).toBeFalse();
     });
 
@@ -390,8 +391,8 @@ describe('config/migration', () => {
       expect(migratedConfig.includePaths).toHaveLength(4);
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(4);
-      expect(migratedConfig.packageRules[0].rangeStrategy).toBe('replace');
-      expect(migratedConfig.packageRules[1].rangeStrategy).toBe('pin');
+      expect(migratedConfig.packageRules?.[0].rangeStrategy).toBe('replace');
+      expect(migratedConfig.packageRules?.[1].rangeStrategy).toBe('pin');
     });
     it('migrates more packageFiles', () => {
       const config: TestRenovateConfig = {

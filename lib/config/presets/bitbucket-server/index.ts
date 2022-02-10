@@ -18,7 +18,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  branchOrTag?: string
+  branchOrTag?: string | null
 ): Promise<Preset> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
@@ -57,14 +57,16 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
-  presetPath: string,
-  endpoint: string
+  presetPath?: string,
+  endpoint?: string,
+  packageTag?: string | null
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset,
     presetPath,
     endpoint,
+    packageTag,
     fetch: fetchJSONFile,
   });
 }

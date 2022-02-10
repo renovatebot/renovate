@@ -62,7 +62,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
               delete newRule[newKey];
             }
           });
-          newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
+          newRule.matchUpdateTypes = rule.matchUpdateTypes ?? [];
           newRule.matchUpdateTypes.push(key);
           newRule = { ...newRule, ...val };
           newRules.push(newRule);

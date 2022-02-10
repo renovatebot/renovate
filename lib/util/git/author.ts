@@ -4,7 +4,7 @@ import { regEx } from '../regex';
 import type { GitAuthor } from './types';
 
 export function parseGitAuthor(input: string): GitAuthor | null {
-  let result: GitAuthor = null;
+  let result: GitAuthor | null = null;
   if (!input) {
     return null;
   }
@@ -21,7 +21,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     }
     if (input.includes('[bot]@')) {
       // invalid github app/bot addresses
-      massagedInput = (massagedInput || input).replace('[bot]@', '@');
+      massagedInput = (massagedInput ?? input).replace('[bot]@', '@');
       massagedBotEmail = true;
     }
     if (!massagedInput) {
@@ -30,11 +30,11 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     const parsed = addrs.parseOneAddress(massagedInput) as addrs.ParsedMailbox;
     if (parsed?.address) {
       result = {
-        name: parsed.name || input.replace(regEx(/@.*/), ''),
+        name: parsed.name ?? input.replace(regEx(/@.*/), ''),
         address: parsed.address,
       };
       if (massagedBotEmail) {
-        result.address = result.address.replace('@', '[bot]@');
+        result.address = result.address?.replace('@', '[bot]@');
       }
       return result;
     }

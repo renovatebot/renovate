@@ -17,13 +17,13 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     }
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
-    const hostType = splitEnv.shift();
+    const hostType = splitEnv.shift() as string;
     if (datasources.has(hostType)) {
-      const suffix = splitEnv.pop();
+      const suffix = splitEnv.pop() as keyof HostRule;
       if (fields.includes(suffix)) {
-        let matchHost: string;
+        let matchHost: string | undefined;
         const rule: HostRule = {};
-        rule[suffix] = env[envName];
+        rule[suffix] = env[envName] as never; // TODO: fix types (#9610)
         if (splitEnv.length === 0) {
           // host-less rule
         } else if (splitEnv.length === 1) {
@@ -38,7 +38,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
         logger.debug(`Converting ${envName} into a global host rule`);
         if (existingRule) {
           // Add current field to existing rule
-          existingRule[suffix] = env[envName];
+          existingRule[suffix] = env[envName] as never; // TODO: fix types (#9610)
         } else {
           // Create a new rule
           const newRule: HostRule = {
@@ -47,7 +47,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
           if (matchHost) {
             newRule.matchHost = matchHost;
           }
-          newRule[suffix] = env[envName];
+          newRule[suffix] = env[envName] as never; // TODO: fix types (#9610)
           hostRules.push(newRule);
         }
       }

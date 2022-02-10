@@ -88,7 +88,7 @@ function replaceSecretsinObject(
   secrets: Record<string, string>,
   deleteSecrets: boolean
 ): RenovateConfig {
-  const config = { ...config_ };
+  const config = { ...config_ } as RenovateConfig;
   if (deleteSecrets) {
     delete config.secrets;
   }
@@ -102,17 +102,13 @@ function replaceSecretsinObject(
     if (is.array(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
         if (is.plainObject(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsinObject(
+          value[arrayIndex] = replaceSecretsinObject(
             arrayItem,
             secrets,
             deleteSecrets
           );
         } else if (is.string(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsInString(
-            key,
-            arrayItem,
-            secrets
-          );
+          value[arrayIndex] = replaceSecretsInString(key, arrayItem, secrets);
         }
       }
     }
@@ -130,6 +126,10 @@ export function applySecretsToConfig(
     for (const secret of Object.values(secrets)) {
       addSecretForSanitizing(String(secret));
     }
+  }
+  // istanbul ignore if: TODO: fix types (#9610)
+  if (!secrets) {
+    return config;
   }
   return replaceSecretsinObject(config, secrets, deleteSecrets);
 }

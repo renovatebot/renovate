@@ -104,7 +104,11 @@ module.exports = {
 
     '@typescript-eslint/restrict-template-expressions': [
       1,
-      { allowNumber: true, allowBoolean: true },
+      {
+        allowNumber: true,
+        allowBoolean: true,
+        allowNullish: true, // fixme
+      },
     ],
     '@typescript-eslint/restrict-plus-operands': 2,
 

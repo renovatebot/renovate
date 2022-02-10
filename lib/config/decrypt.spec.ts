@@ -84,7 +84,10 @@ describe('config/decrypt', () => {
         },
         'backend/package.json',
       ];
-      const res = await decryptConfig(config, repository);
+      const res = (await decryptConfig(
+        config,
+        repository
+      )) as RenovateConfig & { packageFiles: any[] };
       expect(res.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(

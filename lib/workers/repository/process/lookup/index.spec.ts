@@ -49,7 +49,7 @@ let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
   beforeEach(() => {
-    // TODO: fix types
+    // TODO: fix types (#9610)
     config = partial<LookupUpdateConfig>(getConfig());
     config.manager = 'npm';
     config.versioning = npmVersioningId;

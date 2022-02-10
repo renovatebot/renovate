@@ -1,14 +1,14 @@
 import { getOptions } from './options';
 import type { AllConfig, RenovateOptions } from './types';
 
-const defaultValues = {
+const defaultValues: Record<string, unknown> = {
   boolean: true,
   array: [],
   string: null,
   object: null,
 };
 
-export function getDefault(option: RenovateOptions): any {
+export function getDefault(option: RenovateOptions): unknown {
   return option.default === undefined
     ? defaultValues[option.type]
     : option.default;

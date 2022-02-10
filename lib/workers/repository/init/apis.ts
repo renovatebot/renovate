@@ -7,7 +7,7 @@ import {
 import * as npmApi from '../../../datasource/npm';
 import { RepoParams, RepoResult, platform } from '../../../platform';
 
-// TODO: fix types
+// TODO: fix types (#9610)
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
@@ -45,7 +45,7 @@ async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   }
 }
 
-// TODO: fix types
+// TODO: fix types (#9610)
 async function getPlatformConfig(
   config: RepoParams
 ): Promise<WorkerPlatformConfig> {
@@ -56,7 +56,7 @@ async function getPlatformConfig(
   };
 }
 
-// TODO: fix types
+// TODO: fix types (#9610)
 export async function initApis(
   input: RenovateConfig
 ): Promise<WorkerPlatformConfig> {

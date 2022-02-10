@@ -37,7 +37,7 @@ export async function getUserDetails(
   }
 }
 
-let userEmail: string;
+let userEmail: string | null;
 
 export async function getUserEmail(
   endpoint: string,

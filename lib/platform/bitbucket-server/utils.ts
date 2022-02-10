@@ -1,5 +1,6 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
+import is from '@sindresorhus/is';
 import type { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
 import type {
@@ -139,7 +140,7 @@ interface BitbucketError extends HTTPError {
 }
 
 export function isInvalidReviewersResponse(err: BitbucketError): boolean {
-  const errors = err?.response?.body?.errors || [];
+  const errors = err?.response?.body?.errors ?? [];
   return (
     errors.length > 0 &&
     errors.every(
@@ -149,12 +150,14 @@ export function isInvalidReviewersResponse(err: BitbucketError): boolean {
 }
 
 export function getInvalidReviewers(err: BitbucketError): string[] {
-  const errors = err?.response?.body?.errors || [];
-  let invalidReviewers = [];
+  const errors = err?.response?.body?.errors ?? [];
+  let invalidReviewers: string[] = [];
   for (const error of errors) {
     if (error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION) {
       invalidReviewers = invalidReviewers.concat(
-        error.reviewerErrors?.map(({ context }) => context) || []
+        error.reviewerErrors
+          ?.map(({ context }) => context)
+          .filter(is.nonEmptyString) ?? []
       );
     }
   }

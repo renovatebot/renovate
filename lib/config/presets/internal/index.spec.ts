@@ -4,13 +4,14 @@ import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
 import { resolveConfigPresets } from '../index';
 import * as _npm from '../npm';
+import type { Preset } from '../types';
 import * as internal from '.';
 
 jest.mock('./npm');
 jest.mock('../../../datasource/npm');
 
 const npm = mocked(_npm);
-npm.getPreset = jest.fn((_) => null);
+npm.getPreset = jest.fn((_) => Promise.resolve<Preset>(null as never));
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 

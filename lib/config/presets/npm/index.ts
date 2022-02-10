@@ -1,5 +1,8 @@
 import { resolvePackage } from '../../../datasource/npm/npmrc';
-import type { NpmResponse } from '../../../datasource/npm/types';
+import type {
+  NpmResponse,
+  NpmResponseVersion,
+} from '../../../datasource/npm/types';
 import { logger } from '../../../logger';
 import { Http } from '../../../util/http';
 import type { Preset, PresetConfig } from '../types';
@@ -13,6 +16,9 @@ const id = 'npm';
 
 const http = new Http(id);
 
+// TODO: fix types (#9610)
+type RenovateNpmResponse = NpmResponseVersion & { 'renovate-config'?: any };
+
 export async function getPreset({
   packageName,
   presetName = 'default',
@@ -22,7 +28,7 @@ export async function getPreset({
     const { headers, packageUrl } = resolvePackage(packageName);
     const body = (await http.getJson<NpmResponse>(packageUrl, { headers }))
       .body;
-    dep = body.versions[body['dist-tags'].latest];
+    dep = body.versions?.[body['dist-tags'].latest] as RenovateNpmResponse;
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }

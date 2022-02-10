@@ -23,15 +23,14 @@ export function getPreset({
   packageTag,
   baseConfig,
 }: PresetConfig): Promise<Preset> {
-  const { platform, endpoint } = baseConfig;
+  const { platform, endpoint } = baseConfig ?? {};
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  const resolver = resolvers[platform.toLowerCase()];
+  const platformId = platform.toLowerCase() as keyof typeof resolvers;
+  const resolver = resolvers[platformId];
   if (!resolver) {
-    throw new Error(
-      `Unsupported platform '${baseConfig.platform}' for local preset.`
-    );
+    throw new Error(`Unsupported platform '${platform}' for local preset.`);
   }
   return resolver.getPresetFromEndpoint(
     pkgName,

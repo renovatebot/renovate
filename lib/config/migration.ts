@@ -11,6 +11,7 @@ import { removedPresets } from './presets/common';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
+  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
@@ -51,13 +52,15 @@ export function migrateConfig(
           migratedConfig.packageRules = is.array(migratedConfig.packageRules)
             ? migratedConfig.packageRules
             : [];
-          migratedConfig.packageRules = val.concat(migratedConfig.packageRules);
+          migratedConfig.packageRules = (val as PackageRule[]).concat(
+            migratedConfig.packageRules
+          );
         }
         delete migratedConfig.pathRules;
       } else if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
           migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications.filter(
+            migratedConfig.suppressNotifications?.filter(
               (item) => item !== 'prEditNotification'
             );
         }
@@ -106,7 +109,7 @@ export function migrateConfig(
                 packageFile as RenovateConfig,
                 key
               ).migratedConfig;
-              for (const subrule of payload.packageRules || []) {
+              for (const subrule of payload.packageRules ?? []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
               }
@@ -186,7 +189,7 @@ export function migrateConfig(
         if (is.string(migratedConfig.extends)) {
           migratedConfig.extends = [migratedConfig.extends];
         }
-        const presets = migratedConfig.extends;
+        const presets: (string | null)[] = migratedConfig.extends ?? [];
         for (let i = 0; i < presets.length; i += 1) {
           const preset = presets[i];
           if (is.string(preset)) {
@@ -200,10 +203,12 @@ export function migrateConfig(
             }
           }
         }
-        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
+        migratedConfig.extends = migratedConfig.extends?.filter(
+          is.nonEmptyString
+        );
       } else if (key === 'unpublishSafe') {
         if (val === true) {
-          migratedConfig.extends = migratedConfig.extends || [];
+          migratedConfig.extends = migratedConfig.extends ?? [];
           if (is.string(migratedConfig.extends)) {
             migratedConfig.extends = [migratedConfig.extends];
           }
@@ -212,7 +217,7 @@ export function migrateConfig(
               ':unpublishSafe',
               'default:unpublishSafe',
               'npm:unpublishSafe',
-            ].some((x) => migratedConfig.extends.includes(x))
+            ].some((x) => migratedConfig.extends?.includes(x))
           ) {
             migratedConfig.extends.push('npm:unpublishSafe');
           }
@@ -225,11 +230,11 @@ export function migrateConfig(
       ) {
         migratedConfig.automergeType = 'branch';
       } else if (key === 'automergeMinor') {
-        migratedConfig.minor = migratedConfig.minor || {};
+        migratedConfig.minor = migratedConfig.minor ?? {};
         migratedConfig.minor.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'automergeMajor') {
-        migratedConfig.major = migratedConfig.major || {};
+        migratedConfig.major = migratedConfig.major ?? {};
         migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'renovateFork' && is.boolean(val)) {
@@ -239,7 +244,7 @@ export function migrateConfig(
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
       } else if (key === 'automergePatch') {
-        migratedConfig.patch = migratedConfig.patch || {};
+        migratedConfig.patch = migratedConfig.patch ?? {};
         migratedConfig.patch.automerge = !!val;
         delete migratedConfig[key];
       } else if (
@@ -251,29 +256,27 @@ export function migrateConfig(
         if (val === 'none') {
           migratedConfig.automerge = false;
         } else if (val === 'patch') {
-          migratedConfig.patch = migratedConfig.patch || {};
+          migratedConfig.patch = migratedConfig.patch ?? {};
           migratedConfig.patch.automerge = true;
-          migratedConfig.minor = migratedConfig.minor || {};
+          migratedConfig.minor = migratedConfig.minor ?? {};
           migratedConfig.minor.automerge = false;
-          migratedConfig.major = migratedConfig.major || {};
+          migratedConfig.major = migratedConfig.major ?? {};
           migratedConfig.major.automerge = false;
         } else if (val === 'minor') {
-          migratedConfig.minor = migratedConfig.minor || {};
+          migratedConfig.minor = migratedConfig.minor ?? {};
           migratedConfig.minor.automerge = true;
-          migratedConfig.major = migratedConfig.major || {};
+          migratedConfig.major = migratedConfig.major ?? {};
           migratedConfig.major.automerge = false;
         } /* istanbul ignore else: we can never go to else */ else if (
           val === 'any'
         ) {
           migratedConfig.automerge = true;
         }
-      } else if (key === 'packages') {
+      } else if (key === 'packages' && is.array(val)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
           : [];
-        migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages
-        );
+        migratedConfig.packageRules = migratedConfig.packageRules.concat(val);
         delete migratedConfig.packages;
       } else if (key === 'packageName') {
         migratedConfig.packageNames = [val];
@@ -303,7 +306,11 @@ export function migrateConfig(
               fixShortHours(schedules[i])
             ).schedules[0];
             // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
-            if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
+            if (
+              parsedSchedule?.t_a &&
+              parsedSchedule?.t_b &&
+              parsedSchedule.t_a[0] > parsedSchedule.t_b[0]
+            ) {
               const toSplit = schedules[i];
               schedules[i] = toSplit
                 .replace(afterBeforeRe, '$1$2 $3 $7')
@@ -390,10 +397,10 @@ export function migrateConfig(
       ) {
         migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        delete migratedConfig.node.enabled;
-        migratedConfig.travis = migratedConfig.travis || {};
+        delete migratedConfig.node?.enabled;
+        migratedConfig.travis = migratedConfig.travis ?? {};
         migratedConfig.travis.enabled = true;
-        if (Object.keys(migratedConfig.node).length) {
+        if (migratedConfig.node && Object.keys(migratedConfig.node).length) {
           const subMigrate = migrateConfig(migratedConfig.node, key);
           migratedConfig.node = subMigrate.migratedConfig;
         } else {
@@ -445,7 +452,7 @@ export function migrateConfig(
       }
     }
     if (is.array(migratedConfig.packageRules)) {
-      const renameMap = {
+      const renameMap: Record<string, string | undefined> = {
         paths: 'matchPaths',
         languages: 'matchLanguages',
         baseBranchList: 'matchBaseBranches',
@@ -476,7 +483,10 @@ export function migrateConfig(
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
-            const combinedRule = mergeChildConfig(packageRule, subrule);
+            const combinedRule = mergeChildConfig(
+              packageRule,
+              subrule as RenovateConfig
+            );
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }
@@ -497,7 +507,7 @@ export function migrateConfig(
     }
     if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle || {},
+        migratedConfig.gradle ?? {},
         migratedConfig['gradle-lite']
       );
     }

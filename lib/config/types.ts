@@ -24,7 +24,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   branchPrefix?: string;
   branchName?: string;
-  manager?: string;
+  manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -61,7 +61,7 @@ export interface RenovateSharedConfig {
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
-  semanticCommitScope?: string;
+  semanticCommitScope?: string | null;
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -322,7 +322,7 @@ export interface RenovateOptionBase {
 export interface RenovateArrayOption<
   T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
-  default?: T[];
+  default?: T[] | null;
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
@@ -344,21 +344,21 @@ export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
-  default?: boolean;
+  default?: boolean | null;
   type: 'boolean';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
-  default?: number;
+  default?: number | null;
   type: 'integer';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
-  default?: string;
+  default?: string | null;
   format?: 'regex';
 
   // Not used
@@ -412,8 +412,11 @@ export interface MigratedConfig {
 
 export interface MigratedRenovateConfig extends RenovateConfig {
   endpoints?: HostRule[];
-  pathRules: PackageRule[];
-  packages: PackageRule[];
+
+  gradle?: RenovateConfig;
+
+  pathRules?: PackageRule[];
+  packages?: PackageRule[];
 
   node?: RenovateConfig;
   travis?: RenovateConfig;

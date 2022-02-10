@@ -17,7 +17,11 @@ export async function fetchPreset({
   endpoint: _endpoint,
   packageTag = null,
   fetch,
-}: FetchPresetConfig): Promise<Preset | undefined> {
+}: FetchPresetConfig): Promise<Preset> {
+  // istanbul ignopre if: fix types (#9610)
+  if (!_endpoint) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
   const endpoint = ensureTrailingSlash(_endpoint);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';

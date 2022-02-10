@@ -28,8 +28,8 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env) {
     return option.env;
   }
-  const nameWithUnderscores = option.name.replace(/([A-Z])/g, '_$1');
-  return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
+  const nameWithUnderscores = option.name?.replace(/([A-Z])/g, '_$1');
+  return `RENOVATE_${nameWithUnderscores?.toUpperCase()}`;
 }
 
 const renameKeys = {
@@ -85,7 +85,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
       if (env[envName]) {
         if (option.type === 'array' && option.subType === 'object') {
           try {
-            const parsed = JSON.parse(env[envName]);
+            const parsed = JSON.parse(env[envName] as string);
             if (is.array(parsed)) {
               config[option.name] = parsed;
             } else {
@@ -102,7 +102,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
           }
         } else {
           const coerce = coersions[option.type];
-          config[option.name] = coerce(env[envName]);
+          config[option.name] = coerce(env[envName] as string);
         }
       }
     }

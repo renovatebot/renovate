@@ -20,8 +20,8 @@ function massageLink(input: string): string {
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
   const transformer = (tree: Content): void => {
-    const startOffset: number = tree.position.start.offset;
-    const endOffset: number = tree.position.end.offset;
+    const startOffset = tree.position?.start.offset as number;
+    const endOffset = tree.position?.end.offset as number;
 
     if (tree.type === 'link') {
       const substr = input.slice(startOffset, endOffset);
@@ -39,7 +39,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
         const [url] = match;
-        const start = startOffset + match.index;
+        const start = startOffset + (match.index as number);
         const end = start + url.length;
         const newUrl = massageLink(url);
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });

@@ -28,14 +28,14 @@ export type PresetFetcher = (
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  packageTag?: string | null
 ) => Promise<Preset>;
 
 export type FetchPresetConfig = {
   pkgName: string;
   filePreset: string;
   presetPath?: string;
-  endpoint: string;
-  packageTag?: string;
+  endpoint?: string;
+  packageTag?: string | null;
   fetch: PresetFetcher;
 };

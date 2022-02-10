@@ -23,7 +23,7 @@ describe('config/options/index', () => {
       .filter((option) => option.supportedManagers)
       .forEach((option) => {
         expect(option.supportedManagers).toBeNonEmptyArray();
-        for (const item of option.supportedManagers) {
+        for (const item of option.supportedManagers as string[]) {
           expect(managerList).toContain(item);
         }
       });
@@ -38,7 +38,7 @@ describe('config/options/index', () => {
       .filter((option) => option.supportedPlatforms)
       .forEach((option) => {
         expect(option.supportedPlatforms).toBeNonEmptyArray();
-        for (const item of option.supportedPlatforms) {
+        for (const item of option.supportedPlatforms as string[]) {
           expect(platformList).toContain(item);
         }
       });

@@ -5,7 +5,7 @@ import * as npmExtract from '.';
 
 const fs: any = _fs;
 
-// TODO: fix types
+// TODO: fix types (#9610)
 const defaultConfig = getConfig();
 
 const input01Content = loadFixture('inputs/01.json', '..');

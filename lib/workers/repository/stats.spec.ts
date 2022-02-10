@@ -3,6 +3,7 @@ import { printRequestStats } from './stats';
 
 jest.mock('../../util/cache/memory');
 
+// TODO: fix types (#9610)
 const memCache: any = memCache_ as any;
 
 describe('workers/repository/stats', () => {
