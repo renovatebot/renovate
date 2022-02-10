@@ -8,8 +8,8 @@ import type { GitHubTag, TagResponse } from './types';
 export class GithubTagsDatasource extends GithubReleasesDatasource {
   static override readonly id = 'github-tags';
 
-  constructor(id = GithubTagsDatasource.id) {
-    super(id);
+  constructor() {
+    super(GithubTagsDatasource.id);
   }
 
   @cache({
