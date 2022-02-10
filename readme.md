@@ -12,57 +12,91 @@ Multi-platform and multi-language.
 
 ## Why Use Renovate?
 
-- Get automated Pull Requests whenever dependencies need updating
-- Define schedules to avoid unnecessary noise in projects (e.g. for weekends or outside of working hours, or weekly updates, etc.)
-- Relevant package files are discovered automatically (e.g. supports monorepo architecture such as Lerna or Yarn workspaces without further configuration)
-- Bot behavior is extremely customizable via configuration files (config as code)
+- Get automated Pull Requests to update your dependencies
+- Reduce noise by running Renovate on a schedule, for example:
+  - on weekends
+  - outside of working hours
+  - each week
+  - each month
+- Relevant package files are discovered automatically
+- Supports monorepo architectures like Lerna or Yarn workspaces with no extra configuration
+- Bot behavior is customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
-- Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
+- Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
 - Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
-- Supports GitHub (.com and Enterprise), GitLab (.com and CE/EE), Bitbucket Cloud, Bitbucket Server, Azure DevOps and Gitea.
 - Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
+
+## Supported Platforms
+
+Renovate works on the following platforms:
+
+- GitHub.com (.com and Enterprise)
+- GitLab (.com and CE/EE)
+- Bitbucket Cloud
+- Bitbucket Server
+- Azure DevOps
+- Gitea
 
 ## Who Uses Renovate?
 
-Renovate was released in 2017 and already is widely used in the developer community, including:
+Renovate is widely used in the developer community:
 
 ![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
 
 ## The Renovate Approach
 
-- We believe everyone benefits from automation, whether it's a little or a lot
-- Renovate should not cause you to change your workflow against your wishes, instead it should be adaptable to your existing workflow
-- All behavior should be configurable, down to a ridiculous level if necessary
-- Autodetect settings wherever possible (to minimize configuration) but always allow overrides
+We believe everyone benefits from automation, whether it's a little or a lot.
+This means that Renovate:
+
+- Adapts to your workflow
+- Allows you to configure its behavior
+- Will autodetect settings where possible
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are hosted on GitHub.com is to install the hosted Renovate app.
-On Azure DevOps you can install Renovate as an extension from the marketplace.
+### GitHub
 
-For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install it now.
+It's easiest to use the hosted Renovate app.
+Install the [Renovate app](https://github.com/apps/renovate) now.
+
 [More details on the GitHub App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
 
-For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
+### Azure DevOps
+
+There are two ways to run Renovate on Azure DevOps:
+
+- Renovate Me extension
+- Custom pipeline
+
+#### Renovate Me extension
+
+Go to the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
 From there you can create a pipeline with the `RenovateMe` task.
 [More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me).
-Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
-Alternatively, you can create a custom pipeline with a `yml` definition that will trigger `npx renovate`.
+
+**Note:** This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
+
+#### Custom pipeline
+
+You can create a custom pipeline with a `yml` definition that triggers `npx renovate`.
 [More details on how to configure the pipeline](https://docs.renovatebot.com/setup-azure-devops/).
+
+### Bitbucket Cloud/Server, Gitea, GitLab
 
 For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting option.
 
 ## Configuration
 
-Visit <https://docs.renovatebot.com/> for documentation, and in particular <https://docs.renovatebot.com/configuration-options/> for a list of configuration options.
+Go to our [documentation website](https://docs.renovatebot.com/) to learn how to configure Renovate.
+We have a [full list of configuration options](https://docs.renovatebot.com/configuration-options/).
 
-To get help and/or a review for your config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.
+To get help with your configuration, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.
 
 ## Self-Hosting
 
-If you are not on github.com or gitlab.com, or you prefer to run your own instance of Renovate then you have several options:
+To run your own instance of Renovate you have several options:
 
-- Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using cron)
+- Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using `cron`)
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
 - Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
 
@@ -70,7 +104,7 @@ If you are not on github.com or gitlab.com, or you prefer to run your own instan
 
 ## Contributing
 
-If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [.github/contributing.md](.github/contributing.md).
+If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
 
 ## Security / Disclosure
 
