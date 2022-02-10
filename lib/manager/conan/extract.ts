@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -30,7 +31,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
-    const rawLines = section.split('\n').filter((line) => line.length !== 0);
+    const rawLines = section.split('\n').filter(is.nonEmptyString);
 
     for (const rawline of rawLines) {
       // don't process after a comment
