@@ -190,7 +190,7 @@ function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
-  const cacheNamespace = 'datasource-packagist-org-v2';
+  const cacheNamespace = 'datasource-packagist-org';
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     name
