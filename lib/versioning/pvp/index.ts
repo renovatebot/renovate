@@ -33,18 +33,22 @@ class PvpVersioningApi extends GenericVersioningApi {
   }
 
   override getMajor(version: string): number | null {
-    const { release } = this._parse(version);
-    return parseFloat(`${release[0]}.${release[1]}`);
+    const {
+      release: [major],
+    } = this._parse(version);
+    return major;
   }
 
   override getMinor(version: string): number | null {
-    const { release } = this._parse(version);
-    return release[2];
+    const {
+      release: [, minor],
+    } = this._parse(version);
+    return minor;
   }
 
   override getPatch(version: string): number | null {
     const { release } = this._parse(version);
-    return release[3];
+    return release[2];
   }
 
   /**

@@ -70,4 +70,28 @@ describe('versioning/pvp/index', () => {
   `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {
     expect(pvp.isGreaterThan(a, b)).toBe(expected);
   });
+
+  test.each`
+    input      | expected
+    ${'1.2.3'} | ${1.2}
+    ${'1.0.2'} | ${1}
+  `('getMajor("$input") === $expected', ({ input, expected }) => {
+    expect(pvp.getMajor(input)).toBe(expected);
+  });
+
+  test.each`
+    input      | expected
+    ${'1.2.3'} | ${3}
+    ${'1.0.0'} | ${0}
+  `('getMinor("$input") === $expected', ({ input, expected }) => {
+    expect(pvp.getMinor(input)).toBe(expected);
+  });
+
+  test.each`
+    input        | expected
+    ${'1.2.3.4'} | ${4}
+    ${'1.0.2'}   | ${undefined}
+  `('getPatch("$input") === $expected', ({ input, expected }) => {
+    expect(pvp.getPatch(input)).toBe(expected);
+  });
 });
