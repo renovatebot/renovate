@@ -282,7 +282,7 @@ e.g.
 
 If you use `binarySource=docker|install` read the section below.
 
-If you need to change the docker user please make sure to use the root (`0`) group, otherwise yu'll get in trouble with missing file and directory permissions.
+If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you'll get in trouble with missing file and directory permissions.
 
 Like this:
 
