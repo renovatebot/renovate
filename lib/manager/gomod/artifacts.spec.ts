@@ -29,6 +29,9 @@ require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
 
 replace github.com/pkg/errors => ../errors
+
+replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
+
 `;
 
 const adminConfig: RepoGlobalConfig = {
@@ -248,17 +251,16 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '6',
               GIT_CONFIG_KEY_0:
-                'url."https://ssh:some-token@github.com/".insteadOf',
+                'url.https://ssh:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url."https://git:some-token@github.com/".insteadOf',
-              GIT_CONFIG_KEY_2:
-                'url."https://some-token@github.com/".insteadOf',
+                'url.https://git:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url."https://ssh:some-enterprise-token@github.enterprise.com/".insteadOf',
+                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url."https://git:some-enterprise-token@github.enterprise.com/".insteadOf',
+                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url."https://some-enterprise-token@github.enterprise.com/".insteadOf',
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -303,11 +305,11 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
               GIT_CONFIG_KEY_0:
-                'url."https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url."https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_2:
-                'url."https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/',
               GIT_CONFIG_VALUE_1: 'git@gitlab.enterprise.com:',
               GIT_CONFIG_VALUE_2: 'https://gitlab.enterprise.com/',
@@ -354,17 +356,17 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '6',
               GIT_CONFIG_KEY_0:
-                'url."https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url."https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_2:
-                'url."https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url."https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url."https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url."https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2".insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/repo1',
               GIT_CONFIG_VALUE_1: 'git@gitlab.enterprise.com:repo1',
               GIT_CONFIG_VALUE_2: 'https://gitlab.enterprise.com/repo1',
@@ -414,11 +416,11 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
               GIT_CONFIG_KEY_0:
-                'url."https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url."https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_2:
-                'url."https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/',
               GIT_CONFIG_VALUE_1: 'git@gitlab.enterprise.com:',
               GIT_CONFIG_VALUE_2: 'https://gitlab.enterprise.com/',
@@ -473,29 +475,28 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '12',
               GIT_CONFIG_KEY_0:
-                'url."https://ssh:some-token@github.com/".insteadOf',
+                'url.https://ssh:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url."https://git:some-token@github.com/".insteadOf',
-              GIT_CONFIG_KEY_2:
-                'url."https://some-token@github.com/".insteadOf',
+                'url.https://git:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url."https://ssh:some-token@api.github.com/".insteadOf',
+                'url.https://ssh:some-token@api.github.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url."https://git:some-token@api.github.com/".insteadOf',
+                'url.https://git:some-token@api.github.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url."https://some-token@api.github.com/".insteadOf',
+                'url.https://some-token@api.github.com/.insteadOf',
               GIT_CONFIG_KEY_6:
-                'url."https://ssh:some-enterprise-token@github.enterprise.com/".insteadOf',
+                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_7:
-                'url."https://git:some-enterprise-token@github.enterprise.com/".insteadOf',
+                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_8:
-                'url."https://some-enterprise-token@github.enterprise.com/".insteadOf',
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_9:
-                'url."https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_10:
-                'url."https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_11:
-                'url."https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/".insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -549,11 +550,10 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
               GIT_CONFIG_KEY_0:
-                'url."https://ssh:some-token@github.com/".insteadOf',
+                'url.https://ssh:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url."https://git:some-token@github.com/".insteadOf',
-              GIT_CONFIG_KEY_2:
-                'url."https://some-token@github.com/".insteadOf',
+                'url.https://git:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
