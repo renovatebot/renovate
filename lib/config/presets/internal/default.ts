@@ -83,7 +83,8 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDependencies: {
-    description: 'Pin dependency versions for <code>dependencies</code>',
+    description:
+      'Pin dependency versions where depType=dependencies. Usually applies only to non-dev dependencies in <code>package.json</code>',
     packageRules: [
       {
         matchDepTypes: ['dependencies'],
@@ -92,7 +93,8 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for <code>devDependencies</code>',
+    description:
+      'Pin dependency versions where depType=dependencies. Usually applies only to non-dev dependencies in <code>package.json</code>',
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
