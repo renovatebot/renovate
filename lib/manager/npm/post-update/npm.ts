@@ -9,7 +9,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  findLocalSiblingOrParent,
+  localPathExists,
   move,
   readLocalFile,
 } from '../../../util/fs';
@@ -118,7 +118,9 @@ export async function generateLockFile(
     // massage to shrinkwrap if necessary
     if (
       filename === 'npm-shrinkwrap.json' &&
-      (await findLocalSiblingOrParent(lockFileName, 'package-lock.json'))
+      (await localPathExists(
+        lockFileName.replace('npm-shrinkwrap.json', 'package-lock.json')
+      ))
     ) {
       await move(
         upath.join(cwd, 'package-lock.json'),

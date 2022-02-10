@@ -58,9 +58,7 @@ describe('manager/npm/post-update/npm', () => {
 
   it('performs npm-shrinkwrap.json updates', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'some-dir/package-lock.json'
-    );
+    fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
