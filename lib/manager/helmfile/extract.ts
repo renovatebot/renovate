@@ -37,7 +37,7 @@ export function extractPackageFile(
 
     deps = doc.releases.map((dep) => {
       let depName = dep.chart;
-      let repoName = null;
+      let repoName: string | null = null;
 
       if (!is.string(dep.chart)) {
         return {
@@ -49,16 +49,13 @@ export function extractPackageFile(
       // If starts with ./ is for sure a local path
       if (dep.chart.startsWith('./')) {
         return {
-          depName,
+          depName: dep.name,
           skipReason: 'local-chart',
         };
       }
 
-      if (!is.string(dep.version)) {
-        return {
-          depName: dep.name,
-          skipReason: 'invalid-version',
-        };
+      if (is.number(dep.version)) {
+        dep.version = String(dep.version);
       }
 
       if (dep.chart.includes('/')) {
@@ -69,6 +66,13 @@ export function extractPackageFile(
         repoName = dep.chart;
       }
 
+      if (!is.string(dep.version)) {
+        return {
+          depName,
+          skipReason: 'invalid-version',
+        };
+      }
+
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
@@ -76,11 +80,6 @@ export function extractPackageFile(
           .concat([config.aliases[repoName]])
           .filter(Boolean),
       };
-
-      // If version is null is probably a local chart
-      if (!res.currentValue) {
-        res.skipReason = 'local-chart';
-      }
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
@@ -97,10 +96,5 @@ export function extractPackageFile(
     });
   }
 
-  if (!deps.length) {
-    logger.debug({ fileName }, 'helmfile.yaml has no releases');
-    return null;
-  }
-
-  return { deps, datasource: HelmDatasource.id } as PackageFile;
+  return deps.length ? { deps, datasource: HelmDatasource.id } : null;
 }

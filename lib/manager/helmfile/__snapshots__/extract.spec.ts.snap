@@ -5,7 +5,7 @@ Object {
   "datasource": "helm",
   "deps": Array [
     Object {
-      "depName": "./environment/{{\`{{ .Environment.Name }}\`}}/static",
+      "depName": "manifests",
       "skipReason": "local-chart",
     },
     Object {
@@ -16,7 +16,7 @@ Object {
       ],
     },
     Object {
-      "currentValue": "13.7.2",
+      "currentValue": "13.7",
       "depName": "kube-prometheus-stack",
       "registryUrls": Array [
         "https://prometheus-community.github.io/helm-charts",
@@ -103,7 +103,7 @@ Object {
   "datasource": "helm",
   "deps": Array [
     Object {
-      "depName": "./charts/example",
+      "depName": "example",
       "skipReason": "local-chart",
     },
   ],

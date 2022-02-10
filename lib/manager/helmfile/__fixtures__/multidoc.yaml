@@ -59,7 +59,7 @@ releases:
   chart: prometheus-community/kube-prometheus-stack
   needs:
     - manifests
-  version: 13.7.2
+  version: 13.7
 
 - name: invalid
 
