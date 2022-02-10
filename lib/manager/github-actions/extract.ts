@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)\s*(?:#\s+(?:renovate:\s+)?tag=(?<tag>.+?))?)\s*?$/
+  /^\s+-?\s+?uses: ['"]?(?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)['"]?\s*(?:#\s+(?:renovate:\s+)?tag=(?<tag>.+?))?)\s*?$/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
