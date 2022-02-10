@@ -6,20 +6,39 @@ describe('manager/composer/range', () => {
     const config: RangeConfig = { rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toBe('widen');
   });
-  it('pins require-dev', () => {
+  it('pins require-dev if already pinned', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'require-dev',
+      currentValue: '1.0.0',
     };
     expect(getRangeStrategy(config)).toBe('pin');
   });
-  it('pins project require', () => {
+  it('bumps require-dev if not pinned', () => {
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: 'require-dev',
+      currentValue: '^1.0.0',
+    };
+    expect(getRangeStrategy(config)).toBe('bump');
+  });
+  it('pins project require if already pinned', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       managerData: { composerJsonType: 'project' },
       depType: 'require',
+      currentValue: '1.0.0',
     };
     expect(getRangeStrategy(config)).toBe('pin');
+  });
+  it('bumps project require if not pinned', () => {
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      managerData: { composerJsonType: 'project' },
+      depType: 'require',
+      currentValue: '^1.0.0',
+    };
+    expect(getRangeStrategy(config)).toBe('bump');
   });
   it('widens complex ranges', () => {
     const config: RangeConfig = {
