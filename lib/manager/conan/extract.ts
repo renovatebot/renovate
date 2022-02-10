@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -66,10 +65,6 @@ export function extractPackageFile(content: string): PackageFile | null {
               depType,
             };
             deps.push(dep);
-
-            logger.trace(
-              `Found a Conan package: ${depName}, ${currentValue}, ${userAndChannel}, ${depType}.`
-            );
           }
         }
       }
