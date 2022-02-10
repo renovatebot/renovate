@@ -282,9 +282,7 @@ e.g.
 
 If you use `binarySource=docker|install` read the section below.
 
-A user can only write to their own home directory.
-If you override the home directory, so that your user has no home directory, then we implicitly redirect it to our user (`1000`).
-To get another userid working you need to override the default group, because we made the home directory writeable by the root group.
+If you need to change the docker user please make sure to use the root (`0`) group, otherwise yu'll get in trouble with missing file and directory permissions.
 
 Like this:
 
