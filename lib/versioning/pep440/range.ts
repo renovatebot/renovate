@@ -14,7 +14,7 @@ function getFutureVersion(
   const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
   let found = false;
   const futureRelease = baseRelease.map((basePart, index) => {
-    if (found && toRelease[index] < 1) {
+    if (found) {
       return 0;
     }
     const toPart = toRelease[index] || 0;
@@ -26,6 +26,9 @@ function getFutureVersion(
   });
   if (!found) {
     futureRelease[futureRelease.length - 1] += step;
+  }
+  if (futureRelease[0] === toRelease[0] && futureRelease[1] < toRelease[1]) {
+    futureRelease[1] = toRelease[1];
   }
   return futureRelease.join('.');
 }
