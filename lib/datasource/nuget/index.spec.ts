@@ -3,7 +3,10 @@ import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
-import { id as datasource, parseRegistryUrl } from '.';
+import { parseRegistryUrl } from './util';
+import { NugetDatasource } from '.';
+
+const datasource = NugetDatasource.id;
 
 const hostRules: any = _hostRules;
 
