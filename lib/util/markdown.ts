@@ -7,7 +7,7 @@ export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
 
   // Replace spaces in Markdown links with %20.
-  const markdownLinks = res.match(/\(https?:\/\/[^)]*\)/g);
+  const markdownLinks = res.match(regEx(/\(https?:\/\/[^)]*\)/g));
 
   if (markdownLinks) {
     markdownLinks.forEach((ml) => {
