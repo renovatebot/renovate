@@ -1,8 +1,8 @@
 import hasha from 'hasha';
 import * as httpMock from '../../../test/http-mock';
-import { findDigestAsset, mapDigestAssetToRelease } from './digest';
 import { GitHubReleaseMocker } from './test';
 import type { DigestAsset } from './types';
+import { findDigestAsset, mapDigestAssetToRelease } from '.';
 
 describe('datasource/github-releases/digest', () => {
   const lookupName = 'some/dep';
