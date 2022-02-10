@@ -130,6 +130,7 @@ const repoGroups = {
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   'material-ui': 'https://github.com/mui-org/material-ui',
+  'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',

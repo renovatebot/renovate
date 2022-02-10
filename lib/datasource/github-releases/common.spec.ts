@@ -1,5 +1,5 @@
-import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from './common';
 import { GitHubReleaseMocker } from './test';
+import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from '.';
 
 describe('datasource/github-releases/common', () => {
   describe('getSourceUrlBase', () => {
