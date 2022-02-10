@@ -30,7 +30,7 @@ describe('datasource/pod/index', () => {
         .reply(404);
       expect(
         await getPkgReleases({
-          datasource: pod.id,
+          datasource: PodDatasource.id,
           depName: 'foobar',
           registryUrls: [],
         })
