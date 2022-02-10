@@ -12,8 +12,28 @@ describe('manager/conan/extract', () => {
     });
     it('extracts multiple image lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile1);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toContainValues([
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.9.4',
+          depName: 'poco',
+          depType: 'requires',
+          lookupName: 'poco/1.9.4@_/_',
+          replaceString: 'poco/1.9.4',
+        },
+        {
+          currentValue: '[~1.2.3, loose=False]',
+          depName: 'zlib',
+          depType: 'requires',
+          lookupName: 'zlib/[~1.2.3, loose=False]@_/_',
+          replaceString: 'zlib/[~1.2.3, loose=False]',
+        },
+        {
+          currentValue: '8.62.134',
+          depName: 'fake',
+          depType: 'requires',
+          lookupName: 'fake/8.62.134@test/dev',
+          replaceString: 'fake/8.62.134@test/dev',
+        },
         {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',
           depName: '7zip',
@@ -51,6 +71,20 @@ describe('manager/conan/extract', () => {
           lookupName: 'openssl/[~=3.0]@test/prod',
           replaceString: 'openssl/[~=3.0]@test/prod',
         },
+        {
+          currentValue: '[>1.1 || 0.8]',
+          depName: 'cmake',
+          depType: 'build_requires',
+          lookupName: 'cmake/[>1.1 || 0.8]@_/_',
+          replaceString: 'cmake/[>1.1 || 0.8]',
+        },
+        {
+          currentValue: '[1.2.7 || >=1.2.9 <2.0.0]',
+          depName: 'cryptopp',
+          depType: 'build_requires',
+          lookupName: 'cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local',
+          replaceString: 'cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local',
+        },
       ]);
     });
     it('extracts multiple 0 lines from conanfile.txt', () => {
@@ -59,8 +93,7 @@ describe('manager/conan/extract', () => {
     });
     it('extracts multiple image lines from conanfile.py', () => {
       const res = extractPackageFile(conanfile3);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toContainValues([
+      expect(res?.deps).toEqual([
         {
           currentValue: '0.1',
           depName: 'pyreq',
@@ -88,6 +121,90 @@ describe('manager/conan/extract', () => {
           depType: 'requires',
           lookupName: 'req_a/1.0@_/_',
           replaceString: 'req_a/1.0',
+        },
+        {
+          currentValue: '2.1',
+          depName: 'req_l',
+          depType: 'requires',
+          lookupName: 'req_l/2.1@otheruser/testing',
+          replaceString: 'req_l/2.1@otheruser/testing',
+        },
+        {
+          currentValue: '0.1',
+          depName: 'req_b',
+          depType: 'requires',
+          lookupName: 'req_b/0.1@user/testing',
+          replaceString: 'req_b/0.1@user/testing',
+        },
+        {
+          currentValue: '0.2',
+          depName: 'req_d',
+          depType: 'requires',
+          lookupName: 'req_d/0.2@dummy/stable',
+          replaceString: 'req_d/0.2@dummy/stable',
+        },
+        {
+          currentValue: '2.1',
+          depName: 'req_e',
+          depType: 'requires',
+          lookupName: 'req_e/2.1@coder/beta',
+          replaceString: 'req_e/2.1@coder/beta',
+        },
+        {
+          currentValue: '1.0',
+          depName: 'req_c',
+          depType: 'requires',
+          lookupName: 'req_c/1.0@user/stable',
+          replaceString: 'req_c/1.0@user/stable',
+        },
+        {
+          currentValue: '1.0',
+          depName: 'req_f',
+          depType: 'requires',
+          lookupName: 'req_f/1.0@user/stable',
+          replaceString: 'req_f/1.0@user/stable',
+        },
+        {
+          currentValue: '3.0',
+          depName: 'req_h',
+          depType: 'requires',
+          lookupName: 'req_h/3.0@other/beta',
+          replaceString: 'req_h/3.0@other/beta',
+        },
+        {
+          currentValue: '[>1.0 <1.8]',
+          depName: 'req_g',
+          depType: 'requires',
+          lookupName: 'req_g/[>1.0 <1.8]@user/stable',
+          replaceString: 'req_g/[>1.0 <1.8]@user/stable',
+        },
+        {
+          currentValue: '1.2',
+          depName: 'req_i',
+          depType: 'requires',
+          lookupName: 'req_i/1.2@drl/testing',
+          replaceString: 'req_i/1.2@drl/testing',
+        },
+        {
+          currentValue: '2.2',
+          depName: 'req_i',
+          depType: 'requires',
+          lookupName: 'req_i/2.2@drl/stable',
+          replaceString: 'req_i/2.2@drl/stable',
+        },
+        {
+          currentValue: '1.2',
+          depName: 'req_k',
+          depType: 'requires',
+          lookupName: 'req_k/1.2@drl/testing',
+          replaceString: 'req_k/1.2@drl/testing',
+        },
+        {
+          currentValue: '0.1',
+          depName: 'tool_win',
+          depType: 'build_requires',
+          lookupName: 'tool_win/0.1@user/stable',
+          replaceString: 'tool_win/0.1@user/stable',
         },
       ]);
     });
