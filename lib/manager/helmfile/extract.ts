@@ -54,6 +54,13 @@ export function extractPackageFile(
         };
       }
 
+      if (!is.string(dep.version)) {
+        return {
+          depName: dep.name,
+          skipReason: 'invalid-version',
+        };
+      }
+
       if (dep.chart.includes('/')) {
         const v = dep.chart.split('/');
         repoName = v.shift();

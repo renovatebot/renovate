@@ -62,3 +62,9 @@ releases:
   version: 13.7.2
 
 - name: invalid
+
+- name:  "external-dns"
+  chart: "bitnami/external-dns"
+  namespace: "external-dns"
+  version: {{ .Values | getOrNil "external_dns.version" | default "4.5.5" }}
+  installed: {{ .Values | getOrNil "external_dns.installed" | default false }}

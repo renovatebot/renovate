@@ -26,6 +26,10 @@ Object {
       "depName": "invalid",
       "skipReason": "invalid-name",
     },
+    Object {
+      "depName": "external-dns",
+      "skipReason": "invalid-version",
+    },
   ],
 }
 `;
@@ -35,12 +39,8 @@ Object {
   "datasource": "helm",
   "deps": Array [
     Object {
-      "currentValue": undefined,
       "depName": "example",
-      "registryUrls": Array [
-        "https://charts.helm.sh/stable",
-      ],
-      "skipReason": "local-chart",
+      "skipReason": "invalid-version",
     },
   ],
 }

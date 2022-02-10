@@ -198,6 +198,7 @@ describe('manager/helmfile/extract', () => {
           { depName: 'rabbitmq', currentValue: '7.4.3' },
           { depName: 'kube-prometheus-stack', currentValue: '13.7.2' },
           { depName: 'invalid', skipReason: 'invalid-name' },
+          { depName: 'external-dns', skipReason: 'invalid-version' },
         ],
       });
     });
