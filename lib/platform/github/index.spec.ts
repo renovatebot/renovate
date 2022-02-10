@@ -5,9 +5,9 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import * as _logger from '../../logger';
+import type * as _logger from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import * as _git from '../../util/git';
+import type * as _git from '../../util/git';
 import type { CreatePRConfig, Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
@@ -2136,7 +2136,6 @@ describe('platform/github/index', () => {
           number: 1,
           state: PrState.Closed,
           base: { sha: '1234' },
-          mergeable: true,
           merged_at: 'sometime',
         })
         .post('/graphql')
@@ -2183,7 +2182,6 @@ describe('platform/github/index', () => {
           state: PrState.Open,
           base: { sha: '5678' },
           commits: 1,
-          mergeable: true,
         })
         .post('/graphql')
         .twice()

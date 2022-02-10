@@ -1,8 +1,12 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
-import { HTTPError, Response } from 'got';
+import type { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
-import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
+import type {
+  HttpOptions,
+  HttpPostOptions,
+  HttpResponse,
+} from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import type { BbsPr, BbsRestPr } from './types';
 

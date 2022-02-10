@@ -1,4 +1,4 @@
-import { Pr } from '../types';
+import type { Pr } from '../types';
 
 export interface AzurePr extends Pr {
   sourceRefName?: string;

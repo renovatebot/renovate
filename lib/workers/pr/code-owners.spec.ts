@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
 import { fs, git } from '../../../test/util';
-import { Pr } from '../../platform';
+import type { Pr } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
 jest.mock('../../util/fs');
