@@ -10,7 +10,7 @@ import { loadModules } from '../util/modules';
 import { Datasource } from './datasource';
 import * as datasourceDocker from './docker';
 import { GalaxyDatasource } from './galaxy';
-import * as datasourceGithubTags from './github-tags';
+import { GithubTagsDatasource } from './github-tags';
 import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
 import * as datasourcePackagist from './packagist';
@@ -72,7 +72,7 @@ describe('datasource/index', () => {
     }
   });
   it('returns if digests are supported', () => {
-    expect(datasource.supportsDigests(datasourceGithubTags.id)).toBeTrue();
+    expect(datasource.supportsDigests(GithubTagsDatasource.id)).toBeTrue();
   });
   it('returns null for no datasource', async () => {
     expect(

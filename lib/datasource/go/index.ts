@@ -1,6 +1,6 @@
 import { cache } from '../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
-import * as github from '../github-tags';
+import { GithubTagsDatasource } from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
@@ -57,8 +57,8 @@ export class GoDatasource extends Datasource {
     const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
 
     switch (source.datasource) {
-      case github.id: {
-        return github.getDigest(source, tag);
+      case GithubTagsDatasource.id: {
+        return this.direct.github.getDigest(source, tag);
       }
       case bitbucket.id: {
         return bitbucket.getDigest(source, tag);

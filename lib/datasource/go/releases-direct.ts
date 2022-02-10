@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
 import { Datasource } from '../datasource';
-import * as github from '../github-tags';
+import { GithubTagsDatasource } from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
@@ -11,8 +11,11 @@ import { bitbucket, getSourceUrl } from './common';
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
+  github: GithubTagsDatasource;
+
   constructor() {
     super(GoDirectDatasource.id);
+    this.github = new GithubTagsDatasource();
   }
 
   /**
@@ -47,8 +50,8 @@ export class GoDirectDatasource extends Datasource {
     }
 
     switch (source.datasource) {
-      case github.id: {
-        res = await github.getReleases(source);
+      case GithubTagsDatasource.id: {
+        res = await this.github.getReleases(source);
         break;
       }
       case gitlab.id: {

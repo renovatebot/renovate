@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { PlatformId } from '../../constants';
-import { id as githubTagsId } from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import type { SkipReason } from '../../types';
@@ -34,7 +34,7 @@ function determineDatasource(
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
   if (hostname === 'github.com') {
     logger.debug({ repository, hostname }, 'Found github dependency');
-    return { datasource: githubTagsId };
+    return { datasource: GithubTagsDatasource.id };
   }
   if (hostname === 'gitlab.com') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
@@ -52,7 +52,7 @@ function determineDatasource(
   }
   for (const [hostType, sourceId] of [
     [PlatformId.Gitea, gitlabTagsId],
-    [PlatformId.Github, githubTagsId],
+    [PlatformId.Github, GithubTagsDatasource.id],
     [PlatformId.Gitlab, gitlabTagsId],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
