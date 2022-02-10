@@ -30,7 +30,7 @@ Multi-platform and multi-language.
 
 Renovate works on the following platforms:
 
-- GitHub.com (.com and Enterprise)
+- GitHub (.com and Enterprise)
 - GitLab (.com and CE/EE)
 - Bitbucket Cloud
 - Bitbucket Server
