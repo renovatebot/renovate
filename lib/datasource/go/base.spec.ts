@@ -177,7 +177,7 @@ describe('datasource/go/base', () => {
         );
 
         expect(res).toEqual({
-          datasource: GitlabTagsDatasource .id,
+          datasource: GitlabTagsDatasource.id,
           lookupName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
