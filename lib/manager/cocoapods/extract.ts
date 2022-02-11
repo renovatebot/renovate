@@ -1,6 +1,6 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -62,7 +62,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
       const datasource =
         platform === 'github'
           ? datasourceGithubTags.id
-          : datasourceGitlabTags.id;
+          : GitlabTagsDatasource.id;
       return {
         datasource,
         depName,

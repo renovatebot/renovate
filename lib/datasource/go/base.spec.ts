@@ -2,7 +2,7 @@ import * as httpMock from '../../../test/http-mock';
 import { loadFixture, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as githubDatasource } from '../github-tags';
-import { id as gitlabDatasource } from '../gitlab-tags';
+import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
 
 jest.mock('../../util/host-rules');
@@ -124,7 +124,7 @@ describe('datasource/go/base', () => {
         );
 
         expect(res).toEqual({
-          datasource: gitlabDatasource,
+          datasource: GitlabTagsDatasource.id,
           lookupName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
@@ -141,7 +141,7 @@ describe('datasource/go/base', () => {
         );
 
         expect(res).toEqual({
-          datasource: gitlabDatasource,
+          datasource: GitlabTagsDatasource.id,
           lookupName: 'group/subgroup/private',
           registryUrl: 'https://gitlab.com',
         });
@@ -160,7 +160,7 @@ describe('datasource/go/base', () => {
         const res = await BaseGoDatasource.getDatasource('golang.org/x/text');
 
         expect(res).toEqual({
-          datasource: gitlabDatasource,
+          datasource: GitlabTagsDatasource.id,
           lookupName: 'golang/text',
           registryUrl: 'https://gitlab.com',
         });
@@ -178,7 +178,7 @@ describe('datasource/go/base', () => {
         );
 
         expect(res).toEqual({
-          datasource: gitlabDatasource,
+          datasource: GitlabTagsDatasource.id,
           lookupName: 'golang/myrepo',
           registryUrl: 'https://my.custom.domain',
         });
