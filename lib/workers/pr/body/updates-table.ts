@@ -5,12 +5,12 @@ import type { BranchConfig } from '../../types';
 
 type TableDefinition = {
   header: string;
-  value: string;
+  value: string | undefined;
 };
 
 function getTableDefinition(config: BranchConfig): TableDefinition[] {
   const res: TableDefinition[] = [];
-  for (const header of config.prBodyColumns) {
+  for (const header of config.prBodyColumns ?? []) {
     const value = config.prBodyDefinitions?.[header];
     res.push({ header, value });
   }

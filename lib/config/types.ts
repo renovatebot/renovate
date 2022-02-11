@@ -1,6 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
-import type { HostRule } from '../types';
+import type { AutoMergeType, HostRule, RangeStrategy } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
 export type RenovateConfigStage =
@@ -20,14 +20,18 @@ export interface GroupConfig extends Record<string, unknown> {
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
+  additionalBranchPrefix?: string;
   automerge?: boolean;
+  automergeType?: AutoMergeType;
   automergeStrategy?: MergeStrategy;
   branchPrefix?: string;
   branchName?: string;
-  manager?: string | null;
+  branchTopic?: string;
+  manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
+  constraints?: Record<string, string>;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -47,14 +51,19 @@ export interface RenovateSharedConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   platform?: string;
+  platformAutomerge?: boolean;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prFooter?: string;
+  prHeader?: string;
+  prTitle?: string;
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
   stopUpdatingLabel?: string;
+  rangeStrategy?: RangeStrategy;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;
@@ -63,8 +72,13 @@ export interface RenovateSharedConfig {
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
+  separateMajorMinor?: boolean;
+  separateMinorPatch?: boolean;
+  separateMultipleMajor?: boolean;
+  stabilityDays?: number;
   suppressNotifications?: string[];
   timezone?: string;
+  transitiveRemediation?: boolean;
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
   platformCommit?: boolean;
@@ -83,7 +97,10 @@ export interface GlobalOnlyConfig {
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
+  optimizeForDisabled?: boolean;
+  persistRepoData?: boolean;
   prCommitsPerRunLimit?: number;
+  printConfig?: boolean;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
@@ -107,8 +124,11 @@ export interface RepoGlobalConfig {
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
+  optimizeForDisabled?: boolean;
+  persistRepoData?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
+  printConfig?: boolean;
   localDir?: string;
   cacheDir?: string;
 }
@@ -130,6 +150,8 @@ export interface LegacyAdminConfig {
 
   platform?: string;
   requireConfig?: boolean;
+
+  token?: string;
 }
 export type ExecutionMode = 'branch' | 'update';
 
@@ -162,18 +184,50 @@ export interface CustomManager {
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 
+export interface GeneratedRenovateConfig {
+  depNameSanitized?: string;
+
+  hasBaseBranches?: boolean;
+  isLockFileMaintenance?: boolean;
+  isPatch?: boolean;
+  isVulnerabilityAlert?: boolean;
+  newMajor?: number;
+  newMinor?: number;
+  newValue?: string;
+
+  sourceRepo?: string;
+  sourceRepoName?: string;
+  sourceRepoOrg?: string;
+  sourceRepoSlug?: string;
+
+  version?: string;
+}
+
+export interface RenovateHiddenConfig {
+  /**
+   * TODO: Why not public config option
+   */
+  dependencyDashboardPrApproval?: boolean;
+  depType?: string;
+  vulnerabilityAlertsOnly?: boolean;
+}
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
-    Record<string, unknown> {
+    GeneratedRenovateConfig,
+    PackageRuleInputConfig,
+    RenovateHiddenConfig {
   depName?: string;
   baseBranches?: string[];
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
+
+  branchConcurrentLimit?: number;
   branchList?: string[];
   description?: string | string[];
   force?: RenovateConfig;
@@ -185,6 +239,7 @@ export interface RenovateConfig
 
   ignorePresets?: string[];
   includeForks?: boolean;
+  internalChecksFilter?: 'strict' | 'flexible' | 'none';
   isFork?: boolean;
 
   fileList?: string[];
@@ -204,6 +259,8 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
+  pruneStaleBranches?: boolean;
+
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
 
@@ -214,6 +271,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  remediations?: Record<string, any[]>;
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
@@ -386,7 +445,7 @@ export type RenovateOptions =
   | RenovateArrayOption
   | RenovateObjectOption;
 
-export interface PackageRuleInputConfig extends Record<string, unknown> {
+export interface PackageRuleInputConfig {
   versioning?: string;
   packageFile?: string;
   depType?: string;
@@ -403,6 +462,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface MigratedConfig {

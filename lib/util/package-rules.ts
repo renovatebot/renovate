@@ -2,13 +2,17 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import slugify from 'slugify';
 import { mergeChildConfig } from '../config';
-import type { PackageRule, PackageRuleInputConfig } from '../config/types';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+  RenovateConfig,
+} from '../config/types';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
 import { configRegexPredicate, regEx } from './regex';
 
 function matchesRule(
-  inputConfig: PackageRuleInputConfig,
+  inputConfig: RenovateConfig,
   packageRule: PackageRule
 ): boolean {
   const {
@@ -263,9 +267,7 @@ function matchesRule(
   return positiveMatch;
 }
 
-export function applyPackageRules<T extends PackageRuleInputConfig>(
-  inputConfig: T
-): T {
+export function applyPackageRules<T extends RenovateConfig>(inputConfig: T): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules || [];
   logger.trace(

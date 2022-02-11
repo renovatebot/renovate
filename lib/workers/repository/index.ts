@@ -1,7 +1,11 @@
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
-import type { RenovateConfig } from '../../config/types';
+import type {
+  GlobalOnlyConfig,
+  RenovateConfig,
+  RepoGlobalConfig,
+} from '../../config/types';
 import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -20,7 +24,7 @@ import { printRequestStats } from './stats';
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig,
+  repoConfig: RenovateConfig & GlobalOnlyConfig & RepoGlobalConfig,
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
@@ -38,6 +42,10 @@ export async function renovateRepository(
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
+    // istanbul ignore if
+    if (repoConfig.printConfig) {
+      logger.info({ config }, 'Full resolved config including presets');
+    }
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
       config
@@ -64,7 +72,7 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (localDir && !config.persistRepoData) {
+  if (localDir && !repoConfig.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {

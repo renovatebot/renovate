@@ -132,7 +132,7 @@ describe('workers/repository/updates/branch-name', () => {
           '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         branchPrefix: 'renovate/',
         depNameSanitized: 'jest',
-        newMajor: '42',
+        newMajor: 42,
         group: {},
       };
       generateBranchName(upgrade);
@@ -148,7 +148,7 @@ describe('workers/repository/updates/branch-name', () => {
         hashedBranchLength: 14,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
-        newMajor: '42',
+        newMajor: 42,
         group: {},
       };
       generateBranchName(upgrade);
@@ -160,7 +160,7 @@ describe('workers/repository/updates/branch-name', () => {
         hashedBranchLength: 20,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
-        newMajor: '42',
+        newMajor: 42,
         groupName: 'some group name',
         group: {
           branchName:
@@ -178,7 +178,7 @@ describe('workers/repository/updates/branch-name', () => {
         hashedBranchLength: 3,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
-        newMajor: '42',
+        newMajor: 42,
         groupName: 'some group name',
         group: {
           branchName:

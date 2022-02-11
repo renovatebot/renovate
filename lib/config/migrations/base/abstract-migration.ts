@@ -1,29 +1,29 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../types';
-import type { Migration } from '../types';
+import type { DeprecatedRenovateConfig, Migration } from '../types';
 
-export abstract class AbstractMigration implements Migration {
+export abstract class AbstractMigration<
+  TConfig extends DeprecatedRenovateConfig = DeprecatedRenovateConfig
+> implements Migration<TConfig>
+{
   readonly deprecated: boolean = false;
-  abstract readonly propertyName: string;
-  private readonly originalConfig: RenovateConfig;
-  private readonly migratedConfig: RenovateConfig;
+  abstract readonly propertyName: keyof TConfig;
+  private readonly originalConfig: TConfig;
+  private readonly migratedConfig: TConfig;
 
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+  constructor(originalConfig: TConfig, migratedConfig: TConfig) {
     this.originalConfig = originalConfig;
     this.migratedConfig = migratedConfig;
   }
 
   abstract run(value: unknown): void;
 
-  protected get<Key extends keyof RenovateConfig>(
-    key: Key
-  ): RenovateConfig[Key] {
+  protected get<Key extends keyof TConfig>(key: Key): TConfig[Key] {
     return this.migratedConfig[key] ?? this.originalConfig[key];
   }
 
-  protected setSafely<Key extends keyof RenovateConfig>(
+  protected setSafely<Key extends keyof TConfig>(
     key: Key,
-    value: RenovateConfig[Key]
+    value: TConfig[Key]
   ): void {
     if (
       is.nullOrUndefined(this.originalConfig[key]) &&
@@ -33,18 +33,19 @@ export abstract class AbstractMigration implements Migration {
     }
   }
 
-  protected setHard<Key extends keyof RenovateConfig>(
+  protected setHard<Key extends keyof TConfig>(
     key: Key,
-    value: RenovateConfig[Key]
+    value: TConfig[Key]
   ): void {
     this.migratedConfig[key] = value;
   }
 
   protected rewrite(value: unknown): void {
-    this.setHard(this.propertyName, value);
+    // TODO: fix types (#9610)
+    this.setHard(this.propertyName, value as never);
   }
 
-  protected delete(property: string): void {
+  protected delete(property: keyof TConfig): void {
     delete this.migratedConfig[property];
   }
 }

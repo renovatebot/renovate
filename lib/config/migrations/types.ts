@@ -1,13 +1,25 @@
-import type { RenovateConfig } from './../types';
+import type {
+  GlobalOnlyConfig,
+  RenovateConfig,
+  RepoGlobalConfig,
+} from './../types';
 export interface MigrationConstructor {
   new (
-    originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    originalConfig: DeprecatedRenovateConfig,
+    migratedConfig: DeprecatedRenovateConfig
   ): Migration;
 }
 
-export interface Migration {
+export interface Migration<
+  TConfig extends DeprecatedRenovateConfig = DeprecatedRenovateConfig
+> {
   readonly deprecated: boolean;
-  readonly propertyName: string;
+  readonly propertyName: string | keyof TConfig;
   run(value: unknown): void;
 }
+
+export interface DeprecatedRenovateConfig
+  extends RenovateConfig,
+    RepoGlobalConfig,
+    GlobalOnlyConfig,
+    Record<string, unknown> {}

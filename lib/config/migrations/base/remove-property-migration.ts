@@ -1,13 +1,15 @@
-import type { RenovateConfig } from '../../types';
+import type { DeprecatedRenovateConfig } from '../types';
 import { AbstractMigration } from './abstract-migration';
 
-export class RemovePropertyMigration extends AbstractMigration {
-  override readonly propertyName: string;
+export class RemovePropertyMigration<
+  TConfig extends DeprecatedRenovateConfig = DeprecatedRenovateConfig
+> extends AbstractMigration<TConfig> {
+  override readonly propertyName: keyof TConfig;
 
   constructor(
-    propertyName: string,
-    originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    propertyName: keyof TConfig,
+    originalConfig: TConfig,
+    migratedConfig: TConfig
   ) {
     super(originalConfig, migratedConfig);
     this.propertyName = propertyName;

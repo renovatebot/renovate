@@ -1,4 +1,5 @@
 import { configFileNames } from '../../../config/app-strings';
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
@@ -28,7 +29,7 @@ async function getJsonFile(file: string): Promise<RenovateConfig | null> {
 async function validateOptimizeForDisabled(
   config: RenovateConfig
 ): Promise<void> {
-  if (config.optimizeForDisabled) {
+  if (GlobalConfig.get('optimizeForDisabled')) {
     const renovateConfig = await getJsonFile(defaultConfigFile(config));
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);

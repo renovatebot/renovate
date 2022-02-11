@@ -1,9 +1,9 @@
 import { expect } from '@jest/globals';
 import type {
+  DeprecatedRenovateConfig,
   Migration,
   MigrationConstructor,
 } from '../lib/config/migrations/types';
-import type { RenovateConfig } from '../lib/config/types';
 import { MigrationsService } from './../lib/config/migrations/migrations-service';
 
 declare global {
@@ -11,8 +11,8 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toMigrate(
-        originalConfig: RenovateConfig,
-        expectedConfig: RenovateConfig,
+        originalConfig: DeprecatedRenovateConfig,
+        expectedConfig: DeprecatedRenovateConfig,
         isMigrated?: boolean
       ): R;
     }
@@ -22,14 +22,14 @@ declare global {
 expect.extend({
   toMigrate(
     CustomMigration: MigrationConstructor,
-    originalConfig: RenovateConfig,
-    expectedConfig: RenovateConfig,
+    originalConfig: DeprecatedRenovateConfig,
+    expectedConfig: DeprecatedRenovateConfig,
     isMigrated = true
   ) {
     class CustomMigrationsService extends MigrationsService {
       protected static override getMigrations(
-        original: RenovateConfig,
-        migrated: RenovateConfig
+        original: DeprecatedRenovateConfig,
+        migrated: DeprecatedRenovateConfig
       ): ReadonlyArray<Migration> {
         return [new CustomMigration(original, migrated)];
       }

@@ -146,6 +146,9 @@ export interface LookupUpdate {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+  /** TODO: fix types (#9610) */
+  [_: string]: unknown;
+
   newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;

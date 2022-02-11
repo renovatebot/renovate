@@ -1,4 +1,5 @@
 import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
@@ -13,7 +14,7 @@ describe('workers/repository/init/apis', () => {
       config.errors = [];
       config.warnings = [];
       config.token = 'some-token';
-      delete config.optimizeForDisabled;
+      GlobalConfig.reset();
       delete config.includeForks;
     });
     afterEach(() => {
@@ -33,12 +34,10 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
       });
       platform.getJsonFile.mockResolvedValueOnce({ enabled: false });
-      await expect(
-        initApis({
-          ...config,
-          optimizeForDisabled: true,
-        })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
+      GlobalConfig.set({ optimizeForDisabled: true });
+      await expect(initApis({ ...config })).rejects.toThrow(
+        REPOSITORY_DISABLED
+      );
     });
     it('throws for forked', async () => {
       platform.initRepo.mockResolvedValueOnce({
@@ -59,10 +58,10 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
       });
       platform.getJsonFile.mockRejectedValue(new Error());
+      GlobalConfig.set({ optimizeForDisabled: true });
       await expect(
         initApis({
           ...config,
-          optimizeForDisabled: true,
           includeForks: false,
           isFork: true,
         })
@@ -74,9 +73,9 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      GlobalConfig.set({ optimizeForDisabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         onboardingConfigFileName: '.github/renovate.json',
       });
       expect(workerPlatformConfig).toBeTruthy();
@@ -94,9 +93,9 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      GlobalConfig.set({ optimizeForDisabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         onboardingConfigFileName: undefined,
       });
       expect(workerPlatformConfig).toBeTruthy();
@@ -109,9 +108,9 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      GlobalConfig.set({ optimizeForDisabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         onboardingConfigFileName: 'foo.bar',
       });
       expect(workerPlatformConfig).toBeTruthy();

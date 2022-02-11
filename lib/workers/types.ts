@@ -14,6 +14,7 @@ import type {
   PackageFile,
 } from '../manager/types';
 import type { PlatformPrOptions } from '../platform/types';
+import type { AutoMergeType } from '../types';
 import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence';
 import type { ChangeLogRelease, ChangeLogResult } from './pr/changelog/types';
@@ -106,7 +107,7 @@ export interface BranchConfig
     LegacyAdminConfig,
     PlatformPrOptions {
   automergeComment?: string;
-  automergeType?: string;
+  automergeType?: AutoMergeType;
   baseBranch?: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;

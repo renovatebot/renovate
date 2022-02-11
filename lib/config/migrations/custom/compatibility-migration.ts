@@ -6,8 +6,8 @@ export class CompatibilityMigration extends AbstractMigration {
   override readonly propertyName = 'compatibility';
 
   override run(value: unknown): void {
-    if (is.object(value)) {
-      this.setSafely('constraints', value);
+    if (is.plainObject(value)) {
+      this.setSafely('constraints', value as Record<string, string>);
     }
   }
 }

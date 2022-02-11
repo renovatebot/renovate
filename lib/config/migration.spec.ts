@@ -2,6 +2,7 @@ import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
 import { GlobalConfig } from './global';
 import * as configMigration from './migration';
+import type { DeprecatedRenovateConfig } from './migrations/types';
 import type {
   MigratedConfig,
   RenovateConfig,
@@ -10,7 +11,7 @@ import type {
 
 const defaultConfig = getConfig();
 
-interface TestRenovateConfig extends RenovateConfig {
+interface TestRenovateConfig extends DeprecatedRenovateConfig {
   node?: RenovateSharedConfig;
 }
 

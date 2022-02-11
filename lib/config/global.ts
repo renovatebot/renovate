@@ -19,6 +19,9 @@ export class GlobalConfig {
     'executionTimeout',
     'localDir',
     'migratePresets',
+    'optimizeForDisabled',
+    'persistRepoData',
+    'printConfig',
     'privateKey',
     'privateKeyOld',
   ];

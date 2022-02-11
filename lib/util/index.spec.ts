@@ -10,21 +10,15 @@ describe('util/index', () => {
       expect(sampleSize(array, undefined as never)).toEqual(array);
     });
     it('returns full array for null number', () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       expect(sampleSize(array, null)).toBeEmptyArray();
     });
     it('returns full array for 0 number', () => {
       expect(sampleSize(array, 0)).toBeEmptyArray();
     });
     it('returns empty array for null array', () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       expect(sampleSize(null, 1)).toBeEmptyArray();
     });
     it('returns empty array for undefined array', () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       expect(sampleSize(undefined, 1)).toBeEmptyArray();
     });
     it('returns empty array for empty array', () => {

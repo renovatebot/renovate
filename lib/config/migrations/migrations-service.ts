@@ -17,10 +17,16 @@ import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
-import type { Migration, MigrationConstructor } from './types';
+import type {
+  DeprecatedRenovateConfig,
+  Migration,
+  MigrationConstructor,
+} from './types';
 
 export class MigrationsService {
-  static readonly removedProperties: ReadonlySet<string> = new Set([
+  static readonly removedProperties: ReadonlySet<
+    keyof DeprecatedRenovateConfig
+  > = new Set([
     'gitFs',
     'groupBranchName',
     'groupCommitMessage',
@@ -65,8 +71,8 @@ export class MigrationsService {
     VersionStrategyMigration,
   ];
 
-  static run(originalConfig: RenovateConfig): RenovateConfig {
-    const migratedConfig: RenovateConfig = {};
+  static run(originalConfig: DeprecatedRenovateConfig): RenovateConfig {
+    const migratedConfig = {} as DeprecatedRenovateConfig;
     const migrations = this.getMigrations(originalConfig, migratedConfig);
 
     for (const [key, value] of Object.entries(originalConfig)) {
@@ -93,8 +99,8 @@ export class MigrationsService {
   }
 
   protected static getMigrations(
-    originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    originalConfig: DeprecatedRenovateConfig,
+    migratedConfig: DeprecatedRenovateConfig
   ): ReadonlyArray<Migration> {
     const migrations: Migration[] = [];
 

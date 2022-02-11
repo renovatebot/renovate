@@ -1,17 +1,19 @@
-import type { RenovateConfig } from '../../types';
+import type { DeprecatedRenovateConfig } from '../types';
 import { AbstractMigration } from './abstract-migration';
 
-export class RenamePropertyMigration extends AbstractMigration {
+export class RenamePropertyMigration<
+  TConfig extends DeprecatedRenovateConfig = DeprecatedRenovateConfig
+> extends AbstractMigration<TConfig> {
   override readonly deprecated = true;
-  override readonly propertyName: string;
+  override readonly propertyName: keyof TConfig;
 
-  private readonly newPropertyName: string;
+  private readonly newPropertyName: keyof TConfig;
 
   constructor(
-    deprecatedPropertyName: string,
-    newPropertyName: string,
-    originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    deprecatedPropertyName: keyof TConfig,
+    newPropertyName: keyof TConfig,
+    originalConfig: TConfig,
+    migratedConfig: TConfig
   ) {
     super(originalConfig, migratedConfig);
     this.propertyName = deprecatedPropertyName;
@@ -19,6 +21,7 @@ export class RenamePropertyMigration extends AbstractMigration {
   }
 
   override run(value: unknown): void {
-    this.setSafely(this.newPropertyName, value);
+    // TODO: fix types (#9610)
+    this.setSafely(this.newPropertyName, value as never);
   }
 }

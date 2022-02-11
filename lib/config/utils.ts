@@ -3,10 +3,10 @@ import { clone } from '../util/clone';
 import * as options from './options';
 import type { RenovateConfig } from './types';
 
-export function mergeChildConfig<
-  T extends RenovateConfig,
-  TChild extends RenovateConfig
->(parent: T, child: TChild): T & TChild {
+export function mergeChildConfig<T extends RenovateConfig, TChild>(
+  parent: T,
+  child: TChild
+): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
     return parent as never;

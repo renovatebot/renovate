@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { clone } from '../clone';
 
@@ -177,7 +178,7 @@ const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12873
 
 export function compile(
   template: string,
-  input: CompileInput,
+  input: RenovateConfig,
   filterFields = true
 ): string {
   const data = { ...GlobalConfig.get(), ...input };
