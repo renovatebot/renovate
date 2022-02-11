@@ -6,7 +6,7 @@ import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
 import * as github from '../github-tags';
-import * as gitlab from '../gitlab-tags';
+import { GitlabTagsDatasource } from '../gitlab-tags';
 import { bitbucket } from './common';
 import type { DataSource } from './types';
 
@@ -94,7 +94,7 @@ export class BaseGoDatasource {
         if (gitlabModuleName?.startsWith(gitlabUrlName)) {
           if (gitlabModuleName.includes('.git')) {
             return {
-              datasource: gitlab.id,
+              datasource: GitlabTagsDatasource.id,
               registryUrl: gitlabUrl,
               lookupName: gitlabModuleName.substring(
                 0,
@@ -103,13 +103,13 @@ export class BaseGoDatasource {
             };
           }
           return {
-            datasource: gitlab.id,
+            datasource: GitlabTagsDatasource.id,
             registryUrl: gitlabUrl,
             lookupName: gitlabModuleName,
           };
         }
         return {
-          datasource: gitlab.id,
+          datasource: GitlabTagsDatasource.id,
           registryUrl: gitlabUrl,
           lookupName: gitlabUrlName,
         };
@@ -130,7 +130,7 @@ export class BaseGoDatasource {
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
         return {
-          datasource: gitlab.id,
+          datasource: GitlabTagsDatasource.id,
           registryUrl,
           lookupName,
         };
