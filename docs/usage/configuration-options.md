@@ -1772,11 +1772,17 @@ For example to apply a special label for Major updates:
 
 ### replacementName
 
+This config option only works with the `npm` manager.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+
 Use this field to define the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementVersion
+
+This config option only works with the `npm` manager.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
 
 Use this field to define the version of a replacement package.
 Must be used with `replacementName`.
