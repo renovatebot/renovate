@@ -1,10 +1,11 @@
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
-import type { ConanJSON } from './types';
+import type { ConanJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -19,6 +20,33 @@ export class ConanDatasource extends Datasource {
     super(ConanDatasource.id);
   }
 
+  async getConanCenterReleases(
+    depName: string,
+    userAndChannel: string
+  ): Promise<ReleaseResult | null> {
+    if (userAndChannel && userAndChannel !== '@_/_') {
+      logger.debug(
+        { depName, userAndChannel },
+        'User/channel not supported for Conan Center lookups'
+      );
+      return null;
+    }
+    const url = `https://raw.githubusercontent.com/conan-io/conan-center-index/master/recipes/${depName}/config.yml`;
+    try {
+      const res = await this.http.get(url);
+      const doc: ConanYAML = load(res.body, {
+        json: true,
+      });
+      return {
+        releases: Object.keys(doc.versions).map((version) => ({ version })),
+      };
+    } catch (err) {
+      // TODO: catch 429 errors
+      logger.debug({ err, depName }, 'Error looking up Conan Center');
+    }
+    return null;
+  }
+
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
@@ -30,6 +58,9 @@ export class ConanDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depName = lookupName.split('/')[0];
     const userAndChannel = '@' + lookupName.split('@')[1];
+    if (ensureTrailingSlash(registryUrl) === defaultRegistryUrl) {
+      return this.getConanCenterReleases(depName, userAndChannel);
+    }
 
     logger.trace({ depName, registryUrl }, 'Looking up conan api dependency');
     if (registryUrl) {
