@@ -61,7 +61,7 @@ export interface RenovateSharedConfig {
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
-  semanticCommitScope?: string;
+  semanticCommitScope?: string | null;
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;

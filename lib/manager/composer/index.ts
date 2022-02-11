@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourcePackagist from '../../datasource/packagist';
+import { PackagistDatasource } from '../../datasource/packagist';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
@@ -25,5 +25,5 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   GitTagsDatasource.id,
-  datasourcePackagist.id,
+  PackagistDatasource.id,
 ];
