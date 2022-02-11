@@ -22,6 +22,7 @@
     "checkJs": true,
     "importsNotUsedAsValues": "error"
   },
+  "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
     "node_modules",
     "./.cache",
