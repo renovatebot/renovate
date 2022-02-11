@@ -14,7 +14,7 @@ const orbData = {
         { version: '4.1.4', createdAt: '2018-12-11T22:13:29.297Z' },
         { version: '4.1.3', createdAt: '2018-12-11T21:40:44.870Z' },
         { version: '4.1.2', createdAt: '2018-12-11T21:28:37.846Z' },
-        { version: '4.1.1', createdAt: '2018-12-11T18:24:13.119Z' },
+        { version: '4.1.1' },
         { version: '4.1.0', createdAt: '2018-12-11T18:14:41.116Z' },
         { version: '4.0.0', createdAt: '2018-12-11T17:41:26.595Z' },
         { version: '3.0.0', createdAt: '2018-12-11T05:28:14.080Z' },
@@ -94,7 +94,7 @@ describe('datasource/orb/index', () => {
         depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
-      expect(res.homepage).toBe('https://google.com');
+      expect(res?.homepage).toBe('https://google.com');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
