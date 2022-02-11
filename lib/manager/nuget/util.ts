@@ -27,7 +27,7 @@ const defaultRegistries = defaultRegistryUrls.map(
 );
 
 export function getDefaultRegistries(): Registry[] {
-  return defaultRegistries;
+  return [...defaultRegistries];
 }
 
 export async function getConfiguredRegistries(
