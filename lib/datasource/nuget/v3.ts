@@ -18,13 +18,7 @@ import type {
   ServicesIndexRaw,
 } from './types';
 
-// https://api.nuget.org/v3/index.json is a default official nuget feed
-const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
 const cacheNamespace = 'datasource-nuget';
-
-export function getDefaultFeed(): string {
-  return defaultNugetFeed;
-}
 
 export async function getResourceUrl(
   http: Http,

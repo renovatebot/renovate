@@ -2,10 +2,11 @@ import { logger } from '../../logger';
 import * as nugetVersioning from '../../versioning/nuget';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { parseRegistryUrl } from './util';
+import { parseRegistryUrl } from './common';
 import * as v2 from './v2';
 import * as v3 from './v3';
 
+// https://api.nuget.org/v3/index.json is a default official nuget feed
 export const defaultRegistryUrls = ['https://api.nuget.org/v3/index.json'];
 
 export class NugetDatasource extends Datasource {
