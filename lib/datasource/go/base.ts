@@ -13,10 +13,10 @@ import type { DataSource } from './types';
 // TODO: figure out class hierarchy (#10532)
 export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
-    /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/
+    /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/
   );
   private static readonly gitlabRegExp = regEx(
-    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/
+    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/
   );
 
   private static readonly id = 'go';
@@ -89,7 +89,6 @@ export class BaseGoDatasource {
           ?.httpsRegExpName;
       const gitlabModuleName =
         BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
-
       if (gitlabUrl && gitlabUrlName) {
         if (gitlabModuleName?.startsWith(gitlabUrlName)) {
           if (gitlabModuleName.includes('.git')) {
@@ -108,6 +107,7 @@ export class BaseGoDatasource {
             lookupName: gitlabModuleName,
           };
         }
+
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl: gitlabUrl,
