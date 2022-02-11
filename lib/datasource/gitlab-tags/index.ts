@@ -1,136 +1,115 @@
 import { logger } from '../../logger';
-import * as packageCache from '../../util/cache/package';
+import { cache } from '../../util/cache/package/decorator';
 import { GitlabHttp } from '../../util/http/gitlab';
 import { joinUrlParts } from '../../util/url';
+import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabCommit, GitlabTag } from './types';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
-export const id = 'gitlab-tags';
-const gitlabApi = new GitlabHttp(id);
+export class GitlabTagsDatasource extends Datasource {
+  static readonly id = 'gitlab-tags';
 
-export const customRegistrySupport = true;
-export const defaultRegistryUrls = [defaultRegistryUrl];
-export const registryStrategy = 'first';
+  protected override http: GitlabHttp;
 
-const cacheNamespace = 'datasource-gitlab';
-
-function getCacheKey(depHost: string, repo: string, type = 'tags'): string {
-  return `${depHost}:${repo}:${type}`;
-}
-
-export async function getReleases({
-  registryUrl,
-  lookupName: repo,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const depHost = getDepHost(registryUrl);
-
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    getCacheKey(depHost, repo)
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  constructor() {
+    super(GitlabTagsDatasource.id);
+    this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  const urlEncodedRepo = encodeURIComponent(repo);
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  // tag
-  const url = joinUrlParts(
-    depHost,
-    `api/v4/projects`,
-    urlEncodedRepo,
-    `repository/tags?per_page=100`
-  );
+  @cache({
+    namespace: `datasource-${GitlabTagsDatasource.id}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${getDepHost(registryUrl)}:${lookupName}`,
+  })
+  async getReleases({
+    registryUrl,
+    lookupName: repo,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const depHost = getDepHost(registryUrl);
 
-  const gitlabTags = (
-    await gitlabApi.getJson<GitlabTag[]>(url, {
-      paginate: true,
-    })
-  ).body;
+    const urlEncodedRepo = encodeURIComponent(repo);
 
-  const dependency: ReleaseResult = {
-    sourceUrl: getSourceUrl(repo, registryUrl),
-    releases: null,
-  };
-  dependency.releases = gitlabTags.map(({ name, commit }) => ({
-    version: name,
-    gitRef: name,
-    releaseTimestamp: commit?.created_at,
-  }));
-
-  const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(depHost, repo),
-    dependency,
-    cacheMinutes
-  );
-  return dependency;
-}
-
-/**
- * gitlab.getDigest
- *
- * This function will simply return the latest commit hash for the configured repository.
- */
-export async function getDigest(
-  { lookupName: repo, registryUrl }: Partial<DigestConfig>,
-  newValue?: string
-): Promise<string | null> {
-  const depHost = getDepHost(registryUrl);
-
-  const cachedResult = await packageCache.get<string>(
-    cacheNamespace,
-    getCacheKey(depHost, repo, 'commit')
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-
-  const urlEncodedRepo = encodeURIComponent(repo);
-  let digest: string;
-
-  try {
-    if (newValue) {
-      const url = joinUrlParts(
-        depHost,
-        `api/v4/projects`,
-        urlEncodedRepo,
-        `repository/commits/`,
-        newValue
-      );
-      const gitlabCommits = await gitlabApi.getJson<GitlabCommit>(url);
-      digest = gitlabCommits.body.id;
-    } else {
-      const url = joinUrlParts(
-        depHost,
-        `api/v4/projects`,
-        urlEncodedRepo,
-        `repository/commits?per_page=1`
-      );
-      const gitlabCommits = await gitlabApi.getJson<GitlabCommit[]>(url);
-      digest = gitlabCommits.body[0].id;
-    }
-  } catch (err) {
-    logger.debug(
-      { gitlabRepo: repo, err, registryUrl },
-      'Error getting latest commit from Gitlab repo'
+    // tag
+    const url = joinUrlParts(
+      depHost,
+      `api/v4/projects`,
+      urlEncodedRepo,
+      `repository/tags?per_page=100`
     );
+
+    const gitlabTags = (
+      await this.http.getJson<GitlabTag[]>(url, {
+        paginate: true,
+      })
+    ).body;
+
+    const dependency: ReleaseResult = {
+      sourceUrl: getSourceUrl(repo, registryUrl),
+      releases: null,
+    };
+    dependency.releases = gitlabTags.map(({ name, commit }) => ({
+      version: name,
+      gitRef: name,
+      releaseTimestamp: commit?.created_at,
+    }));
+
+    return dependency;
   }
 
-  if (!digest) {
-    return null;
-  }
+  /**
+   * gitlab.getDigest
+   *
+   * Returs the latest commit hash of the repository.
+   */
+  @cache({
+    namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${getDepHost(registryUrl)}:${lookupName}`,
+  })
+  override async getDigest(
+    { lookupName: repo, registryUrl }: Partial<DigestConfig>,
+    newValue?: string
+  ): Promise<string | null> {
+    const depHost = getDepHost(registryUrl);
 
-  const cacheMinutes = 10;
-  await packageCache.set(
-    cacheNamespace,
-    getCacheKey(registryUrl, repo, 'commit'),
-    digest,
-    cacheMinutes
-  );
-  return digest;
+    const urlEncodedRepo = encodeURIComponent(repo);
+    let digest: string;
+
+    try {
+      if (newValue) {
+        const url = joinUrlParts(
+          depHost,
+          `api/v4/projects`,
+          urlEncodedRepo,
+          `repository/commits/`,
+          newValue
+        );
+        const gitlabCommits = await this.http.getJson<GitlabCommit>(url);
+        digest = gitlabCommits.body.id;
+      } else {
+        const url = joinUrlParts(
+          depHost,
+          `api/v4/projects`,
+          urlEncodedRepo,
+          `repository/commits?per_page=1`
+        );
+        const gitlabCommits = await this.http.getJson<GitlabCommit[]>(url);
+        digest = gitlabCommits.body[0].id;
+      }
+    } catch (err) {
+      logger.debug(
+        { gitlabRepo: repo, err, registryUrl },
+        'Error getting latest commit from Gitlab repo'
+      );
+    }
+
+    if (!digest) {
+      return null;
+    }
+
+    return digest;
+  }
 }
