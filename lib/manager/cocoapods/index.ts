@@ -1,7 +1,7 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
-import * as datasourcePod from '../../datasource/pod';
+import { PodDatasource } from '../../datasource/pod';
 import * as rubyVersioning from '../../versioning/ruby';
 
 export { extractPackageFile } from './extract';
@@ -16,5 +16,5 @@ export const supportedDatasources = [
   GitTagsDatasource.id,
   GithubTagsDatasource.id,
   datasourceGitlabTags.id,
-  datasourcePod.id,
+  PodDatasource.id,
 ];
