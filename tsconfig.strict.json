@@ -474,10 +474,6 @@
     "test/setup.ts",
     "test/to-migrate.ts",
     "test/util.ts",
-    "tools/check-fenced-code.mjs",
-    "tools/check-git-version.mjs",
-    "tools/check-re2.mjs",
-    "tools/dispatch-release.mjs",
     "tools/docs/config.ts",
     "tools/docs/datasources.ts",
     "tools/docs/manager.ts",
@@ -489,9 +485,6 @@
     "tools/docs/utils.ts",
     "tools/docs/versioning.ts",
     "tools/generate-docs.ts",
-    "tools/generate-imports.mjs",
-    "tools/release.mjs",
-    "tools/utils.mjs",
-    "tools/verify.mjs"
+    "tools/generate-schema.ts"
   ]
 }
