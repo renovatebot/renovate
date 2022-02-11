@@ -1,6 +1,6 @@
 <!-- prettier-ignore -->
 !!! warning
-    The conan package manager is currently disable by default due to slowness in the Conan API.
+    The Conan package manager is disabled by default due to slowness in the Conan API.
     It is recommended to use it for low volume experimental purposes only until [Issue #14170](https://github.com/renovatebot/renovate/issues/14170) is resolved.
 
 Renovate can upgrade dependencies in `conanfile.txt` or `conanfile.py` files.
