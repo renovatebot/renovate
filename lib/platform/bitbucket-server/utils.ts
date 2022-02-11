@@ -1,7 +1,6 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
 import is from '@sindresorhus/is';
-import type { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
 import type {
   HttpOptions,
@@ -9,9 +8,9 @@ import type {
   HttpResponse,
 } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
-import type { BbsPr, BbsRestPr } from './types';
+import type { BbsPr, BbsRestPr, BitbucketError } from './types';
 
-const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
+export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -126,17 +125,6 @@ export type BitbucketBranchState =
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;
-}
-
-interface BitbucketErrorResponse {
-  errors?: {
-    exceptionName?: string;
-    reviewerErrors?: { context?: string }[];
-  }[];
-}
-
-interface BitbucketError extends HTTPError {
-  readonly response: Response<BitbucketErrorResponse>;
 }
 
 export function isInvalidReviewersResponse(err: BitbucketError): boolean {
