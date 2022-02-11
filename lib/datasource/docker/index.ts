@@ -27,7 +27,8 @@ import {
   id as dockerVersioningId,
 } from '../../versioning/docker';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { MediaType, RegistryRepository } from './types';
+import { sourceLabels } from './common';
+import { Image, ImageList, MediaType, RegistryRepository } from './types';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
 
@@ -384,7 +385,7 @@ async function getConfigDigest(
   if (!manifestResponse) {
     return null;
   }
-  const manifest = JSON.parse(manifestResponse.body);
+  const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
   if (manifest.schemaVersion !== 2) {
     logger.debug(
       { registry, dockerRepository, tag },
@@ -408,8 +409,11 @@ async function getConfigDigest(
     );
   }
 
-  if (manifest.mediaType === MediaType.manifestV2) {
-    return manifest.config?.digest || null;
+  if (
+    manifest.mediaType === MediaType.manifestV2 &&
+    is.string(manifest.config?.digest)
+  ) {
+    return manifest.config?.digest;
   }
 
   logger.debug({ manifest }, 'Invalid manifest - returning');
@@ -609,7 +613,7 @@ async function getDockerApiTags(
   let page = 1;
   let foundMaxResultsError = false;
   do {
-    let res;
+    let res: HttpResponse<{ tags: string[] }>;
     try {
       res = await http.getJson<{ tags: string[] }>(url, {
         headers,
@@ -814,8 +818,13 @@ export async function getReleases({
 
   const latestTag = tags.includes('latest') ? 'latest' : findLatestStable(tags);
   const labels = await getLabels(registryHost, dockerRepository, latestTag);
-  if (labels && 'org.opencontainers.image.source' in labels) {
-    ret.sourceUrl = labels['org.opencontainers.image.source'];
+  if (labels) {
+    for (const label of sourceLabels) {
+      if (is.nonEmptyString(labels[label])) {
+        ret.sourceUrl = labels[label];
+        break;
+      }
+    }
   }
   return ret;
 }
