@@ -3,7 +3,7 @@ import { id as GH_RELEASES_DS } from '../datasource/github-releases';
 import { id as GH_TAGS_DS } from '../datasource/github-tags';
 import { GitlabPackagesDatasource } from '../datasource/gitlab-packages';
 import { GitlabReleasesDatasource } from '../datasource/gitlab-releases';
-import { id as GL_TAGS_DS } from '../datasource/gitlab-tags';
+import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
 import { PodDatasource } from '../datasource/pod';
 import { id as GITHUB_CHANGELOG_ID } from '../workers/pr/changelog/github';
 import { id as GITLAB_CHANGELOG_ID } from '../workers/pr/changelog/gitlab';
@@ -16,7 +16,9 @@ import {
 
 describe('constants/platform', () => {
   it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {
-    expect(GITLAB_API_USING_HOST_TYPES.includes(GL_TAGS_DS)).toBeTrue();
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GitlabTagsDatasource.id)
+    ).toBeTrue();
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GitlabReleasesDatasource.id)
     ).toBeTrue();
