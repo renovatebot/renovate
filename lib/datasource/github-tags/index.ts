@@ -14,7 +14,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
 
   @cache({
     ttlMinutes: 120,
-    namespace: 'datasource-github-tags',
+    namespace: `datasource-${GitHubTagsDatasource.id}`,
     key: (registryUrl: string, githubRepo: string, tag: string) =>
       `${registryUrl}:${githubRepo}:tag-${tag}`,
   })
@@ -47,7 +47,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
 
   @cache({
     ttlMinutes: 10,
-    namespace: 'datasource-github-tags',
+    namespace: `datasource-${GitHubTagsDatasource.id}`,
     key: (registryUrl: string, githubRepo: string) =>
       `${registryUrl}:${githubRepo}:commit`,
   })
@@ -88,7 +88,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
 
   @cache({
     ttlMinutes: 10,
-    namespace: 'datasource-github-tags',
+    namespace: `datasource-${GitHubTagsDatasource.id}`,
     key: ({ registryUrl, lookupName: repo }: GetReleasesConfig) =>
       `${registryUrl}:${repo}:tags`,
   })
