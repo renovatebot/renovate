@@ -1,4 +1,11 @@
-import { defaultConfig, fs, git, mocked, platform } from '../../../test/util';
+import {
+  defaultConfig,
+  fs,
+  git,
+  mocked,
+  partial,
+  platform,
+} from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
@@ -92,12 +99,12 @@ describe('workers/branch/index', () => {
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
-        pr: {
+        pr: partial<Pr>({
           title: '',
           sourceBranch: '',
           state: '',
           body: '',
-        },
+        }),
       });
       GlobalConfig.set(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
