@@ -271,7 +271,7 @@
     "graphql": "15.8.0",
     "husky": "7.0.4",
     "jest": "27.4.7",
-    "jest-extended": "1.2.1",
+    "jest-extended": "2.0.0",
     "jest-github-actions-reporter": "1.0.3",
     "jest-junit": "13.0.0",
     "jest-mock-extended": "2.0.4",
