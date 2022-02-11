@@ -10,7 +10,6 @@ import * as memCache from '../../util/cache/memory';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
