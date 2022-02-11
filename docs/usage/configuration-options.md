@@ -2638,7 +2638,9 @@ Please see the above link for valid timezone names.
 
 When enabled, Renovate will attempt to remediate vulnerabilities even if they exist only in transitive dependencies.
 
-Applicable only for GitHub platform (with vulnerability alerts enabled), `npm` manager, and when a `package-lock.json` v1 format is present.
+Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
+When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
+
 This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
 
 ## unicodeEmoji
