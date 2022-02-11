@@ -1,7 +1,7 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import * as datasourcePod from '../../datasource/pod';
+import { PodDatasource } from '../../datasource/pod';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { newlineRegex, regEx } from '../../util/regex';
@@ -119,7 +119,7 @@ export async function extractPackageFile(
         dep = {
           depName,
           groupName,
-          datasource: datasourcePod.id,
+          datasource: PodDatasource.id,
           currentValue,
           managerData,
           registryUrls,

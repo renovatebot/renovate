@@ -4,7 +4,7 @@ import { id as GH_TAGS_DS } from '../datasource/github-tags';
 import { GitlabPackagesDatasource } from '../datasource/gitlab-packages';
 import { GitlabReleasesDatasource } from '../datasource/gitlab-releases';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
-import { id as POD_DS } from '../datasource/pod';
+import { PodDatasource } from '../datasource/pod';
 import { id as GITHUB_CHANGELOG_ID } from '../workers/pr/changelog/github';
 import { id as GITLAB_CHANGELOG_ID } from '../workers/pr/changelog/gitlab';
 import {
@@ -38,7 +38,7 @@ describe('constants/platform', () => {
   it('should be part of the GITHUB_API_USING_HOST_TYPES ', () => {
     expect(GITHUB_API_USING_HOST_TYPES.includes(GH_TAGS_DS)).toBeTrue();
     expect(GITHUB_API_USING_HOST_TYPES.includes(GH_RELEASES_DS)).toBeTrue();
-    expect(GITHUB_API_USING_HOST_TYPES.includes(POD_DS)).toBeTrue();
+    expect(GITHUB_API_USING_HOST_TYPES.includes(PodDatasource.id)).toBeTrue();
     expect(
       GITHUB_API_USING_HOST_TYPES.includes(GITHUB_CHANGELOG_ID)
     ).toBeTrue();
