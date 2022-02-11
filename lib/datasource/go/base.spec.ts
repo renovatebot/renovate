@@ -166,6 +166,23 @@ describe('datasource/go/base', () => {
         });
       });
 
+      it('supports GitLab deps with version', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/group/subgroup/v2?go-get=1')
+          .reply(200, loadFixture('go-get-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/group/subgroup/v2'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          lookupName: 'group/subgroup',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
       it('supports GitLab EE deps', async () => {
         hostRules.find.mockReturnValue({ token: 'some-token' });
         httpMock
