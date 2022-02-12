@@ -198,9 +198,25 @@ describe('datasource/index', () => {
   });
 
   describe('Packages', () => {
+    it('supports defaultRegistryUrls parameter', async () => {
+      const registries: RegistriesMock = {
+        'https://foo.bar': { releases: [{ version: '0.0.1' }] },
+      };
+      datasources.set(datasource, new DummyDatasource(registries));
+
+      const res = await getPkgReleases({
+        datasource,
+        depName,
+        defaultRegistryUrls: ['https://foo.bar'],
+      });
+      expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
+    });
+
     it('applies extractVersion', async () => {
       const registries: RegistriesMock = {
-        'https://reg1.com': { releases: [{ version: 'v4.3.143' }] },
+        'https://reg1.com': {
+          releases: [{ version: 'v4.3.143' }, { version: 'rc4.3.143' }],
+        },
       };
       datasources.set(datasource, new DummyDatasource(registries));
 
