@@ -23,14 +23,16 @@ export function getGitAuthenticatedEnvironmentVariables(
 
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
-    environmentVariables?.GIT_CONFIG_COUNT || process.env.GIT_CONFIG_COUNT;
+    environmentVariables?.GIT_CONFIG_COUNT ?? process.env.GIT_CONFIG_COUNT;
   let gitConfigCount = 0;
   if (gitConfigCountEnvVariable) {
     // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
     gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${process.env.GIT_CONFIG_COUNT}. Ignoring it.`
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${String(
+          process.env.GIT_CONFIG_COUNT
+        )}. Ignoring it.`
       );
       gitConfigCount = 0;
     }
@@ -63,7 +65,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 
 function getAuthenticationRulesWithToken(
   url: string,
-  hostType: string,
+  hostType: string | undefined,
   authToken: string
 ): AuthenticationRule[] {
   let token = authToken;

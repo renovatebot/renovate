@@ -13,7 +13,7 @@ import { GitDatasource } from '../../../../datasource/git-refs/base';
 import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
-import { id as datasourcePackagistId } from '../../../../datasource/packagist';
+import { PackagistDatasource } from '../../../../datasource/packagist';
 import { PypiDatasource } from '../../../../datasource/pypi';
 import { id as dockerVersioningId } from '../../../../versioning/docker';
 import { id as gitVersioningId } from '../../../../versioning/git';
@@ -1196,7 +1196,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
     it('handles packagist', async () => {
       config.depName = 'foo/bar';
-      config.datasource = datasourcePackagistId;
+      config.datasource = PackagistDatasource.id;
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
       config.registryUrls = ['https://packagist.org'];

@@ -3,8 +3,8 @@ import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
 import { Datasource } from '../datasource';
 import { GithubTagsDatasource } from '../github-tags';
-import * as gitlab from '../gitlab-tags';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { GitlabTagsDatasource } from '../gitlab-tags';
+import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { bitbucket, getSourceUrl } from './common';
 
@@ -12,10 +12,12 @@ export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
   github: GithubTagsDatasource;
+  gitlab: DatasourceApi;
 
   constructor() {
     super(GoDirectDatasource.id);
     this.github = new GithubTagsDatasource();
+    this.gitlab = new GitlabTagsDatasource();
   }
 
   /**
@@ -54,8 +56,8 @@ export class GoDirectDatasource extends Datasource {
         res = await this.github.getReleases(source);
         break;
       }
-      case gitlab.id: {
-        res = await gitlab.getReleases(source);
+      case GitlabTagsDatasource.id: {
+        res = await this.gitlab.getReleases(source);
         break;
       }
       case bitbucket.id: {
@@ -103,8 +105,8 @@ export class GoDirectDatasource extends Datasource {
       // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
       // If not, it's simply a repo in a subfolder, and the normal tags are used.
       if (
-        !(source.datasource === gitlab.id) ||
-        (source.datasource === gitlab.id && submodReleases.length)
+        !(source.datasource === GitlabTagsDatasource.id) ||
+        (source.datasource === GitlabTagsDatasource.id && submodReleases.length)
       ) {
         return {
           sourceUrl,

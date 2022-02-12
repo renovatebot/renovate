@@ -7,6 +7,7 @@ export const defaultConfig = {
   datasource: ConanDatasource.id,
   versioning: conan.id,
   rangeStrategy: 'bump',
+  enabled: false, // See https://github.com/renovatebot/renovate/issues/14170
 };
 
 export const supportedDatasources = [ConanDatasource.id];

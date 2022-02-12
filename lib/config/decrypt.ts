@@ -49,7 +49,7 @@ export function tryDecryptPublicKeyDefault(
   privateKey: string,
   encryptedStr: string
 ): string | null {
-  let decryptedStr: string = null;
+  let decryptedStr: string | null = null;
   try {
     decryptedStr = crypto
       .privateDecrypt(privateKey, Buffer.from(encryptedStr, 'base64'))
@@ -65,7 +65,7 @@ export function tryDecryptPublicKeyPKCS1(
   privateKey: string,
   encryptedStr: string
 ): string | null {
-  let decryptedStr: string = null;
+  let decryptedStr: string | null = null;
   try {
     decryptedStr = crypto
       .privateDecrypt(
@@ -87,7 +87,7 @@ export async function tryDecrypt(
   encryptedStr: string,
   repository: string
 ): Promise<string | null> {
-  let decryptedStr: string = null;
+  let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
