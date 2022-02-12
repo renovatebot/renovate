@@ -42,7 +42,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
     logger.trace({ dependency: depName }, 'Pinning app require');
     return 'pin';
   }
-  if (isComplexRange) {
+  if (isComplexRange || ['typo3-cms-extension'].includes(composerJsonType)) {
     return 'widen';
   }
   return 'replace';
