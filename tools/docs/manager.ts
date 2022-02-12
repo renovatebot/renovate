@@ -18,7 +18,7 @@ export async function generateManagers(dist: string): Promise<void> {
   const managers = getManagers();
   const allLanguages: Record<string, string[]> = {};
   for (const [manager, definition] of managers) {
-    const language = definition.language || 'other';
+    const language = definition.language ?? 'other';
     allLanguages[language] = allLanguages[language] || [];
     allLanguages[language].push(manager);
     const { defaultConfig, supportedDatasources } = definition;

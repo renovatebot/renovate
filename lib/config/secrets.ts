@@ -102,17 +102,13 @@ function replaceSecretsinObject(
     if (is.array(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
         if (is.plainObject(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsinObject(
+          value[arrayIndex] = replaceSecretsinObject(
             arrayItem,
             secrets,
             deleteSecrets
           );
         } else if (is.string(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsInString(
-            key,
-            arrayItem,
-            secrets
-          );
+          value[arrayIndex] = replaceSecretsInString(key, arrayItem, secrets);
         }
       }
     }
@@ -131,5 +127,6 @@ export function applySecretsToConfig(
       addSecretForSanitizing(String(secret));
     }
   }
-  return replaceSecretsinObject(config, secrets, deleteSecrets);
+  // TODO: fix types (#9610)
+  return replaceSecretsinObject(config, secrets as never, deleteSecrets);
 }
