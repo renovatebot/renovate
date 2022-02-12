@@ -21,7 +21,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';

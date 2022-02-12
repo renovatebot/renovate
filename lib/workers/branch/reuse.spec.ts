@@ -1,5 +1,5 @@
 import { git, platform } from '../../../test/util';
-import { Pr } from '../../platform';
+import type { Pr } from '../../platform';
 import { PrState } from '../../types';
 import type { BranchConfig } from '../types';
 import { shouldReuseExistingBranch } from './reuse';
@@ -9,6 +9,7 @@ jest.mock('../../util/git');
 describe('workers/branch/reuse', () => {
   describe('shouldReuseExistingBranch(config)', () => {
     const pr: Pr = {
+      number: 42,
       sourceBranch: 'master',
       state: PrState.Open,
       title: 'any',

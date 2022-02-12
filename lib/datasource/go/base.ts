@@ -6,17 +6,17 @@ import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { parseUrl, trimTrailingSlash } from '../../util/url';
 import * as github from '../github-tags';
-import * as gitlab from '../gitlab-tags';
+import { GitlabTagsDatasource } from '../gitlab-tags';
 import { bitbucket } from './common';
 import type { DataSource } from './types';
 
 // TODO: figure out class hierarchy (#10532)
 export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
-    /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/
+    /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/
   );
   private static readonly gitlabRegExp = regEx(
-    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/
+    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/
   );
 
   private static readonly id = 'go';
@@ -89,12 +89,11 @@ export class BaseGoDatasource {
           ?.httpsRegExpName;
       const gitlabModuleName =
         BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
-
       if (gitlabUrl && gitlabUrlName) {
         if (gitlabModuleName?.startsWith(gitlabUrlName)) {
           if (gitlabModuleName.includes('.git')) {
             return {
-              datasource: gitlab.id,
+              datasource: GitlabTagsDatasource.id,
               registryUrl: gitlabUrl,
               lookupName: gitlabModuleName.substring(
                 0,
@@ -103,13 +102,14 @@ export class BaseGoDatasource {
             };
           }
           return {
-            datasource: gitlab.id,
+            datasource: GitlabTagsDatasource.id,
             registryUrl: gitlabUrl,
             lookupName: gitlabModuleName,
           };
         }
+
         return {
-          datasource: gitlab.id,
+          datasource: GitlabTagsDatasource.id,
           registryUrl: gitlabUrl,
           lookupName: gitlabUrlName,
         };
@@ -130,7 +130,7 @@ export class BaseGoDatasource {
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
         return {
-          datasource: gitlab.id,
+          datasource: GitlabTagsDatasource.id,
           registryUrl,
           lookupName,
         };

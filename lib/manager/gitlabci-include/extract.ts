@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { replaceReferenceTags } from '../gitlabci/utils';
@@ -12,7 +12,7 @@ function extractDepFromIncludeFile(includeObj: {
   ref: string;
 }): PackageDependency {
   const dep: PackageDependency = {
-    datasource: datasourceGitlabTags.id,
+    datasource: GitlabTagsDatasource.id,
     depName: includeObj.project,
     depType: 'repository',
   };
