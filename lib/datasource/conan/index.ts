@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
@@ -38,11 +39,13 @@ export class ConanDatasource extends Datasource {
     const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
     const res = await this.githubHttp.getJson<{ content: string }>(url);
     const content = Buffer.from(res.body.content, 'base64').toString('utf8');
-    const doc: ConanYAML = load(content, {
+    const doc = load(content, {
       json: true,
-    });
+    }) as ConanYAML;
     return {
-      releases: Object.keys(doc.versions).map((version) => ({ version })),
+      releases: Object.keys(doc?.versions || {}).map((version) => ({
+        version,
+      })),
     };
   }
 
@@ -57,7 +60,10 @@ export class ConanDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depName = lookupName.split('/')[0];
     const userAndChannel = '@' + lookupName.split('@')[1];
-    if (ensureTrailingSlash(registryUrl) === defaultRegistryUrl) {
+    if (
+      is.string(registryUrl) &&
+      ensureTrailingSlash(registryUrl) === defaultRegistryUrl
+    ) {
       return this.getConanCenterReleases(depName, userAndChannel);
     }
 
