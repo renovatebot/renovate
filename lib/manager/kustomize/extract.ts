@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -70,7 +70,7 @@ export function extractImage(image: Image): PackageDependency | null {
     }
 
     return {
-      datasource: datasourceDocker.id,
+      datasource: DockerDatasource.id,
       depName,
       currentValue: nameDep.currentValue,
       currentDigest: digest,
@@ -90,7 +90,7 @@ export function extractImage(image: Image): PackageDependency | null {
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,
-      datasource: datasourceDocker.id,
+      datasource: DockerDatasource.id,
       replaceString: newTag,
     };
   }
@@ -98,7 +98,7 @@ export function extractImage(image: Image): PackageDependency | null {
   if (image.newName) {
     return {
       ...nameDep,
-      datasource: datasourceDocker.id,
+      datasource: DockerDatasource.id,
       replaceString: image.newName,
     };
   }

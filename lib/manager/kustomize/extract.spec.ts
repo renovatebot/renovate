@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -158,7 +158,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentDigest: undefined,
         currentValue: 'v1.0.0',
-        datasource: datasourceDocker.id,
+        datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'node',
       };
@@ -172,7 +172,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentDigest: undefined,
         currentValue: 'v1.0.0',
-        datasource: datasourceDocker.id,
+        datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'test/node',
       };
@@ -186,7 +186,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentDigest: undefined,
         currentValue: 'v1.0.0',
-        datasource: datasourceDocker.id,
+        datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'quay.io/repo/image',
       };
@@ -200,7 +200,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentDigest: undefined,
         currentValue: 'v1.0.0',
-        datasource: datasourceDocker.id,
+        datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
       };
@@ -215,7 +215,7 @@ describe('manager/kustomize/extract', () => {
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
-        datasource: datasourceDocker.id,
+        datasource: DockerDatasource.id,
         depName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({
