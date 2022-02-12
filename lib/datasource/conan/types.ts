@@ -3,5 +3,5 @@ export interface ConanJSON {
 }
 
 export interface ConanYAML {
-  versions?: Record<string, { folder?: string }>;
+  versions?: Record<string, unknown>;
 }
