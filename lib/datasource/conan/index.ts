@@ -1,6 +1,7 @@
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
+import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -16,8 +17,11 @@ export class ConanDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
-  constructor() {
-    super(ConanDatasource.id);
+  githubHttp: GithubHttp;
+
+  constructor(id = ConanDatasource.id) {
+    super(id);
+    this.githubHttp = new GithubHttp(id);
   }
 
   async getConanCenterReleases(
@@ -31,20 +35,15 @@ export class ConanDatasource extends Datasource {
       );
       return null;
     }
-    const url = `https://raw.githubusercontent.com/conan-io/conan-center-index/master/recipes/${depName}/config.yml`;
-    try {
-      const res = await this.http.get(url);
-      const doc: ConanYAML = load(res.body, {
-        json: true,
-      });
-      return {
-        releases: Object.keys(doc.versions).map((version) => ({ version })),
-      };
-    } catch (err) {
-      // TODO: catch 429 errors
-      logger.debug({ err, depName }, 'Error looking up Conan Center');
-    }
-    return null;
+    const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
+    const res = await this.githubHttp.getJson<{ content: string }>(url);
+    const content = Buffer.from(res.body.content, 'base64').toString('utf8');
+    const doc: ConanYAML = load(content, {
+      json: true,
+    });
+    return {
+      releases: Object.keys(doc.versions).map((version) => ({ version })),
+    };
   }
 
   @cache({
