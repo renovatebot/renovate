@@ -5,9 +5,9 @@ import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
+import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
-import { bitbucket } from './common';
 import type { DataSource } from './types';
 
 // TODO: figure out class hierarchy (#10532)
@@ -47,7 +47,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const lookupName = split[1] + '/' + split[2];
       return {
-        datasource: bitbucket.id,
+        datasource: BitBucketTagsDatasource.id,
         lookupName,
         registryUrl: 'https://bitbucket.org',
       };

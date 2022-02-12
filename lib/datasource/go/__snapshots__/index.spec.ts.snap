@@ -44,27 +44,4 @@ Array [
 
 exports[`datasource/go/index getDigest support bitbucket digest 1`] = `"123"`;
 
-exports[`datasource/go/index getDigest support bitbucket digest 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/golang/text",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/commits/master",
-  },
-]
-`;
+exports[`datasource/go/index getDigest support bitbucket digest 2`] = `Array []`;

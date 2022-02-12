@@ -6,8 +6,6 @@ import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
 
 import type { DataSource } from './types';
 
-export const bitbucket = new BitBucketTagsDatasource();
-
 // eslint-disable-next-line typescript-enum/no-enum
 export enum GoproxyFallback {
   WhenNotFoundOrGone = ',',
@@ -26,7 +24,7 @@ export function getSourceUrl(dataSource?: DataSource): string | undefined {
       return gitlabSourceUrl(lookupName, registryUrl);
     }
 
-    if (datasource === bitbucket.id) {
+    if (datasource === BitBucketTagsDatasource.id) {
       return BitBucketTagsDatasource.getSourceUrl(lookupName, registryUrl);
     }
   }
