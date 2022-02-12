@@ -3,8 +3,8 @@ import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from '../sbt-plugin/util';
-import * as sbtPackage from '.';
+import { parseIndexDir } from './util';
+import { SbtPackageDatasource } from '.';
 
 describe('datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
@@ -201,7 +201,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
@@ -212,7 +212,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'com.example:empty',
           registryUrls: [],
         })
@@ -223,7 +223,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven', MAVEN_REPO],
         })
@@ -238,7 +238,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest_2.12',
           registryUrls: [],
         })
@@ -253,7 +253,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'io.confluent:kafka-avro-serializer',
           registryUrls: ['https://packages.confluent.io/maven'],
         })
@@ -268,7 +268,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest-app_2.12',
           registryUrls: [],
         })
@@ -282,7 +282,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest-flatspec_2.12',
           registryUrls: [],
         })
@@ -295,7 +295,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest-matchers-core_2.12',
           registryUrls: [],
         })

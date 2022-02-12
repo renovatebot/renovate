@@ -1,4 +1,4 @@
-import * as datasourceMaven from './maven';
+import { MavenDatasource } from './maven';
 import { addMetaData, massageGithubUrl } from './metadata';
 import * as datasourceNpm from './npm';
 import { PypiDatasource } from './pypi';
@@ -175,7 +175,7 @@ describe('datasource/metadata', () => {
       sourceUrl: 'http://www.github.com/mockk/mockk/',
       releases: [{ version: '1.9.3' }],
     };
-    const datasource = datasourceMaven.id;
+    const datasource = MavenDatasource.id;
     const lookupName = 'io.mockk:mockk';
 
     addMetaData(dep, datasource, lookupName);
@@ -188,7 +188,7 @@ describe('datasource/metadata', () => {
       releases: [{ version: '1.9.3' }],
       sourceUrl: undefined,
     };
-    const datasource = datasourceMaven.id;
+    const datasource = MavenDatasource.id;
     const lookupName = 'io.mockk:mockk';
 
     addMetaData(dep, datasource, lookupName);
@@ -201,7 +201,7 @@ describe('datasource/metadata', () => {
       sourceUrl: 'http://gitlab.com/meno/dropzone/',
       releases: [{ version: '5.7.0' }],
     };
-    const datasource = datasourceMaven.id;
+    const datasource = MavenDatasource.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
@@ -216,7 +216,7 @@ describe('datasource/metadata', () => {
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
       ],
     };
-    addMetaData(dep, datasourceMaven.id, 'foobar');
+    addMetaData(dep, MavenDatasource.id, 'foobar');
     expect(dep.releases).toMatchObject([
       { releaseTimestamp: '2000-01-01T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
