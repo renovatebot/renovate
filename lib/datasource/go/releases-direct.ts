@@ -1,18 +1,24 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
+import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import * as github from '../github-tags';
-import * as gitlab from '../gitlab-tags';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { GitlabTagsDatasource } from '../gitlab-tags';
+import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
-import { bitbucket, getSourceUrl } from './common';
+import { getSourceUrl } from './common';
 
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
+  gitlab: DatasourceApi;
+  bitbucket: DatasourceApi;
+
   constructor() {
     super(GoDirectDatasource.id);
+    this.gitlab = new GitlabTagsDatasource();
+    this.bitbucket = new BitBucketTagsDatasource();
   }
 
   /**
@@ -51,12 +57,12 @@ export class GoDirectDatasource extends Datasource {
         res = await github.getReleases(source);
         break;
       }
-      case gitlab.id: {
-        res = await gitlab.getReleases(source);
+      case GitlabTagsDatasource.id: {
+        res = await this.gitlab.getReleases(source);
         break;
       }
-      case bitbucket.id: {
-        res = await bitbucket.getReleases(source);
+      case BitBucketTagsDatasource.id: {
+        res = await this.bitbucket.getReleases(source);
         break;
       }
       /* istanbul ignore next: can never happen, makes lint happy */
@@ -100,8 +106,8 @@ export class GoDirectDatasource extends Datasource {
       // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
       // If not, it's simply a repo in a subfolder, and the normal tags are used.
       if (
-        !(source.datasource === gitlab.id) ||
-        (source.datasource === gitlab.id && submodReleases.length)
+        !(source.datasource === GitlabTagsDatasource.id) ||
+        (source.datasource === GitlabTagsDatasource.id && submodReleases.length)
       ) {
         return {
           sourceUrl,

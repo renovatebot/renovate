@@ -1,10 +1,10 @@
 import { cache } from '../../util/cache/package/decorator';
+import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import * as github from '../github-tags';
-import * as gitlab from '../gitlab-tags';
+import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
-import { bitbucket } from './common';
 import { GoDirectDatasource } from './releases-direct';
 import { GoProxyDatasource } from './releases-goproxy';
 
@@ -60,11 +60,11 @@ export class GoDatasource extends Datasource {
       case github.id: {
         return github.getDigest(source, tag);
       }
-      case bitbucket.id: {
-        return bitbucket.getDigest(source, tag);
+      case BitBucketTagsDatasource.id: {
+        return this.direct.bitbucket.getDigest(source, tag);
       }
-      case gitlab.id: {
-        return gitlab.getDigest(source, tag);
+      case GitlabTagsDatasource.id: {
+        return this.direct.gitlab.getDigest(source, tag);
       }
       /* istanbul ignore next: can never happen, makes lint happy */
       default: {
