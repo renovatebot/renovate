@@ -3,7 +3,7 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
-import { id as npmId } from '../../../datasource/npm';
+import { NpmDatasource } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -193,7 +193,7 @@ export async function extractPackageFile(
         dep.versioning = nodeVersioning.id;
         constraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
-        dep.datasource = npmId;
+        dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
         if (
@@ -203,11 +203,11 @@ export async function extractPackageFile(
           dep.lookupName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
-        dep.datasource = npmId;
+        dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'npm';
         constraints.npm = dep.currentValue;
       } else if (depName === 'pnpm') {
-        dep.datasource = npmId;
+        dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'pnpm';
         constraints.pnpm = dep.currentValue;
       } else if (depName === 'vscode') {
@@ -230,10 +230,10 @@ export async function extractPackageFile(
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
-        dep.datasource = npmId;
+        dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
       } else if (depName === 'npm') {
-        dep.datasource = npmId;
+        dep.datasource = NpmDatasource.id;
       } else {
         dep.skipReason = 'unknown-volta';
       }
@@ -263,7 +263,7 @@ export async function extractPackageFile(
       return dep;
     }
     if (isValid(dep.currentValue)) {
-      dep.datasource = npmId;
+      dep.datasource = NpmDatasource.id;
       if (dep.currentValue === '*') {
         dep.skipReason = 'any-version';
       }

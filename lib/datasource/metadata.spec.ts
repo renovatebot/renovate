@@ -1,6 +1,6 @@
 import * as datasourceMaven from './maven';
 import { addMetaData, massageGithubUrl } from './metadata';
-import * as datasourceNpm from './npm';
+import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
 
@@ -105,7 +105,7 @@ describe('datasource/metadata', () => {
         },
       ],
     };
-    const datasource = datasourceNpm.id;
+    const datasource = NpmDatasource.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
@@ -124,7 +124,7 @@ describe('datasource/metadata', () => {
         },
       ],
     };
-    const datasource = datasourceNpm.id;
+    const datasource = NpmDatasource.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
@@ -143,7 +143,7 @@ describe('datasource/metadata', () => {
         },
       ],
     };
-    const datasource = datasourceNpm.id;
+    const datasource = NpmDatasource.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
@@ -162,7 +162,7 @@ describe('datasource/metadata', () => {
         },
       ],
     };
-    const datasource = datasourceNpm.id;
+    const datasource = NpmDatasource.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
