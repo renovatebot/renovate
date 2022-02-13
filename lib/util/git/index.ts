@@ -913,19 +913,32 @@ export async function pushCommitToRenovateRef(
 
 /**
  *
- * $ git ls-remote origin "refs/renovate/*"
+ * Removes all remote "refs/renovate/*" refs in two steps:
  *
- * > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
- * > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
- * > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
- * > ...
+ * Step 1: list refs
  *
- * $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
+ *   $ git ls-remote origin "refs/renovate/*"
+ *
+ *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
+ *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
+ *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
+ *   > ...
+ *
+ * Step 2:
+ *
+ *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
  *
  */
 export async function clearRenovateRefs(): Promise<void> {
+  if (!gitInitialized) {
+    logger.debug(
+      `Clear Renovate refs: repository isn't initialized - skipping`
+    );
+    return;
+  }
+
   try {
-    logger.debug(`Prune funny Renovate refs: "refs/renovate/*"`);
+    logger.debug(`Clear Renovate refs: refs/renovate/*`);
     const rawOutput = await git.raw([
       'ls-remote',
       config.url,
@@ -940,7 +953,7 @@ export async function clearRenovateRefs(): Promise<void> {
       await git.raw(purgeCmd);
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, `Prune funny Renovate refs: error`);
+    logger.debug({ err }, `Clear Renovate refs: error`);
   }
 }
 
@@ -952,17 +965,24 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
 
 /**
  *
- * $ git cat-file -p <commit-sha>
+ * Obtain top-level items of commit tree.
+ * We don't need subtree items, so here are 2 steps only.
  *
- * > tree <tree-sha>
- * > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
- * > ...
+ * Step 1: commit SHA -> tree SHA
  *
- * $ git cat-file -p <tree-sha>
+ *   $ git cat-file -p <commit-sha>
  *
- * > 040000 tree 389400684d1f004960addc752be13097fe85d776    .devcontainer
- * > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    .editorconfig
- * > ...
+ *   > tree <tree-sha>
+ *   > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
+ *   > ...
+ *
+ * Step 2: tree SHA -> tree items (top-level)
+ *
+ *   $ git cat-file -p <tree-sha>
+ *
+ *   > 040000 tree 389400684d1f004960addc752be13097fe85d776    src
+ *   > ...
+ *   > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    package.json
  *
  */
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
