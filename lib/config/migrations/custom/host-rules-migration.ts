@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { HostRule } from '../../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -6,21 +7,31 @@ export class HostRulesMigration extends AbstractMigration {
 
   override run(value: Record<string, unknown>[]): void {
     const newHostRules: HostRule[] = value.map((rule) => {
-      const newRule = { ...rule };
-      newRule.hostType ??= newRule.platform;
-      newRule.matchHost ??=
-        newRule.endpoint ||
-        newRule.host ||
-        newRule.baseUrl ||
-        newRule.hostName ||
-        newRule.domainName;
+      const newRule: HostRule = {};
 
-      delete newRule.platform;
-      delete newRule.endpoint;
-      delete newRule.host;
-      delete newRule.baseUrl;
-      delete newRule.hostName;
-      delete newRule.domainName;
+      for (const [key, value] of Object.entries(rule)) {
+        if (key === 'platform') {
+          if (is.string(value)) {
+            newRule.hostType ??= value;
+          }
+          continue;
+        }
+
+        if (
+          key === 'endpoint' ||
+          key === 'host' ||
+          key === 'baseUrl' ||
+          key === 'hostName' ||
+          key === 'domainName'
+        ) {
+          if (is.string(value)) {
+            newRule.matchHost ??= value;
+          }
+          continue;
+        }
+
+        newRule[key] = value;
+      }
 
       return newRule;
     });
