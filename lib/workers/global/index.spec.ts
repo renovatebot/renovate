@@ -1,7 +1,9 @@
 import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import { fs, logger } from '../../../test/util';
+import { fs, logger, mocked } from '../../../test/util';
+import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
@@ -11,11 +13,13 @@ import * as globalWorker from '.';
 
 jest.mock('../repository');
 jest.mock('../../util/fs');
+jest.mock('../../config/presets');
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;
 const configParser: jest.Mocked<typeof _configParser> = _configParser as never;
 const platform: jest.Mocked<typeof _platform> = _platform as never;
+const presets = mocked(_presets);
 const limits = _limits;
 
 describe('workers/global/index', () => {
@@ -25,6 +29,7 @@ describe('workers/global/index', () => {
     configParser.parseConfigs = jest.fn();
     platform.initPlatform.mockImplementation((input) => Promise.resolve(input));
   });
+
   it('handles config warnings and errors', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       repositories: [],
@@ -33,6 +38,33 @@ describe('workers/global/index', () => {
     });
     await expect(globalWorker.start()).resolves.toBe(0);
   });
+
+  it('resolves global presets immediately', async () => {
+    configParser.parseConfigs.mockResolvedValueOnce({
+      repositories: [],
+      globalExtends: [':pinVersions'],
+    });
+    presets.resolveConfigPresets.mockResolvedValueOnce({});
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(presets.resolveConfigPresets).toHaveBeenCalledWith({
+      extends: [':pinVersions'],
+    });
+  });
+
+  it('throws if global presets could not be resolved', async () => {
+    configParser.parseConfigs.mockResolvedValueOnce({
+      repositories: [],
+      globalExtends: [':pinVersions'],
+    });
+    presets.resolveConfigPresets.mockImplementation(() => {
+      throw new Error('some-error');
+    });
+    await expect(
+      globalWorker.resolveGlobalExtends(['some-preset'])
+    ).rejects.toThrow(CONFIG_PRESETS_INVALID);
+    expect(presets.resolveConfigPresets).toHaveBeenCalled();
+  });
+
   it('handles zero repos', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -41,6 +73,7 @@ describe('workers/global/index', () => {
     });
     await expect(globalWorker.start()).resolves.toBe(0);
   });
+
   it('processes repositories', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',

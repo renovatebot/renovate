@@ -1,6 +1,7 @@
 import * as amazonMachineImage from './aws-machine-image';
 import * as cargo from './cargo';
 import * as composer from './composer';
+import * as conan from './conan';
 import * as docker from './docker';
 import * as git from './git';
 import * as gradle from './gradle';
@@ -30,6 +31,7 @@ export default api;
 api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set('cargo', cargo.api);
 api.set('composer', composer.api);
+api.set('conan', conan.api);
 api.set('docker', docker.api);
 api.set('git', git.api);
 api.set('gradle', gradle.api);

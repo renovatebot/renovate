@@ -5,7 +5,7 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 
 type TableDefinition = {
   header: string;
-  value: string;
+  value: string | undefined;
 };
 
 function getRowDefinition(
