@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../test/fixtures';
-import { id as githubReleaseDatasource } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { extractPackageFile } from './extract';
@@ -21,7 +21,7 @@ describe('manager/batect-wrapper/extract', () => {
         depName: 'batect/batect',
         commitMessageTopic: 'Batect',
         currentValue: '0.60.1',
-        datasource: githubReleaseDatasource,
+        datasource: GithubReleasesDatasource.id,
         versioning: semverVersioning,
       };
 
@@ -35,7 +35,7 @@ describe('manager/batect-wrapper/extract', () => {
         depName: 'batect/batect',
         commitMessageTopic: 'Batect',
         currentValue: '0.60.1',
-        datasource: githubReleaseDatasource,
+        datasource: GithubReleasesDatasource.id,
         versioning: semverVersioning,
       };
 

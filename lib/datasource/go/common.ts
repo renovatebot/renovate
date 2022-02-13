@@ -1,6 +1,6 @@
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
-import { getSourceUrl as githubSourceUrl } from '../github-releases';
-import { id as githubDatasource } from '../github-tags';
+import { getSourceUrl as githubSourceUrl } from '../github-releases/common';
+import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
 
@@ -16,7 +16,7 @@ export function getSourceUrl(dataSource?: DataSource): string | undefined {
   if (dataSource) {
     const { datasource, registryUrl, lookupName } = dataSource;
 
-    if (datasource === githubDatasource) {
+    if (datasource === GithubTagsDatasource.id) {
       return githubSourceUrl(lookupName, registryUrl);
     }
 
