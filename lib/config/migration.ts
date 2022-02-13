@@ -68,24 +68,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (parentKey === 'hostRules' && key === 'platform') {
-        migratedConfig.hostType = val;
-        delete migratedConfig.platform;
-      } else if (parentKey === 'hostRules' && key === 'endpoint') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.endpoint;
-      } else if (parentKey === 'hostRules' && key === 'host') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.host;
-      } else if (parentKey === 'hostRules' && key === 'baseUrl') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.baseUrl;
-      } else if (parentKey === 'hostRules' && key === 'hostName') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.hostName;
-      } else if (parentKey === 'hostRules' && key === 'domainName') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.domainName;
       } else if (key === 'packageRules' && is.plainObject(val)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
