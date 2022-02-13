@@ -20,8 +20,8 @@ function massageLink(input: string): string {
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
   const transformer = (tree: Content): void => {
-    const startOffset: number = tree.position.start.offset;
-    const endOffset: number = tree.position.end.offset;
+    const startOffset: number = tree.position?.start.offset ?? 0;
+    const endOffset: number = tree.position?.end.offset ?? 0;
 
     if (tree.type === 'link') {
       const substr = input.slice(startOffset, endOffset);
@@ -39,7 +39,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
         const [url] = match;
-        const start = startOffset + match.index;
+        const start = startOffset + (match.index ?? 0);
         const end = start + url.length;
         const newUrl = massageLink(url);
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });
@@ -56,7 +56,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
 
 export function massageMarkdownLinks(content: string): string {
   try {
-    const rightSpaces = content.replace(content.trimRight(), '');
+    const rightSpaces = content.replace(content.trimEnd(), '');
     const matches: UrlMatch[] = [];
     remark().use(collectLinkPosition(content, matches)).processSync(content);
     const result = matches.reduceRight((acc, { start, end, replaceTo }) => {
@@ -64,7 +64,7 @@ export function massageMarkdownLinks(content: string): string {
       const rightPart = acc.slice(end);
       return leftPart + replaceTo + rightPart;
     }, content);
-    return result.trimRight() + rightSpaces;
+    return result.trimEnd() + rightSpaces;
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;

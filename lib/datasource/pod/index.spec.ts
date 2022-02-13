@@ -2,11 +2,11 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as rubyVersioning from '../../versioning/ruby';
-import * as pod from '.';
+import { PodDatasource } from '.';
 
 const config = {
   versioning: rubyVersioning.id,
-  datasource: pod.id,
+  datasource: PodDatasource.id,
   depName: 'foo',
   registryUrls: [],
 };
@@ -30,7 +30,7 @@ describe('datasource/pod/index', () => {
         .reply(404);
       expect(
         await getPkgReleases({
-          datasource: pod.id,
+          datasource: PodDatasource.id,
           depName: 'foobar',
           registryUrls: [],
         })

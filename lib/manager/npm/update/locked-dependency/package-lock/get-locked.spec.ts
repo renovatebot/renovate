@@ -36,6 +36,11 @@ describe('manager/npm/update/locked-dependency/package-lock/get-locked', () => {
         },
       ]);
     });
+    it('finds any version', () => {
+      expect(getLockedDependencies(packageLockJson, 'send', null)).toHaveLength(
+        2
+      );
+    });
     it('finds bundled dependency', () => {
       expect(
         getLockedDependencies(bundledPackageLockJson, 'ansi-regex', '3.0.0')

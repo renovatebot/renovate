@@ -4,7 +4,9 @@ import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
-import { id as datasource } from '.';
+import { RepologyDatasource } from './index';
+
+const datasource = RepologyDatasource.id;
 
 const repologyHost = 'https://repology.org/';
 

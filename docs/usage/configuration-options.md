@@ -257,7 +257,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the amount of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
+The `config:base` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -293,7 +293,7 @@ Solutions:
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
-- You have a use case we didn't anticipate and we should have a feature request from you to add it to the project
+- You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
 ## branchPrefix
 
@@ -1772,11 +1772,17 @@ For example to apply a special label for Major updates:
 
 ### replacementName
 
+This config option only works with the `npm` manager.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+
 Use this field to define the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementVersion
+
+This config option only works with the `npm` manager.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
 
 Use this field to define the version of a replacement package.
 Must be used with `replacementName`.
@@ -2066,7 +2072,7 @@ Renovate's `"auto"` strategy works like this for npm:
 5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
-As such, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
+Therefore, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range.
 If instead you'd prefer to be updated to `^1.2.0` in cases like this, then configure `rangeStrategy` to `bump` in your Renovate config.
@@ -2560,13 +2566,13 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
 
-Note: Renovate will wait for the set amount of `stabilityDays` to pass for each **separate** version.
+Note: Renovate will wait for the set number of `stabilityDays` to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x `stabilityDays`.
 `stabilityDays` is not intended to help with slowing down fast releasing project updates.
 If you want to slow down PRs for a specific package, setup a custom schedule for that package.
 Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
 
-If the amount of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
+If the number of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
 Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
@@ -2632,7 +2638,9 @@ Please see the above link for valid timezone names.
 
 When enabled, Renovate will attempt to remediate vulnerabilities even if they exist only in transitive dependencies.
 
-Applicable only for GitHub platform (with vulnerability alerts enabled), `npm` manager, and when a `package-lock.json` v1 format is present.
+Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
+When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
+
 This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
 
 ## unicodeEmoji

@@ -2,8 +2,7 @@ import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import * as _hostRules from '../../util/host-rules';
 import { GitHubReleaseMocker } from './test';
-import { id as datasource } from '.';
-import * as github from '.';
+import { GithubReleasesDatasource } from '.';
 
 jest.mock('../../util/host-rules');
 const hostRules: any = _hostRules;
@@ -25,6 +24,8 @@ const responseBody = [
 ];
 
 describe('datasource/github-releases/index', () => {
+  const githubReleases = new GithubReleasesDatasource();
+
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
@@ -40,7 +41,7 @@ describe('datasource/github-releases/index', () => {
         .reply(200, responseBody);
 
       const res = await getPkgReleases({
-        datasource,
+        datasource: GithubReleasesDatasource.id,
         depName: 'some/dep',
       });
       expect(res).toMatchSnapshot();
@@ -62,7 +63,7 @@ describe('datasource/github-releases/index', () => {
         .scope(githubEnterpriseApiHost)
         .get(`/api/v3/repos/${lookupName}/releases?per_page=100`)
         .reply(200, responseBody);
-      const res = await github.getReleases({
+      const res = await githubReleases.getReleases({
         registryUrl: 'https://git.enterprise.com',
         lookupName,
       });
@@ -80,14 +81,17 @@ describe('datasource/github-releases/index', () => {
     const releaseMock = new GitHubReleaseMocker(githubApiHost, depName);
 
     it('requires currentDigest', async () => {
-      const digest = await getDigest({ datasource, depName }, currentValue);
+      const digest = await getDigest(
+        { datasource: GithubReleasesDatasource.id, depName },
+        currentValue
+      );
       expect(digest).toBeNull();
     });
 
     it('defaults to currentDigest when currentVersion is missing', async () => {
       const digest = await getDigest(
         {
-          datasource,
+          datasource: GithubReleasesDatasource.id,
           depName,
           currentDigest,
         },
@@ -106,7 +110,7 @@ describe('datasource/github-releases/index', () => {
       releaseMock.withDigestFileAsset(nextValue, `${nextDigest} asset.zip`);
       const digest = await getDigest(
         {
-          datasource,
+          datasource: GithubReleasesDatasource.id,
           depName,
           currentValue,
           currentDigest,
@@ -122,7 +126,7 @@ describe('datasource/github-releases/index', () => {
       releaseMock.release(currentValue);
       const digest = await getDigest(
         {
-          datasource,
+          datasource: GithubReleasesDatasource.id,
           depName,
           currentValue,
           currentDigest,

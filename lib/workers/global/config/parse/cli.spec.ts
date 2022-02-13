@@ -1,7 +1,7 @@
-import type { RenovateOptions } from '../../../../config/types';
 import * as datasourceDocker from '../../../../datasource/docker';
 import getArgv from './__fixtures__/argv';
 import * as cli from './cli';
+import type { ParseConfigOptions } from './types';
 
 describe('workers/global/config/parse/cli', () => {
   let argv: string[];
@@ -10,13 +10,13 @@ describe('workers/global/config/parse/cli', () => {
   });
   describe('.getCliName(definition)', () => {
     it('generates CLI value', () => {
-      const option: Partial<RenovateOptions> = {
+      const option: ParseConfigOptions = {
         name: 'oneTwoThree',
       };
       expect(cli.getCliName(option)).toBe('--one-two-three');
     });
     it('generates returns empty if CLI false', () => {
-      const option: Partial<RenovateOptions> = {
+      const option: ParseConfigOptions = {
         name: 'oneTwoThree',
         cli: false,
       };
