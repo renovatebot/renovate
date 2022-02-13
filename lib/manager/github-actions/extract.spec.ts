@@ -26,7 +26,7 @@ describe('manager/github-actions/extract', () => {
           datasource: 'github-tags',
           depName: 'pascalgn/automerge-action',
           depType: 'action',
-          replaceString: 'pascalgn/automerge-action@v0.13.1"',
+          replaceString: '"pascalgn/automerge-action@v0.13.1"',
           versioning: 'docker',
         },
       ]);
