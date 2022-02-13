@@ -84,7 +84,7 @@ export const presets: Record<string, Preset> = {
   },
   pinDependencies: {
     description:
-      'Pin dependency versions where depType=dependencies. Usually applies only to non-dev dependencies in <code>package.json</code>',
+      'Pin dependency versions where <code>depType=dependencies</code>. Usually applies only to non-dev dependencies in <code>package.json</code>',
     packageRules: [
       {
         matchDepTypes: ['dependencies'],
