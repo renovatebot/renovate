@@ -4,6 +4,7 @@ import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
 import * as git from '.';
@@ -754,13 +755,31 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('pushCommitAsRef', () => {
-    it('creates non-branch ref', async () => {
+  describe('Funny refs', () => {
+    const lsRenovateFunnyRefs = async (): Promise<string[]> =>
+      (await Git(tmpDir.path).raw(['ls-remote', 'origin', 'refs/renovate/*']))
+        .split(newlineRegex)
+        .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
+        .filter(Boolean);
+
+    it('creates renovate funny ref', async () => {
       const commit = git.getBranchCommit('develop');
-      await git.pushCommitAsRef(commit, 'refs/foo/bar');
-      const repo = Git(tmpDir.path);
-      const res = (await repo.raw(['ls-remote'])).split(/\s+/);
-      expect(res).toContain('refs/foo/bar');
+
+      await git.createFunnyRenovateRef(commit, 'foo/bar');
+
+      const funnyRefs = await lsRenovateFunnyRefs();
+      expect(funnyRefs).toContain('refs/renovate/foo/bar');
+    });
+
+    it('purges all funny Renovate refs', async () => {
+      const commit = git.getBranchCommit('develop');
+      await git.createFunnyRenovateRef(commit, 'foo');
+      await git.createFunnyRenovateRef(commit, 'bar');
+      await git.createFunnyRenovateRef(commit, 'baz');
+
+      expect(await lsRenovateFunnyRefs()).not.toBeEmpty();
+      await git.purgeFunnyRenovateRefs();
+      expect(await lsRenovateFunnyRefs()).toBeEmpty();
     });
   });
 

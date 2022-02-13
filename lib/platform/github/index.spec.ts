@@ -2645,7 +2645,7 @@ describe('platform/github/index', () => {
       expect(res).toBeNull();
     });
     it('force-pushes with REST', async () => {
-      git.pushCommitAsRef.mockResolvedValueOnce();
+      git.createFunnyRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
 
       const scope = httpMock.scope(githubApiHost);

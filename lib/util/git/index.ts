@@ -902,12 +902,46 @@ export function getUrl({
   });
 }
 
-export async function pushCommitAsRef(
+export async function createFunnyRenovateRef(
   commitSha: string,
   refName: string
 ): Promise<void> {
-  await git.raw(['update-ref', refName, commitSha]);
-  await git.raw(['push', '--force', 'origin', refName]);
+  const fullRefName = `refs/renovate/${refName}`;
+  await git.raw(['update-ref', fullRefName, commitSha]);
+  await git.raw(['push', '--force', 'origin', fullRefName]);
+}
+
+/**
+ *
+ * $ git ls-remote origin "refs/renovate/*"
+ *
+ * > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
+ * > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
+ * > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
+ * > ...
+ *
+ * $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
+ *
+ */
+export async function purgeFunnyRenovateRefs(): Promise<void> {
+  try {
+    logger.debug(`Prune funny Renovate refs: "refs/renovate/*"`);
+    const rawOutput = await git.raw([
+      'ls-remote',
+      config.url,
+      'refs/renovate/*',
+    ]);
+    const renovateRefs = rawOutput
+      .split(newlineRegex)
+      .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
+      .filter(is.truthy);
+    if (renovateRefs.length) {
+      const purgeCmd = ['push', '--delete', 'origin', ...renovateRefs];
+      await git.raw(purgeCmd);
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, `Prune funny Renovate refs: error`);
+  }
 }
 
 const treeItemRegex = regEx(
