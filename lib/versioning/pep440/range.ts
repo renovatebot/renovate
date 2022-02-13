@@ -8,7 +8,7 @@ import type { NewValueConfig } from '../types';
 function getFutureVersion(
   baseVersion: string,
   newVersion: string,
-  step: number
+  incrementValue: number
 ): string {
   const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
   const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
@@ -20,12 +20,12 @@ function getFutureVersion(
     const toPart = toRelease[index] || 0;
     if (toPart > basePart) {
       found = true;
-      return toPart + step;
+      return toPart + incrementValue;
     }
     return toPart;
   });
   if (!found) {
-    futureRelease[futureRelease.length - 1] += step;
+    futureRelease[futureRelease.length - 1] += incrementValue;
   }
   return futureRelease.join('.');
 }
@@ -34,6 +34,123 @@ interface Range {
   operator: string;
   prefix: string;
   version: string;
+}
+
+export function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string | null {
+  let ranges: Range[];
+  let updatedRange: string[];
+  if (rangeStrategy === 'pin') {
+    return '==' + newVersion;
+  }
+
+  // no symbol: accept only that specific version specified
+  if (currentValue === currentVersion) {
+    return newVersion;
+  }
+
+  try {
+    ranges = parseCurrentRange(currentValue);
+    if (!ranges.length) {
+      // an empty string is an allowed value for PEP440 range
+      // it means get any version
+      logger.warn('Empty currentValue: ' + currentValue);
+      return currentValue;
+    }
+  } catch (error) {
+    logger.warn({ currentValue }, (<Error>error).message);
+    return null;
+  }
+
+  switch (rangeStrategy) {
+    case 'auto':
+    case 'replace':
+      updatedRange = handleReplaceStrategy(
+        newVersion,
+        currentValue,
+        currentVersion,
+        ranges
+      );
+      break;
+    case 'bump':
+      updatedRange = handleBumpStrategy(
+        newVersion,
+        currentValue,
+        currentVersion,
+        ranges
+      );
+      break;
+    default:
+      // Unsupported rangeStrategy
+      // Valid rangeStrategy values are: bump, extend, pin, replace.
+      // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
+      logger.debug(
+        'Unsupported rangeStrategy: ' +
+          rangeStrategy +
+          '. Using "replace" instead.'
+      );
+      return getNewValue({
+        currentValue,
+        rangeStrategy: 'auto',
+        currentVersion,
+        newVersion,
+      });
+  }
+
+  let result = updatedRange.filter(Boolean).join(', ');
+
+  if (result.includes(', ') && !currentValue.includes(', ')) {
+    result = result.replace(regEx(/, /g), ',');
+  }
+
+  if (!satisfies(newVersion, result)) {
+    // we failed at creating the range
+    logger.warn(
+      { result, newVersion, currentValue },
+      'pep440: failed to calculate newValue'
+    );
+    return null;
+  }
+  return result;
+}
+
+export function isLessThanRange(input: string, range: string): boolean {
+  try {
+    let invertResult = true;
+
+    const results = range
+      .split(',')
+      .map((x) =>
+        x
+          .replace(regEx(/\s*/g), '')
+          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
+          .slice(1)
+      )
+      .map(([op, version]) => {
+        if (['!=', '<=', '<'].includes(op)) {
+          return true;
+        }
+        invertResult = false;
+        if (['~=', '==', '>=', '==='].includes(op)) {
+          return lt(input, version);
+        }
+        if (op === '>') {
+          return lte(input, version);
+        }
+        // istanbul ignore next
+        return false;
+      });
+
+    const result = results.every((res) => res === true);
+
+    return invertResult ? !result : result;
+  } catch (err) /* istanbul ignore next */ {
+    return false;
+  }
 }
 
 function parseCurrentRange(currentValue: string): Range[] {
@@ -91,6 +208,8 @@ function nonPolicySpecific(
 ): string {
   let output = handleUpperBound(range, newVersion);
   if (output) {
+    // manged to update upperbound
+    // no need to try anything else
     return output;
   }
   output = handleLowerBound(range, newVersion);
@@ -145,121 +264,4 @@ function handleBumpStrategy(
     }
     return nonPolicySpecific(newVersion, currentValue, currentVersion, range);
   });
-}
-
-export function getNewValue({
-  currentValue,
-  rangeStrategy,
-  currentVersion,
-  newVersion,
-}: NewValueConfig): string | null {
-  let ranges: Range[];
-  let updatedRange: string[];
-  if (rangeStrategy !== 'pin') {
-    // no symbol: accept only that specific version specified
-    if (currentValue === currentVersion) {
-      return newVersion;
-    }
-    try {
-      ranges = parseCurrentRange(currentValue);
-      if (!ranges.length) {
-        // an empty string is an allowed value for PEP440 range
-        // it means get any version
-        logger.warn('Empty currentValue: ' + currentValue);
-        return currentValue;
-      }
-    } catch (error) {
-      logger.warn({ currentValue }, (<Error>error).message);
-      return null;
-    }
-  }
-
-  switch (rangeStrategy) {
-    case 'pin':
-      // easy pin
-      return '==' + newVersion;
-    case 'auto':
-    case 'replace':
-      updatedRange = handleReplaceStrategy(
-        newVersion,
-        currentValue,
-        currentVersion,
-        ranges
-      );
-      break;
-    case 'bump':
-      updatedRange = handleBumpStrategy(
-        newVersion,
-        currentValue,
-        currentVersion,
-        ranges
-      );
-      break;
-    default:
-      // Unsupported rangeStrategy
-      // Valid rangeStrategy values are: bump, extend, pin, replace.
-      // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
-      logger.debug(
-        'Unsupported rangeStrategy: ' +
-          rangeStrategy +
-          '. Using "replace" instead.'
-      );
-      return getNewValue({
-        currentValue,
-        rangeStrategy: 'replace',
-        currentVersion,
-        newVersion,
-      });
-  }
-
-  let result = updatedRange.filter(Boolean).join(', ');
-
-  if (result.includes(', ') && !currentValue.includes(', ')) {
-    result = result.replace(regEx(/, /g), ',');
-  }
-
-  if (!satisfies(newVersion, result)) {
-    // we failed at creating the range
-    logger.warn(
-      { result, newVersion, currentValue },
-      'pep440: failed to calculate newValue'
-    );
-    return null;
-  }
-  return result;
-}
-
-export function isLessThanRange(input: string, range: string): boolean {
-  try {
-    let invertResult = true;
-
-    const results = range
-      .split(',')
-      .map((x) =>
-        x
-          .replace(regEx(/\s*/g), '')
-          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
-          .slice(1)
-      )
-      .map(([op, version]) => {
-        if (['!=', '<=', '<'].includes(op)) {
-          return true;
-        }
-        invertResult = false;
-        if (['~=', '==', '>=', '==='].includes(op)) {
-          return lt(input, version);
-        }
-        if (op === '>') {
-          return lte(input, version);
-        }
-        // istanbul ignore next
-        return false;
-      });
-
-    const result = results.every((res) => res === true);
-
-    return invertResult ? !result : result;
-  } catch (err) /* istanbul ignore next */ {
-    return false;
-  }
 }
