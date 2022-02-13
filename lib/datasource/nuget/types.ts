@@ -22,3 +22,8 @@ export interface CatalogPage {
 export interface PackageRegistration {
   items: CatalogPage[];
 }
+
+export interface ParsedRegistryUrl {
+  feedUrl: string;
+  protocolVersion: number | null;
+}

@@ -3,7 +3,10 @@ import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
-import { id as datasource, parseRegistryUrl } from '.';
+import { parseRegistryUrl } from './common';
+import { NugetDatasource } from '.';
+
+const datasource = NugetDatasource.id;
 
 const hostRules: any = _hostRules;
 
@@ -118,11 +121,9 @@ describe('datasource/nuget/index', () => {
     });
 
     it('returns null for unparseable', () => {
-      const parsed = parseRegistryUrl(
-        'https://test:malfor%5Med@test.example.com'
-      );
+      const parsed = parseRegistryUrl('https://test.example.com:abc');
 
-      expect(parsed.feedUrl).toBe('https://test:malfor%5Med@test.example.com');
+      expect(parsed.feedUrl).toBe('https://test.example.com:abc');
       expect(parsed.protocolVersion).toBeNull();
     });
   });
