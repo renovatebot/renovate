@@ -182,6 +182,14 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'globalExtends',
+    description:
+      'Configuration presets to use/extend for a self-hosted config.',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',

@@ -7,7 +7,7 @@ import { chmod } from '../../util/fs';
 import { newlineRegex, regEx } from '../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
 import { id as npmVersioning } from '../../versioning/npm';
-import { GradleVersionExtract } from './types';
+import type { GradleVersionExtract } from './types';
 
 export const extraEnv = {
   GRADLE_OPTS:

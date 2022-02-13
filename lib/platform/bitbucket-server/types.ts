@@ -1,3 +1,4 @@
+import type { HTTPError, Response } from 'got';
 import type { Pr } from '../types';
 
 export interface BbsConfig {
@@ -56,4 +57,15 @@ export interface BbsRestRepo {
 
 export interface BbsRestBranch {
   displayId: string;
+}
+
+export interface BitbucketErrorResponse {
+  errors?: {
+    exceptionName?: string;
+    reviewerErrors?: { context?: string }[];
+  }[];
+}
+
+export interface BitbucketError extends HTTPError {
+  readonly response: Response<BitbucketErrorResponse>;
 }

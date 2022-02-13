@@ -15,7 +15,7 @@ import { maskToken } from '../mask';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { parseLinkHeader } from '../url';
-import { GotLegacyError } from './legacy';
+import type { GotLegacyError } from './legacy';
 import type { GraphqlOptions } from './types';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 

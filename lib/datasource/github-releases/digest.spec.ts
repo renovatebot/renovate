@@ -1,8 +1,9 @@
 import hasha from 'hasha';
 import * as httpMock from '../../../test/http-mock';
-import { findDigestAsset, mapDigestAssetToRelease } from './digest';
 import { GitHubReleaseMocker } from './test';
-import { DigestAsset } from './types';
+import type { DigestAsset } from './types';
+
+import { GithubReleasesDatasource } from '.';
 
 describe('datasource/github-releases/digest', () => {
   const lookupName = 'some/dep';
@@ -10,6 +11,7 @@ describe('datasource/github-releases/digest', () => {
     'https://api.github.com',
     lookupName
   );
+  const githubReleases = new GithubReleasesDatasource();
 
   describe('findDigestAsset', () => {
     it('finds SHASUMS.txt file containing digest', async () => {
@@ -19,7 +21,10 @@ describe('datasource/github-releases/digest', () => {
         'another-digest linux-arm64.tar.gz'
       );
 
-      const digestAsset = await findDigestAsset(release, 'test-digest');
+      const digestAsset = await githubReleases.findDigestAsset(
+        release,
+        'test-digest'
+      );
       expect(digestAsset.assetName).toBe('SHASUMS.txt');
       expect(digestAsset.digestedFileName).toBe('linux-amd64.tar.gz');
     });
@@ -35,7 +40,10 @@ describe('datasource/github-releases/digest', () => {
         .get(`/repos/${lookupName}/releases/download/v1.0.0/SHASUMS.txt`)
         .reply(200, '');
 
-      const digestAsset = await findDigestAsset(release, 'test-digest');
+      const digestAsset = await githubReleases.findDigestAsset(
+        release,
+        'test-digest'
+      );
       expect(digestAsset).toBeNull();
     });
 
@@ -49,14 +57,20 @@ describe('datasource/github-releases/digest', () => {
       });
       const contentDigest = await hasha.async(content, { algorithm: 'sha256' });
 
-      const digestAsset = await findDigestAsset(release, contentDigest);
+      const digestAsset = await githubReleases.findDigestAsset(
+        release,
+        contentDigest
+      );
       expect(digestAsset.assetName).toBe('asset.zip');
       expect(digestAsset.digestedFileName).toBeUndefined();
     });
 
     it('returns null when no assets available', async () => {
       const release = releaseMock.release('v1.0.0');
-      const digestAsset = await findDigestAsset(release, 'test-digest');
+      const digestAsset = await githubReleases.findDigestAsset(
+        release,
+        'test-digest'
+      );
       expect(digestAsset).toBeNull();
     });
   });
@@ -75,7 +89,10 @@ describe('datasource/github-releases/digest', () => {
           'v1.0.1',
           'updated-digest  asset.zip'
         );
-        const digest = await mapDigestAssetToRelease(digestAsset, release);
+        const digest = await githubReleases.mapDigestAssetToRelease(
+          digestAsset,
+          release
+        );
         expect(digest).toBe('updated-digest');
       });
 
@@ -89,7 +106,7 @@ describe('datasource/github-releases/digest', () => {
           'v1.0.1',
           'updated-digest  asset-1.0.1.zip'
         );
-        const digest = await mapDigestAssetToRelease(
+        const digest = await githubReleases.mapDigestAssetToRelease(
           digestAssetWithVersion,
           release
         );
@@ -101,13 +118,19 @@ describe('datasource/github-releases/digest', () => {
           'v1.0.1',
           'moot-digest asset.tar.gz'
         );
-        const digest = await mapDigestAssetToRelease(digestAsset, release);
+        const digest = await githubReleases.mapDigestAssetToRelease(
+          digestAsset,
+          release
+        );
         expect(digest).toBeNull();
       });
 
       it('returns null when digest file not found', async () => {
         const release = releaseMock.release('v1.0.1');
-        const digest = await mapDigestAssetToRelease(digestAsset, release);
+        const digest = await githubReleases.mapDigestAssetToRelease(
+          digestAsset,
+          release
+        );
         expect(digest).toBeNull();
       });
     });
@@ -128,13 +151,19 @@ describe('datasource/github-releases/digest', () => {
           algorithm: 'sha256',
         });
 
-        const digest = await mapDigestAssetToRelease(digestAsset, release);
+        const digest = await githubReleases.mapDigestAssetToRelease(
+          digestAsset,
+          release
+        );
         expect(digest).toEqual(contentDigest);
       });
 
       it('returns null when not found', async () => {
         const release = releaseMock.release('v1.0.1');
-        const digest = await mapDigestAssetToRelease(digestAsset, release);
+        const digest = await githubReleases.mapDigestAssetToRelease(
+          digestAsset,
+          release
+        );
         expect(digest).toBeNull();
       });
     });

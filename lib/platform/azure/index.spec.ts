@@ -6,10 +6,10 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { REPOSITORY_ARCHIVED } from '../../constants/error-messages';
-import { logger as _logger } from '../../logger';
+import type { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
-import * as _hostRules from '../../util/host-rules';
+import type * as _git from '../../util/git';
+import type * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 

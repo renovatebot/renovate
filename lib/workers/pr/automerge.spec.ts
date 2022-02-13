@@ -1,7 +1,7 @@
 import { getConfig, git, mocked, partial } from '../../../test/util';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { BranchConfig } from '../types';
+import type { BranchConfig } from '../types';
 import * as prAutomerge from './automerge';
 
 jest.mock('../../util/git');

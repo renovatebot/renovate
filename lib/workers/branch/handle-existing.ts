@@ -4,7 +4,7 @@ import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { branchExists, deleteBranch } from '../../util/git';
 import * as template from '../../util/template';
-import { BranchConfig } from '../types';
+import type { BranchConfig } from '../types';
 
 export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
   if (pr.state === PrState.Closed) {

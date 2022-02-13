@@ -341,6 +341,8 @@ describe('datasource/crate/index', () => {
   describe('fetchCrateRecordsPayload', () => {
     it('rejects if it has neither clonePath nor crates.io flavor', async () => {
       const info: RegistryInfo = {
+        rawUrl: 'https://example.com',
+        url: new URL('https://example.com'),
         flavor: RegistryFlavor.Cloudsmith,
       };
       const crateDatasource = new CrateDatasource();

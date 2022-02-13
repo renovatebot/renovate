@@ -8,7 +8,7 @@ import { simpleGitConfig } from '../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageFile } from '../types';
-import { GitModule } from './types';
+import type { GitModule } from './types';
 
 async function getUrl(
   git: SimpleGit,
