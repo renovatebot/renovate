@@ -4,7 +4,7 @@ import { loadJsonFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
-import { id as datasource } from '.';
+import { PackagistDatasource } from '.';
 
 jest.mock('../../util/host-rules');
 
@@ -15,6 +15,7 @@ const beytJson: any = loadJsonFixture('1beyt.json');
 const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
 
 const baseUrl = 'https://packagist.org';
+const datasource = PackagistDatasource.id;
 
 describe('datasource/packagist/index', () => {
   describe('getReleases', () => {
