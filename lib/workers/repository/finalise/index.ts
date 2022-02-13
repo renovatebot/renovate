@@ -1,7 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { platform } from '../../../platform';
 import * as repositoryCache from '../../../util/cache/repository';
-import { purgeFunnyRenovateRefs } from '../../../util/git';
+import { clearRenovateRefs } from '../../../util/git';
 import { pruneStaleBranches } from './prune';
 
 // istanbul ignore next
@@ -15,6 +15,6 @@ export async function finaliseRepo(
     `Action Required: Fix Renovate Configuration`
   );
   if (config.platformCommit) {
-    await purgeFunnyRenovateRefs();
+    await clearRenovateRefs();
   }
 }

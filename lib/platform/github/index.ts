@@ -22,7 +22,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import { createFunnyRenovateRef, listCommitTree } from '../../util/git';
+import { pushCommitToRenovateRef, listCommitTree } from '../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
@@ -1738,7 +1738,7 @@ async function forcePushFiles(
   localCommitSha: string,
   message: string
 ): Promise<string> {
-  await createFunnyRenovateRef(localCommitSha, branchName);
+  await pushCommitToRenovateRef(localCommitSha, branchName);
   const treeItems = await listCommitTree(localCommitSha);
 
   const treeRes = await githubApi.postJson<{ sha: string }>(

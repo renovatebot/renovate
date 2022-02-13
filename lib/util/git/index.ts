@@ -902,7 +902,7 @@ export function getUrl({
   });
 }
 
-export async function createFunnyRenovateRef(
+export async function pushCommitToRenovateRef(
   commitSha: string,
   refName: string
 ): Promise<void> {
@@ -923,7 +923,7 @@ export async function createFunnyRenovateRef(
  * $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
  *
  */
-export async function purgeFunnyRenovateRefs(): Promise<void> {
+export async function clearRenovateRefs(): Promise<void> {
   try {
     logger.debug(`Prune funny Renovate refs: "refs/renovate/*"`);
     const rawOutput = await git.raw([

@@ -765,7 +765,7 @@ describe('util/git/index', () => {
     it('creates renovate funny ref', async () => {
       const commit = git.getBranchCommit('develop');
 
-      await git.createFunnyRenovateRef(commit, 'foo/bar');
+      await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
       const funnyRefs = await lsRenovateFunnyRefs();
       expect(funnyRefs).toContain('refs/renovate/foo/bar');
@@ -773,12 +773,12 @@ describe('util/git/index', () => {
 
     it('purges all funny Renovate refs', async () => {
       const commit = git.getBranchCommit('develop');
-      await git.createFunnyRenovateRef(commit, 'foo');
-      await git.createFunnyRenovateRef(commit, 'bar');
-      await git.createFunnyRenovateRef(commit, 'baz');
+      await git.pushCommitToRenovateRef(commit, 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar');
+      await git.pushCommitToRenovateRef(commit, 'baz');
 
       expect(await lsRenovateFunnyRefs()).not.toBeEmpty();
-      await git.purgeFunnyRenovateRefs();
+      await git.clearRenovateRefs();
       expect(await lsRenovateFunnyRefs()).toBeEmpty();
     });
   });
