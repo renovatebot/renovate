@@ -39,6 +39,7 @@ export async function updateLockedDependency(
       logger.warn({ err }, 'Failed to parse files');
       return { status: 'update-failed' };
     }
+    const { lockfileVersion } = packageLockJson;
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
@@ -63,7 +64,7 @@ export async function updateLockedDependency(
         );
         status = 'already-updated';
       } else {
-        if (packageLockJson.lockfileVersion !== 1) {
+        if (lockfileVersion !== 1) {
           logger.debug(
             `Found lockfileVersion ${packageLockJson.lockfileVersion}`
           );
@@ -240,6 +241,11 @@ export async function updateLockedDependency(
     }
     if (newPackageJsonContent) {
       files[packageFile] = newPackageJsonContent;
+    } else if (lockfileVersion !== 1) {
+      logger.debug(
+        'Remediations which change package-lock.json only are not supported unless lockfileVersion=1'
+      );
+      return { status: 'unsupported' };
     }
     return { status: 'updated', files };
   } catch (err) /* istanbul ignore next */ {

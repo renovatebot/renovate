@@ -1,6 +1,6 @@
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
@@ -12,7 +12,7 @@ export { extractPackageFile } from './extract';
 export const supportedDatasources = [
   BitBucketTagsDatasource.id,
   GitTagsDatasource.id,
-  datasourceGithubTags.id,
+  GithubTagsDatasource.id,
   HelmDatasource.id,
   TerraformModuleDatasource.id,
   TerraformProviderDatasource.id,

@@ -1,4 +1,4 @@
-import * as githubTagsDatasource from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { newlineRegex, regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
@@ -43,7 +43,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const dep: PackageDependency = {
         depName,
         commitMessageTopic: '{{{depName}}} action',
-        datasource: githubTagsDatasource.id,
+        datasource: GithubTagsDatasource.id,
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
