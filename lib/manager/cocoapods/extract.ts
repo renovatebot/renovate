@@ -1,5 +1,5 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
 import { logger } from '../../logger';
@@ -61,7 +61,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     if (account && repo) {
       const datasource =
         platform === 'github'
-          ? datasourceGithubTags.id
+          ? GithubTagsDatasource.id
           : GitlabTagsDatasource.id;
       return {
         datasource,

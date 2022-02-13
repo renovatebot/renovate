@@ -1,5 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
 
@@ -31,4 +31,4 @@ export const defaultConfig = {
   },
 };
 
-export const supportedDatasources = [datasourceGithubTags.id, NpmDatasource.id];
+export const supportedDatasources = [GithubTagsDatasource.id, NpmDatasource.id];

@@ -6,7 +6,7 @@ import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
-import * as github from '../github-tags';
+import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DataSource } from './types';
 
@@ -27,7 +27,7 @@ export class BaseGoDatasource {
       const [pkg] = goModule.replace('gopkg.in/', '').split('.');
       const lookupName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
       return {
-        datasource: github.id,
+        datasource: GithubTagsDatasource.id,
         lookupName,
         registryUrl: 'https://github.com',
       };
@@ -37,7 +37,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const lookupName = split[1] + '/' + split[2];
       return {
-        datasource: github.id,
+        datasource: GithubTagsDatasource.id,
         lookupName,
         registryUrl: 'https://github.com',
       };
@@ -74,7 +74,7 @@ export class BaseGoDatasource {
       logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
       if (goSourceUrl?.startsWith('https://github.com/')) {
         return {
-          datasource: github.id,
+          datasource: GithubTagsDatasource.id,
           lookupName: goSourceUrl
             .replace('https://github.com/', '')
             .replace(regEx(/\/$/), ''),
@@ -159,7 +159,7 @@ export class BaseGoDatasource {
           .join('/');
 
         return {
-          datasource: github.id,
+          datasource: GithubTagsDatasource.id,
           registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
           lookupName,
         };

@@ -7,26 +7,29 @@ import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
 const pocoJson = Fixtures.get('poco.json');
+const pocoYamlGitHubContent = Fixtures.get('poco.yaml.json');
 const malformedJson = Fixtures.get('malformed.json');
 const fakeJson = Fixtures.get('fake.json');
 const datasource = ConanDatasource.id;
+
+const nonDefaultRegistryUrl = 'https://not.conan.io/';
 
 const config: GetPkgReleasesConfig = {
   depName: '',
   datasource,
   versioning: conan.id,
-  registryUrls: [defaultRegistryUrl],
+  registryUrls: [nonDefaultRegistryUrl],
 };
 
 describe('datasource/conan/index', () => {
   beforeEach(() => {
-    config.registryUrls = [defaultRegistryUrl];
+    config.registryUrls = [nonDefaultRegistryUrl];
   });
 
   describe('getReleases', () => {
     it('handles bad return', async () => {
       httpMock
-        .scope(defaultRegistryUrl)
+        .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, null);
       config.depName = 'fakepackage';
@@ -40,7 +43,7 @@ describe('datasource/conan/index', () => {
 
     it('handles empty return', async () => {
       httpMock
-        .scope(defaultRegistryUrl)
+        .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, {});
       config.depName = 'fakepackage';
@@ -69,7 +72,7 @@ describe('datasource/conan/index', () => {
 
     it('handles missing packages', async () => {
       httpMock
-        .scope(defaultRegistryUrl)
+        .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, fakeJson);
       config.depName = 'fakepackage';
@@ -83,7 +86,7 @@ describe('datasource/conan/index', () => {
 
     it('processes real versioned data', async () => {
       httpMock
-        .scope(defaultRegistryUrl)
+        .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
       config.depName = 'poco';
@@ -93,7 +96,7 @@ describe('datasource/conan/index', () => {
           lookupName: 'poco/1.2@_/_',
         })
       ).toEqual({
-        registryUrl: 'https://center.conan.io',
+        registryUrl: 'https://not.conan.io',
         releases: [
           {
             version: '1.8.1',
@@ -114,9 +117,61 @@ describe('datasource/conan/index', () => {
       });
     });
 
+    it('uses github isntead of conan center', async () => {
+      httpMock
+        .scope('https://api.github.com')
+        .get(
+          '/repos/conan-io/conan-center-index/contents/recipes/poco/config.yml'
+        )
+        .reply(200, pocoYamlGitHubContent);
+      expect(
+        await getPkgReleases({
+          ...config,
+          registryUrls: [defaultRegistryUrl],
+          depName: 'poco',
+          lookupName: 'poco/1.2@_/_',
+        })
+      ).toEqual({
+        registryUrl: 'https://center.conan.io',
+        releases: [
+          {
+            version: '1.8.1',
+          },
+          {
+            version: '1.9.3',
+          },
+          {
+            version: '1.9.4',
+          },
+          {
+            version: '1.10.0',
+          },
+          {
+            version: '1.10.1',
+          },
+          {
+            version: '1.11.0',
+          },
+          {
+            version: '1.11.1',
+          },
+        ],
+      });
+    });
+    it('rejects userAndChannel for Conan Center', async () => {
+      expect(
+        await getPkgReleases({
+          ...config,
+          registryUrls: [defaultRegistryUrl],
+          depName: 'poco',
+          lookupName: 'poco/1.2@foo/bar',
+        })
+      ).toBeNull();
+    });
+
     it('it handles mismatched userAndChannel versioned data', async () => {
       httpMock
-        .scope(defaultRegistryUrl)
+        .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
       config.depName = 'poco';
@@ -130,7 +185,7 @@ describe('datasource/conan/index', () => {
 
     it('handles malformed packages', async () => {
       httpMock
-        .scope(defaultRegistryUrl)
+        .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=bad')
         .reply(200, malformedJson);
       config.depName = 'bad';
@@ -140,7 +195,7 @@ describe('datasource/conan/index', () => {
           lookupName: 'bad/1.2@_/_',
         })
       ).toEqual({
-        registryUrl: 'https://center.conan.io',
+        registryUrl: 'https://not.conan.io',
         releases: [
           {
             version: '1.9.3',

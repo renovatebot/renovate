@@ -1,7 +1,7 @@
 import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import {
   extractHelmChart,
@@ -44,7 +44,7 @@ describe('manager/kustomize/extract', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitHubTags.id,
+        datasource: GithubTagsDatasource.id,
         depName: 'user/test-repo',
       };
 
@@ -89,7 +89,7 @@ describe('manager/kustomize/extract', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitHubTags.id,
+        datasource: GithubTagsDatasource.id,
         depName: 'fluxcd/flux',
       };
 
@@ -101,7 +101,7 @@ describe('manager/kustomize/extract', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitHubTags.id,
+        datasource: GithubTagsDatasource.id,
         depName: 'user/repo',
       };
 
@@ -113,7 +113,7 @@ describe('manager/kustomize/extract', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitHubTags.id,
+        datasource: GithubTagsDatasource.id,
         depName: 'user/repo',
       };
 
