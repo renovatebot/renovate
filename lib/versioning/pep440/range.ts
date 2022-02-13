@@ -36,112 +36,183 @@ interface Range {
   version: string;
 }
 
+function parseCurrentRange(currentValue: string): Range[] {
+  const ranges: Range[] = parseRange(currentValue);
+  if (!ranges) {
+    throw new TypeError('Invalid pep440 currentValue');
+  }
+  if (ranges.some((range) => range.operator === '===')) {
+    // the operator "===" is used for legacy non PEP440 versions
+    throw new TypeError('PEP440 arbitrary equality (===) not supported');
+  }
+  return ranges;
+}
+
+function handleLowerBound(range: Range, newVersion: string): string | null {
+  // used to exclude versions,
+  // we assume that's for a good reason
+  if (range.operator === '!=') {
+    return range.operator + range.version;
+  }
+  // used to mark minimum supported version
+  // lower the bound if the new version is lower than current range
+  if (['>', '>='].includes(range.operator)) {
+    if (lte(newVersion, range.version)) {
+      // this looks like a rollback
+      return '>=' + newVersion;
+    }
+    // otherwise, treat it same as exclude
+    return range.operator + range.version;
+  }
+  return null;
+}
+
+function handleUpperBound(range: Range, newVersion: string): string | null {
+  // this is used to exclude future versions
+  if (range.operator === '<') {
+    // if newVersion is that future version
+    if (gte(newVersion, range.version)) {
+      // now here things get tricky
+      // we calculate the new future version
+      const futureVersion = getFutureVersion(range.version, newVersion, 1);
+      return range.operator + futureVersion;
+    }
+    // otherwise, treat it same as exclude
+    return range.operator + range.version;
+  }
+  return null;
+}
+
+function nonPolicySpecific(
+  newVersion: string,
+  currentValue: string,
+  currentVersion: string,
+  range: Range
+): string {
+  let output = handleUpperBound(range, newVersion);
+  if (output) {
+    return output;
+  }
+  output = handleLowerBound(range, newVersion);
+  if (output) {
+    return output;
+  }
+  // keep the .* suffix
+  if (range.prefix) {
+    const futureVersion = getFutureVersion(range.version, newVersion, 0);
+    return range.operator + futureVersion + '.*';
+  }
+
+  if (['==', '~=', '<='].includes(range.operator)) {
+    return range.operator + newVersion;
+  }
+
+  // unless PEP440 changes, this won't happen
+  // istanbul ignore next
+  logger.error(
+    { newVersion, currentValue, range },
+    'pep440: failed to process range'
+  );
+  // istanbul ignore next
+  return null;
+}
+
+function handleReplaceStrategy(
+  newVersion: string,
+  currentValue: string,
+  currentVersion: string,
+  ranges: Range[]
+): string[] {
+  // newVersion is within range
+  if (satisfies(newVersion, currentValue)) {
+    return [currentValue];
+  }
+  return ranges.map((range) =>
+    nonPolicySpecific(newVersion, currentValue, currentVersion, range)
+  );
+}
+
+function handleBumpStrategy(
+  newVersion: string,
+  currentValue: string,
+  currentVersion: string,
+  ranges: Range[]
+): string[] {
+  return ranges.map((range) => {
+    // bump lower bound to current new version
+    if (range.operator === '>=') {
+      return range.operator + newVersion;
+    }
+    return nonPolicySpecific(newVersion, currentValue, currentVersion, range);
+  });
+}
+
 export function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
-  // easy pin
-  if (rangeStrategy === 'pin') {
-    return '==' + newVersion;
-  }
-  if (currentValue === currentVersion) {
-    return newVersion;
-  }
-  const ranges: Range[] = parseRange(currentValue);
-  if (!ranges) {
-    logger.warn({ currentValue }, 'Invalid pep440 currentValue');
-    return null;
-  }
-  if (!ranges.length) {
-    // an empty string is an allowed value for PEP440 range
-    // it means get any version
-    logger.warn('Empty currentValue: ' + currentValue);
-    return currentValue;
-  }
-  if (rangeStrategy === 'auto' || rangeStrategy === 'replace') {
-    if (satisfies(newVersion, currentValue)) {
-      return currentValue;
+  let ranges: Range[];
+  let updatedRange: string[];
+  if (rangeStrategy !== 'pin') {
+    // no symbol: accept only that specific version specified
+    if (currentValue === currentVersion) {
+      return newVersion;
+    }
+    try {
+      ranges = parseCurrentRange(currentValue);
+      if (!ranges.length) {
+        // an empty string is an allowed value for PEP440 range
+        // it means get any version
+        logger.warn('Empty currentValue: ' + currentValue);
+        return currentValue;
+      }
+    } catch (error) {
+      logger.warn({ currentValue }, (<Error>error).message);
+      return null;
     }
   }
-  if (!['replace', 'bump'].includes(rangeStrategy)) {
-    logger.debug(
-      'Unsupported rangeStrategy: ' +
-        rangeStrategy +
-        '. Using "replace" instead.'
-    );
-    return getNewValue({
-      currentValue,
-      rangeStrategy: 'replace',
-      currentVersion,
-      newVersion,
-    });
-  }
-  if (ranges.some((range) => range.operator === '===')) {
-    // the operator "===" is used for legacy non PEP440 versions
-    logger.warn(
-      { currentValue },
-      'PEP440 arbitrary equality (===) not supported'
-    );
-    return null;
-  }
-  let result = ranges
-    .map((range) => {
-      // used to exclude versions,
-      // we assume that's for a good reason
-      if (range.operator === '!=') {
-        return range.operator + range.version;
-      }
 
-      // used to mark minimum supported version
-      if (['>', '>='].includes(range.operator)) {
-        if (lte(newVersion, range.version)) {
-          // this looks like a rollback
-          return '>=' + newVersion;
-        }
-        // this is similar to ~=
-        if (rangeStrategy === 'bump' && range.operator === '>=') {
-          return range.operator + newVersion;
-        }
-        // otherwise treat it same as exclude
-        return range.operator + range.version;
-      }
-
-      // this is used to exclude future versions
-      if (range.operator === '<') {
-        // if newVersion is that future version
-        if (gte(newVersion, range.version)) {
-          // now here things get tricky
-          // we calculate the new future version
-          const futureVersion = getFutureVersion(range.version, newVersion, 1);
-          return range.operator + futureVersion;
-        }
-        // otherwise treat it same as exclude
-        return range.operator + range.version;
-      }
-
-      // keep the .* suffix
-      if (range.prefix) {
-        const futureVersion = getFutureVersion(range.version, newVersion, 0);
-        return range.operator + futureVersion + '.*';
-      }
-
-      if (['==', '~=', '<='].includes(range.operator)) {
-        return range.operator + newVersion;
-      }
-
-      // unless PEP440 changes, this won't happen
-      // istanbul ignore next
-      logger.error(
-        { newVersion, currentValue, range },
-        'pep440: failed to process range'
+  switch (rangeStrategy) {
+    case 'pin':
+      // easy pin
+      return '==' + newVersion;
+    case 'auto':
+    case 'replace':
+      updatedRange = handleReplaceStrategy(
+        newVersion,
+        currentValue,
+        currentVersion,
+        ranges
       );
-      // istanbul ignore next
-      return null;
-    })
-    .filter(Boolean)
-    .join(', ');
+      break;
+    case 'bump':
+      updatedRange = handleBumpStrategy(
+        newVersion,
+        currentValue,
+        currentVersion,
+        ranges
+      );
+      break;
+    default:
+      // Unsupported rangeStrategy
+      // Valid rangeStrategy values are: bump, extend, pin, replace.
+      // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
+      logger.debug(
+        'Unsupported rangeStrategy: ' +
+          rangeStrategy +
+          '. Using "replace" instead.'
+      );
+      return getNewValue({
+        currentValue,
+        rangeStrategy: 'replace',
+        currentVersion,
+        newVersion,
+      });
+  }
+
+  let result = updatedRange.filter(Boolean).join(', ');
 
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
@@ -155,7 +226,6 @@ export function getNewValue({
     );
     return null;
   }
-
   return result;
 }
 
