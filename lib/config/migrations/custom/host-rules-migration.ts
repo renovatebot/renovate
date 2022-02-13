@@ -7,7 +7,7 @@ export class HostRulesMigration extends AbstractMigration {
 
   override run(value: Record<string, unknown>[]): void {
     const newHostRules: HostRule[] = value.map((rule) => {
-      const newRule: HostRule = {};
+      const newRule: any = {};
 
       for (const [key, value] of Object.entries(rule)) {
         if (key === 'platform') {
