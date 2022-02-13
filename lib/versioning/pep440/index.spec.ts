@@ -150,7 +150,7 @@ describe('versioning/pep440/index', () => {
     ${'!=1.2.3'}          | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
     ${'==3.2.*,>=3.2.2'}  | ${'replace'}  | ${'3.2.2'}     | ${'4.1.1'} | ${'==4.1.*'}
     ${'==3.2.*,>=3.2.2'}  | ${'replace'}  | ${'3.2.2'}     | ${'4.0.0'} | ${'==4.0.*'}
-    ${'>=1.0.0,<1.1.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'1.2.0'} | ${'>=1.0.0,<1.3.0'}
+    ${'>=1.0.0,<1.1.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'1.2.0'} | ${'>=1.2.0,<1.3.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
