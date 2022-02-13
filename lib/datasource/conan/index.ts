@@ -37,9 +37,10 @@ export class ConanDatasource extends Datasource {
       return null;
     }
     const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
-    const res = await this.githubHttp.getJson<{ content: string }>(url);
-    const content = Buffer.from(res.body.content, 'base64').toString('utf8');
-    const doc = load(content, {
+    const res = await this.githubHttp.get(url, {
+      headers: { Accept: 'application/vnd.github.v3.raw' },
+    });
+    const doc = load(res.body, {
       json: true,
     }) as ConanYAML;
     return {
