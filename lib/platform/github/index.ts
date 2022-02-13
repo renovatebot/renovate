@@ -22,7 +22,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import { listCommitTree, createFunnyRenovateRef } from '../../util/git';
+import { createFunnyRenovateRef, listCommitTree } from '../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
