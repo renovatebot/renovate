@@ -232,3 +232,5 @@ Object {
   ],
 }
 `;
+
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades: some-title (patch) 1`] = `"some-title (patch)"`;
