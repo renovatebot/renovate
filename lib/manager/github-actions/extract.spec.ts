@@ -16,7 +16,7 @@ describe('manager/github-actions/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(
         res.deps.filter((d) => d.datasource === 'github-tags')
-      ).toHaveLength(5);
+      ).toHaveLength(8);
     });
   });
 });

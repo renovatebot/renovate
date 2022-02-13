@@ -36,6 +36,17 @@ describe('manager/npm/update/locked-dependency/package-lock/dep-constraints', ()
         )
       ).toEqual([{ constraint: '4.0.0', depType: 'dependencies' }]);
     });
+    it('skips non-matching direct dependency', () => {
+      expect(
+        findDepConstraints(
+          packageJson,
+          packageLockJson,
+          'express',
+          '4.4.0',
+          '4.5.0'
+        )
+      ).toHaveLength(0);
+    });
     it('finds direct devDependency', () => {
       const packageJsonDev = { ...packageJson };
       packageJsonDev.devDependencies = packageJsonDev.dependencies;
