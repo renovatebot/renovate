@@ -1,4 +1,4 @@
-import { id as githubReleaseDatasource } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { id as semverVersioning } from '../../versioning/semver';
@@ -18,7 +18,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     depName: 'batect/batect',
     commitMessageTopic: 'Batect',
     currentValue: match[1],
-    datasource: githubReleaseDatasource,
+    datasource: GithubReleasesDatasource.id,
     versioning: semverVersioning,
   };
 
