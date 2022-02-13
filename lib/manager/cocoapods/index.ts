@@ -1,5 +1,5 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
 import * as rubyVersioning from '../../versioning/ruby';
@@ -14,7 +14,7 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   GitTagsDatasource.id,
-  datasourceGithubTags.id,
+  GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   PodDatasource.id,
 ];
