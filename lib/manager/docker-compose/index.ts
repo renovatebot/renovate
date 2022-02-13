@@ -1,5 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { extractPackageFile } from './extract';
 
 const language = ProgrammingLanguage.Docker;
@@ -10,4 +10,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)docker-compose[^/]*\\.ya?ml$'],
 };
 
-export const supportedDatasources = [datasourceDocker.id];
+export const supportedDatasources = [DockerDatasource.id];

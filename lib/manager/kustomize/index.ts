@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -10,7 +10,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  datasourceDocker.id,
+  DockerDatasource.id,
   GitTagsDatasource.id,
   GithubTagsDatasource.id,
   HelmDatasource.id,
