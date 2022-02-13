@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 import type { TravisMatrixItem, TravisYaml } from './types';
@@ -19,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (doc && is.array(doc.node_js)) {
     deps = doc.node_js.map((currentValue) => ({
       depName: 'node',
-      datasource: datasourceGithubTags.id,
+      datasource: GithubTagsDatasource.id,
       lookupName: 'nodejs/node',
       currentValue: currentValue.toString(),
     }));
@@ -43,7 +43,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         item.node_js.forEach((currentValue) => {
           deps.push({
             depName: 'node',
-            datasource: datasourceGithubTags.id,
+            datasource: GithubTagsDatasource.id,
             lookupName: 'nodejs/node',
             currentValue: currentValue.toString(),
           });
@@ -51,7 +51,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else if (is.string(item.node_js)) {
         deps.push({
           depName: 'node',
-          datasource: datasourceGithubTags.id,
+          datasource: GithubTagsDatasource.id,
           lookupName: 'nodejs/node',
           currentValue: item.node_js.toString(),
         });

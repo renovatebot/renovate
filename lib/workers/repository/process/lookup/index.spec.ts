@@ -9,8 +9,8 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../datasource/docker';
 import { GitRefsDatasource } from '../../../../datasource/git-refs';
 import { GitDatasource } from '../../../../datasource/git-refs/base';
-import * as datasourceGithubReleases from '../../../../datasource/github-releases';
-import { id as datasourceGithubTagsId } from '../../../../datasource/github-tags';
+import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
+import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
 import { PackagistDatasource } from '../../../../datasource/packagist';
 import { PypiDatasource } from '../../../../datasource/pypi';
@@ -23,7 +23,6 @@ import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
-jest.mock('../../../../datasource/github-releases');
 
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
@@ -39,9 +38,6 @@ const vueJson = loadJsonFixture('vue.json', fixtureRoot);
 const webpackJson = loadJsonFixture('webpack.json', fixtureRoot);
 
 const docker = mocked(DockerDatasource.prototype);
-const githubReleases = mocked(datasourceGithubReleases);
-
-Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
 let config: LookupUpdateConfig;
 
@@ -811,21 +807,15 @@ describe('workers/repository/process/lookup/index', () => {
     it('should ignore unstable versions from datasource', async () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
-      config.datasource = datasourceGithubReleases.id;
-      githubReleases.getReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '1.4.4',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '2.1.0',
-            isStable: false,
-          },
-        ],
-      });
+      config.datasource = GithubReleasesDatasource.id;
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/some/action/releases?per_page=100')
+        .reply(200, [
+          { tag_name: '1.4.4' },
+          { tag_name: '2.0.0' },
+          { tag_name: '2.1.0', prerelease: true },
+        ]);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
         { newValue: '2.0.0', updateType: 'major' },
       ]);
@@ -834,28 +824,21 @@ describe('workers/repository/process/lookup/index', () => {
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
-      config.datasource = datasourceGithubReleases.id;
+      config.datasource = GithubReleasesDatasource.id;
       config.stabilityDays = 14;
       config.internalChecksFilter = 'strict';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
-      githubReleases.getReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '1.4.4',
-          },
-          {
-            version: '1.4.5',
-            releaseTimestamp: lastWeek.toISOString(),
-          },
-          {
-            version: '1.4.6',
-            releaseTimestamp: yesterday.toISOString(),
-          },
-        ],
-      });
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/some/action/releases?per_page=100')
+        .reply(200, [
+          { tag_name: '1.4.4' },
+          { tag_name: '1.4.5', published_at: lastWeek.toISOString() },
+          { tag_name: '1.4.6', published_at: yesterday.toISOString() },
+        ]);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newVersion).toBe('1.4.6');
@@ -865,28 +848,21 @@ describe('workers/repository/process/lookup/index', () => {
     it('should return pendingVersions', async () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
-      config.datasource = datasourceGithubReleases.id;
+      config.datasource = GithubReleasesDatasource.id;
       config.stabilityDays = 3;
       config.internalChecksFilter = 'strict';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
-      githubReleases.getReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '1.4.4',
-          },
-          {
-            version: '1.4.5',
-            releaseTimestamp: lastWeek.toISOString(),
-          },
-          {
-            version: '1.4.6',
-            releaseTimestamp: yesterday.toISOString(),
-          },
-        ],
-      });
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/some/action/releases?per_page=100')
+        .reply(200, [
+          { tag_name: '1.4.4' },
+          { tag_name: '1.4.5', published_at: lastWeek.toISOString() },
+          { tag_name: '1.4.6', published_at: yesterday.toISOString() },
+        ]);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newVersion).toBe('1.4.5');
@@ -1199,7 +1175,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
     it('handles github 404', async () => {
       config.depName = 'foo';
-      config.datasource = datasourceGithubTagsId;
+      config.datasource = GithubTagsDatasource.id;
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
       httpMock.scope('https://pypi.org').get('/pypi/foo/json').reply(404);

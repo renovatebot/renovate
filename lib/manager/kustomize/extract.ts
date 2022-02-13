@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
@@ -27,7 +27,7 @@ export function extractResource(base: string): PackageDependency | null {
   if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
     return {
       currentValue: match.groups.currentValue,
-      datasource: datasourceGitHubTags.id,
+      datasource: GithubTagsDatasource.id,
       depName: match.groups.project.replace('.git', ''),
     };
   }
