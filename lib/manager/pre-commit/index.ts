@@ -1,8 +1,11 @@
-import { id as githubTagsId } from '../../datasource/github-tags';
-import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [githubTagsId, gitlabTagsId];
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  GitlabTagsDatasource.id,
+];
 
 export const defaultConfig = {
   commitMessageTopic: 'pre-commit hook {{depName}}',

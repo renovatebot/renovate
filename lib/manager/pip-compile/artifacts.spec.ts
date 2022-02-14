@@ -2,9 +2,11 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
+import { Fixtures } from '../../../test/fixtures';
 import { git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
+import { logger } from '../../logger';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git/types';
@@ -159,5 +161,59 @@ describe('manager/pip-compile/artifacts', () => {
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  describe('constructPipCompileCmd()', () => {
+    it('returns default cmd for garbage', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          Fixtures.get('requirementsNoHeaders.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe('pip-compile requirements.in');
+    });
+
+    it('returns extracted common arguments (like those featured in the README)', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          Fixtures.get('requirementsWithHashes.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe(
+        'pip-compile --allow-unsafe --generate-hashes --output-file=requirements.txt requirements.in'
+      );
+    });
+
+    it('skips unknown arguments', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          Fixtures.get('requirementsWithUnknownArguments.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe('pip-compile --generate-hashes requirements.in');
+      expect(logger.trace).toHaveBeenCalledWith(
+        { argument: '--version' },
+        'pip-compile argument is not (yet) supported'
+      );
+    });
+
+    it('skips exploitable subcommands and files', () => {
+      expect(
+        pipCompile.constructPipCompileCmd(
+          Fixtures.get('requirementsWithExploitingArguments.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt'
+        )
+      ).toBe(
+        'pip-compile --generate-hashes --output-file=requirements.txt requirements.in'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { argument: '--output-file=/etc/shadow' },
+        'pip-compile was previously executed with an unexpected `--output-file` filename'
+      );
+    });
   });
 });
