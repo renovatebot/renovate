@@ -955,8 +955,8 @@ export async function clearRenovateRefs(): Promise<void> {
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(is.truthy);
 
-      const clearCmd = ['push', '--delete', 'origin', ...remoteRenovateRefs];
-      await git.raw(clearCmd);
+      const pushOpts = ['--delete', 'origin', ...remoteRenovateRefs];
+      await git.push(pushOpts);
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ err }, `Clear Renovate refs: error`);
     } finally {
