@@ -108,6 +108,16 @@ describe('datasource/deb/index', () => {
         expect(res.releases).toHaveLength(1);
       });
 
+      it('returns a valid version for the package `steam-devices` if release is used in the registryUrl', async () => {
+        // release is a synonym for suite
+        cfg.registryUrls = [
+          'http://ftp.debian.org/debian?release=stable&components=non-free&binaryArch=amd64',
+        ];
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeObject();
+        expect(res.releases).toHaveLength(1);
+      });
+
       it('returns null for an unknown package', async () => {
         cfg.depName = 'you-will-never-find-me';
         const res = await getPkgReleases(cfg);
