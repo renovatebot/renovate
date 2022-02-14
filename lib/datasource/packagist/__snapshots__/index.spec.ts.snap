@@ -79,6 +79,26 @@ Object {
       "releaseTimestamp": "2018-02-16T15:31:05.000Z",
       "version": "2.5",
     },
+    Object {
+      "gitRef": "v2.5.1",
+      "releaseTimestamp": "2019-03-19T11:43:38.000Z",
+      "version": "2.5.1",
+    },
+    Object {
+      "gitRef": "v2.5.2",
+      "releaseTimestamp": "2019-03-26T09:00:38.000Z",
+      "version": "2.5.2",
+    },
+    Object {
+      "gitRef": "v2.5.3",
+      "releaseTimestamp": "2019-03-28T15:20:43.000Z",
+      "version": "2.5.3",
+    },
+    Object {
+      "gitRef": "v2.5.4",
+      "releaseTimestamp": "2019-08-06T09:24:58.000Z",
+      "version": "2.5.4",
+    },
   ],
   "sourceUrl": "https://github.com/drewm/mailchimp-api",
 }
@@ -95,6 +115,16 @@ Array [
     },
     "method": "GET",
     "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "packagist.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://packagist.org/p2/drewm/mailchimp-api~dev.json",
   },
 ]
 `;
@@ -144,7 +174,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://packagist.org/p2/drewm/mailchip-api.json",
+    "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
   },
 ]
 `;
@@ -313,6 +343,26 @@ Object {
       "releaseTimestamp": "2018-02-16T15:31:05.000Z",
       "version": "2.5",
     },
+    Object {
+      "gitRef": "v2.5.1",
+      "releaseTimestamp": "2019-03-19T11:43:38.000Z",
+      "version": "2.5.1",
+    },
+    Object {
+      "gitRef": "v2.5.2",
+      "releaseTimestamp": "2019-03-26T09:00:38.000Z",
+      "version": "2.5.2",
+    },
+    Object {
+      "gitRef": "v2.5.3",
+      "releaseTimestamp": "2019-03-28T15:20:43.000Z",
+      "version": "2.5.3",
+    },
+    Object {
+      "gitRef": "v2.5.4",
+      "releaseTimestamp": "2019-08-06T09:24:58.000Z",
+      "version": "2.5.4",
+    },
   ],
   "sourceUrl": "https://github.com/drewm/mailchimp-api",
 }
@@ -329,6 +379,16 @@ Array [
     },
     "method": "GET",
     "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "packagist.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://packagist.org/p2/drewm/mailchimp-api~dev.json",
   },
 ]
 `;
