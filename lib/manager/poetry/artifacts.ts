@@ -107,7 +107,8 @@ function getSourceCredentialVars(
   const envVars: Record<string, string> = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = find({ url: source.url });
+    const matchingHostRule =
+      find({ hostType: 'pypi', url: source.url }) || find({ url: source.url });
     const formattedSourceName = source.name.toUpperCase();
     if (matchingHostRule.username) {
       envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_USERNAME`] =
