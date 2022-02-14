@@ -98,6 +98,21 @@ describe('datasource/deb/index', () => {
       });
     });
 
+    describe('without server response', () => {
+      beforeEach(() => {
+        httpMock
+          .scope('http://ftp.debian.org')
+          .get('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+          .reply(404);
+      });
+
+      it('returns null for the package', async () => {
+        cfg.depName = 'you-will-never-find-me';
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeNull();
+      });
+    });
+
     it('supports specifying a custom binary arch', async () => {
       httpMock
         .scope('http://ftp.debian.org')
