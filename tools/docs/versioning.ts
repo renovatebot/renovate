@@ -28,7 +28,7 @@ export async function generateVersioning(dist: string): Promise<void> {
     versioningContent += `**Ranges/Constraints:**\n\n`;
     if (supportsRanges) {
       versioningContent += `✅ Ranges are supported.\n\nValid \`rangeStrategy\` values are: ${(
-        supportedRangeStrategies || []
+        supportedRangeStrategies ?? []
       )
         .map((strategy: string) => `\`${strategy}\``)
         .join(', ')}\n\n`;

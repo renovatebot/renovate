@@ -166,6 +166,7 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum QualifierTypes {
   Alpha = 1,
   Beta,

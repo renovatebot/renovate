@@ -1,5 +1,5 @@
 import { PypiDatasource } from '../../datasource/pypi';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import pep440 from '../../versioning/pep440';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
@@ -64,7 +64,7 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
   content
-    .split('\n')
+    .split(newlineRegex)
     .map((line) => line.replace(regEx(/[;#].*$/), '').trimRight())
     .forEach((rawLine) => {
       let line = rawLine;

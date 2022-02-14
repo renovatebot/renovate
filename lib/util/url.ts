@@ -67,7 +67,11 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
   }
 }
 
-export function parseUrl(url: string): URL | null {
+export function parseUrl(url: string | undefined | null): URL | null {
+  if (!url) {
+    return null;
+  }
+
   try {
     return new URL(url);
   } catch (err) {

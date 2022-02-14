@@ -182,6 +182,14 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'globalExtends',
+    description:
+      'Configuration presets to use/extend for a self-hosted config.',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -695,6 +703,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'useBaseBranchConfig',
+    description:
+      'Whether to read configuration from baseBranches instead of only the default branch',
+    type: 'string',
+    allowedValues: ['merge', 'none'],
+    default: 'none',
+  },
+  {
     name: 'gitAuthor',
     description: 'Author to use for Git commits. Must conform to RFC5322.',
     type: 'string',
@@ -765,6 +781,17 @@ const options: RenovateOptions[] = [
       format: 'uri',
     },
     supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+  },
+  {
+    name: 'defaultRegistryUrls',
+    description:
+      'List of registry URLs to use as the default for a datasource.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    stage: 'branch',
+    cli: false,
+    env: false,
   },
   {
     name: 'registryUrls',
@@ -1150,6 +1177,7 @@ const options: RenovateOptions[] = [
       'replace',
       'widen',
       'update-lockfile',
+      'in-range-only',
     ],
     cli: false,
     env: false,
@@ -1306,6 +1334,13 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
+    name: 'stopUpdatingLabel',
+    description: 'Label to use to request the bot to stop updating a PR.',
+    type: 'string',
+    default: 'stop-updating',
+    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
+  },
+  {
     name: 'stabilityDays',
     description:
       'Number of days required before a new release is considered to be stabilized.',
@@ -1378,7 +1413,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
   // Automatic merging
   {
@@ -1958,6 +1993,7 @@ const options: RenovateOptions[] = [
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
     },
@@ -1967,7 +2003,7 @@ const options: RenovateOptions[] = [
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
-    default: ['Package', 'Type', 'Update', 'Change'],
+    default: ['Package', 'Type', 'Update', 'Change', 'Pending'],
   },
   {
     name: 'prBodyNotes',
@@ -2197,12 +2233,13 @@ const options: RenovateOptions[] = [
     description:
       'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
     type: 'object',
+    freeChoice: true,
     default: {
       ignoreTopic: 'Renovate Ignore Notification',
       ignoreMajor:
         'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{newMajor}}}.x releases. However, if you upgrade to {{{newMajor}}}.x manually then Renovate will reenable minor and patch updates automatically.',
       ignoreDigest:
-        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{depName}}}:{{{currentValue}}} digest updates. Digest updates will resume if you update the specified tag at any time.',
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.',
       ignoreOther:
         'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
     },

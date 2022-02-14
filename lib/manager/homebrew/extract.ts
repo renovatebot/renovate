@@ -1,6 +1,6 @@
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { UrlPathParsedResult } from './types';
@@ -156,18 +156,18 @@ export function extractPackageFile(content: string): PackageFile | null {
     repoName = urlPathResult.repoName;
   } else {
     logger.debug('Error: Unsupported URL field');
-    skipReason = SkipReason.UnsupportedUrl;
+    skipReason = 'unsupported-url';
   }
   const sha256 = extractSha256(cleanContent);
   if (!sha256 || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
-    skipReason = SkipReason.InvalidSha256;
+    skipReason = 'invalid-sha256';
   }
   const dep: PackageDependency = {
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
-    datasource: datasourceGithubTags.id,
+    datasource: GithubTagsDatasource.id,
   };
   if (skipReason) {
     dep.skipReason = skipReason;

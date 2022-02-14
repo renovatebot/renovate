@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { HelmsmanDocument } from './types';
@@ -20,26 +19,26 @@ function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
   }
 
   if (!anApp.version) {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
     return dep;
   }
   dep.currentValue = anApp.version;
 
   const regexResult = chartRegex.exec(anApp.chart);
   if (!regexResult) {
-    dep.skipReason = SkipReason.InvalidUrl;
+    dep.skipReason = 'invalid-url';
     return dep;
   }
 
   if (!is.nonEmptyString(regexResult.groups.lookupName)) {
-    dep.skipReason = SkipReason.InvalidName;
+    dep.skipReason = 'invalid-name';
     return dep;
   }
   dep.lookupName = regexResult.groups.lookupName;
 
   const registryUrl = doc.helmRepos[regexResult.groups.registryRef];
   if (!is.nonEmptyString(registryUrl)) {
-    dep.skipReason = SkipReason.NoRepository;
+    dep.skipReason = 'no-repository';
     return dep;
   }
   dep.registryUrls = [registryUrl];

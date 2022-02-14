@@ -1,3 +1,4 @@
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
@@ -8,3 +9,5 @@ export const defaultConfig = {
   commitMessageExtra:
     'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}',
 };
+
+export const supportedDatasources = [GithubTagsDatasource.id];

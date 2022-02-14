@@ -1,6 +1,5 @@
-import * as datasourceNuget from '../../../datasource/nuget';
+import { NugetDatasource } from '../../../datasource/nuget';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import type { PackageDependency, PackageFile } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
 
@@ -31,7 +30,7 @@ export function extractMsbuildGlobalManifest(
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
-      skipReason: SkipReason.UnsupportedDatasource,
+      skipReason: 'unsupported-datasource',
     });
   }
 
@@ -42,7 +41,7 @@ export function extractMsbuildGlobalManifest(
         depType: 'msbuild-sdk',
         depName,
         currentValue,
-        datasource: datasourceNuget.id,
+        datasource: NugetDatasource.id,
       };
 
       deps.push(dep);

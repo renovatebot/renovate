@@ -4,6 +4,7 @@ import { getLockedDependencies } from './get-locked';
 jest.mock('../../../../../util/fs');
 
 const packageLockJson = loadJsonFixture('package-lock.json');
+const bundledPackageLockJson = loadJsonFixture('bundled.package-lock.json');
 
 describe('manager/npm/update/locked-dependency/package-lock/get-locked', () => {
   describe('getLockedDependencies()', () => {
@@ -32,6 +33,25 @@ describe('manager/npm/update/locked-dependency/package-lock/get-locked', () => {
         {
           resolved: 'https://registry.npmjs.org/send/-/send-0.2.0.tgz',
           version: '0.2.0',
+        },
+      ]);
+    });
+    it('finds any version', () => {
+      expect(getLockedDependencies(packageLockJson, 'send', null)).toHaveLength(
+        2
+      );
+    });
+    it('finds bundled dependency', () => {
+      expect(
+        getLockedDependencies(bundledPackageLockJson, 'ansi-regex', '3.0.0')
+      ).toMatchSnapshot([
+        {
+          bundled: true,
+          dev: true,
+          integrity: 'sha1-7QMXwyIGT3lGbAKWa922Bas32Zg=',
+          resolved:
+            'https://registry.npmjs.org/ansi-regex/-/ansi-regex-3.0.0.tgz',
+          version: '3.0.0',
         },
       ]);
     });

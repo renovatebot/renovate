@@ -1,10 +1,10 @@
+import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../../../manager/types';
-import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
@@ -16,6 +16,9 @@ async function fetchDepUpdates(
 ): Promise<PackageDependency> {
   let dep = clone(indep);
   dep.updates = [];
+  if (!is.nonEmptyString(dep.depName?.trim())) {
+    dep.skipReason = 'missing-depname';
+  }
   if (dep.skipReason) {
     return dep;
   }
@@ -27,10 +30,10 @@ async function fetchDepUpdates(
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');
-    dep.skipReason = SkipReason.Ignored;
+    dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: depName }, 'Dependency is disabled');
-    dep.skipReason = SkipReason.Disabled;
+    dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
       dep = {

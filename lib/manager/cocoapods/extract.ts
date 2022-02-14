@@ -1,11 +1,10 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
-import * as datasourcePod from '../../datasource/pod';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { PodDatasource } from '../../datasource/pod';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
@@ -62,8 +61,8 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     if (account && repo) {
       const datasource =
         platform === 'github'
-          ? datasourceGithubTags.id
-          : datasourceGitlabTags.id;
+          ? GithubTagsDatasource.id
+          : GitlabTagsDatasource.id;
       return {
         datasource,
         depName,
@@ -87,7 +86,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const lines: string[] = content.split('\n');
+  const lines: string[] = content.split(newlineRegex);
 
   const registryUrls: string[] = [];
 
@@ -113,14 +112,14 @@ export async function extractPackageFile(
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: SkipReason.UnknownVersion,
+        skipReason: 'unknown-version',
       };
 
       if (currentValue) {
         dep = {
           depName,
           groupName,
-          datasource: datasourcePod.id,
+          datasource: PodDatasource.id,
           currentValue,
           managerData,
           registryUrls,
@@ -132,14 +131,14 @@ export async function extractPackageFile(
           dep = {
             depName,
             groupName,
-            skipReason: SkipReason.GitDependency,
+            skipReason: 'git-dependency',
           };
         }
       } else if (path) {
         dep = {
           depName,
           groupName,
-          skipReason: SkipReason.PathDependency,
+          skipReason: 'path-dependency',
         };
       }
 

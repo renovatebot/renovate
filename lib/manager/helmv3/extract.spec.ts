@@ -1,5 +1,5 @@
 import { fs } from '../../../test/util';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -79,7 +79,7 @@ describe('manager/helmv3/extract', () => {
       dependencies:
       - name: library
         version: 0.1.0
-        repository: oci://ghcr.io/ankitabhopatkar13/library
+        repository: oci://ghcr.io/ankitabhopatkar13
         import-values:
           - defaults
       - name: postgresql
@@ -97,7 +97,7 @@ describe('manager/helmv3/extract', () => {
         deps: [
           {
             depName: 'library',
-            datasource: datasourceDocker.id,
+            datasource: DockerDatasource.id,
             currentValue: '0.1.0',
           },
           { depName: 'postgresql', currentValue: '0.8.1' },
@@ -119,12 +119,16 @@ describe('manager/helmv3/extract', () => {
         - name: example
           version: 1.0.0
           repository: alias:longalias
+        - name: oci-example
+          version: 2.2.0
+          repository: alias:ociRegistry
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
         aliases: {
           placeholder: 'https://my-registry.gcr.io/',
           longalias: 'https://registry.example.com/',
+          ociRegistry: 'oci://quay.example.com/organization',
         },
       });
       expect(result).not.toBeNull();

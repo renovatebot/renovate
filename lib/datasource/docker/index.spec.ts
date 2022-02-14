@@ -4,10 +4,13 @@ import * as httpMock from '../../../test/http-mock';
 import { mocked, partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
-import { id } from './common';
+import { Http } from '../../util/http';
 import { MediaType } from './types';
+import { DockerDatasource, getAuthHeaders, getRegistryRepository } from '.';
 
 const hostRules = mocked(_hostRules);
+
+const http = new Http(DockerDatasource.id);
 
 jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
@@ -53,6 +56,120 @@ describe('datasource/docker/index', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  describe('getRegistryRepository', () => {
+    it('handles local registries', () => {
+      const res = getRegistryRepository(
+        'registry:5000/org/package',
+        'https://index.docker.io'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "org/package",
+          "registryHost": "https://registry:5000",
+        }
+      `);
+    });
+    it('supports registryUrls', () => {
+      const res = getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'https://my.local.registry/prefix'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
+        }
+      `);
+    });
+    it('supports http registryUrls', () => {
+      const res = getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'http://my.local.registry/prefix'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "http://my.local.registry",
+        }
+      `);
+    });
+    it('supports schemeless registryUrls', () => {
+      const res = getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'my.local.registry/prefix'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
+        }
+      `);
+    });
+  });
+  describe('getAuthHeaders', () => {
+    beforeEach(() => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+      hostRules.hosts.mockReturnValue([]);
+    });
+
+    it('returns "authType token" if both provided', async () => {
+      hostRules.find.mockReturnValue({
+        authType: 'some-authType',
+        token: 'some-token',
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toMatchInlineSnapshot(`
+Object {
+  "authorization": "some-authType some-token",
+}
+`);
+    });
+
+    it('returns "Bearer token" if only token provided', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'some-token',
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toMatchInlineSnapshot(`
+Object {
+  "authorization": "Bearer some-token",
+}
+`);
+    });
+
+    it('fails', async () => {
+      httpMock.clear(false);
+
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {});
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toBeNull();
+    });
   });
 
   describe('getDigest', () => {
@@ -423,7 +540,7 @@ describe('datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(403);
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
         registryUrls: ['https://docker.io'],
       });
@@ -453,7 +570,7 @@ describe('datasource/docker/index', () => {
         .get('/user/9287/repos?page=3&per_page=100')
         .reply(200, { tags: ['latest'] }, {});
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
@@ -474,7 +591,7 @@ describe('datasource/docker/index', () => {
         .get('/node/manifests/1.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -497,7 +614,7 @@ describe('datasource/docker/index', () => {
         .get('/v2/bitnami/redis/manifests/5.0.12')
         .reply(200, '', {});
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
@@ -513,13 +630,11 @@ describe('datasource/docker/index', () => {
         )
         .reply(500);
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
-      await expect(getPkgReleases(config)).rejects.toThrow(
-        'external-host-error'
-      );
+      await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('uses lower tag limit for ECR deps', async () => {
@@ -537,12 +652,281 @@ describe('datasource/docker/index', () => {
         .reply(200);
       expect(
         await getPkgReleases({
-          datasource: id,
+          datasource: DockerDatasource.id,
           depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
         })
       ).toEqual({
         registryUrl: 'https://123456789.dkr.ecr.us-east-1.amazonaws.com',
         releases: [],
+      });
+    });
+
+    describe('when making requests that interact with an ECR proxy', () => {
+      it('resolves requests to ECR proxy', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                  message:
+                    "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                },
+              ],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          )
+          .get('/')
+          .reply(200)
+          .get('/node/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {})
+          .get('/node/manifests/some')
+          .reply(200, {
+            schemaVersion: 2,
+            mediaType: MediaType.manifestV2,
+            config: { digest: 'some-config-digest' },
+          })
+          .get('/')
+          .reply(200)
+          .get('/node/blobs/some-config-digest')
+          .reply(200, {
+            config: {
+              Labels: {
+                'org.opencontainers.image.source':
+                  'https://github.com/renovatebot/renovate',
+              },
+            },
+          });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toEqual({
+          registryUrl: 'https://ecr-proxy.company.com',
+          releases: [],
+          sourceUrl: 'https://github.com/renovatebot/renovate',
+        });
+      });
+
+      it('returns null when it receives ECR max results error more than once', async () => {
+        const maxResultsErrorBody = {
+          errors: [
+            {
+              code: 'UNSUPPORTED',
+              message:
+                "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+            },
+          ],
+        };
+
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          })
+          .get('/node/tags/list?n=1000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the response code is not 405', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            401,
+            {
+              body: {
+                errors: [
+                  {
+                    code: 'UNSUPPORTED',
+                    message:
+                      "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                  },
+                ],
+              },
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when no response headers are present', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(405, {
+            errors: [
+              {
+                code: 'UNSUPPORTED',
+                message:
+                  "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+              },
+            ],
+          });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the expected docker header is missing', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                  message:
+                    "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                },
+              ],
+            },
+            {
+              'Irrelevant-Header': 'irrelevant-value',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the response body does not contain an errors object', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {},
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the response body does not contain errors', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the the response errors does not have a message property', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                },
+              ],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the the error message does not have the expected max results error', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                  message: 'Some unrelated error message',
+                },
+              ],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
       });
     });
 
@@ -568,7 +952,7 @@ describe('datasource/docker/index', () => {
         )
         .reply(200, { token: 'test' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
       });
       expect(res.releases).toHaveLength(1);
@@ -596,7 +980,7 @@ describe('datasource/docker/index', () => {
         )
         .reply(200, { token: 'test' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'docker.io/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -622,7 +1006,7 @@ describe('datasource/docker/index', () => {
         .get('/kubernetes-dashboard-amd64/manifests/1.0.0')
         .reply(200);
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
       expect(res.releases).toHaveLength(1);
@@ -636,7 +1020,7 @@ describe('datasource/docker/index', () => {
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'my/node',
       });
       expect(res).toBeNull();
@@ -661,7 +1045,7 @@ describe('datasource/docker/index', () => {
         .get('/token?service=registry.docker.io&scope=repository:my/node:pull')
         .reply(200, { token: 'some-token ' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'my/node',
         registryUrls: ['https://index.docker.io/'],
       });
@@ -674,7 +1058,7 @@ describe('datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -714,7 +1098,7 @@ describe('datasource/docker/index', () => {
           },
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -750,7 +1134,7 @@ describe('datasource/docker/index', () => {
           },
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -770,7 +1154,7 @@ describe('datasource/docker/index', () => {
           mediaType: MediaType.manifestV1,
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -787,7 +1171,7 @@ describe('datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {});
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -830,7 +1214,7 @@ describe('datasource/docker/index', () => {
           config: {},
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();

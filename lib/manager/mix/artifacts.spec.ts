@@ -94,7 +94,11 @@ describe('manager/mix/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toEqual([{ file: { contents: 'New mix.lock', name: 'mix.lock' } }]);
+    ).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -129,7 +133,7 @@ describe('manager/mix/artifacts', () => {
 
     const [updateResult] = result;
     expect(updateResult).toEqual({
-      file: { contents: 'New mix.lock', name: 'mix.lock' },
+      file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
     });
 
     const [, packageUpdateCommand] = execSnapshots;

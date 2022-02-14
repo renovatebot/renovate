@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { Doc } from './types';
@@ -38,21 +37,25 @@ export function extractPackageFile(
 
     deps = doc.releases.map((dep) => {
       let depName = dep.chart;
-      let repoName = null;
+      let repoName: string | null = null;
 
       if (!is.string(dep.chart)) {
         return {
           depName: dep.name,
-          skipReason: SkipReason.InvalidName,
+          skipReason: 'invalid-name',
         };
       }
 
       // If starts with ./ is for sure a local path
       if (dep.chart.startsWith('./')) {
         return {
-          depName,
-          skipReason: SkipReason.LocalChart,
+          depName: dep.name,
+          skipReason: 'local-chart',
         };
+      }
+
+      if (is.number(dep.version)) {
+        dep.version = String(dep.version);
       }
 
       if (dep.chart.includes('/')) {
@@ -63,38 +66,35 @@ export function extractPackageFile(
         repoName = dep.chart;
       }
 
+      if (!is.string(dep.version)) {
+        return {
+          depName,
+          skipReason: 'invalid-version',
+        };
+      }
+
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
         registryUrls: [aliases[repoName]]
           .concat([config.aliases[repoName]])
-          .filter(Boolean),
+          .filter(is.string),
       };
-
-      // If version is null is probably a local chart
-      if (!res.currentValue) {
-        res.skipReason = SkipReason.LocalChart;
-      }
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
       if (!isValidChartName(res.depName)) {
-        res.skipReason = SkipReason.UnsupportedChartType;
+        res.skipReason = 'unsupported-chart-type';
       }
 
       // Skip in case we cannot locate the registry
       if (is.emptyArray(res.registryUrls)) {
-        res.skipReason = SkipReason.UnknownRegistry;
+        res.skipReason = 'unknown-registry';
       }
 
       return res;
     });
   }
 
-  if (!deps.length) {
-    logger.debug({ fileName }, 'helmfile.yaml has no releases');
-    return null;
-  }
-
-  return { deps, datasource: HelmDatasource.id } as PackageFile;
+  return deps.length ? { deps, datasource: HelmDatasource.id } : null;
 }

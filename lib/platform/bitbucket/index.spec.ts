@@ -1,7 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
-import { logger as _logger } from '../../logger';
+import type { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
+import type * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import type { Platform, RepoParams } from '../types';
 
@@ -16,22 +16,6 @@ const pr = {
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
 };
-
-const diff = `
-diff --git a/requirements.txt b/requirements.txt
-index 7e08d70..f5283ca 100644
---- a/requirements.txt
-+++ b/requirements.txt
-@@ -7,7 +7,7 @@ docutils==0.12
-enum34==1.1.6
-futures==3.2.0
-isort==4.3.4
--jedi==0.11.1
-+jedi==0.12.1
-lazy-object-proxy==1.3.1
-lxml==3.6.0
-mccabe==0.6.1
-`;
 
 describe('platform/bitbucket/index', () => {
   let bitbucket: Platform;
@@ -164,9 +148,7 @@ describe('platform/bitbucket/index', () => {
         )
         .reply(200, { values: [pr] })
         .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff);
+        .reply(200, pr);
 
       expect(await bitbucket.getBranchPr('branch')).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -584,8 +566,6 @@ describe('platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff)
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await bitbucket.addReviewers(5, ['someuser', 'someotheruser']);
@@ -699,11 +679,7 @@ describe('platform/bitbucket/index', () => {
   describe('getPr()', () => {
     it('exists', async () => {
       const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff);
+      scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, pr);
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -722,14 +698,9 @@ describe('platform/bitbucket/index', () => {
           state: 'OPEN',
           created_on: '2018-07-02T07:02:25.275030+00:00',
         })
-        .get('/2.0/repositories/some/repo/pullrequests/3/diff')
-        .reply(200, ' ')
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .twice()
-        .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .twice()
-        .reply(200, diff);
+        .reply(200, pr);
       expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
       expect(await bitbucket.getPr(5)).toMatchSnapshot();

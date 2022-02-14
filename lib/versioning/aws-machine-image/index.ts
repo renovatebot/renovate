@@ -1,5 +1,5 @@
 import { regEx } from '../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'aws-machine-image';
@@ -24,7 +24,7 @@ class AwsMachineImageVersioningApi extends GenericVersioningApi {
   }
 
   protected override _compare(_version: string, _other: string): number {
-    return 0;
+    return 1;
   }
 }
 

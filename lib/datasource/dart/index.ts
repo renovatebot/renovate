@@ -1,4 +1,4 @@
-import { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { DartResult } from './types';
@@ -18,10 +18,14 @@ export class DartDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let result: ReleaseResult = null;
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+    let result: ReleaseResult | null = null;
     const pkgUrl = `${registryUrl}api/packages/${lookupName}`;
 
-    let raw: HttpResponse<DartResult> = null;
+    let raw: HttpResponse<DartResult> | null = null;
     try {
       raw = await this.http.getJson<DartResult>(pkgUrl);
     } catch (err) {
@@ -31,13 +35,14 @@ export class DartDatasource extends Datasource {
     const body = raw?.body;
     if (body) {
       const { versions, latest } = body;
-      if (versions && latest) {
-        result = {
-          releases: body.versions.map(({ version, published }) => ({
-            version,
-            releaseTimestamp: published,
-          })),
-        };
+      const releases = versions
+        ?.filter(({ retracted }) => !retracted)
+        ?.map(({ version, published }) => ({
+          version,
+          releaseTimestamp: published,
+        }));
+      if (releases && latest) {
+        result = { releases };
 
         const pubspec = latest.pubspec;
         if (pubspec) {

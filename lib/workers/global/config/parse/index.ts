@@ -1,5 +1,5 @@
 import * as defaultsParser from '../../../../config/defaults';
-import { AllConfig } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../manager';

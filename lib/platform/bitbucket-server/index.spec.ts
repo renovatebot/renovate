@@ -5,7 +5,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
+import type * as _git from '../../util/git';
 import type { Platform } from '../types';
 
 function sshLink(projectKey: string, repositorySlug: string): string {
@@ -487,11 +487,6 @@ describe('platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .twice()
-            .reply(200, { conflicted: false })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
@@ -509,11 +504,6 @@ describe('platform/bitbucket-server/index', () => {
           expect.assertions(1);
           const scope = await initRepo();
           scope
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .twice()
-            .reply(200, { conflicted: false })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -559,10 +549,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -582,10 +568,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -603,10 +585,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -643,10 +621,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1136,11 +1110,7 @@ describe('platform/bitbucket-server/index', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(
             await bitbucket.getBranchPr('userName1/pullRequest5')
@@ -1279,11 +1249,7 @@ describe('platform/bitbucket-server/index', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1297,19 +1263,10 @@ describe('platform/bitbucket-server/index', () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge`
-            )
-            .reply(200, { conflicted: false })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .twice()
-            .reply(200, { conflicted: false });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
@@ -1348,10 +1305,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1372,10 +1325,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1401,10 +1350,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1457,10 +1402,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1480,10 +1421,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1510,10 +1447,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
               (body) => body.reviewers.length === 0
@@ -1537,10 +1470,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1559,10 +1488,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1583,10 +1508,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1635,10 +1556,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1660,10 +1577,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1685,10 +1598,6 @@ describe('platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
-            )
-            .reply(200, { conflicted: false })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -2112,9 +2021,9 @@ Followed by some information.
 
         it('returns file content in json5 format', async () => {
           const json5Data = `
-          { 
+          {
             // json5 comment
-            foo: 'bar' 
+            foo: 'bar'
           }
         `;
           const scope = await initRepo();

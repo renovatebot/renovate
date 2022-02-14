@@ -19,8 +19,10 @@
     "lib": ["es2020"],
     "types": ["node", "jest", "jest-extended", "expect-more-jest"],
     "allowJs": true,
-    "checkJs": true
+    "checkJs": true,
+    "importsNotUsedAsValues": "error"
   },
+  "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
     "node_modules",
     "./.cache",

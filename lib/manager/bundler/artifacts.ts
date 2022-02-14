@@ -5,12 +5,11 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
@@ -18,7 +17,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
-import { add } from '../../util/sanitize';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
@@ -91,40 +90,19 @@ export async function updateArtifacts(
     return null;
   }
 
-  if (config.isLockFileMaintenance) {
-    await deleteLocalFile(lockFileName);
-  }
-
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     let cmd;
 
     if (config.isLockFileMaintenance) {
-      cmd = 'bundle lock';
+      cmd = 'bundler lock --update';
     } else {
-      cmd = `bundle lock --update ${updatedDeps
+      cmd = `bundler lock --update ${updatedDeps
         .map((dep) => dep.depName)
         .map(quote)
         .join(' ')}`;
     }
-
-    let bundlerVersion = '';
-    const { bundler } = constraints;
-    if (bundler) {
-      if (isValid(bundler)) {
-        logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
-        bundlerVersion = ` -v ${quote(bundler)}`;
-      } else {
-        logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
-      }
-    } else {
-      logger.debug('No bundler version constraint found - will use latest');
-    }
-    const preCommands = [
-      'ruby --version',
-      `gem install bundler${bundlerVersion}`,
-    ];
 
     const bundlerHostRules = findAllAuthenticatable({
       hostType: 'rubygems',
@@ -147,12 +125,15 @@ export async function updateArtifacts(
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
           // sanitize the authentication
-          add(creds);
+          addSecretForSanitizing(creds);
         }
         return authCommands;
       },
       []
     );
+
+    const { bundler } = constraints || {};
+    const preCommands = ['ruby --version'];
 
     // Bundler < 2 has a different config option syntax than >= 2
     if (
@@ -185,6 +166,12 @@ export async function updateArtifacts(
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
       },
+      toolConstraints: [
+        {
+          toolName: 'bundler',
+          constraint: bundler,
+        },
+      ],
       preCommands,
     };
     await exec(cmd, execOptions);
@@ -198,7 +185,8 @@ export async function updateArtifacts(
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: lockFileContent,
         },
       },

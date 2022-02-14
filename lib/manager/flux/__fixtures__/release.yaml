@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  releaseName: sealed-secrets-controller
+  chart:
+    spec:
+      chart: sealed-secrets
+      sourceRef:
+        kind: HelmRepository
+        name: sealed-secrets
+        namespace: kube-system
+      version: "2.0.2"
+  interval: 1h0m0s
+  values:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi

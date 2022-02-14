@@ -6,7 +6,7 @@ import type {
 } from '../config/types';
 import type { ProgrammingLanguage } from '../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../types';
-import type { File } from '../util/git/types';
+import type { FileChange } from '../util/git/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -201,7 +201,7 @@ export interface ArtifactError {
 
 export interface UpdateArtifactsResult {
   artifactError?: ArtifactError;
-  file?: File;
+  file?: FileChange;
 }
 
 export interface UpdateArtifact {
@@ -229,6 +229,7 @@ export interface UpdateLockedConfig {
   currentVersion?: string;
   newVersion?: string;
   allowParentUpdates?: boolean;
+  allowHigherOrRemoved?: boolean;
 }
 
 export interface UpdateLockedResult {
@@ -245,6 +246,8 @@ export interface ManagerApi extends ModuleApi {
   defaultConfig: Record<string, unknown>;
   language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
+
+  supportedDatasources: string[];
 
   bumpPackageVersion?(
     content: string,
@@ -284,7 +287,7 @@ export interface ManagerApi extends ModuleApi {
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>,
     ManagerData<T> {
-  updatedPackageFiles?: File[];
+  updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
   ignoreScripts?: boolean;

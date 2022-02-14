@@ -3,7 +3,8 @@ The `regex` manager is designed to allow users to manually configure Renovate fo
 This manager is unique in Renovate in that:
 
 - It is configurable via regex named capture groups
-- Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository.
+- Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository
+- It can extract any `datasource`
 
 ### Required Fields
 
@@ -40,9 +41,10 @@ ENV YARN_VERSION=1.19.1
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 ```
 
-You would need to capture the `currentValue` using a named capture group, like so: `ENV YARN_VERSION=(?<currentValue>.*?)\n`.
+You would need to capture the `currentValue` using a named capture group, like so: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`.
 
-If you're looking for an online regex testing tool that supports capture groups, try [https://regex101.com/](https://regex101.com/).
+If you're looking for an online regex testing tool that supports capture groups, try [https://regex101.com/](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
+Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g `\n\s` --> `\\n\\s`.
 
 ### Configuration templates
 
@@ -53,7 +55,7 @@ In many cases, named capture groups alone won't be enough and you'll need to con
   "regexManagers": [
     {
       "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\n"],
+      "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
       "depNameTemplate": "yarn",
       "datasourceTemplate": "npm"
     }

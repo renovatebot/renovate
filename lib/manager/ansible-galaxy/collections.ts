@@ -1,7 +1,6 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
-import { SkipReason } from '../../types';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -40,7 +39,7 @@ function interpretLine(
     }
     default: {
       // fail if we find an unexpected key
-      localDependency.skipReason = SkipReason.Unsupported;
+      localDependency.skipReason = 'unsupported';
     }
   }
 }
@@ -54,7 +53,7 @@ function handleGitDep(
   if (nameMatch) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
-      dep.datasource = datasourceGithubTags.id;
+      dep.datasource = GithubTagsDatasource.id;
     } else {
       dep.datasource = GitTagsDatasource.id;
     }
@@ -100,7 +99,7 @@ function finalize(dependency: PackageDependency): boolean {
       handleGitDep(dep, nameMatch);
       break;
     case 'file':
-      dep.skipReason = SkipReason.LocalDependency;
+      dep.skipReason = 'local-dependency';
       break;
     case null:
       // try to find out type based on source
@@ -113,15 +112,15 @@ function finalize(dependency: PackageDependency): boolean {
         dep.depName = dep.managerData.name;
         break;
       }
-      dep.skipReason = SkipReason.NoSourceMatch;
+      dep.skipReason = 'no-source-match';
       break;
     default:
-      dep.skipReason = SkipReason.Unsupported;
+      dep.skipReason = 'unsupported';
       return true;
   }
 
   if (!dependency.currentValue && !dep.skipReason) {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
   }
   return true;
 }

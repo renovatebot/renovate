@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -28,7 +27,7 @@ export function extractResource(base: string): PackageDependency | null {
   if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
     return {
       currentValue: match.groups.currentValue,
-      datasource: datasourceGitHubTags.id,
+      datasource: GithubTagsDatasource.id,
       depName: match.groups.project.replace('.git', ''),
     };
   }
@@ -57,7 +56,7 @@ export function extractImage(image: Image): PackageDependency | null {
       depName,
       currentValue: newTag,
       currentDigest: digest,
-      skipReason: SkipReason.InvalidDependencySpecification,
+      skipReason: 'invalid-dependency-specification',
     };
   }
 
@@ -66,12 +65,12 @@ export function extractImage(image: Image): PackageDependency | null {
       return {
         depName,
         currentValue: digest,
-        skipReason: SkipReason.InvalidValue,
+        skipReason: 'invalid-value',
       };
     }
 
     return {
-      datasource: datasourceDocker.id,
+      datasource: DockerDatasource.id,
       depName,
       currentValue: nameDep.currentValue,
       currentDigest: digest,
@@ -84,14 +83,14 @@ export function extractImage(image: Image): PackageDependency | null {
       return {
         depName,
         currentValue: newTag,
-        skipReason: SkipReason.InvalidValue,
+        skipReason: 'invalid-value',
       };
     }
 
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,
-      datasource: datasourceDocker.id,
+      datasource: DockerDatasource.id,
       replaceString: newTag,
     };
   }
@@ -99,7 +98,7 @@ export function extractImage(image: Image): PackageDependency | null {
   if (image.newName) {
     return {
       ...nameDep,
-      datasource: datasourceDocker.id,
+      datasource: DockerDatasource.id,
       replaceString: image.newName,
     };
   }

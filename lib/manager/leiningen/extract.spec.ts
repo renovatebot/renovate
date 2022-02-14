@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { ClojureDatasource } from '../../datasource/clojure';
 import {
   extractFromVectors,
@@ -7,7 +7,7 @@ import {
   trimAtKey,
 } from './extract';
 
-const leinProjectClj = loadFixture(`project.clj`);
+const leinProjectClj = Fixtures.get(`project.clj`);
 
 describe('manager/leiningen/extract', () => {
   it('trimAtKey', () => {

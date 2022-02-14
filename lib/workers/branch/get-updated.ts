@@ -4,15 +4,15 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import type { ArtifactError, PackageDependency } from '../../manager/types';
 import { getFile } from '../../util/git';
-import { File } from '../../util/git/types';
+import type { FileAddition, FileChange } from '../../util/git/types';
 import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
   reuseExistingBranch?: boolean;
-  updatedPackageFiles: File[];
-  updatedArtifacts: File[];
+  updatedPackageFiles: FileChange[];
+  updatedArtifacts: FileChange[];
 }
 
 export async function getUpdatedPackageFiles(
@@ -75,6 +75,7 @@ export async function getUpdatedPackageFiles(
         packageFileContent,
         lockFileContent,
         allowParentUpdates: true,
+        allowHigherOrRemoved: true,
       });
       if (reuseExistingBranch && status !== 'already-updated') {
         logger.debug(
@@ -88,6 +89,9 @@ export async function getUpdatedPackageFiles(
       }
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
+      }
+      if (status === 'update-failed' || status === 'unsupported') {
+        upgrade.remediationNotPossible = true;
       }
     } else if (upgrade.isLockfileUpdate) {
       if (updateLockedDependency) {
@@ -213,21 +217,24 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
-  const updatedPackageFiles = Object.keys(updatedFileContents).map((name) => ({
-    name,
+  const updatedPackageFiles: FileAddition[] = Object.keys(
+    updatedFileContents
+  ).map((name) => ({
+    type: 'addition',
+    path: name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts: File[] = [];
+  const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   for (const packageFile of updatedPackageFiles) {
-    const manager = packageFileManagers[packageFile.name];
-    const updatedDeps = packageFileUpdatedDeps[packageFile.name];
+    const manager = packageFileManagers[packageFile.path];
+    const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const updateArtifacts = get(manager, 'updateArtifacts');
     if (updateArtifacts) {
       const results = await updateArtifacts({
-        packageFileName: packageFile.name,
+        packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents,
+        newPackageFileContent: packageFile.contents.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
@@ -242,21 +249,22 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
-  const nonUpdatedPackageFiles = Object.keys(nonUpdatedFileContents).map(
-    (name) => ({
-      name,
-      contents: nonUpdatedFileContents[name],
-    })
-  );
+  const nonUpdatedPackageFiles: FileAddition[] = Object.keys(
+    nonUpdatedFileContents
+  ).map((name) => ({
+    type: 'addition',
+    path: name,
+    contents: nonUpdatedFileContents[name],
+  }));
   for (const packageFile of nonUpdatedPackageFiles) {
-    const manager = packageFileManagers[packageFile.name];
-    const updatedDeps = packageFileUpdatedDeps[packageFile.name];
+    const manager = packageFileManagers[packageFile.path];
+    const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const updateArtifacts = get(manager, 'updateArtifacts');
     if (updateArtifacts) {
       const results = await updateArtifacts({
-        packageFileName: packageFile.name,
+        packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents,
+        newPackageFileContent: packageFile.contents.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {

@@ -1,9 +1,8 @@
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
@@ -43,7 +42,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.depType = 'module';
     dep.depName = 'github.com/' + dep.lookupName;
     dep.currentValue = githubRefMatch.groups.tag;
-    dep.datasource = datasourceGithubTags.id;
+    dep.datasource = GithubTagsDatasource.id;
   } else if (bitbucketRefMatch) {
     dep.depType = 'module';
     dep.depName =
@@ -69,7 +68,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
   } else if (dep.managerData.source) {
     const moduleParts = dep.managerData.source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
-      dep.skipReason = SkipReason.Local;
+      dep.skipReason = 'local';
     } else if (moduleParts.length >= 3) {
       const hostnameMatch = hostnameMatchRegex.exec(dep.managerData.source);
       if (hostnameMatch) {
@@ -81,6 +80,6 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     }
   } else {
     logger.debug({ dep }, 'terraform dep has no source');
-    dep.skipReason = SkipReason.NoSource;
+    dep.skipReason = 'no-source';
   }
 }

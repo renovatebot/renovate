@@ -1,4 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
+import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
@@ -13,3 +14,5 @@ export const defaultConfig = {
     '(^|\\/)global\\.json$',
   ],
 };
+
+export const supportedDatasources = [NugetDatasource.id];

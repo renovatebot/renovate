@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import { HostRule } from '../types';
+import type { HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { parseUrl, validateUrl } from './url';
@@ -54,14 +54,14 @@ export function add(params: HostRule): void {
   confidentialFields.forEach((field) => {
     const secret = rule[field];
     if (is.string(secret) && secret.length > 3) {
-      sanitize.add(secret);
+      sanitize.addSecretForSanitizing(secret);
     }
   });
   if (rule.username && rule.password) {
     const secret = Buffer.from(`${rule.username}:${rule.password}`).toString(
       'base64'
     );
-    sanitize.add(secret);
+    sanitize.addSecretForSanitizing(secret);
   }
   hostRules.push(rule);
 }
@@ -151,13 +151,10 @@ export function find(search: HostRuleSearch): HostRule {
 }
 
 export function hosts({ hostType }: { hostType: string }): string[] {
-  const result: string[] = [];
-  for (const rule of hostRules) {
-    if (rule.hostType === hostType && rule.resolvedHost) {
-      result.push(rule.resolvedHost);
-    }
-  }
-  return result;
+  return hostRules
+    .filter((rule) => rule.hostType === hostType)
+    .map((rule) => rule.resolvedHost)
+    .filter(is.truthy);
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
@@ -174,5 +171,5 @@ export function getAll(): HostRule[] {
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clear();
+  sanitize.clearSanitizedSecretsList();
 }

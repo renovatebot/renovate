@@ -1,7 +1,7 @@
 import { parse } from '@iarna/toml';
 import { CrateDatasource } from '../../datasource/crate';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
@@ -45,24 +45,24 @@ function extractFromSection(
           if (registryUrl) {
             registryUrls = [registryUrl];
           } else {
-            skipReason = SkipReason.UnknownRegistry;
+            skipReason = 'unknown-registry';
           }
         }
         if (path) {
-          skipReason = SkipReason.PathDependency;
+          skipReason = 'path-dependency';
         }
         if (git) {
-          skipReason = SkipReason.GitDependency;
+          skipReason = 'git-dependency';
         }
       } else if (path) {
         currentValue = '';
-        skipReason = SkipReason.PathDependency;
+        skipReason = 'path-dependency';
       } else if (git) {
         currentValue = '';
-        skipReason = SkipReason.GitDependency;
+        skipReason = 'git-dependency';
       } else {
         currentValue = '';
-        skipReason = SkipReason.InvalidDependencySpecification;
+        skipReason = 'invalid-dependency-specification';
       }
     }
     const dep: PackageDependency = {

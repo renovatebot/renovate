@@ -1,13 +1,13 @@
-import * as utils from '../../platform/bitbucket/utils';
+import type * as utils from '../../platform/bitbucket/utils';
 import { cache } from '../../util/cache/package/decorator';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { BitbucketCommit, BitbucketTag } from './types';
+import type { BitbucketCommit, BitbucketTag } from './types';
 
 export class BitBucketTagsDatasource extends Datasource {
-  bitbucketHttp = new BitbucketHttp();
+  bitbucketHttp = new BitbucketHttp(BitBucketTagsDatasource.id);
 
   static readonly id = 'bitbucket-tags';
 

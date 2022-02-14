@@ -6,6 +6,7 @@ import { updateLockedDependency } from '.';
 
 const packageFileContent = loadFixture('package.json', './package-lock');
 const lockFileContent = loadFixture('package-lock.json', './package-lock');
+const lockFileV2Content = loadFixture('package-lock-v2.json', './package-lock');
 const acceptsJson = JSON.parse(loadFixture('accepts.json', './package-lock'));
 const expressJson = JSON.parse(loadFixture('express.json', './common'));
 const mimeJson = JSON.parse(loadFixture('mime.json', './package-lock'));
@@ -14,6 +15,14 @@ const serveStaticJson = JSON.parse(
 );
 const sendJson = JSON.parse(loadFixture('send.json', './package-lock'));
 const typeIsJson = JSON.parse(loadFixture('type-is.json', './package-lock'));
+const bundledPackageJson = loadFixture(
+  'bundled.package.json',
+  './package-lock'
+);
+const bundledPackageLockJson = loadFixture(
+  'bundled.package-lock.json',
+  './package-lock'
+);
 
 describe('manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
@@ -84,6 +93,16 @@ describe('manager/npm/update/locked-dependency/index', () => {
         JSON.parse(res.files['package-lock.json']).dependencies.mime.version
       ).toBe('1.2.12');
     });
+    it('rejects in-range remediation if lockfile v2+', async () => {
+      const res = await updateLockedDependency({
+        ...config,
+        lockFileContent: lockFileV2Content,
+        depName: 'mime',
+        currentVersion: '1.2.11',
+        newVersion: '1.2.12',
+      });
+      expect(res.status).toBe('unsupported');
+    });
     it('fails to remediate if parent dep cannot support', async () => {
       const acceptsModified = clone(acceptsJson);
       acceptsModified.versions['2.0.0'] = {};
@@ -112,12 +131,54 @@ describe('manager/npm/update/locked-dependency/index', () => {
       const packageLock = JSON.parse(res.files['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
-    it('returns if already remediated', async () => {
+    it('remediates lock file v2 express', async () => {
+      config.depName = 'express';
+      config.currentVersion = '4.0.0';
+      config.newVersion = '4.1.0';
+      config.lockFileContent = lockFileV2Content;
+      const res = await updateLockedDependency(config);
+      expect(res.files['package.json']).toContain('"express": "4.1.0"');
+      const packageLock = JSON.parse(res.files['package-lock.json']);
+      expect(packageLock.dependencies.express.version).toBe('4.1.0');
+    });
+    it('returns already-updated if already remediated exactly', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.10';
       config.newVersion = '1.2.11';
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('already-updated');
+    });
+    it('returns already-updated if already v2 remediated exactly', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.10';
+      config.newVersion = '1.2.11';
+      config.lockFileContent = lockFileV2Content;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
+    });
+    it('returns already-updated if already remediated higher', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.9';
+      config.newVersion = '1.2.10';
+      config.allowHigherOrRemoved = true;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
+    });
+    it('returns already-updated if not found', async () => {
+      config.depName = 'notfound';
+      config.currentVersion = '1.2.9';
+      config.newVersion = '1.2.10';
+      config.allowHigherOrRemoved = true;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
+    });
+    it('returns update-failed if other, lower version found', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.5';
+      config.newVersion = '1.2.15';
+      config.allowHigherOrRemoved = true;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('update-failed');
     });
     it('remediates mime', async () => {
       config.depName = 'mime';
@@ -150,6 +211,15 @@ describe('manager/npm/update/locked-dependency/index', () => {
       config.currentVersion = '1.2.11';
       config.newVersion = '1.4.1';
       config.allowParentUpdates = false;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('update-failed');
+    });
+    it('fails remediation if bundled', async () => {
+      config.depName = 'ansi-regex';
+      config.currentVersion = '3.0.0';
+      config.newVersion = '5.0.1';
+      config.packageFileContent = bundledPackageJson;
+      config.lockFileContent = bundledPackageLockJson;
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('update-failed');
     });

@@ -1,4 +1,6 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
+import { mocked } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -6,9 +8,14 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import * as _repositoryCache from '../../util/cache/repository';
+import type { Cache } from '../../util/cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
+
+jest.mock('../../util/cache/repository');
+const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
@@ -40,10 +47,14 @@ query(
 
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
+  let repoCache: Cache = {};
+
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
+    repoCache = {};
+    repositoryCache.getCache.mockReturnValue(repoCache);
   });
 
   afterEach(() => {
@@ -66,10 +77,10 @@ describe('util/http/github', () => {
     });
 
     it('supports different datasources', async () => {
-      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      const githubApiDatasource = new GithubHttp(GithubReleasesDatasource.id);
       hostRules.add({ hostType: 'github', token: 'abc' });
       hostRules.add({
-        hostType: GITHUB_RELEASES_ID,
+        hostType: GithubReleasesDatasource.id,
         token: 'def',
       });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
@@ -474,6 +485,15 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(2);
     });
     it('shrinks items count on 50x', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local().toISO(),
+          pageSize: 50,
+        },
+      };
+
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -488,11 +508,42 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+      ).toBe(25);
+
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(4);
       expect(trace).toMatchSnapshot();
     });
+    it('expands items count on timeout', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 42,
+        },
+      };
 
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+      ).toBe(84);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('continues to iterate with a lower page size on error 502', async () => {
       httpMock
         .scope(githubApiHost)
@@ -507,8 +558,41 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-    });
 
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(4);
+    });
+    it('removes cache record once expanded to the maximum', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 50,
+        },
+      };
+
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem
+      ).toBeUndefined();
+
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(3);
+    });
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);
       await expect(

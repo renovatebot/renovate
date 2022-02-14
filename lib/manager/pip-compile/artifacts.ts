@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { quote } from 'shlex';
+import { quote, split } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -40,6 +40,47 @@ function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
   return '';
 }
 
+const constraintLineRegex = regEx(
+  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/
+);
+
+export function constructPipCompileCmd(
+  content: string,
+  inputFileName: string,
+  outputFileName: string
+): string {
+  const headers = constraintLineRegex.exec(content);
+  const args = ['pip-compile'];
+  if (headers) {
+    logger.debug({ header: headers[0] }, 'Found pip-compile header');
+    for (const argument of split(headers.groups.arguments)) {
+      if (['--allow-unsafe', '--generate-hashes'].includes(argument)) {
+        args.push(argument);
+      } else if (argument.startsWith('--output-file=')) {
+        const file = upath.parse(outputFileName).base;
+        if (argument !== `--output-file=${file}`) {
+          // we don't trust the user-supplied output-file argument; use our value here
+          logger.warn(
+            { argument },
+            'pip-compile was previously executed with an unexpected `--output-file` filename'
+          );
+        }
+        args.push(`--output-file=${file}`);
+      } else if (argument.startsWith('--')) {
+        logger.trace(
+          { argument },
+          'pip-compile argument is not (yet) supported'
+        );
+      } else {
+        // ignore position argument (.in file)
+      }
+    }
+  }
+  args.push(upath.parse(inputFileName).base);
+
+  return args.map((argument) => quote(argument)).join(' ');
+}
+
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
@@ -59,7 +100,11 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
-    const cmd = `pip-compile ${quote(upath.parse(inputFileName).base)}`;
+    const cmd = constructPipCompileCmd(
+      existingOutput,
+      inputFileName,
+      outputFileName
+    );
     const tagConstraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
@@ -83,7 +128,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: outputFileName,
+          type: 'addition',
+          path: outputFileName,
           contents: await readLocalFile(outputFileName, 'utf8'),
         },
       },

@@ -10,9 +10,9 @@ jest.mock('./file');
 describe('util/cache/package/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
 
-  beforeAll(() => {
+  beforeAll(async () => {
     memCache.init();
-    packageCache.init({ cacheDir: os.tmpdir() });
+    await packageCache.init({ cacheDir: os.tmpdir() });
   });
 
   beforeEach(() => {

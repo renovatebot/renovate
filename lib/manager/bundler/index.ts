@@ -1,4 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
+import { RubyGemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
@@ -25,3 +26,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Gemfile$'],
   versioning: rubyVersioning.id,
 };
+
+export const supportedDatasources = [RubyGemsDatasource.id];

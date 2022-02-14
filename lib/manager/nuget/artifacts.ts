@@ -2,7 +2,8 @@ import { join } from 'path';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { id, parseRegistryUrl } from '../../datasource/nuget';
+import { NugetDatasource } from '../../datasource/nuget';
+import { parseRegistryUrl } from '../../datasource/nuget/common';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
@@ -39,7 +40,7 @@ async function addSourceCmds(
   const result = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
-      hostType: id,
+      hostType: NugetDatasource.id,
       url: registry.url,
     });
     const registryInfo = parseRegistryUrl(registry.url);
@@ -137,7 +138,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: await readLocalFile(lockFileName),
         },
       },

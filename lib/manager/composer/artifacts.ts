@@ -5,7 +5,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import * as datasourcePackagist from '../../datasource/packagist';
+import { PackagistDatasource } from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
@@ -59,7 +59,7 @@ function getAuthJson(): string | null {
     });
 
   hostRules
-    .findAll({ hostType: datasourcePackagist.id })
+    .findAll({ hostType: PackagistDatasource.id })
     ?.forEach((hostRule) => {
       const { resolvedHost, username, password, token } = hostRule;
       if (resolvedHost && username && password) {
@@ -154,7 +154,8 @@ export async function updateArtifacts({
     const res: UpdateArtifactsResult[] = [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: await readLocalFile(lockFileName),
         },
       },
@@ -169,7 +170,8 @@ export async function updateArtifacts({
       if (f.startsWith(vendorDir)) {
         res.push({
           file: {
-            name: f,
+            type: 'addition',
+            path: f,
             contents: await readLocalFile(f),
           },
         });
@@ -178,8 +180,8 @@ export async function updateArtifacts({
     for (const f of status.deleted) {
       res.push({
         file: {
-          name: '|delete|',
-          contents: f,
+          type: 'deletion',
+          path: f,
         },
       });
     }

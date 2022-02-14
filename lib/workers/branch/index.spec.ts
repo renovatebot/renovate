@@ -1,5 +1,11 @@
-import * as _fs from 'fs-extra';
-import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import {
+  defaultConfig,
+  fs,
+  git,
+  mocked,
+  partial,
+  platform,
+} from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
@@ -10,7 +16,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
-import type { File, StatusResult } from '../../util/git/types';
+import type { FileChange, StatusResult } from '../../util/git/types';
 import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
@@ -41,8 +47,8 @@ jest.mock('../pr/automerge');
 jest.mock('../../util/exec');
 jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
+jest.mock('../../util/fs');
 jest.mock('../../util/git');
-jest.mock('fs-extra');
 jest.mock('../global/limits');
 
 const getUpdated = mocked(_getUpdated);
@@ -57,10 +63,17 @@ const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
-const fs = mocked(_fs);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
+
+function findFileContent(files: FileChange[], path: string): string | null {
+  const f = files.find((file) => file.path === path);
+  if (f.type === 'addition') {
+    return f.contents.toString();
+  }
+  return null;
+}
 
 describe('workers/branch/index', () => {
   describe('processBranch', () => {
@@ -86,12 +99,12 @@ describe('workers/branch/index', () => {
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
-        pr: {
+        pr: partial<Pr>({
           title: '',
           sourceBranch: '',
           state: '',
           body: '',
-        },
+        }),
       });
       GlobalConfig.set(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
@@ -126,22 +139,16 @@ describe('workers/branch/index', () => {
     it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
-      config.upgrades = [
+      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
         {
-          releaseTimestamp: new Date('2019-01-01').getTime(),
+          releaseTimestamp: new Date('2019-01-01').getTime().toString(),
           stabilityDays: 1,
         },
         {
-          releaseTimestamp: new Date().getTime(),
+          releaseTimestamp: new Date().toString(),
           stabilityDays: 1,
         },
-        /* TODO: This test is probably broken and needs to be fixed.
-           The type definition for "releaseTimestamp" is a string. But when I change it to
-           one the test starts failing. Once this test has been fixed, the never typing can be removed.
-           And instead replaced with the pattern used on the other places that have a config.upgrades
-           (#9718)
-        */
-      ] as never;
+      ];
 
       git.branchExists.mockReturnValue(false);
       const res = await branchWorker.processBranch(config);
@@ -856,7 +863,7 @@ describe('workers/branch/index', () => {
           ...config,
           updateType: 'lockFileMaintenance',
           reuseExistingBranch: false,
-          updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toEqual({
         branchExists: true,
@@ -922,7 +929,7 @@ describe('workers/branch/index', () => {
           ...config,
           updateType: 'lockFileMaintenance',
           reuseExistingBranch: false,
-          updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toEqual({
         branchExists: true,
@@ -931,9 +938,80 @@ describe('workers/branch/index', () => {
       });
     });
 
+    it('skips branch update if stopUpdatingLabel presents', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        labels: ['stop-updating'],
+        body: `- [ ] <!-- rebase-check -->`,
+      } as Pr);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "branchExists": true,
+          "prNo": undefined,
+          "result": "no-work",
+        }
+      `);
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
+    it('updates branch if stopUpdatingLabel presents and PR rebase/retry box checked', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'Update dependency',
+        state: PrState.Open,
+        labels: ['stop-updating'],
+        body: `- [x] <!-- rebase-check -->`,
+      } as Pr);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: false,
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "branchExists": true,
+          "prNo": undefined,
+          "result": "done",
+        }
+      `);
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
     it('executes post-upgrade tasks if trust is high', async () => {
-      const updatedPackageFile: File = {
-        name: 'pom.xml',
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
         contents: 'pom.xml file contents',
       };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -944,7 +1022,8 @@ describe('workers/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [
           {
-            name: 'yarn.lock',
+            type: 'addition',
+            path: 'yarn.lock',
             contents: Buffer.from([1, 2, 3]) /* Binary content */,
           },
         ],
@@ -961,9 +1040,13 @@ describe('workers/branch/index', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1013,8 +1096,9 @@ describe('workers/branch/index', () => {
     });
 
     it('handles post-upgrade task exec errors', async () => {
-      const updatedPackageFile: File = {
-        name: 'pom.xml',
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
         contents: 'pom.xml file contents',
       };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -1043,8 +1127,13 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1083,8 +1172,9 @@ describe('workers/branch/index', () => {
     });
 
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
-      const updatedPackageFile: File = {
-        name: 'pom.xml',
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
         contents: 'pom.xml file contents',
       };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -1095,7 +1185,8 @@ describe('workers/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [
           {
-            name: 'yarn.lock',
+            type: 'addition',
+            path: 'yarn.lock',
             contents: Buffer.from([1, 2, 3]) /* Binary content */,
           },
         ],
@@ -1113,8 +1204,13 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1156,8 +1252,9 @@ describe('workers/branch/index', () => {
     });
 
     it('executes post-upgrade tasks with multiple dependecy in one branch', async () => {
-      const updatedPackageFile: File = {
-        name: 'pom.xml',
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
         contents: 'pom.xml file contents',
       };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -1168,7 +1265,8 @@ describe('workers/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [
           {
-            name: 'yarn.lock',
+            type: 'addition',
+            path: 'yarn.lock',
             contents: Buffer.from([1, 2, 3]) /* Binary content */,
           },
         ],
@@ -1192,12 +1290,15 @@ describe('workers/branch/index', () => {
           deleted: ['deleted_file', 'modified_then_deleted_file'],
         } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile
-        .mockResolvedValueOnce(Buffer.from('modified file content'))
-        .mockResolvedValueOnce(Buffer.from('this file will not exists'))
-        .mockResolvedValueOnce(Buffer.from('modified file content again'))
-        .mockResolvedValueOnce(Buffer.from('this file was once deleted'));
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content' as never)
+        .mockResolvedValueOnce('this file will not exists' as never)
+        .mockResolvedValueOnce('modified file content again' as never)
+        .mockResolvedValueOnce('this file was once deleted' as never);
+      fs.localPathExists.mockResolvedValue(true).mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1268,42 +1369,37 @@ describe('workers/branch/index', () => {
         cwd: '/localDir',
       });
       expect(exec.exec).toHaveBeenCalledTimes(2);
+      const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
+      const updatedArtifacts = calledWithConfig.updatedArtifacts;
+      expect(findFileContent(updatedArtifacts, 'modified_file')).toBe(
+        'modified file content again'
+      );
       expect(
-        (
-          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-            (f) => f.name === 'modified_file'
-          ).contents as Buffer
-        ).toString()
-      ).toBe('modified file content again');
-      expect(
-        (
-          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-            (f) => f.name === 'deleted_then_created_file'
-          ).contents as Buffer
-        ).toString()
+        findFileContent(updatedArtifacts, 'deleted_then_created_file')
       ).toBe('this file was once deleted');
       expect(
-        commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) =>
-            f.contents === 'deleted_then_created_file' && f.name === '|delete|'
+        updatedArtifacts.find(
+          (f) => f.type === 'deletion' && f.path === 'deleted_then_created_file'
         )
       ).toBeUndefined();
       expect(
-        commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-          (f) => f.name === 'modified_then_deleted_file'
+        updatedArtifacts.find(
+          (f) =>
+            f.type === 'addition' && f.path === 'modified_then_deleted_file'
         )
       ).toBeUndefined();
       expect(
-        commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+        updatedArtifacts.find(
           (f) =>
-            f.contents === 'modified_then_deleted_file' && f.name === '|delete|'
+            f.type === 'deletion' && f.path === 'modified_then_deleted_file'
         )
       ).toBeDefined();
     });
 
     it('executes post-upgrade tasks once when set to branch mode', async () => {
-      const updatedPackageFile: File = {
-        name: 'pom.xml',
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
         contents: 'pom.xml file contents',
       };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -1314,7 +1410,8 @@ describe('workers/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [
           {
-            name: 'yarn.lock',
+            type: 'addition',
+            path: 'yarn.lock',
             contents: Buffer.from([1, 2, 3]) /* Binary content */,
           },
         ],
@@ -1332,10 +1429,15 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file', 'deleted_then_created_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile
-        .mockResolvedValueOnce(Buffer.from('modified file content'))
-        .mockResolvedValueOnce(Buffer.from('this file will not exists'));
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1403,13 +1505,13 @@ describe('workers/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
-        (
-          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
-            (f) => f.name === 'modified_file'
-          ).contents as Buffer
-        ).toString()
+        findFileContent(
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts,
+          'modified_file'
+        )
       ).toBe('modified file content');
     });
+
     it('returns when rebaseWhen=never', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,

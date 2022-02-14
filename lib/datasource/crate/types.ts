@@ -1,3 +1,4 @@
+// eslint-disable-next-line typescript-enum/no-enum
 export enum RegistryFlavor {
   /** https://crates.io, supports rawgit access */
   CratesIo,
@@ -13,10 +14,10 @@ export interface RegistryInfo {
   flavor: RegistryFlavor;
 
   /** raw URL of the registry, as specified in cargo config */
-  rawUrl?: string;
+  rawUrl: string;
 
   /** parsed URL of the registry */
-  url?: URL;
+  url: URL;
 
   /** path where the registry is cloned */
   clonePath?: string;

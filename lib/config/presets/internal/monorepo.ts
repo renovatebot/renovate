@@ -85,6 +85,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/runtime',
   ],
+  'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
@@ -129,6 +130,7 @@ const repoGroups = {
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   'material-ui': 'https://github.com/mui-org/material-ui',
+  'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',
@@ -152,12 +154,14 @@ const repoGroups = {
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  parcel: 'https://github.com/parcel-bundler/parcel',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
+  quartznet: 'https://github.com/quartznet/quartznet',
   react: 'https://github.com/facebook/react',
   'react-router': [
     'https://github.com/ReactTraining/react-router', // old repo
@@ -182,7 +186,7 @@ const repoGroups = {
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
-  vue: 'https://github.com/vuejs/vue',
+  vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
@@ -192,6 +196,7 @@ const repoGroups = {
 };
 
 const patternGroups = {
+  'apache-camel': '^org.apache.camel:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   wordpress: '^@wordpress/',

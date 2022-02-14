@@ -18,6 +18,18 @@ describe('manager/composer/utils', () => {
       ).toEqual({ php: '>=5.3.2', composer: '1.1.0' });
     });
 
+    it('returns platform php version', () => {
+      expect(
+        extractContraints(
+          {
+            config: { platform: { php: '7.4.27' } },
+            require: { php: '~7.4 || ~8.0' },
+          },
+          {}
+        )
+      ).toEqual({ composer: '1.*', php: '7.4.27' });
+    });
+
     it('returns from require-dev', () => {
       expect(
         extractContraints(

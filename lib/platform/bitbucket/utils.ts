@@ -1,7 +1,11 @@
 import url from 'url';
 import type { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
-import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
+import type {
+  HttpOptions,
+  HttpPostOptions,
+  HttpResponse,
+} from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
@@ -146,27 +150,6 @@ export async function accumulateValues<T = any>(
   }
 
   return accumulator;
-}
-
-interface Files {
-  chunks: {
-    changes: {
-      content: string;
-    }[];
-  }[];
-}
-
-export function isConflicted(files: Files[]): boolean {
-  for (const file of files) {
-    for (const chunk of file.chunks) {
-      for (const change of chunk.changes) {
-        if (change.content === '+=======') {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
 }
 
 export interface PrResponse {

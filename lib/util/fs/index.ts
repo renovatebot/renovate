@@ -163,3 +163,11 @@ export function createReadStream(path: string): fs.ReadStream {
 export function access(path: string, mode?: number): Promise<void> {
   return fs.access(path, mode);
 }
+
+export function localPathIsFile(pathName: string): Promise<boolean> {
+  const { localDir } = GlobalConfig.get();
+  return fs
+    .stat(upath.join(localDir, pathName))
+    .then((s) => s.isFile())
+    .catch(() => false);
+}

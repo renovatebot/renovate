@@ -1,7 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
-
-const multidocYaml = loadFixture('multidoc.yaml');
 
 describe('manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
@@ -184,18 +182,23 @@ describe('manager/helmfile/extract', () => {
 
     it('parses multidoc yaml', () => {
       const fileName = 'helmfile.yaml';
-      const result = extractPackageFile(multidocYaml, fileName, {
-        aliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
-      });
+      const result = extractPackageFile(
+        Fixtures.get('multidoc.yaml'),
+        fileName,
+        {
+          aliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        }
+      );
       expect(result).toMatchSnapshot({
         datasource: 'helm',
         deps: [
-          { skipReason: 'local-chart' },
+          { depName: 'manifests', skipReason: 'local-chart' },
           { depName: 'rabbitmq', currentValue: '7.4.3' },
-          { depName: 'kube-prometheus-stack', currentValue: '13.7.2' },
+          { depName: 'kube-prometheus-stack', currentValue: '13.7' },
           { depName: 'invalid', skipReason: 'invalid-name' },
+          { depName: 'external-dns', skipReason: 'invalid-version' },
         ],
       });
     });

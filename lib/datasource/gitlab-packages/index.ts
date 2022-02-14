@@ -21,7 +21,7 @@ export class GitlabPackagesDatasource extends Datasource {
 
   constructor() {
     super(datasource);
-    this.http = new GitlabHttp();
+    this.http = new GitlabHttp(datasource);
   }
 
   static getGitlabPackageApiUrl(

@@ -652,27 +652,6 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
   });
-  it('it migrates hostRules fields', () => {
-    const config: RenovateConfig = {
-      hostRules: [
-        { baseUrl: 'https://some.domain.com', token: '123test' },
-        { domainName: 'domain.com', token: '123test' },
-        { hostName: 'some.domain.com', token: '123test' },
-      ],
-    } as any;
-    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-      config,
-      defaultConfig
-    );
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({
-      hostRules: [
-        { matchHost: 'https://some.domain.com', token: '123test' },
-        { matchHost: 'domain.com', token: '123test' },
-        { matchHost: 'some.domain.com', token: '123test' },
-      ],
-    });
-  });
   it('it migrates presets', () => {
     GlobalConfig.set({
       migratePresets: {
@@ -689,32 +668,6 @@ describe('config/migration', () => {
     );
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
-  });
-
-  it('it migrates composerIgnorePlatformReqs values', () => {
-    let config: TestRenovateConfig;
-    let res: MigratedConfig;
-
-    config = {
-      composerIgnorePlatformReqs: true,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-
-    config = {
-      composerIgnorePlatformReqs: false,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
-
-    config = {
-      composerIgnorePlatformReqs: [],
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeFalse();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
   });
 
   it('it migrates gradle-lite', () => {

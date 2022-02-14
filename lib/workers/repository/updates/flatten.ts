@@ -42,6 +42,18 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(regEx(/^\//), '') // remove leading slash
         .replace(regEx(/\//g), '-') // change slashes to hyphens
         .replace(regEx(/-+/g), '-'); // remove multiple hyphens
+      updateConfig.sourceRepo = parsedSourceUrl.pathname.replace(
+        regEx(/^\//),
+        ''
+      ); // remove leading slash
+      updateConfig.sourceRepoOrg = updateConfig.sourceRepo.replace(
+        regEx(/\/.*/g),
+        ''
+      ); // remove everything after first slash
+      updateConfig.sourceRepoName = updateConfig.sourceRepo.replace(
+        regEx(/.*\//g),
+        ''
+      ); // remove everything up to the last slash
     }
   }
   generateBranchName(updateConfig);
@@ -128,6 +140,7 @@ export async function flattenUpdates(
           packageFileConfig.lockFileMaintenance
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
+        lockFileConfig.isLockFileMaintenance = true;
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(

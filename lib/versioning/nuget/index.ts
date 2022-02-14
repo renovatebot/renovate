@@ -1,6 +1,6 @@
 import semver from 'semver';
 import { regEx } from '../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'nuget';
@@ -13,7 +13,7 @@ export const supportsRanges = false;
 const pattern = regEx(/^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/);
 
 class NugetVersioningApi extends GenericVersioningApi {
-  protected _parse(version: string): GenericVersion {
+  protected _parse(version: string): GenericVersion | null {
     const matches = pattern.exec(version);
     if (!matches) {
       return null;

@@ -194,7 +194,7 @@ describe('workers/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get(
-          '/api/v4/projects/some%2fyet-other-repository/releases?per_page=100'
+          '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100'
         )
         .reply(200, [
           { tag_name: `v1.0.0` },
@@ -210,15 +210,15 @@ describe('workers/pr/changelog/release-notes', () => {
       expect(res).toMatchSnapshot([
         {
           notesSourceUrl:
-            'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases',
+            'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.0',
-          url: 'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0',
+          url: 'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0',
         },
         {
           notesSourceUrl:
-            'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases',
+            'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.1',
-          url: 'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1',
+          url: 'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1',
         },
       ]);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -229,7 +229,7 @@ describe('workers/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://my.custom.domain/')
         .get(
-          '/api/v4/projects/some%2fyet-other-repository/releases?per_page=100'
+          '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100'
         )
         .reply(200, [
           { tag_name: `v1.0.0` },
@@ -247,15 +247,15 @@ describe('workers/pr/changelog/release-notes', () => {
       expect(res).toMatchSnapshot([
         {
           notesSourceUrl:
-            'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases',
+            'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.0',
-          url: 'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0',
+          url: 'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0',
         },
         {
           notesSourceUrl:
-            'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases',
+            'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.1',
-          url: 'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1',
+          url: 'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1',
         },
       ]);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -440,7 +440,7 @@ describe('workers/pr/changelog/release-notes', () => {
       const prefix = '';
       httpMock
         .scope('https://api.gitlab.com/')
-        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .get('/projects/some%2Fother-repository/releases?per_page=100')
         .reply(200, [
           { tag_name: `${prefix}1.0.0` },
           {
@@ -463,7 +463,7 @@ describe('workers/pr/changelog/release-notes', () => {
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
         name: undefined,
         notesSourceUrl:
-          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+          'https://api.gitlab.com/projects/some%2Fother-repository/releases',
         tag: '1.0.1',
         url: 'https://gitlab.com/some/other-repository/tags/1.0.1',
       });
@@ -473,7 +473,7 @@ describe('workers/pr/changelog/release-notes', () => {
       const prefix = 'v';
       httpMock
         .scope('https://api.gitlab.com/')
-        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .get('/projects/some%2Fother-repository/releases?per_page=100')
         .reply(200, [
           { tag_name: `${prefix}1.0.0` },
           {
@@ -496,7 +496,7 @@ describe('workers/pr/changelog/release-notes', () => {
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
         name: undefined,
         notesSourceUrl:
-          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+          'https://api.gitlab.com/projects/some%2Fother-repository/releases',
         tag: 'v1.0.1',
         url: 'https://gitlab.com/some/other-repository/tags/v1.0.1',
       });
@@ -506,7 +506,7 @@ describe('workers/pr/changelog/release-notes', () => {
       const prefix = 'other-';
       httpMock
         .scope('https://api.gitlab.com/')
-        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .get('/projects/some%2Fother-repository/releases?per_page=100')
         .reply(200, [
           { tag_name: `${prefix}1.0.0` },
           {
@@ -529,7 +529,7 @@ describe('workers/pr/changelog/release-notes', () => {
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
         name: undefined,
         notesSourceUrl:
-          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+          'https://api.gitlab.com/projects/some%2Fother-repository/releases',
         tag: 'other-1.0.1',
         url: 'https://gitlab.com/some/other-repository/tags/other-1.0.1',
       });
@@ -661,10 +661,10 @@ describe('workers/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://api.gitlab.com/')
         .get(
-          '/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100'
+          '/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100'
         )
         .reply(200, gitlabTreeResponse)
-        .get('/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw')
+        .get('/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw')
         .reply(200, gitterWebappChangelogMd);
       const res = await getReleaseNotesMd(
         {
@@ -688,10 +688,10 @@ describe('workers/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://my.custom.domain/')
         .get(
-          '/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100'
+          '/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100'
         )
         .reply(200, gitlabTreeResponse)
-        .get('/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw')
+        .get('/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw')
         .reply(200, gitterWebappChangelogMd);
       const res = await getReleaseNotesMd(
         {
@@ -865,11 +865,11 @@ describe('workers/pr/changelog/release-notes', () => {
         httpMock
           .scope('https://gitlab.com/')
           .get(
-            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100'
+            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100'
           )
           .reply(200, gitlabTreeResponse)
           .get(
-            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw'
+            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw'
           )
           .reply(200, adapterutilsChangelogMd);
         const res = await getReleaseNotesMd(
@@ -897,11 +897,11 @@ describe('workers/pr/changelog/release-notes', () => {
         httpMock
           .scope('https://gitlab.com/')
           .get(
-            `/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100&path=${sourceDirectory}`
+            `/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100&path=${sourceDirectory}`
           )
           .reply(200, response)
           .get(
-            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw'
+            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw'
           )
           .reply(200, adapterutilsChangelogMd);
         const res = await getReleaseNotesMd(
