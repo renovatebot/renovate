@@ -5,12 +5,12 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import type { Http } from '../../util/http';
 import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
-import { id, removeBuildMeta } from './common';
+import { removeBuildMeta } from './common';
 import type {
   CatalogEntry,
   CatalogPage,
@@ -18,17 +18,10 @@ import type {
   ServicesIndexRaw,
 } from './types';
 
-const http = new Http(id);
-
-// https://api.nuget.org/v3/index.json is a default official nuget feed
-const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
 const cacheNamespace = 'datasource-nuget';
 
-export function getDefaultFeed(): string {
-  return defaultNugetFeed;
-}
-
 export async function getResourceUrl(
+  http: Http,
   url: string,
   resourceType = 'RegistrationsBaseUrl'
 ): Promise<string | null> {
@@ -101,6 +94,7 @@ export async function getResourceUrl(
 }
 
 async function getCatalogEntry(
+  http: Http,
   catalogPage: CatalogPage
 ): Promise<CatalogEntry[]> {
   let items = catalogPage.items;
@@ -113,6 +107,7 @@ async function getCatalogEntry(
 }
 
 export async function getReleases(
+  http: Http,
   registryUrl: string,
   feedUrl: string,
   pkgName: string
@@ -122,7 +117,7 @@ export async function getReleases(
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
   const catalogPagesQueue = catalogPages.map(
-    (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(page)
+    (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
   );
   const catalogEntries = (
     await pAll(catalogPagesQueue, { concurrency: 5 })
@@ -164,6 +159,7 @@ export async function getReleases(
 
   try {
     const packageBaseAddress = await getResourceUrl(
+      http,
       registryUrl,
       'PackageBaseAddress'
     );
