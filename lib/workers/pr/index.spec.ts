@@ -296,7 +296,9 @@ describe('workers/pr/index', () => {
           displayFrom: 'zzzzzz',
           displayTo: 'aaaaaaa',
           prBodyNotes: ['note 1', 'note 2'],
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+          },
         },
         {
           depName: 'b',
@@ -304,7 +306,9 @@ describe('workers/pr/index', () => {
           displayFrom: 'some_old_value',
           displayTo: 'some_new_value',
           updateType: 'pin',
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+          },
         },
         {
           depName: 'c',
@@ -315,38 +319,41 @@ describe('workers/pr/index', () => {
           depName: 'd',
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Update: '{{{updateType}}}',
+          },
         },
         {
           depName: depsWithSameNotesSourceUrl[0],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Update: '{{{updateType}}}',
+          },
         },
         {
           depName: depsWithSameNotesSourceUrl[1],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
           prBodyDefinitions: {
-            // Package: '{{{depNameLinked}}}',
-            // Type: '{{{depType}}}',
-            // Update: '{{{updateType}}}',
-            // 'Current value': '{{{currentValue}}}',
-            // 'New value': '{{{newValue}}}',
-            Change: 'All locks refreshed',
+            Update: '{{{updateType}}}',
           },
         },
         {
           depName: depsWithSameSourceUrl[0],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Update: '{{{updateType}}}',
+          },
         },
         {
           depName: depsWithSameSourceUrl[1],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Update: '{{{updateType}}}',
+          },
         },
       ] as never);
       config.updateType = 'lockFileMaintenance';

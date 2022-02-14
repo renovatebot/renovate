@@ -21,11 +21,11 @@ function getRowDefinition(
 }
 
 function getNonEmptyColumns(
-  headers: string[],
+  prBodyColumns: string[],
   rows: Record<string, string>[]
 ): string[] {
   const res: string[] = [];
-  for (const header of headers) {
+  for (const header of prBodyColumns) {
     for (const row of rows) {
       if (row[header]?.length) {
         if (!res.includes(header)) {
