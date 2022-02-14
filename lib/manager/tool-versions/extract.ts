@@ -1,4 +1,5 @@
 // Based on http://asdf-vm.com/manage/configuration.html#tool-versions
+import is from '@sindresorhus/is';
 import * as GitHubTagsDatasource from '../../datasource/github-tags';
 import * as NpmDatasource from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
@@ -47,7 +48,7 @@ export function extractPackageFile(
 
       // Each line is in format "depName version [...fallbackVersion]"
       const parts = line.split(whiteSpaceRegex).filter(function (part) {
-        return part.trim().length > 0;
+        return is.nonEmptyString(part.trim());
       });
 
       if (parts.length < 2) {
