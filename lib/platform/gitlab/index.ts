@@ -943,7 +943,7 @@ export async function addAssignees(
       await gitlabApi.putJson(url);
     } else {
       try {
-        logger.debug('Try using gitlab premium API');
+        logger.debug('Try using GitLab premium API');
         let url = `projects/${config.repository}/merge_requests/${iid}`;
         for (let i = 0; i < assignees.length; i++) {
           const assigneeId = await getUserID(assignees[i]);
