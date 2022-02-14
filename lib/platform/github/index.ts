@@ -1834,7 +1834,7 @@ export async function commitFiles(
   if (!commitResult) {
     const { branchName, files } = config;
     logger.debug(
-      { branchName, files },
+      { branchName, files: files.map(({ path }) => path) },
       `Platform-native commit: unable to prepare for commit`
     );
     return null;
