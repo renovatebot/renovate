@@ -61,8 +61,8 @@ export function getNewValue({
       logger.warn('Empty currentValue: ' + currentValue);
       return currentValue;
     }
-  } catch (error) {
-    logger.warn({ currentValue }, (error as Error).message);
+  } catch (err) {
+    logger.warn({ currentValue, err }, 'Unexpected range error');
     return null;
   }
 
@@ -194,7 +194,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
       const futureVersion = getFutureVersion(range.version, newVersion, 1);
       return range.operator + futureVersion;
     }
-    // otherwise, treat it same as exclude
+    // newVersion is in range, for other than "replace" strategies
     return range.operator + range.version;
   }
   // istanbul ignore next
