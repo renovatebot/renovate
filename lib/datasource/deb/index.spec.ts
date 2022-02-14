@@ -114,22 +114,35 @@ describe('datasource/deb/index', () => {
         expect(res).toBeNull();
       });
 
-      it('works for two releases of `steam-devices` in two components', async () => {
+      describe('with two components', () => {
         const testPackagesFile2 = __dirname + '/test-data/Packages2.gz';
 
-        httpMock
-          .scope('http://ftp.debian.org')
-          .get('/debian/dists/stable/non-free-second/binary-amd64/Packages.gz')
-          .replyWithFile(200, testPackagesFile2);
+        beforeEach(() => {
+          httpMock
+            .scope('http://ftp.debian.org')
+            .get(
+              '/debian/dists/stable/non-free-second/binary-amd64/Packages.gz'
+            )
+            .replyWithFile(200, testPackagesFile2);
 
-        // overwrite the previously set registryUrls to have two components
-        cfg.registryUrls = [
-          'http://ftp.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
-        ];
+          // overwrite the previously set registryUrls to have two components
+          cfg.registryUrls = [
+            'http://ftp.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
+          ];
+        });
 
-        const res = await getPkgReleases(cfg);
-        expect(res).toBeObject();
-        expect(res.releases).toHaveLength(2);
+        it('returns two releases for `steam-devices` which is the same across the components', async () => {
+          const res = await getPkgReleases(cfg);
+          expect(res).toBeObject();
+          expect(res.releases).toHaveLength(2);
+        });
+
+        it('returns two releases for `album` which has different metadata across the components', async () => {
+          cfg.depName = 'album';
+          const res = await getPkgReleases(cfg);
+          expect(res).toBeObject();
+          expect(res.releases).toHaveLength(2);
+        });
       });
     });
 
