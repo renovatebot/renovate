@@ -24,6 +24,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -902,6 +903,16 @@ export function getUrl({
   });
 }
 
+const remoteRenovateRefs = new Set<string>();
+
+/**
+ *
+ * Non-branch refs allow us to store git objects without triggering CI pipelines.
+ * It's useful for API-based branch rebasing.
+ *
+ * @see https://stackoverflow.com/questions/63866947/pushing-git-non-branch-references-to-a-remote/63868286
+ *
+ */
 export async function pushCommitToRenovateRef(
   commitSha: string,
   refName: string
@@ -909,6 +920,7 @@ export async function pushCommitToRenovateRef(
   const fullRefName = `refs/renovate/${refName}`;
   await git.raw(['update-ref', fullRefName, commitSha]);
   await git.raw(['push', '--force', 'origin', fullRefName]);
+  remoteRenovateRefs.add(fullRefName);
 }
 
 /**
@@ -930,30 +942,38 @@ export async function pushCommitToRenovateRef(
  *
  */
 export async function clearRenovateRefs(): Promise<void> {
-  if (!gitInitialized) {
-    logger.debug(
-      `Clear Renovate refs: repository isn't initialized - skipping`
-    );
-    return;
-  }
-
-  try {
+  if (gitInitialized && remoteRenovateRefs.size > 0) {
     logger.debug(`Clear Renovate refs: refs/renovate/*`);
-    const rawOutput = await git.raw([
-      'ls-remote',
-      config.url,
-      'refs/renovate/*',
-    ]);
-    const renovateRefs = rawOutput
-      .split(newlineRegex)
-      .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
-      .filter(is.truthy);
-    if (renovateRefs.length) {
-      const purgeCmd = ['push', '--delete', 'origin', ...renovateRefs];
-      await git.raw(purgeCmd);
+    try {
+      const repoCache = getCache();
+      const fetchSkipsTotal = 15;
+      repoCache.renovateRefsFetchSkipsCounter ??= fetchSkipsTotal;
+      if (repoCache.renovateRefsFetchSkipsCounter > 0) {
+        repoCache.renovateRefsFetchSkipsCounter -= 1;
+      } else {
+        repoCache.renovateRefsFetchSkipsCounter = fetchSkipsTotal;
+
+        const rawOutput = await git.raw([
+          'ls-remote',
+          config.url,
+          'refs/renovate/*',
+        ]);
+
+        rawOutput
+          .split(newlineRegex)
+          .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
+          .filter(is.truthy)
+          .forEach((ref) => {
+            remoteRenovateRefs.add(ref);
+          });
+      }
+
+      const clearCmd = ['push', '--delete', 'origin', ...remoteRenovateRefs];
+      remoteRenovateRefs.clear();
+      await git.raw(clearCmd);
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, `Clear Renovate refs: error`);
     }
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, `Clear Renovate refs: error`);
   }
 }
 

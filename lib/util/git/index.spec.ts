@@ -4,6 +4,7 @@ import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
@@ -755,31 +756,52 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('Funny refs', () => {
-    const lsRenovateFunnyRefs = async (): Promise<string[]> =>
+  describe('Renovate non-branch refs', () => {
+    const lsRenovateRefs = async (): Promise<string[]> =>
       (await Git(tmpDir.path).raw(['ls-remote', 'origin', 'refs/renovate/*']))
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
 
-    it('creates renovate funny ref', async () => {
+    it('creates renovate ref', async () => {
       const commit = git.getBranchCommit('develop');
 
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
-      const funnyRefs = await lsRenovateFunnyRefs();
+      const funnyRefs = await lsRenovateRefs();
       expect(funnyRefs).toContain('refs/renovate/foo/bar');
     });
 
-    it('purges all funny Renovate refs', async () => {
+    it('clears pushed Renovate refs', async () => {
       const commit = git.getBranchCommit('develop');
       await git.pushCommitToRenovateRef(commit, 'foo');
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
 
-      expect(await lsRenovateFunnyRefs()).not.toBeEmpty();
+      expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
-      expect(await lsRenovateFunnyRefs()).toBeEmpty();
+      expect(await lsRenovateRefs()).toBeEmpty();
+    });
+
+    it('clears remote Renovate refs', async () => {
+      const repoCache = getCache();
+      repoCache.renovateRefsFetchSkipsCounter = 2;
+      const commit = git.getBranchCommit('develop');
+      const tmpGit = Git(tmpDir.path);
+      await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
+      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
+
+      await git.pushCommitToRenovateRef(commit, 'bbb');
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toEqual(['refs/renovate/aaa']);
+
+      await git.pushCommitToRenovateRef(commit, 'ccc');
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toEqual(['refs/renovate/aaa']);
+
+      await git.pushCommitToRenovateRef(commit, 'ddd');
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toBeEmpty();
     });
   });
 
