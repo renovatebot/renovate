@@ -1,17 +1,16 @@
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
-import { Http } from '../../util/http';
+import type { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import type { ReleaseResult } from '../types';
-import { id, removeBuildMeta } from './common';
-
-const http = new Http(id);
+import { removeBuildMeta } from './common';
 
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`)?.val;
 }
 
 export async function getReleases(
+  http: Http,
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {

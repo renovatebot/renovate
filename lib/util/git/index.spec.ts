@@ -753,4 +753,29 @@ describe('util/git/index', () => {
       });
     });
   });
+
+  describe('pushCommitAsRef', () => {
+    it('creates non-branch ref', async () => {
+      const commit = git.getBranchCommit('develop');
+      await git.pushCommitAsRef(commit, 'refs/foo/bar');
+      const repo = Git(tmpDir.path);
+      const res = (await repo.raw(['ls-remote'])).split(/\s+/);
+      expect(res).toContain('refs/foo/bar');
+    });
+  });
+
+  describe('listCommitTree', () => {
+    it('creates non-branch ref', async () => {
+      const commit = git.getBranchCommit('develop');
+      const res = await git.listCommitTree(commit);
+      expect(res).toEqual([
+        {
+          mode: '100644',
+          path: 'past_file',
+          sha: '913705ab2ca79368053a476efa48aa6912d052c5',
+          type: 'blob',
+        },
+      ]);
+    });
+  });
 });
