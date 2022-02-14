@@ -119,7 +119,7 @@ export async function generateLockFile(
     if (
       filename === 'npm-shrinkwrap.json' &&
       (await localPathExists(
-        lockFileName.replace('npm-shrinkwrap.json', 'package-lock.json')
+        lockFileName.replace(regex('(?:^|\/)npm-shrinkwrap\.json$'), 'package-lock.json')
       ))
     ) {
       await move(
