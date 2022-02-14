@@ -327,6 +327,7 @@ describe('workers/pr/index', () => {
           prBodyDefinitions: {
             Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
           },
         },
         {
@@ -336,6 +337,7 @@ describe('workers/pr/index', () => {
           prBodyDefinitions: {
             Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
           },
         },
         {
@@ -345,6 +347,7 @@ describe('workers/pr/index', () => {
           prBodyDefinitions: {
             Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
           },
         },
         {
@@ -354,6 +357,7 @@ describe('workers/pr/index', () => {
           prBodyDefinitions: {
             Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
           },
         },
         {
@@ -363,6 +367,7 @@ describe('workers/pr/index', () => {
           prBodyDefinitions: {
             Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
           },
         },
       ] as never);
