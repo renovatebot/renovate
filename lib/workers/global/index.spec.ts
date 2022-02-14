@@ -43,6 +43,7 @@ describe('workers/global/index', () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       repositories: [],
       globalExtends: [':pinVersions'],
+      hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
     });
     presets.resolveConfigPresets.mockResolvedValueOnce({});
     await expect(globalWorker.start()).resolves.toBe(0);
