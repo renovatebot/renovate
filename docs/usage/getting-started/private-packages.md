@@ -327,6 +327,39 @@ For those found, a command similar to the following is run: `dotnet nuget add so
 
 For every poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`.
 
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "pypi.example.com",
+      "username": "pypi-user",
+      "password": "pypi-password"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    Environment variables are build from the poetry source `name` configured in the section `[[tool.poetry.source]]` of
+    the project's `pyproject.toml` file.
+
+When using renovate on Gitlab hosted projects which depend on Python dependencies also hosted on Gitlab's private pypi registries, use a distinct
+`hostType`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "gitlab.example.com",
+      "hostType": "pypi",
+      "username": "gitlab-ci-token", // CI credentials will work on self-hosted renovate
+      "password": "$CI_JOB_TOKEN" // use any other username/password in other cases
+    }
+  ]
+}
+```
+
 ## WhiteSource Renovate Hosted App Encryption
 
 The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by WhiteSource.
