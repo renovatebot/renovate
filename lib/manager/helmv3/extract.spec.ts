@@ -1,5 +1,5 @@
 import { fs } from '../../../test/util';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -97,7 +97,7 @@ describe('manager/helmv3/extract', () => {
         deps: [
           {
             depName: 'library',
-            datasource: datasourceDocker.id,
+            datasource: DockerDatasource.id,
             currentValue: '0.1.0',
           },
           { depName: 'postgresql', currentValue: '0.8.1' },

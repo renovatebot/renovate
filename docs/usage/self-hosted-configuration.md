@@ -280,6 +280,16 @@ e.g.
 }
 ```
 
+If you use `binarySource=docker|install` read the section below.
+
+If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you'll get in trouble with missing file and directory permissions.
+
+Like this:
+
+```
+> export RENOVATE_DOCKER_USER="$(id -u):0" # 500:0 (username:root)
+```
+
 ## dryRun
 
 ## endpoint
