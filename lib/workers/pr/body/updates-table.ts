@@ -13,9 +13,11 @@ function getRowDefinition(
   upgrade: BranchUpgradeConfig
 ): TableDefinition[] {
   const res: TableDefinition[] = [];
-  for (const header of prBodyColumns) {
-    const value = upgrade.prBodyDefinitions[header];
-    res.push({ header, value });
+  if (upgrade.prBodyDefinitions) {
+    for (const header of prBodyColumns) {
+      const value = upgrade.prBodyDefinitions[header];
+      res.push({ header, value });
+    }
   }
   return res;
 }
@@ -38,27 +40,34 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
-  const tableValues = config.upgrades.map((upgrade) => {
-    const res: Record<string, string> = {};
-    const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
-    for (const column of rowDefinition) {
-      const { header, value } = column;
-      try {
-        // istanbul ignore else
-        if (value) {
-          res[header] = template
-            .compile(value, upgrade)
-            .replace(regEx(/^``$/), '');
-        } else {
-          res[header] = '';
+  const prBodyColumns = config.prBodyColumns;
+  if (prBodyColumns === undefined) {
+    logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
+    return '';
+  }
+  const tableValues = config.upgrades
+    .filter((upgrade) => upgrade !== undefined)
+    .map((upgrade) => {
+      const res: Record<string, string> = {};
+      const rowDefinition = getRowDefinition(prBodyColumns ?? [], upgrade);
+      for (const column of rowDefinition) {
+        const { header, value } = column;
+        try {
+          // istanbul ignore else
+          if (value) {
+            res[header] = template
+              .compile(value, upgrade)
+              .replace(regEx(/^``$/), '');
+          } else {
+            res[header] = '';
+          }
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ header, value, err }, 'Handlebars compilation error');
         }
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ header, value, err }, 'Handlebars compilation error');
       }
-    }
-    return res;
-  });
-  const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
+      return res;
+    });
+  const tableColumns = getNonEmptyColumns(prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';

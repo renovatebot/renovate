@@ -71,9 +71,10 @@ describe('workers/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     };
+    const upgrade3: BranchUpgradeConfig = undefined;
     const configObj: BranchConfig = {
       branchName: 'some-branch',
-      upgrades: [upgrade0, upgrade1, upgrade2],
+      upgrades: [upgrade0, upgrade1, upgrade2, upgrade3],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',
