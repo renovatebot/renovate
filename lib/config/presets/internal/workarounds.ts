@@ -76,4 +76,15 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  doNotUpgradeFromAlpineStableToEdge: {
+    description: 'Do not upgrade from Alpine stable to edge',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['alpine'],
+        matchCurrentVersion: '<20000000',
+        allowedVersions: '<20000000',
+      },
+    ],
+  },
 };
