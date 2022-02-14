@@ -24,7 +24,6 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -903,7 +902,7 @@ export function getUrl({
   });
 }
 
-const remoteRenovateRefs = new Set<string>();
+let remoteRefsExist = false;
 
 /**
  *
@@ -920,7 +919,7 @@ export async function pushCommitToRenovateRef(
   const fullRefName = `refs/renovate/${refName}`;
   await git.raw(['update-ref', fullRefName, commitSha]);
   await git.raw(['push', '--force', 'origin', fullRefName]);
-  remoteRenovateRefs.add(fullRefName);
+  remoteRefsExist = true;
 }
 
 /**
@@ -942,38 +941,26 @@ export async function pushCommitToRenovateRef(
  *
  */
 export async function clearRenovateRefs(): Promise<void> {
-  if (gitInitialized && remoteRenovateRefs.size > 0) {
+  if (gitInitialized && remoteRefsExist) {
     logger.debug(`Clear Renovate refs: refs/renovate/*`);
     try {
-      const repoCache = getCache();
-      const fetchSkipsTotal = 15;
-      repoCache.renovateRefsFetchSkipsCounter ??= fetchSkipsTotal;
-      if (repoCache.renovateRefsFetchSkipsCounter > 0) {
-        repoCache.renovateRefsFetchSkipsCounter -= 1;
-      } else {
-        repoCache.renovateRefsFetchSkipsCounter = fetchSkipsTotal;
+      const rawOutput = await git.raw([
+        'ls-remote',
+        config.url,
+        'refs/renovate/*',
+      ]);
 
-        const rawOutput = await git.raw([
-          'ls-remote',
-          config.url,
-          'refs/renovate/*',
-        ]);
-
-        rawOutput
-          .split(newlineRegex)
-          .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
-          .filter(is.truthy)
-          .forEach((ref) => {
-            remoteRenovateRefs.add(ref);
-          });
-      }
+      const remoteRenovateRefs = rawOutput
+        .split(newlineRegex)
+        .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
+        .filter(is.truthy);
 
       const clearCmd = ['push', '--delete', 'origin', ...remoteRenovateRefs];
       await git.raw(clearCmd);
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ err }, `Clear Renovate refs: error`);
     } finally {
-      remoteRenovateRefs.clear();
+      remoteRefsExist = false;
     }
   }
 }

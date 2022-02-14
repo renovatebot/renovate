@@ -4,7 +4,6 @@ import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
@@ -784,22 +783,12 @@ describe('util/git/index', () => {
     });
 
     it('clears remote Renovate refs', async () => {
-      const repoCache = getCache();
-      repoCache.renovateRefsFetchSkipsCounter = 2;
       const commit = git.getBranchCommit('develop');
       const tmpGit = Git(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
-      await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toEqual(['refs/renovate/aaa']);
-
-      await git.pushCommitToRenovateRef(commit, 'ccc');
-      await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toEqual(['refs/renovate/aaa']);
-
-      await git.pushCommitToRenovateRef(commit, 'ddd');
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
     });
