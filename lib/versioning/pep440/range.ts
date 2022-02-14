@@ -43,7 +43,7 @@ export function getNewValue({
   newVersion,
 }: NewValueConfig): string | null {
   let ranges: Range[];
-  let result: string;
+  let updatedRange: (string | null)[];
   if (rangeStrategy === 'pin') {
     return '==' + newVersion;
   }
@@ -69,7 +69,7 @@ export function getNewValue({
   switch (rangeStrategy) {
     case 'auto':
     case 'replace':
-      result = handleReplaceStrategy(
+      updatedRange = handleReplaceStrategy(
         {
           currentValue,
           rangeStrategy,
@@ -80,7 +80,7 @@ export function getNewValue({
       );
       break;
     case 'bump':
-      result = handleBumpStrategy(
+      updatedRange = handleBumpStrategy(
         {
           currentValue,
           rangeStrategy,
@@ -106,6 +106,8 @@ export function getNewValue({
         newVersion,
       });
   }
+
+  let result = updatedRange.filter(Boolean).join(', ');
 
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
@@ -245,47 +247,41 @@ function updateRangeValue(
 function handleReplaceStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   ranges: Range[]
-): string {
+): (string | null)[] {
   // newVersion is within range
   if (satisfies(newVersion, currentValue)) {
-    return currentValue;
+    return [currentValue];
   }
-  return ranges
-    .map((range) =>
-      updateRangeValue(
-        {
-          currentValue,
-          rangeStrategy,
-          currentVersion,
-          newVersion,
-        },
-        range
-      )
+  return ranges.map((range) =>
+    updateRangeValue(
+      {
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      },
+      range
     )
-    .filter(Boolean)
-    .join(', ');
+  );
 }
 
 function handleBumpStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   ranges: Range[]
-): string {
-  return ranges
-    .map((range) => {
-      // bump lower bound to current new version
-      if (range.operator === '>=') {
-        return range.operator + newVersion;
-      }
-      return updateRangeValue(
-        {
-          currentValue,
-          rangeStrategy,
-          currentVersion,
-          newVersion,
-        },
-        range
-      );
-    })
-    .filter(Boolean)
-    .join(', ');
+): (string | null)[] {
+  return ranges.map((range) => {
+    // bump lower bound to current new version
+    if (range.operator === '>=') {
+      return range.operator + newVersion;
+    }
+    return updateRangeValue(
+      {
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      },
+      range
+    );
+  });
 }
