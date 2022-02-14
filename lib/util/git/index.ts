@@ -24,6 +24,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -902,12 +903,79 @@ export function getUrl({
   });
 }
 
-export async function pushCommitAsRef(
+const remoteRenovateRefs = new Set<string>();
+
+/**
+ *
+ * Non-branch refs allow us to store git objects without triggering CI pipelines.
+ * It's useful for API-based branch rebasing.
+ *
+ * @see https://stackoverflow.com/questions/63866947/pushing-git-non-branch-references-to-a-remote/63868286
+ *
+ */
+export async function pushCommitToRenovateRef(
   commitSha: string,
   refName: string
 ): Promise<void> {
-  await git.raw(['update-ref', refName, commitSha]);
-  await git.raw(['push', '--force', 'origin', refName]);
+  const fullRefName = `refs/renovate/${refName}`;
+  await git.raw(['update-ref', fullRefName, commitSha]);
+  await git.raw(['push', '--force', 'origin', fullRefName]);
+  remoteRenovateRefs.add(fullRefName);
+}
+
+/**
+ *
+ * Removes all remote "refs/renovate/*" refs in two steps:
+ *
+ * Step 1: list refs
+ *
+ *   $ git ls-remote origin "refs/renovate/*"
+ *
+ *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
+ *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
+ *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
+ *   > ...
+ *
+ * Step 2:
+ *
+ *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
+ *
+ */
+export async function clearRenovateRefs(): Promise<void> {
+  if (gitInitialized && remoteRenovateRefs.size > 0) {
+    logger.debug(`Clear Renovate refs: refs/renovate/*`);
+    try {
+      const repoCache = getCache();
+      const fetchSkipsTotal = 15;
+      repoCache.renovateRefsFetchSkipsCounter ??= fetchSkipsTotal;
+      if (repoCache.renovateRefsFetchSkipsCounter > 0) {
+        repoCache.renovateRefsFetchSkipsCounter -= 1;
+      } else {
+        repoCache.renovateRefsFetchSkipsCounter = fetchSkipsTotal;
+
+        const rawOutput = await git.raw([
+          'ls-remote',
+          config.url,
+          'refs/renovate/*',
+        ]);
+
+        rawOutput
+          .split(newlineRegex)
+          .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
+          .filter(is.truthy)
+          .forEach((ref) => {
+            remoteRenovateRefs.add(ref);
+          });
+      }
+
+      const clearCmd = ['push', '--delete', 'origin', ...remoteRenovateRefs];
+      await git.raw(clearCmd);
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ err }, `Clear Renovate refs: error`);
+    } finally {
+      remoteRenovateRefs.clear();
+    }
+  }
 }
 
 const treeItemRegex = regEx(
@@ -918,17 +986,24 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
 
 /**
  *
- * $ git cat-file -p <commit-sha>
+ * Obtain top-level items of commit tree.
+ * We don't need subtree items, so here are 2 steps only.
  *
- * > tree <tree-sha>
- * > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
- * > ...
+ * Step 1: commit SHA -> tree SHA
  *
- * $ git cat-file -p <tree-sha>
+ *   $ git cat-file -p <commit-sha>
  *
- * > 040000 tree 389400684d1f004960addc752be13097fe85d776    .devcontainer
- * > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    .editorconfig
- * > ...
+ *   > tree <tree-sha>
+ *   > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
+ *   > ...
+ *
+ * Step 2: tree SHA -> tree items (top-level)
+ *
+ *   $ git cat-file -p <tree-sha>
+ *
+ *   > 040000 tree 389400684d1f004960addc752be13097fe85d776    src
+ *   > ...
+ *   > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    package.json
  *
  */
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
