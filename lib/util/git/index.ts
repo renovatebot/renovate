@@ -953,7 +953,8 @@ export async function clearRenovateRefs(): Promise<void> {
       const remoteRenovateRefs = rawOutput
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
-        .filter(is.truthy);
+        .trim()
+        .filter((line) => line.startsWith('refs/renovate/');
 
       const pushOpts = ['--delete', 'origin', ...remoteRenovateRefs];
       await git.push(pushOpts);
