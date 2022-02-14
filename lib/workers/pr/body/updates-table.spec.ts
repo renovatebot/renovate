@@ -2,6 +2,15 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { getPrUpdatesTable } from './updates-table';
 
 describe('workers/pr/body/updates-table', () => {
+  it('checks a case where prBodyColumns are undefined', () => {
+    const configObj: BranchConfig = {
+      branchName: 'some-branch',
+      upgrades: [],
+      prBodyColumns: undefined,
+    };
+    const result = getPrUpdatesTable(configObj);
+    expect(result).toBe('');
+  });
   it('checks results for getPrUpdatesTable', () => {
     const upgrade0: BranchUpgradeConfig = {
       branchName: 'some-branch',
