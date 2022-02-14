@@ -2,7 +2,7 @@
 import { parse as _parse } from 'url';
 import parse from 'github-url-from-git';
 import moo from 'moo';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
@@ -300,7 +300,7 @@ export function extractPackageFile(
       dep.currentValue = currentValue;
       dep.depName = depName;
       dep.versioning = dockerVersioning.id;
-      dep.datasource = datasourceDocker.id;
+      dep.datasource = DockerDatasource.id;
       dep.lookupName = repository;
       dep.registryUrls = [registry];
       deps.push(dep);
