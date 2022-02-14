@@ -221,65 +221,68 @@ export class DebDatasource extends Datasource {
     return lhs.homepage === rhs.homepage;
   }
 
-  async getReleases(cfg: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fullComponentUrls: string[] = [];
-    // when specifying n repository urls, this will be called n times in each call,
-    // cfg.registryUrl is filled with the next element of cfg.registryUrls
-    const registryUrls: [string] = [cfg.registryUrl];
-    for (const aptUrl of registryUrls) {
-      let url: URL;
-      try {
-        url = new URL(aptUrl);
-      } catch (e) {
-        logger.warn('Invalid deb repo url ' + aptUrl + ' - see documentation');
-        continue;
-      }
-      if (!url.searchParams.has('components')) {
-        logger.warn(
-          'No components query parameter for deb repo url ' +
-            aptUrl +
-            ' - see documentation'
-        );
-        continue;
-      }
-
-      let release: string;
-      if (url.searchParams.has('release')) {
-        release = url.searchParams.get('release');
-      } else if (url.searchParams.has('suite')) {
-        release = url.searchParams.get('suite');
-      } else {
-        logger.warn(
-          'No release or suite query parameter for deb repo url ' +
-            aptUrl +
-            ' - see documentation'
-        );
-        continue;
-      }
-
-      if (!url.searchParams.has('binaryArch')) {
-        logger.warn(
-          'No binaryArch query parameter for deb repo url ' +
-            aptUrl +
-            ' - see documentation'
-        );
-        continue;
-      }
-      const binaryArch: string = url.searchParams.get('binaryArch');
-
-      const components = url.searchParams.get('components').split(',');
-      url.searchParams.delete('release');
-      url.searchParams.delete('suite');
-      url.searchParams.delete('components');
-      url.searchParams.delete('binaryArch');
-
-      url.pathname += '/dists/' + release;
-      for (const component of components) {
-        const newUrl = new URL(url);
-        newUrl.pathname += '/' + component + '/binary-' + binaryArch;
-        fullComponentUrls.push(newUrl.toString());
-      }
+  extractComponentUrls(registryUrl: string): string[] {
+    let url: URL;
+    try {
+      url = new URL(registryUrl);
+    } catch (e) {
+      throw new Error(
+        'Invalid deb repo url ' + registryUrl + ' - see documentation'
+      );
     }
+    if (!url.searchParams.has('components')) {
+      throw new Error(
+        'No components query parameter for deb repo url ' +
+          registryUrl +
+          ' - see documentation'
+      );
+    }
+
+    let release: string;
+    if (url.searchParams.has('release')) {
+      release = url.searchParams.get('release');
+    } else if (url.searchParams.has('suite')) {
+      release = url.searchParams.get('suite');
+    } else {
+      throw new Error(
+        'No release or suite query parameter for deb repo url ' +
+          registryUrl +
+          ' - see documentation'
+      );
+    }
+
+    if (!url.searchParams.has('binaryArch')) {
+      throw new Error(
+        'No binaryArch query parameter for deb repo url ' +
+          registryUrl +
+          ' - see documentation'
+      );
+    }
+    const binaryArch: string = url.searchParams.get('binaryArch');
+
+    const components = url.searchParams.get('components').split(',');
+    url.searchParams.delete('release');
+    url.searchParams.delete('suite');
+    url.searchParams.delete('components');
+    url.searchParams.delete('binaryArch');
+
+    url.pathname += '/dists/' + release;
+
+    const fullComponentUrls: string[] = [];
+    for (const component of components) {
+      const newUrl = new URL(url);
+      newUrl.pathname += '/' + component + '/binary-' + binaryArch;
+      fullComponentUrls.push(newUrl.toString());
+    }
+    return fullComponentUrls;
+  }
+
+  async getReleases(cfg: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // when specifying n repository urls, getReleases will be called n times in each call,
+    // cfg.registryUrl is filled with the next element of cfg.registryUrls so no need to manually
+    // use registryUrls. However, to follow along with how the sources.list file looks like,
+    // we allow multiple components per registry url.
+    const fullComponentUrls = this.extractComponentUrls(cfg.registryUrl);
 
     let release: ReleaseResult = null;
     for (let i = 0; i < fullComponentUrls.length; i++) {
