@@ -959,8 +959,9 @@ describe('platform/gitlab/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('addAssignees(issueNo, assignees)', () => {
-    it('should add the given assignees to the issue', async () => {
+    it('should add the given assignee to the issue', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
@@ -970,27 +971,17 @@ describe('platform/gitlab/index', () => {
       await gitlab.addAssignees(42, ['someuser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should warn if more than one assignee', async () => {
+    it('should add the given assignees to the issue', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
         .reply(200, [{ id: 123 }])
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
-        .put('/api/v4/projects/undefined/merge_requests/42?assignee_id=123')
-        .reply(200)
         .put(
           '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
         )
-        .replyWithError('error');
-      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should swallow error', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/users?username=someuser')
-        .replyWithError('some error');
+        .reply(200);
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -1001,12 +992,24 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 123 }])
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
-        .put('/api/v4/projects/undefined/merge_requests/42?assignee_id=123')
-        .reply(200)
         .put(
           '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
         )
+        .replyWithError('some error')
+        .get('/api/v4/users?username=someuser')
+        .reply(200, [{ id: 123 }])
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_id=123')
         .reply(200);
+      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should swallow error', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users?username=someuser')
+        .replyWithError('some error')
+        .get('/api/v4/users?username=someuser')
+        .replyWithError('some error');
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
