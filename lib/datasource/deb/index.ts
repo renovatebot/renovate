@@ -48,8 +48,6 @@ export class DebDatasource extends Datasource {
    * - components: comma separated list of components
    * - suite: stable, oldstable or other alias for a release, either this or release must be given
    * - release: buster, etc.
-   *
-   * The following query parameters are optional:
    * - binaryArch: e.g. amd64 resolves to http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
   override readonly defaultRegistryUrls = [
