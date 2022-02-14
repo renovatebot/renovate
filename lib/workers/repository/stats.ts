@@ -35,6 +35,11 @@ export function printRequestStats(): void {
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
     );
     const { hostname } = URL.parse(url);
+
+    // istanbul ignore if: TODO: fix types (#9610)
+    if (!hostname) {
+      return;
+    }
     requestHosts[hostname] = requestHosts[hostname] || [];
     requestHosts[hostname].push(httpRequest);
   }

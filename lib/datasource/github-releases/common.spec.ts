@@ -1,5 +1,4 @@
-import { getApiBaseUrl, getGithubRelease, getSourceUrlBase } from './common';
-import { GitHubReleaseMocker } from './test';
+import { getApiBaseUrl, getSourceUrlBase } from './common';
 
 describe('datasource/github-releases/common', () => {
   describe('getSourceUrlBase', () => {
@@ -22,20 +21,6 @@ describe('datasource/github-releases/common', () => {
     it('supports local github installations', () => {
       const apiUrl = getApiBaseUrl('https://gh.my-company.com/');
       expect(apiUrl).toBe('https://gh.my-company.com/api/v3/');
-    });
-  });
-
-  describe('getGithubRelease', () => {
-    const apiUrl = 'https://github.com/';
-    const lookupName = 'someDep';
-    const releaseMock = new GitHubReleaseMocker(apiUrl, lookupName);
-
-    it('returns release', async () => {
-      const version = 'v1.0.0';
-      releaseMock.release(version);
-
-      const release = await getGithubRelease(apiUrl, lookupName, version);
-      expect(release.tag_name).toBe(version);
     });
   });
 });

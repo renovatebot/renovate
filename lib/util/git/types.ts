@@ -3,7 +3,7 @@ import type { GitOptions } from '../../types/git';
 export type { DiffResult, StatusResult } from 'simple-git';
 
 export interface GitAuthor {
-  name?: string;
+  name?: string | null;
   address?: string;
 }
 
@@ -93,8 +93,16 @@ export interface SourceBranchConflict {
 }
 
 export interface CommitResult {
-  sha: string;
+  parentCommitSha: string;
+  commitSha: string;
   files: FileChange[];
+}
+
+export interface TreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: string;
 }
 
 /**

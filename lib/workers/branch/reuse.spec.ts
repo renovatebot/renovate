@@ -9,6 +9,7 @@ jest.mock('../../util/git');
 describe('workers/branch/reuse', () => {
   describe('shouldReuseExistingBranch(config)', () => {
     const pr: Pr = {
+      number: 42,
       sourceBranch: 'master',
       state: PrState.Open,
       title: 'any',

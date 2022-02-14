@@ -1,7 +1,7 @@
-import commander from 'commander';
+import { Command } from 'commander';
 import shell from 'shelljs';
 
-const program = new commander.Command();
+const program = new Command();
 program
   .version('0.0.1')
   .requiredOption('-r, --release <type>', 'Version to use')
