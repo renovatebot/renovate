@@ -60,6 +60,40 @@ describe('datasource/deb/index', () => {
       expect(modifiedTs).toEqual(ts.toUTCString());
     });
 
+    describe('parsing of registry url', () => {
+      it('returns null when registry url misses components', async () => {
+        cfg.registryUrls = [
+          'http://ftp.debian.org/debian?suite=stable&binaryArch=amd64',
+        ];
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeNull();
+      });
+
+      it('returns null when registry url misses components', async () => {
+        cfg.registryUrls = [
+          'http://ftp.debian.org/debian?suite=stable&binaryArch=amd64',
+        ];
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeNull();
+      });
+
+      it('returns null when registry url misses binaryArch', async () => {
+        cfg.registryUrls = [
+          'http://ftp.debian.org/debian?suite=stable&components=non-free',
+        ];
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeNull();
+      });
+
+      it('returns null when registry url misses suite', async () => {
+        cfg.registryUrls = [
+          'http://ftp.debian.org/debian?components=non-free&binaryArch=amd64',
+        ];
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeNull();
+      });
+    });
+
     describe('without local version', () => {
       beforeEach(() => {
         httpMock
