@@ -43,7 +43,7 @@ export function getNewValue({
   newVersion,
 }: NewValueConfig): string | null {
   let ranges: Range[];
-  let updatedRange: string[];
+  let result: string;
   if (rangeStrategy === 'pin') {
     return '==' + newVersion;
   }
@@ -69,7 +69,7 @@ export function getNewValue({
   switch (rangeStrategy) {
     case 'auto':
     case 'replace':
-      updatedRange = handleReplaceStrategy(
+      result = handleReplaceStrategy(
         {
           currentValue,
           rangeStrategy,
@@ -80,7 +80,7 @@ export function getNewValue({
       );
       break;
     case 'bump':
-      updatedRange = handleBumpStrategy(
+      result = handleBumpStrategy(
         {
           currentValue,
           rangeStrategy,
@@ -106,8 +106,6 @@ export function getNewValue({
         newVersion,
       });
   }
-
-  let result = updatedRange.filter(Boolean).join(', ');
 
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
@@ -206,7 +204,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
 function updateRangeValue(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   range: Range
-): string {
+): string | null {
   // used to exclude versions,
   // we assume that's for a good reason
   if (range.operator === '!=') {
@@ -247,41 +245,47 @@ function updateRangeValue(
 function handleReplaceStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   ranges: Range[]
-): string[] {
+): string {
   // newVersion is within range
   if (satisfies(newVersion, currentValue)) {
-    return [currentValue];
+    return currentValue;
   }
-  return ranges.map((range) =>
-    updateRangeValue(
-      {
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      },
-      range
+  return ranges
+    .map((range) =>
+      updateRangeValue(
+        {
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        },
+        range
+      )
     )
-  );
+    .filter(Boolean)
+    .join(', ');
 }
 
 function handleBumpStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   ranges: Range[]
-): string[] {
-  return ranges.map((range) => {
-    // bump lower bound to current new version
-    if (range.operator === '>=') {
-      return range.operator + newVersion;
-    }
-    return updateRangeValue(
-      {
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      },
-      range
-    );
-  });
+): string {
+  return ranges
+    .map((range) => {
+      // bump lower bound to current new version
+      if (range.operator === '>=') {
+        return range.operator + newVersion;
+      }
+      return updateRangeValue(
+        {
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        },
+        range
+      );
+    })
+    .filter(Boolean)
+    .join(', ');
 }
