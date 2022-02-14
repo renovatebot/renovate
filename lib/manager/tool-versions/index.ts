@@ -1,4 +1,4 @@
-import * as GitHubTagsDatasource from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as NpmDatasource from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 
@@ -9,7 +9,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  GitHubTagsDatasource.id,
+  GithubTagsDatasource.id,
   NpmDatasource.id,
   RubyVersionDatasource.id,
 ];

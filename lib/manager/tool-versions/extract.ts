@@ -1,6 +1,6 @@
 // Based on http://asdf-vm.com/manage/configuration.html#tool-versions
 import is from '@sindresorhus/is';
-import * as GitHubTagsDatasource from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as NpmDatasource from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { logger } from '../../logger';
@@ -25,7 +25,7 @@ const supportedDeps: Record<string, ToolVersionsDep> = {
     lookupName: 'ruby/ruby',
   },
   python: {
-    datasource: GitHubTagsDatasource.id,
+    datasource: GithubTagsDatasource.id,
     lookupName: 'python/cpython',
   },
 };
@@ -74,7 +74,7 @@ export function extractPackageFile(
       const toolVersionsDep: ToolVersionsDep = supportedDeps[depName];
 
       dep.datasource = toolVersionsDep.datasource;
-      if (dep.datasource === GitHubTagsDatasource.id) {
+      if (dep.datasource === GithubTagsDatasource.id) {
         dep.lookupName = toolVersionsDep.lookupName;
       }
 
@@ -91,7 +91,7 @@ export function extractPackageFile(
         // The version is a tag or branch name
         dep = {
           ...dep,
-          datasource: GitHubTagsDatasource.id,
+          datasource: GithubTagsDatasource.id,
           currentRawValue,
           currentDigest: currentRawValue.substr(refString.length),
           lookupName: toolVersionsDep.lookupName,
