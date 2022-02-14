@@ -42,4 +42,5 @@ export type SkipReason =
   | 'unsupported'
   | 'unversioned-reference'
   | 'version-placeholder'
-  | 'is-pinned';
+  | 'is-pinned'
+  | 'missing-depname';

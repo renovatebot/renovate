@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
@@ -14,4 +14,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Chart.yaml$'],
 };
 
-export const supportedDatasources = [datasourceDocker.id, HelmDatasource.id];
+export const supportedDatasources = [DockerDatasource.id, HelmDatasource.id];

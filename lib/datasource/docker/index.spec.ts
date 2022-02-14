@@ -4,10 +4,13 @@ import * as httpMock from '../../../test/http-mock';
 import { mocked, partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
+import { Http } from '../../util/http';
 import { MediaType } from './types';
-import { getAuthHeaders, getRegistryRepository, id } from '.';
+import { DockerDatasource, getAuthHeaders, getRegistryRepository } from '.';
 
 const hostRules = mocked(_hostRules);
+
+const http = new Http(DockerDatasource.id);
 
 jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
@@ -121,6 +124,7 @@ describe('datasource/docker/index', () => {
       });
 
       const headers = await getAuthHeaders(
+        http,
         'https://my.local.registry',
         'https://my.local.registry/prefix'
       );
@@ -138,6 +142,7 @@ Object {
       });
 
       const headers = await getAuthHeaders(
+        http,
         'https://my.local.registry',
         'https://my.local.registry/prefix'
       );
@@ -158,6 +163,7 @@ Object {
         .reply(401, '', {});
 
       const headers = await getAuthHeaders(
+        http,
         'https://my.local.registry',
         'https://my.local.registry/prefix'
       );
@@ -534,7 +540,7 @@ Object {
         .get('/library/node/tags/list?n=10000')
         .reply(403);
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
         registryUrls: ['https://docker.io'],
       });
@@ -564,7 +570,7 @@ Object {
         .get('/user/9287/repos?page=3&per_page=100')
         .reply(200, { tags: ['latest'] }, {});
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
@@ -585,7 +591,7 @@ Object {
         .get('/node/manifests/1.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -608,7 +614,7 @@ Object {
         .get('/v2/bitnami/redis/manifests/5.0.12')
         .reply(200, '', {});
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
@@ -624,7 +630,7 @@ Object {
         )
         .reply(500);
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
@@ -646,7 +652,7 @@ Object {
         .reply(200);
       expect(
         await getPkgReleases({
-          datasource: id,
+          datasource: DockerDatasource.id,
           depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
         })
       ).toEqual({
@@ -700,7 +706,7 @@ Object {
           });
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toEqual({
@@ -735,7 +741,7 @@ Object {
           });
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -766,7 +772,7 @@ Object {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -789,7 +795,7 @@ Object {
           });
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -818,7 +824,7 @@ Object {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -839,7 +845,7 @@ Object {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -862,7 +868,7 @@ Object {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -889,7 +895,7 @@ Object {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -917,7 +923,7 @@ Object {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -946,7 +952,7 @@ Object {
         )
         .reply(200, { token: 'test' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
       });
       expect(res.releases).toHaveLength(1);
@@ -974,7 +980,7 @@ Object {
         )
         .reply(200, { token: 'test' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'docker.io/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -1000,7 +1006,7 @@ Object {
         .get('/kubernetes-dashboard-amd64/manifests/1.0.0')
         .reply(200);
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
       expect(res.releases).toHaveLength(1);
@@ -1014,7 +1020,7 @@ Object {
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'my/node',
       });
       expect(res).toBeNull();
@@ -1039,7 +1045,7 @@ Object {
         .get('/token?service=registry.docker.io&scope=repository:my/node:pull')
         .reply(200, { token: 'some-token ' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'my/node',
         registryUrls: ['https://index.docker.io/'],
       });
@@ -1052,7 +1058,7 @@ Object {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -1092,7 +1098,7 @@ Object {
           },
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1128,7 +1134,7 @@ Object {
           },
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1148,7 +1154,7 @@ Object {
           mediaType: MediaType.manifestV1,
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1165,7 +1171,7 @@ Object {
         .get('/node/manifests/latest')
         .reply(200, {});
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1208,7 +1214,7 @@ Object {
           config: {},
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();

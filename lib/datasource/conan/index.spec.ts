@@ -7,7 +7,7 @@ import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
 const pocoJson = Fixtures.get('poco.json');
-const pocoYamlGitHubContent = Fixtures.get('poco.yaml.json');
+const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
 const malformedJson = Fixtures.get('malformed.json');
 const fakeJson = Fixtures.get('fake.json');
 const datasource = ConanDatasource.id;
