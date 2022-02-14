@@ -972,7 +972,7 @@ export async function clearRenovateRefs(): Promise<void> {
       remoteRenovateRefs.clear();
       await git.raw(clearCmd);
     } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, `Clear Renovate refs: error`);
+      logger.warn({ err }, `Clear Renovate refs: error`);
     }
   }
 }
