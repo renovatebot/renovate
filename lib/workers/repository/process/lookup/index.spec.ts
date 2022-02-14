@@ -6,8 +6,7 @@ import {
   partial,
 } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import * as datasourceDocker from '../../../../datasource/docker';
-import { id as datasourceDockerId } from '../../../../datasource/docker';
+import { DockerDatasource } from '../../../../datasource/docker';
 import { GitRefsDatasource } from '../../../../datasource/git-refs';
 import { GitDatasource } from '../../../../datasource/git-refs/base';
 import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
@@ -38,8 +37,7 @@ const typescriptJson = loadJsonFixture('typescript.json', fixtureRoot);
 const vueJson = loadJsonFixture('vue.json', fixtureRoot);
 const webpackJson = loadJsonFixture('webpack.json', fixtureRoot);
 
-const docker = mocked(datasourceDocker) as any;
-docker.defaultRegistryUrls = ['https://index.docker.io'];
+const docker = mocked(DockerDatasource.prototype);
 
 let config: LookupUpdateConfig;
 
@@ -1278,20 +1276,20 @@ describe('workers/repository/process/lookup/index', () => {
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
     it('skips undefined values', async () => {
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       config.pinDigests = true;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1327,7 +1325,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '8.1.0';
       config.depName = 'node';
       config.versioning = dockerVersioningId;
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '8.1.0' },
@@ -1350,7 +1348,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '8.1';
       config.depName = 'node';
       config.versioning = dockerVersioningId;
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '8.1.0' },
@@ -1376,7 +1374,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '8';
       config.depName = 'node';
       config.versioning = dockerVersioningId;
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '8.1.0' },
@@ -1398,7 +1396,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('handles digest pin for up to date version', async () => {
       config.currentValue = '8.1.0';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       config.pinDigests = true;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1425,7 +1423,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('handles digest pin for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       config.pinDigests = true;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1455,7 +1453,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('handles digest lookup failure', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       config.pinDigests = true;
       docker.getReleases.mockResolvedValueOnce({
         releases: [
@@ -1477,7 +1475,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('handles digest update', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
       docker.getReleases.mockResolvedValueOnce({
@@ -1511,7 +1509,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('handles digest update for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.datasource = datasourceDockerId;
+      config.datasource = DockerDatasource.id;
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
       docker.getReleases.mockResolvedValueOnce({
