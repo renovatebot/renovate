@@ -66,14 +66,15 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   options
     .filter((option) => option.releaseStatus !== 'unpublished')
     .forEach((option) => {
+      // TODO: fix types (#9610)
       const el: Record<string, any> = { ...option };
       let headerIndex = configOptionsRaw.indexOf(`## ${option.name}`);
       if (headerIndex === -1) {
         headerIndex = configOptionsRaw.indexOf(`### ${option.name}`);
       }
       if (bot) {
-        el.cli = getCliName(el);
-        el.env = getEnvName(el);
+        el.cli = getCliName(option);
+        el.env = getEnvName(option);
         if (el.cli === '') {
           el.cli = `N/A`;
         }

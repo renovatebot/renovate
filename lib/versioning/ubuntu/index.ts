@@ -44,7 +44,7 @@ function isStable(version: string): boolean {
 
 function getMajor(version: string): null | number {
   if (isValid(version)) {
-    const [major] = version.split('.') || [];
+    const [major] = version.split('.');
     return parseInt(major, 10);
   }
   return null;
@@ -52,7 +52,7 @@ function getMajor(version: string): null | number {
 
 function getMinor(version: string): null | number {
   if (isValid(version)) {
-    const [, minor] = version.split('.') || [];
+    const [, minor] = version.split('.');
     return parseInt(minor, 10);
   }
   return null;
@@ -60,7 +60,7 @@ function getMinor(version: string): null | number {
 
 function getPatch(version: string): null | number {
   if (isValid(version)) {
-    const [, , patch] = version.split('.') || [];
+    const [, , patch] = version.split('.');
     return patch ? parseInt(patch, 10) : null;
   }
   return null;
