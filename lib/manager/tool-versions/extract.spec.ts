@@ -17,20 +17,23 @@ describe('manager/tool-versions/extract', () => {
         deps: [
           {
             currentValue: '10.15.0',
+            currentVersion: '10.15.0',
             datasource: 'npm',
-            depName: 'nodejs',
+            depName: 'node',
           },
           {
             currentDigest: 'v1.0.2-a',
-            currentValue: 'ref:v1.0.2-a',
-            datasource: 'pypi',
+            currentRawValue: 'ref:v1.0.2-a',
+            datasource: 'github-tags',
             depName: 'python',
+            lookupName: 'python/cpython',
           },
           {
             currentDigest: '39cb398vb39',
-            currentValue: 'ref:39cb398vb39',
-            datasource: 'ruby-version',
+            currentRawValue: 'ref:39cb398vb39',
+            datasource: 'github-tags',
             depName: 'ruby',
+            lookupName: 'ruby/ruby',
           },
         ],
       });
@@ -38,7 +41,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('handles multiple version fallback dependencies', () => {
       const res = extractPackageFile(
-        Fixtures.get('.tool-versions-multiple'),
+        'python 3.7.2 2.7.15 system\n',
         'unused_file_name',
         {}
       );
@@ -46,8 +49,10 @@ describe('manager/tool-versions/extract', () => {
         deps: [
           {
             currentValue: '3.7.2',
-            datasource: 'pypi',
+            currentVersion: '3.7.2',
+            datasource: 'github-tags',
             depName: 'python',
+            lookupName: 'python/cpython',
           },
         ],
       });
@@ -55,7 +60,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('handles unsupported datasources', () => {
       const res = extractPackageFile(
-        Fixtures.get('.tool-versions-unsupported-datasource'),
+        'some-unknown-datasource 1.2.3\n',
         'unused_file_name',
         {}
       );
@@ -71,7 +76,7 @@ describe('manager/tool-versions/extract', () => {
 
     it('skips unsupported versions', () => {
       const res = extractPackageFile(
-        Fixtures.get('.tool-versions-unsupported-version'),
+        'nodejs path:/some/local/dir\nruby system\npython non-semver\n',
         'unused_file_name',
         {}
       );
@@ -80,7 +85,7 @@ describe('manager/tool-versions/extract', () => {
           {
             currentValue: 'path:/some/local/dir',
             datasource: 'npm',
-            depName: 'nodejs',
+            depName: 'node',
             skipReason: 'unsupported-version',
           },
           {
@@ -89,16 +94,19 @@ describe('manager/tool-versions/extract', () => {
             depName: 'ruby',
             skipReason: 'unsupported-version',
           },
+          {
+            currentValue: 'non-semver',
+            datasource: 'github-tags',
+            depName: 'python',
+            lookupName: 'python/cpython',
+            skipReason: 'unsupported-version',
+          },
         ],
       });
     });
 
     it('handles invalid deps', () => {
-      const res = extractPackageFile(
-        Fixtures.get('.tool-versions-invalid'),
-        'unused_file_name',
-        {}
-      );
+      const res = extractPackageFile('invalid\n', 'unused_file_name', {});
       expect(res).toBeNull();
     });
 
@@ -111,33 +119,37 @@ describe('manager/tool-versions/extract', () => {
       expect(res).toEqual([
         {
           currentValue: '2.5.3',
+          currentVersion: '2.5.3',
           datasource: 'ruby-version',
           depName: 'ruby',
         },
         {
           currentValue: '10.15.0',
+          currentVersion: '10.15.0',
           datasource: 'npm',
-          depName: 'nodejs',
+          depName: 'node',
         },
       ]);
     });
 
     it('skips deps with ignore comments', () => {
       const res = extractPackageFile(
-        Fixtures.get('.tool-versions-with-ignore-comments'),
+        'ruby 2.5.3 # This is a comment\nnodejs 10.15.0 # renovate:ignore\n',
         'unused_file_name',
         {}
       ).deps;
       expect(res).toEqual([
         {
           currentValue: '2.5.3',
+          currentVersion: '2.5.3',
           datasource: 'ruby-version',
           depName: 'ruby',
         },
         {
           currentValue: '10.15.0',
+          currentVersion: '10.15.0',
           datasource: 'npm',
-          depName: 'nodejs',
+          depName: 'node',
           skipReason: 'ignored',
         },
       ]);

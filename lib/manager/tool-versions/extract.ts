@@ -1,20 +1,32 @@
 // Based on http://asdf-vm.com/manage/configuration.html#tool-versions
+import * as GitHubTagsDatasource from '../../datasource/github-tags';
 import * as NpmDatasource from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { newlineRegex, regEx } from '../../util/regex';
+import * as semverCoerced from '../../versioning/semver-coerced';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { ToolVersionsDep } from './types';
 
 const whiteSpaceRegex = regEx(`(\\s+)`);
 const refString = 'ref:';
 
-// Mapping between supported dependency names and their datasources
-const supportedDeps: Record<string, string> = {
-  nodejs: NpmDatasource.id,
-  ruby: RubyVersionDatasource.id,
-  python: PypiDatasource.id,
+// Mapping between supported dependency names and their datasources/lookup names
+const supportedDeps: Record<string, ToolVersionsDep> = {
+  nodejs: {
+    datasource: NpmDatasource.id,
+    depName: 'node',
+    lookupName: 'nodejs',
+  },
+  ruby: {
+    datasource: RubyVersionDatasource.id,
+    lookupName: 'ruby/ruby',
+  },
+  python: {
+    datasource: GitHubTagsDatasource.id,
+    lookupName: 'python/cpython',
+  },
 };
 
 export function extractPackageFile(
@@ -27,7 +39,7 @@ export function extractPackageFile(
   const deps = content
     .split(newlineRegex)
     .map((rawline) => {
-      const dep: PackageDependency = {};
+      let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
         dep.skipReason = 'ignored';
@@ -45,7 +57,8 @@ export function extractPackageFile(
       }
 
       const depName = parts[0];
-      dep.depName = depName;
+
+      dep.depName = supportedDeps[depName]?.depName ?? depName;
 
       // Check if the datasource for this dependency is known to us
       if (!supportedDeps[depName]) {
@@ -56,19 +69,46 @@ export function extractPackageFile(
         dep.skipReason = 'unsupported-datasource';
         return dep;
       }
-      dep.datasource = supportedDeps[depName];
+
+      const toolVersionsDep: ToolVersionsDep = supportedDeps[depName];
+
+      dep.datasource = toolVersionsDep.datasource;
+      if (dep.datasource === GitHubTagsDatasource.id) {
+        dep.lookupName = toolVersionsDep.lookupName;
+      }
+
       parts.shift();
 
       // If we have multiple fallback versions in one line, take only the first one and ignore fallback versions.
-      const currentValue = parts[0];
-      dep.currentValue = currentValue;
+      const currentRawValue = parts[0];
 
-      if (currentValue === 'system' || currentValue.startsWith('path:')) {
+      if (currentRawValue === 'system' || currentRawValue.startsWith('path:')) {
         // We do not support updating 'system' or 'path:' deps
+        dep.currentValue = currentRawValue;
         dep.skipReason = 'unsupported-version';
-      } else if (currentValue.startsWith('ref:')) {
+      } else if (currentRawValue.startsWith('ref:')) {
         // The version is a tag or branch name
-        dep.currentDigest = currentValue.substr(refString.length);
+        dep = {
+          ...dep,
+          datasource: GitHubTagsDatasource.id,
+          currentRawValue,
+          currentDigest: currentRawValue.substr(refString.length),
+          lookupName: toolVersionsDep.lookupName,
+        };
+      } else if (semverCoerced.isVersion(currentRawValue)) {
+        // The version is semver-like
+        dep = {
+          ...dep,
+          currentValue: currentRawValue,
+          currentVersion: currentRawValue,
+        };
+      } else {
+        logger.debug(
+          { currentRawValue },
+          'Not a well-formed or supported version'
+        );
+        dep.currentValue = currentRawValue;
+        dep.skipReason = 'unsupported-version';
       }
 
       return dep;
