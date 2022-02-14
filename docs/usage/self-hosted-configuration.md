@@ -179,7 +179,7 @@ The format of the environment variables must follow:
 - Underscore (`_`)
 - `matchHost`
 - Underscore (`_`)
-- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
+- Field name (`TOKEN`, `USERNAME`, or `PASSWORD`)
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
@@ -280,6 +280,16 @@ e.g.
 }
 ```
 
+If you use `binarySource=docker|install` read the section below.
+
+If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you'll get in trouble with missing file and directory permissions.
+
+Like this:
+
+```
+> export RENOVATE_DOCKER_USER="$(id -u):0" # 500:0 (username:root)
+```
+
 ## dryRun
 
 ## endpoint
@@ -352,6 +362,13 @@ Possible values:
 - `default`: use HTTPS URLs provided by the platform for Git
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
+## globalExtends
+
+Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.
+Therefore you need to use this field if your preset contains any global-only configuration options, such as the list of repositories to run against.
+
+Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
 ## logContext
 

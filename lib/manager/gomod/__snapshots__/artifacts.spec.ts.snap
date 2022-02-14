@@ -286,9 +286,9 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GIT_CONFIG_COUNT": "3",
-        "GIT_CONFIG_KEY_0": "url.\\"https://ssh:some-token@github.com/\\".insteadOf",
-        "GIT_CONFIG_KEY_1": "url.\\"https://git:some-token@github.com/\\".insteadOf",
-        "GIT_CONFIG_KEY_2": "url.\\"https://some-token@github.com/\\".insteadOf",
+        "GIT_CONFIG_KEY_0": "url.https://ssh:some-token@github.com/.insteadOf",
+        "GIT_CONFIG_KEY_1": "url.https://git:some-token@github.com/.insteadOf",
+        "GIT_CONFIG_KEY_2": "url.https://some-token@github.com/.insteadOf",
         "GIT_CONFIG_VALUE_0": "ssh://git@github.com/",
         "GIT_CONFIG_VALUE_1": "git@github.com:",
         "GIT_CONFIG_VALUE_2": "https://github.com/",
