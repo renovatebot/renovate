@@ -4,7 +4,7 @@ import { fs, logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
 import * as _configParser from './config/parse';
@@ -81,7 +81,7 @@ describe('workers/global/index', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
           username: 'some-user',
           password: 'some-password',
         },
@@ -100,7 +100,7 @@ describe('workers/global/index', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
           username: 'some-user',
           password: 'some-password',
         },

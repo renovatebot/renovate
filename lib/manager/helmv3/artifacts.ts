@@ -2,7 +2,7 @@ import yaml from 'js-yaml';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
@@ -44,7 +44,7 @@ async function helmCommands(
         repository: value.repository.replace('oci://', ''),
         hostRule: hostRules.find({
           url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
         }),
       };
     });
