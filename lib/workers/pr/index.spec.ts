@@ -297,6 +297,7 @@ describe('workers/pr/index', () => {
           displayTo: 'aaaaaaa',
           prBodyNotes: ['note 1', 'note 2'],
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
           },
         },
@@ -307,19 +308,24 @@ describe('workers/pr/index', () => {
           displayTo: 'some_new_value',
           updateType: 'pin',
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+            Update: '{{{updateType}}}',
           },
         },
         {
           depName: 'c',
           gitRef: 'ccccccc',
-          prBodyDefinitions: {},
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+          },
         },
         {
           depName: 'd',
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
           },
         },
@@ -328,6 +334,7 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
           },
         },
@@ -336,6 +343,7 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
           },
         },
@@ -344,6 +352,7 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
           },
         },
@@ -352,6 +361,7 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
           prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
             Update: '{{{updateType}}}',
           },
         },
