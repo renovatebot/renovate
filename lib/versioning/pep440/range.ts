@@ -176,6 +176,7 @@ function handleLowerBound(range: Range, newVersion: string): string | null {
     // otherwise, treat it same as exclude
     return range.operator + range.version;
   }
+  // istanbul ignore next
   return null;
 }
 
@@ -192,6 +193,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
     // otherwise, treat it same as exclude
     return range.operator + range.version;
   }
+  // istanbul ignore next
   return null;
 }
 
@@ -217,13 +219,13 @@ function updateRangeValue(
     return range.operator + newVersion;
   }
 
-  let output = handleUpperBound(range, newVersion);
+  let output = handleUpperBound(range, newVersion) ?? '';
   if (output) {
     // manged to update upperbound
     // no need to try anything else
     return output;
   }
-  output = handleLowerBound(range, newVersion);
+  output = handleLowerBound(range, newVersion) ?? '';
   if (output) {
     return output;
   }
