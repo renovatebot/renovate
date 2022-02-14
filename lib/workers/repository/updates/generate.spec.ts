@@ -74,7 +74,6 @@ describe('workers/repository/updates/generate', () => {
         lockedVersion: '1.0.0',
         newValue: '^1.0.0',
         newVersion: '1.0.1',
-        prBodyColumns: [],
         reuseLockFiles: true,
         upgrades: [
           {

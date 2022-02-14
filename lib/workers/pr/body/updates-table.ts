@@ -38,10 +38,9 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
-  const headers = config.prBodyColumns;
   const tableValues = config.upgrades.map((upgrade) => {
     const res: Record<string, string> = {};
-    const rowDefinition = getRowDefinition(headers, upgrade);
+    const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
     for (const column of rowDefinition) {
       const { header, value } = column;
       try {
@@ -60,7 +59,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     return res;
   });
 
-  const tableColumns = getNonEmptyColumns(headers, tableValues);
+  const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';
