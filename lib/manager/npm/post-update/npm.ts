@@ -13,18 +13,19 @@ import {
   move,
   readLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
-  cwd: string,
+  lockFileDir: string,
   env: NodeJS.ProcessEnv,
-  filename: string,
+  fileName: string,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
+  logger.debug(`Spawning npm install to create ${lockFileDir}/${fileName}`);
   const { skipInstalls, postUpdateOptions } = config;
 
   let lockFile = null;
@@ -49,7 +50,7 @@ export async function generateLockFile(
 
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwd: lockFileDir,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
@@ -96,7 +97,7 @@ export async function generateLockFile(
     }
 
     // TODO: don't assume package-lock.json is in the same directory
-    const lockFileName = upath.join(cwd, filename);
+    const lockFileName = upath.join(lockFileDir, fileName);
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
@@ -117,14 +118,17 @@ export async function generateLockFile(
 
     // massage to shrinkwrap if necessary
     if (
-      filename === 'npm-shrinkwrap.json' &&
+      fileName === 'npm-shrinkwrap.json' &&
       (await localPathExists(
-        lockFileName.replace(regex('(?:^|\/)npm-shrinkwrap\.json$'), 'package-lock.json')
+        lockFileName.replace(
+          regEx('(?:^|/)npm-shrinkwrap.json$'),
+          'package-lock.json'
+        )
       ))
     ) {
       await move(
-        upath.join(cwd, 'package-lock.json'),
-        upath.join(cwd, 'npm-shrinkwrap.json')
+        upath.join(lockFileDir, 'package-lock.json'),
+        upath.join(lockFileDir, 'npm-shrinkwrap.json')
       );
     }
 

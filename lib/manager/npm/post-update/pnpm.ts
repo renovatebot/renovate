@@ -10,12 +10,12 @@ import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
-  cwd: string,
+  lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = upath.join(cwd, 'pnpm-lock.yaml');
+  const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
@@ -32,7 +32,7 @@ export async function generateLockFile(
     };
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwd: lockFileDir,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
