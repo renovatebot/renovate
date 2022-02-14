@@ -62,7 +62,7 @@ export function getNewValue({
       return currentValue;
     }
   } catch (error) {
-    logger.warn({ currentValue }, (<Error>error).message);
+    logger.warn({ currentValue }, (error as Error).message);
     return null;
   }
 
@@ -166,11 +166,6 @@ function parseCurrentRange(currentValue: string): Range[] {
 }
 
 function handleLowerBound(range: Range, newVersion: string): string | null {
-  // used to exclude versions,
-  // we assume that's for a good reason
-  if (range.operator === '!=') {
-    return range.operator + range.version;
-  }
   // used to mark minimum supported version
   // lower the bound if the new version is lower than current range
   if (['>', '>='].includes(range.operator)) {
@@ -200,12 +195,28 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
   return null;
 }
 
-function nonPolicySpecific(
+function updateRangeValue(
   newVersion: string,
   currentValue: string,
   currentVersion: string,
   range: Range
 ): string {
+  // used to exclude versions,
+  // we assume that's for a good reason
+  if (range.operator === '!=') {
+    return range.operator + range.version;
+  }
+
+  // keep the .* suffix
+  if (range.prefix) {
+    const futureVersion = getFutureVersion(range.version, newVersion, 0);
+    return range.operator + futureVersion + '.*';
+  }
+
+  if (['==', '~=', '<='].includes(range.operator)) {
+    return range.operator + newVersion;
+  }
+
   let output = handleUpperBound(range, newVersion);
   if (output) {
     // manged to update upperbound
@@ -215,15 +226,6 @@ function nonPolicySpecific(
   output = handleLowerBound(range, newVersion);
   if (output) {
     return output;
-  }
-  // keep the .* suffix
-  if (range.prefix) {
-    const futureVersion = getFutureVersion(range.version, newVersion, 0);
-    return range.operator + futureVersion + '.*';
-  }
-
-  if (['==', '~=', '<='].includes(range.operator)) {
-    return range.operator + newVersion;
   }
 
   // unless PEP440 changes, this won't happen
@@ -247,7 +249,7 @@ function handleReplaceStrategy(
     return [currentValue];
   }
   return ranges.map((range) =>
-    nonPolicySpecific(newVersion, currentValue, currentVersion, range)
+    updateRangeValue(newVersion, currentValue, currentVersion, range)
   );
 }
 
@@ -262,6 +264,6 @@ function handleBumpStrategy(
     if (range.operator === '>=') {
       return range.operator + newVersion;
     }
-    return nonPolicySpecific(newVersion, currentValue, currentVersion, range);
+    return updateRangeValue(newVersion, currentValue, currentVersion, range);
   });
 }
