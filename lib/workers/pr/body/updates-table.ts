@@ -40,8 +40,7 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
-  const prBodyColumns = config.prBodyColumns;
-  if (prBodyColumns === undefined) {
+  if (config.prBodyColumns === undefined) {
     logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
     return '';
   }
@@ -49,7 +48,10 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     .filter((upgrade) => upgrade !== undefined)
     .map((upgrade) => {
       const res: Record<string, string> = {};
-      const rowDefinition = getRowDefinition(prBodyColumns ?? [], upgrade);
+      const rowDefinition = getRowDefinition(
+        config.prBodyColumns ?? [],
+        upgrade
+      );
       for (const column of rowDefinition) {
         const { header, value } = column;
         try {
@@ -67,7 +69,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
       }
       return res;
     });
-  const tableColumns = getNonEmptyColumns(prBodyColumns, tableValues);
+  const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';
