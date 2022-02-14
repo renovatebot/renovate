@@ -22,6 +22,28 @@ describe('config/migrations/custom/path-rules-migration', () => {
     );
   });
 
+  it('should rewrite packageRules when it is not array', () => {
+    expect(PathRulesMigration).toMigrate(
+      {
+        packageRules: 'test',
+        pathRules: [
+          {
+            paths: ['examples/**'],
+            extends: ['foo'],
+          },
+        ],
+      } as any,
+      {
+        packageRules: [
+          {
+            paths: ['examples/**'],
+            extends: ['foo'],
+          },
+        ],
+      }
+    );
+  });
+
   it('should not migrate non array value', () => {
     expect(PathRulesMigration).toMigrate(
       {
