@@ -56,7 +56,7 @@ export interface Pr {
   hasAssignees?: boolean;
   hasReviewers?: boolean;
   labels?: string[];
-  number?: number;
+  number: number;
   reviewers?: string[];
   sha?: string;
   sourceRepo?: string;
@@ -127,7 +127,7 @@ export interface MergePRConfig {
 }
 export interface EnsureCommentConfig {
   number: number;
-  topic: string;
+  topic: string | null;
   content: string;
 }
 

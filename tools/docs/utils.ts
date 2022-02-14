@@ -19,7 +19,7 @@ export function getDisplayName(
   moduleName: string,
   moduleDefinition: ModuleApi
 ): string {
-  return moduleDefinition.displayName || formatName(moduleName);
+  return moduleDefinition.displayName ?? formatName(moduleName);
 }
 
 export function getNameWithUrl(

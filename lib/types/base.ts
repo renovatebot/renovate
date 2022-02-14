@@ -7,4 +7,5 @@ export interface ModuleApi {
 
 export type RenovatePackageJson = PackageJson & {
   'engines-next': Record<string, string>;
+  version: string;
 };

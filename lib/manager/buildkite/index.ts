@@ -1,4 +1,4 @@
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
@@ -10,4 +10,4 @@ export const defaultConfig = {
     'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}',
 };
 
-export const supportedDatasources = [datasourceGithubTags.id];
+export const supportedDatasources = [GithubTagsDatasource.id];
