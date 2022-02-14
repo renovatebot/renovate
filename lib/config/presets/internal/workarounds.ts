@@ -12,6 +12,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
+      'workarounds:doNotUpgradeFromAlpineStableToEdge',
     ],
   },
   mavenCommonsAncientVersion: {
