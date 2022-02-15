@@ -118,7 +118,7 @@ export async function generateLockFile(
     // massage to shrinkwrap if necessary
     if (
       fileName === 'npm-shrinkwrap.json' &&
-      (await localPathExists(upath.join(lockFileDir, 'npm-shrinkwrap.json')))
+      (await localPathExists(upath.join(lockFileDir, 'package-lock.json')))
     ) {
       await move(
         upath.join(lockFileDir, 'package-lock.json'),
