@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
-import * as datasourceMaven from '../../../datasource/maven';
+import { MavenDatasource } from '../../../datasource/maven';
 import type { PackageFile } from '../../../manager/types';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
@@ -57,7 +57,7 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: datasourceMaven.id, depName: 'bbb' }],
+            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
           },
         ],
       };

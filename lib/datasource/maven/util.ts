@@ -4,26 +4,17 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http, HttpResponse } from '../../util/http';
+import type { Http, HttpResponse } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
-import { MAVEN_REPO, id } from './common';
+import { MAVEN_REPO } from './common';
 import type {
   HttpResourceCheckResult,
   MavenDependency,
   MavenXml,
 } from './types';
-
-const http: Record<string, Http> = {};
-
-function httpByHostType(hostType: string): Http {
-  if (!http[hostType]) {
-    http[hostType] = new Http(hostType);
-  }
-  return http[hostType];
-}
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -65,13 +56,12 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 }
 
 export async function downloadHttpProtocol(
-  pkgUrl: url.URL | string,
-  hostType = id
+  http: Http,
+  pkgUrl: url.URL | string
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
-    const httpClient = httpByHostType(hostType);
-    raw = await httpClient.get(pkgUrl.toString());
+    raw = await http.get(pkgUrl.toString());
     return raw;
   } catch (err) {
     const failedUrl = pkgUrl.toString();
@@ -82,7 +72,7 @@ export async function downloadHttpProtocol(
       logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
       // istanbul ignore next
-      logger.debug({ failedUrl }, `Cannot connect to ${hostType} host`);
+      logger.debug({ failedUrl }, `Cannot connect to host`);
     } else if (isPermissionsIssue(err)) {
       logger.debug(
         { failedUrl },
@@ -107,12 +97,11 @@ export async function downloadHttpProtocol(
 }
 
 export async function checkHttpResource(
-  pkgUrl: url.URL | string,
-  hostType = id
+  http: Http,
+  pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
-    const httpClient = httpByHostType(hostType);
-    const res = await httpClient.head(pkgUrl.toString());
+    const res = await http.head(pkgUrl.toString());
     const timestamp = res?.headers?.['last-modified'];
     if (timestamp) {
       const isoTimestamp = normalizeDate(timestamp);
@@ -151,6 +140,7 @@ export function getMavenUrl(
 }
 
 export async function downloadMavenXml(
+  http: Http,
   pkgUrl: url.URL | null
 ): Promise<MavenXml> {
   /* istanbul ignore if */
@@ -167,7 +157,7 @@ export async function downloadMavenXml(
         authorization,
         body: rawContent,
         statusCode,
-      } = await downloadHttpProtocol(pkgUrl));
+      } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
@@ -200,6 +190,7 @@ export function getDependencyParts(lookupName: string): MavenDependency {
 }
 
 export async function getDependencyInfo(
+  http: Http,
   dependency: MavenDependency,
   repoUrl: string,
   version: string,
@@ -209,7 +200,7 @@ export async function getDependencyInfo(
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const { xml: pomContent } = await downloadMavenXml(pomUrl);
+  const { xml: pomContent } = await downloadMavenXml(http, pomUrl);
   // istanbul ignore if
   if (!pomContent) {
     return result;
@@ -249,6 +240,7 @@ export async function getDependencyInfo(
       const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
       const parentDependency = getDependencyParts(parentDisplayId);
       const parentInformation = await getDependencyInfo(
+        http,
         parentDependency,
         repoUrl,
         parentVersion,
