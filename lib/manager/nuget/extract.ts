@@ -1,6 +1,6 @@
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
 import { GlobalConfig } from '../../config/global';
-import * as datasourceNuget from '../../datasource/nuget';
+import { NugetDatasource } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { hasKey } from '../../util/object';
@@ -54,7 +54,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
         ?.groups?.currentValue?.trim();
       if (depName && currentValue) {
         results.push({
-          datasource: datasourceNuget.id,
+          datasource: NugetDatasource.id,
           depType: 'nuget',
           depName,
           currentValue,
@@ -103,7 +103,7 @@ export async function extractPackageFile(
         depType: 'nuget',
         depName,
         currentValue,
-        datasource: datasourceNuget.id,
+        datasource: NugetDatasource.id,
       };
       if (registryUrls) {
         dep.registryUrls = registryUrls;

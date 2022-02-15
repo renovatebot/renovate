@@ -30,13 +30,19 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   }
   const isApp =
     composerJsonType &&
-    !['library', 'metapackage', 'composer-plugin'].includes(composerJsonType);
+    ![
+      'library',
+      'metapackage',
+      'composer-plugin',
+      'symfony-bundle',
+      'typo3-cms-extension',
+    ].includes(composerJsonType);
   if (isApp && depType === 'require') {
     // Pin dependencies if it's an app/project
     logger.trace({ dependency: depName }, 'Pinning app require');
     return 'pin';
   }
-  if (isComplexRange) {
+  if (isComplexRange || ['typo3-cms-extension'].includes(composerJsonType)) {
     return 'widen';
   }
   return 'replace';

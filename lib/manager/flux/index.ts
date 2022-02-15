@@ -1,4 +1,4 @@
-import { id as GithubReleasesId } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { systemManifestRegex } from './common';
 
@@ -9,4 +9,7 @@ export const defaultConfig = {
   fileMatch: [systemManifestRegex],
 };
 
-export const supportedDatasources = [GithubReleasesId, HelmDatasource.id];
+export const supportedDatasources = [
+  GithubReleasesDatasource.id,
+  HelmDatasource.id,
+];

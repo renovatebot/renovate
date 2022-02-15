@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
@@ -7,4 +7,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const supportedDatasources = [datasourceDocker.id];
+export const supportedDatasources = [DockerDatasource.id];
