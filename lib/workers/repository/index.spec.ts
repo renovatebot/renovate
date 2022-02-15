@@ -3,7 +3,7 @@ import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import * as _process from './process';
-import { ExtractResult } from './process/extract-update';
+import type { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
 
 const process = mocked(_process);

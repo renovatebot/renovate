@@ -1,6 +1,6 @@
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { newlineRegex, regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
@@ -47,7 +47,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               depName: gitPluginName,
               currentValue: currentValue,
               registryUrls: ['https://' + registry],
-              datasource: datasourceGithubTags.id,
+              datasource: GithubTagsDatasource.id,
             };
             deps.push(dep);
             continue;
@@ -77,7 +77,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             skipReason,
           };
           if (repo) {
-            dep.datasource = datasourceGithubTags.id;
+            dep.datasource = GithubTagsDatasource.id;
             dep.lookupName = repo;
           }
           deps.push(dep);

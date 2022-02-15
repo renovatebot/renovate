@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { PlatformId } from '../../constants';
-import { id as githubTagsId } from '../../datasource/github-tags';
-import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
+import type { SkipReason } from '../../types';
 import { find } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -12,7 +12,7 @@ import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
 } from './parsing';
-import { PreCommitConfig } from './types';
+import type { PreCommitConfig } from './types';
 
 function isEmptyObject(obj: any): boolean {
   return Object.keys(obj).length === 0 && obj.constructor === Object;
@@ -34,11 +34,11 @@ function determineDatasource(
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
   if (hostname === 'github.com') {
     logger.debug({ repository, hostname }, 'Found github dependency');
-    return { datasource: githubTagsId };
+    return { datasource: GithubTagsDatasource.id };
   }
   if (hostname === 'gitlab.com') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
-    return { datasource: gitlabTagsId };
+    return { datasource: GitlabTagsDatasource.id };
   }
   const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
@@ -51,9 +51,9 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    [PlatformId.Gitea, gitlabTagsId],
-    [PlatformId.Github, githubTagsId],
-    [PlatformId.Gitlab, gitlabTagsId],
+    [PlatformId.Gitea, GitlabTagsDatasource.id],
+    [PlatformId.Github, GithubTagsDatasource.id],
+    [PlatformId.Gitlab, GitlabTagsDatasource.id],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(

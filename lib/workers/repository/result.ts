@@ -23,8 +23,8 @@ type ProcessStatus = 'disabled' | 'enabled' | 'onboarding' | 'unknown';
 export interface ProcessResult {
   res: string;
   status: ProcessStatus;
-  enabled: boolean;
-  onboarded: boolean;
+  enabled: boolean | undefined;
+  onboarded: boolean | undefined;
 }
 
 export function processResult(
@@ -49,8 +49,8 @@ export function processResult(
   ];
   const enabledStatuses = [CONFIG_SECRETS_EXPOSED, CONFIG_VALIDATION];
   let status: ProcessStatus;
-  let enabled: boolean;
-  let onboarded: boolean;
+  let enabled: boolean | undefined;
+  let onboarded: boolean | undefined;
   // istanbul ignore next
   if (disabledStatuses.includes(res)) {
     status = 'disabled';

@@ -15,8 +15,9 @@ function hashicorp2npm(input: string): string {
   return input.replace(regEx(/~>(\s*\d+\.\d+$)/), '^$1').replace(',', '');
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(hashicorp2npm(version), hashicorp2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return !!npm.isLessThanRange?.(hashicorp2npm(version), hashicorp2npm(range));
+}
 
 export const isValid = (input: string): boolean =>
   !!input && npm.isValid(hashicorp2npm(input));
@@ -24,29 +25,42 @@ export const isValid = (input: string): boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.getSatisfyingVersion(
+    versions.map(hashicorp2npm),
+    hashicorp2npm(range)
+  );
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.minSatisfyingVersion(
+    versions.map(hashicorp2npm),
+    hashicorp2npm(range)
+  );
+}
 
 function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   if (['replace', 'update-lockfile'].includes(rangeStrategy)) {
-    if (
-      regEx(/~>\s*0\.\d+/).test(currentValue) &&
-      npm.getMajor(newVersion) === 0
-    ) {
+    const minor = npm.getMinor(newVersion);
+    const major = npm.getMajor(newVersion);
+    if (regEx(/~>\s*0\.\d+/).test(currentValue) && major === 0 && minor) {
       const testFullVersion = regEx(/(~>\s*0\.)(\d+)\.\d$/);
       let replaceValue = '';
       if (testFullVersion.test(currentValue)) {
-        replaceValue = `$<prefix>${npm.getMinor(newVersion)}.0`;
+        replaceValue = `$<prefix>${minor}.0`;
       } else {
-        replaceValue = `$<prefix>${npm.getMinor(newVersion)}$<suffix>`;
+        replaceValue = `$<prefix>${minor}$<suffix>`;
       }
       return currentValue.replace(
         regEx(`(?<prefix>~>\\s*0\\.)\\d+(?<suffix>.*)$`),
@@ -54,10 +68,10 @@ function getNewValue({
       );
     }
     // handle special ~> 1.2 case
-    if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
+    if (major && regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
         regEx(`(?<prefix>~>\\s*)\\d+\\.\\d+$`),
-        `$<prefix>${npm.getMajor(newVersion)}.0`
+        `$<prefix>${major}.0`
       );
     }
   }

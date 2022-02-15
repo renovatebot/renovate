@@ -41,4 +41,14 @@ describe('manager/composer/range', () => {
     const config: RangeConfig = { rangeStrategy: 'auto', depType: 'require' };
     expect(getRangeStrategy(config)).toBe('replace');
   });
+  it('defaults to widen for TYPO3 extensions', () => {
+    const config: RangeConfig = {
+      managerData: {
+        composerJsonType: 'typo3-cms-extension',
+      },
+      rangeStrategy: 'auto',
+      depType: 'require',
+    };
+    expect(getRangeStrategy(config)).toBe('widen');
+  });
 });

@@ -1,6 +1,6 @@
 import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
-import { HelmDockerImageDependency } from './types';
+import type { HelmDockerImageDependency } from './types';
 
 const parentKeyRe = regEx(/image$/i);
 

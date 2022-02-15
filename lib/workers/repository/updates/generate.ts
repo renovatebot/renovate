@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
 import semver from 'semver';
@@ -305,6 +306,14 @@ export function generateBranchConfig(
   config.dependencyDashboardPrApproval = config.upgrades.some(
     (upgrade) => upgrade.prCreation === 'approval'
   );
+  config.prBodyColumns = [
+    ...new Set(
+      config.upgrades.reduce(
+        (existing, upgrade) => existing.concat(upgrade.prBodyColumns),
+        []
+      )
+    ),
+  ].filter(is.nonEmptyString);
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   // combine all labels
   config.labels = [

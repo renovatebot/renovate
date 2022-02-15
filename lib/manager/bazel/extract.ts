@@ -2,9 +2,9 @@
 import { parse as _parse } from 'url';
 import parse from 'github-url-from-git';
 import moo from 'moo';
-import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGithubReleases from '../../datasource/github-releases';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { DockerDatasource } from '../../datasource/docker';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
@@ -26,11 +26,11 @@ function parseUrl(urlString: string): UrlParsedResult | null {
   let datasource: string;
   let currentValue: string = null;
   if (path[2] === 'releases' && path[3] === 'download') {
-    datasource = datasourceGithubReleases.id;
+    datasource = GithubReleasesDatasource.id;
     currentValue = path[4];
   }
   if (path[2] === 'archive') {
-    datasource = datasourceGithubTags.id;
+    datasource = GithubTagsDatasource.id;
     currentValue = path[3];
     // Strip archive extension to get hash or tag.
     // Tolerates formats produced by Git(Hub|Lab) and allowed by http_archive
@@ -241,7 +241,7 @@ export function extractPackageFile(
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
-        dep.datasource = datasourceGithubReleases.id;
+        dep.datasource = GithubReleasesDatasource.id;
         dep.lookupName = repo;
         deps.push(dep);
       }
@@ -300,7 +300,7 @@ export function extractPackageFile(
       dep.currentValue = currentValue;
       dep.depName = depName;
       dep.versioning = dockerVersioning.id;
-      dep.datasource = datasourceDocker.id;
+      dep.datasource = DockerDatasource.id;
       dep.lookupName = repository;
       dep.registryUrls = [registry];
       deps.push(dep);
