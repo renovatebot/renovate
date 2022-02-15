@@ -1,126 +1,136 @@
 import { logger } from '../../logger';
+import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { downloadHttpProtocol } from '../maven/util';
-import {
-  getArtifactSubdirs,
-  getLatestVersion,
-  getPackageReleases,
-  getUrls,
-} from '../sbt-package';
+import { SbtPackageDatasource } from '../sbt-package';
+import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 
-export const id = 'sbt-plugin';
-export const customRegistrySupport = true;
+export const SBT_PLUGINS_REPO =
+  'https://dl.bintray.com/sbt/sbt-plugin-releases';
+
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
-export const defaultVersioning = ivyVersioning.id;
-export const registryStrategy = 'hunt';
 
-async function resolvePluginReleases(
-  rootUrl: string,
-  artifact: string,
-  scalaVersion: string
-): Promise<string[] | null> {
-  const searchRoot = `${rootUrl}/${artifact}`;
-  const parse = (content: string): string[] =>
-    parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
-  const { body: indexContent } = await downloadHttpProtocol(
-    ensureTrailingSlash(searchRoot),
-    'sbt'
-  );
-  if (indexContent) {
-    const releases: string[] = [];
-    const scalaVersionItems = parse(indexContent);
-    const scalaVersions = scalaVersionItems.map((x) =>
-      x.replace(regEx(/^scala_/), '')
+export class SbtPluginDatasource extends SbtPackageDatasource {
+  static override readonly id = 'sbt-plugin';
+
+  override readonly defaultRegistryUrls = defaultRegistryUrls;
+
+  override readonly registryStrategy = 'hunt';
+
+  override readonly defaultVersioning = ivyVersioning.id;
+
+  constructor() {
+    super(SbtPluginDatasource.id);
+    this.http = new Http('sbt');
+  }
+
+  async resolvePluginReleases(
+    rootUrl: string,
+    artifact: string,
+    scalaVersion: string
+  ): Promise<string[] | null> {
+    const searchRoot = `${rootUrl}/${artifact}`;
+    const parse = (content: string): string[] =>
+      parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
+    const { body: indexContent } = await downloadHttpProtocol(
+      this.http,
+      ensureTrailingSlash(searchRoot)
     );
-    const searchVersions = scalaVersions.includes(scalaVersion)
-      ? [scalaVersion]
-      : scalaVersions;
-    for (const searchVersion of searchVersions) {
-      const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
-      const { body: subRootContent } = await downloadHttpProtocol(
-        ensureTrailingSlash(searchSubRoot),
-        'sbt'
+    if (indexContent) {
+      const releases: string[] = [];
+      const scalaVersionItems = parse(indexContent);
+      const scalaVersions = scalaVersionItems.map((x) =>
+        x.replace(regEx(/^scala_/), '')
       );
-      if (subRootContent) {
-        const sbtVersionItems = parse(subRootContent);
-        for (const sbtItem of sbtVersionItems) {
-          const releasesRoot = `${searchSubRoot}/${sbtItem}`;
-          const { body: releasesIndexContent } = await downloadHttpProtocol(
-            ensureTrailingSlash(releasesRoot),
-            'sbt'
-          );
-          if (releasesIndexContent) {
-            const releasesParsed = parse(releasesIndexContent);
-            releasesParsed.forEach((x) => releases.push(x));
+      const searchVersions = scalaVersions.includes(scalaVersion)
+        ? [scalaVersion]
+        : scalaVersions;
+      for (const searchVersion of searchVersions) {
+        const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
+        const { body: subRootContent } = await downloadHttpProtocol(
+          this.http,
+          ensureTrailingSlash(searchSubRoot)
+        );
+        if (subRootContent) {
+          const sbtVersionItems = parse(subRootContent);
+          for (const sbtItem of sbtVersionItems) {
+            const releasesRoot = `${searchSubRoot}/${sbtItem}`;
+            const { body: releasesIndexContent } = await downloadHttpProtocol(
+              this.http,
+              ensureTrailingSlash(releasesRoot)
+            );
+            if (releasesIndexContent) {
+              const releasesParsed = parse(releasesIndexContent);
+              releasesParsed.forEach((x) => releases.push(x));
+            }
           }
         }
       }
+      if (releases.length) {
+        return [...new Set(releases)].sort(compare);
+      }
     }
-    if (releases.length) {
-      return [...new Set(releases)].sort(compare);
-    }
-  }
-  return null;
-}
-
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!registryUrl) {
     return null;
   }
 
-  const [groupId, artifactId] = lookupName.split(':');
-  const groupIdSplit = groupId.split('.');
-  const artifactIdSplit = artifactId.split('_');
-  const [artifact, scalaVersion] = artifactIdSplit;
+  override async getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
 
-  const repoRoot = ensureTrailingSlash(registryUrl);
-  const searchRoots: string[] = [];
-  // Optimize lookup order
-  searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
-  searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
+    const [groupId, artifactId] = lookupName.split(':');
+    const groupIdSplit = groupId.split('.');
+    const artifactIdSplit = artifactId.split('_');
+    const [artifact, scalaVersion] = artifactIdSplit;
 
-  for (let idx = 0; idx < searchRoots.length; idx += 1) {
-    const searchRoot = searchRoots[idx];
-    let versions = await resolvePluginReleases(
-      searchRoot,
-      artifact,
-      scalaVersion
-    );
-    let urls = {};
+    const repoRoot = ensureTrailingSlash(registryUrl);
+    const searchRoots: string[] = [];
+    // Optimize lookup order
+    searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
+    searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
 
-    if (!versions?.length) {
-      const artifactSubdirs = await getArtifactSubdirs(
+    for (let idx = 0; idx < searchRoots.length; idx += 1) {
+      const searchRoot = searchRoots[idx];
+      let versions = await this.resolvePluginReleases(
         searchRoot,
         artifact,
         scalaVersion
       );
-      versions = await getPackageReleases(searchRoot, artifactSubdirs);
-      const latestVersion = getLatestVersion(versions);
-      urls = await getUrls(searchRoot, artifactSubdirs, latestVersion);
+      let urls = {};
+
+      if (!versions?.length) {
+        const artifactSubdirs = await this.getArtifactSubdirs(
+          searchRoot,
+          artifact,
+          scalaVersion
+        );
+        versions = await this.getPackageReleases(searchRoot, artifactSubdirs);
+        const latestVersion = getLatestVersion(versions);
+        urls = await this.getUrls(searchRoot, artifactSubdirs, latestVersion);
+      }
+
+      const dependencyUrl = `${searchRoot}/${artifact}`;
+
+      if (versions) {
+        return {
+          ...urls,
+          dependencyUrl,
+          releases: versions.map((v) => ({ version: v })),
+        };
+      }
     }
 
-    const dependencyUrl = `${searchRoot}/${artifact}`;
-
-    if (versions) {
-      return {
-        ...urls,
-        dependencyUrl,
-        releases: versions.map((v) => ({ version: v })),
-      };
-    }
+    logger.debug(
+      `No versions found for ${lookupName} in ${searchRoots.length} repositories`
+    );
+    return null;
   }
-
-  logger.debug(
-    `No versions found for ${lookupName} in ${searchRoots.length} repositories`
-  );
-  return null;
 }

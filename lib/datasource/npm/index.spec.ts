@@ -5,7 +5,9 @@ import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
-import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
+import { NpmDatasource, getNpmrc, resetCache, setNpmrc } from '.';
+
+const datasource = NpmDatasource.id;
 
 jest.mock('registry-auth-token');
 jest.mock('delay');

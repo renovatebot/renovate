@@ -1,6 +1,6 @@
 import { defaultConfig, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
-import * as datasourceNpm from '../../../datasource/npm';
+import { NpmDatasource } from '../../../datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
@@ -502,7 +502,7 @@ describe('workers/repository/updates/generate', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: '@types/some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -515,7 +515,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -525,7 +525,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -570,7 +570,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
