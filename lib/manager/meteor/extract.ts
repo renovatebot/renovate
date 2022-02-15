@@ -1,4 +1,4 @@
-import { id as npmId } from '../../datasource/npm';
+import { NpmDatasource } from '../../datasource/npm';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         return {
           depName,
           currentValue,
-          datasource: npmId,
+          datasource: NpmDatasource.id,
         };
       })
       .filter((dep) => dep.depName && dep.currentValue);
