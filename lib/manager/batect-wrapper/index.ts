@@ -1,4 +1,4 @@
-import { id as githubReleaseDatasource } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { id as versioning } from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
@@ -9,4 +9,4 @@ export const defaultConfig = {
   versioning,
 };
 
-export const supportedDatasources = [githubReleaseDatasource];
+export const supportedDatasources = [GithubReleasesDatasource.id];

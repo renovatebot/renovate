@@ -1,10 +1,13 @@
+import is from '@sindresorhus/is';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
+import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
-import type { ConanJSON } from './types';
+import type { ConanJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -15,8 +18,36 @@ export class ConanDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
-  constructor() {
-    super(ConanDatasource.id);
+  githubHttp: GithubHttp;
+
+  constructor(id = ConanDatasource.id) {
+    super(id);
+    this.githubHttp = new GithubHttp(id);
+  }
+
+  async getConanCenterReleases(
+    depName: string,
+    userAndChannel: string
+  ): Promise<ReleaseResult | null> {
+    if (userAndChannel && userAndChannel !== '@_/_') {
+      logger.debug(
+        { depName, userAndChannel },
+        'User/channel not supported for Conan Center lookups'
+      );
+      return null;
+    }
+    const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
+    const res = await this.githubHttp.get(url, {
+      headers: { Accept: 'application/vnd.github.v3.raw' },
+    });
+    const doc = load(res.body, {
+      json: true,
+    }) as ConanYAML;
+    return {
+      releases: Object.keys(doc?.versions || {}).map((version) => ({
+        version,
+      })),
+    };
   }
 
   @cache({
@@ -30,6 +61,12 @@ export class ConanDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depName = lookupName.split('/')[0];
     const userAndChannel = '@' + lookupName.split('@')[1];
+    if (
+      is.string(registryUrl) &&
+      ensureTrailingSlash(registryUrl) === defaultRegistryUrl
+    ) {
+      return this.getConanCenterReleases(depName, userAndChannel);
+    }
 
     logger.trace({ depName, registryUrl }, 'Looking up conan api dependency');
     if (registryUrl) {

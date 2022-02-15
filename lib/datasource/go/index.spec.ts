@@ -7,15 +7,20 @@ jest.mock('../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
 const getReleasesDirectMock = jest.fn();
+
+const getDigestGithubMock = jest.fn();
 const getDigestGitlabMock = jest.fn();
+const getDigestBitbucketMock = jest.fn();
 jest.mock('./releases-direct', () => {
   return {
-    GoDirectDatasource: jest.fn().mockImplementation(() => ({
-      gitlab: {
-        getDigest: () => getDigestGitlabMock(),
-      },
-      getReleases: () => getReleasesDirectMock(),
-    })),
+    GoDirectDatasource: jest.fn().mockImplementation(() => {
+      return {
+        github: { getDigest: () => getDigestGithubMock() },
+        gitlab: { getDigest: () => getDigestGitlabMock() },
+        bitbucket: { getDigest: () => getDigestBitbucketMock() },
+        getReleases: () => getReleasesDirectMock(),
+      };
+    }),
   };
 });
 
@@ -140,10 +145,7 @@ describe('datasource/go/index', () => {
         .scope('https://golang.org/')
         .get('/x/text?go-get=1')
         .reply(200, loadFixture('go-get-github.html'));
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/golang/text/commits?per_page=1')
-        .reply(200, [{ sha: 'abcdefabcdefabcdefabcdef' }]);
+      getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { lookupName: 'golang.org/x/text' },
         null
@@ -152,23 +154,7 @@ describe('datasource/go/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('support bitbucket digest', async () => {
-      httpMock
-        .scope('https://api.bitbucket.org')
-        .get('/2.0/repositories/golang/text')
-        .reply(200, { mainbranch: { name: 'master' } });
-      httpMock
-        .scope('https://api.bitbucket.org')
-        .get('/2.0/repositories/golang/text/commits/master')
-        .reply(200, {
-          pagelen: 1,
-          values: [
-            {
-              hash: '123',
-              date: '2020-11-19T09:05:35+00:00',
-            },
-          ],
-          page: 1,
-        });
+      getDigestBitbucketMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
         {
           lookupName: 'bitbucket.org/golang/text',

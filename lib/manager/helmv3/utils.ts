@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../logger';
 import type { PackageDependency } from '../types';
 import type { ChartDefinition, Repository } from './types';
@@ -13,7 +13,7 @@ export function parseRepository(
     const url = new URL(repositoryURL);
     switch (url.protocol) {
       case 'oci:':
-        res.datasource = datasourceDocker.id;
+        res.datasource = DockerDatasource.id;
         res.lookupName = `${repositoryURL.replace('oci://', '')}/${depName}`;
         break;
       case 'file:':

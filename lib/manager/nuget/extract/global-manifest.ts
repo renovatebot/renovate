@@ -1,4 +1,4 @@
-import * as datasourceNuget from '../../../datasource/nuget';
+import { NugetDatasource } from '../../../datasource/nuget';
 import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
@@ -41,7 +41,7 @@ export function extractMsbuildGlobalManifest(
         depType: 'msbuild-sdk',
         depName,
         currentValue,
-        datasource: datasourceNuget.id,
+        datasource: NugetDatasource.id,
       };
 
       deps.push(dep);
