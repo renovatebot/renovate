@@ -169,7 +169,7 @@ export function checkRangeAndRemoveUnnecessaryRangeLimit(
       });
     }
   }
-  if (futureRelease) {
+  if (futureRelease && firstRangePart) {
     if (futureRelease.length === 2) {
       return firstRangePart[0].operator.concat(futureRelease.join('.'), '.*');
     } else {
