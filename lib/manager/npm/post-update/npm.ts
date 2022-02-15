@@ -13,7 +13,6 @@ import {
   move,
   readLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -119,12 +118,7 @@ export async function generateLockFile(
     // massage to shrinkwrap if necessary
     if (
       fileName === 'npm-shrinkwrap.json' &&
-      (await localPathExists(
-        lockFileName.replace(
-          regEx('(?:^|/)npm-shrinkwrap.json$'),
-          'package-lock.json'
-        )
-      ))
+      (await localPathExists(upath.join(lockFileDir, 'npm-shrinkwrap.json')))
     ) {
       await move(
         upath.join(lockFileDir, 'package-lock.json'),
