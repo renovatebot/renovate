@@ -936,28 +936,13 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
-    if (assignees.length === 1) {
-      logger.debug('Setting single assignee');
-      const assigneeId = await getUserID(assignees[0]);
-      const url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
-      await gitlabApi.putJson(url);
-    } else {
-      try {
-        logger.debug('Try using GitLab Premium API');
-        let url = `projects/${config.repository}/merge_requests/${iid}`;
-        for (let i = 0; i < assignees.length; i++) {
-          const assigneeId = await getUserID(assignees[i]);
-          url += `${i > 0 ? '&' : '?'}assignee_ids[]=${assigneeId}`;
-        }
-        await gitlabApi.putJson(url);
-      } catch (error) {
-        logger.debug({ iid, assignees }, 'Failed to add multiple assignees');
-        logger.debug('Falling back to setting to first assignee');
-        const assigneeId = await getUserID(assignees[0]);
-        const url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
-        await gitlabApi.putJson(url);
-      }
+    let url = `projects/${config.repository}/merge_requests/${iid}`;
+    for (let i = 0; i < assignees.length; i++) {
+      const assigneeId = await getUserID(assignees[i]);
+      url += `${i > 0 ? '&' : '?'}assignee_ids[]=${assigneeId}`;
     }
+    logger.debug(`Adding assignees using '${url}'`);
+    await gitlabApi.putJson(url);
   } catch (err) {
     logger.debug({ err }, 'addAssignees error');
     logger.warn({ iid, assignees }, 'Failed to add assignees');
