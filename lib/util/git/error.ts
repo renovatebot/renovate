@@ -121,10 +121,10 @@ export function handleCommitError(
     return null;
   }
   if (err.message.includes('[rejected] (stale info)')) {
-    logger.info(
+    logger.warn(
       'Branch update was rejected because local copy is not up-to-date.'
     );
-    return null;
+    throw new ExternalHostError(err, 'git');
   }
   if (
     err.message.includes('denying non-fast-forward') ||
