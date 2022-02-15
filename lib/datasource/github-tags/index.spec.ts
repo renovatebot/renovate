@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import * as _hostRules from '../../util/host-rules';
-import * as github from '.';
+import { GithubTagsDatasource } from '.';
 
 jest.mock('../../util/host-rules');
 const hostRules: any = _hostRules;
@@ -10,6 +10,8 @@ const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
 describe('datasource/github-tags/index', () => {
+  const github = new GithubTagsDatasource();
+
   beforeEach(() => {
     jest.resetAllMocks();
     hostRules.hosts = jest.fn(() => []);

@@ -154,14 +154,6 @@ Object {
   "onboarding": false,
   "packageRules": Array [
     Object {
-      "extends": Array [
-        "foo",
-      ],
-      "matchPaths": Array [
-        "examples/**",
-      ],
-    },
-    Object {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
       "matchPackagePatterns": "^(@angular|typescript)",
@@ -194,6 +186,14 @@ Object {
       ],
       "matchPackageNames": Array [
         "foo",
+      ],
+    },
+    Object {
+      "extends": Array [
+        "foo",
+      ],
+      "matchPaths": Array [
+        "examples/**",
       ],
     },
     Object {

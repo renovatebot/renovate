@@ -40,6 +40,7 @@ import type {
   LocalConfig,
   StatusResult,
   StorageConfig,
+  TreeItem,
 } from './types';
 
 export { setNoVerify } from './config';
@@ -704,11 +705,12 @@ export async function prepareCommit({
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const { localDir } = GlobalConfig.get();
   await syncGit();
-  logger.debug(`Preparing files for commiting to branch ${branchName}`);
+  logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
+    const parentCommitSha = config.currentBranchSha;
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
@@ -787,7 +789,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commit = commitRes?.commit || 'unknown';
+    const commitSha = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -797,7 +799,8 @@ export async function prepareCommit({
     }
 
     const result: CommitResult = {
-      sha: commit,
+      parentCommitSha,
+      commitSha,
       files: files.filter((fileChange) => {
         if (fileChange.type === 'deletion') {
           return deletedFiles.includes(fileChange.path);
@@ -897,4 +900,107 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
+}
+
+let remoteRefsExist = false;
+
+/**
+ *
+ * Non-branch refs allow us to store git objects without triggering CI pipelines.
+ * It's useful for API-based branch rebasing.
+ *
+ * @see https://stackoverflow.com/questions/63866947/pushing-git-non-branch-references-to-a-remote/63868286
+ *
+ */
+export async function pushCommitToRenovateRef(
+  commitSha: string,
+  refName: string
+): Promise<void> {
+  const fullRefName = `refs/renovate/${refName}`;
+  await git.raw(['update-ref', fullRefName, commitSha]);
+  await git.push(['--force', 'origin', fullRefName]);
+  remoteRefsExist = true;
+}
+
+/**
+ *
+ * Removes all remote "refs/renovate/*" refs in two steps:
+ *
+ * Step 1: list refs
+ *
+ *   $ git ls-remote origin "refs/renovate/*"
+ *
+ *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
+ *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
+ *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
+ *   > ...
+ *
+ * Step 2:
+ *
+ *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
+ *
+ */
+export async function clearRenovateRefs(): Promise<void> {
+  if (gitInitialized && remoteRefsExist) {
+    logger.debug(`Clear Renovate refs: refs/renovate/*`);
+    try {
+      const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
+
+      const remoteRenovateRefs = rawOutput
+        .split(newlineRegex)
+        .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
+        .filter((line) => line.startsWith('refs/renovate/'));
+
+      const pushOpts = ['--delete', 'origin', ...remoteRenovateRefs];
+      await git.push(pushOpts);
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ err }, `Clear Renovate refs: error`);
+    } finally {
+      remoteRefsExist = false;
+    }
+  }
+}
+
+const treeItemRegex = regEx(
+  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+);
+
+const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
+
+/**
+ *
+ * Obtain top-level items of commit tree.
+ * We don't need subtree items, so here are 2 steps only.
+ *
+ * Step 1: commit SHA -> tree SHA
+ *
+ *   $ git cat-file -p <commit-sha>
+ *
+ *   > tree <tree-sha>
+ *   > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
+ *   > ...
+ *
+ * Step 2: tree SHA -> tree items (top-level)
+ *
+ *   $ git cat-file -p <tree-sha>
+ *
+ *   > 040000 tree 389400684d1f004960addc752be13097fe85d776    src
+ *   > ...
+ *   > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    package.json
+ *
+ */
+export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
+  const commitOutput = await git.catFile(['-p', commitSha]);
+  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const contents = await git.catFile(['-p', treeSha]);
+  const lines = contents.split(newlineRegex);
+  const result: TreeItem[] = [];
+  for (const line of lines) {
+    const matchGroups = treeItemRegex.exec(line)?.groups;
+    if (matchGroups) {
+      const { path, mode, type, sha } = matchGroups;
+      result.push({ path, mode, type, sha });
+    }
+  }
+  return result;
 }

@@ -1,4 +1,4 @@
-import * as datasourceGitHubRelease from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -7,7 +7,7 @@ export function extractPackageFile(content: string): PackageFile {
   const dep: PackageDependency = {
     depName: 'hashicorp/terraform',
     currentValue: content.trim(),
-    datasource: datasourceGitHubRelease.id,
+    datasource: GithubReleasesDatasource.id,
   };
   return { deps: [dep] };
 }
