@@ -98,8 +98,18 @@ describe('workers/pr/body/updates-table', () => {
       },
     };
     const result = getPrUpdatesTable(configObj);
-    expect(result).toContain('6.2.3');
-    expect(result).toContain('1.7.0');
-    expect(result).toContain('All locks refreshed');
+    expect(result).toMatch(
+      '\n' +
+        '\n' +
+        'This PR contains the following updates:\n' +
+        '\n' +
+        '| Package | Type | Update | Change |\n' +
+        '|---|---|---|---|\n' +
+        '|  |  | lockFileMaintenance | All locks refreshed |\n' +
+        '| [koa](https://github.com/koajs/koa) | dependencies | pin | [`^1.7.0` -> `1.7.0`](https://renovatebot.com/diffs/npm/koa/1.7.0/1.7.0) |\n' +
+        '| [mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha)) | devDependencies | pin | [`^6.2.3` -> `6.2.3`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.3) |\n' +
+        '\n' +
+        '\n'
+    );
   });
 });
