@@ -1,5 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
-import * as datasourceNuget from '../../datasource/nuget';
+import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
@@ -15,4 +15,4 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [datasourceNuget.id];
+export const supportedDatasources = [NugetDatasource.id];

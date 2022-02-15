@@ -1,7 +1,7 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { FileChange } from './types';
+import type { FileChange } from './types';
 
 // istanbul ignore next
 export function checkForPlatformFailure(err: Error): void {
@@ -22,6 +22,7 @@ export function checkForPlatformFailure(err: Error): void {
     'early EOF',
     'fatal: bad config', // .gitmodules problem
     'expected flush after ref listing',
+    '[rejected] (stale info)',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -118,12 +119,6 @@ export function handleCommitError(
   }
   if (err.message.includes('remote: error: cannot lock ref')) {
     logger.error({ err }, 'Error committing files.');
-    return null;
-  }
-  if (err.message.includes('[rejected] (stale info)')) {
-    logger.info(
-      'Branch update was rejected because local copy is not up-to-date.'
-    );
     return null;
   }
   if (

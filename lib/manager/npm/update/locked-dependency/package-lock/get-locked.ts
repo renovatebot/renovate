@@ -5,7 +5,7 @@ import type { PackageLockDependency, PackageLockOrEntry } from './types';
 export function getLockedDependencies(
   entry: PackageLockOrEntry,
   depName: string,
-  currentVersion: string,
+  currentVersion: string | null,
   bundled = false
 ): PackageLockDependency[] {
   let res: PackageLockDependency[] = [];
@@ -15,7 +15,7 @@ export function getLockedDependencies(
       return [];
     }
     const dep = dependencies[depName];
-    if (dep?.version === currentVersion) {
+    if (dep && (currentVersion === null || dep?.version === currentVersion)) {
       if (bundled || entry.bundled) {
         dep.bundled = true;
       }

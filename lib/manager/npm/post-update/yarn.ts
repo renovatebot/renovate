@@ -7,7 +7,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
-import { id as npmId } from '../../../datasource/npm';
+import { NpmDatasource } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
@@ -16,7 +16,7 @@ import { exists, readFile, remove, writeFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
-import { GenerateLockFileResult } from './types';
+import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
   cwd: string
@@ -249,7 +249,7 @@ export async function generateLockFile(
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new ExternalHostError(err, npmId);
+        throw new ExternalHostError(err, NpmDatasource.id);
       }
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };

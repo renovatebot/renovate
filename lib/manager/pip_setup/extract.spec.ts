@@ -35,5 +35,9 @@ describe('manager/pip_setup/extract', () => {
         ],
       });
     });
+
+    it('returns nothing', () => {
+      expect(extractPackageFile('', packageFile, config)).toBeNull();
+    });
   });
 });

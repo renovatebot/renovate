@@ -1,4 +1,4 @@
-import * as githubTagsDatasource from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { newlineRegex, regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/
+  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)\s*['"]?(?:#\s+(?:renovate:\s+)?tag=(?<tag>.+?))?)\s*?$/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -43,11 +43,11 @@ export function extractPackageFile(content: string): PackageFile | null {
       const dep: PackageDependency = {
         depName,
         commitMessageTopic: '{{{depName}}} action',
-        datasource: githubTagsDatasource.id,
+        datasource: GithubTagsDatasource.id,
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
+        autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
       };
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;

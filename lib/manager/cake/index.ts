@@ -1,8 +1,8 @@
 import moo from 'moo';
 import { ProgrammingLanguage } from '../../constants';
-import { id as datasource } from '../../datasource/nuget';
+import { NugetDatasource } from '../../datasource/nuget';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 
 export const language = ProgrammingLanguage.NET;
 
@@ -36,7 +36,11 @@ function parseDependencyLine(line: string): PackageDependency | null {
     const depName = searchParams.get('package');
     const currentValue = searchParams.get('version');
 
-    const result: PackageDependency = { datasource, depName, currentValue };
+    const result: PackageDependency = {
+      datasource: NugetDatasource.id,
+      depName,
+      currentValue,
+    };
 
     if (!isEmptyHost) {
       if (protocol.startsWith('http')) {
@@ -69,4 +73,4 @@ export function extractPackageFile(content: string): PackageFile {
   return { deps };
 }
 
-export const supportedDatasources = [datasource];
+export const supportedDatasources = [NugetDatasource.id];

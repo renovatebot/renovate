@@ -1,5 +1,5 @@
 // TODO fix mocks
-import { Platform, RepoParams } from '..';
+import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -9,10 +9,10 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import { logger as _logger } from '../../logger';
+import type { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
-import * as _git from '../../util/git';
-import * as _hostRules from '../../util/host-rules';
+import type * as _git from '../../util/git';
+import type * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
 

@@ -29,18 +29,19 @@ export function satisfiesConfidenceLevel(
   return confidenceLevels[confidence] >= confidenceLevels[minimumConfidence];
 }
 
-const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence> = {
-  pin: 'high',
-  digest: 'neutral',
-  bump: 'neutral',
-  lockFileMaintenance: 'neutral',
-  lockfileUpdate: 'neutral',
-  rollback: 'neutral',
-  replacement: 'neutral',
-  major: null,
-  minor: null,
-  patch: null,
-};
+const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence | null> =
+  {
+    pin: 'high',
+    digest: 'neutral',
+    bump: 'neutral',
+    lockFileMaintenance: 'neutral',
+    lockfileUpdate: 'neutral',
+    rollback: 'neutral',
+    replacement: 'neutral',
+    major: null,
+    minor: null,
+    patch: null,
+  };
 
 export async function getMergeConfidenceLevel(
   datasource: string,

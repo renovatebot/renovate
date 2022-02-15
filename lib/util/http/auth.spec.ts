@@ -1,8 +1,8 @@
-import { NormalizedOptions } from 'got';
+import type { NormalizedOptions } from 'got';
 import { partial } from '../../../test/util';
 import { PlatformId } from '../../constants';
 import { applyAuthorization, removeAuthorization } from './auth';
-import { GotOptions } from './types';
+import type { GotOptions } from './types';
 
 describe('util/http/auth', () => {
   describe('applyAuthorization', () => {

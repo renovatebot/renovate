@@ -1,6 +1,8 @@
+// based on https://www.python.org/dev/peps/pep-0508/#names
+import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { PypiDatasource } from '../../datasource/pypi';
+import { logger } from '../../logger';
 import { newlineRegex, regEx } from '../../util/regex';
-import pep440 from '../../versioning/pep440';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
@@ -25,7 +27,10 @@ function getDepType(section: string, record: string): null | string {
       return 'test';
     }
   }
-  return 'extra';
+  if (section === 'options.extras_require') {
+    return 'extra';
+  }
+  return null;
 }
 
 function parseDep(
@@ -33,56 +38,88 @@ function parseDep(
   section: string,
   record: string
 ): PackageDependency | null {
-  const [, depName, , currentValue] =
-    regEx(/\s+([-_a-zA-Z0-9]*)(\[.*\])?\s*(.*)/).exec(line) || [];
-  if (
-    section &&
-    record &&
-    depName &&
-    currentValue &&
-    pep440.isValid(currentValue)
-  ) {
-    const dep: PackageDependency = {
-      datasource: PypiDatasource.id,
-      depName,
-      currentValue,
-    };
-    const depType = getDepType(section, record);
-    if (depType) {
-      dep.depType = depType;
-    }
-    return dep;
+  const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
+  const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
+
+  const rangePattern: string = RANGE_PATTERN;
+  const specifierPartPattern = `\\s*${rangePattern.replace(
+    regEx(/\?<\w+>/g),
+    '?:'
+  )}`;
+  const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
+  const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+
+  const pkgRegex = regEx(`^(${packagePattern})$`);
+  const pkgValRegex = regEx(`^${dependencyPattern}$`);
+
+  const depType = getDepType(section, record);
+  if (!depType) {
+    return null;
   }
-  return null;
+
+  const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
+  const packageMatches =
+    pkgValRegex.exec(lineNoEnvMarkers) || pkgRegex.exec(lineNoEnvMarkers);
+
+  if (!packageMatches) {
+    return null;
+  }
+
+  const [, depName, , currVal] = packageMatches;
+  const currentValue = currVal?.trim();
+
+  const dep: PackageDependency = {
+    depName,
+    currentValue,
+    datasource: PypiDatasource.id,
+    depType: depType,
+  };
+
+  if (currentValue?.startsWith('==')) {
+    dep.currentVersion = currentValue.replace(/^==\s*/, '');
+  }
+
+  return dep;
 }
 
 export function extractPackageFile(
   content: string
 ): Result<PackageFile | null> {
+  logger.trace('setup-cfg.extractPackageFile()');
+
   let sectionName = null;
   let sectionRecord = null;
 
   const deps: PackageDependency[] = [];
+
   content
     .split(newlineRegex)
-    .map((line) => line.replace(regEx(/[;#].*$/), '').trimRight())
+    .map((line) => line.replace(regEx(/#.*$/), '').trimEnd())
     .forEach((rawLine) => {
       let line = rawLine;
       const newSectionName = getSectionName(line);
       const newSectionRecord = getSectionRecord(line);
       if (newSectionName) {
         sectionName = newSectionName;
-      } else {
-        if (newSectionRecord) {
-          sectionRecord = newSectionRecord;
-          line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
-        }
-        const dep = parseDep(line, sectionName, sectionRecord);
-        if (dep) {
-          deps.push(dep);
-        }
+      }
+      if (newSectionRecord) {
+        sectionRecord = newSectionRecord;
+        // Propably there are also requirements in this line.
+        line = rawLine.replace(regEx(/^[^=]*=\s*/), '');
+        line.split(';').forEach((part) => {
+          const dep = parseDep(part, sectionName, sectionRecord);
+          if (dep) {
+            deps.push(dep);
+          }
+        });
+        return;
+      }
+
+      const dep = parseDep(line, sectionName, sectionRecord);
+      if (dep) {
+        deps.push(dep);
       }
     });
 
-  return deps.length > 0 ? { deps } : null;
+  return deps.length ? { deps } : null;
 }
