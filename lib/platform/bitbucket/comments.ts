@@ -131,7 +131,7 @@ export async function ensureCommentRemoval(
     const byContent = (comment: Comment): boolean =>
       comment.content.raw.trim() === content;
 
-    let commentId: number | null = null;
+    let commentId: number | undefined = undefined;
 
     if (topic) {
       commentId = comments.find(byTopic)?.id;

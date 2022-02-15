@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { PlatformId } from '../../constants';
 import * as _datasource from '../../datasource';
-import * as datasourcePackagist from '../../datasource/packagist';
+import { PackagistDatasource } from '../../datasource/packagist';
 import * as docker from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
@@ -109,24 +109,24 @@ describe('manager/composer/artifacts', () => {
       token: 'gitlab-token',
     });
     hostRules.add({
-      hostType: datasourcePackagist.id,
+      hostType: PackagistDatasource.id,
       matchHost: 'packagist.renovatebot.com',
       username: 'some-username',
       password: 'some-password',
     });
     hostRules.add({
-      hostType: datasourcePackagist.id,
+      hostType: PackagistDatasource.id,
       matchHost: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
       username: 'some-other-username',
       password: 'some-other-password',
     });
     hostRules.add({
-      hostType: datasourcePackagist.id,
+      hostType: PackagistDatasource.id,
       username: 'some-other-username',
       password: 'some-other-password',
     });
     hostRules.add({
-      hostType: datasourcePackagist.id,
+      hostType: PackagistDatasource.id,
       matchHost: 'https://packages-bearer.example.com/',
       token: 'abcdef0123456789',
     });

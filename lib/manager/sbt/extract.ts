@@ -1,7 +1,10 @@
-import * as datasourceMaven from '../../datasource/maven';
+import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
-import * as datasourceSbtPackage from '../../datasource/sbt-package';
-import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
+import { SbtPackageDatasource } from '../../datasource/sbt-package';
+import {
+  SbtPluginDatasource,
+  defaultRegistryUrls as sbtPluginDefaultRegistries,
+} from '../../datasource/sbt-plugin';
 import { regEx } from '../../util/regex';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
@@ -241,7 +244,7 @@ function parseSbtLine(
       const rawScalaVersion = getScalaVersion(line);
       scalaVersion = normalizeScalaVersion(rawScalaVersion);
       dep = {
-        datasource: datasourceMaven.id,
+        datasource: MavenDatasource.id,
         depName: 'scala',
         lookupName: 'org.scala-lang:scala-library',
         currentValue: rawScalaVersion,
@@ -309,13 +312,10 @@ function parseSbtLine(
   if (dep) {
     if (!dep.datasource) {
       if (dep.depType === 'plugin') {
-        dep.datasource = datasourceSbtPlugin.id;
-        dep.registryUrls = [
-          ...registryUrls,
-          ...datasourceSbtPlugin.defaultRegistryUrls,
-        ];
+        dep.datasource = SbtPluginDatasource.id;
+        dep.registryUrls = [...registryUrls, ...sbtPluginDefaultRegistries];
       } else {
-        dep.datasource = datasourceSbtPackage.id;
+        dep.datasource = SbtPackageDatasource.id;
       }
     }
     deps.push({

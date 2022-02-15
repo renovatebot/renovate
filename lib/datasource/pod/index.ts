@@ -2,25 +2,13 @@ import crypto from 'crypto';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { cache } from '../../util/cache/package/decorator';
 import { GithubHttp } from '../../util/http/github';
 import type { HttpError } from '../../util/http/types';
 import { newlineRegex, regEx } from '../../util/regex';
+import { Datasource } from '../datasource';
 import { massageGithubUrl } from '../metadata';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-
-export const id = 'pod';
-
-export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
-export const registryStrategy = 'hunt';
-
-const cacheNamespace = `datasource-${id}`;
-const cacheMinutes = 30;
-
-const githubHttp = new GithubHttp(id);
-const http = new Http(id);
 
 // eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
 const enum URLFormatOptions {
@@ -38,6 +26,10 @@ function shardParts(lookupName: string): string[] {
     .slice(0, 3)
     .split('');
 }
+
+const githubRegex = regEx(
+  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+);
 
 function releasesGithubUrl(
   lookupName: string,
@@ -85,113 +77,6 @@ function handleError(lookupName: string, err: HttpError): void {
   }
 }
 
-async function requestCDN(
-  url: string,
-  lookupName: string
-): Promise<string | null> {
-  try {
-    const resp = await http.get(url);
-    if (resp?.body) {
-      return resp.body;
-    }
-  } catch (err) {
-    handleError(lookupName, err);
-  }
-
-  return null;
-}
-
-async function requestGithub<T = unknown>(
-  url: string,
-  lookupName: string
-): Promise<T | null> {
-  try {
-    const resp = await githubHttp.getJson<T>(url);
-    if (resp?.body) {
-      return resp.body;
-    }
-  } catch (err) {
-    handleError(lookupName, err);
-  }
-
-  return null;
-}
-
-const githubRegex = regEx(
-  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
-);
-
-async function getReleasesFromGithub(
-  lookupName: string,
-  opts: { hostURL: string; account: string; repo: string },
-  useShard = true,
-  useSpecs = true,
-  urlFormatOptions = URLFormatOptions.WithShardWithSpec
-): Promise<ReleaseResult | null> {
-  const url = releasesGithubUrl(lookupName, { ...opts, useShard, useSpecs });
-  const resp = await requestGithub<{ name: string }[]>(url, lookupName);
-  if (resp) {
-    const releases = resp.map(({ name }) => ({ version: name }));
-    return { releases };
-  }
-
-  // iterating through enum to support different url formats
-  switch (urlFormatOptions) {
-    case URLFormatOptions.WithShardWithSpec:
-      return getReleasesFromGithub(
-        lookupName,
-        opts,
-        true,
-        false,
-        URLFormatOptions.WithShardWithoutSpec
-      );
-    case URLFormatOptions.WithShardWithoutSpec:
-      return getReleasesFromGithub(
-        lookupName,
-        opts,
-        false,
-        true,
-        URLFormatOptions.WithSpecsWithoutShard
-      );
-    case URLFormatOptions.WithSpecsWithoutShard:
-      return getReleasesFromGithub(
-        lookupName,
-        opts,
-        false,
-        false,
-        URLFormatOptions.WithoutSpecsWithoutShard
-      );
-    case URLFormatOptions.WithoutSpecsWithoutShard:
-    default:
-      return null;
-  }
-}
-
-function releasesCDNUrl(lookupName: string, registryUrl: string): string {
-  const shard = shardParts(lookupName).join('_');
-  return `${registryUrl}/all_pods_versions_${shard}.txt`;
-}
-
-async function getReleasesFromCDN(
-  lookupName: string,
-  registryUrl: string
-): Promise<ReleaseResult | null> {
-  const url = releasesCDNUrl(lookupName, registryUrl);
-  const resp = await requestCDN(url, lookupName);
-  if (resp) {
-    const lines = resp.split(newlineRegex);
-    for (let idx = 0; idx < lines.length; idx += 1) {
-      const line = lines[idx];
-      const [name, ...versions] = line.split('/');
-      if (name === lookupName.replace(regEx(/\/.*$/), '')) {
-        const releases = versions.map((version) => ({ version }));
-        return { releases };
-      }
-    }
-  }
-  return null;
-}
-
 function isDefaultRepo(url: string): boolean {
   const match = githubRegex.exec(url);
   if (match) {
@@ -203,41 +88,151 @@ function isDefaultRepo(url: string): boolean {
   return false;
 }
 
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const podName = lookupName.replace(regEx(/\/.*$/), '');
+function releasesCDNUrl(lookupName: string, registryUrl: string): string {
+  const shard = shardParts(lookupName).join('_');
+  return `${registryUrl}/all_pods_versions_${shard}.txt`;
+}
 
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    registryUrl + podName
-  );
+export class PodDatasource extends Datasource {
+  static readonly id = 'pod';
 
-  // istanbul ignore if
-  if (cachedResult !== undefined) {
-    logger.trace(`CocoaPods: Return cached result for ${podName}`);
-    return cachedResult;
+  override readonly defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+
+  override readonly registryStrategy = 'hunt';
+
+  githubHttp: GithubHttp;
+
+  constructor() {
+    super(PodDatasource.id);
+    this.githubHttp = new GithubHttp(PodDatasource.id);
   }
 
-  let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
-  baseUrl = massageGithubUrl(baseUrl);
-  // In order to not abuse github API limits, query CDN instead
-  if (isDefaultRepo(baseUrl)) {
-    [baseUrl] = defaultRegistryUrls;
+  private async requestCDN(
+    url: string,
+    lookupName: string
+  ): Promise<string | null> {
+    try {
+      const resp = await this.http.get(url);
+      if (resp?.body) {
+        return resp.body;
+      }
+    } catch (err) {
+      handleError(lookupName, err);
+    }
+
+    return null;
   }
 
-  let result: ReleaseResult | null = null;
-  const match = githubRegex.exec(baseUrl);
-  if (match) {
-    const { hostURL, account, repo } = match?.groups || {};
-    const opts = { hostURL, account, repo };
-    result = await getReleasesFromGithub(podName, opts);
-  } else {
-    result = await getReleasesFromCDN(podName, baseUrl);
+  private async requestGithub<T = unknown>(
+    url: string,
+    lookupName: string
+  ): Promise<T | null> {
+    try {
+      const resp = await this.githubHttp.getJson<T>(url);
+      if (resp?.body) {
+        return resp.body;
+      }
+    } catch (err) {
+      handleError(lookupName, err);
+    }
+
+    return null;
   }
 
-  await packageCache.set(cacheNamespace, podName, result, cacheMinutes);
+  private async getReleasesFromGithub(
+    lookupName: string,
+    opts: { hostURL: string; account: string; repo: string },
+    useShard = true,
+    useSpecs = true,
+    urlFormatOptions = URLFormatOptions.WithShardWithSpec
+  ): Promise<ReleaseResult | null> {
+    const url = releasesGithubUrl(lookupName, { ...opts, useShard, useSpecs });
+    const resp = await this.requestGithub<{ name: string }[]>(url, lookupName);
+    if (resp) {
+      const releases = resp.map(({ name }) => ({ version: name }));
+      return { releases };
+    }
 
-  return result;
+    // iterating through enum to support different url formats
+    switch (urlFormatOptions) {
+      case URLFormatOptions.WithShardWithSpec:
+        return this.getReleasesFromGithub(
+          lookupName,
+          opts,
+          true,
+          false,
+          URLFormatOptions.WithShardWithoutSpec
+        );
+      case URLFormatOptions.WithShardWithoutSpec:
+        return this.getReleasesFromGithub(
+          lookupName,
+          opts,
+          false,
+          true,
+          URLFormatOptions.WithSpecsWithoutShard
+        );
+      case URLFormatOptions.WithSpecsWithoutShard:
+        return this.getReleasesFromGithub(
+          lookupName,
+          opts,
+          false,
+          false,
+          URLFormatOptions.WithoutSpecsWithoutShard
+        );
+      case URLFormatOptions.WithoutSpecsWithoutShard:
+      default:
+        return null;
+    }
+  }
+
+  private async getReleasesFromCDN(
+    lookupName: string,
+    registryUrl: string
+  ): Promise<ReleaseResult | null> {
+    const url = releasesCDNUrl(lookupName, registryUrl);
+    const resp = await this.requestCDN(url, lookupName);
+    if (resp) {
+      const lines = resp.split(newlineRegex);
+      for (let idx = 0; idx < lines.length; idx += 1) {
+        const line = lines[idx];
+        const [name, ...versions] = line.split('/');
+        if (name === lookupName.replace(regEx(/\/.*$/), '')) {
+          const releases = versions.map((version) => ({ version }));
+          return { releases };
+        }
+      }
+    }
+    return null;
+  }
+
+  @cache({
+    ttlMinutes: 30,
+    namespace: `datasource-${PodDatasource.id}`,
+    key: ({ lookupName, registryUrl }: GetReleasesConfig) =>
+      `${registryUrl}:${lookupName}`,
+  })
+  async getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const podName = lookupName.replace(regEx(/\/.*$/), '');
+    let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
+    baseUrl = massageGithubUrl(baseUrl);
+    // In order to not abuse github API limits, query CDN instead
+    if (isDefaultRepo(baseUrl)) {
+      [baseUrl] = this.defaultRegistryUrls;
+    }
+
+    let result: ReleaseResult | null = null;
+    const match = githubRegex.exec(baseUrl);
+    if (match) {
+      const { hostURL, account, repo } = match?.groups || {};
+      const opts = { hostURL, account, repo };
+      result = await this.getReleasesFromGithub(podName, opts);
+    } else {
+      result = await this.getReleasesFromCDN(podName, baseUrl);
+    }
+
+    return result;
+  }
 }

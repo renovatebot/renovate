@@ -1,5 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as nodeVersioning from '../../versioning/node';
 
 export { extractPackageFile } from './extract';
@@ -11,4 +11,4 @@ export const defaultConfig = {
   versioning: nodeVersioning.id,
 };
 
-export const supportedDatasources = [datasourceGithubTags.id];
+export const supportedDatasources = [GithubTagsDatasource.id];

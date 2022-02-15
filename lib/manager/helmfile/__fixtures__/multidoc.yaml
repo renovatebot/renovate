@@ -59,6 +59,12 @@ releases:
   chart: prometheus-community/kube-prometheus-stack
   needs:
     - manifests
-  version: 13.7.2
+  version: 13.7
 
 - name: invalid
+
+- name:  "external-dns"
+  chart: "bitnami/external-dns"
+  namespace: "external-dns"
+  version: {{ .Values | getOrNil "external_dns.version" | default "4.5.5" }}
+  installed: {{ .Values | getOrNil "external_dns.installed" | default false }}

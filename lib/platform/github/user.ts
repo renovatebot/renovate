@@ -37,7 +37,7 @@ export async function getUserDetails(
   }
 }
 
-let userEmail: string;
+let userEmail: string | null;
 
 export async function getUserEmail(
   endpoint: string,
@@ -49,7 +49,7 @@ export async function getUserEmail(
         token,
       })
     ).body;
-    userEmail = emails?.[0].email || null;
+    userEmail = emails?.[0].email ?? null;
     return userEmail;
   } catch (err) {
     logger.debug(

@@ -77,7 +77,7 @@ export class GalaxyDatasource extends Datasource {
     };
 
     result.dependencyUrl = galaxyProjectUrl;
-    const { github_user: user = null, github_repo: repo = null } = resultObject;
+    const { github_user: user, github_repo: repo } = resultObject;
     if (typeof user === 'string' && typeof repo === 'string') {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
