@@ -2,7 +2,7 @@ import cryptoRandomString from 'crypto-random-string';
 import findUp from 'find-up';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
-import * as datasourceNuget from '../../datasource/nuget';
+import { defaultRegistryUrls } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { readFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
@@ -22,13 +22,12 @@ export function getRandomString(): string {
   return cryptoRandomString({ length: 16 });
 }
 
+const defaultRegistries = defaultRegistryUrls.map(
+  (registryUrl) => ({ url: registryUrl } as Registry)
+);
+
 export function getDefaultRegistries(): Registry[] {
-  return datasourceNuget.defaultRegistryUrls.map(
-    (registryUrl) =>
-      ({
-        url: registryUrl,
-      } as Registry)
-  );
+  return [...defaultRegistries];
 }
 
 export async function getConfiguredRegistries(

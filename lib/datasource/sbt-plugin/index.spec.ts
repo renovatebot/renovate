@@ -3,8 +3,8 @@ import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from './util';
-import * as sbtPlugin from '.';
+import { parseIndexDir } from '../sbt-package/util';
+import { SbtPluginDatasource } from '.';
 
 const mavenIndexHtml = loadFixture(`maven-index.html`);
 const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
@@ -136,7 +136,7 @@ describe('datasource/sbt-plugin/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: SbtPluginDatasource.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
@@ -144,7 +144,7 @@ describe('datasource/sbt-plugin/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: SbtPluginDatasource.id,
           depName: 'org.scalatest:scalaz',
           registryUrls: [],
         })
@@ -155,7 +155,7 @@ describe('datasource/sbt-plugin/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: SbtPluginDatasource.id,
           depName: 'org.foundweekends:sbt-bintray',
           registryUrls: [],
         })
@@ -170,7 +170,7 @@ describe('datasource/sbt-plugin/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: SbtPluginDatasource.id,
           depName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [],
         })
@@ -186,7 +186,7 @@ describe('datasource/sbt-plugin/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: SbtPluginDatasource.id,
           depName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
         })

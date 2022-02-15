@@ -154,6 +154,7 @@ const repoGroups = {
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  parcel: 'https://github.com/parcel-bundler/parcel',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',

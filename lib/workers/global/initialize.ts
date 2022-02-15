@@ -7,6 +7,7 @@ import { initPlatform } from '../../platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
+import * as hostRules from '../../util/host-rules';
 import { Limit, setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -42,6 +43,13 @@ async function checkVersions(): Promise<void> {
   }
 }
 
+function setGlobalHostRules(config: RenovateConfig): void {
+  if (config.hostRules) {
+    logger.debug('Setting global hostRules');
+    config.hostRules.forEach((rule) => hostRules.add(rule));
+  }
+}
+
 export async function globalInitialize(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -52,6 +60,7 @@ export async function globalInitialize(
   await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
+  setGlobalHostRules(config);
   return config;
 }
 
