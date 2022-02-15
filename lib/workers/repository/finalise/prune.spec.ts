@@ -81,7 +81,6 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('does nothing on prune stale branches disabled', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      config.dryRun = false;
       config.pruneStaleBranches = false;
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
@@ -94,7 +93,6 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('posts comment if someone pushed to PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      config.dryRun = false;
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
@@ -136,7 +134,6 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('delete branch no PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      config.dryRun = false;
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );

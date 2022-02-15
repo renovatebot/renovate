@@ -1,4 +1,4 @@
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
@@ -7,4 +7,4 @@ export const defaultConfig = {
   fileMatch: ['^Formula/[^/]+[.]rb$'],
 };
 
-export const supportedDatasources = [datasourceGithubTags.id];
+export const supportedDatasources = [GithubTagsDatasource.id];

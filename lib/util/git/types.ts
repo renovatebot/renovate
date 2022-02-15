@@ -3,7 +3,7 @@ import type { GitOptions } from '../../types/git';
 export type { DiffResult, StatusResult } from 'simple-git';
 
 export interface GitAuthor {
-  name?: string;
+  name?: string | null;
   address?: string;
 }
 

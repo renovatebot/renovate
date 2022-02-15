@@ -1,5 +1,5 @@
 import { loadAll } from 'js-yaml';
-import { id as GithubReleasesId } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
@@ -77,7 +77,7 @@ function resolveManifest(
       return [
         {
           depName: 'fluxcd/flux2',
-          datasource: GithubReleasesId,
+          datasource: GithubReleasesDatasource.id,
           currentValue: manifest.version,
         },
       ];
