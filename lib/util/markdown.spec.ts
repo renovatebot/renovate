@@ -1,5 +1,4 @@
 import { linkify } from './markdown';
-import { sanitizeMarkdown } from './markdown';
 
 describe('util/markdown', () => {
   describe('.linkify', () => {
@@ -30,13 +29,5 @@ describe('util/markdown', () => {
     it('works', async () => {
       expect(await linkify(before, { repository: 'some/repo' })).toEqual(after);
     });
-  }),
-    describe('.sanitizeMarkdown', () => {
-      it('sanitizes URLs of Markdown links containing spaces to working links', async () => {
-        const before = `[Some.Package](https://foo.bar/E  F/A2B CD) [Some.Package](https://foo.bar/E  F/A2B CD) ([source](https://foo.bar/EF/A2B CD/_git/Some.Package))`;
-        const after = `[Some.Package](https://foo.bar/E%20%20F/A2B%20CD) [Some.Package](https://foo.bar/E%20%20F/A2B%20CD) ([source](https://foo.bar/EF/A2B%20CD/_git/Some.Package))`;
-
-        expect(await sanitizeMarkdown(before)).toEqual(after);
-      });
-    });
+  });
 });

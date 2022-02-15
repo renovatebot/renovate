@@ -6,15 +6,6 @@ import { regEx } from './regex';
 export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
 
-  // Replace spaces in Markdown links with %20.
-  const markdownLinks = res.match(regEx(/\(https?:\/\/[^)]*\)/g));
-
-  if (markdownLinks) {
-    markdownLinks.forEach((ml) => {
-      res = res.replace(ml, ml.replace(regEx(/\s/g), '%20'));
-    });
-  }
-
   // Put a zero width space after every # followed by a digit
   res = res.replace(regEx(/#(\d)/gi), '#&#8203;$1');
 

@@ -10,7 +10,7 @@ import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
-import { id, removeBuildMeta } from './common';
+import { id, massageUrl, removeBuildMeta } from './common';
 import type {
   CatalogEntry,
   CatalogPage,
@@ -138,7 +138,7 @@ export async function getReleases(
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
         latestStable = removeBuildMeta(version);
-        homepage = projectUrl || homepage;
+        homepage = massageUrl(projectUrl || homepage);
       }
       if (listed === false) {
         release.isDeprecated = true;
@@ -176,7 +176,7 @@ export async function getReleases(
       const nuspec = new XmlDocument(metaresult.body);
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
       if (sourceUrl) {
-        dep.sourceUrl = sourceUrl;
+        dep.sourceUrl = massageUrl(sourceUrl);
       }
     }
   } catch (err) {

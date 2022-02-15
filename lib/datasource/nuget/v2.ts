@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import type { ReleaseResult } from '../types';
-import { id, removeBuildMeta } from './common';
+import { id, massageUrl, removeBuildMeta } from './common';
 
 const http = new Http(id);
 
@@ -40,7 +40,7 @@ export async function getReleases(
         if (pkgIsLatestVersion === 'true') {
           const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
           if (projectUrl) {
-            dep.sourceUrl = projectUrl;
+            dep.sourceUrl = massageUrl(projectUrl);
           }
         }
       } catch (err) /* istanbul ignore next */ {
