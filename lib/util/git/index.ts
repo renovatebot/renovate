@@ -918,7 +918,7 @@ export async function pushCommitToRenovateRef(
 ): Promise<void> {
   const fullRefName = `refs/renovate/${refName}`;
   await git.raw(['update-ref', fullRefName, commitSha]);
-  await git.raw(['push', '--force', 'origin', fullRefName]);
+  await git.push(['--force', 'origin', fullRefName]);
   remoteRefsExist = true;
 }
 
@@ -944,11 +944,7 @@ export async function clearRenovateRefs(): Promise<void> {
   if (gitInitialized && remoteRefsExist) {
     logger.debug(`Clear Renovate refs: refs/renovate/*`);
     try {
-      const rawOutput = await git.raw([
-        'ls-remote',
-        config.url,
-        'refs/renovate/*',
-      ]);
+      const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
 
       const remoteRenovateRefs = rawOutput
         .split(newlineRegex)
@@ -994,9 +990,9 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
  *
  */
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
-  const commitOutput = await git.raw(['cat-file', '-p', commitSha]);
+  const commitOutput = await git.catFile(['-p', commitSha]);
   const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
-  const contents = await git.raw(['cat-file', '-p', treeSha]);
+  const contents = await git.catFile(['-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
   for (const line of lines) {
