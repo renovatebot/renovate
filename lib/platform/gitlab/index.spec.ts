@@ -990,8 +990,6 @@ describe('platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
         .replyWithError('some error')
-        .get('/api/v4/users?username=someuser')
-        .replyWithError('some error');
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
