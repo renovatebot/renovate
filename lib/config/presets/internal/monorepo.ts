@@ -129,7 +129,10 @@ const repoGroups = {
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
-  'material-ui': 'https://github.com/mui-org/material-ui',
+  'material-ui': [
+    'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
+    'https://github.com/mui/material-ui',
+  ],
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
