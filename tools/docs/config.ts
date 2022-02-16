@@ -15,12 +15,16 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'default',
     'stage',
     'allowString',
-    'cli',
-    'env',
     'admin',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
+    if (key === 'cli' && val === 'N/A') {
+      ignoredKeys.push('cli');
+    }
+    if (key === 'env' && val === 'N/A') {
+      ignoredKeys.push('env');
+    }
     if (
       !ignoredKeys.includes(el[0]) ||
       (el[0] === 'default' && typeof el[1] !== 'object' && name !== 'prBody')
