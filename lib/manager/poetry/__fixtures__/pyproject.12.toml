@@ -1,4 +1,0 @@
-[[tool.poetry.source]]
-name = "one"
-url = "some.url"
-
