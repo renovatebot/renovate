@@ -76,15 +76,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       if (headerIndex === -1) {
         headerIndex = configOptionsRaw.indexOf(`### ${option.name}`);
       }
-      if (bot) {
-        el.cli = getCliName(option);
-        el.env = getEnvName(option);
-        if (el.cli === '') {
-          el.cli = `N/A`;
-        }
-        if (el.env === '') {
-          el.env = 'N/A';
-        }
+      el.cli = getCliName(option);
+      el.env = getEnvName(option);
+      if (el.cli === '') {
+        el.cli = `N/A`;
+      }
+      if (el.env === '') {
+        el.env = 'N/A';
       }
 
       configOptionsRaw[headerIndex] +=
