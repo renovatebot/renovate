@@ -7,7 +7,7 @@ describe('manager/tool-versions/extract', () => {
       expect(extractPackageFile('', '.tool-versions', {})).toBeNull();
     });
 
-    it('extracts dependencies for supported tools', () => {
+    it('extracts dep versions for supported tools', () => {
       const res = extractPackageFile(
         Fixtures.get('.tool-versions'),
         'unused_file_name',
@@ -18,22 +18,55 @@ describe('manager/tool-versions/extract', () => {
           {
             currentValue: '10.15.0',
             currentVersion: '10.15.0',
-            datasource: 'npm',
-            depName: 'node',
+            datasource: 'github-tags',
+            depName: 'nodejs',
+            lookupName: 'nodejs/node',
           },
           {
-            currentDigest: 'v1.0.2-a',
-            currentRawValue: 'ref:v1.0.2-a',
+            currentValue: '3.2.5',
+            currentVersion: '3.2.5',
+            datasource: 'ruby-version',
+            depName: 'ruby',
+          },
+          {
+            currentValue: '2.1.3',
+            currentVersion: '2.1.3',
             datasource: 'github-tags',
             depName: 'python',
             lookupName: 'python/cpython',
           },
+        ],
+      });
+    });
+
+    it('extracts dep digests for supported tools', () => {
+      const res = extractPackageFile(
+        Fixtures.get('.tool-versions-refs'),
+        'unused_file_name',
+        {}
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            currentDigest: '10.15.0',
+            currentRawValue: 'ref:10.15.0',
+            datasource: 'git-refs',
+            depName: 'nodejs',
+            lookupName: 'https://github.com/nodejs/node.git',
+          },
           {
             currentDigest: '39cb398vb39',
             currentRawValue: 'ref:39cb398vb39',
-            datasource: 'github-tags',
+            datasource: 'git-refs',
             depName: 'ruby',
-            lookupName: 'ruby/ruby',
+            lookupName: 'https://github.com/ruby/ruby.git',
+          },
+          {
+            currentDigest: 'v1.0.2-a',
+            currentRawValue: 'ref:v1.0.2-a',
+            datasource: 'git-refs',
+            depName: 'python',
+            lookupName: 'https://github.com/python/cpython.git',
           },
         ],
       });
@@ -84,8 +117,9 @@ describe('manager/tool-versions/extract', () => {
         deps: [
           {
             currentValue: 'path:/some/local/dir',
-            datasource: 'npm',
-            depName: 'node',
+            datasource: 'github-tags',
+            depName: 'nodejs',
+            lookupName: 'nodejs/node',
             skipReason: 'unsupported-version',
           },
           {
@@ -126,8 +160,9 @@ describe('manager/tool-versions/extract', () => {
         {
           currentValue: '10.15.0',
           currentVersion: '10.15.0',
-          datasource: 'npm',
-          depName: 'node',
+          datasource: 'github-tags',
+          depName: 'nodejs',
+          lookupName: 'nodejs/node',
         },
       ]);
     });
@@ -148,8 +183,9 @@ describe('manager/tool-versions/extract', () => {
         {
           currentValue: '10.15.0',
           currentVersion: '10.15.0',
-          datasource: 'npm',
-          depName: 'node',
+          datasource: 'github-tags',
+          depName: 'nodejs',
+          lookupName: 'nodejs/node',
           skipReason: 'ignored',
         },
       ]);

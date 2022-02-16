@@ -1,7 +1,7 @@
 // Based on http://asdf-vm.com/manage/configuration.html#tool-versions
 import is from '@sindresorhus/is';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as NpmDatasource from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
@@ -16,9 +16,8 @@ const refString = 'ref:';
 // Mapping between supported dependency names and their datasources/lookup names
 const supportedDeps: Record<string, ToolVersionsDep> = {
   nodejs: {
-    datasource: NpmDatasource.id,
-    depName: 'node',
-    lookupName: 'nodejs',
+    datasource: GithubTagsDatasource.id,
+    lookupName: 'nodejs/node',
   },
   ruby: {
     datasource: RubyVersionDatasource.id,
@@ -58,8 +57,7 @@ export function extractPackageFile(
       }
 
       const depName = parts[0];
-
-      dep.depName = supportedDeps[depName]?.depName ?? depName;
+      dep.depName = depName;
 
       // Check if the datasource for this dependency is known to us
       if (!supportedDeps[depName]) {
@@ -72,29 +70,31 @@ export function extractPackageFile(
       }
 
       const toolVersionsDep: ToolVersionsDep = supportedDeps[depName];
+      parts.shift();
 
       dep.datasource = toolVersionsDep.datasource;
       if (dep.datasource === GithubTagsDatasource.id) {
         dep.lookupName = toolVersionsDep.lookupName;
       }
 
-      parts.shift();
-
       // If we have multiple fallback versions in one line, take only the first one and ignore fallback versions.
       const currentRawValue = parts[0];
 
       if (currentRawValue === 'system' || currentRawValue.startsWith('path:')) {
         // We do not support updating 'system' or 'path:' deps
-        dep.currentValue = currentRawValue;
-        dep.skipReason = 'unsupported-version';
-      } else if (currentRawValue.startsWith('ref:')) {
-        // The version is a tag or branch name
         dep = {
           ...dep,
-          datasource: GithubTagsDatasource.id,
+          currentValue: currentRawValue,
+          skipReason: 'unsupported-version',
+        };
+      } else if (currentRawValue.startsWith('ref:')) {
+        // The version is a GitHub ref (tag, commit or branch)
+        dep = {
+          ...dep,
+          datasource: GitRefsDatasource.id,
           currentRawValue,
           currentDigest: currentRawValue.substr(refString.length),
-          lookupName: toolVersionsDep.lookupName,
+          lookupName: `https://github.com/${toolVersionsDep.lookupName}.git`,
         };
       } else if (semverCoerced.isVersion(currentRawValue)) {
         // The version is semver-like
@@ -108,8 +108,11 @@ export function extractPackageFile(
           { currentRawValue },
           'Not a well-formed or supported version'
         );
-        dep.currentValue = currentRawValue;
-        dep.skipReason = 'unsupported-version';
+        dep = {
+          ...dep,
+          currentValue: currentRawValue,
+          skipReason: 'unsupported-version',
+        };
       }
 
       return dep;
