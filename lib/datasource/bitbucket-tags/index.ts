@@ -76,11 +76,11 @@ export class BitBucketTagsDatasource extends Datasource {
   // getTagCommit fetched the commit has for specified tag
   @cache({
     namespace: BitBucketTagsDatasource.cacheNamespace,
-    key: (registryUrl, repo, tag: string) =>
+    key: (registryUrl: string | undefined, repo: string, tag: string): string =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
   })
   async getTagCommit(
-    _registryUrl: string,
+    _registryUrl: string | undefined,
     repo: string,
     tag: string
   ): Promise<string | null> {
