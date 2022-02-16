@@ -133,7 +133,10 @@ const repoGroups = {
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
-  nest: 'https://github.com/nestjs/nest',
+  nest: [
+    'https://github.com/nestjs/nest',
+    'https://github.com/nestjs/passport',
+  ],
   netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
@@ -176,6 +179,7 @@ const repoGroups = {
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
+  'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',

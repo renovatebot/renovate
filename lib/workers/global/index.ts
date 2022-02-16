@@ -78,6 +78,7 @@ function checkEnv(): void {
 }
 
 export async function validatePresets(config: AllConfig): Promise<void> {
+  logger.debug('validatePresets()');
   try {
     await resolveConfigPresets(config);
   } catch (err) /* istanbul ignore next */ {
@@ -141,6 +142,7 @@ export async function start(): Promise<number> {
       }
       const repoConfig = await getRepositoryConfig(config, repository);
       if (repoConfig.hostRules) {
+        logger.debug('Reinitializing hostRules for repo');
         hostRules.clear();
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
         repoConfig.hostRules = [];
