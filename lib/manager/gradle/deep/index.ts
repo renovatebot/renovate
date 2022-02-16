@@ -2,7 +2,7 @@ import type { Stats } from 'fs';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import * as datasourceMaven from '../../../datasource/maven';
+import { MavenDatasource } from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
@@ -145,7 +145,7 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        datasource: datasourceMaven.id,
+        datasource: MavenDatasource.id,
         deps: dependencies,
       });
 

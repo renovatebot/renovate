@@ -1,5 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignee to the issue 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/users?username=someuser",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_ids%5B%5D=123",
+  },
+]
+`;
+
 exports[`platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Object {
@@ -21,44 +48,6 @@ Array [
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_id=123",
-  },
-]
-`;
-
-exports[`platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignees to the issue if supported 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/users?username=someuser",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_id=123",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/users?username=someotheruser",
   },
@@ -71,7 +60,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_ids%5B%5D=123&assignee_ids%5B%5D=124",
   },
 ]
 `;
@@ -88,55 +77,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/users?username=someuser",
-  },
-]
-`;
-
-exports[`platform/gitlab/index addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/users?username=someuser",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_id=123",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/users?username=someotheruser",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124",
   },
 ]
 `;

@@ -14,7 +14,5 @@ export async function finaliseRepo(
   await platform.ensureIssueClosing(
     `Action Required: Fix Renovate Configuration`
   );
-  if (config.platformCommit) {
-    await clearRenovateRefs();
-  }
+  await clearRenovateRefs();
 }
