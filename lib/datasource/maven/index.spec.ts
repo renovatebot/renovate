@@ -4,7 +4,9 @@ import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
-import { id as datasource } from '.';
+import { MavenDatasource } from '.';
+
+const datasource = MavenDatasource.id;
 
 const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';

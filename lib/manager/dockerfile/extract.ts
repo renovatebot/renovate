@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -119,7 +119,7 @@ export function getDep(
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
-  dep.datasource = datasourceDocker.id;
+  dep.datasource = DockerDatasource.id;
 
   // Pretty up special prefixes
   if (dep.depName) {

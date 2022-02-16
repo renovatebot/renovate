@@ -64,7 +64,7 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (localDir && !config.persistRepoData) {
+  if (localDir && !repoConfig.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {
