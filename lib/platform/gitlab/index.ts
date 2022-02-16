@@ -941,7 +941,6 @@ export async function addAssignees(
       const assigneeId = await getUserID(assignees[i]);
       url += `${i > 0 ? '&' : '?'}assignee_ids[]=${assigneeId}`;
     }
-    logger.debug(`Adding assignees using '${url}'`);
     await gitlabApi.putJson(url);
   } catch (err) {
     logger.debug({ err }, 'addAssignees error');
