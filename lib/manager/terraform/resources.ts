@@ -56,6 +56,7 @@ export function analyseTerraformResource(
       dep.datasource = HelmDatasource.id;
       break;
 
+    /* istanbul ignore next */
     default:
       dep.skipReason = 'invalid-value';
       break;
