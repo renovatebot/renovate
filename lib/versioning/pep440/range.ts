@@ -27,8 +27,8 @@ function getRangePrecision(
   ranges: Range[],
   newVersion: string
 ): ReplaceUserPolicy | null {
-  let upperBound: number[];
   const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
+  let upperBound: number[];
   let rangePrecision: number;
   // range is defined by a single bound.
   // ie. <1.2.2.3;  >=7.
@@ -51,11 +51,12 @@ function getRangePrecision(
   if (rangePrecision === -1) {
     rangePrecision = upperBound.length - 1;
   }
-  // Tune down precision if followed by a zero
+  // Tune down Major precision if followed by a zero
   // The following will result in a "patch"("micro") level precision,
   //    currentValue          | rangeStrategy    | currentVersion | newVersion | expected
   //     ${'7+<8.0'}          | ${'replace'}     | ${'7.2.3'}     | ${'8.2.5'} | ${'7+<8.3'}
   if (
+    rangePrecision === ReplaceUserPolicy.Major &&
     rangePrecision + 1 < upperBound.length &&
     upperBound[rangePrecision + 1] === 0
   ) {
@@ -160,6 +161,17 @@ export function getNewValue({
     case 'auto':
     case 'replace':
       updatedRange = handleReplaceStrategy(
+        {
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        },
+        ranges
+      );
+      break;
+    case 'widen':
+      updatedRange = handleWidenStrategy(
         {
           currentValue,
           rangeStrategy,
@@ -334,6 +346,36 @@ function updateRangeValue(
   return null;
 }
 
+function handleWidenStrategy(
+  { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
+  ranges: Range[]
+): (string | null)[] {
+  // newVersion is within range
+  if (satisfies(newVersion, currentValue)) {
+    return [currentValue];
+  }
+  const rangePrecision = getRangePrecision(ranges, newVersion);
+  return ranges.map((range) => {
+    if (range.operator === '<' && gte(newVersion, range.version)) {
+      const futureVersion = getPreciseFutureVersion(
+        range.version,
+        newVersion,
+        rangePrecision
+      );
+      return range.operator + futureVersion;
+    }
+    return updateRangeValue(
+      {
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      },
+      range
+    );
+  });
+}
+
 function handleReplaceStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   ranges: Range[]
@@ -351,6 +393,13 @@ function handleReplaceStrategy(
         rangePrecision
       );
       return range.operator + futureVersion;
+    }
+    if (['>', '>='].includes(range.operator)) {
+      if (lte(newVersion, range.version)) {
+        // this looks like a rollback
+        return '>=' + newVersion;
+      }
+      return range.operator + newVersion;
     }
     return updateRangeValue(
       {
