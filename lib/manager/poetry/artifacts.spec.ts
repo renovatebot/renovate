@@ -102,6 +102,7 @@ describe('manager/poetry/artifacts', () => {
       password: 'passwordOne',
     });
     hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
+    hostRules.find.mockReturnValueOnce({});
     hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -112,7 +113,7 @@ describe('manager/poetry/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(hostRules.find.mock.calls).toHaveLength(3);
+    expect(hostRules.find.mock.calls).toHaveLength(4);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('prioritizes pypi-scoped credentials', async () => {

@@ -4,6 +4,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
+import type { HostRule } from '../../types';
 import { exec } from '../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
@@ -100,6 +101,13 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   return sourceArray;
 }
 
+function getMatchingHostRule(source: PoetrySource): HostRule {
+  const scopedMatch = find({ hostType: PypiDatasource.id, url: source.url });
+  return is.nonEmptyObject(scopedMatch)
+    ? scopedMatch
+    : find({ url: source.url });
+}
+
 function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string
@@ -108,9 +116,7 @@ function getSourceCredentialVars(
   const envVars: Record<string, string> = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule =
-      find({ hostType: PypiDatasource.id, url: source.url }) ??
-      find({ url: source.url });
+    const matchingHostRule = getMatchingHostRule(source);
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
