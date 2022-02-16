@@ -347,7 +347,7 @@ module.exports = {
   hostRules: [
     {
       matchHost: 'gitlab.example.com',
-      hostType: 'pypi'
+      hostType: 'pypi',
       username: 'gitlab-ci-token',
       password: process.env.CI_JOB_TOKEN,
     },
