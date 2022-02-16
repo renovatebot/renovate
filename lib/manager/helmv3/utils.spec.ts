@@ -39,5 +39,19 @@ describe('manager/helmv3/utils', () => {
       });
       expect(repository).toBe(repoUrl);
     });
+
+    it('return false if repository is null', () => {
+      const repository = resolveAlias(null, {
+        anotherRepository: 'https://charts.helm.sh/stable',
+      });
+      expect(repository).not.toBeTrue();
+    });
+
+    it('return false if repository is undefined', () => {
+      const repository = resolveAlias(undefined, {
+        anotherRepository: 'https://charts.helm.sh/stable',
+      });
+      expect(repository).not.toBeTrue();
+    });
   });
 });
