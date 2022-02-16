@@ -934,13 +934,17 @@ export async function addAssignees(
   iid: number,
   assignees: string[]
 ): Promise<void> {
-  logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
-    let url = `projects/${config.repository}/merge_requests/${iid}`;
-    for (let i = 0; i < assignees.length; i++) {
-      const assigneeId = await getUserID(assignees[i]);
-      url += `${i > 0 ? '&' : '?'}assignee_ids[]=${assigneeId}`;
+    logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
+    const assigneeIds = [];
+    for (const assignee of assignees) {
+      assigneeIds.push(await getUserID(assignee));
     }
+    const url = `projects/${
+      config.repository
+    }/merge_requests/${iid}?${getQueryString({
+      'assignee_ids[]': assigneeIds,
+    })}`;
     await gitlabApi.putJson(url);
   } catch (err) {
     logger.debug({ err }, 'addAssignees error');
