@@ -7,7 +7,7 @@ test.each`
   ${'==7.2.*'}         | ${'==7.2.*'}
   ${'==7.2.8'}         | ${'==7.2.8'}
   ${'==7.2.8,>=7.2.2'} | ${'==7.2.8'}
-`('checkRange("rangeIn  put") === "$expected"', ({ rangeInput, expected }) => {
+`('checkRange("rangeInput") === "$expected"', ({ rangeInput, expected }) => {
   const res = checkRangeAndRemoveUnnecessaryRangeLimit(rangeInput);
   expect(res).toEqual(expected);
 });
