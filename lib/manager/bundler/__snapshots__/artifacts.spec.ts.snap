@@ -256,7 +256,7 @@ Array [
 exports[`manager/bundler/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
-    "cmd": "bundler lock",
+    "cmd": "bundler lock --update",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -292,7 +292,7 @@ Array [
 exports[`manager/bundler/artifacts returns error when failing in lockFileMaintenance true 2`] = `
 Array [
   Object {
-    "cmd": "bundler lock",
+    "cmd": "bundler lock --update",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

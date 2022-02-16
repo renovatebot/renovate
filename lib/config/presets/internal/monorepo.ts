@@ -129,10 +129,17 @@ const repoGroups = {
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
-  'material-ui': 'https://github.com/mui-org/material-ui',
+  'material-ui': [
+    'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
+    'https://github.com/mui/material-ui',
+  ],
+  'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
-  nest: 'https://github.com/nestjs/nest',
+  nest: [
+    'https://github.com/nestjs/nest',
+    'https://github.com/nestjs/passport',
+  ],
   netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
@@ -153,6 +160,7 @@ const repoGroups = {
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  parcel: 'https://github.com/parcel-bundler/parcel',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
@@ -174,6 +182,7 @@ const repoGroups = {
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
+  'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',

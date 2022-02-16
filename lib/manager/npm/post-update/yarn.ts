@@ -7,7 +7,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
-import { id as npmId } from '../../../datasource/npm';
+import { NpmDatasource } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
@@ -249,7 +249,7 @@ export async function generateLockFile(
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new ExternalHostError(err, npmId);
+        throw new ExternalHostError(err, NpmDatasource.id);
       }
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };

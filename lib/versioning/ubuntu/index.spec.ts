@@ -197,6 +197,7 @@ describe('versioning/ubuntu/index', () => {
     ${'16.04.7'} | ${'16.04.1'} | ${true}
     ${'19.10.1'} | ${'20.04.1'} | ${false}
     ${'20.04.1'} | ${'19.10.1'} | ${true}
+    ${'xxx'}     | ${'yyy'}     | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(ubuntu.isGreaterThan(a, b)).toBe(expected);
   });
