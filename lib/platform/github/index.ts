@@ -28,6 +28,7 @@ import type {
   CommitResult,
   CommitSha,
   FileAddition,
+  FileChange,
   FileDeletion,
 } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
@@ -1761,49 +1762,51 @@ async function forcePushFiles(
   return remoteCommitSha;
 }
 
+function containsExecutables(files: FileChange[], branchName: string): boolean {
+  const executableFiles = files
+    .filter((file): file is FileAddition => file.type === 'addition')
+    .filter(({ isExecutable }) => isExecutable)
+    .map(({ path }) => path);
+  if (executableFiles.length) {
+    logger.debug(
+      { branchName, executableFiles },
+      'Platform-native commit: found executable files'
+    );
+    return true;
+  }
+  return false;
+}
+
 async function pushFiles(
   { branchName, files, message }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult
 ): Promise<CommitSha | null> {
-  const additions: FileAddition[] = [];
-  const deletions: FileDeletion[] = [];
-
-  for (const file of files) {
-    if (file.type === 'addition') {
-      additions.push(file);
-    } else {
-      deletions.push(file);
-    }
-  }
-
-  const executableFiles = additions
-    .filter(({ isExecutable }) => isExecutable)
-    .map(({ path }) => path);
-  if (executableFiles.length) {
-    logger.warn(
-      { branchName, executableFiles },
-      'Platform-native commit: found executable files'
-    );
-  }
-
-  const fileChanges: GithubGraphqlFileChanges = {
-    additions: additions.map(({ path, contents }) => ({
-      path,
-      contents: Buffer.from(contents).toString('base64'),
-    })),
-    deletions: deletions.map(({ path }) => ({ path })),
-  };
-
-  const variables: GraphqlVariables = {
-    repo: config.repository,
-    repositoryId: config.repositoryId,
-    branchName: `refs/heads/${branchName}`,
-    oid: parentCommitSha,
-    fileChanges,
-    message,
-  };
-
   try {
+    if (containsExecutables(files, branchName)) {
+      return forcePushFiles(branchName, parentCommitSha, commitSha, message);
+    }
+
+    const fileChanges: GithubGraphqlFileChanges = {
+      additions: files
+        .filter((file): file is FileAddition => file.type === 'addition')
+        .map(({ path, contents }) => ({
+          path,
+          contents: Buffer.from(contents).toString('base64'),
+        })),
+      deletions: files
+        .filter((file): file is FileDeletion => file.type === 'deletion')
+        .map(({ path }) => ({ path })),
+    };
+
+    const variables: GraphqlVariables = {
+      repo: config.repository,
+      repositoryId: config.repositoryId,
+      branchName: `refs/heads/${branchName}`,
+      oid: parentCommitSha,
+      fileChanges,
+      message,
+    };
+
     const { data, errors } = await githubApi.requestGraphql<{
       createCommitOnBranch: { commit: { oid: string } };
     }>(commitFilesMutation, { variables });
