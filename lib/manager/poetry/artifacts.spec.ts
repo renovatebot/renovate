@@ -14,6 +14,7 @@ import { updateArtifacts } from './artifacts';
 
 const pyproject1toml = loadFixture('pyproject.1.toml');
 const pyproject10toml = loadFixture('pyproject.10.toml');
+const pyproject12toml = loadFixture('pyproject.12.toml');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -112,6 +113,26 @@ describe('manager/poetry/artifacts', () => {
       })
     ).not.toBeNull();
     expect(hostRules.find.mock.calls).toHaveLength(3);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('prioritizes pypi-scoped credentials', async () => {
+    fs.readFile.mockResolvedValueOnce(null);
+    fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    hostRules.find.mockImplementation((search) => ({
+      password:
+        search.hostType === 'pypi' ? 'scoped-password' : 'unscoped-password',
+    }));
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: pyproject12toml,
+        config,
+      })
+    ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated pyproject.lock', async () => {

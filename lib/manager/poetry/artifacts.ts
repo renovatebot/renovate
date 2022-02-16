@@ -2,6 +2,7 @@ import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
@@ -108,8 +109,11 @@ function getSourceCredentialVars(
 
   for (const source of poetrySources) {
     const matchingHostRule =
-      find({ hostType: 'pypi', url: source.url }) || find({ url: source.url });
-    const formattedSourceName = source.name.toUpperCase();
+      find({ hostType: PypiDatasource.id, url: source.url }) ??
+      find({ url: source.url });
+    const formattedSourceName = source.name
+      .replace(regEx(/(\.|-)+/g), '_')
+      .toUpperCase();
     if (matchingHostRule.username) {
       envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_USERNAME`] =
         matchingHostRule.username;
