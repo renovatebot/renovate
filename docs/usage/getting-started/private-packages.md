@@ -325,39 +325,34 @@ For those found, a command similar to the following is run: `dotnet nuget add so
 
 ### poetry
 
-For every poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`.
+For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.
 
-```json
-{
-  "hostRules": [
+```js
+module.exports = {
+  hostRules: [
     {
-      "matchHost": "pypi.example.com",
-      "username": "pypi-user",
-      "password": "pypi-password"
-    }
-  ]
-}
+      matchHost: 'pypi.example.com',
+      hostType: 'pypi'
+      username: process.env.PYPI_USERNAME,
+      password: process.env.PYPI_PASSWORD,
+    },
+  ],
+};
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    Environment variables are build from the poetry source `name` configured in the section `[[tool.poetry.source]]` of
-    the project's `pyproject.toml` file.
+If you're self-hosting Renovate via the [GitLab Runner](../getting-started/running.md#gitlab-runner) and want to access packages from private GitLab registries, you can use the GitLab CI job token for authentication:
 
-When using renovate on Gitlab hosted projects which depend on Python dependencies also hosted on Gitlab's private pypi registries, use a distinct
-`hostType`:
-
-```json
-{
-  "hostRules": [
+```js
+module.exports = {
+  hostRules: [
     {
-      "matchHost": "gitlab.example.com",
-      "hostType": "pypi",
-      "username": "gitlab-ci-token", // CI credentials will work on self-hosted renovate
-      "password": "$CI_JOB_TOKEN" // use any other username/password in other cases
-    }
-  ]
-}
+      matchHost: 'gitlab.example.com',
+      hostType: 'pypi'
+      username: 'gitlab-ci-token',
+      password: process.env.CI_JOB_TOKEN,
+    },
+  ],
+};
 ```
 
 ## WhiteSource Renovate Hosted App Encryption
