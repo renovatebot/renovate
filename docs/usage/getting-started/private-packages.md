@@ -332,7 +332,7 @@ module.exports = {
   hostRules: [
     {
       matchHost: 'pypi.example.com',
-      hostType: 'pypi'
+      hostType: 'pypi',
       username: process.env.PYPI_USERNAME,
       password: process.env.PYPI_PASSWORD,
     },
