@@ -44,14 +44,14 @@ describe('manager/helmv3/utils', () => {
       const repository = resolveAlias(null, {
         anotherRepository: 'https://charts.helm.sh/stable',
       });
-      expect(repository).not.toBeTrue();
+      expect(repository).toBeFalse();
     });
 
     it('return false if repository is undefined', () => {
       const repository = resolveAlias(undefined, {
         anotherRepository: 'https://charts.helm.sh/stable',
       });
-      expect(repository).not.toBeTrue();
+      expect(repository).toBeFalse();
     });
   });
 });
