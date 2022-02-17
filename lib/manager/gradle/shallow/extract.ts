@@ -1,6 +1,6 @@
 import upath from 'upath';
 import {
-  id as datasource,
+  MavenDatasource,
   defaultRegistryUrls,
 } from '../../../datasource/maven';
 import { logger } from '../../../logger';
@@ -22,6 +22,8 @@ import {
   reorderFiles,
   toAbsolutePath,
 } from './utils';
+
+const datasource = MavenDatasource.id;
 
 // Enables reverse sorting in generateBranchConfig()
 //

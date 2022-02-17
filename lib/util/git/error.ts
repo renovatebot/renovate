@@ -4,9 +4,9 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { FileChange } from './types';
 
 // istanbul ignore next
-export function checkForPlatformFailure(err: Error): void {
+export function checkForPlatformFailure(err: Error): Error | null {
   if (process.env.NODE_ENV === 'test') {
-    return;
+    return null;
   }
   const externalHostFailureStrings = [
     'remote: Invalid username or password',
@@ -22,11 +22,12 @@ export function checkForPlatformFailure(err: Error): void {
     'early EOF',
     'fatal: bad config', // .gitmodules problem
     'expected flush after ref listing',
+    '[rejected] (stale info)',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
-      throw new ExternalHostError(err, 'git');
+      return new ExternalHostError(err, 'git');
     }
   }
 
@@ -63,9 +64,11 @@ export function checkForPlatformFailure(err: Error): void {
       const res = new Error(CONFIG_VALIDATION);
       res.validationError = message;
       res.validationMessage = err.message;
-      throw res;
+      return res;
     }
   }
+
+  return null;
 }
 
 // istanbul ignore next
@@ -118,12 +121,6 @@ export function handleCommitError(
   }
   if (err.message.includes('remote: error: cannot lock ref')) {
     logger.error({ err }, 'Error committing files.');
-    return null;
-  }
-  if (err.message.includes('[rejected] (stale info)')) {
-    logger.info(
-      'Branch update was rejected because local copy is not up-to-date.'
-    );
     return null;
   }
   if (

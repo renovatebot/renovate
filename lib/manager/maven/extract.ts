@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
-import * as datasourceMaven from '../../datasource/maven';
+import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
@@ -56,7 +56,7 @@ function depFromNode(
     const depName = `${groupId}:${artifactId}`;
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
-    const datasource = datasourceMaven.id;
+    const datasource = MavenDatasource.id;
     const registryUrls = [MAVEN_REPO];
     const result: PackageDependency = {
       datasource,
@@ -204,7 +204,7 @@ export function extractPackage(
   }
 
   const result: PackageFile = {
-    datasource: datasourceMaven.id,
+    datasource: MavenDatasource.id,
     packageFile,
     deps: [],
   };
