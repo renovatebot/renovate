@@ -198,6 +198,7 @@ Array [
       },
     ],
     "packageFile": "random.pom.xml",
+    "packageFileVersion": "0.0.1",
     "parent": "../pom.xml",
   },
 ]
@@ -390,6 +391,7 @@ Array [
       },
     ],
     "packageFile": "child.pom.xml",
+    "packageFileVersion": "0.0.1",
     "parent": "parent.pom.xml",
   },
 ]

@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import type { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import type { ReleaseResult } from '../types';
-import { removeBuildMeta } from './common';
+import { massageUrl, removeBuildMeta } from './common';
 
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`)?.val;
@@ -39,7 +39,7 @@ export async function getReleases(
         if (pkgIsLatestVersion === 'true') {
           const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
           if (projectUrl) {
-            dep.sourceUrl = projectUrl;
+            dep.sourceUrl = massageUrl(projectUrl);
           }
         }
       } catch (err) /* istanbul ignore next */ {
