@@ -337,7 +337,8 @@ type BranchState =
   | 'success'
   | 'failed'
   | 'canceled'
-  | 'skipped';
+  | 'skipped'
+  | 'scheduled';
 
 interface GitlabBranchStatus {
   status: BranchState;
@@ -378,6 +379,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
   skipped: BranchStatus.red,
+  scheduled: BranchStatus.yellow,
 };
 
 // Returns the combined status for a branch.
