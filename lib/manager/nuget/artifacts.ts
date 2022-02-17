@@ -27,6 +27,7 @@ import {
   getDefaultRegistries,
   getRandomString,
 } from './util';
+import { getDependentPackageFiles } from './package-tree';
 
 async function addSourceCmds(
   packageFileName: string,
@@ -67,7 +68,7 @@ async function runDotnetRestore(
       image: 'dotnet',
     },
   };
-
+  getDependentPackageFiles(packageFileName);
   const nugetCacheDir = await ensureCacheDir('nuget');
   const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
   const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
