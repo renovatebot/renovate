@@ -1,6 +1,7 @@
 import stream from 'stream';
 import util from 'util';
 import is from '@sindresorhus/is';
+import findUp from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
@@ -161,4 +162,31 @@ export function localPathIsFile(pathName: string): Promise<boolean> {
     .stat(upath.join(localDir, pathName))
     .then((s) => s.isFile())
     .catch(() => false);
+}
+
+/**
+ * Find a file or directory by walking up parent directories within localDir
+ */
+
+export async function findUpLocal(
+  fileName: string | string[],
+  cwd: string
+): Promise<string | undefined> {
+  const { localDir } = GlobalConfig.get();
+  const absoluteCwd = upath.join(localDir, cwd);
+  const res = await findUp(fileName, { cwd: absoluteCwd, type: 'file' });
+  // Return undefined if nothing found
+  if (res === undefined) {
+    return res;
+  }
+  // Return relative path if file is inside of local dir
+  if (res.startsWith(localDir)) {
+    let relativePath = res.replace(localDir, '');
+    if (relativePath.startsWith('/')) {
+      relativePath = relativePath.substr(1);
+    }
+    return relativePath;
+  }
+  // Return undefined if found file is outside of localDir
+  return undefined;
 }

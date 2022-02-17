@@ -1,10 +1,9 @@
 import cryptoRandomString from 'crypto-random-string';
-import findUp from 'find-up';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { defaultRegistryUrls } from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { readLocalFile } from '../../util/fs';
+import { findUpLocal, readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { Registry } from './types';
 
@@ -37,26 +36,16 @@ export async function getConfiguredRegistries(
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
-  const normalizedLocalDir = upath.normalizeSafe(localDir);
-  const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: upath.dirname(upath.join(normalizedLocalDir, packageFile)),
-    type: 'file',
-  });
-
-  if (
-    !nuGetConfigPath ||
-    upath.normalizeSafe(nuGetConfigPath).startsWith(normalizedLocalDir) !== true
-  ) {
+  const nuGetConfigPath = await findUpLocal(
+    nuGetConfigFileNames,
+    upath.dirname(packageFile)
+  );
+  if (!nuGetConfigPath) {
     return undefined;
   }
 
   logger.debug({ nuGetConfigPath }, 'found NuGet.config');
-  // Get relative path to nuget config
-  const relativeNuGetConfigPath = nuGetConfigPath.replace(
-    normalizedLocalDir,
-    ''
-  );
-  const nuGetConfig = await readFileAsXmlDocument(relativeNuGetConfigPath);
+  const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
   if (!nuGetConfig) {
     return undefined;
   }
