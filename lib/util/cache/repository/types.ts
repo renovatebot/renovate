@@ -52,5 +52,4 @@ export interface Cache {
     };
   };
   gitConflicts?: GitConflictsCache;
-  renovateRefsFetchSkipsCounter?: number;
 }
