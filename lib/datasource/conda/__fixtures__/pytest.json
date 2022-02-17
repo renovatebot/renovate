@@ -28,6 +28,53 @@
   "app_summary": {},
   "public": true,
   "revision": 530,
+  "files": [
+    {
+      "description": null,
+      "basename": "linux-32/pytest-3.10.0-py27_0.tar.bz2",
+      "labels": [
+        "main"
+      ],
+      "dependencies": [],
+      "distribution_type": "conda",
+      "attrs": {
+        "build_number": 0,
+        "name": "pytest",
+        "license": "MIT",
+        "timestamp": 1541443263263,
+        "source_url": "http://repo.continuum.io/pkgs/main/linux-32/pytest-3.10.0-py27_0.tar.bz2",
+        "platform": "linux",
+        "depends": [
+          "atomicwrites >=1.0",
+          "attrs >=17.4.0",
+          "funcsigs",
+          "more-itertools >=4.0",
+          "pathlib2 >=2.2.0",
+          "pluggy >=0.7",
+          "py >=1.5.0",
+          "python >=2.7,<2.8.0a0",
+          "setuptools >=40.0",
+          "six >=1.10.0"
+        ],
+        "version": "3.10.0",
+        "subdir": "linux-32",
+        "build": "py27_0",
+        "sha256": "b6d51c12e8a9188c2f57a82655a3c6a6c6ac2956b49548a70924fc8a187fa884",
+        "arch": "x86",
+        "md5": "5b2f041b36b1fa2b1a52369b49f0265d",
+        "size": 340998
+      },
+      "full_name": "anaconda/pytest/3.10.0/linux-32/pytest-3.10.0-py27_0.tar.bz2",
+      "owner": "anaconda",
+      "size": 340998,
+      "upload_time": "2020-02-28 11:46:01.948000+00:00",
+      "ndownloads": 6,
+      "download_url": "//api.anaconda.org/download/anaconda/pytest/3.10.0/linux-32/pytest-3.10.0-py27_0.tar.bz2",
+      "version": "3.10.0",
+      "md5": "5b2f041b36b1fa2b1a52369b49f0265d",
+      "type": "conda"
+    }
+  ],
   "package_types": [
     "conda"
   ],
