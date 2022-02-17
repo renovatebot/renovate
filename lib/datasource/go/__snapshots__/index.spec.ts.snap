@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/go/index getDigest returns digest 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "golang.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://golang.org/x/text?go-get=1",
+  },
+]
+`;
+
+exports[`datasource/go/index getDigest returns null for no go-source tag 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "golang.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://golang.org/y/text?go-get=1",
+  },
+]
+`;
+
+exports[`datasource/go/index getDigest returns null for wrong name 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "golang.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://golang.org/y/text?go-get=1",
+  },
+]
+`;
+
+exports[`datasource/go/index getDigest support bitbucket digest 1`] = `"123"`;
+
+exports[`datasource/go/index getDigest support bitbucket digest 2`] = `Array []`;

@@ -1,4 +1,4 @@
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
@@ -47,7 +47,7 @@ export function extractTerraformRequiredVersion(
 
 export function analyseTerraformVersion(dep: PackageDependency): void {
   dep.depType = 'required_version';
-  dep.datasource = datasourceGithubTags.id;
+  dep.datasource = GithubTagsDatasource.id;
   dep.depName = 'hashicorp/terraform';
   dep.extractVersion = 'v(?<version>.*)$';
 }

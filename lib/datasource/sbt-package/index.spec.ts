@@ -3,8 +3,8 @@ import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from '../sbt-plugin/util';
-import * as sbtPackage from '.';
+import { parseIndexDir } from './util';
+import { SbtPackageDatasource } from '.';
 
 describe('datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
@@ -153,6 +153,45 @@ describe('datasource/sbt-package/index', () => {
             '</body>\n' +
             '</html>\n'
         );
+
+      httpMock
+        .scope('https://packages.confluent.io/maven')
+        .get('/io/confluent/')
+        .reply(
+          200,
+          '<a href="/maven/io/confluent/kafka-avro-serializer/">kafka-avro-serializer/</a>'
+        );
+      httpMock
+        .scope('https://packages.confluent.io/maven')
+        .get('/io/confluent/kafka-avro-serializer/')
+        .reply(
+          200,
+          '<a href="/maven/io/confluent/kafka-avro-serializer/7.0.1/">7.0.1/</a>'
+        );
+      httpMock
+        .scope('https://packages.confluent.io/maven')
+        .get('/io/confluent/kafka-avro-serializer/7.0.1/')
+        .reply(
+          200,
+          '<a href="/maven/io/confluent/kafka-avro-serializer/7.0.1/kafka-avro-serializer-7.0.1.pom">kafka-avro-serializer-7.0.1.pom</a>'
+        );
+      httpMock
+        .scope('https://packages.confluent.io/maven')
+        .get(
+          '/io/confluent/kafka-avro-serializer/7.0.1/kafka-avro-serializer-7.0.1.pom'
+        )
+        .reply(
+          200,
+          `
+            <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://maven.apache.org/POM/4.0.0"
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">z
+              <artifactId>kafka-avro-serializer</artifactId>
+              <packaging>jar</packaging>
+              <name>kafka-avro-serializer</name>
+            </project>
+          `
+        );
     });
 
     // TODO: fix mocks
@@ -162,7 +201,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
@@ -173,7 +212,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'com.example:empty',
           registryUrls: [],
         })
@@ -184,7 +223,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven', MAVEN_REPO],
         })
@@ -199,7 +238,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest_2.12',
           registryUrls: [],
         })
@@ -210,11 +249,26 @@ describe('datasource/sbt-package/index', () => {
       });
     });
 
+    it('fetches releases from Confluent', async () => {
+      expect(
+        await getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: SbtPackageDatasource.id,
+          depName: 'io.confluent:kafka-avro-serializer',
+          registryUrls: ['https://packages.confluent.io/maven'],
+        })
+      ).toEqual({
+        dependencyUrl: 'https://packages.confluent.io/maven/io/confluent',
+        registryUrl: 'https://packages.confluent.io/maven',
+        releases: [{ version: '7.0.1' }],
+      });
+    });
+
     it('extracts URL from Maven POM file', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest-app_2.12',
           registryUrls: [],
         })
@@ -228,7 +282,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest-flatspec_2.12',
           registryUrls: [],
         })
@@ -241,7 +295,7 @@ describe('datasource/sbt-package/index', () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPackage.id,
+          datasource: SbtPackageDatasource.id,
           depName: 'org.scalatest:scalatest-matchers-core_2.12',
           registryUrls: [],
         })

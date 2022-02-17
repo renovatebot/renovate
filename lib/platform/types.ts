@@ -49,15 +49,14 @@ export interface RepoParams {
 export interface Pr {
   body?: string;
   sourceBranch: string;
-  canMerge?: boolean;
-  canMergeReason?: string;
+  cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
   displayNumber?: string;
   hasAssignees?: boolean;
   hasReviewers?: boolean;
   labels?: string[];
-  number?: number;
+  number: number;
   reviewers?: string[];
   sha?: string;
   sourceRepo?: string;
@@ -128,7 +127,7 @@ export interface MergePRConfig {
 }
 export interface EnsureCommentConfig {
   number: number;
-  topic: string;
+  topic: string | null;
   content: string;
 }
 

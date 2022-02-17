@@ -1,5 +1,5 @@
 import { hasKey } from '../../util/object';
-import { PreCommitConfig, PreCommitDependency } from './types';
+import type { PreCommitConfig, PreCommitDependency } from './types';
 
 /**
  * Type guard to determine whether the file matches pre-commit configuration format

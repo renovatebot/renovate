@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -56,7 +56,14 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  if (currentValue && currentValue.indexOf(variableMarker) !== -1) {
+  if (depName?.includes(variableMarker)) {
+    // If depName contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we currently not support this.
+    return {
+      skipReason: 'contains-variable',
+    };
+  }
+
+  if (currentValue?.includes(variableMarker)) {
     // If tag contains a variable, e.g. "5.0${VERSION_SUFFIX}", we do not support this.
     return {
       skipReason: 'contains-variable',
@@ -112,7 +119,7 @@ export function getDep(
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
-  dep.datasource = datasourceDocker.id;
+  dep.datasource = DockerDatasource.id;
 
   // Pretty up special prefixes
   if (dep.depName) {

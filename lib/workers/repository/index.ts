@@ -24,7 +24,9 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = GlobalConfig.set(applySecretsToConfig(repoConfig, {}, false));
+  let config = GlobalConfig.set(
+    applySecretsToConfig(repoConfig, undefined, false)
+  );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');
@@ -62,7 +64,7 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (localDir && !config.persistRepoData) {
+  if (localDir && !repoConfig.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {

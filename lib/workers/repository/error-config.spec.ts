@@ -2,7 +2,7 @@ import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { Pr } from '../../platform';
+import type { Pr } from '../../platform';
 import { PrState } from '../../types';
 import { raiseConfigWarningIssue } from './error-config';
 

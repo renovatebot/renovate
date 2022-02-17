@@ -229,6 +229,7 @@ export interface UpdateLockedConfig {
   currentVersion?: string;
   newVersion?: string;
   allowParentUpdates?: boolean;
+  allowHigherOrRemoved?: boolean;
 }
 
 export interface UpdateLockedResult {

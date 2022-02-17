@@ -32,6 +32,8 @@ This makes it harder for us to review your work because we don't know what has c
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
+If you are updating your PR branch from within the GitHub PR interface, then only use the default "Update branch" button.
+
 Force pushing a PR is OK when:
 
 - you need to make large changes on a PR which require a full review anyway
@@ -64,7 +66,7 @@ Read more about this in the [GitHub docs, Re-requesting a review](https://docs.g
 
 ## Slack collaboration with maintainers
 
-Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
+The codebase can be difficult to navigate, especially for a first-time contributor.
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.

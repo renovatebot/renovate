@@ -1,14 +1,14 @@
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
-import { regEx } from '../../util/regex';
+import type { SkipReason } from '../../types';
+import { newlineRegex, regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     let isPluginsSection = false;
     let pluginsIndent = '';
     for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {
@@ -47,7 +47,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               depName: gitPluginName,
               currentValue: currentValue,
               registryUrls: ['https://' + registry],
-              datasource: datasourceGithubTags.id,
+              datasource: GithubTagsDatasource.id,
             };
             deps.push(dep);
             continue;
@@ -77,7 +77,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             skipReason,
           };
           if (repo) {
-            dep.datasource = datasourceGithubTags.id;
+            dep.datasource = GithubTagsDatasource.id;
             dep.lookupName = repo;
           }
           deps.push(dep);

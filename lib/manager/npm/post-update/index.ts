@@ -5,7 +5,7 @@ import { dump, load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
-import { id as npmId } from '../../../datasource/npm';
+import { NpmDatasource } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
@@ -25,7 +25,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import type { FileChange } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
@@ -377,7 +377,7 @@ async function updateYarnOffline(
     } else if (yarnrc) {
       // Yarn 1 (offline mirror)
       const mirrorLine = yarnrc
-        .split('\n')
+        .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
       if (mirrorLine) {
         const mirrorPath = ensureTrailingSlash(
@@ -563,7 +563,7 @@ export async function getAdditionalFiles(
             const err = new Error(
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new ExternalHostError(err, npmId);
+            throw new ExternalHostError(err, NpmDatasource.id);
           }
         }
       }
@@ -650,7 +650,7 @@ export async function getAdditionalFiles(
               new Error(
                 'lock file failed for the dependency being updated - skipping branch creation'
               ),
-              npmId
+              NpmDatasource.id
             );
           }
           /* eslint-enable no-useless-escape */
@@ -727,7 +727,7 @@ export async function getAdditionalFiles(
               Error(
                 'lock file failed for the dependency being updated - skipping branch creation'
               ),
-              npmId
+              NpmDatasource.id
             );
           }
         }
@@ -810,7 +810,7 @@ export async function getAdditionalFiles(
             Error(
               'lock file failed for the dependency being updated - skipping branch creation'
             ),
-            npmId
+            NpmDatasource.id
           );
         }
         /* eslint-enable no-useless-escape */
@@ -827,7 +827,7 @@ export async function getAdditionalFiles(
             Error(
               'lock file failed for the dependency being updated - skipping branch creation'
             ),
-            npmId
+            NpmDatasource.id
           );
         }
       }

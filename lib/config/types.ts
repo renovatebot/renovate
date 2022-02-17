@@ -61,7 +61,7 @@ export interface RenovateSharedConfig {
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
-  semanticCommitScope?: string;
+  semanticCommitScope?: string | null;
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -81,6 +81,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
@@ -204,6 +205,7 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;

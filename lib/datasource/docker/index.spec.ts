@@ -4,10 +4,13 @@ import * as httpMock from '../../../test/http-mock';
 import { mocked, partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
-import { id } from './common';
+import { Http } from '../../util/http';
 import { MediaType } from './types';
+import { DockerDatasource, getAuthHeaders, getRegistryRepository } from '.';
 
 const hostRules = mocked(_hostRules);
+
+const http = new Http(DockerDatasource.id);
 
 jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
@@ -53,6 +56,120 @@ describe('datasource/docker/index', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  describe('getRegistryRepository', () => {
+    it('handles local registries', () => {
+      const res = getRegistryRepository(
+        'registry:5000/org/package',
+        'https://index.docker.io'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "org/package",
+          "registryHost": "https://registry:5000",
+        }
+      `);
+    });
+    it('supports registryUrls', () => {
+      const res = getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'https://my.local.registry/prefix'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
+        }
+      `);
+    });
+    it('supports http registryUrls', () => {
+      const res = getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'http://my.local.registry/prefix'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "http://my.local.registry",
+        }
+      `);
+    });
+    it('supports schemeless registryUrls', () => {
+      const res = getRegistryRepository(
+        'my.local.registry/prefix/image',
+        'my.local.registry/prefix'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "dockerRepository": "prefix/image",
+          "registryHost": "https://my.local.registry",
+        }
+      `);
+    });
+  });
+  describe('getAuthHeaders', () => {
+    beforeEach(() => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+      hostRules.hosts.mockReturnValue([]);
+    });
+
+    it('returns "authType token" if both provided', async () => {
+      hostRules.find.mockReturnValue({
+        authType: 'some-authType',
+        token: 'some-token',
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toMatchInlineSnapshot(`
+Object {
+  "authorization": "some-authType some-token",
+}
+`);
+    });
+
+    it('returns "Bearer token" if only token provided', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'some-token',
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toMatchInlineSnapshot(`
+Object {
+  "authorization": "Bearer some-token",
+}
+`);
+    });
+
+    it('fails', async () => {
+      httpMock.clear(false);
+
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {});
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toBeNull();
+    });
   });
 
   describe('getDigest', () => {
@@ -423,7 +540,7 @@ describe('datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(403);
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
         registryUrls: ['https://docker.io'],
       });
@@ -453,7 +570,7 @@ describe('datasource/docker/index', () => {
         .get('/user/9287/repos?page=3&per_page=100')
         .reply(200, { tags: ['latest'] }, {});
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
@@ -474,7 +591,7 @@ describe('datasource/docker/index', () => {
         .get('/node/manifests/1.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -497,7 +614,7 @@ describe('datasource/docker/index', () => {
         .get('/v2/bitnami/redis/manifests/5.0.12')
         .reply(200, '', {});
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
@@ -513,7 +630,7 @@ describe('datasource/docker/index', () => {
         )
         .reply(500);
       const config = {
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
@@ -535,7 +652,7 @@ describe('datasource/docker/index', () => {
         .reply(200);
       expect(
         await getPkgReleases({
-          datasource: id,
+          datasource: DockerDatasource.id,
           depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
         })
       ).toEqual({
@@ -589,7 +706,7 @@ describe('datasource/docker/index', () => {
           });
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toEqual({
@@ -624,7 +741,7 @@ describe('datasource/docker/index', () => {
           });
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -655,7 +772,7 @@ describe('datasource/docker/index', () => {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -678,7 +795,7 @@ describe('datasource/docker/index', () => {
           });
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -707,7 +824,7 @@ describe('datasource/docker/index', () => {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -728,7 +845,7 @@ describe('datasource/docker/index', () => {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -751,7 +868,7 @@ describe('datasource/docker/index', () => {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -778,7 +895,7 @@ describe('datasource/docker/index', () => {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -806,7 +923,7 @@ describe('datasource/docker/index', () => {
           );
         expect(
           await getPkgReleases({
-            datasource: id,
+            datasource: DockerDatasource.id,
             depName: 'ecr-proxy.company.com/node',
           })
         ).toBeNull();
@@ -835,7 +952,7 @@ describe('datasource/docker/index', () => {
         )
         .reply(200, { token: 'test' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
       });
       expect(res.releases).toHaveLength(1);
@@ -863,7 +980,7 @@ describe('datasource/docker/index', () => {
         )
         .reply(200, { token: 'test' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'docker.io/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -889,7 +1006,7 @@ describe('datasource/docker/index', () => {
         .get('/kubernetes-dashboard-amd64/manifests/1.0.0')
         .reply(200);
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
       expect(res.releases).toHaveLength(1);
@@ -903,7 +1020,7 @@ describe('datasource/docker/index', () => {
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'my/node',
       });
       expect(res).toBeNull();
@@ -928,7 +1045,7 @@ describe('datasource/docker/index', () => {
         .get('/token?service=registry.docker.io&scope=repository:my/node:pull')
         .reply(200, { token: 'some-token ' });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'my/node',
         registryUrls: ['https://index.docker.io/'],
       });
@@ -941,7 +1058,7 @@ describe('datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -981,7 +1098,7 @@ describe('datasource/docker/index', () => {
           },
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1017,7 +1134,7 @@ describe('datasource/docker/index', () => {
           },
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1037,7 +1154,7 @@ describe('datasource/docker/index', () => {
           mediaType: MediaType.manifestV1,
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1054,7 +1171,7 @@ describe('datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {});
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
@@ -1097,7 +1214,7 @@ describe('datasource/docker/index', () => {
           config: {},
         });
       const res = await getPkgReleases({
-        datasource: id,
+        datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
       expect(res).toMatchSnapshot();
