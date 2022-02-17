@@ -4,9 +4,9 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { FileChange } from './types';
 
 // istanbul ignore next
-export function checkForPlatformFailure(err: Error): void {
+export function checkForPlatformFailure(err: Error): Error | null {
   if (process.env.NODE_ENV === 'test') {
-    return;
+    return null;
   }
   const externalHostFailureStrings = [
     'remote: Invalid username or password',
@@ -27,7 +27,7 @@ export function checkForPlatformFailure(err: Error): void {
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
-      throw new ExternalHostError(err, 'git');
+      return new ExternalHostError(err, 'git');
     }
   }
 
@@ -64,9 +64,11 @@ export function checkForPlatformFailure(err: Error): void {
       const res = new Error(CONFIG_VALIDATION);
       res.validationError = message;
       res.validationMessage = err.message;
-      throw res;
+      return res;
     }
   }
+
+  return null;
 }
 
 // istanbul ignore next

@@ -130,6 +130,7 @@ describe('manager/maven/extract', () => {
         deps: [],
         mavenProps: {},
         packageFile: null,
+        packageFileVersion: '1',
       });
     });
   });
