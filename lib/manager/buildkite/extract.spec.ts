@@ -31,5 +31,10 @@ describe('manager/buildkite/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
+    it('extracts git-based plugin with .git at the end of its name', () => {
+      const res = extractPackageFile(Fixtures.get('pipeline6.yml')).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
   });
 });

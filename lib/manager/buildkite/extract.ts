@@ -43,8 +43,9 @@ export function extractPackageFile(content: string): PackageFile | null {
           if (gitPluginMatch) {
             logger.debug('Examining git plugin');
             const { registry, gitPluginName } = gitPluginMatch.groups;
+            const gitDepName = gitPluginName.replace('.git', '');
             const dep: PackageDependency = {
-              depName: gitPluginName,
+              depName: gitDepName,
               currentValue: currentValue,
               registryUrls: ['https://' + registry],
               datasource: GithubTagsDatasource.id,
