@@ -111,6 +111,10 @@ function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
 }
 
 function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
+  // istanbul ignore if: won't happen in practice
+  if (!rule1.matchHost || !rule2.matchHost) {
+    return 0;
+  }
   if (rule1.matchHost.length === rule2.matchHost.length) {
     return 0;
   }
