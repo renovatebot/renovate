@@ -128,8 +128,8 @@
     "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ec2": "3.47.0",
-    "@aws-sdk/client-ecr": "3.47.0",
+    "@aws-sdk/client-ec2": "3.50.0",
+    "@aws-sdk/client-ecr": "3.50.0",
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "2.2.5",
@@ -210,7 +210,7 @@
   },
   "devDependencies": {
     "@actions/core": "1.6.0",
-    "@aws-sdk/client-s3": "3.47.0",
+    "@aws-sdk/client-s3": "3.50.0",
     "@jest/globals": "27.5.1",
     "@jest/reporters": "27.5.1",
     "@jest/test-result": "27.5.1",
