@@ -90,6 +90,19 @@ async function runDotnetRestore(
   await remove(nugetConfigDir);
 }
 
+async function getLockFileContentMap(lockFileNames: [string]): object {
+  const lockFileContentMap = {};
+
+  for (const lockFileName of lockFileNames) {
+    lockFileContentMap[lockFileName] = await readLocalFile(
+      lockFileName,
+      'utf8'
+    );
+  }
+
+  return lockFileContentMap;
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -110,21 +123,19 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(
-    packageFileName,
-    'packages.lock.json'
-  );
-
   const packageFiles = (await getDependentPackageFiles(packageFileName)).concat(
     packageFileName
   );
+
   const lockFileNames = packageFiles.map((f) =>
     getSiblingFileName(f, 'packages.lock.json')
   );
-  const existingLockFileContentMap = await lockFileNames.reduce(
-    async (a, v) => ({ ...a, [v]: await readLocalFile(v, 'utf8') }),
-    {}
-  );
+
+  logger.info(lockFileNames, 'lockFileNames');
+
+  const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
+
+  logger.info(existingLockFileContentMap, 'Existing Lock File Content Map');
 
   // TODO: confirm this logic works
   const hasLockFileContent = Object.keys(existingLockFileContentMap).reduce(
@@ -151,10 +162,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await lockFileNames.reduce(
-      async (a, v) => ({ ...a, [v]: await readLocalFile(v, 'utf8') }),
-      {}
-    );
+    const newLockFileContentMap = await getLockFileContentMap(lockFileNames);
 
     const retArray = [];
     for (const lockFileName of lockFileNames) {
