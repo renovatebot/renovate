@@ -5,7 +5,6 @@
 Quotes from the [Haskell PVP Specification](https://pvp.haskell.org/):
 
 > A package version number **SHOULD** have the form A.B.C, and **MAY** optionally have any number of additional components, for example 2.1.0.4 (in this case, A=2, B=1, C=0).
-
 > A.B is known as the _major_ version number, and C the _minor_ version number.
 
 The one unusual difference between PVP and SemVer is that there are two major versions, and that there can be an optional number of additional version numbers past _minor_.

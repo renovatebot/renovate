@@ -1,6 +1,6 @@
 import { regEx } from '../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../generic';
-import { VersioningApi } from '../types';
+import type { VersioningApi } from '../types';
 
 export const id = 'pvp';
 export const displayName = 'PVP';
