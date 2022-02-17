@@ -73,7 +73,7 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
   });
 }
 
-function isAlias(repository: string): boolean {
+export function isAlias(repository: string): boolean {
   if (!repository) {
     return false;
   }
