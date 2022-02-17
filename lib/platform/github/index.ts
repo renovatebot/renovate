@@ -27,13 +27,9 @@ import type {
   CommitFilesConfig,
   CommitResult,
   CommitSha,
-  FileAddition,
-  FileChange,
-  FileDeletion,
 } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
-import type { GraphqlVariables } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
@@ -59,7 +55,6 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
-  commitFilesMutation,
   enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
@@ -76,7 +71,6 @@ import type {
   GhGraphQlPr,
   GhRepo,
   GhRestPr,
-  GithubGraphqlFileChanges,
   LocalRepoConfig,
   PlatformConfig,
   PrList,
@@ -274,7 +268,6 @@ export async function initRepo({
       },
     });
     repo = res?.data?.repository;
-    config.repositoryId = repo.repositoryId;
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -1733,97 +1726,32 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return alerts;
 }
 
-async function forcePushFiles(
-  branchName: string,
-  parentCommitSha: string,
-  localCommitSha: string,
-  message: string
-): Promise<string> {
-  await pushCommitToRenovateRef(localCommitSha, branchName);
-  const treeItems = await listCommitTree(localCommitSha);
-
-  const treeRes = await githubApi.postJson<{ sha: string }>(
-    `/repos/${config.repository}/git/trees`,
-    { body: { tree: treeItems } }
-  );
-  const treeSha = treeRes.body.sha;
-
-  const commitRes = await githubApi.postJson<{ sha: string }>(
-    `/repos/${config.repository}/git/commits`,
-    { body: { message, tree: treeSha, parents: [parentCommitSha] } }
-  );
-  const remoteCommitSha = commitRes.body.sha;
-
-  await githubApi.patchJson(
-    `/repos/${config.repository}/git/refs/heads/${branchName}`,
-    { body: { sha: remoteCommitSha, force: true } }
-  );
-
-  return remoteCommitSha;
-}
-
-function containsExecutables(files: FileChange[], branchName: string): boolean {
-  const executableFiles = files
-    .filter((file): file is FileAddition => file.type === 'addition')
-    .filter(({ isExecutable }) => isExecutable)
-    .map(({ path }) => path);
-  if (executableFiles.length) {
-    logger.debug(
-      { branchName, executableFiles },
-      'Platform-native commit: found executable files'
-    );
-    return true;
-  }
-  return false;
-}
-
 async function pushFiles(
-  { branchName, files, message }: CommitFilesConfig,
+  { branchName, message }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult
 ): Promise<CommitSha | null> {
   try {
-    if (containsExecutables(files, branchName)) {
-      return forcePushFiles(branchName, parentCommitSha, commitSha, message);
-    }
+    await pushCommitToRenovateRef(commitSha, branchName);
+    const treeItems = await listCommitTree(commitSha);
 
-    const fileChanges: GithubGraphqlFileChanges = {
-      additions: files
-        .filter((file): file is FileAddition => file.type === 'addition')
-        .map(({ path, contents }) => ({
-          path,
-          contents: Buffer.from(contents).toString('base64'),
-        })),
-      deletions: files
-        .filter((file): file is FileDeletion => file.type === 'deletion')
-        .map(({ path }) => ({ path })),
-    };
+    const treeRes = await githubApi.postJson<{ sha: string }>(
+      `/repos/${config.repository}/git/trees`,
+      { body: { tree: treeItems } }
+    );
+    const treeSha = treeRes.body.sha;
 
-    const variables: GraphqlVariables = {
-      repo: config.repository,
-      repositoryId: config.repositoryId,
-      branchName: `refs/heads/${branchName}`,
-      oid: parentCommitSha,
-      fileChanges,
-      message,
-    };
+    const commitRes = await githubApi.postJson<{ sha: string }>(
+      `/repos/${config.repository}/git/commits`,
+      { body: { message, tree: treeSha, parents: [parentCommitSha] } }
+    );
+    const remoteCommitSha = commitRes.body.sha;
 
-    const { data, errors } = await githubApi.requestGraphql<{
-      createCommitOnBranch: { commit: { oid: string } };
-    }>(commitFilesMutation, { variables });
+    await githubApi.patchJson(
+      `/repos/${config.repository}/git/refs/heads/${branchName}`,
+      { body: { sha: remoteCommitSha, force: true } }
+    );
 
-    if (errors) {
-      if (errors.some(({ type }) => type === 'STALE_DATA')) {
-        return forcePushFiles(branchName, parentCommitSha, commitSha, message);
-      } else {
-        logger.warn(
-          { branchName, errors },
-          'Platform-native commit: GraphQL errors'
-        );
-        return null;
-      }
-    }
-
-    return data?.createCommitOnBranch?.commit?.oid;
+    return remoteCommitSha;
   } catch (err) {
     logger.debug({ branchName, err }, 'Platform-native commit: unknown error');
     return null;

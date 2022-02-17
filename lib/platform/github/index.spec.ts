@@ -2586,31 +2586,6 @@ describe('platform/github/index', () => {
       );
       git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
     });
-    it('commits and returns SHA string', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      scope.post('/graphql').reply(200, {
-        data: { createCommitOnBranch: { commit: { oid: '0abcdef' } } },
-      });
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [
-          {
-            type: 'addition',
-            path: 'foo.bar',
-            contents: 'foobar',
-            isExecutable: true,
-          },
-          { type: 'deletion', path: 'baz' },
-          { type: 'deletion', path: 'qux' },
-        ],
-        message: 'Foobar',
-      });
-
-      expect(res).toBe('0abcdef');
-    });
     it('returns null if pre-commit phase has failed', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -2634,7 +2609,7 @@ describe('platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      scope.post('/graphql').replyWithError('unknown');
+      scope.post('/repos/some/repo/git/trees').replyWithError('unknown');
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -2644,7 +2619,7 @@ describe('platform/github/index', () => {
 
       expect(res).toBeNull();
     });
-    it('force-pushes with REST', async () => {
+    it('commits and returns SHA string', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
 
@@ -2654,8 +2629,6 @@ describe('platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
 
       scope
-        .post('/graphql')
-        .reply(200, { errors: [{ type: 'STALE_DATA' }] })
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
@@ -2670,22 +2643,6 @@ describe('platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
-    });
-    it('returns null on GraphQL errors', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      scope
-        .post('/graphql')
-        .reply(200, { errors: [{ message: 'Something is wrong' }] });
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
-
-      expect(res).toBeNull();
     });
   });
 });

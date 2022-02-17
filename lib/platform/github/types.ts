@@ -62,7 +62,6 @@ export interface PlatformConfig {
 
 export interface LocalRepoConfig {
   repositoryName: string;
-  repositoryId: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
@@ -89,7 +88,6 @@ export type BranchProtection = any;
 export type PrList = Record<number, GhPr>;
 
 export interface GhRepo {
-  repositoryId: string;
   isFork: boolean;
   isArchived: boolean;
   nameWithOwner: string;
@@ -110,14 +108,4 @@ export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
     pullRequest: { number: number };
   };
-}
-
-export interface GithubGraphqlFileChanges {
-  additions: {
-    path: string;
-    contents: string;
-  }[];
-  deletions: {
-    path: string;
-  }[];
 }
