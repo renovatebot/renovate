@@ -6,6 +6,7 @@ import { joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
+import type { CondaPackage } from './types';
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -36,15 +37,16 @@ export class CondaDatasource extends Datasource {
     const result: ReleaseResult = {
       releases: [],
     };
+
+    let response: { body: CondaPackage };
+
     try {
-      const response = await this.http.get(url);
+      response = await this.http.getJson(url);
 
-      const packageJson = JSON.parse(response.body);
+      result.homepage = response.body.html_url;
+      result.sourceUrl = response.body.dev_url;
 
-      result.homepage = packageJson['html_url'];
-      result.sourceUrl = packageJson['dev_url'];
-
-      packageJson['versions'].forEach((version: string) => {
+      response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
           version: version,
         };
