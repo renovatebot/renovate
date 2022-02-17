@@ -1833,7 +1833,7 @@ async function pushFiles(
 export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
-  const commitResult = await git.prepareCommit(config);
+  const commitResult = await git.prepareCommit(config); // Commit locally and don't push
   if (!commitResult) {
     const { branchName, files } = config;
     logger.debug(

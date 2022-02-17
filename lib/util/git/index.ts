@@ -697,6 +697,18 @@ async function handleCommitAuth(localDir: string): Promise<void> {
   await writeGitAuthor();
 }
 
+/**
+ *
+ * Prepare local branch with commit
+ *
+ * 0. Hard reset
+ * 1. Creates local branch with `origin/` prefix
+ * 2. Perform `git add` (respecting mode) and `git remove` for each file
+ * 3. Perform commit
+ * 4. Check whether resulting commit is empty or not (due to .gitignore)
+ * 5. If not empty, return commit info for further processing
+ *
+ */
 export async function prepareCommit({
   branchName,
   files,
