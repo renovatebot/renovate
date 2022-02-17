@@ -7,6 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
+import { ensureComment } from '../../platform/comment';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
@@ -491,7 +492,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
-        await platform.ensureComment({
+        await ensureComment({
           number: pr.number,
           topic,
           content,
