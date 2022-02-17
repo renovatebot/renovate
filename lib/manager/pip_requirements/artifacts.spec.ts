@@ -68,7 +68,7 @@ describe('manager/pip_requirements/artifacts', () => {
   });
 
   it('catches and returns errors', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('new content');
+    fs.readLocalFile.mockResolvedValueOnce(null);
     expect(
       await updateArtifacts({
         packageFileName: null,
