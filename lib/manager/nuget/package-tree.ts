@@ -40,13 +40,24 @@ export async function getDependentPackageFiles(
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
-      graph.addEdge(f, ref);
+      graph.addEdge(ref, f);
     }
   }
 
-  logger.info(graph.serialize(), 'Dependency graph');
+  return recursivelyGetDependentPackageFiles(packageFileName, graph);
+}
 
-  return packageFiles;
+function recursivelyGetDependentPackageFiles(
+  packageFileName: string,
+  graph
+): [string] {
+  const dependents = graph.adjacent(packageFileName);
+
+  if (dependents.length == 0) return [];
+
+  return dependents.concat(
+    dependents.map((d) => recursivelyGetDependentPackageFiles(d, graph)).flat()
+  );
 }
 
 function normalizeRelativePath(fromPackageFile, toPackageFile): string {
