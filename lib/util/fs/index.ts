@@ -171,7 +171,7 @@ export function localPathIsFile(pathName: string): Promise<boolean> {
 export async function findUpLocal(
   fileName: string | string[],
   cwd: string
-): Promise<string | undefined> {
+): Promise<string | null> {
   const { localDir } = GlobalConfig.get();
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
