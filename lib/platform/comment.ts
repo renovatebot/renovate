@@ -7,13 +7,15 @@ import type {
 } from './types';
 import { platform } from '.';
 
+const hash = (content: string): string => hasha(content, { algorithm: 'sha1' });
+
 export async function ensureComment(
   commentConfig: EnsureCommentConfig
 ): Promise<boolean> {
   const { number, content } = commentConfig;
   const topic = commentConfig.topic ?? '';
 
-  const contentHash = hasha(content, { algorithm: 'md5' });
+  const contentHash = hash(content);
   const repoCache = getCache();
 
   if (contentHash !== repoCache.prComments?.[number]?.[topic]) {
@@ -43,7 +45,7 @@ export async function ensureCommentRemoval(
       delete repoCache.prComments?.[number]?.[topic];
     }
     if (content) {
-      const contentHash = hasha(content, { algorithm: 'md5' });
+      const contentHash = hash(content);
       for (const [cachedTopic, cachedContentHash] of Object.entries(
         repoCache.prComments?.[number]
       )) {

@@ -28,7 +28,11 @@ describe('platform/comment', () => {
 
       expect(res).toBe(true);
       expect(repoCache).toEqual({
-        prComments: { '1': { foo: '37b51d194a7513e45b56f6524f2d51f2' } },
+        prComments: {
+          '1': {
+            foo: '62cdb7020ff920e5aa642c3d4066950dd1f01f4d',
+          },
+        },
       });
     });
 
@@ -43,7 +47,11 @@ describe('platform/comment', () => {
 
       expect(res).toBe(true);
       expect(repoCache).toEqual({
-        prComments: { '1': { '': '37b51d194a7513e45b56f6524f2d51f2' } },
+        prComments: {
+          '1': {
+            '': '62cdb7020ff920e5aa642c3d4066950dd1f01f4d',
+          },
+        },
       });
     });
 
@@ -77,7 +85,11 @@ describe('platform/comment', () => {
 
       expect(platform.ensureComment).toHaveBeenCalledTimes(2);
       expect(repoCache).toEqual({
-        prComments: { '1': { aaa: 'bcbe3365e6ac95ea2c0343a2395834dd' } },
+        prComments: {
+          '1': {
+            aaa: '1c6637a8f2e1f75e06ff9984894d6bd16a3a36a9',
+          },
+        },
       });
     });
 
@@ -94,8 +106,8 @@ describe('platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {
-            aaa: '698d51a19d8a121ce581499d7b701668',
-            bbb: '698d51a19d8a121ce581499d7b701668',
+            aaa: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
+            bbb: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
           },
         },
       });
@@ -129,7 +141,11 @@ describe('platform/comment', () => {
       await ensureComment({ number: 1, topic: 'bbb', content: '111' });
       await ensureCommentRemoval({ number: 1, content: '111' });
       expect(repoCache).toEqual({
-        prComments: { '1': { bbb: '698d51a19d8a121ce581499d7b701668' } },
+        prComments: {
+          '1': {
+            bbb: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
+          },
+        },
       });
     });
 
@@ -140,7 +156,9 @@ describe('platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {},
-          '2': { aaa: '698d51a19d8a121ce581499d7b701668' },
+          '2': {
+            aaa: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
+          },
         },
       });
     });
