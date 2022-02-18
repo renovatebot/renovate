@@ -15,15 +15,23 @@ describe('config/presets/util', () => {
     fetch.mockReset();
   });
   it('works', async () => {
-    fetch.mockResolvedValue({ sub: { preset: { foo: true } } });
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(await fetchPreset({ ...config, fetch })).toEqual({
       sub: { preset: { foo: true } },
     });
 
+    fetch.mockRejectedValueOnce(new Error(PRESET_DEP_NOT_FOUND));
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
+    expect(await fetchPreset({ ...config, fetch })).toEqual({
+      sub: { preset: { foo: true } },
+    });
+
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(
       await fetchPreset({ ...config, filePreset: 'some/sub', fetch })
     ).toEqual({ preset: { foo: true } });
 
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(
       await fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch })
     ).toEqual({ foo: true });
