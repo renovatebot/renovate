@@ -33,10 +33,8 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const { localDir } = GlobalConfig.get();
   const registries =
-    (await getConfiguredRegistries(packageFileName, localDir)) ||
-    getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
   const result = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
