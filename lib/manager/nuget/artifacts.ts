@@ -1,6 +1,5 @@
 import { join } from 'path';
 import { quote } from 'shlex';
-import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { NugetDatasource } from '../../datasource/nuget';
 import { parseRegistryUrl } from '../../datasource/nuget/common';
