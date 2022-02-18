@@ -1,4 +1,4 @@
-import _findUp from 'find-up';
+import * as _findUp from 'find-up';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
@@ -226,16 +226,16 @@ describe('util/fs/index', () => {
       expect(res).toBe('subdir/file.json');
     });
 
-    it('returns undefined if nothing found', async () => {
+    it('returns null if nothing found', async () => {
       findUp.mockResolvedValueOnce(undefined);
       const res = await findUpLocal('file.json', 'subdir/subdir2');
-      expect(res).toBeUndefined();
+      expect(res).toBeNull();
     });
 
     it('returns undefined if found a file outside of localDir', async () => {
       findUp.mockResolvedValueOnce('/abs/path/to/file.json');
       const res = await findUpLocal('file.json', 'subdir/subdir2');
-      expect(res).toBeUndefined();
+      expect(res).toBeNull();
     });
   });
 });

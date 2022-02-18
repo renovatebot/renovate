@@ -174,10 +174,14 @@ export async function findUpLocal(
 ): Promise<string | undefined> {
   const { localDir } = GlobalConfig.get();
   const absoluteCwd = upath.join(localDir, cwd);
-  const res = await findUp(fileName, { cwd: absoluteCwd, type: 'file' });
-  // Return undefined if nothing found
+  const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
+  const res = await findUp(fileName, {
+    cwd: normalizedAbsoluteCwd,
+    type: 'file',
+  });
+  // Return null if nothing found
   if (res === undefined) {
-    return res;
+    return null;
   }
   // Return relative path if file is inside of local dir
   if (res.startsWith(localDir)) {
@@ -187,6 +191,6 @@ export async function findUpLocal(
     }
     return relativePath;
   }
-  // Return undefined if found file is outside of localDir
-  return undefined;
+  // Return null if found file is outside of localDir
+  return null;
 }
