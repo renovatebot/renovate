@@ -254,6 +254,7 @@
     "@types/traverse": "0.6.32",
     "@types/url-join": "4.0.1",
     "@types/xmldoc": "1.1.6",
+    "@types/xmldom": "0.1.31",
     "@typescript-eslint/eslint-plugin": "5.11.0",
     "@typescript-eslint/parser": "5.11.0",
     "aws-sdk-client-mock": "0.5.6",

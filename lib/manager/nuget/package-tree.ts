@@ -15,9 +15,9 @@ const globAsync = util.promisify(glob);
 // Get all package files at any level of ancestry that depend on `packageFileName`
 export async function getDependentPackageFiles(
   packageFileName: string
-): Promise<[string]> {
+): Promise<string[]> {
   const packageFiles = await getAllPackageFiles();
-  const graph = Graph();
+  const graph: any = Graph();
 
   for (const f of packageFiles) {
     graph.addNode(f);
@@ -32,7 +32,7 @@ export async function getDependentPackageFiles(
       doc
     );
     const projectReferences = projectReferenceAttributes.map((a) =>
-      upath.normalize(a.value)
+      upath.normalize(a as string)
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
       normalizeRelativePath(f, r)
@@ -49,9 +49,9 @@ export async function getDependentPackageFiles(
 // Traverse graph and find dependent package files at any level of ancestry
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
-  graph
-): [string] {
-  const dependents = graph.adjacent(packageFileName);
+  graph: any
+): string[] {
+  const dependents: string[] = graph.adjacent(packageFileName);
 
   if (dependents.length === 0) {
     return [];
@@ -68,6 +68,10 @@ function normalizeRelativePath(
   toPackageFile: string
 ): string {
   const { localDir } = GlobalConfig.get();
+  if (localDir === undefined) {
+    throw 'localDir must be set';
+  }
+
   const fromFullPath = `${localDir}/${fromPackageFile}`;
   const toFullPath = path.resolve(path.dirname(fromFullPath), toPackageFile);
   const relativeToPackageFile = path.relative(localDir, toFullPath);
@@ -76,8 +80,11 @@ function normalizeRelativePath(
 }
 
 // Get a list of package files in `localDir`
-async function getAllPackageFiles(): Promise<[string]> {
+async function getAllPackageFiles(): Promise<string[]> {
   const { localDir } = GlobalConfig.get();
+  if (localDir === undefined) {
+    throw 'localDir must be set';
+  }
   const possiblePackageFiles = await globAsync(`${localDir}/**/*proj`);
   const filteredPackageFiles = possiblePackageFiles.filter((f) =>
     regEx(/(?:cs|vb|fs)proj$/i).test(f)

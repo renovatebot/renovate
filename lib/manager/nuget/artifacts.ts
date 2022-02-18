@@ -61,7 +61,7 @@ async function addSourceCmds(
 
 async function runDotnetRestore(
   packageFileName: string,
-  dependentPackageFileNames: [string],
+  dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const execOptions: ExecOptions = {
@@ -90,7 +90,7 @@ async function runDotnetRestore(
   await remove(nugetConfigDir);
 }
 
-async function getLockFileContentMap(lockFileNames: [string]): Promise<object> {
+async function getLockFileContentMap(lockFileNames: string[]): Promise<object> {
   const lockFileContentMap = {};
 
   for (const lockFileName of lockFileNames) {
@@ -195,7 +195,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          lockFile: lockFileNames.join(', '),
           stderr: err.message,
         },
       },
