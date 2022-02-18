@@ -9,4 +9,8 @@
     <PackageReference Include="Serilog" Version="2.10.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../one/one.csproj" />
+  </ItemGroup>
+
 </Project>

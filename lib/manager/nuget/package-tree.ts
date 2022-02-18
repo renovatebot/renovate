@@ -16,7 +16,11 @@ const globAsync = util.promisify(glob);
 export async function getDependentPackageFiles(
   packageFileName: string
 ): Promise<string[]> {
-  const packageFiles = await getAllPackageFiles();
+  const { localDir } = GlobalConfig.get();
+  if (localDir === undefined) {
+    throw new Error('localDir must be set');
+  }
+  const packageFiles = await getAllPackageFiles(localDir);
   const graph: any = Graph();
 
   for (const f of packageFiles) {
@@ -32,10 +36,10 @@ export async function getDependentPackageFiles(
       doc
     );
     const projectReferences = projectReferenceAttributes.map((a) =>
-      upath.normalize(a as string)
+      upath.normalize((a as Attr).value)
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      normalizeRelativePath(f, r)
+      normalizeRelativePath(localDir, f, r)
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -64,14 +68,10 @@ function recursivelyGetDependentPackageFiles(
 
 // Take the path relative from a package file, and make it relative from the root of the repo
 function normalizeRelativePath(
+  localDir: string,
   fromPackageFile: string,
   toPackageFile: string
 ): string {
-  const { localDir } = GlobalConfig.get();
-  if (localDir === undefined) {
-    throw 'localDir must be set';
-  }
-
   const fromFullPath = `${localDir}/${fromPackageFile}`;
   const toFullPath = path.resolve(path.dirname(fromFullPath), toPackageFile);
   const relativeToPackageFile = path.relative(localDir, toFullPath);
@@ -80,11 +80,7 @@ function normalizeRelativePath(
 }
 
 // Get a list of package files in `localDir`
-async function getAllPackageFiles(): Promise<string[]> {
-  const { localDir } = GlobalConfig.get();
-  if (localDir === undefined) {
-    throw 'localDir must be set';
-  }
+async function getAllPackageFiles(localDir: string): Promise<string[]> {
   const possiblePackageFiles = await globAsync(`${localDir}/**/*proj`);
   const filteredPackageFiles = possiblePackageFiles.filter((f) =>
     regEx(/(?:cs|vb|fs)proj$/i).test(f)
