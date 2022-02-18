@@ -22,7 +22,7 @@ import {
 jest.mock('../../util/exec/env');
 jest.mock('find-up');
 const env = mocked(_env);
-const { findUp } = mocked({ findUp: _findUp });
+const findUp = _findUp as any;
 
 describe('util/fs/index', () => {
   describe('readLocalFile', () => {
