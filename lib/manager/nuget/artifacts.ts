@@ -22,12 +22,12 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { getDependentPackageFiles } from './package-tree';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
   getRandomString,
 } from './util';
-import { getDependentPackageFiles } from './package-tree';
 
 async function addSourceCmds(
   packageFileName: string,
@@ -90,7 +90,7 @@ async function runDotnetRestore(
   await remove(nugetConfigDir);
 }
 
-async function getLockFileContentMap(lockFileNames: [string]): object {
+async function getLockFileContentMap(lockFileNames: [string]): Promise<object> {
   const lockFileContentMap = {};
 
   for (const lockFileName of lockFileNames) {
@@ -127,6 +127,11 @@ export async function updateArtifacts({
     packageFileName
   );
 
+  logger.debug(
+    { packageFiles },
+    `Found ${packageFiles.length} dependent package files`
+  );
+
   const lockFileNames = packageFiles.map((f) =>
     getSiblingFileName(f, 'packages.lock.json')
   );
@@ -135,9 +140,6 @@ export async function updateArtifacts({
 
   const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
 
-  logger.info(existingLockFileContentMap, 'Existing Lock File Content Map');
-
-  // TODO: confirm this logic works
   const hasLockFileContent = Object.keys(existingLockFileContentMap).reduce(
     (a, k) => a || existingLockFileContentMap[k],
     false
@@ -167,9 +169,11 @@ export async function updateArtifacts({
     const retArray = [];
     for (const lockFileName of lockFileNames) {
       if (
-        existingLockFileContentMap[lockFileName] !==
+        existingLockFileContentMap[lockFileName] ===
         newLockFileContentMap[lockFileName]
       ) {
+        logger.debug(`Lock file ${lockFileName} is unchanged`);
+      } else {
         retArray.push({
           file: {
             type: 'addition',
@@ -177,8 +181,6 @@ export async function updateArtifacts({
             contents: newLockFileContentMap[lockFileName],
           },
         });
-      } else {
-        logger.info(`Lock file ${lockFileName} is unchanged`);
       }
     }
 

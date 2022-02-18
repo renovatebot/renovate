@@ -1,14 +1,14 @@
-import glob from 'glob';
-import { GlobalConfig } from '../../config/global';
-import Graph from 'graph-data-structure';
-import { logger } from '../../logger';
 import path from 'path';
-import upath from 'upath';
-import { regEx } from '../../util/regex';
 import util from 'util';
-import { readLocalFile } from '../../util/fs';
+import { glob } from 'glob';
+import Graph from 'graph-data-structure';
+import upath from 'upath';
 import { DOMParser as dom } from 'xmldom';
 import xpath from 'xpath';
+import { GlobalConfig } from '../../config/global';
+import { logger } from '../../logger';
+import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 
 const globAsync = util.promisify(glob);
 
@@ -16,7 +16,6 @@ const globAsync = util.promisify(glob);
 export async function getDependentPackageFiles(
   packageFileName: string
 ): Promise<[string]> {
-  const { localDir } = GlobalConfig.get();
   const packageFiles = await getAllPackageFiles();
   const graph = Graph();
 
@@ -47,20 +46,27 @@ export async function getDependentPackageFiles(
   return recursivelyGetDependentPackageFiles(packageFileName, graph);
 }
 
+// Traverse graph and find dependent package files at any level of ancestry
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
   graph
 ): [string] {
   const dependents = graph.adjacent(packageFileName);
 
-  if (dependents.length == 0) return [];
+  if (dependents.length === 0) {
+    return [];
+  }
 
   return dependents.concat(
     dependents.map((d) => recursivelyGetDependentPackageFiles(d, graph)).flat()
   );
 }
 
-function normalizeRelativePath(fromPackageFile, toPackageFile): string {
+// Take the path relative from a package file, and make it relative from the root of the repo
+function normalizeRelativePath(
+  fromPackageFile: string,
+  toPackageFile: string
+): string {
   const { localDir } = GlobalConfig.get();
   const fromFullPath = `${localDir}/${fromPackageFile}`;
   const toFullPath = path.resolve(path.dirname(fromFullPath), toPackageFile);
@@ -70,7 +76,7 @@ function normalizeRelativePath(fromPackageFile, toPackageFile): string {
 }
 
 // Get a list of package files in `localDir`
-async function getAllPackageFiles() {
+async function getAllPackageFiles(): Promise<[string]> {
   const { localDir } = GlobalConfig.get();
   const possiblePackageFiles = await globAsync(`${localDir}/**/*proj`);
   const filteredPackageFiles = possiblePackageFiles.filter((f) =>
@@ -79,5 +85,8 @@ async function getAllPackageFiles() {
   const relativePackageFiles = filteredPackageFiles.map((f) =>
     f.substring(localDir.length + 1)
   );
+
+  logger.debug({ relativePackageFiles }, 'Found package files');
+
   return relativePackageFiles;
 }
