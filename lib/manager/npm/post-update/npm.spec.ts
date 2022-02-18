@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { env, fs } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as npmHelper from './npm';
 
 jest.mock('child_process');
@@ -13,6 +14,7 @@ describe('manager/npm/post-update/npm', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    GlobalConfig.set({ localDir: '' });
   });
 
   it('generates lock files', async () => {

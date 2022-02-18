@@ -24,6 +24,9 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
+  // TODO: don't assume package-lock.json is in the same directory
+  const lockFileName = upath.join(lockFileDir, fileName);
+
   logger.debug(`Spawning npm install to create ${lockFileDir}/${fileName}`);
   const { skipInstalls, postUpdateOptions } = config;
 
@@ -49,7 +52,7 @@ export async function generateLockFile(
 
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd: lockFileDir,
+      cwdFile: lockFileName,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
@@ -94,9 +97,6 @@ export async function generateLockFile(
       logger.debug('Performing npm dedupe');
       commands.push('npm dedupe');
     }
-
-    // TODO: don't assume package-lock.json is in the same directory
-    const lockFileName = upath.join(lockFileDir, fileName);
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(

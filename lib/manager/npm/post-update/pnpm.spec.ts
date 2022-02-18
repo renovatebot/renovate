@@ -1,5 +1,6 @@
 import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import type { PostUpdateConfig } from '../../types';
 import * as _pnpmHelper from './pnpm';
 
@@ -17,6 +18,7 @@ describe('manager/npm/post-update/pnpm', () => {
     jest.clearAllMocks();
     config = { cacheDir: 'some-cache-dir', constraints: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    GlobalConfig.set({ localDir: '' });
   });
 
   it('generates lock files', async () => {

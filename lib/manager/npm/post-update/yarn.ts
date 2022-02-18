@@ -156,7 +156,7 @@ export async function generateLockFile(
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd: lockFileDir,
+      cwdFile: lockFileName,
       extraEnv,
       docker: {
         image: 'node',

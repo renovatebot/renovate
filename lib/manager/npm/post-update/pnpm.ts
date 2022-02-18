@@ -32,7 +32,7 @@ export async function generateLockFile(
     };
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd: lockFileDir,
+      cwdFile: lockFileName,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
