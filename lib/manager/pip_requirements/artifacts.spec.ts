@@ -68,7 +68,9 @@ describe('manager/pip_requirements/artifacts', () => {
   });
 
   it('catches and returns errors', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockImplementation(() => {
+      throw new Error('some-error');
+    });
     expect(
       await updateArtifacts({
         packageFileName: null,

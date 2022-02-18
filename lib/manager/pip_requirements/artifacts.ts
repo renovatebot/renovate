@@ -48,9 +48,6 @@ export async function updateArtifacts({
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');
-    if (newContent === null) {
-      throw new Error('Error reading package file');
-    }
     if (newContent === newPackageFileContent) {
       logger.debug(`${packageFileName} is unchanged`);
       return null;
