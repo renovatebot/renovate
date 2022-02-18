@@ -52,5 +52,5 @@ export interface Cache {
     };
   };
   gitConflicts?: GitConflictsCache;
-  prComments?: Record<string, Record<string, string>>;
+  prComments?: Record<number, Record<string, string>>;
 }
