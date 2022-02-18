@@ -1,5 +1,4 @@
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
-import { GlobalConfig } from '../../config/global';
 import { NugetDatasource } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -74,8 +73,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
-  const localDir = GlobalConfig.get('localDir');
-  const registries = await getConfiguredRegistries(packageFile, localDir);
+  const registries = await getConfiguredRegistries(packageFile);
   const registryUrls = registries
     ? registries.map((registry) => registry.url)
     : undefined;
