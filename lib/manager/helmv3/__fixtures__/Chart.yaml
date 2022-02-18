@@ -11,3 +11,5 @@ dependencies:
   - name: repo-test
     version: 0.1.0
     repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
+  - name: cert-manager
+    version: v1.7.1

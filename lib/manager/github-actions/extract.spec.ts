@@ -18,5 +18,18 @@ describe('manager/github-actions/extract', () => {
         res.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(8);
     });
+    it('extracts tag line with double quotes', () => {
+      const res = extractPackageFile(Fixtures.get('workflow_3.yml'));
+      expect(res.deps).toMatchSnapshot([
+        {
+          currentValue: 'v0.13.1',
+          datasource: 'github-tags',
+          depName: 'pascalgn/automerge-action',
+          depType: 'action',
+          replaceString: '"pascalgn/automerge-action@v0.13.1"',
+          versioning: 'docker',
+        },
+      ]);
+    });
   });
 });

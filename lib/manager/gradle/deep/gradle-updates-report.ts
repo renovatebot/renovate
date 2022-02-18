@@ -1,5 +1,5 @@
 import upath from 'upath';
-import * as datasourceSbtPackage from '../../../datasource/sbt-package';
+import { SbtPackageDatasource } from '../../../datasource/sbt-package';
 import { logger } from '../../../logger';
 import {
   localPathExists,
@@ -146,7 +146,7 @@ export async function extractDependenciesFromUpdatesReport(
         return {
           ...dep,
           depName: depName.replace(regEx(/_%%/), ''),
-          datasource: datasourceSbtPackage.id,
+          datasource: SbtPackageDatasource.id,
         };
       }
       if (regEx(/^%.*%$/).test(currentValue)) {

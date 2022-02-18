@@ -7,7 +7,7 @@ import { cache } from '../../util/cache/package/decorator';
 import * as hostRules from '../../util/host-rules';
 import type { HttpOptions } from '../../util/http';
 import { regEx } from '../../util/regex';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -137,13 +137,14 @@ export class PackagistDatasource extends Datasource {
     }
     dep.releases = Object.keys(versions).map((version) => {
       const release = versions[version];
+      const parsedVersion = release.version ?? version;
       dep.homepage = release.homepage || dep.homepage;
       if (release.source?.url) {
         dep.sourceUrl = release.source.url;
       }
       return {
-        version: version.replace(regEx(/^v/), ''),
-        gitRef: version,
+        version: parsedVersion.replace(regEx(/^v/), ''),
+        gitRef: parsedVersion,
         releaseTimestamp: release.time,
       };
     });
@@ -210,9 +211,16 @@ export class PackagistDatasource extends Datasource {
     }
     let dep: ReleaseResult = null;
     const regUrl = 'https://packagist.org';
-    const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
+    const pkgUrl = [
+      joinUrlParts(regUrl, `/p2/${name}.json`),
+      joinUrlParts(regUrl, `/p2/${name}~dev.json`),
+    ];
     // TODO: fix types (#9610)
-    const res = (await this.http.getJson<any>(pkgUrl)).body.packages[name];
+    let res = (await this.http.getJson<any>(pkgUrl[0])).body.packages[name];
+    res = [
+      ...res,
+      ...(await this.http.getJson<any>(pkgUrl[1])).body.packages[name],
+    ];
     if (res) {
       dep = PackagistDatasource.extractDepReleases(res);
       logger.trace({ dep }, 'dep');
@@ -246,7 +254,7 @@ export class PackagistDatasource extends Datasource {
       if (includesPackages?.[name]) {
         return includesPackages[name];
       }
-      let pkgUrl;
+      let pkgUrl: string;
       if (name in providerPackages) {
         pkgUrl = URL.resolve(
           regUrl,
