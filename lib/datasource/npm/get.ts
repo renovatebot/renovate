@@ -3,12 +3,10 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { Http, HttpOptions } from '../../util/http';
+import type { Http, HttpOptions } from '../../util/http';
 import { id } from './common';
 import { resolvePackage } from './npmrc';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
-
-const http = new Http(id);
 
 let memcache: Record<string, string> = {};
 
@@ -53,6 +51,7 @@ function getPackageSource(repository: any): PackageSource {
 }
 
 export async function getDependency(
+  http: Http,
   packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);

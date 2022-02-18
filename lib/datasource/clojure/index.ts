@@ -1,10 +1,8 @@
-import { Datasource } from '../datasource';
-import { getReleases } from '../maven';
+import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-export class ClojureDatasource extends Datasource {
-  static readonly id = 'clojure';
+export class ClojureDatasource extends MavenDatasource {
+  static override readonly id = 'clojure';
 
   constructor() {
     super(ClojureDatasource.id);
@@ -16,11 +14,4 @@ export class ClojureDatasource extends Datasource {
     'https://clojars.org/repo',
     MAVEN_REPO,
   ];
-
-  getReleases({
-    lookupName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return getReleases({ lookupName, registryUrl });
-  }
 }
