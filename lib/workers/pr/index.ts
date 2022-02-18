@@ -145,12 +145,12 @@ export function getPlatformPrOptions(
 }
 
 export type ResultWithPr = {
+  type: 'with-pr';
   pr: Pr;
-  prBlockedBy?: never;
 };
 
 export type ResultWithoutPr = {
-  pr?: never;
+  type: 'without-pr';
   prBlockedBy: PrBlockedBy;
 };
 
