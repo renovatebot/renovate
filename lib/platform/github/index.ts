@@ -1746,10 +1746,19 @@ async function pushFiles(
     );
     const remoteCommitSha = commitRes.body.sha;
 
-    await githubApi.patchJson(
-      `/repos/${config.repository}/git/refs/heads/${branchName}`,
-      { body: { sha: remoteCommitSha, force: true } }
-    );
+    try {
+      await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+        body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
+      });
+    } catch (e) {
+      if (e.err?.code !== 'ERR_NON_2XX_3XX_RESPONSE') {
+        throw e;
+      }
+      await githubApi.patchJson(
+        `/repos/${config.repository}/git/refs/heads/${branchName}`,
+        { body: { sha: remoteCommitSha, force: true } }
+      );
+    }
 
     return remoteCommitSha;
   } catch (err) {

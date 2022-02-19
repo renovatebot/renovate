@@ -2633,6 +2633,33 @@ describe('platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+    it('performs rebase', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .post('/repos/some/repo/git/refs')
+        .reply(422)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
 
