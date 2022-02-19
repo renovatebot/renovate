@@ -1751,6 +1751,7 @@ async function pushFiles(
         body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
       });
     } catch (e) {
+      // istanbul ignore if
       if (e.err?.code !== 'ERR_NON_2XX_3XX_RESPONSE') {
         throw e;
       }
