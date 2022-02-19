@@ -1,4 +1,4 @@
-import { resolveAlias } from './utils';
+import { isAlias, resolveAlias } from './utils';
 
 describe('manager/helmv3/utils', () => {
   describe('.resolveAlias()', () => {
@@ -38,6 +38,32 @@ describe('manager/helmv3/utils', () => {
         anotherRepository: 'https://charts.helm.sh/stable',
       });
       expect(repository).toBe(repoUrl);
+    });
+
+    it('return repository parameter if repository is null', () => {
+      const repository = resolveAlias(null, {
+        anotherRepository: 'https://charts.helm.sh/stable',
+      });
+      expect(repository).toBeNull();
+    });
+
+    it('return repository parameter if repository is undefined', () => {
+      const repository = resolveAlias(undefined, {
+        anotherRepository: 'https://charts.helm.sh/stable',
+      });
+      expect(repository).toBeUndefined();
+    });
+  });
+
+  describe('.isAlias()', () => {
+    it('return false if repository is null', () => {
+      const repository = isAlias(null);
+      expect(repository).toBeFalse();
+    });
+
+    it('return false if repository is undefined', () => {
+      const repository = isAlias(undefined);
+      expect(repository).toBeFalse();
     });
   });
 });

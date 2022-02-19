@@ -38,6 +38,7 @@ const repoGroups = {
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
+  groovy: 'https://github.com/apache/groovy',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   'mdc-react': 'material-components/material-components-web-react',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
@@ -129,7 +130,10 @@ const repoGroups = {
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
-  'material-ui': 'https://github.com/mui-org/material-ui',
+  'material-ui': [
+    'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
+    'https://github.com/mui/material-ui',
+  ],
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
