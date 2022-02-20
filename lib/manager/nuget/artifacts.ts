@@ -84,8 +84,6 @@ async function runDotnetRestore(
         `dotnet restore ${f} --force-evaluate --configfile ${nugetConfigFile}`
     ),
   ];
-
-  logger.info({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
   await remove(nugetConfigDir);
 }
