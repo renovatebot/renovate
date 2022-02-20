@@ -45,6 +45,10 @@ export async function getDependentPackageFiles(
     for (const ref of normalizedRelativeProjectReferences) {
       graph.addEdge(ref, f);
     }
+
+    if (graph.hasCycle()) {
+      throw new Error('Circular reference detected in NuGet package files');
+    }
   }
 
   return recursivelyGetDependentPackageFiles(packageFileName, graph);

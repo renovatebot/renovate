@@ -76,5 +76,18 @@ describe('manager/nuget/package-tree', () => {
         'localDir must be set'
       );
     });
+    it('throws error on circular reference', async () => {
+      mockfs({
+        '/tmp/repo/one': {
+          'one.csproj': loadFixture('circular-reference/one/one.csproj'),
+        },
+        '/tmp/repo/two': {
+          'two.csproj': loadFixture('circular-reference/two/two.csproj'),
+        },
+      });
+      await expect(getDependentPackageFiles('one/one.csproj')).rejects.toThrow(
+        'Circular reference detected in NuGet package files'
+      );
+    });
   });
 });
