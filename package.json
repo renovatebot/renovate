@@ -205,9 +205,7 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "3.0.0",
-    "xmldoc": "1.1.2",
-    "xmldom": "0.6.0",
-    "xpath": "0.0.32"
+    "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
     "re2": "1.17.3"

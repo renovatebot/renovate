@@ -3,8 +3,7 @@ import util from 'util';
 import { glob } from 'glob';
 import Graph from 'graph-data-structure';
 import upath from 'upath';
-import { DOMParser as dom } from 'xmldom';
-import xpath from 'xpath';
+import xmldoc from 'xmldoc';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
@@ -30,13 +29,18 @@ export async function getDependentPackageFiles(
   for (const f of packageFiles) {
     const packageFileContent = (await readLocalFile(f, 'utf8')).toString();
 
-    const doc = new dom().parseFromString(packageFileContent);
-    const projectReferenceAttributes = xpath.select(
-      '//ProjectReference/@Include',
+    const doc = new xmldoc.XmlDocument(packageFileContent);
+    const projectReferenceAttributes = (
       doc
-    );
+        .childrenNamed('ItemGroup')
+        .map((ig) => ig.childrenNamed('ProjectReference')) ?? []
+    )
+      .flat()
+      .map((pf) => pf.attr['Include']);
+
+    logger.debug(projectReferenceAttributes);
     const projectReferences = projectReferenceAttributes.map((a) =>
-      upath.normalize((a as Attr).value)
+      upath.normalize(a)
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
       normalizeRelativePath(localDir, f, r)
