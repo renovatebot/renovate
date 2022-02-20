@@ -15,11 +15,7 @@ const globAsync = util.promisify(glob);
 export async function getDependentPackageFiles(
   packageFileName: string
 ): Promise<string[]> {
-  const { localDir } = GlobalConfig.get();
-  if (localDir === undefined) {
-    throw new Error('localDir must be set');
-  }
-  const packageFiles = await getAllPackageFiles(localDir);
+  const packageFiles = await getAllPackageFiles();
   const graph: ReturnType<typeof Graph> = Graph();
 
   for (const f of packageFiles) {
@@ -43,7 +39,7 @@ export async function getDependentPackageFiles(
       upath.normalize(a)
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      normalizeRelativePath(localDir, f, r)
+      normalizeRelativePath(f, r)
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -76,28 +72,33 @@ function recursivelyGetDependentPackageFiles(
 
 // Take the path relative from a package file, and make it relative from the root of the repo
 function normalizeRelativePath(
-  localDir: string,
   fromPackageFile: string,
   toPackageFile: string
 ): string {
-  const fromFullPath = `${localDir}/${fromPackageFile}`;
+  const fromFullPath = `/${fromPackageFile}`;
   const toFullPath = path.resolve(path.dirname(fromFullPath), toPackageFile);
-  const relativeToPackageFile = path.relative(localDir, toFullPath);
+  const relativeToPackageFile = path.relative('/', toFullPath);
 
   return relativeToPackageFile;
 }
 
 // Get a list of package files in `localDir`
-async function getAllPackageFiles(localDir: string): Promise<string[]> {
-  const possiblePackageFiles = await globAsync(`${localDir}/**/*proj`);
+async function getAllPackageFiles(): Promise<string[]> {
+  const possiblePackageFiles = await globLocalFiles('**/*proj');
   const filteredPackageFiles = possiblePackageFiles.filter((f) =>
     regEx(/(?:cs|vb|fs)proj$/i).test(f)
   );
-  const relativePackageFiles = filteredPackageFiles.map((f) =>
-    f.substring(localDir.length + 1)
+
+  logger.debug({ filteredPackageFiles }, 'Found package files');
+
+  return filteredPackageFiles;
+}
+
+async function globLocalFiles(globPattern: string): Promise<string[]> {
+  const { localDir } = GlobalConfig.get();
+  const globbedFiles = await globAsync(upath.join(localDir, globPattern));
+  const relativeFiles = globbedFiles.map((f) =>
+    upath.relative(localDir ?? '', f)
   );
-
-  logger.debug({ relativePackageFiles }, 'Found package files');
-
-  return relativePackageFiles;
+  return relativeFiles;
 }

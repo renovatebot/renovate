@@ -52,30 +52,6 @@ describe('manager/nuget/package-tree', () => {
         'two/two.csproj',
       ]);
     });
-    it('throws error on undefined localDir', async () => {
-      GlobalConfig.set({
-        localDir: undefined,
-      });
-      await expect(getDependentPackageFiles('test.csproj')).rejects.toThrow(
-        'localDir must be set'
-      );
-    });
-    it('throws error on undefined localDir with project reference', async () => {
-      GlobalConfig.set({
-        localDir: undefined,
-      });
-      mockfs({
-        '/tmp/repo/one': {
-          'one.csproj': loadFixture('two-one-reference/one/one.csproj'),
-        },
-        '/tmp/repo/two': {
-          'two.csproj': loadFixture('two-one-reference/two/two.csproj'),
-        },
-      });
-      await expect(getDependentPackageFiles('one/one.csproj')).rejects.toThrow(
-        'localDir must be set'
-      );
-    });
     it('throws error on circular reference', async () => {
       mockfs({
         '/tmp/repo/one': {
