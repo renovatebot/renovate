@@ -140,9 +140,8 @@ export async function updateArtifacts({
 
   const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
 
-  const hasLockFileContent = Object.keys(existingLockFileContentMap).reduce(
-    (a, k) => a || existingLockFileContentMap[k],
-    false
+  const hasLockFileContent = Object.values(existingLockFileContentMap).some(
+    (val) => !!val
   );
   if (!hasLockFileContent) {
     logger.debug(
