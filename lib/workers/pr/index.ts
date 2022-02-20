@@ -56,9 +56,10 @@ function prepareAssigneesReviewers(
 export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
-  return [...new Set([...labels, ...addLabels])].map((label) =>
-    template.compile(label, config)
-  );
+  return [...new Set([...labels, ...addLabels])]
+    .filter((el) => el !== null && el !== undefined && el.trim() !== '')
+    .map((label) => template.compile(label, config))
+    .filter((el) => el !== null && el.trim() !== '');
 }
 
 export async function addAssigneesReviewers(
