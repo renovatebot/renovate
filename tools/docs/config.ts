@@ -29,13 +29,14 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       !ignoredKeys.includes(el[0]) ||
       (el[0] === 'default' && typeof el[1] !== 'object' && name !== 'prBody')
     ) {
-      if (el[0] === 'cli' || el[0] === 'env') {
-        el[1] = `\`${el[1]}\``;
-      }
       if (type === 'string' && el[0] === 'default') {
         el[1] = `\`"${el[1]}"\``;
       }
-      if (type === 'boolean' && el[0] === 'default') {
+      if (
+        (type === 'boolean' && el[0] === 'default') ||
+        el[0] === 'cli' ||
+        el[0] === 'env'
+      ) {
         el[1] = `\`${el[1]}\``;
       }
       if (type === 'string' && el[0] === 'default' && el[1].length > 200) {
