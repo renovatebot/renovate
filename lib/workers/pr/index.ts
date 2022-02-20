@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -57,9 +58,9 @@ export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
   return [...new Set([...labels, ...addLabels])]
-    .filter((el) => el !== null && el !== undefined && el.trim() !== '')
+    .filter((el) => is.nonEmptyString(el) && !is.emptyStringOrWhitespace(el))
     .map((label) => template.compile(label, config))
-    .filter((el) => el !== null && el.trim() !== '');
+    .filter((el) => is.nonEmptyString(el) && !is.emptyStringOrWhitespace(el));
 }
 
 export async function addAssigneesReviewers(

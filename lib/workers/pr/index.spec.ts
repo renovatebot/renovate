@@ -838,7 +838,7 @@ describe('workers/pr/index', () => {
 
     it('template labels with empty datasource', () => {
       const result = prWorker.prepareLabels({
-        labels: ['{{{datasource}}}'],
+        labels: ['{{{datasource}}}', ' {{{datasource}}} '],
         datasource: null,
       });
       expect(result).toBeArrayOfSize(0);
