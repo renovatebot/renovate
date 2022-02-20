@@ -69,6 +69,7 @@ async function runDotnetRestore(
       image: 'dotnet',
     },
   };
+
   const nugetCacheDir = await ensureCacheDir('nuget');
   const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
   const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
@@ -121,9 +122,10 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = [...await getDependentPackageFiles(packageFileName),
-    packageFileName
-   ];
+  const packageFiles = [
+    ...(await getDependentPackageFiles(packageFileName)),
+    packageFileName,
+  ];
 
   logger.debug(
     { packageFiles },
