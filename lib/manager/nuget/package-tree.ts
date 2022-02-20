@@ -21,7 +21,7 @@ export async function getDependentPackageFiles(
     throw new Error('localDir must be set');
   }
   const packageFiles = await getAllPackageFiles(localDir);
-  const graph: any = Graph();
+  const graph: ReturnType<typeof Graph> = Graph();
 
   for (const f of packageFiles) {
     graph.addNode(f);
@@ -57,7 +57,7 @@ export async function getDependentPackageFiles(
 // Traverse graph and find dependent package files at any level of ancestry
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
-  graph: any
+  graph: ReturnType<typeof Graph>
 ): string[] {
   const dependents: string[] = graph.adjacent(packageFileName);
 
