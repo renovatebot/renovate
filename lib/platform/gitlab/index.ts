@@ -161,7 +161,7 @@ export async function getRawFile(
   branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const repo = repoName ?? config.repository;
+  const repo = urlEscape(repoName ?? config.repository);
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag || `HEAD`);
@@ -337,7 +337,8 @@ type BranchState =
   | 'success'
   | 'failed'
   | 'canceled'
-  | 'skipped';
+  | 'skipped'
+  | 'scheduled';
 
 interface GitlabBranchStatus {
   status: BranchState;
@@ -378,6 +379,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
   skipped: BranchStatus.red,
+  scheduled: BranchStatus.yellow,
 };
 
 // Returns the combined status for a branch.

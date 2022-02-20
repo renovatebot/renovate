@@ -23,12 +23,16 @@ export class BitBucketTagsDatasource extends Datasource {
     super(BitBucketTagsDatasource.id);
   }
 
-  static getRegistryURL(registryUrl: string): string {
+  static getRegistryURL(registryUrl?: string): string {
     // fallback to default API endpoint if custom not provided
     return registryUrl ?? this.defaultRegistryUrls[0];
   }
 
-  static getCacheKey(registryUrl: string, repo: string, type: string): string {
+  static getCacheKey(
+    registryUrl: string | undefined,
+    repo: string,
+    type: string
+  ): string {
     return `${BitBucketTagsDatasource.getRegistryURL(
       registryUrl
     )}:${repo}:${type}`;
@@ -59,13 +63,12 @@ export class BitBucketTagsDatasource extends Datasource {
     const dependency: ReleaseResult = {
       sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
       registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
-      releases: null,
+      releases: bitbucketTags.values.map(({ name, target }) => ({
+        version: name,
+        gitRef: name,
+        releaseTimestamp: target?.date,
+      })),
     };
-    dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
-      version: name,
-      gitRef: name,
-      releaseTimestamp: target?.date,
-    }));
 
     return dependency;
   }
@@ -73,11 +76,11 @@ export class BitBucketTagsDatasource extends Datasource {
   // getTagCommit fetched the commit has for specified tag
   @cache({
     namespace: BitBucketTagsDatasource.cacheNamespace,
-    key: (registryUrl, repo, tag: string) =>
+    key: (registryUrl: string | undefined, repo: string, tag: string): string =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
   })
   async getTagCommit(
-    registryUrl: string,
+    _registryUrl: string | undefined,
     repo: string,
     tag: string
   ): Promise<string | null> {
@@ -86,7 +89,7 @@ export class BitBucketTagsDatasource extends Datasource {
     const bitbucketTag = (await this.bitbucketHttp.getJson<BitbucketTag>(url))
       .body;
 
-    return bitbucketTag.target.hash;
+    return bitbucketTag.target?.hash ?? null;
   }
 
   @cache({

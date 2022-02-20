@@ -10,7 +10,7 @@ url = "another.url"
 url = "missingname.url"
 
 [[tool.poetry.source]]
-name = "four"
+name = "four-oh.four"
 url = "last.url"
 
 [[tool.poetry.source]]
