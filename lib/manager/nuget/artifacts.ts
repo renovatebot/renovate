@@ -145,7 +145,7 @@ export async function updateArtifacts({
     false
   );
   if (!hasLockFileContent) {
-    logger.info(
+    logger.debug(
       { packageFileName },
       'No lock file found for package or dependents'
     );
