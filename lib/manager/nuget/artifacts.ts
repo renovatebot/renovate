@@ -123,9 +123,9 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = (await getDependentPackageFiles(packageFileName)).concat(
+  const packageFiles = [...await getDependentPackageFiles(packageFileName),
     packageFileName
-  );
+   ];
 
   logger.debug(
     { packageFiles },
