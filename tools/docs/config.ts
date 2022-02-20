@@ -16,6 +16,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'stage',
     'allowString',
     'admin',
+    'globalOnly',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
