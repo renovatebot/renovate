@@ -48,6 +48,7 @@ describe('manager/nuget/artifacts', () => {
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
       Promise.resolve(`others/${dirName}`)
     );
+    fs.globLocalFiles.mockReturnValueOnce(Promise.resolve([]));
     getRandomString.mockReturnValue('not-so-random' as any);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

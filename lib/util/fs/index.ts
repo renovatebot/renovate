@@ -2,9 +2,12 @@ import stream from 'stream';
 import util from 'util';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { glob } from 'glob';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+
+const globAsync = util.promisify(glob);
 
 export * from './proxies';
 
@@ -161,4 +164,13 @@ export function localPathIsFile(pathName: string): Promise<boolean> {
     .stat(upath.join(localDir, pathName))
     .then((s) => s.isFile())
     .catch(() => false);
+}
+
+export async function globLocalFiles(globPattern: string): Promise<string[]> {
+  const { localDir } = GlobalConfig.get();
+  const globbedFiles = await globAsync(upath.join(localDir, globPattern));
+  const relativeFiles = globbedFiles.map((f) =>
+    upath.relative(localDir ?? '', f)
+  );
+  return relativeFiles;
 }

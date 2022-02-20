@@ -1,15 +1,10 @@
 import path from 'path';
-import util from 'util';
-import { glob } from 'glob';
 import Graph from 'graph-data-structure';
 import upath from 'upath';
 import xmldoc from 'xmldoc';
-import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { readLocalFile } from '../../util/fs';
+import { globLocalFiles, readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
-
-const globAsync = util.promisify(glob);
 
 // Get all package files at any level of ancestry that depend on `packageFileName`
 export async function getDependentPackageFiles(
@@ -84,6 +79,7 @@ function normalizeRelativePath(
 
 // Get a list of package files in `localDir`
 async function getAllPackageFiles(): Promise<string[]> {
+  console.log(globLocalFiles);
   const possiblePackageFiles = await globLocalFiles('**/*proj');
   const filteredPackageFiles = possiblePackageFiles.filter((f) =>
     regEx(/(?:cs|vb|fs)proj$/i).test(f)
@@ -92,13 +88,4 @@ async function getAllPackageFiles(): Promise<string[]> {
   logger.debug({ filteredPackageFiles }, 'Found package files');
 
   return filteredPackageFiles;
-}
-
-async function globLocalFiles(globPattern: string): Promise<string[]> {
-  const { localDir } = GlobalConfig.get();
-  const globbedFiles = await globAsync(upath.join(localDir, globPattern));
-  const relativeFiles = globbedFiles.map((f) =>
-    upath.relative(localDir ?? '', f)
-  );
-  return relativeFiles;
 }
