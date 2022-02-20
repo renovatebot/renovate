@@ -16,11 +16,11 @@ import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import type { HttpResponse } from '../../util/http';
 import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
+import type { HttpResponse } from '../../util/http/types';
 import { newlineRegex, regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';

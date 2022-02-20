@@ -16,7 +16,12 @@ import { range } from '../range';
 import { regEx } from '../regex';
 import { parseLinkHeader } from '../url';
 import type { GotLegacyError } from './legacy';
-import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
+import type {
+  HttpPostOptions,
+  HttpResponse,
+  InternalHttpOptions,
+} from './types';
+import { Http } from '.';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
