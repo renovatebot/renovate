@@ -79,7 +79,6 @@ function normalizeRelativePath(
 
 // Get a list of package files in `localDir`
 async function getAllPackageFiles(): Promise<string[]> {
-  console.log(globLocalFiles);
   const possiblePackageFiles = await globLocalFiles('**/*proj');
   const filteredPackageFiles = possiblePackageFiles.filter((f) =>
     regEx(/(?:cs|vb|fs)proj$/i).test(f)
