@@ -89,7 +89,9 @@ async function runDotnetRestore(
   await remove(nugetConfigDir);
 }
 
-async function getLockFileContentMap(lockFileNames: string[]): Promise<Record<string, string>> {
+async function getLockFileContentMap(
+  lockFileNames: string[]
+): Promise<Record<string, string>> {
   const lockFileContentMap: Record<string, string> = {};
 
   for (const lockFileName of lockFileNames) {
