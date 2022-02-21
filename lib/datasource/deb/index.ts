@@ -54,7 +54,7 @@ export class DebDatasource extends Datasource {
     'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
   ];
 
-  override readonly caching = false; // TODO: how can this be used?
+  override readonly caching = true;
 
   /**
    * Here, we tell Renovate that this data source can respect multiple upstream repositories
