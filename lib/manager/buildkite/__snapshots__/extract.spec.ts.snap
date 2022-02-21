@@ -48,19 +48,6 @@ Array [
 ]
 `;
 
-exports[`manager/buildkite/extract extractPackageFile() extracts git-based plugin with .git at the end of its name 1`] = `
-Array [
-  Object {
-    "currentValue": "v3.2.7",
-    "datasource": "github-tags",
-    "depName": "some-org/some-plugin",
-    "registryUrls": Array [
-      "https://github.company.com",
-    ],
-  },
-]
-`;
-
 exports[`manager/buildkite/extract extractPackageFile() extracts git-based plugins 1`] = `
 Array [
   Object {
