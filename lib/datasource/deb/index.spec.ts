@@ -1,4 +1,6 @@
-import { copyFile, mkdirp, remove, stat } from 'fs-extra';
+import { copyFile, mkdirp, stat } from 'fs-extra';
+import { DirectoryResult, dir } from 'tmp-promise';
+import upath from 'upath';
 import { getPkgReleases } from '..';
 import type { GetPkgReleasesConfig } from '..';
 import * as httpMock from '../../../test/http-mock';
@@ -7,27 +9,27 @@ import { DebDatasource } from '.';
 
 describe('datasource/deb/index', () => {
   describe('getReleases', () => {
-    const testPackagesFile = __dirname + '/test-data/Packages.gz';
-    const extractedTestFile = __dirname + '/test-data/Packages';
-    const cacheDir = '/tmp/renovate-cache/';
-    // const downloadFolder =
-    //   cacheDir + 'others/' + DebDatasource.downloadDirectory + '/';
-    const extractionFolder =
-      cacheDir + 'others/' + DebDatasource.cacheSubDir + '/';
-    // const compressedPackageFile =
-    //   downloadFolder +
-    //   '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
-    const extractedPackageFile =
-      extractionFolder +
-      '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
-
-    GlobalConfig.set({ cacheDir: cacheDir });
-
+    const testPackagesFile = upath.join(__dirname, 'test-data', 'Packages.gz');
+    const extractedTestFile = upath.join(__dirname, 'test-data', 'Packages');
+    let cacheDir: DirectoryResult;
+    let extractionFolder: string;
+    let extractedPackageFile: string;
     let cfg: GetPkgReleasesConfig; // this can be modified within the test cases
 
     beforeEach(async () => {
       jest.resetAllMocks();
-      await remove(cacheDir);
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cacheDir: cacheDir.path });
+      extractionFolder = upath.join(
+        cacheDir.path,
+        'others',
+        DebDatasource.cacheSubDir
+      );
+      extractedPackageFile = upath.join(
+        extractionFolder,
+        '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt'
+      );
+
       cfg = {
         datasource: 'deb',
         depName: 'steam-devices',
