@@ -32,8 +32,8 @@ import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
 import {
-  PrResponse,
   Account,
+  PrResponse,
   RepoInfoBody,
   mergeBodyTransformer,
 } from './utils';
