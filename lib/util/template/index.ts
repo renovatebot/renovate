@@ -162,7 +162,7 @@ function getFilteredObject(input: CompileInput): FilteredObject {
     const value = obj[field];
     if (is.array(value)) {
       res[field] = value
-        .filter(is.object)
+        .filter(is.plainObject)
         .map((element) => getFilteredObject(element as CompileInput));
     } else if (is.plainObject(value)) {
       res[field] = getFilteredObject(value);
