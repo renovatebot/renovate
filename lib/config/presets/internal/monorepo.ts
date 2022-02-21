@@ -38,6 +38,7 @@ const repoGroups = {
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
+  groovy: 'https://github.com/apache/groovy',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   'mdc-react': 'material-components/material-components-web-react',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
