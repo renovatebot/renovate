@@ -16,8 +16,11 @@ async function fetchDepUpdates(
 ): Promise<PackageDependency> {
   let dep = clone(indep);
   dep.updates = [];
-  if (!is.nonEmptyString(dep.depName?.trim())) {
-    dep.skipReason = 'missing-depname';
+  if (is.string(dep.depName)) {
+    dep.depName = dep.depName.trim();
+  }
+  if (!is.nonEmptyString(dep.depName)) {
+    dep.skipReason = 'invalid-name';
   }
   if (dep.skipReason) {
     return dep;
