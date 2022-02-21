@@ -29,7 +29,7 @@ describe('manager/flux/extract', () => {
         ],
       });
     });
-    it('extracts version from system manifests', () => {
+    it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
         loadFixture('system.yaml'),
         'clusters/my-cluster/flux-system/gotk-components.yaml'
@@ -40,9 +40,20 @@ describe('manager/flux/extract', () => {
             currentValue: 'v0.24.1',
             datasource: 'github-releases',
             depName: 'fluxcd/flux2',
+            managerData: {
+              components:
+                'source-controller,kustomize-controller,helm-controller,notification-controller',
+            },
           },
         ],
       });
+    });
+    it('considers components optional in system manifests', () => {
+      const result = extractPackageFile(
+        `# Flux Version: v0.27.0`,
+        'clusters/my-cluster/flux-system/gotk-components.yaml'
+      );
+      expect(result.deps[0].managerData.components).toBeFalsy();
     });
     it('ignores system manifests without a version', () => {
       const result = extractPackageFile(

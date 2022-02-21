@@ -10,7 +10,9 @@ import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
 
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
-    const versionMatch = regEx(/#\s*Flux\s+Version:\s*(\S+)/).exec(content);
+    const versionMatch = regEx(
+      /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*(\S+))?/
+    ).exec(content);
     if (!versionMatch) {
       return null;
     }
@@ -18,6 +20,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
       kind: 'system',
       file: file,
       version: versionMatch[1],
+      components: versionMatch[2],
     };
   }
 
@@ -79,6 +82,9 @@ function resolveManifest(
           depName: 'fluxcd/flux2',
           datasource: GithubReleasesDatasource.id,
           currentValue: manifest.version,
+          managerData: {
+            components: manifest.components,
+          },
         },
       ];
     case 'resource':
