@@ -69,14 +69,6 @@ describe('datasource/deb/index', () => {
         expect(res).toBeNull();
       });
 
-      it('returns null when registry url misses components', async () => {
-        cfg.registryUrls = [
-          'http://ftp.debian.org/debian?suite=stable&binaryArch=amd64',
-        ];
-        const res = await getPkgReleases(cfg);
-        expect(res).toBeNull();
-      });
-
       it('returns null when registry url misses binaryArch', async () => {
         cfg.registryUrls = [
           'http://ftp.debian.org/debian?suite=stable&components=non-free',
