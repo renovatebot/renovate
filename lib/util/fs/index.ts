@@ -9,7 +9,6 @@ import { logger } from '../../logger';
 export * from './proxies';
 
 export const pipeline = util.promisify(stream.pipeline);
-export const constants = fs.constants;
 
 export function getSubDirectory(fileName: string): string {
   return upath.parse(fileName).dir;
