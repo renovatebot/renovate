@@ -53,7 +53,7 @@ describe('manager/flux/extract', () => {
         `# Flux Version: v0.27.0`,
         'clusters/my-cluster/flux-system/gotk-components.yaml'
       );
-      expect(result.deps[0].managerData.components).toBeFalsy();
+      expect(result.deps[0].managerData.components).toBeUndefined();
     });
     it('ignores system manifests without a version', () => {
       const result = extractPackageFile(

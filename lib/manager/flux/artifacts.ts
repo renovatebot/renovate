@@ -19,7 +19,7 @@ export async function updateArtifacts({
     logger.debug(`Updating Flux system manifests`);
     const args: string[] = ['--export'];
     if (systemDep.managerData?.components) {
-      args.push('--components', systemDep.managerData.components);
+      args.push('--components', quote(systemDep.managerData.components));
     }
     const cmd = `flux install ${args.join(' ')} > ${quote(packageFileName)}`;
     const execOptions: ExecOptions = {

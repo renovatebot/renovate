@@ -11,7 +11,7 @@ import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
     const versionMatch = regEx(
-      /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*(\S+))?/
+      /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
     ).exec(content);
     if (!versionMatch) {
       return null;
