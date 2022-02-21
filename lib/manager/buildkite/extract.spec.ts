@@ -42,7 +42,7 @@ describe('manager/buildkite/extract', () => {
       const res = extractPackageFile(Fixtures.get('pipeline6.yml')).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0]).toEqual(expectedPackageDependency);
+      expect(res).toEqual([expectedPackageDependency]);
     });
   });
 });
