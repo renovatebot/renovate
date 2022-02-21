@@ -144,8 +144,7 @@ describe('datasource/deb/index', () => {
         it('returns two releases for `album` which has different metadata across the components', async () => {
           cfg.depName = 'album';
           const res = await getPkgReleases(cfg);
-          expect(res).toBeObject();
-          expect(res.releases).toHaveLength(2);
+          expect(res?.releases).toHaveLength(2);
         });
       });
     });
