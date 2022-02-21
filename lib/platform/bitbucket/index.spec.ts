@@ -808,7 +808,7 @@ describe('platform/bitbucket/index', () => {
         })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
-    it('rethrows exception when PR create error not due to inactive default reviewers', async () => {
+    it('rethrows exception when PR create error not due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
@@ -826,6 +826,40 @@ describe('platform/bitbucket/index', () => {
           error: {
             fields: {
               reviewers: ['Some other unhandled error'],
+            },
+            message: 'Some other unhandled error',
+          },
+        });
+      await expect(() =>
+        bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        })
+      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+    });
+    it('rethrows exception when PR create error not due to reviewers field', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [reviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              description: ['Some other unhandled error'],
             },
             message: 'Some other unhandled error',
           },
@@ -1013,7 +1047,7 @@ describe('platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
-    it('rethrows exception when PR update error not due to inactive reviewers', async () => {
+    it('rethrows exception when PR update error not due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
@@ -1037,6 +1071,30 @@ describe('platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('rethrows exception when PR create error not due to reviewers field', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              description: ['Some other unhandled error'],
+            },
+            message: 'Some other unhandled error',
+          },
+        });
+      await expect(() =>
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
     it('throws an error on failure to get current list of reviewers', async () => {
       const scope = await initRepoMock();
