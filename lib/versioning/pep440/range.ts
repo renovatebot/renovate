@@ -11,6 +11,7 @@ enum UserPolicy {
   Minor,
   Micro,
   Bug,
+  NONE = Infinity,
 }
 
 /**
@@ -20,33 +21,31 @@ enum UserPolicy {
  * @returns A {@link UserPolicy}
  */
 function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
-  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
-  const upperBound: number[] =
+  const newRelease: number[] = parseVersion(newVersion)?.release ?? [];
+  const bound: number[] =
     parseVersion((ranges[1] || ranges[0]).version)?.release ?? [];
   let rangePrecision = -1;
   // range is defined by a single bound.
   // ie. <1.2.2.3,
   //     >=7
-  if (ranges.length !== 2) {
-    rangePrecision = toRelease.findIndex((el, index) => el > upperBound[index]);
+  if (ranges.length === 1) {
+    rangePrecision = newRelease.findIndex((el, index) => el > bound[index]);
   }
   // Range is defined by both upper and lower bounds.
   if (ranges.length === 2) {
     const lowerBound: number[] = parseVersion(ranges[0].version)?.release ?? [];
-    rangePrecision = upperBound.findIndex(
-      (el, index) => el > lowerBound[index]
-    );
+    rangePrecision = bound.findIndex((el, index) => el > lowerBound[index]);
   }
   // Could not calculate user precision
   // Default to the smallest possible
   if (rangePrecision === -1) {
-    rangePrecision = upperBound.length - 1;
+    rangePrecision = bound.length - 1;
   }
   // Tune down Major precision if followed by a zero
   if (
     rangePrecision === UserPolicy.Major &&
-    rangePrecision + 1 < upperBound.length &&
-    upperBound[rangePrecision + 1] === 0
+    rangePrecision + 1 < bound.length &&
+    bound[rangePrecision + 1] === 0
   ) {
     rangePrecision++;
   }
@@ -55,13 +54,12 @@ function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
 }
 
 /**
- * Calculate new bounds for the "Replace" strategy.
- * @param policy The user's range update precision
+ * @param policy Required range precision
  * @param newVersion A newly accepted update version
- * @param baseVersion Current upper bound (to be excluded when used to calc lower bound)
+ * @param baseVersion Optional Current upper bound
  * @returns A string represents a future version upper bound.
  */
-function getPreciseFutureVersion(
+function getFutureVersion(
   policy: UserPolicy,
   newVersion: string,
   baseVersion?: string
@@ -69,7 +67,7 @@ function getPreciseFutureVersion(
   const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
   const baseRelease: number[] =
     parseVersion(baseVersion || newVersion)?.release ?? [];
-  return baseRelease.map((num, index) => {
+  return baseRelease.map((_, index) => {
     const toPart = toRelease[index] || 0;
     if (index < policy) {
       return toPart;
@@ -79,31 +77,6 @@ function getPreciseFutureVersion(
     }
     return 0;
   });
-}
-
-function getFutureVersion(
-  baseVersion: string,
-  newVersion: string,
-  incrementValue: number
-): string {
-  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
-  const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
-  let found = false;
-  const futureRelease = baseRelease.map((basePart, index) => {
-    if (found) {
-      return 0;
-    }
-    const toPart = toRelease[index] || 0;
-    if (toPart > basePart) {
-      found = true;
-      return toPart + incrementValue;
-    }
-    return toPart;
-  });
-  if (!found) {
-    futureRelease[futureRelease.length - 1] += incrementValue;
-  }
-  return futureRelease.join('.');
 }
 
 interface Range {
@@ -280,8 +253,13 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
     if (gte(newVersion, range.version)) {
       // now here things get tricky
       // we calculate the new future version
-      const futureVersion = getFutureVersion(range.version, newVersion, 1);
-      return range.operator + futureVersion;
+      const precision = getRangePrecision([range], newVersion);
+      const futureVersion = getFutureVersion(
+        precision,
+        newVersion,
+        range.version
+      );
+      return range.operator + futureVersion.join('.');
     }
     // newVersion is in range, for other than "replace" strategies
     return range.operator + range.version;
@@ -302,7 +280,11 @@ function updateRangeValue(
 
   // keep the .* suffix
   if (range.prefix) {
-    const futureVersion = getFutureVersion(range.version, newVersion, 0);
+    const futureVersion = getFutureVersion(
+      UserPolicy.NONE,
+      newVersion,
+      range.version
+    ).join('.');
     return range.operator + futureVersion + '.*';
   }
 
@@ -331,7 +313,14 @@ function updateRangeValue(
   return null;
 }
 
-function getZeroTrimmingMode(ranges: Range[]): boolean {
+/**
+ * Checks for zero specifiers.
+ * Used mainly for cosmetics for the rez versioning.
+ * returns true if one of the bounds' length is < 3.
+ * @param ranges A {@link Range} array.
+ * @returns A boolean value
+ */
+function hasZeroSpecifier(ranges: Range[]): boolean {
   let mode = false;
   ranges.forEach((range) => {
     const release = parseVersion(range.version)?.release;
@@ -358,19 +347,20 @@ function handleWidenStrategy(
     return [currentValue];
   }
   const rangePrecision = getRangePrecision(ranges, newVersion);
-  const zeroTrimming = getZeroTrimmingMode(ranges);
+  const trimZeros = hasZeroSpecifier(ranges);
   return ranges.map((range) => {
+    // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
-      const futureVersion = getPreciseFutureVersion(
+      const futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
         range.version
       );
       return (
-        range.operator +
-        trimTrailingZeros(futureVersion, zeroTrimming).join('.')
+        range.operator + trimTrailingZeros(futureVersion, trimZeros).join('.')
       );
     }
+    // default
     return updateRangeValue(
       {
         currentValue,
@@ -391,18 +381,18 @@ function handleReplaceStrategy(
   if (satisfies(newVersion, currentValue)) {
     return [currentValue];
   }
-  const rangePrecision = getRangePrecision(ranges, newVersion);
-  const zeroTrimming = getZeroTrimmingMode(ranges);
+  const trimZeros = hasZeroSpecifier(ranges);
   return ranges.map((range) => {
+    // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
-      const futureVersion = getPreciseFutureVersion(
+      const rangePrecision = getRangePrecision(ranges, newVersion);
+      const futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
         range.version
       );
       return (
-        range.operator +
-        trimTrailingZeros(futureVersion, zeroTrimming).join('.')
+        range.operator + trimTrailingZeros(futureVersion, trimZeros).join('.')
       );
     }
     if (['>', '>='].includes(range.operator)) {
@@ -410,14 +400,17 @@ function handleReplaceStrategy(
         // this looks like a rollback
         return '>=' + newVersion;
       }
-      return (
-        range.operator +
-        trimTrailingZeros(
-          getPreciseFutureVersion(rangePrecision, newVersion),
-          zeroTrimming
-        ).join('.')
-      );
+      // update the lower bound to reflect the accepted new version
+      const lowerBound = parseVersion(range.version)?.release ?? [];
+      const rangePrecision = lowerBound.length - 1;
+      const newBase = trimTrailingZeros(
+        getFutureVersion(rangePrecision, newVersion),
+        trimZeros
+      ).join('.');
+      const op = newBase === newVersion ? '>=' : range.operator;
+      return op + newBase;
     }
+    // default
     return updateRangeValue(
       {
         currentValue,
