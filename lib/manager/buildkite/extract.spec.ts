@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../test/fixtures';
+import type { PackageDependency } from '../../manager/types';
 import { extractPackageFile } from './extract';
 
 describe('manager/buildkite/extract', () => {
@@ -32,9 +33,16 @@ describe('manager/buildkite/extract', () => {
       expect(res).toHaveLength(2);
     });
     it('extracts git-based plugin with .git at the end of its name', () => {
+      const expectedPackageDependency: PackageDependency = {
+        currentValue: 'v3.2.7',
+        datasource: 'github-tags',
+        depName: 'some-org/some-plugin',
+        registryUrls: ['https://github.company.com'],
+      };
       const res = extractPackageFile(Fixtures.get('pipeline6.yml')).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(expectedPackageDependency);
     });
   });
 });
