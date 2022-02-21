@@ -20,7 +20,7 @@ describe('versioning/pvp/index', () => {
     ${'renovatebot/renovate#main'}                   | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
   `('isValid("$version") === $isValid', ({ version, isValid }) => {
-    const res = !!pvp.isValid(version);
+    const res = pvp.isValid(version);
     expect(res).toBe(isValid);
   });
 

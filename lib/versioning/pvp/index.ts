@@ -20,7 +20,7 @@ class PvpVersioningApi extends GenericVersioningApi {
    * PVP has two major components A.B
    * To keep compatibility with Renovate's versioning API we will treat it as a float
    */
-  protected _parse(version: string): GenericVersion {
+  protected _parse(version: string): GenericVersion | null {
     const matches = versionPattern.exec(version);
     if (!matches) {
       return null;
@@ -28,7 +28,7 @@ class PvpVersioningApi extends GenericVersioningApi {
 
     const components = version.split('.');
     const major = parseFloat(`${components[0]}.${components[1]}`);
-    const rest = components.slice(2).map((i) => parseInt(i));
+    const rest = components.slice(2).map((i) => parseInt(i, 10));
     return { release: [major, ...rest] };
   }
 

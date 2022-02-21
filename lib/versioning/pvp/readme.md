@@ -1,6 +1,6 @@
 # PVP
 
-**What type of versioning is used?**
+## What type of versioning is used?
 
 Quotes from the [Haskell PVP Specification](https://pvp.haskell.org/):
 
@@ -10,12 +10,12 @@ Quotes from the [Haskell PVP Specification](https://pvp.haskell.org/):
 The one unusual difference between PVP and SemVer is that there are two major versions, and that there can be an optional number of additional version numbers past _minor_.
 For example `1.2.3` (note there's no _patch_ version here), `1.2.3.4` (`4` is the _patch_ version), or `1.2.3.4.5.6.7` are all valid version numbers.
 
-**Are ranges supported?**
+## Are ranges supported?
 
 Currently this is not supported but you can have ranges.
 This implementation just supports updating extra-deps in the Stack build tool which does not support ranges.
 If this is used for Cabal then it would be useful to support ranges.
 
-**Are commit hashes supported?**
+## Are commit hashes supported?
 
 No.
