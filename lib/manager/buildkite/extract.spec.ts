@@ -40,7 +40,6 @@ describe('manager/buildkite/extract', () => {
         registryUrls: ['https://github.company.com'],
       };
       const res = extractPackageFile(Fixtures.get('pipeline6.yml')).deps;
-      expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
       expect(res).toEqual([expectedPackageDependency]);
     });
