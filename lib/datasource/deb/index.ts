@@ -83,11 +83,11 @@ export class DebDatasource extends Datasource {
     }
   }
 
-  async downloadAndExtractPackage(basePackageUrl: string): Promise<string> {
+  async downloadAndExtractPackage(componentUrl: string): Promise<string> {
     // we hash the package URL and export the hex to make it file system friendly
     // we use the hashed url as the filename for the local directories/files
     const hash = createHash('sha256');
-    hash.update(basePackageUrl);
+    hash.update(componentUrl);
     const hashedPackageUrl = hash.digest('hex');
 
     const fullCacheDir = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
@@ -106,7 +106,7 @@ export class DebDatasource extends Datasource {
         fullCacheDir + '/' + hashedPackageUrl + '.' + compression;
       try {
         const wasUpdated = await this.downloadPackageFile(
-          basePackageUrl,
+          componentUrl,
           compression,
           compressedFile,
           lastTimestamp
@@ -121,15 +121,16 @@ export class DebDatasource extends Datasource {
         return extractedFile;
       } catch (e) {
         logger.warn(
-          "Couldn't download package file with compression " +
-            compression +
-            ' from ' +
-            basePackageUrl
+          {
+            componentUrl: componentUrl,
+            compression: compression,
+          },
+          "Couldn't download package file with compression"
         );
       }
     }
 
-    throw 'No compression standard worked for ' + basePackageUrl;
+    throw 'No compression standard worked for ' + componentUrl;
   }
 
   /**
@@ -147,9 +148,13 @@ export class DebDatasource extends Datasource {
     compressedFile: string,
     lastDownloadTimestamp: Date
   ): Promise<boolean> {
-    const packageUri = basePackageUrl + '/Packages.' + compression;
+    const packageUrl = basePackageUrl + '/Packages.' + compression;
     logger.debug(
-      'Downloading package file from ' + packageUri + ' as ' + compressedFile
+      {
+        url: packageUrl,
+        targetFile: compressedFile,
+      },
+      'Downloading Debian package file'
     );
     let needsToDownload = true;
     // we can use If-Modified-Since to avoid that we are redownloaded the file
@@ -159,12 +164,12 @@ export class DebDatasource extends Datasource {
       downloadOptions.headers = {
         'If-Modified-Since': lastDownloadTimestamp.toUTCString(),
       };
-      const headResult = await this.http.head(packageUri, downloadOptions);
+      const headResult = await this.http.head(packageUrl, downloadOptions);
       needsToDownload = headResult.statusCode !== 304;
     }
 
     if (needsToDownload) {
-      const readStream = this.http.stream(packageUri);
+      const readStream = this.http.stream(packageUrl);
       const writeStream = fs.createWriteStream(compressedFile);
 
       await fs.pipeline(readStream, writeStream);
@@ -291,10 +296,11 @@ export class DebDatasource extends Datasource {
         );
       } catch (e) {
         logger.warn(
-          'Skipping package ' +
-            fullComponentUrls[i] +
-            ' because of error ' +
-            JSON.stringify(e)
+          {
+            componentUrl: fullComponentUrls[i],
+            error: e,
+          },
+          'Skipping package because of error'
         );
         continue;
       }
@@ -310,6 +316,9 @@ export class DebDatasource extends Datasource {
         } else {
           if (!this.releaseMetaInformationMatches(release, newRelease)) {
             logger.warn(
+              {
+                lookupName: cfg.lookupName,
+              },
               'package occurred in more than one repository but with different meta information - still adding it'
             );
           }
