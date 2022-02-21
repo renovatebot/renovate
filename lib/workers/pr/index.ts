@@ -30,6 +30,10 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
+function nonEmptyStringAndNotWhitespace(input: string): boolean {
+  return is.nonEmptyString(input) && !is.emptyStringOrWhitespace(input);
+}
+
 async function addCodeOwners(
   assigneesOrReviewers: string[],
   pr: Pr
@@ -58,9 +62,9 @@ export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
   return [...new Set([...labels, ...addLabels])]
-    .filter((el) => is.nonEmptyString(el) && !is.emptyStringOrWhitespace(el))
+    .filter(nonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
-    .filter((el) => is.nonEmptyString(el) && !is.emptyStringOrWhitespace(el));
+    .filter(nonEmptyStringAndNotWhitespace);
 }
 
 export async function addAssigneesReviewers(
