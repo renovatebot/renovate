@@ -204,21 +204,4 @@ describe('versioning/pep440/index', () => {
       expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
-
-  test.each`
-    currentValue | rangeStrategy | currentVersion | newVersion | expected
-    ${'1.0.0'}   | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
-    ${'invalid'} | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
-  `(
-    'getNewValueBug("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
-    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      const res = pep440.getNewValue({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      });
-      expect(res).toEqual(expected);
-    }
-  );
 });
