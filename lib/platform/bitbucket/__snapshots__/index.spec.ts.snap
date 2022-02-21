@@ -1753,9 +1753,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error not due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
+exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
 
-exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error not due to unknown reviewers error 2`] = `
+exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 2`] = `
 Array [
   Object {
     "headers": Object {
