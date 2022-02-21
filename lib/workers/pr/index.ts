@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -14,6 +13,7 @@ import { sampleSize } from '../../util';
 import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import { regEx } from '../../util/regex';
+import { nonEmptyStringAndNotWhitespace } from '../../util/string';
 import * as template from '../../util/template';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
@@ -28,10 +28,6 @@ function noWhitespaceOrHeadings(input: string): string {
 
 function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
-}
-
-function nonEmptyStringAndNotWhitespace(input: string): boolean {
-  return is.nonEmptyString(input) && !is.emptyStringOrWhitespace(input);
 }
 
 async function addCodeOwners(
