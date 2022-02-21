@@ -15,9 +15,9 @@ enum UserPolicy {
 }
 
 /**
- * Calculate update precision by the current user update range.
- * @param ranges A {@link Range} array consists of user's allowed range
- * @param newVersion The newly introduced new version
+ * Calculate current update range precision.
+ * @param ranges A {@link Range} consists of current range
+ * @param newVersion The newly accepted version
  * @returns A {@link UserPolicy}
  */
 function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
@@ -55,7 +55,7 @@ function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
 
 /**
  * @param policy Required range precision
- * @param newVersion A newly accepted update version
+ * @param newVersion The newly accepted version
  * @param baseVersion Optional Current upper bound
  * @returns A string represents a future version upper bound.
  */
@@ -315,10 +315,10 @@ function updateRangeValue(
 
 /**
  * Checks for zero specifiers.
- * Used mainly for cosmetics for the rez versioning.
  * returns true if one of the bounds' length is < 3.
  * @param ranges A {@link Range} array.
  * @returns A boolean value
+ * Used mainly for cosmetics for the rez versioning syntax.
  */
 function hasZeroSpecifier(ranges: Range[]): boolean {
   let mode = false;
@@ -331,18 +331,15 @@ function hasZeroSpecifier(ranges: Range[]): boolean {
   return mode;
 }
 
-function trimTrailingZeros(numbers: number[], bool: boolean): number[] {
-  if (bool) {
-    const arr: number[] = [];
-    for (let i = numbers.length - 1; i >= 0; i--) {
-      while (numbers[i] === 0) {
-        i--;
-      }
-      arr.push(numbers[i]);
+function trimTrailingZeros(numbers: number[]): number[] {
+  const arr: number[] = [];
+  for (let i = numbers.length - 1; i >= 0; i--) {
+    while (numbers[i] === 0) {
+      i--;
     }
-    return arr.reverse();
+    arr.push(numbers[i]);
   }
-  return numbers;
+  return arr.reverse();
 }
 
 function handleWidenStrategy(
@@ -358,14 +355,15 @@ function handleWidenStrategy(
   return ranges.map((range) => {
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
-      const futureVersion = getFutureVersion(
+      let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
         range.version
       );
-      return (
-        range.operator + trimTrailingZeros(futureVersion, trimZeros).join('.')
-      );
+      if (trimZeros) {
+        futureVersion = trimTrailingZeros(futureVersion);
+      }
+      return range.operator + futureVersion.join('.');
     }
     // default
     return updateRangeValue(
@@ -393,15 +391,17 @@ function handleReplaceStrategy(
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
       const rangePrecision = getRangePrecision(ranges, newVersion);
-      const futureVersion = getFutureVersion(
+      let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
         range.version
       );
-      return (
-        range.operator + trimTrailingZeros(futureVersion, trimZeros).join('.')
-      );
+      if (trimZeros) {
+        futureVersion = trimTrailingZeros(futureVersion);
+      }
+      return range.operator + futureVersion.join('.');
     }
+    // handle lower bound
     if (['>', '>='].includes(range.operator)) {
       if (lte(newVersion, range.version)) {
         // this looks like a rollback
@@ -410,10 +410,10 @@ function handleReplaceStrategy(
       // update the lower bound to reflect the accepted new version
       const lowerBound = parseVersion(range.version)?.release ?? [];
       const rangePrecision = lowerBound.length - 1;
-      const newBase = trimTrailingZeros(
-        getFutureVersion(rangePrecision, newVersion),
-        trimZeros
-      );
+      let newBase = getFutureVersion(rangePrecision, newVersion);
+      if (trimZeros) {
+        newBase = trimTrailingZeros(newBase);
+      }
       // trim last element of the newBase when new accepted version is out of range.
       // example: let new bound be >8.2.5 & newVersion be 8.2.5
       // return value will be: >8.2
