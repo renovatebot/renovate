@@ -132,7 +132,6 @@ export interface LookupUpdate {
   isRange?: boolean;
   isRollback?: boolean;
   isReplacement?: boolean;
-  isDigest?: boolean;
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
