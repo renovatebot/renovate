@@ -88,7 +88,7 @@ Array [
       },
       "reviewers": Array [
         Object {
-          "uuid": "{1234-5678}",
+          "account_id": "1234-5678",
         },
       ],
       "source": Object {
@@ -102,7 +102,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "183",
+      "content-length": "187",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

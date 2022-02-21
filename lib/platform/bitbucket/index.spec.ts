@@ -658,7 +658,7 @@ describe('platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/default-reviewers')
         .reply(200, {
-          values: [{ uuid: '{1234-5678}' }],
+          values: [{ account_id: '1234-5678' }],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -673,6 +673,174 @@ describe('platform/bitbucket/index', () => {
       });
       expect(number).toBe(5);
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('removes inactive reviewers when updating pr', async () => {
+      const inactiveReviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const activeReviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [activeReviewer, inactiveReviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: ['Malformed reviewers list'],
+            },
+            message: 'reviewers: Malformed reviewers list',
+          },
+        })
+        .get('/2.0/users/123')
+        .reply(200, {
+          account_status: 'inactive',
+        })
+        .get('/2.0/users/456')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+      const { number } = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+      expect(number).toBe(5);
+    });
+    it('removes default reviewers no longer member of the workspace when creating pr', async () => {
+      const notMemberReviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const memberReviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [memberReviewer, notMemberReviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head('/2.0/workspaces/some/members/123')
+        .reply(404)
+        .head('/2.0/workspaces/some/members/456')
+        .reply(200)
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+      const { number } = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+      expect(number).toBe(5);
+    });
+    it('throws exception when unable to check default reviewers workspace membership', async () => {
+      const reviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [reviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head('/2.0/workspaces/some/members/123')
+        .reply(401);
+      await expect(() =>
+        bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        })
+      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
+    });
+    it('rethrows exception when PR create error not due to inactive default reviewers', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [reviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: ['Some other unhandled error'],
+            },
+            message: 'Some other unhandled error',
+          },
+        });
+      await expect(() =>
+        bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        })
+      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
   });
 

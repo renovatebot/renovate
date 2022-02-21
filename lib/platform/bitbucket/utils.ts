@@ -172,7 +172,7 @@ export interface PrResponse {
       name: string;
     };
   };
-  reviewers: Array<PrReviewer>;
+  reviewers: Array<Account>;
   created_on: string;
 }
 
@@ -191,15 +191,9 @@ export function prInfo(pr: PrResponse): Pr {
   };
 }
 
-export interface UserResponse {
-  display_name: string;
+export interface Account {
+  display_name?: string;
   account_id: string;
-  nickname: string;
-  account_status: string;
-}
-
-export interface PrReviewer {
-  display_name: string;
-  account_id: string;
-  nickname: string;
+  nickname?: string;
+  account_status?: string;
 }
