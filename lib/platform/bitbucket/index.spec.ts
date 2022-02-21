@@ -808,7 +808,7 @@ describe('platform/bitbucket/index', () => {
         })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
-    it('rethrows exception when PR create error not due to unknown reviewers error', async () => {
+    it('rethrows exception when PR create error due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
@@ -1047,7 +1047,7 @@ describe('platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
-    it('rethrows exception when PR update error not due to unknown reviewers error', async () => {
+    it('rethrows exception when PR update error due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
