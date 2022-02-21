@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import readline from 'readline';
 import { createUnzip } from 'zlib';
+import upath from 'upath';
 import type { GetReleasesConfig, ReleaseResult } from '..';
 import { logger } from '../../logger';
 import * as fs from '../../util/fs';
@@ -91,7 +92,7 @@ export class DebDatasource extends Datasource {
     const hashedPackageUrl = hash.digest('hex');
 
     const fullCacheDir = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
-    const extractedFile = fullCacheDir + '/' + hashedPackageUrl + '.txt';
+    const extractedFile = upath.join(fullCacheDir, hashedPackageUrl + '.txt');
     const extractedFileExists = await fs.pathExists(extractedFile);
 
     let lastTimestamp: Date = null;
@@ -102,8 +103,10 @@ export class DebDatasource extends Datasource {
 
     for (let i = 0; i < DebDatasource.compressions.length; i++) {
       const compression = DebDatasource.compressions[i];
-      const compressedFile =
-        fullCacheDir + '/' + hashedPackageUrl + '.' + compression;
+      const compressedFile = upath.join(
+        fullCacheDir,
+        hashedPackageUrl + '.' + compression
+      );
       try {
         const wasUpdated = await this.downloadPackageFile(
           componentUrl,
