@@ -68,9 +68,9 @@ export class DebDatasource extends Datasource {
    */
   override readonly defaultVersioning = 'loose';
 
-  requiredPackageKeys = ['Package', 'Version', 'Homepage'];
+  static requiredPackageKeys = ['Package', 'Version', 'Homepage'];
 
-  async extract(
+  static async extract(
     compressedFile: string,
     compression: string,
     outputFile: string
@@ -116,7 +116,11 @@ export class DebDatasource extends Datasource {
         );
         if (wasUpdated || !extractedFileExists) {
           try {
-            await this.extract(compressedFile, compression, extractedFile);
+            await DebDatasource.extract(
+              compressedFile,
+              compression,
+              extractedFile
+            );
           } finally {
             await fs.rm(compressedFile);
           }
@@ -202,10 +206,10 @@ export class DebDatasource extends Datasource {
         continue;
       }
 
-      for (let i = 0; i < this.requiredPackageKeys.length; i++) {
-        if (line.startsWith(this.requiredPackageKeys[i])) {
-          pd[this.requiredPackageKeys[i]] = line
-            .substring(this.requiredPackageKeys[i].length + 1)
+      for (let i = 0; i < DebDatasource.requiredPackageKeys.length; i++) {
+        if (line.startsWith(DebDatasource.requiredPackageKeys[i])) {
+          pd[DebDatasource.requiredPackageKeys[i]] = line
+            .substring(DebDatasource.requiredPackageKeys[i].length + 1)
             .trim();
           break;
         }
