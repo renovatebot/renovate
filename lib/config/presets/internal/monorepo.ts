@@ -134,7 +134,10 @@ const repoGroups = {
     'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
     'https://github.com/mui/material-ui',
   ],
-  'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
+  'mikro-orm': [
+    'https://github.com/mikro-orm/mikro-orm',
+    'https://github.com/mikro-orm/nestjs',
+  ],
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: [
