@@ -1,8 +1,7 @@
 import type { IncomingHttpHeaders } from 'http';
-import {
+import type {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
-  RequestError as RequestError_,
 } from 'got';
 
 export type GotContextOptions = {
@@ -24,8 +23,6 @@ export type GotExtraOptions = {
   noAuth?: boolean;
   context?: GotContextOptions;
 };
-
-export { RequestError_ as HttpError };
 
 export interface RequestStats {
   method: string;

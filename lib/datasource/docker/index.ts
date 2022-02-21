@@ -10,8 +10,8 @@ import type { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
-import type { Http } from '../../util/http';
-import { HttpError, HttpOptions, HttpResponse } from '../../util/http/types';
+import { Http, HttpError } from '../../util/http';
+import type { HttpOptions, HttpResponse } from '../../util/http/types';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
@@ -707,7 +707,7 @@ export class DockerDatasource extends Datasource {
       // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
-          { registryHost, dockerRepository, err },
+          {registryHost, dockerRepository, err},
           'docker registry failure: too many requests'
         );
         throw new ExternalHostError(err);
@@ -715,7 +715,7 @@ export class DockerDatasource extends Datasource {
       // prettier-ignore
       if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
-          { registryHost, dockerRepository, err },
+          {registryHost, dockerRepository, err},
           'docker registry failure: unauthorized'
         );
         throw new ExternalHostError(err);
