@@ -11,7 +11,7 @@ enum UserPolicy {
   Minor,
   Micro,
   Bug,
-  NONE = Infinity,
+  None = Infinity,
 }
 
 /**
@@ -281,7 +281,7 @@ function updateRangeValue(
   // keep the .* suffix
   if (range.prefix) {
     const futureVersion = getFutureVersion(
-      UserPolicy.NONE,
+      UserPolicy.None,
       newVersion,
       range.version
     ).join('.');
@@ -333,7 +333,14 @@ function hasZeroSpecifier(ranges: Range[]): boolean {
 
 function trimTrailingZeros(numbers: number[], bool: boolean): number[] {
   if (bool) {
-    return numbers.filter((num) => num !== 0);
+    const arr: number[] = [];
+    for (let i = numbers.length - 1; i >= 0; i--) {
+      while (numbers[i] === 0) {
+        i--;
+      }
+      arr.push(numbers[i]);
+    }
+    return arr.reverse();
   }
   return numbers;
 }
@@ -406,9 +413,16 @@ function handleReplaceStrategy(
       const newBase = trimTrailingZeros(
         getFutureVersion(rangePrecision, newVersion),
         trimZeros
-      ).join('.');
-      const op = newBase === newVersion ? '>=' : range.operator;
-      return op + newBase;
+      );
+      // trim last element of the newBase when new accepted version is out of range.
+      // example: let new bound be >8.2.5 & newVersion be 8.2.5
+      // return value will be: >8.2
+      if (range.operator === '>') {
+        if (newVersion === newBase.join('.') && newBase.length > 1) {
+          newBase.pop();
+        }
+      }
+      return range.operator + newBase.join('.');
     }
     // default
     return updateRangeValue(
