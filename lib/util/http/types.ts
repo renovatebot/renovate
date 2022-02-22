@@ -1,7 +1,8 @@
 import type { IncomingHttpHeaders } from 'http';
-import type {
+import {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
+  RequestError as RequestError_,
 } from 'got';
 
 export type GotContextOptions = {
@@ -12,6 +13,8 @@ export type GotContextOptions = {
 export type GotOptions = GotBufferOptions | GotJSONOptions;
 export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
 export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
+
+export { RequestError_ as HttpError };
 
 export type GotExtraOptions = {
   abortOnError?: boolean;

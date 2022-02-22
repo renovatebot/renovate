@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { clone } from '../util/clone';
-import { HttpError } from '../util/http';
+import { HttpError } from '../util/http/types';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 

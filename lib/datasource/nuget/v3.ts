@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import type { Http } from '../../util/http';
-import { HttpError } from '../../util/http';
+import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
