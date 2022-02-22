@@ -1746,19 +1746,15 @@ async function pushFiles(
     );
     const remoteCommitSha = commitRes.body.sha;
 
-    try {
-      await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
-        body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
-      });
-    } catch (e) {
-      // istanbul ignore if
-      if (e.err?.code !== 'ERR_NON_2XX_3XX_RESPONSE') {
-        throw e;
-      }
+    if (git.branchExists(branchName)) {
       await githubApi.patchJson(
         `/repos/${config.repository}/git/refs/heads/${branchName}`,
         { body: { sha: remoteCommitSha, force: true } }
       );
+    } else {
+      await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+        body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
+      });
     }
 
     return remoteCommitSha;

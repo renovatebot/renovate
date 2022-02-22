@@ -2622,6 +2622,7 @@ describe('platform/github/index', () => {
     it('commits and returns SHA string', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
+      git.branchExists.mockReturnValueOnce(false);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -2647,6 +2648,7 @@ describe('platform/github/index', () => {
     it('performs rebase', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
+      git.branchExists.mockReturnValueOnce(true);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -2658,8 +2660,6 @@ describe('platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
-        .post('/repos/some/repo/git/refs')
-        .reply(422)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
 
