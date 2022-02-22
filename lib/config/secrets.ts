@@ -83,7 +83,7 @@ function replaceSecretsInString(
   });
 }
 
-function replaceSecretsinObject(
+function replaceSecretsInObject(
   config_: RenovateConfig,
   secrets: Record<string, string>,
   deleteSecrets: boolean
@@ -94,7 +94,7 @@ function replaceSecretsinObject(
   }
   for (const [key, value] of Object.entries(config)) {
     if (is.plainObject(value)) {
-      config[key] = replaceSecretsinObject(value, secrets, deleteSecrets);
+      config[key] = replaceSecretsInObject(value, secrets, deleteSecrets);
     }
     if (is.string(value)) {
       config[key] = replaceSecretsInString(key, value, secrets);
@@ -102,7 +102,7 @@ function replaceSecretsinObject(
     if (is.array(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
         if (is.plainObject(arrayItem)) {
-          value[arrayIndex] = replaceSecretsinObject(
+          value[arrayIndex] = replaceSecretsInObject(
             arrayItem,
             secrets,
             deleteSecrets
@@ -128,5 +128,5 @@ export function applySecretsToConfig(
     }
   }
   // TODO: fix types (#9610)
-  return replaceSecretsinObject(config, secrets as never, deleteSecrets);
+  return replaceSecretsInObject(config, secrets as never, deleteSecrets);
 }
