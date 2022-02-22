@@ -7,6 +7,7 @@ export const presets: Record<string, Preset> = {
     extends: [
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:cucumber-to-scoped',
+      'replacements:emotion-10-to-11',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
@@ -35,6 +36,54 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'emotion-10-to-11': {
+    description:
+      'various unscoped emotion v10 packages became renamed & scoped in v11',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=11.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@emotion/core', 'emotion-theming'],
+        replacementName: '@emotion/react',
+        replacementVersion: '11.0.0',
+      },
+      {
+        matchCurrentVersion: '>=11.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['emotion', 'create-emotion'],
+        replacementName: '@emotion/css',
+        replacementVersion: '11.0.0',
+      },
+      {
+        matchCurrentVersion: '>=11.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['emotion-server', 'create-emotion-server'],
+        replacementName: '@emotion/server',
+        replacementVersion: '11.0.0',
+      },
+      {
+        matchCurrentVersion: '>=11.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['babel-plugin-emotion'],
+        replacementName: '@emotion/babel-plugin',
+        replacementVersion: '11.0.0',
+      },
+      {
+        matchCurrentVersion: '>=11.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-plugin-emotion'],
+        replacementName: '@emotion/eslint-plugin',
+        replacementVersion: '11.0.0',
+      },
+      {
+        matchCurrentVersion: '>=11.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['jest-emotion'],
+        replacementName: '@emotion/jest',
+        replacementVersion: '11.0.0',
       },
     ],
   },
