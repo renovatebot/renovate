@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import merge from 'deepmerge';
-import got, { Options, Response } from 'got';
+import got, { Options, RequestError as RequestError_, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
@@ -23,6 +23,8 @@ import type {
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
+
+export { RequestError_ as HttpError };
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>
