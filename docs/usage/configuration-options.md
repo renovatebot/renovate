@@ -1837,7 +1837,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 Supports GitHub-only.
 
-The primary reason to use this option is because commits will then be signed automatically, including if authenticating as an app.
+The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
 
 ## postUpdateOptions
 
