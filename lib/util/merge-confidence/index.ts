@@ -33,6 +33,7 @@ const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence | null> =
   {
     pin: 'high',
     digest: 'neutral',
+    pinDigest: 'neutral',
     bump: 'neutral',
     lockFileMaintenance: 'neutral',
     lockfileUpdate: 'neutral',

@@ -243,7 +243,8 @@ export type UpdateType =
   | 'lockfileUpdate'
   | 'rollback'
   | 'bump'
-  | 'replacement';
+  | 'replacement'
+  | 'pinDigest';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
