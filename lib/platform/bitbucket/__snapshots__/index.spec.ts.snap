@@ -88,7 +88,7 @@ Array [
       },
       "reviewers": Array [
         Object {
-          "account_id": "1234-5678",
+          "uuid": "{1234-5678}",
         },
       ],
       "source": Object {
@@ -102,7 +102,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "187",
+      "content-length": "183",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1713,7 +1713,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/users/456",
+    "url": "https://api.bitbucket.org/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D",
   },
   Object {
     "headers": Object {
@@ -1724,7 +1724,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/users/123",
+    "url": "https://api.bitbucket.org/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D",
   },
   Object {
     "body": Object {

@@ -658,7 +658,7 @@ describe('platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/default-reviewers')
         .reply(200, {
-          values: [{ account_id: '1234-5678' }],
+          values: [{ uuid: '{1234-5678}' }],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -701,11 +701,11 @@ describe('platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/123')
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
         .reply(200, {
           account_status: 'inactive',
         })
-        .get('/2.0/users/456')
+        .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
         })
@@ -752,9 +752,13 @@ describe('platform/bitbucket/index', () => {
               'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
           },
         })
-        .head('/2.0/workspaces/some/members/123')
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
         .reply(404)
-        .head('/2.0/workspaces/some/members/456')
+        .head(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
         .reply(200)
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -794,7 +798,9 @@ describe('platform/bitbucket/index', () => {
               'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
           },
         })
-        .head('/2.0/workspaces/some/members/123')
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
         .reply(401);
       await expect(() =>
         bitbucket.createPr({
@@ -963,11 +969,11 @@ describe('platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/123')
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
         .reply(200, {
           account_status: 'inactive',
         })
-        .get('/2.0/users/456')
+        .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
         })
@@ -1004,9 +1010,13 @@ describe('platform/bitbucket/index', () => {
               'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
           },
         })
-        .head('/2.0/workspaces/some/members/123')
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
         .reply(404)
-        .head('/2.0/workspaces/some/members/456')
+        .head(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
         .reply(200)
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
@@ -1041,7 +1051,9 @@ describe('platform/bitbucket/index', () => {
               'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
           },
         })
-        .head('/2.0/workspaces/some/members/123')
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })

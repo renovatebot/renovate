@@ -70,7 +70,7 @@ export async function initPlatform({
   renovateUserUuid = null;
   try {
     const { uuid } = (
-      await bitbucketHttp.getJson<{ uuid: string }>('/2.0/user', {
+      await bitbucketHttp.getJson<Account>('/2.0/user', {
         username,
         password,
         useCache: false,
@@ -654,9 +654,7 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still active
         for (const reviewer of reviewers) {
           const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(
-              `/2.0/users/${reviewer.account_id}`
-            )
+            await bitbucketHttp.getJson<Account>(`/2.0/users/${reviewer.uuid}`)
           ).body;
 
           if (reviewerUser.account_status === 'active') {
@@ -681,7 +679,7 @@ async function sanitizeReviewers(
         for (const reviewer of reviewers) {
           try {
             await bitbucketHttp.head(
-              `/2.0/workspaces/${workspace}/members/${reviewer.account_id}`
+              `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
             );
 
             sanitizedReviewers.push(reviewer);
@@ -726,7 +724,7 @@ export async function createPr({
       )
     ).body;
     reviewers = reviewersResponse.values.map((reviewer: Account) => ({
-      account_id: reviewer.account_id,
+      uuid: reviewer.uuid,
     }));
   }
 
