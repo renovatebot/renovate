@@ -161,7 +161,7 @@ export function getNewValue({
       );
       return getNewValue({
         currentValue,
-        rangeStrategy: 'auto',
+        rangeStrategy: 'replace',
         currentVersion,
         newVersion,
       });
