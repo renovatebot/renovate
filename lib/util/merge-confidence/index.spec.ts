@@ -90,7 +90,7 @@ describe('util/merge-confidence/index', () => {
           '25.0.1',
           'pinDigest'
         )
-      ).toBe('neutral');
+      ).toBe('high');
     });
     it('returns neutral if no token', async () => {
       expect(
