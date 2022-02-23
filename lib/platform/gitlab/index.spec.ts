@@ -1167,7 +1167,11 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      await gitlab.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes comment by content if found', async () => {
@@ -1177,7 +1181,11 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: 'some-body\n' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({ number: 42, content: 'some-body' });
+      await gitlab.ensureCommentRemoval({
+        type: 'by-content',
+        number: 42,
+        content: 'some-body',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

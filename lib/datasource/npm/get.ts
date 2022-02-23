@@ -185,7 +185,7 @@ export async function getDependency(
           statusCode: err.statusCode,
           packageName,
         },
-        `Dependency lookup failure: payent required`
+        `Dependency lookup failure: payment required`
       );
       return null;
     }
