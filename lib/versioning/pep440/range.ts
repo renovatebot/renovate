@@ -5,14 +5,19 @@ import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { NewValueConfig } from '../types';
 
-// eslint-disable-next-line typescript-enum/no-enum
-enum UserPolicy {
-  Major = 0,
-  Minor,
-  Micro,
-  Bug,
-  None = Infinity,
-}
+const UserPolicy = {
+  Major: 0,
+  Minor: 1,
+  Micro: 2,
+  Bug: 3,
+  0: 'Major',
+  1: 'Minor',
+  2: 'Micro',
+  3: 'Bug',
+  None: Infinity,
+} as const;
+
+type UserPolicy = typeof UserPolicy[keyof typeof UserPolicy];
 
 /**
  * Calculate current update range precision.
@@ -49,7 +54,7 @@ function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
   ) {
     rangePrecision++;
   }
-  const key = UserPolicy[rangePrecision];
+  const key = UserPolicy[rangePrecision as keyof typeof UserPolicy];
   return UserPolicy[key as keyof typeof UserPolicy];
 }
 
@@ -321,25 +326,18 @@ function updateRangeValue(
  * Used mainly for cosmetics for the rez versioning syntax.
  */
 function hasZeroSpecifier(ranges: Range[]): boolean {
-  let mode = false;
-  ranges.forEach((range) => {
+  return ranges.some((range) => {
     const release = parseVersion(range.version)?.release;
-    if (release && release.length < 3) {
-      mode = true;
-    }
+    return release && release.length < 3;
   });
-  return mode;
 }
 
 function trimTrailingZeros(numbers: number[]): number[] {
-  const arr: number[] = [];
-  for (let i = numbers.length - 1; i >= 0; i--) {
-    while (numbers[i] === 0) {
-      i--;
-    }
-    arr.push(numbers[i]);
+  let i = numbers.length - 1;
+  while (numbers[i] === 0) {
+    i--;
   }
-  return arr.reverse();
+  return numbers.slice(0, i + 1);
 }
 
 function handleWidenStrategy(
