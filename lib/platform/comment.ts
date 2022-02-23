@@ -1,10 +1,6 @@
 import hasha from 'hasha';
 import { getCache } from '../util/cache/repository';
-import type {
-  EnsureCommentConfig,
-  EnsureCommentRemovalConfigByContent,
-  EnsureCommentRemovalConfigByTopic,
-} from './types';
+import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from './types';
 import { platform } from '.';
 
 const hash = (content: string): string => hasha(content, { algorithm: 'sha1' });
@@ -32,20 +28,18 @@ export async function ensureComment(
 }
 
 export async function ensureCommentRemoval(
-  config:
-    | EnsureCommentRemovalConfigByTopic
-    | EnsureCommentRemovalConfigByContent
+  config: EnsureCommentRemovalConfig
 ): Promise<void> {
   await platform.ensureCommentRemoval(config);
 
-  const { number, topic, content } = { topic: null, content: null, ...config };
   const repoCache = getCache();
+
+  const { type, number } = config;
   if (repoCache.prComments?.[number]) {
-    if (topic) {
-      delete repoCache.prComments?.[number]?.[topic];
-    }
-    if (content) {
-      const contentHash = hash(content);
+    if (type === 'by-topic') {
+      delete repoCache.prComments?.[number]?.[config.topic];
+    } else if (type === 'by-content') {
+      const contentHash = hash(config.content);
       for (const [cachedTopic, cachedContentHash] of Object.entries(
         repoCache.prComments?.[number]
       )) {

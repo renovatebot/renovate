@@ -122,7 +122,7 @@ describe('platform/comment', () => {
 
     it('deletes cached comment by topic', async () => {
       await ensureComment({ number: 1, topic: 'aaa', content: '111' });
-      await ensureCommentRemoval({ number: 1, topic: 'aaa' });
+      await ensureCommentRemoval({ type: 'by-topic', number: 1, topic: 'aaa' });
       expect(repoCache).toEqual({
         prComments: { '1': {} },
       });
@@ -130,7 +130,11 @@ describe('platform/comment', () => {
 
     it('deletes cached comment by content', async () => {
       await ensureComment({ number: 1, topic: 'aaa', content: '111' });
-      await ensureCommentRemoval({ number: 1, content: '111' });
+      await ensureCommentRemoval({
+        type: 'by-content',
+        number: 1,
+        content: '111',
+      });
       expect(repoCache).toEqual({
         prComments: { '1': {} },
       });
@@ -139,7 +143,11 @@ describe('platform/comment', () => {
     it('deletes by content only one comment', async () => {
       await ensureComment({ number: 1, topic: 'aaa', content: '111' });
       await ensureComment({ number: 1, topic: 'bbb', content: '111' });
-      await ensureCommentRemoval({ number: 1, content: '111' });
+      await ensureCommentRemoval({
+        type: 'by-content',
+        number: 1,
+        content: '111',
+      });
       expect(repoCache).toEqual({
         prComments: {
           '1': {
@@ -152,7 +160,11 @@ describe('platform/comment', () => {
     it('deletes only for selected PR', async () => {
       await ensureComment({ number: 1, topic: 'aaa', content: '111' });
       await ensureComment({ number: 2, topic: 'aaa', content: '111' });
-      await ensureCommentRemoval({ number: 1, content: '111' });
+      await ensureCommentRemoval({
+        type: 'by-content',
+        number: 1,
+        content: '111',
+      });
       expect(repoCache).toEqual({
         prComments: {
           '1': {},
