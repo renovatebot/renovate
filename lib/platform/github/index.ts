@@ -1791,6 +1791,7 @@ export async function commitFiles(
   if (!pushResult) {
     return null;
   }
-  // Because the branch commit was done remotely via REST API, now we git fetch it locally
+  // Because the branch commit was done remotely via REST API, now we git fetch it locally.
+  // We also do this step when committing/pushing using local git tooling.
   return git.fetchCommit(config);
 }
