@@ -5,6 +5,7 @@ const packageFile = 'packageFile';
 
 const fvmConfigRange = loadFixture('fvm-config-range.json');
 const fvmConfigNonRange = loadFixture('fvm-config-non-range.json');
+const fvmConfigNonString = loadFixture('fvm-config-non-string.json');
 
 describe('manager/fvm/extract', () => {
   describe('extractPackageFile()', () => {
@@ -15,6 +16,9 @@ describe('manager/fvm/extract', () => {
     });
     it('returns null for empty flutter sdk version', () => {
       expect(extractPackageFile('{}', packageFile)).toBeNull();
+    });
+    it('returns null for non string flutter sdk version', () => {
+      expect(extractPackageFile(fvmConfigNonString, packageFile)).toBeNull();
     });
     it('returns a result', () => {
       const res = extractPackageFile(fvmConfigRange, packageFile);
