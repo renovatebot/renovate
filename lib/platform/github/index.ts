@@ -1731,22 +1731,32 @@ async function pushFiles(
   { parentCommitSha, commitSha }: CommitResult
 ): Promise<CommitSha | null> {
   try {
+    // Push the commit to GitHub using a custom ref
+    // The associated blobs will be pushed automatically
     await pushCommitToRenovateRef(commitSha, branchName);
+    // Get all the blobs which the commit/tree points to
+    // The blob SHAs will be the same locally as on GitHub
     const treeItems = await listCommitTree(commitSha);
 
+    // For reasons unknown, we need to recreate our tree+commit on GitHub
+    // Attempting to reuse the tree or commit SHA we pushed does not work
     const treeRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/trees`,
       { body: { tree: treeItems } }
     );
     const treeSha = treeRes.body.sha;
 
+    // Now we recreate the commit using the tree we recreated the step before
     const commitRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/commits`,
       { body: { message, tree: treeSha, parents: [parentCommitSha] } }
     );
     const remoteCommitSha = commitRes.body.sha;
 
+    // Create branch if it didn't already exist, update it otherwise
     if (git.branchExists(branchName)) {
+      // This is the equivalent of a git force push
+      // We are using this REST API because the GraphQL API doesn't support force push
       await githubApi.patchJson(
         `/repos/${config.repository}/git/refs/heads/${branchName}`,
         { body: { sha: remoteCommitSha, force: true } }
@@ -1776,9 +1786,11 @@ export async function commitFiles(
     );
     return null;
   }
+  // Perform the commits using REST API
   const pushResult = await pushFiles(config, commitResult);
   if (!pushResult) {
     return null;
   }
+  // Because the branch commit was done remotely via REST API, now we git fetch it locally
   return git.fetchCommit(config);
 }
