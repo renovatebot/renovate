@@ -760,7 +760,7 @@ export async function ensureCommentRemoval(
     logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
     const comments = await getComments(prNo);
 
-    let commentId: number | null = null;
+    let commentId: number | null | undefined = null;
     if (deleteConfig.type === 'by-topic') {
       const byTopic = (comment: Comment): boolean =>
         comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);

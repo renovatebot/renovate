@@ -569,7 +569,7 @@ export async function ensureCommentRemoval(
   const azureApiGit = await azureApi.gitApi();
   const threads = await azureApiGit.getThreads(config.repoId, issueNo);
 
-  let threadIdFound: number | null = null;
+  let threadIdFound: number | null | undefined = null;
   if (removeConfig.type === 'by-topic') {
     const thread = threads.find(
       (thread: GitPullRequestCommentThread): boolean =>

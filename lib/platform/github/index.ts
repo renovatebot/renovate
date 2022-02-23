@@ -1407,7 +1407,7 @@ export async function ensureCommentRemoval(
       : deleteConfig.content;
   logger.trace(`Ensuring comment "${key}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
-  let commentId: number | null = null;
+  let commentId: number | null | undefined = null;
 
   if (deleteConfig.type === 'by-topic') {
     const byTopic = (comment: Comment): boolean =>
