@@ -1,10 +1,7 @@
-import { ProgrammingLanguage } from '../../constants';
 import { DartDatasource } from '../../datasource/dart';
 import * as npmVersioning from '../../versioning/npm';
 
 export { extractPackageFile } from './extract';
-
-export const language = ProgrammingLanguage.Dart;
 
 export const supportedDatasources = [DartDatasource.id];
 

@@ -1,1 +1,1 @@
-Simply keeps the `.fvm/fvm_config.json` file updated.
+Keeps the `.fvm/fvm_config.json` file updated.

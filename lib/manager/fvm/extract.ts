@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
@@ -14,7 +15,7 @@ export function extractPackageFile(
   try {
     fvmConfig = JSON.parse(content);
   } catch (err) {
-    logger.debug({ packageFile }, 'Invalid FVM config');
+    logger.debug({ packageFile, err }, 'Invalid FVM config');
     return null;
   }
 
