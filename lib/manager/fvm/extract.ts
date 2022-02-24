@@ -24,7 +24,7 @@ export function extractPackageFile(
       'FVM config does not have flutterSdkVersion specified'
     );
     return null;
-  } else if (typeof fvmConfig.flutterSdkVersion !== 'string') {
+  } else if (!is.string(fvmConfig.flutterSdkVersion)) {
     logger.debug({ contents: fvmConfig }, 'flutterSdkVersion must be a string');
     return null;
   }
