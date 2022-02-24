@@ -1837,6 +1837,8 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 Supports only GitHub App mode and not when using Personal Access Tokens.
 
+To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
+
 The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
 
 ## postUpdateOptions
