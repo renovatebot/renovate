@@ -5,7 +5,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { cache } from '../../util/cache/package/decorator';
 import * as hostRules from '../../util/host-rules';
-import type { HttpOptions } from '../../util/http';
+import type { HttpOptions } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
