@@ -138,8 +138,6 @@ export async function updateArtifacts({
     getSiblingFileName(f, 'packages.lock.json')
   );
 
-  logger.info(lockFileNames, 'lockFileNames');
-
   const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
