@@ -1,6 +1,6 @@
 import Marshal from 'marshal';
 import { logger } from '../../logger';
-import { HttpError } from '../../util/http/types';
+import { HttpError } from '../../util/http';
 import { getQueryString, joinUrlParts, parseUrl } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';

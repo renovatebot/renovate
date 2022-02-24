@@ -596,7 +596,11 @@ describe('platform/bitbucket/index', () => {
         .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
         .reply(500);
       expect(
-        await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' })
+        await bitbucket.ensureCommentRemoval({
+          type: 'by-topic',
+          number: 3,
+          topic: 'topic',
+        })
       ).toMatchSnapshot();
     });
   });
@@ -673,6 +677,214 @@ describe('platform/bitbucket/index', () => {
       });
       expect(number).toBe(5);
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('removes inactive reviewers when updating pr', async () => {
+      const inactiveReviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const activeReviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [activeReviewer, inactiveReviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: ['Malformed reviewers list'],
+            },
+            message: 'reviewers: Malformed reviewers list',
+          },
+        })
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
+        .reply(200, {
+          account_status: 'inactive',
+        })
+        .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+      const { number } = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+      expect(number).toBe(5);
+    });
+    it('removes default reviewers no longer member of the workspace when creating pr', async () => {
+      const notMemberReviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const memberReviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [memberReviewer, notMemberReviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
+        .reply(404)
+        .head(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200)
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+      const { number } = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+      expect(number).toBe(5);
+    });
+    it('throws exception when unable to check default reviewers workspace membership', async () => {
+      const reviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [reviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
+        .reply(401);
+      await expect(() =>
+        bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        })
+      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
+    });
+    it('rethrows exception when PR create error due to unknown reviewers error', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [reviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: ['Some other unhandled error'],
+            },
+            message: 'Some other unhandled error',
+          },
+        });
+      await expect(() =>
+        bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        })
+      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+    });
+    it('rethrows exception when PR create error not due to reviewers field', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/default-reviewers')
+        .reply(200, {
+          values: [reviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              description: ['Some other unhandled error'],
+            },
+            message: 'Some other unhandled error',
+          },
+        });
+      await expect(() =>
+        bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        })
+      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
   });
 
@@ -761,11 +973,11 @@ describe('platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/123')
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
         .reply(200, {
           account_status: 'inactive',
         })
-        .get('/2.0/users/456')
+        .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
         })
@@ -802,9 +1014,13 @@ describe('platform/bitbucket/index', () => {
               'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
           },
         })
-        .head('/2.0/workspaces/some/members/123')
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
         .reply(404)
-        .head('/2.0/workspaces/some/members/456')
+        .head(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
         .reply(200)
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
@@ -839,13 +1055,15 @@ describe('platform/bitbucket/index', () => {
               'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
           },
         })
-        .head('/2.0/workspaces/some/members/123')
+        .head(
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+        )
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
-    it('rethrows exception when PR update error not due to inactive reviewers', async () => {
+    it('rethrows exception when PR update error due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
@@ -869,6 +1087,30 @@ describe('platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('rethrows exception when PR create error not due to reviewers field', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              description: ['Some other unhandled error'],
+            },
+            message: 'Some other unhandled error',
+          },
+        });
+      await expect(() =>
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
     it('throws an error on failure to get current list of reviewers', async () => {
       const scope = await initRepoMock();

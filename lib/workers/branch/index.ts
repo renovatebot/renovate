@@ -434,6 +434,7 @@ export async function processBranch(
       } else {
         // Remove artifacts error comment only if this run has successfully updated artifacts
         await platform.ensureCommentRemoval({
+          type: 'by-topic',
           number: branchPr.number,
           topic: artifactErrorTopic,
         });
