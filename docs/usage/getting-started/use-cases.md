@@ -8,7 +8,7 @@ The original use case, and the most popular one, is for developers to automate d
 
 ### Updating of package files
 
-The term "package file" is used to describe files which contain lists of dependencies.
+The term "package file" is used to describe files which contain references to dependencies.
 Package files are managed by a "package manager".
 
 Example package files include:
