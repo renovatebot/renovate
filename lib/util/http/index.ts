@@ -108,15 +108,11 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       options.hooks = {
         beforeRedirect: [removeAuthorization],
       };
-    }
-    if (options) {
       applyDefaultHeaders(options);
     }
     options = applyHostRules(url, options);
-    if (options) {
-      if (options.enabled === false) {
-        throw new Error(HOST_DISABLED);
-      }
+    if (options?.enabled === false) {
+      throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
 
