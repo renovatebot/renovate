@@ -646,7 +646,7 @@ async function sanitizeReviewers(
     for (const msg of err.body.error.fields.reviewers) {
       // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
       if (msg === 'Malformed reviewers list') {
-        logger.warn(
+        logger.debug(
           { err },
           'PR contains inactive reviewer accounts. Will try setting only active reviewers'
         );
@@ -668,7 +668,7 @@ async function sanitizeReviewers(
           'is not a member of this workspace and cannot be added to this pull request'
         )
       ) {
-        logger.warn(
+        logger.debug(
           { err },
           'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
         );
