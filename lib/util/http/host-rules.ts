@@ -8,10 +8,13 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import type { GotOptions } from './types';
+import type { HttpOptions } from './types';
 
-function findMatchingRules(options: GotOptions, url: string): HostRule {
-  const { hostType } = options;
+function findMatchingRules(
+  options: HttpOptions['GotOptions'],
+  url: string
+): HostRule {
+  const hostType = options?.hostType;
   let res = hostRules.find({ hostType, url });
 
   if (res.token || res.username || res.password) {
@@ -68,8 +71,11 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
 }
 
 // Apply host rules to requests
-export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
-  const options: GotOptions = { ...inOptions };
+export function applyHostRules(
+  url: string,
+  inOptions: HttpOptions['GotOptions']
+): HttpOptions['GotOptions'] {
+  const options: HttpOptions['GotOptions'] = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
   if (options.noAuth) {

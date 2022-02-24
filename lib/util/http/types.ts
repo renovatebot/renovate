@@ -9,7 +9,6 @@ export type GotContextOptions = {
 } & Record<string, unknown>;
 
 // TODO: Move options to context
-export type GotOptions = GotBufferOptions | GotJSONOptions;
 export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
 export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
 
@@ -47,6 +46,7 @@ export interface HttpOptions {
 
   throwHttpErrors?: boolean;
   useCache?: boolean;
+  GotOptions?: GotBufferOptions | GotJSONOptions;
 }
 
 export interface HttpPostOptions extends HttpOptions {

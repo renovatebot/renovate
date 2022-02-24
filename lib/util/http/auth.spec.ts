@@ -2,12 +2,12 @@ import type { NormalizedOptions } from 'got';
 import { partial } from '../../../test/util';
 import { PlatformId } from '../../constants';
 import { applyAuthorization, removeAuthorization } from './auth';
-import type { GotOptions } from './types';
+import type { HttpOptions } from './types';
 
 describe('util/http/auth', () => {
   describe('applyAuthorization', () => {
     it('does nothing', () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: { authorization: 'token' },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
@@ -27,7 +27,7 @@ describe('util/http/auth', () => {
     });
 
     it('gitea password', () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         hostType: PlatformId.Gitea,
         password: 'XXXX',
@@ -47,7 +47,7 @@ describe('util/http/auth', () => {
     });
 
     it('gittea token', () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         token: 'XXXX',
         hostType: PlatformId.Gitea,
@@ -67,7 +67,7 @@ describe('util/http/auth', () => {
     });
 
     it('github token', () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         token: 'XXX',
         hostType: PlatformId.Github,
@@ -85,7 +85,7 @@ describe('util/http/auth', () => {
     });
 
     it('github token for datasource using github api', () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         token: 'ZZZZ',
         hostType: 'github-releases',
@@ -104,7 +104,7 @@ describe('util/http/auth', () => {
     });
 
     it(`gitlab personal access token`, () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         // Personal Access Token is exactly 20 characters long
         token: '0123456789012345test',
@@ -125,7 +125,7 @@ describe('util/http/auth', () => {
     });
 
     it(`gitlab oauth token`, () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         token:
           'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
@@ -146,7 +146,7 @@ describe('util/http/auth', () => {
     });
 
     it(`npm basic token`, () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         token: 'test',
         hostType: 'npm',
@@ -170,7 +170,7 @@ describe('util/http/auth', () => {
     });
 
     it(`bare token`, () => {
-      const opts: GotOptions = {
+      const opts: HttpOptions['GotOptions'] = {
         headers: {},
         token: 'test',
         context: {
