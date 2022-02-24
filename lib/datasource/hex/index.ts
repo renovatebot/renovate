@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import type { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http/types';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';

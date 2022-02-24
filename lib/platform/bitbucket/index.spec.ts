@@ -596,7 +596,11 @@ describe('platform/bitbucket/index', () => {
         .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
         .reply(500);
       expect(
-        await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' })
+        await bitbucket.ensureCommentRemoval({
+          type: 'by-topic',
+          number: 3,
+          topic: 'topic',
+        })
       ).toMatchSnapshot();
     });
   });

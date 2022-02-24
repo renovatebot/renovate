@@ -628,12 +628,10 @@ export function ensureComment({
   });
 }
 
-export function ensureCommentRemoval({
-  number: prNo,
-  topic,
-  content,
-}: EnsureCommentRemovalConfig): Promise<void> {
-  return comments.ensureCommentRemoval(config, prNo, topic, content);
+export function ensureCommentRemoval(
+  deleteConfig: EnsureCommentRemovalConfig
+): Promise<void> {
+  return comments.ensureCommentRemoval(config, deleteConfig);
 }
 
 async function sanitizeReviewers(

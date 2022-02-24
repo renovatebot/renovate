@@ -1,6 +1,6 @@
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { Http } from '../util/http';
-import type { HttpError } from '../util/http/types';
+import type { HttpError } from '../util/http';
 import type {
   DatasourceApi,
   DigestConfig,
