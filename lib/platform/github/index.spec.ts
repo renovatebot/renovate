@@ -1759,7 +1759,11 @@ describe('platform/github/index', () => {
         .delete('/repos/some/repo/issues/comments/1234')
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      await github.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      await github.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes comment by content if found', async () => {
@@ -1776,6 +1780,7 @@ describe('platform/github/index', () => {
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       await github.ensureCommentRemoval({
+        type: 'by-content',
         number: 42,
         content: 'some-content',
       });

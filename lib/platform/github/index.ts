@@ -1403,25 +1403,25 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval({
-  number: issueNo,
-  topic,
-  content,
-}: EnsureCommentRemovalConfig): Promise<void> {
-  logger.trace(
-    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
-  );
+export async function ensureCommentRemoval(
+  deleteConfig: EnsureCommentRemovalConfig
+): Promise<void> {
+  const { number: issueNo } = deleteConfig;
+  const key =
+    deleteConfig.type === 'by-topic'
+      ? deleteConfig.topic
+      : deleteConfig.content;
+  logger.trace(`Ensuring comment "${key}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
-  let commentId: number | null = null;
+  let commentId: number | null | undefined = null;
 
-  const byTopic = (comment: Comment): boolean =>
-    comment.body.startsWith(`### ${topic}\n\n`);
-  const byContent = (comment: Comment): boolean =>
-    comment.body.trim() === content;
-
-  if (topic) {
+  if (deleteConfig.type === 'by-topic') {
+    const byTopic = (comment: Comment): boolean =>
+      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
     commentId = comments.find(byTopic)?.id;
-  } else if (content) {
+  } else if (deleteConfig.type === 'by-content') {
+    const byContent = (comment: Comment): boolean =>
+      comment.body.trim() === deleteConfig.content;
     commentId = comments.find(byContent)?.id;
   }
 
