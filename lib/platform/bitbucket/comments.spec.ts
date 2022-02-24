@@ -108,7 +108,11 @@ describe('platform/bitbucket/comments', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [] });
-      await comments.ensureCommentRemoval(config, 5, 'topic');
+      await comments.ensureCommentRemoval(config, {
+        type: 'by-topic',
+        number: 5,
+        topic: 'topic',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -128,7 +132,11 @@ describe('platform/bitbucket/comments', () => {
         .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
         .reply(200);
 
-      await comments.ensureCommentRemoval(config, 5, 'some-subject');
+      await comments.ensureCommentRemoval(config, {
+        type: 'by-topic',
+        number: 5,
+        topic: 'some-subject',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -148,7 +156,11 @@ describe('platform/bitbucket/comments', () => {
         .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
         .reply(200);
 
-      await comments.ensureCommentRemoval(config, 5, undefined, 'some-content');
+      await comments.ensureCommentRemoval(config, {
+        type: 'by-content',
+        number: 5,
+        content: 'some-content',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -158,7 +170,11 @@ describe('platform/bitbucket/comments', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [] });
-      await comments.ensureCommentRemoval(config, 5, 'topic');
+      await comments.ensureCommentRemoval(config, {
+        type: 'by-topic',
+        number: 5,
+        topic: 'topic',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
