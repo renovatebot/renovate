@@ -117,7 +117,7 @@ We use Renovate's git submodule support to do this.
 - After the automatic update is merged, the documentation site is rebuilt and pushed live
 
 We also use Renovate's "automerge" feature.
-It allows us to automatically merge the submodule update without needing manual approval, manual merging, or even without getting a PR at all
+It allows us to automatically merge the submodule update without needing manual approval, manual merging, or even without getting a PR at all.
 
 Automerge is particularly useful for internal dependencies where it's best to use the approach of "if it passes tests then merge it".
 
