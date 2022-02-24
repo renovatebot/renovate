@@ -2579,4 +2579,102 @@ describe('platform/github/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
+  describe('pushFiles', () => {
+    beforeEach(() => {
+      git.prepareCommit.mockImplementation(({ files }) =>
+        Promise.resolve({
+          parentCommitSha: '1234567',
+          commitSha: '7654321',
+          files,
+        })
+      );
+      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+    });
+    it('returns null if pre-commit phase has failed', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      git.prepareCommit.mockResolvedValueOnce(null);
+
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [
+          { type: 'addition', path: 'foo.bar', contents: 'foobar' },
+          { type: 'deletion', path: 'baz' },
+          { type: 'deletion', path: 'qux' },
+        ],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+    it('returns null on REST error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.post('/repos/some/repo/git/trees').replyWithError('unknown');
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+    it('commits and returns SHA string', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+      git.branchExists.mockReturnValueOnce(false);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+    it('performs rebase', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+      git.branchExists.mockReturnValueOnce(true);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+  });
 });
