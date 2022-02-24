@@ -14,13 +14,21 @@ describe('manager/flux/artifacts', () => {
   });
 
   it('replaces existing value', async () => {
-    mockExecAll(exec, { stdout: '', stderr: '' });
+    const snapshots = mockExecAll(exec, { stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('test');
 
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
-      updatedDeps: [{ newVersion: '1.0.1' }],
+      updatedDeps: [
+        {
+          newVersion: '1.0.1',
+          managerData: {
+            components:
+              'source-controller,kustomize-controller,helm-controller,notification-controller',
+          },
+        },
+      ],
       newPackageFileContent: undefined,
       config: {},
     });
@@ -34,6 +42,9 @@ describe('manager/flux/artifacts', () => {
         },
       },
     ]);
+    expect(snapshots[0].cmd).toBe(
+      'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml'
+    );
   });
 
   it('ignores non-system manifests', async () => {
