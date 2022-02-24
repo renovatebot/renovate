@@ -348,11 +348,18 @@ function handleWidenStrategy(
   if (satisfies(newVersion, currentValue)) {
     return [currentValue];
   }
-  const rangePrecision = getRangePrecision(ranges, newVersion);
+  let rangePrecision = getRangePrecision(ranges, newVersion);
   const trimZeros = hasZeroSpecifier(ranges);
   return ranges.map((range) => {
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
+      const upperBound = parseVersion(range.version)?.release ?? [];
+      const len = upperBound.length;
+      // Match the precision of the smallest specifier if other than 0
+      if (upperBound[len - 1] !== 0) {
+        const key = UserPolicy[(len - 1) as keyof typeof UserPolicy];
+        rangePrecision = UserPolicy[key as keyof typeof UserPolicy];
+      }
       let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
