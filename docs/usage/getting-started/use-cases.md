@@ -141,7 +141,7 @@ You may want to limit the times when Renovate is allowed to raise updates.
 This can help to reduce "noise" during your working hours, and reduce the chance of CI contention.
 You can tell Renovate to "not bother you" during times when you're using the CI resources, or want to focus on your work.
 
-You can set the time ranges during Renovate create updates in the `schedule` field.
+You can set the time ranges during which Renovate creates updates in the `schedule` field.
 
 ### On-demand updates via Dependency Dashboard
 
