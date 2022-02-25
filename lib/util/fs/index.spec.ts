@@ -1,10 +1,9 @@
-import * as _findUp from 'find-up';
+import _findUp from 'find-up';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
-import { mocked } from '../../../test/util';
+import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import * as _env from '../exec/env';
 import {
   ensureCacheDir,
   ensureLocalDir,
@@ -21,8 +20,8 @@ import {
 
 jest.mock('../../util/exec/env');
 jest.mock('find-up');
-const env = mocked(_env);
-const findUp = _findUp as jest.MockedFunction<typeof _findUp>;
+
+const findUp = mockedFunction(_findUp);
 
 describe('util/fs/index', () => {
   describe('readLocalFile', () => {
