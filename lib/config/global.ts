@@ -43,8 +43,9 @@ export class GlobalConfig {
 
     const result = { ...config };
     for (const option of GlobalConfig.OPTIONS) {
-      GlobalConfig.config[option] = config[option] as never;
-      delete result[option];
+      // TODO: fix types (#9610)
+      GlobalConfig.config[option] = (config as any)[option] as never;
+      delete (result as any)[option];
     }
 
     return result;

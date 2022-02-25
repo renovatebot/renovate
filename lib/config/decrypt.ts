@@ -201,7 +201,8 @@ export async function decryptConfig<T extends RenovateConfig>(
               decryptedConfig.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
             }
           } else {
-            decryptedConfig[eKey] = decryptedStr;
+            // TODO: fix types (#9610)
+            (decryptedConfig as any)[eKey] = decryptedStr;
             addSecretForSanitizing(decryptedStr);
           }
         }
@@ -210,18 +211,20 @@ export async function decryptConfig<T extends RenovateConfig>(
       }
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
-      decryptedConfig[key] = [];
+      // TODO: fix types (#9610)
+      (decryptedConfig as any)[key] = [];
       for (const item of val) {
         if (is.object(item) && !is.array(item)) {
-          (decryptedConfig[key] as RenovateConfig[]).push(
+          ((decryptedConfig as any)[key] as RenovateConfig[]).push(
             await decryptConfig(item as RenovateConfig, repository)
           );
         } else {
-          (decryptedConfig[key] as unknown[]).push(item);
+          ((decryptedConfig as any)[key] as unknown[]).push(item);
         }
       }
     } else if (is.object(val) && key !== 'content') {
-      decryptedConfig[key] = await decryptConfig(
+      // TODO: fix types (#9610)
+      (decryptedConfig as any)[key] = await decryptConfig(
         val as RenovateConfig,
         repository
       );
