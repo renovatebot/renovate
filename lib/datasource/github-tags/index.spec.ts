@@ -20,6 +20,12 @@ describe('datasource/github-tags/index', () => {
     });
   });
 
+  describe('defaultRegistryUrls', () => {
+    it('returns https://github.com', () => {
+      expect(github.defaultRegistryUrls).toBe(['https://github.com']);
+    });
+  });
+
   describe('getDigest', () => {
     const lookupName = 'some/dep';
     const tag = 'v1.2.0';

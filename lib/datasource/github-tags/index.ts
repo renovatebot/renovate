@@ -12,6 +12,8 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     super(GithubTagsDatasource.id);
   }
 
+  override readonly defaultRegistryUrls = ['https://github.com'];
+
   @cache({
     ttlMinutes: 120,
     namespace: `datasource-${GithubTagsDatasource.id}`,
