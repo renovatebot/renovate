@@ -1,5 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
-import { id as npmId } from '../../datasource/npm';
+import { NpmDatasource } from '../../datasource/npm';
 
 export { extractPackageFile } from './extract';
 
@@ -9,4 +9,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)package.js$'],
 };
 
-export const supportedDatasources = [npmId];
+export const supportedDatasources = [NpmDatasource.id];

@@ -296,6 +296,10 @@ describe('workers/pr/index', () => {
           displayFrom: 'zzzzzz',
           displayTo: 'aaaaaaa',
           prBodyNotes: ['note 1', 'note 2'],
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+          },
         },
         {
           depName: 'b',
@@ -303,35 +307,68 @@ describe('workers/pr/index', () => {
           displayFrom: 'some_old_value',
           displayTo: 'some_new_value',
           updateType: 'pin',
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+            Update: '{{{updateType}}}',
+          },
         },
         {
           depName: 'c',
           gitRef: 'ccccccc',
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+          },
         },
         {
           depName: 'd',
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
+          },
         },
         {
           depName: depsWithSameNotesSourceUrl[0],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
+          },
         },
         {
           depName: depsWithSameNotesSourceUrl[1],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
+          },
         },
         {
           depName: depsWithSameSourceUrl[0],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
+          },
         },
         {
           depName: depsWithSameSourceUrl[1],
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
+          prBodyDefinitions: {
+            Package: '{{{depNameLinked}}}',
+            Update: '{{{updateType}}}',
+            Change: 'All locks refreshed',
+          },
         },
       ] as never);
       config.updateType = 'lockFileMaintenance';
@@ -770,6 +807,26 @@ describe('workers/pr/index', () => {
       expect(result).toEqual(['labelA', 'labelB', 'labelC']);
     });
 
+    it('empty labels ignored', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['labelA', ''],
+        addLabels: [' ', 'labelB'],
+      });
+      expect(result).toBeArrayOfSize(2);
+      expect(result).toEqual(['labelA', 'labelB']);
+    });
+
+    it('null labels ignored', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['labelA', null],
+        // an empty space between two commas in an array is categorized as a null value
+        // eslint-disable-next-line no-sparse-arrays
+        addLabels: ['labelB', '', undefined, , ,],
+      });
+      expect(result).toBeArrayOfSize(2);
+      expect(result).toEqual(['labelA', 'labelB']);
+    });
+
     it('template labels', () => {
       const result = prWorker.prepareLabels({
         labels: ['datasource-{{{datasource}}}'],
@@ -777,6 +834,15 @@ describe('workers/pr/index', () => {
       });
       expect(result).toBeArrayOfSize(1);
       expect(result).toEqual(['datasource-npm']);
+    });
+
+    it('template labels with empty datasource', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['{{{datasource}}}', ' {{{datasource}}} '],
+        datasource: null,
+      });
+      expect(result).toBeArrayOfSize(0);
+      expect(result).toEqual([]);
     });
   });
 });

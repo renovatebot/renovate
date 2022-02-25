@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
@@ -15,6 +16,12 @@ async function fetchDepUpdates(
 ): Promise<PackageDependency> {
   let dep = clone(indep);
   dep.updates = [];
+  if (is.string(dep.depName)) {
+    dep.depName = dep.depName.trim();
+  }
+  if (!is.nonEmptyString(dep.depName)) {
+    dep.skipReason = 'invalid-name';
+  }
   if (dep.skipReason) {
     return dep;
   }

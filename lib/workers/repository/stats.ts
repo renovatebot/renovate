@@ -35,7 +35,8 @@ export function printRequestStats(): void {
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
     );
     const { hostname } = URL.parse(url);
-    // istanbul ignore if: fixme
+
+    // istanbul ignore if: TODO: fix types (#9610)
     if (!hostname) {
       return;
     }

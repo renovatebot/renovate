@@ -1,21 +1,26 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
+import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
-import * as github from '../github-tags';
+import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
-import { bitbucket, getSourceUrl } from './common';
+import { getSourceUrl } from './common';
 
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
+  github: GithubTagsDatasource;
   gitlab: DatasourceApi;
+  bitbucket: DatasourceApi;
 
   constructor() {
     super(GoDirectDatasource.id);
+    this.github = new GithubTagsDatasource();
     this.gitlab = new GitlabTagsDatasource();
+    this.bitbucket = new BitBucketTagsDatasource();
   }
 
   /**
@@ -50,16 +55,16 @@ export class GoDirectDatasource extends Datasource {
     }
 
     switch (source.datasource) {
-      case github.id: {
-        res = await github.getReleases(source);
+      case GithubTagsDatasource.id: {
+        res = await this.github.getReleases(source);
         break;
       }
       case GitlabTagsDatasource.id: {
         res = await this.gitlab.getReleases(source);
         break;
       }
-      case bitbucket.id: {
-        res = await bitbucket.getReleases(source);
+      case BitBucketTagsDatasource.id: {
+        res = await this.bitbucket.getReleases(source);
         break;
       }
       /* istanbul ignore next: can never happen, makes lint happy */

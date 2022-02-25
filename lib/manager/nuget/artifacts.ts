@@ -1,8 +1,8 @@
 import { join } from 'path';
 import { quote } from 'shlex';
-import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { id, parseRegistryUrl } from '../../datasource/nuget';
+import { NugetDatasource } from '../../datasource/nuget';
+import { parseRegistryUrl } from '../../datasource/nuget/common';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
@@ -32,14 +32,12 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const { localDir } = GlobalConfig.get();
   const registries =
-    (await getConfiguredRegistries(packageFileName, localDir)) ||
-    getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
   const result = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
-      hostType: id,
+      hostType: NugetDatasource.id,
       url: registry.url,
     });
     const registryInfo = parseRegistryUrl(registry.url);

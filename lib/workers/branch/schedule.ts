@@ -64,7 +64,7 @@ export function hasValidSchedule(
     if (
       !parsedSchedule.schedules.some(
         (s) =>
-          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || s.t_b
+          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || !!s.t_b
       )
     ) {
       message = `Invalid schedule: "${scheduleText}" has no months, days of week or time of day`;

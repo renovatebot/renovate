@@ -316,11 +316,11 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
-Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
+Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
-Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`.
+Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
 For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
@@ -1772,11 +1772,17 @@ For example to apply a special label for Major updates:
 
 ### replacementName
 
+This config option only works with the `npm` manager.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+
 Use this field to define the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementVersion
+
+This config option only works with the `npm` manager.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
 
 Use this field to define the version of a replacement package.
 Must be used with `replacementName`.
@@ -1826,6 +1832,14 @@ Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=tr
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
+
+## platformCommit
+
+Supports only GitHub App mode and not when using Personal Access Tokens.
+
+To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
+
+The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
 
 ## postUpdateOptions
 
@@ -2087,7 +2101,7 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
@@ -2632,7 +2646,9 @@ Please see the above link for valid timezone names.
 
 When enabled, Renovate will attempt to remediate vulnerabilities even if they exist only in transitive dependencies.
 
-Applicable only for GitHub platform (with vulnerability alerts enabled), `npm` manager, and when a `package-lock.json` v1 format is present.
+Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
+When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
+
 This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
 
 ## unicodeEmoji

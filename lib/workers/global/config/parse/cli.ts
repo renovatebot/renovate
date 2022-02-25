@@ -1,10 +1,11 @@
 import { Command } from 'commander';
 import { getOptions } from '../../../../config/options';
-import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
 import { regEx } from '../../../../util/regex';
+import type { ParseConfigOptions } from './types';
 
-export function getCliName(option: Partial<RenovateOptions>): string {
+export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
     return '';
   }

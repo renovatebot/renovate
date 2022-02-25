@@ -13,7 +13,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     if (result) {
       return result;
     }
-    let massagedInput;
+    let massagedInput: string | undefined;
     let massagedBotEmail = false;
     if (input.includes('<') && input.includes('>')) {
       // try wrapping the name part in quotations

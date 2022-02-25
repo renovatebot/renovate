@@ -13,6 +13,7 @@ const hostRules = _hostRules;
 const includesJson: any = loadJsonFixture('includes.json');
 const beytJson: any = loadJsonFixture('1beyt.json');
 const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
+const mailchimpDevJson: any = loadJsonFixture('mailchimp-api~dev.json');
 
 const baseUrl = 'https://packagist.org';
 const datasource = PackagistDatasource.id;
@@ -79,7 +80,7 @@ describe('datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .replyWithError({ code: 'ETIMEDOUT' });
-      httpMock.scope(baseUrl).get('/p/vendor/package-name2.json').reply(200);
+      httpMock.scope(baseUrl).get('/p2/vendor/package-name2.json').reply(200);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -94,7 +95,7 @@ describe('datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(403);
-      httpMock.scope(baseUrl).get('/p/vendor/package-name.json').reply(200);
+      httpMock.scope(baseUrl).get('/p2/vendor/package-name.json').reply(200);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -109,12 +110,12 @@ describe('datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(404);
-      httpMock.scope(baseUrl).get('/p/drewm/mailchip-api.json').reply(200);
+      httpMock.scope(baseUrl).get('/p2/drewm/mailchimp-api.json').reply(200);
       const res = await getPkgReleases({
         ...config,
         datasource,
         versioning,
-        depName: 'drewm/mailchip-api',
+        depName: 'drewm/mailchimp-api',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -263,7 +264,7 @@ describe('datasource/packagist/index', () => {
           '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json'
         )
         .reply(200, fileJson);
-      httpMock.scope(baseUrl).get('/p/some/other.json').reply(200, beytJson);
+      httpMock.scope(baseUrl).get('/p2/some/other.json').reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -353,7 +354,7 @@ describe('datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(200, packagesJson);
-      httpMock.scope(baseUrl).get('/p/some/other.json').reply(200, beytJson);
+      httpMock.scope(baseUrl).get('/p2/some/other.json').reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -366,8 +367,12 @@ describe('datasource/packagist/index', () => {
     it('processes real versioned data', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/p/drewm/mailchimp-api.json')
+        .get('/p2/drewm/mailchimp-api.json')
         .reply(200, mailchimpJson);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/drewm/mailchimp-api~dev.json')
+        .reply(200, mailchimpDevJson);
       config.registryUrls = ['https://packagist.org'];
       expect(
         await getPkgReleases({
@@ -382,8 +387,12 @@ describe('datasource/packagist/index', () => {
     it('adds packagist source implicitly', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/p/drewm/mailchimp-api.json')
+        .get('/p2/drewm/mailchimp-api.json')
         .reply(200, mailchimpJson);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/drewm/mailchimp-api~dev.json')
+        .reply(200, mailchimpDevJson);
       config.registryUrls = [];
       expect(
         await getPkgReleases({

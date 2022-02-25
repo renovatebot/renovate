@@ -959,30 +959,29 @@ describe('platform/gitlab/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('addAssignees(issueNo, assignees)', () => {
-    it('should add the given assignees to the issue', async () => {
+    it('should add the given assignee to the issue', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
         .reply(200, [{ id: 123 }])
-        .put('/api/v4/projects/undefined/merge_requests/42?assignee_id=123')
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123')
         .reply(200);
       await gitlab.addAssignees(42, ['someuser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should warn if more than one assignee', async () => {
+    it('should add the given assignees to the issue', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
         .reply(200, [{ id: 123 }])
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
-        .put('/api/v4/projects/undefined/merge_requests/42?assignee_id=123')
-        .reply(200)
         .put(
           '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
         )
-        .replyWithError('error');
+        .reply(200);
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -991,22 +990,6 @@ describe('platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
         .replyWithError('some error');
-      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should add the given assignees to the issue if supported', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/users?username=someuser')
-        .reply(200, [{ id: 123 }])
-        .get('/api/v4/users?username=someotheruser')
-        .reply(200, [{ id: 124 }])
-        .put('/api/v4/projects/undefined/merge_requests/42?assignee_id=123')
-        .reply(200)
-        .put(
-          '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
-        )
-        .reply(200);
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -1184,7 +1167,11 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      await gitlab.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes comment by content if found', async () => {
@@ -1194,7 +1181,11 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: 'some-body\n' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({ number: 42, content: 'some-body' });
+      await gitlab.ensureCommentRemoval({
+        type: 'by-content',
+        number: 42,
+        content: 'some-body',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

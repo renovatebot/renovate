@@ -95,6 +95,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
   optimizeForDisabled?: boolean;

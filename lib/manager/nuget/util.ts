@@ -1,16 +1,17 @@
 import cryptoRandomString from 'crypto-random-string';
-import findUp from 'find-up';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
-import * as datasourceNuget from '../../datasource/nuget';
+import { defaultRegistryUrls } from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { readFile } from '../../util/fs';
+import { findUpLocal, readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { Registry } from './types';
 
-async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
+async function readFileAsXmlDocument(
+  file: string
+): Promise<XmlDocument | undefined> {
   try {
-    return new XmlDocument(await readFile(file, 'utf8'));
+    return new XmlDocument(await readLocalFile(file, 'utf8'));
   } catch (err) {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;
@@ -22,32 +23,25 @@ export function getRandomString(): string {
   return cryptoRandomString({ length: 16 });
 }
 
+const defaultRegistries = defaultRegistryUrls.map(
+  (registryUrl) => ({ url: registryUrl } as Registry)
+);
+
 export function getDefaultRegistries(): Registry[] {
-  return datasourceNuget.defaultRegistryUrls.map(
-    (registryUrl) =>
-      ({
-        url: registryUrl,
-      } as Registry)
-  );
+  return [...defaultRegistries];
 }
 
 export async function getConfiguredRegistries(
-  packageFile: string,
-  localDir: string
+  packageFile: string
 ): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
-  const normalizedLocalDir = upath.normalizeSafe(localDir);
-  const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: upath.dirname(upath.join(normalizedLocalDir, packageFile)),
-    type: 'file',
-  });
-
-  if (
-    !nuGetConfigPath ||
-    upath.normalizeSafe(nuGetConfigPath).startsWith(normalizedLocalDir) !== true
-  ) {
+  const nuGetConfigPath = await findUpLocal(
+    nuGetConfigFileNames,
+    upath.dirname(packageFile)
+  );
+  if (!nuGetConfigPath) {
     return undefined;
   }
 

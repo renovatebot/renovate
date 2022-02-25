@@ -21,8 +21,8 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import type { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
+import type { HttpResponse } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
@@ -161,7 +161,7 @@ export async function getRawFile(
   branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const repo = repoName ?? config.repository;
+  const repo = urlEscape(repoName ?? config.repository);
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag || `HEAD`);
@@ -337,7 +337,8 @@ type BranchState =
   | 'success'
   | 'failed'
   | 'canceled'
-  | 'skipped';
+  | 'skipped'
+  | 'scheduled';
 
 interface GitlabBranchStatus {
   status: BranchState;
@@ -378,6 +379,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
   skipped: BranchStatus.red,
+  scheduled: BranchStatus.yellow,
 };
 
 // Returns the combined status for a branch.
@@ -934,23 +936,18 @@ export async function addAssignees(
   iid: number,
   assignees: string[]
 ): Promise<void> {
-  logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
-    let assigneeId = await getUserID(assignees[0]);
-    let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
-    await gitlabApi.putJson(url);
-    try {
-      if (assignees.length > 1) {
-        url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
-        for (let i = 1; i < assignees.length; i += 1) {
-          assigneeId = await getUserID(assignees[i]);
-          url += `&assignee_ids[]=${assigneeId}`;
-        }
-        await gitlabApi.putJson(url);
-      }
-    } catch (error) {
-      logger.error({ iid, assignees }, 'Failed to add multiple assignees');
+    logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
+    const assigneeIds = [];
+    for (const assignee of assignees) {
+      assigneeIds.push(await getUserID(assignee));
     }
+    const url = `projects/${
+      config.repository
+    }/merge_requests/${iid}?${getQueryString({
+      'assignee_ids[]': assigneeIds,
+    })}`;
+    await gitlabApi.putJson(url);
   } catch (err) {
     logger.debug({ err }, 'addAssignees error');
     logger.warn({ iid, assignees }, 'Failed to add assignees');
@@ -1128,26 +1125,26 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval({
-  number: issueNo,
-  topic,
-  content,
-}: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(
-    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
-  );
+export async function ensureCommentRemoval(
+  deleteConfig: EnsureCommentRemovalConfig
+): Promise<void> {
+  const { number: issueNo } = deleteConfig;
+  const key =
+    deleteConfig.type === 'by-topic'
+      ? deleteConfig.topic
+      : deleteConfig.content;
+  logger.debug(`Ensuring comment "${key}" in #${issueNo} is removed`);
 
   const comments = await getComments(issueNo);
-  let commentId: number | null = null;
+  let commentId: number | null | undefined = null;
 
-  const byTopic = (comment: GitlabComment): boolean =>
-    comment.body.startsWith(`### ${topic}\n\n`);
-  const byContent = (comment: GitlabComment): boolean =>
-    comment.body.trim() === content;
-
-  if (topic) {
+  if (deleteConfig.type === 'by-topic') {
+    const byTopic = (comment: GitlabComment): boolean =>
+      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
     commentId = comments.find(byTopic)?.id;
-  } else if (content) {
+  } else if (deleteConfig.type === 'by-content') {
+    const byContent = (comment: GitlabComment): boolean =>
+      comment.body.trim() === deleteConfig.content;
     commentId = comments.find(byContent)?.id;
   }
 

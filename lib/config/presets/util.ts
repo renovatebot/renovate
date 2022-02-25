@@ -39,14 +39,14 @@ export async function fetchPreset({
       if (err.message !== PRESET_DEP_NOT_FOUND) {
         throw err;
       }
-      logger.info(
-        'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
-      );
       jsonContent = await fetch(
         pkgName,
         buildFilePath('renovate.json'),
         endpoint,
         packageTag
+      );
+      logger.info(
+        'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
       );
     }
   } else {
