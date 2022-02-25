@@ -676,7 +676,7 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still a member of this workspace
         for (const reviewer of reviewers) {
           try {
-            await bitbucketHttp.head(
+            await bitbucketHttp.get(
               `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
             );
 
