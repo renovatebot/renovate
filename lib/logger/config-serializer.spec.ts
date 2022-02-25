@@ -6,16 +6,20 @@ describe('logger/config-serializer', () => {
       nottoken: 'b',
       prBody: 'foo',
     };
+
+    // TODO: fix types (#9610)
     expect(configSerializer(config)).toMatchSnapshot({
       prBody: '[Template]',
-    });
+    } as never);
   });
   it('suppresses content', () => {
     const config = {
       content: {},
     };
+
+    // TODO: fix types (#9610)
     expect(configSerializer(config)).toMatchSnapshot({
       content: '[content]',
-    });
+    } as never);
   });
 });

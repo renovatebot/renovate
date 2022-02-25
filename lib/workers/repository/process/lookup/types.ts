@@ -41,6 +41,7 @@ export interface LookupUpdateConfig
   datasource: string;
   depName: string;
   minimumConfidence?: string;
+  versioning: string;
 }
 
 export interface UpdateResult {

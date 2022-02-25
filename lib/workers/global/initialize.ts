@@ -30,7 +30,7 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
   return config;
 }
 
-function limitCommitsPerRun(config: RenovateConfig): void {
+function limitCommitsPerRun(config: AllConfig): void {
   let limit = config.prCommitsPerRunLimit;
   limit = typeof limit === 'number' && limit > 0 ? limit : null;
   setMaxLimit(Limit.Commits, limit);
@@ -51,7 +51,7 @@ function setGlobalHostRules(config: RenovateConfig): void {
 }
 
 export async function globalInitialize(
-  config_: RenovateConfig
+  config_: AllConfig
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();

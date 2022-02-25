@@ -23,16 +23,16 @@ describe('config/decrypt', () => {
       config.encrypted = { a: '1' };
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
-      expect(res.a).toBeUndefined();
+      expect('a' in res).toBeFalse();
     });
     it('handles invalid encrypted type', async () => {
-      config.encrypted = 1;
+      config.encrypted = 1 as never;
       GlobalConfig.set({ privateKey });
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
     });
     it('handles invalid encrypted value', async () => {
-      config.encrypted = { a: 1 };
+      config.encrypted = { a: 1 } as never;
       GlobalConfig.set({ privateKey, privateKeyOld: 'invalid-key' });
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         'config-validation'
@@ -70,7 +70,8 @@ describe('config/decrypt', () => {
     });
     it('decrypts nested', async () => {
       GlobalConfig.set({ privateKey });
-      config.packageFiles = [
+      const cfg = config as RenovateConfig & { packageFiles: any[] };
+      cfg.packageFiles = [
         {
           packageFile: 'package.json',
           devDependencies: {
@@ -84,10 +85,7 @@ describe('config/decrypt', () => {
         },
         'backend/package.json',
       ];
-      const res = (await decryptConfig(
-        config,
-        repository
-      )) as RenovateConfig & { packageFiles: any[] };
+      const res = await decryptConfig(cfg, repository);
       expect(res.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(

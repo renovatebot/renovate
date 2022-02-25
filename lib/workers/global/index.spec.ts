@@ -35,7 +35,7 @@ describe('workers/global/index', () => {
       repositories: [],
       maintainYarnLock: true,
       foo: 1,
-    });
+    } as never);
     await expect(globalWorker.start()).resolves.toBe(0);
   });
 

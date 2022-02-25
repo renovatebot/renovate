@@ -16,6 +16,7 @@ import {
 } from '../../gradle-wrapper/utils';
 import type {
   ExtractConfig,
+  PackageDependency,
   PackageFile,
   UpdateDependencyConfig,
   Upgrade,
@@ -146,7 +147,8 @@ export async function extractAllPackageFiles(
       gradleFiles.push({
         packageFile,
         datasource: MavenDatasource.id,
-        deps: dependencies,
+        // TODO: fix types (#9610)
+        deps: dependencies as unknown as PackageDependency[],
       });
 
       collectVersionVariables(dependencies, content);

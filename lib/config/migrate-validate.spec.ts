@@ -26,7 +26,7 @@ describe('config/migrate-validate', () => {
       });
     });
     it('handles invalid', async () => {
-      const input: RenovateConfig = { foo: 'none' };
+      const input: RenovateConfig & { foo?: unknown } = { foo: 'none' };
       const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();
       expect(res.errors).toHaveLength(1);

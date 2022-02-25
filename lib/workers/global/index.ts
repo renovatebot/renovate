@@ -24,7 +24,7 @@ import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
 
 export async function getRepositoryConfig(
-  globalConfig: RenovateConfig,
+  globalConfig: AllConfig,
   repository: RenovateRepository
 ): Promise<RenovateConfig> {
   const repoConfig = configParser.mergeChildConfig(

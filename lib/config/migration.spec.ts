@@ -5,6 +5,7 @@ import * as configMigration from './migration';
 import type { DeprecatedRenovateConfig } from './migrations/types';
 import type {
   MigratedConfig,
+  MigratedRenovateConfig,
   RenovateConfig,
   RenovateSharedConfig,
 } from './types';
@@ -257,11 +258,11 @@ describe('config/migration', () => {
       expect(isMigrated).toBeFalse();
     });
     it('migrates packages', () => {
-      const config = {
+      const config: MigratedRenovateConfig = {
         packages: [
           {
             packagePatterns: '^(@angular|typescript)',
-            groupName: ['angular packages'],
+            groupName: ['angular packages'] as never,
           },
         ],
       };
@@ -390,7 +391,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.includePaths).toHaveLength(4);
-      expect(migratedConfig.packageFiles).toBeUndefined();
+      expect('packageFiles' in migratedConfig).toBeFalse();
       expect(migratedConfig.packageRules).toHaveLength(4);
       expect(migratedConfig.packageRules?.[0].rangeStrategy).toBe('replace');
       expect(migratedConfig.packageRules?.[1].rangeStrategy).toBe('pin');
@@ -420,7 +421,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.includePaths).toHaveLength(1);
-      expect(migratedConfig.packageFiles).toBeUndefined();
+      expect('packageFiles' in migratedConfig).toBeFalse();
       expect(migratedConfig.packageRules).toHaveLength(2);
     });
 
@@ -437,7 +438,7 @@ describe('config/migration', () => {
         versionStrategy: undefined,
         ignoreNodeModules: undefined,
         baseBranch: [] as never,
-        depTypes: [{}],
+        depTypes: [{}] as never,
         commitMessage: 'test',
         raiseDeprecationWarnings: undefined,
       };
@@ -673,7 +674,8 @@ describe('config/migration', () => {
   });
 
   it('it migrates gradle-lite', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig &
+      Record<'gradle' | 'gradle-lite', RenovateConfig> = {
       gradle: {
         enabled: false,
       },
@@ -696,7 +698,7 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
   });
   it('migrates empty requiredStatusChecks', () => {
-    const config: RenovateConfig = {
+    const config: DeprecatedRenovateConfig = {
       requiredStatusChecks: [],
     };
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -711,22 +713,36 @@ describe('config/migration', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config, defaultConfig);
 
-    expect(migrate({ azureAutoComplete: true })).toEqual({
+    expect(
+      migrate({ azureAutoComplete: true } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: true },
     });
 
-    expect(migrate({ azureAutoComplete: false })).toEqual({
+    expect(
+      migrate({ azureAutoComplete: false } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: false },
     });
 
-    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
+    expect(
+      migrate({
+        automerge: false,
+        azureAutoComplete: true,
+      } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: false, platformAutomerge: true },
     });
 
-    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+    expect(
+      migrate({
+        automerge: true,
+        azureAutoComplete: true,
+      } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: true, platformAutomerge: true },
     });
@@ -736,22 +752,36 @@ describe('config/migration', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config, defaultConfig);
 
-    expect(migrate({ gitLabAutomerge: true })).toEqual({
+    expect(
+      migrate({ gitLabAutomerge: true } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: true },
     });
 
-    expect(migrate({ gitLabAutomerge: false })).toEqual({
+    expect(
+      migrate({ gitLabAutomerge: false } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: false },
     });
 
-    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+    expect(
+      migrate({
+        automerge: false,
+        gitLabAutomerge: true,
+      } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: false, platformAutomerge: true },
     });
 
-    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
+    expect(
+      migrate({
+        automerge: true,
+        gitLabAutomerge: true,
+      } as DeprecatedRenovateConfig)
+    ).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: true, platformAutomerge: true },
     });

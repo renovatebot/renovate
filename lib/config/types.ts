@@ -35,6 +35,9 @@ export interface RenovateSharedConfig {
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+
+  encrypted?: Record<string, string>;
+
   extends?: string[];
   fileMatch?: string[];
   group?: GroupConfig;
@@ -50,6 +53,7 @@ export interface RenovateSharedConfig {
   hashedBranchLength?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
+  npmToken?: string;
   platform?: string;
   platformAutomerge?: boolean;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -91,6 +95,7 @@ export interface GlobalOnlyConfig {
   autodiscoverFilter?: string;
   baseDir?: string;
   cacheDir?: string;
+  detectGlobalManagerConfig?: boolean;
   detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
@@ -102,10 +107,15 @@ export interface GlobalOnlyConfig {
   persistRepoData?: boolean;
   prCommitsPerRunLimit?: number;
   printConfig?: boolean;
+  privateKey?: string;
   privateKeyPath?: string;
+
+  privateKeyOld?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
+
+  writeDiscoveredRepos?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -162,8 +172,10 @@ export type PostUpgradeTasks = {
   executionMode: ExecutionMode;
 };
 
-type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
-  Partial<Record<UpdateType, T>>;
+export type SubRenovateConfig<
+  TKey extends string,
+  TValue extends RenovateSharedConfig = RenovateSharedConfig
+> = Partial<Record<TKey, TValue>>;
 
 export type RenovateRepository =
   | string
@@ -209,21 +221,36 @@ export interface RenovateHiddenConfig {
    * TODO: Why not public config option
    */
   dependencyDashboardPrApproval?: boolean;
+
+  /** @deprecated */
   depType?: string;
+
+  /** @deprecated */
+  depTypeList?: string[];
+
+  /** @deprecated */
+  semanticPrefix?: string;
+
   vulnerabilityAlertsOnly?: boolean;
 }
+
+export type ManagerName = 'node' | 'travis';
 
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
     RenovateSharedConfig,
-    UpdateConfig<PackageRule>,
+    SubRenovateConfig<UpdateType, PackageRule>,
     AssigneesAndReviewersConfig,
     GeneratedRenovateConfig,
     PackageRuleInputConfig,
-    RenovateHiddenConfig {
+    RenovateHiddenConfig,
+    SubRenovateConfig<ManagerName, RenovateSharedConfig> {
+  aliases?: Record<string, string>;
   depName?: string;
   baseBranches?: string[];
+
+  customEnvVariables?: Record<string, string>;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
@@ -254,6 +281,8 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
+
+  lockFiles?: string[];
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -266,6 +295,9 @@ export interface RenovateConfig
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;
+
+  /** @deprecated */
+  renovateJsonPresent?: boolean;
 
   updateType?: UpdateType;
 
@@ -316,7 +348,7 @@ export type MergeStrategy =
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
-    UpdateConfig,
+    SubRenovateConfig<UpdateType>,
     Record<string, any> {
   matchFiles?: string[];
   matchPaths?: string[];
@@ -447,6 +479,7 @@ export type RenovateOptions =
   | RenovateObjectOption;
 
 export interface PackageRuleInputConfig {
+  allowedVersions?: string;
   versioning?: string;
   packageFile?: string;
   depType?: string;
@@ -454,7 +487,12 @@ export interface PackageRuleInputConfig {
   depName?: string;
   currentValue?: string;
   currentVersion?: string;
+  lockFiles?: string[];
   lockedVersion?: string;
+
+  matchPackageNames?: string[];
+  matchPackagePatterns?: string[];
+  matchPackagePrefixes?: string[];
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string;
@@ -478,11 +516,13 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
   gradle?: RenovateConfig;
 
+  matchManagers?: string[];
+
+  packageNames?: string[];
+  packagePatterns?: string[];
+
   pathRules?: PackageRule[];
   packages?: PackageRule[];
-
-  node?: RenovateConfig;
-  travis?: RenovateConfig;
 }
 
 export interface ValidationResult {

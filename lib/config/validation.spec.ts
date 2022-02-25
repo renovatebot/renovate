@@ -87,7 +87,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
     it('returns nested errors', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfig & { foo?: unknown } = {
         foo: 1,
         schedule: ['after 5pm'],
         timezone: 'Asia/Singapore',
@@ -213,7 +213,11 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(12);
     });
     it('selectors outside packageRules array trigger errors', async () => {
-      const config = {
+      const config: RenovateConfig & {
+        matchPackageNames?: unknown;
+        meteor?: RenovateConfig;
+        docker?: RenovateConfig;
+      } = {
         matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
@@ -256,7 +260,7 @@ describe('config/validation', () => {
     });
 
     it('errors for unsafe fileMatches', async () => {
-      const config = {
+      const config: RenovateConfig & Record<string, RenovateConfig> = {
         npm: {
           fileMatch: ['abc ([a-z]+) ([a-z]+))'],
         },
@@ -467,7 +471,7 @@ describe('config/validation', () => {
         constraints: { packageRules: [{}] },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as never,
         true
       );
       expect(warnings).toHaveLength(0);
@@ -487,7 +491,7 @@ describe('config/validation', () => {
     });
 
     it('validates valid alias objects', async () => {
-      const config = {
+      const config: RenovateConfig = {
         aliases: {
           example1: 'http://www.example.com',
           example2: 'https://www.example2.com/example',
@@ -509,7 +513,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config as never
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
@@ -599,7 +603,7 @@ describe('config/validation', () => {
         hostType: 'npm',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config as never
       );
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
@@ -668,7 +672,7 @@ describe('config/validation', () => {
     });
 
     it('validates valid customEnvVariables objects', async () => {
-      const config = {
+      const config: RenovateConfig = {
         customEnvVariables: {
           example1: 'abc',
           example2: 'https://www.example2.com/example',
@@ -684,7 +688,7 @@ describe('config/validation', () => {
       const config = {
         customEnvVariables: {
           example1: 'abc',
-          example2: 123,
+          example2: 123 as never,
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(

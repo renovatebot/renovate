@@ -5,10 +5,13 @@ import { DockerDatasource } from '../datasource/docker';
 import { OrbDatasource } from '../datasource/orb';
 import { applyPackageRules } from './package-rules';
 
+// TODO: fix types (#9610)
 type TestConfig = PackageRuleInputConfig & {
+  foo?: unknown;
   x?: number;
   y?: number;
   groupName?: string;
+  groupSlug?: string;
 };
 
 describe('util/package-rules', () => {

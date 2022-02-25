@@ -41,7 +41,7 @@ npm.getPreset = jest.fn(({ packageName, presetName }) => {
 
 describe('config/presets/index', () => {
   describe('resolvePreset', () => {
-    let config: RenovateConfig;
+    let config: RenovateConfig & { foo?: unknown };
     beforeEach(() => {
       config = {};
     });

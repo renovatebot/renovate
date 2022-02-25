@@ -1,10 +1,10 @@
-import type { RenovateConfig } from '../types';
 import { MigrationsService } from './migrations-service';
+import type { DeprecatedRenovateConfig } from './types';
 
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
     for (const property of MigrationsService.removedProperties) {
-      const originalConfig: RenovateConfig = {
+      const originalConfig: DeprecatedRenovateConfig = {
         [property]: 'test',
       };
 
@@ -21,7 +21,7 @@ describe('config/migrations/migrations-service', () => {
       oldPropertyName,
       newPropertyName,
     ] of MigrationsService.renamedProperties.entries()) {
-      const originalConfig: RenovateConfig = {
+      const originalConfig: DeprecatedRenovateConfig = {
         [oldPropertyName]: 'test',
       };
 
@@ -36,7 +36,7 @@ describe('config/migrations/migrations-service', () => {
   });
 
   it('should save original order of properties', () => {
-    const originalConfig: RenovateConfig = {
+    const originalConfig: DeprecatedRenovateConfig = {
       exposeEnv: true,
       versionScheme: 'test',
       excludedPackageNames: ['test'],

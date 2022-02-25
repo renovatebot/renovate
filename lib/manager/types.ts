@@ -59,7 +59,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depType?: string;
   manager?: string;
   packageJsonType?: 'app' | 'library';
-  rangeStrategy: RangeStrategy;
+  rangeStrategy?: RangeStrategy;
 }
 
 export interface NpmLockFiles {

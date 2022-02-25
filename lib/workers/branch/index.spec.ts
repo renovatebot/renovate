@@ -1446,7 +1446,7 @@ describe('workers/branch/index', () => {
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,
-        trustLevel: 'high',
+        // trustLevel: 'high', ???
         localDir: '/localDir',
       });
 

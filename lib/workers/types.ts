@@ -112,6 +112,7 @@ export interface BranchConfig
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardRebaseAllOpen?: boolean;
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;

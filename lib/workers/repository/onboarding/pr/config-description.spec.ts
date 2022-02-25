@@ -31,7 +31,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     });
     it('assignees, labels and schedule', () => {
       delete config.description;
-      config.packageFiles = [];
       config.assignees = ['someone', '@someone-else'];
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];

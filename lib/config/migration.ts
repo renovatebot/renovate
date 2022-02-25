@@ -6,12 +6,12 @@ import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
+import type { DeprecatedRenovateConfig } from './migrations/types';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
-  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
@@ -23,6 +23,11 @@ export function fixShortHours(input: string): string {
 }
 
 let optionTypes: Record<string, RenovateOptions['type']>;
+
+function renoveOldKey(obj: object, key: string): void {
+  delete obj[key];
+}
+
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
@@ -36,7 +41,7 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const newConfig = MigrationsService.run(config);
+    const newConfig = MigrationsService.run(config as DeprecatedRenovateConfig);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
@@ -99,7 +104,7 @@ export function migrateConfig(
           }
         }
         migratedConfig.includePaths = fileList;
-        delete migratedConfig.packageFiles;
+        renoveOldKey(migratedConfig, key);
       } else if (depTypes.includes(key)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -123,7 +128,7 @@ export function migrateConfig(
           '{{depName}}'
         );
       } else if (key === 'ignoreNpmrcFile') {
-        delete migratedConfig.ignoreNpmrcFile;
+        renoveOldKey(migratedConfig, key);
         if (!is.string(migratedConfig.npmrc)) {
           migratedConfig.npmrc = '';
         }
@@ -145,7 +150,7 @@ export function migrateConfig(
         migratedConfig.branchPrefix = val.substring(0, templateIndex);
         migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'semanticPrefix' && is.string(val)) {
-        delete migratedConfig.semanticPrefix;
+        renoveOldKey(migratedConfig, key);
         let [text] = val.split(':') as any; // TODO: fixme
         text = text.split('(');
         [migratedConfig.semanticCommitType] = text;
@@ -194,7 +199,7 @@ export function migrateConfig(
             migratedConfig.extends.push('npm:unpublishSafe');
           }
         }
-        delete migratedConfig.unpublishSafe;
+        renoveOldKey(migratedConfig, key);
       } else if (
         key === 'automergeType' &&
         is.string(val) &&
@@ -210,7 +215,7 @@ export function migrateConfig(
         migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'renovateFork' && is.boolean(val)) {
-        delete migratedConfig.renovateFork;
+        renoveOldKey(migratedConfig, key);
         migratedConfig.includeForks = val;
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
@@ -252,10 +257,10 @@ export function migrateConfig(
         delete migratedConfig.packages;
       } else if (key === 'packageName') {
         migratedConfig.packageNames = [val];
-        delete migratedConfig.packageName;
+        renoveOldKey(migratedConfig, key);
       } else if (key === 'packagePattern') {
         migratedConfig.packagePatterns = [val];
-        delete migratedConfig.packagePattern;
+        renoveOldKey(migratedConfig, key);
       } else if (key === 'baseBranch') {
         migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
         delete migratedConfig.baseBranch;

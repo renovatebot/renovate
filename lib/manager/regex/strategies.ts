@@ -62,13 +62,15 @@ export function handleRecursive(
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     // if we have a depName and a currentValue which have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(
-        {
-          groups: mergeGroups(combinedGroups, match.groups),
-          replaceString: match[0],
-        },
-        config
-      );
+      return [
+        createDependency(
+          {
+            groups: mergeGroups(combinedGroups, match.groups),
+            replaceString: match[0],
+          },
+          config
+        ),
+      ];
     }
 
     return handleRecursive(

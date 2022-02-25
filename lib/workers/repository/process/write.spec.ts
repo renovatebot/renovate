@@ -62,7 +62,7 @@ describe('workers/repository/process/write', () => {
       git.branchExists.mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
       expect(isLimitReached(Limit.Branches)).toBeFalse();
-      await writeUpdates({ config }, branches);
+      await writeUpdates(config, branches);
       expect(isLimitReached(Limit.Branches)).toBeTrue();
     });
   });

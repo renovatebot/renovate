@@ -149,10 +149,10 @@ export async function tryDecrypt(
   return decryptedStr;
 }
 
-export async function decryptConfig(
-  config: RenovateConfig,
+export async function decryptConfig<T extends RenovateConfig>(
+  config: T,
   repository: string
-): Promise<RenovateConfig> {
+): Promise<T> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   const { privateKey, privateKeyOld } = GlobalConfig.get();
