@@ -183,11 +183,12 @@ export async function findUpLocal(
   if (!is.nonEmptyString(res) || !is.nonEmptyString(localDir)) {
     return null;
   }
+  const safePath = upath.normalizeSafe(res);
   // Return relative path if file is inside of local dir
-  if (res.startsWith(localDir)) {
-    let relativePath = res.replace(localDir, '');
+  if (safePath.startsWith(localDir)) {
+    let relativePath = safePath.replace(localDir, '');
     if (relativePath.startsWith('/')) {
-      relativePath = relativePath.substr(1);
+      relativePath = relativePath.substring(1);
     }
     return relativePath;
   }

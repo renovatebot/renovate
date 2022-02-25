@@ -7,7 +7,9 @@ import { findUpLocal, readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { Registry } from './types';
 
-async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
+async function readFileAsXmlDocument(
+  file: string
+): Promise<XmlDocument | undefined> {
   try {
     return new XmlDocument(await readLocalFile(file, 'utf8'));
   } catch (err) {
