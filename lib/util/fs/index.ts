@@ -180,7 +180,7 @@ export async function findUpLocal(
     type: 'file',
   });
   // Return null if nothing found
-  if (res === undefined) {
+  if (!!res || !!localDir) {
     return null;
   }
   // Return relative path if file is inside of local dir
