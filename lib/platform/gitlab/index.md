@@ -13,3 +13,8 @@ By setting the server version yourself, you save a API call that fetches the ser
 - Use `Draft:` MR prefix instead of `WIP:` prefix since `v13.2.0`
 - Do not truncate Markdown body to 25K chars since `v13.4.0`
 - Allow configure reviewers since `v13.9.0`
+
+## Multiple merge request assignees
+
+Due to licensing restrictions [multiple assignees](https://docs.gitlab.com/ee/user/project/issues/multiple_assignees_for_issues.html) are only available in GitLab Premium self-managed, GitLab Premium SaaS, and higher tiers.
+Because of a safeguard in [GitLab's API](https://github.com/renovatebot/renovate/pull/14212#issuecomment-1040189712) if multiple assignees are set, but not available to the project, only the first assignee will be applied.

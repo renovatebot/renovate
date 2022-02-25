@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../datasource/docker';
+import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../logger';
 import type { PackageDependency } from '../types';
 import type { ChartDefinition, Repository } from './types';
@@ -13,7 +13,7 @@ export function parseRepository(
     const url = new URL(repositoryURL);
     switch (url.protocol) {
       case 'oci:':
-        res.datasource = datasourceDocker.id;
+        res.datasource = DockerDatasource.id;
         res.lookupName = `${repositoryURL.replace('oci://', '')}/${depName}`;
         break;
       case 'file:':
@@ -56,6 +56,7 @@ export function resolveAlias(
 export function getRepositories(definitions: ChartDefinition[]): Repository[] {
   const repositoryList = definitions
     .flatMap((value) => value.dependencies)
+    .filter((dependency) => dependency.repository) // only keep non-local references --> if no repository is defined the chart will be searched in charts/<name>
     .filter((dependency) => !isAlias(dependency.repository)) // do not add aliases
     .map((dependency) => {
       // remove additional keys to prevent interference at deduplication
@@ -72,7 +73,10 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
   });
 }
 
-function isAlias(repository: string): boolean {
+export function isAlias(repository: string): boolean {
+  if (!repository) {
+    return false;
+  }
   return repository.startsWith('@') || repository.startsWith('alias:');
 }
 

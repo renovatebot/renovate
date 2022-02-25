@@ -1,6 +1,6 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -53,7 +53,7 @@ function handleGitDep(
   if (nameMatch) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
-      dep.datasource = datasourceGithubTags.id;
+      dep.datasource = GithubTagsDatasource.id;
     } else {
       dep.datasource = GitTagsDatasource.id;
     }

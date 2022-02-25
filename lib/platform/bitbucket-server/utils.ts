@@ -1,16 +1,16 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
-import type { HTTPError, Response } from 'got';
+import is from '@sindresorhus/is';
 import { PrState } from '../../types';
+import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import type {
   HttpOptions,
   HttpPostOptions,
   HttpResponse,
-} from '../../util/http';
-import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
-import type { BbsPr, BbsRestPr } from './types';
+} from '../../util/http/types';
+import type { BbsPr, BbsRestPr, BitbucketError } from './types';
 
-const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
+export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -127,19 +127,8 @@ export interface BitbucketStatus {
   state: BitbucketBranchState;
 }
 
-interface BitbucketErrorResponse {
-  errors?: {
-    exceptionName?: string;
-    reviewerErrors?: { context?: string }[];
-  }[];
-}
-
-interface BitbucketError extends HTTPError {
-  readonly response: Response<BitbucketErrorResponse>;
-}
-
 export function isInvalidReviewersResponse(err: BitbucketError): boolean {
-  const errors = err?.response?.body?.errors || [];
+  const errors = err?.response?.body?.errors ?? [];
   return (
     errors.length > 0 &&
     errors.every(
@@ -149,12 +138,14 @@ export function isInvalidReviewersResponse(err: BitbucketError): boolean {
 }
 
 export function getInvalidReviewers(err: BitbucketError): string[] {
-  const errors = err?.response?.body?.errors || [];
-  let invalidReviewers = [];
+  const errors = err?.response?.body?.errors ?? [];
+  let invalidReviewers: string[] = [];
   for (const error of errors) {
     if (error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION) {
       invalidReviewers = invalidReviewers.concat(
-        error.reviewerErrors?.map(({ context }) => context) || []
+        error.reviewerErrors
+          ?.map(({ context }) => context)
+          .filter(is.nonEmptyString) ?? []
       );
     }
   }

@@ -182,6 +182,14 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'globalExtends',
+    description:
+      'Configuration presets to use/extend for a self-hosted config.',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -1186,7 +1194,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
-    supportedManagers: ['helmv3', 'npm', 'sbt'],
+    supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
   {
@@ -2235,6 +2243,13 @@ const options: RenovateOptions[] = [
       ignoreOther:
         'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
     },
+  },
+  {
+    name: 'platformCommit',
+    description: `Use platform API to perform commits instead of using git directly.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['github'],
   },
 ];
 

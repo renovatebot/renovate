@@ -56,7 +56,7 @@ export interface Pr {
   hasAssignees?: boolean;
   hasReviewers?: boolean;
   labels?: string[];
-  number?: number;
+  number: number;
   reviewers?: string[];
   sha?: string;
   sourceRepo?: string;
@@ -127,23 +127,23 @@ export interface MergePRConfig {
 }
 export interface EnsureCommentConfig {
   number: number;
-  topic: string;
+  topic: string | null;
   content: string;
 }
 
 export interface EnsureCommentRemovalConfigByTopic {
+  type: 'by-topic';
   number: number;
   topic: string;
 }
 export interface EnsureCommentRemovalConfigByContent {
+  type: 'by-content';
   number: number;
   content: string;
 }
-export interface EnsureCommentRemovalConfig {
-  number: number;
-  content?: string;
-  topic?: string;
-}
+export type EnsureCommentRemovalConfig =
+  | EnsureCommentRemovalConfigByTopic
+  | EnsureCommentRemovalConfigByContent;
 
 export type EnsureIssueResult = 'updated' | 'created';
 

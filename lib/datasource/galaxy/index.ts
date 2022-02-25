@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import type { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GalaxyResult } from './types';
@@ -77,7 +77,7 @@ export class GalaxyDatasource extends Datasource {
     };
 
     result.dependencyUrl = galaxyProjectUrl;
-    const { github_user: user = null, github_repo: repo = null } = resultObject;
+    const { github_user: user, github_repo: repo } = resultObject;
     if (typeof user === 'string' && typeof repo === 'string') {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
     }

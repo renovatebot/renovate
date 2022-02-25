@@ -4,7 +4,7 @@ import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { newlineRegex, regEx } from '../../util/regex';
-import * as dockerVersioning from '../../versioning/docker';
+import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
 
@@ -13,7 +13,7 @@ const YamlExtension = regEx(/\.ya?ml$/);
 function getDependency(plugin: JenkinsPlugin): PackageDependency {
   const dep: PackageDependency = {
     datasource: JenkinsPluginsDatasource.id,
-    versioning: dockerVersioning.id,
+    versioning: mavenVersioning.id,
     depName: plugin.artifactId,
   };
 
