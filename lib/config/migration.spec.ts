@@ -364,12 +364,8 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
-      expect(
-        (migratedConfig.node as RenovateSharedConfig).enabled
-      ).toBeUndefined();
-      expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
-        true
-      );
+      expect(migratedConfig.node.enabled).toBeUndefined();
+      expect(migratedConfig.travis.enabled).toBe(true);
     });
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
