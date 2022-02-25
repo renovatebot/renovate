@@ -1,7 +1,8 @@
-import type { FetchPresetConfig, Preset } from './types';
+import { mockFn } from 'jest-mock-extended';
+import type { FetchPresetConfig } from './types';
 import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util';
 
-const fetch = jest.fn(() => Promise.resolve<Preset>({}));
+const fetch = mockFn();
 
 const config: FetchPresetConfig = {
   pkgName: 'some/repo',
