@@ -3,7 +3,8 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import type { Http, HttpOptions } from '../../util/http';
+import type { Http } from '../../util/http';
+import type { HttpOptions } from '../../util/http/types';
 import { id } from './common';
 import { resolvePackage } from './npmrc';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
@@ -185,7 +186,7 @@ export async function getDependency(
           statusCode: err.statusCode,
           packageName,
         },
-        `Dependency lookup failure: payent required`
+        `Dependency lookup failure: payment required`
       );
       return null;
     }

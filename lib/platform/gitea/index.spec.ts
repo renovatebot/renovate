@@ -1404,7 +1404,11 @@ describe('platform/gitea/index', () => {
     it('should remove existing comment by topic', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
+      await gitea.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 1,
+        topic: 'some-topic',
+      });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
       expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 13);
@@ -1413,7 +1417,11 @@ describe('platform/gitea/index', () => {
     it('should remove existing comment by content', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval({ number: 1, content: 'some-body' });
+      await gitea.ensureCommentRemoval({
+        type: 'by-content',
+        number: 1,
+        content: 'some-body',
+      });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
       expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 11);
@@ -1423,7 +1431,11 @@ describe('platform/gitea/index', () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       helper.deleteComment.mockRejectedValueOnce(new Error());
       await initFakeRepo();
-      await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
+      await gitea.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 1,
+        topic: 'some-topic',
+      });
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
@@ -1431,7 +1443,11 @@ describe('platform/gitea/index', () => {
     it('should abort silently if comment is missing', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval({ number: 1, topic: 'missing' });
+      await gitea.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 1,
+        topic: 'missing',
+      });
 
       expect(helper.deleteComment).not.toHaveBeenCalled();
     });

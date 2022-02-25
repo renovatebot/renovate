@@ -4,7 +4,8 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import type { Http, HttpResponse } from '../../util/http';
+import type { Http } from '../../util/http';
+import type { HttpResponse } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { normalizeDate } from '../metadata';
 

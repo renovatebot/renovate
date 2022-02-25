@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
-import { HttpError } from '../../util/http/types';
+import { HttpError } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
