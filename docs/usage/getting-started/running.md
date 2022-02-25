@@ -220,6 +220,8 @@ Give the bot App password the following permission scopes:
 - [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
 - [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
 
+The bot also needs to be able to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
+
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also be sure to configure the `username` for your bot account too.
 Don't forget to configure `platform=bitbucket` somewhere in config.
