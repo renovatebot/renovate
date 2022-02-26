@@ -78,7 +78,7 @@ export async function getDependency(
   const uri = url.parse(packageUrl);
 
   try {
-    const raw = await http.getJson<NpmResponse>(packageUrl, {});
+    const raw = await http.getJson<NpmResponse>(packageUrl);
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
