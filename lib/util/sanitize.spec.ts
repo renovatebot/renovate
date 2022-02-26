@@ -11,6 +11,7 @@ describe('util/sanitize', () => {
   });
 
   it('sanitizes empty string', () => {
+    addSecretForSanitizing('');
     expect(sanitize(null as never)).toBeNull();
     expect(sanitize('')).toBe('');
   });
