@@ -18,7 +18,7 @@ import {
   writeLocalFile,
 } from '.';
 
-jest.mock('../../util/exec/env');
+jest.mock('../exec/env');
 jest.mock('find-up');
 
 const findUp = mockedFunction(_findUp);
