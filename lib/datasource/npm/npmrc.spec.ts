@@ -51,6 +51,39 @@ describe('datasource/npm/npmrc', () => {
         }
       `);
     });
+    it('handles host, path and auth', () => {
+      expect(
+        convertNpmrcToRules(ini.parse('//some.test/with/path:_auth=abc123'))
+      ).toMatchInlineSnapshot(`
+        Object {
+          "hostRules": Array [
+            Object {
+              "authType": "Basic",
+              "hostType": "npm",
+              "matchHost": "https://some.test/with/path",
+              "token": "abc123",
+            },
+          ],
+        }
+      `);
+    });
+    it('handles host, path, port and auth', () => {
+      expect(
+        convertNpmrcToRules(
+          ini.parse('//some.test:8080/with/path:_authToken=abc123')
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "hostRules": Array [
+            Object {
+              "hostType": "npm",
+              "matchHost": "https://some.test:8080/with/path",
+              "token": "abc123",
+            },
+          ],
+        }
+      `);
+    });
     it('handles naked authToken', () => {
       expect(convertNpmrcToRules(ini.parse('_authToken=abc123\n')))
         .toMatchInlineSnapshot(`
