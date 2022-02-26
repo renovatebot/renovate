@@ -8,6 +8,7 @@ import type {
   GithubGitTreeNode,
 } from '../../../../types/platform/github';
 import { GithubHttp } from '../../../../util/http/github';
+import { fromBase64 } from '../../../../util/string';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
@@ -100,8 +101,7 @@ export async function getReleaseNotesMd(
     `${apiPrefix}/git/blobs/${sha}`
   );
 
-  const changelogMd =
-    Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
+  const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
   return { changelogFile, changelogMd };
 }
 
