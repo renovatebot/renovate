@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../test/fixtures';
-import type { PackageDependency } from '../../manager/types';
+import type { PackageDependency } from '../types';
 import { extractPackageFile } from './extract';
 
 describe('manager/buildkite/extract', () => {
