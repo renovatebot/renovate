@@ -8,7 +8,6 @@ import { NpmDatasource, getNpmrc, resetCache, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
 
-jest.mock('registry-auth-token');
 jest.mock('delay');
 
 let npmResponse: any;
