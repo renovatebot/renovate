@@ -1,5 +1,9 @@
-import type { OutgoingHttpHeaders } from '../../util/http/types';
+import type { HostRule } from '../../types';
 import type { Release, ReleaseResult } from '../types';
+
+export interface NpmrcRules {
+  hostRules?: HostRule[];
+}
 
 export interface NpmResponse {
   _id: string;
@@ -43,7 +47,6 @@ export interface NpmDependency extends ReleaseResult {
 export type Npmrc = Record<string, any>;
 
 export interface PackageResolution {
-  headers: OutgoingHttpHeaders;
   packageUrl: string;
   registryUrl: string;
 }

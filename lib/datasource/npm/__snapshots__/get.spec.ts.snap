@@ -83,6 +83,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer XXX",
       "host": "registry.npmjs.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -93,6 +94,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer XXX",
       "host": "registry.npmjs.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },

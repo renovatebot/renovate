@@ -4,7 +4,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import type { Http } from '../../util/http';
-import type { HttpOptions } from '../../util/http/types';
 import { id } from './common';
 import { resolvePackage } from './npmrc';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
@@ -63,7 +62,7 @@ export async function getDependency(
     return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
-  const { headers, packageUrl, registryUrl } = resolvePackage(packageName);
+  const { packageUrl, registryUrl } = resolvePackage(packageName);
 
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
@@ -78,18 +77,8 @@ export async function getDependency(
 
   const uri = url.parse(packageUrl);
 
-  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
-    // Delete the authorization header for non-scoped public packages to improve http caching
-    // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
-    // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses
-    delete headers.authorization;
-  }
-
   try {
-    const opts: HttpOptions = {
-      headers,
-    };
-    const raw = await http.getJson<NpmResponse>(packageUrl, opts);
+    const raw = await http.getJson<NpmResponse>(packageUrl, {});
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
