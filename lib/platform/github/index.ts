@@ -32,6 +32,7 @@ import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
+import { fromBase64 } from '../../util/string';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -202,7 +203,7 @@ export async function getRawFile(
   }
   const res = await githubApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
+  const str = fromBase64(buf);
   return str;
 }
 

@@ -3,6 +3,7 @@ import {
   clearSanitizedSecretsList,
   sanitize,
 } from './sanitize';
+import { toBase64 } from './string';
 
 describe('util/sanitize', () => {
   beforeEach(() => {
@@ -18,7 +19,7 @@ describe('util/sanitize', () => {
     const username = 'userabc';
     const password = 'password123';
     addSecretForSanitizing(token);
-    const hashed = Buffer.from(`${username}:${password}`).toString('base64');
+    const hashed = toBase64(`${username}:${password}`);
     addSecretForSanitizing(hashed);
     addSecretForSanitizing(password);
 

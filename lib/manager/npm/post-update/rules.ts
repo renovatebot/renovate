@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { toBase64 } from '../../../util/string';
 import { validateUrl } from '../../../util/url';
 
 export interface HostRulesResult {
@@ -37,7 +38,7 @@ export function processHostRules(): HostRulesResult {
           };
         }
       } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
-        const password = Buffer.from(hostRule.password).toString('base64');
+        const password = toBase64(hostRule.password);
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
         additionalNpmrcContent.push(`${uri}:_password=${password}`);
         additionalYarnRcYml ||= { npmRegistries: {} };
