@@ -130,7 +130,7 @@ query(
 export const vulnerabilityAlertsQuery = `
 query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
-    vulnerabilityAlerts(last: 100) {
+    vulnerabilityAlerts(last: 100, states: [OPEN]) {
       edges {
         node {
           dismissReason
