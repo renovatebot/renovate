@@ -52,7 +52,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const hostType = 'npm';
   const hosts: Record<string, HostRule> = {};
   for (const [key, value] of Object.entries(npmrc)) {
-    if (!is.string(value)) {
+    if (!is.nonEmptyString(value)) {
       continue;
     }
     const keyParts = key.split(':');
