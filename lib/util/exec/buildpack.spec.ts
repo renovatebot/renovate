@@ -8,7 +8,7 @@ import {
 } from './buildpack';
 import type { ToolConstraint } from './types';
 
-jest.mock('../../../lib/datasource');
+jest.mock('../../datasource');
 
 const datasource = mocked(_datasource);
 
