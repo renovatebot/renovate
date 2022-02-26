@@ -242,6 +242,7 @@
     "lib/manager/npm/update/package-version/index.ts",
     "lib/manager/nuget/artifacts.ts",
     "lib/manager/nuget/extract.ts",
+    "lib/manager/nuget/package-tree.ts",
     "lib/manager/nuget/extract/global-manifest.ts",
     "lib/manager/nuget/index.ts",
     "lib/manager/nuget/util.ts",

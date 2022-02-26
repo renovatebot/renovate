@@ -1,10 +1,11 @@
 import path from 'path';
 import Graph from 'graph-data-structure';
+import minimatch from 'minimatch';
 import upath from 'upath';
 import xmldoc from 'xmldoc';
 import { logger } from '../../logger';
-import { globLocalFiles, readLocalFile } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { readLocalFile } from '../../util/fs';
+import { getFileList } from '../../util/git';
 
 // Get all package files at any level of ancestry that depend on `packageFileName`
 export async function getDependentPackageFiles(
@@ -79,9 +80,9 @@ function normalizeRelativePath(
 
 // Get a list of package files in `localDir`
 async function getAllPackageFiles(): Promise<string[]> {
-  const possiblePackageFiles = await globLocalFiles('**/*proj');
-  const filteredPackageFiles = possiblePackageFiles.filter((f) =>
-    regEx(/(?:cs|vb|fs)proj$/i).test(f)
+  const allFiles = await getFileList();
+  const filteredPackageFiles = allFiles.filter(
+    minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true })
   );
 
   logger.debug({ filteredPackageFiles }, 'Found package files');
