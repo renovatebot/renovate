@@ -46,6 +46,7 @@ function sanitize(key: string, val: string): void {
   if (key.endsWith('_authToken') || key.endsWith('_auth')) {
     addSecretForSanitizing(val);
   } else if (key.endsWith(':_password')) {
+    addSecretForSanitizing(val);
     const password = fromBase64(val);
     addSecretForSanitizing(password);
     const username: string = npmrc[key.replace(':_password', ':username')];
