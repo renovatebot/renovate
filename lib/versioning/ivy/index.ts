@@ -23,7 +23,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-];
+] as RangeStrategy[];
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const {

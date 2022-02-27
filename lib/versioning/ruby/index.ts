@@ -28,7 +28,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-];
+] as RangeStrategy[];
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {
@@ -80,12 +80,14 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
+
 function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
   return maxSatisfying(versions.map(vtrim), vtrim(range));
 }
+
 function minSatisfyingVersion(
   versions: string[],
   range: string

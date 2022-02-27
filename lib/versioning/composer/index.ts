@@ -21,7 +21,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'pin',
   'replace',
   'update-lockfile',
-];
+] as RangeStrategy[];
 
 function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');
