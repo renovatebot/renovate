@@ -30,7 +30,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 function equals(a: string, b: string): boolean {
   try {

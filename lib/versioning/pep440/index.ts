@@ -12,7 +12,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 const {
   compare: sortVersions,

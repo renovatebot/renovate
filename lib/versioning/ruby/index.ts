@@ -28,7 +28,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {
