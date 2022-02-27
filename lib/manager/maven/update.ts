@@ -69,7 +69,10 @@ export function bumpPackageVersion(
   }
 
   if (!semver.valid(currentValue)) {
-    logger.warn('Unable to bump pom.xml version, not a valid semver');
+    logger.warn(
+      { currentValue },
+      'Unable to bump pom.xml version, not a valid semver'
+    );
     return { bumpedContent };
   }
 
