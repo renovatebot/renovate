@@ -23,7 +23,7 @@ export const id = 'rez';
 export const displayName = 'rez';
 export const urls = ['https://github.com/nerdvegas/rez'];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 function equals(a: string, b: string): boolean {
   try {

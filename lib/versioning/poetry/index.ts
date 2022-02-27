@@ -14,7 +14,7 @@ export const id = 'poetry';
 export const displayName = 'Poetry';
 export const urls = ['https://python-poetry.org/docs/versions/'];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 function equals(a: string, b: string): boolean {
   const semverA = poetry2semver(a);

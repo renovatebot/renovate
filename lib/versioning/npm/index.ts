@@ -12,7 +12,7 @@ export const urls = [
   'https://semver.npmjs.com/',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 const {
   compare: sortVersions,

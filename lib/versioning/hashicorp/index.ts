@@ -8,7 +8,7 @@ export const urls = [
   'https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 function hashicorp2npm(input: string): string {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2

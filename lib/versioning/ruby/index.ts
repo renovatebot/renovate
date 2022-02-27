@@ -22,7 +22,7 @@ export const urls = [
   'https://www.devalot.com/articles/2012/04/gem-versions.html',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {

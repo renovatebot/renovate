@@ -6,7 +6,7 @@ export const id = 'hex';
 export const displayName = 'Hex';
 export const urls = ['https://hexdocs.pm/elixir/Version.html'];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 function hex2npm(input: string): string {
   return input

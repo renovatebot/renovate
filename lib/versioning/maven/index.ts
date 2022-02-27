@@ -22,7 +22,7 @@ export const urls = [
   'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
