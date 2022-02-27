@@ -349,7 +349,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'foo-image',
           newDigest: 'abcdefg987612345',
           currentDigest: '',
-          updateType: 'pinDigest',
+          updateType: 'pin',
         }),
       ];
       const res = generateBranchConfig(branch);

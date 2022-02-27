@@ -81,17 +81,6 @@ describe('util/merge-confidence/index', () => {
         )
       ).toBe('high');
     });
-    it('returns neutral if pinning digest', async () => {
-      expect(
-        await getMergeConfidenceLevel(
-          'npm',
-          'renovate',
-          '25.0.1',
-          '25.0.1',
-          'pinDigest'
-        )
-      ).toBe('high');
-    });
     it('returns neutral if no token', async () => {
       expect(
         await getMergeConfidenceLevel(
