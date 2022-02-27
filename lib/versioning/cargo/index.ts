@@ -15,7 +15,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 const isVersion = (input: string): boolean => npm.isVersion(input);
 
