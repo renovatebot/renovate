@@ -5,7 +5,6 @@ import * as _sanitize from '../../util/sanitize';
 import {
   convertNpmrcToRules,
   getMatchHostFromNpmrcHost,
-  getNpmrc,
   setNpmrc,
 } from './npmrc';
 
@@ -48,6 +47,7 @@ describe('datasource/npm/npmrc', () => {
               "token": "abc123",
             },
           ],
+          "packageRules": Array [],
         }
       `);
     });
@@ -64,6 +64,7 @@ describe('datasource/npm/npmrc', () => {
               "token": "abc123",
             },
           ],
+          "packageRules": Array [],
         }
       `);
     });
@@ -81,6 +82,7 @@ describe('datasource/npm/npmrc', () => {
               "token": "abc123",
             },
           ],
+          "packageRules": Array [],
         }
       `);
     });
@@ -94,6 +96,7 @@ describe('datasource/npm/npmrc', () => {
               "token": "abc123",
             },
           ],
+          "packageRules": Array [],
         }
       `);
     });
@@ -111,6 +114,19 @@ describe('datasource/npm/npmrc', () => {
               "hostType": "npm",
               "matchHost": "https://npm.fontawesome.com/",
               "token": "abc123",
+            },
+          ],
+          "packageRules": Array [
+            Object {
+              "matchDataSources": Array [
+                "npm",
+              ],
+              "matchPackagePrefixes": Array [
+                "@fontawesome/",
+              ],
+              "registryUrls": Array [
+                "https://npm.fontawesome.com/",
+              ],
             },
           ],
         }
@@ -133,6 +149,7 @@ describe('datasource/npm/npmrc', () => {
               "username": "bot",
             },
           ],
+          "packageRules": Array [],
         }
       `);
     });
@@ -174,6 +191,5 @@ describe('datasource/npm/npmrc', () => {
   it('ignores localhost', () => {
     setNpmrc(`registry=http://localhost`);
     expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(0);
-    expect(getNpmrc()).toBeEmptyObject();
   });
 });
