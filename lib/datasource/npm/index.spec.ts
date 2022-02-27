@@ -4,7 +4,7 @@ import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
-import { NpmDatasource, getNpmrc, resetCache, setNpmrc } from '.';
+import { NpmDatasource, resetCache, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
 
@@ -305,8 +305,7 @@ describe('datasource/npm/index', () => {
     const npmrcContent = 'something=something';
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
-    setNpmrc();
-    expect(getNpmrc()).toBeEmptyObject();
+    expect(setNpmrc()).toBeUndefined();
   });
 
   it('should use default registry if missing from npmrc', async () => {
