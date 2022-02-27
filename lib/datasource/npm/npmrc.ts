@@ -1,21 +1,20 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import getRegistryUrl from 'registry-auth-token/registry-url.js';
 import { GlobalConfig } from '../../config/global';
+import type { PackageRule } from '../../config/types';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
-import type { Npmrc, NpmrcRules, PackageResolution } from './types';
+import { ensureTrailingSlash, validateUrl } from '../../util/url';
+import { defaultRegistryUrls } from './common';
+import type { NpmrcRules, PackageResolution } from './types';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
-
-export function getNpmrc(): Npmrc | null {
-  return npmrc;
-}
+let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = process.env): any {
   // istanbul ignore if
@@ -48,7 +47,9 @@ export function getMatchHostFromNpmrcHost(input: string): string {
 export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const rules: NpmrcRules = {
     hostRules: [],
+    packageRules: [],
   };
+  // Generate hostRules
   const hostType = 'npm';
   const hosts: Record<string, HostRule> = {};
   for (const [key, value] of Object.entries(npmrc)) {
@@ -82,6 +83,41 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
       hostRule.matchHost = matchHost;
     }
     rules.hostRules.push(hostRule);
+  }
+  // Generate packageRules
+  const matchDataSources = ['npm'];
+  const { registry } = npmrc;
+  // packageRules order matters, so look for a default registry first
+  if (is.nonEmptyString(registry)) {
+    if (validateUrl(registry)) {
+      // Default registry
+      rules.packageRules.push({
+        matchDataSources,
+        registryUrls: [registry],
+      });
+    } else {
+      logger.warn({ registry }, 'Invalid npmrc registry= URL');
+    }
+  }
+  // Now look for scoped registries
+  for (const [key, value] of Object.entries(npmrc)) {
+    if (!is.nonEmptyString(value)) {
+      continue;
+    }
+    const keyParts = key.split(':');
+    const keyType = keyParts.pop();
+    if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
+      const scope = keyParts.join(':');
+      if (validateUrl(value)) {
+        rules.packageRules.push({
+          matchDataSources,
+          matchPackagePrefixes: [scope + '/'],
+          registryUrls: [value],
+        });
+      } else {
+        logger.warn({ scope, registry: value }, 'Invalid npmrc registry= URL');
+      }
+    }
   }
   return rules;
 }
@@ -120,21 +156,27 @@ export function setNpmrc(input?: string): void {
     if (npmrcRules.hostRules.length) {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
+    packageRules = npmrcRules.packageRules;
   } else if (npmrc) {
     logger.debug('Resetting npmrc');
     npmrc = {};
     npmrcRaw = '';
+    packageRules = [];
   }
 }
 
 export function resolvePackage(packageName: string): PackageResolution {
-  const scope = packageName.split('/')[0];
-  let registryUrl: string;
-  try {
-    registryUrl = getRegistryUrl(scope, getNpmrc());
-  } catch (err) {
-    registryUrl = 'https://registry.npmjs.org/';
+  let registryUrl = defaultRegistryUrls[0];
+  for (const rule of packageRules) {
+    const { matchPackagePrefixes, registryUrls } = rule;
+    if (
+      !matchPackagePrefixes ||
+      packageName.startsWith(matchPackagePrefixes[0])
+    ) {
+      registryUrl = registryUrls[0];
+    }
   }
+  registryUrl = ensureTrailingSlash(registryUrl);
   const packageUrl = url.resolve(
     registryUrl,
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
