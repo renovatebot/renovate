@@ -176,9 +176,8 @@ export function resolvePackage(packageName: string): PackageResolution {
       registryUrl = registryUrls[0];
     }
   }
-  registryUrl = ensureTrailingSlash(registryUrl);
   const packageUrl = url.resolve(
-    registryUrl,
+    ensureTrailingSlash(registryUrl),
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
   );
   return { packageUrl, registryUrl };
