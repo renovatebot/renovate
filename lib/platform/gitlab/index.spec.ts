@@ -13,6 +13,7 @@ import type { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import type * as _git from '../../util/git';
 import type * as _hostRules from '../../util/host-rules';
+import { toBase64 } from '../../util/string';
 
 const gitlabApiHost = 'https://gitlab.com';
 
@@ -1167,7 +1168,11 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      await gitlab.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes comment by content if found', async () => {
@@ -1177,7 +1182,11 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: 'some-body\n' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({ number: 42, content: 'some-body' });
+      await gitlab.ensureCommentRemoval({
+        type: 'by-content',
+        number: 42,
+        content: 'some-body',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1945,7 +1954,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+          content: toBase64(JSON.stringify(data)),
         });
       const res = await gitlab.getJsonFile('dir/file.json');
       expect(res).toEqual(data);
@@ -1965,7 +1974,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from(json5Data).toString('base64'),
+          content: toBase64(json5Data),
         });
       const res = await gitlab.getJsonFile('dir/file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1980,7 +1989,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+          content: toBase64(JSON.stringify(data)),
         });
       const res = await gitlab.getJsonFile('dir/file.json', 'different%2Frepo');
       expect(res).toEqual(data);
@@ -1995,7 +2004,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev'
         )
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+          content: toBase64(JSON.stringify(data)),
         });
       const res = await gitlab.getJsonFile(
         'dir/file.json',
@@ -2013,7 +2022,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from('!@#').toString('base64'),
+          content: toBase64('!@#'),
         });
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();

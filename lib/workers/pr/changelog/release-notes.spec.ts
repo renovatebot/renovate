@@ -3,6 +3,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { loadFixture, mocked } from '../../../../test/util';
 import { clone } from '../../../util/clone';
 import * as _hostRules from '../../../util/host-rules';
+import { toBase64 } from '../../../util/string';
 import {
   addReleaseNotes,
   getReleaseList,
@@ -595,7 +596,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .reply(200, githubTreeResponse)
         .get('/repos/some/repository1/git/blobs/abcd')
         .reply(200, {
-          content: Buffer.from('not really markdown').toString('base64'),
+          content: toBase64('not really markdown'),
         });
       const res = await getReleaseNotesMd(
         {
@@ -617,7 +618,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .reply(200, githubTreeResponse)
         .get('/repos/some/repository2/git/blobs/abcd')
         .reply(200, {
-          content: Buffer.from(`#\nha\nha\n#\nha\nha`).toString('base64'),
+          content: toBase64(`#\nha\nha\n#\nha\nha`),
         });
       const res = await getReleaseNotesMd(
         {
@@ -639,7 +640,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .reply(200, githubTreeResponse)
         .get('/repos/angular/angular.js/git/blobs/abcd')
         .reply(200, {
-          content: Buffer.from(angularJsChangelogMd).toString('base64'),
+          content: toBase64(angularJsChangelogMd),
         });
       const res = await getReleaseNotesMd(
         {
@@ -719,7 +720,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .reply(200, githubTreeResponse)
         .get('/repos/facebook/jest/git/blobs/abcd')
         .reply(200, {
-          content: Buffer.from(jestChangelogMd).toString('base64'),
+          content: toBase64(jestChangelogMd),
         });
       const res = await getReleaseNotesMd(
         {
@@ -750,7 +751,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .reply(200, subdirTree)
         .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
-          content: Buffer.from(jsYamlChangelogMd).toString('base64'),
+          content: toBase64(jsYamlChangelogMd),
         });
       const res = await getReleaseNotesMd(
         {
@@ -777,7 +778,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .reply(200, githubTreeResponse)
         .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
-          content: Buffer.from(jsYamlChangelogMd).toString('base64'),
+          content: toBase64(jsYamlChangelogMd),
         });
       const res = await getReleaseNotesMd(
         {
@@ -816,7 +817,7 @@ describe('workers/pr/changelog/release-notes', () => {
           .reply(200, githubTreeResponse)
           .get('/repos/yargs/yargs/git/blobs/abcd')
           .reply(200, {
-            content: Buffer.from(yargsChangelogMd).toString('base64'),
+            content: toBase64(yargsChangelogMd),
           });
         const res = await getReleaseNotesMd(
           {
@@ -843,7 +844,7 @@ describe('workers/pr/changelog/release-notes', () => {
           .reply(200, githubTreeResponse)
           .get('/repos/yargs/yargs/git/blobs/abcd')
           .reply(200, {
-            content: Buffer.from(yargsChangelogMd).toString('base64'),
+            content: toBase64(yargsChangelogMd),
           });
         const res = await getReleaseNotesMd(
           {

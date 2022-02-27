@@ -1,16 +1,14 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url.js';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import type { OutgoingHttpHeaders } from '../../util/http/types';
-import { maskToken } from '../../util/mask';
+import type { HostRule } from '../../types';
+import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { addSecretForSanitizing } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
-import type { Npmrc, PackageResolution } from './types';
+import { fromBase64 } from '../../util/string';
+import type { Npmrc, NpmrcRules, PackageResolution } from './types';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
@@ -36,23 +34,56 @@ function envReplace(value: any, env = process.env): any {
   });
 }
 
-const envRe = regEx(/(\\*)\$\{([^}]+)\}/);
-// TODO: better add to host rules (#9588)
-function sanitize(key: string, val: string): void {
-  if (!val || envRe.test(val)) {
-    return;
+export function getMatchHostFromNpmrcHost(input: string): string {
+  if (input.startsWith('//')) {
+    const matchHost = input.replace('//', '');
+    if (matchHost.includes('/')) {
+      return 'https://' + matchHost;
+    }
+    return matchHost;
   }
-  if (key.endsWith('_authToken') || key.endsWith('_auth')) {
-    addSecretForSanitizing(val);
-  } else if (key.endsWith(':_password')) {
-    addSecretForSanitizing(val);
-    const password = Buffer.from(val, 'base64').toString();
-    addSecretForSanitizing(password);
-    const username: string = npmrc[key.replace(':_password', ':username')];
-    addSecretForSanitizing(
-      Buffer.from(`${username}:${password}`).toString('base64')
-    );
+  return input;
+}
+
+export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
+  const rules: NpmrcRules = {
+    hostRules: [],
+  };
+  const hostType = 'npm';
+  const hosts: Record<string, HostRule> = {};
+  for (const [key, value] of Object.entries(npmrc)) {
+    if (!is.nonEmptyString(value)) {
+      continue;
+    }
+    const keyParts = key.split(':');
+    const keyType = keyParts.pop();
+    let matchHost = '';
+    if (keyParts.length) {
+      matchHost = getMatchHostFromNpmrcHost(keyParts.join(':'));
+    }
+    const rule: HostRule = hosts[matchHost] || {};
+    if (keyType === '_authToken' || keyType === '_auth') {
+      rule.token = value;
+      if (keyType === '_auth') {
+        rule.authType = 'Basic';
+      }
+    } else if (keyType === 'username') {
+      rule.username = value;
+    } else if (keyType === '_password') {
+      rule.password = fromBase64(value);
+    } else {
+      continue; // don't add the rule
+    }
+    hosts[matchHost] = rule;
   }
+  for (const [matchHost, rule] of Object.entries(hosts)) {
+    const hostRule = { ...rule, hostType };
+    if (matchHost) {
+      hostRule.matchHost = matchHost;
+    }
+    rules.hostRules.push(hostRule);
+  }
+  return rules;
 }
 
 export function setNpmrc(input?: string): void {
@@ -66,9 +97,6 @@ export function setNpmrc(input?: string): void {
     npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
     const { exposeAllEnv } = GlobalConfig.get();
     for (const [key, val] of Object.entries(npmrc)) {
-      if (!exposeAllEnv) {
-        sanitize(key, val);
-      }
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
@@ -83,12 +111,14 @@ export function setNpmrc(input?: string): void {
         return;
       }
     }
-    if (!exposeAllEnv) {
-      return;
+    if (exposeAllEnv) {
+      for (const key of Object.keys(npmrc)) {
+        npmrc[key] = envReplace(npmrc[key]);
+      }
     }
-    for (const key of Object.keys(npmrc)) {
-      npmrc[key] = envReplace(npmrc[key]);
-      sanitize(key, npmrc[key]);
+    const npmrcRules = convertNpmrcToRules(npmrc);
+    if (npmrcRules.hostRules.length) {
+      npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
   } else if (npmrc) {
     logger.debug('Resetting npmrc');
@@ -109,24 +139,5 @@ export function resolvePackage(packageName: string): PackageResolution {
     registryUrl,
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
   );
-  const headers: OutgoingHttpHeaders = {};
-  let authInfo = registryAuthToken(registryUrl, { npmrc, recursive: true });
-  if (
-    !authInfo &&
-    npmrc &&
-    npmrc._authToken &&
-    ensureTrailingSlash(registryUrl) ===
-      ensureTrailingSlash(npmrc?.registry || '')
-  ) {
-    authInfo = { type: 'Bearer', token: npmrc._authToken };
-  }
-
-  if (authInfo?.type && authInfo.token) {
-    headers.authorization = `${authInfo.type} ${authInfo.token}`;
-    logger.trace(
-      { token: maskToken(authInfo.token), npmName: packageName },
-      'Using auth (via npmrc) for npm lookup'
-    );
-  }
-  return { headers, packageUrl, registryUrl };
+  return { packageUrl, registryUrl };
 }

@@ -23,7 +23,7 @@ import { checkOnboardingBranch } from '.';
 const rebase: any = _rebase;
 const configModule: any = _config;
 
-jest.mock('../../../../workers/repository/onboarding/branch/rebase');
+jest.mock('../../../repository/onboarding/branch/rebase');
 jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');

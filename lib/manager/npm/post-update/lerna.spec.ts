@@ -7,7 +7,7 @@ import * as _lernaHelper from './lerna';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
-jest.mock('../../../manager/npm/post-update/node-version');
+jest.mock('../../npm/post-update/node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);

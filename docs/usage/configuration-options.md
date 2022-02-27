@@ -1833,6 +1833,14 @@ Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behin
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
+## platformCommit
+
+Supports only GitHub App mode and not when using Personal Access Tokens.
+
+To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
+
+The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
+
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
