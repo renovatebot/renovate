@@ -16,7 +16,7 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = [
   'bump',
-  'extend',
+  'widen',
   'pin',
   'replace',
   'update-lockfile',
