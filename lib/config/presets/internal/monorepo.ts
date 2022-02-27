@@ -181,6 +181,7 @@ const repoGroups = {
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  'sitecore-jss': 'https://github.com/Sitecore/jss',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
