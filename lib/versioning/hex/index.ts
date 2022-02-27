@@ -1,3 +1,4 @@
+import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -6,7 +7,12 @@ export const id = 'hex';
 export const displayName = 'Hex';
 export const urls = ['https://hexdocs.pm/elixir/Version.html'];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'pin',
+  'replace',
+];
 
 function hex2npm(input: string): string {
   return input

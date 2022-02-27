@@ -1,7 +1,9 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import type { RangeStrategy } from '../../types/versioning';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
+
 import { VERSION_PATTERN } from './patterns';
 import {
   npm2poetry,
@@ -14,7 +16,12 @@ export const id = 'poetry';
 export const displayName = 'Poetry';
 export const urls = ['https://python-poetry.org/docs/versions/'];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'pin',
+  'replace',
+];
 
 function equals(a: string, b: string): boolean {
   const semverA = poetry2semver(a);

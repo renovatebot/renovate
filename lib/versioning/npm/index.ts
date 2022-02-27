@@ -1,5 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
+import type { RangeStrategy } from '../../types/versioning';
 import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
@@ -12,7 +13,12 @@ export const urls = [
   'https://semver.npmjs.com/',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'widen', 'pin', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'pin',
+  'replace',
+];
 
 const {
   compare: sortVersions,
