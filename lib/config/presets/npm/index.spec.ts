@@ -2,7 +2,6 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../global';
 import * as npm from '.';
 
-jest.mock('registry-auth-token');
 jest.mock('delay');
 
 describe('config/presets/npm/index', () => {
