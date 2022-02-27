@@ -14,7 +14,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 const { is: isStable } = stable;
 

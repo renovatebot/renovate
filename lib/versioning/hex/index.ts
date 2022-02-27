@@ -12,7 +12,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 function hex2npm(input: string): string {
   return input

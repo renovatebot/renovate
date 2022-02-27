@@ -14,7 +14,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 function hashicorp2npm(input: string): string {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2

@@ -28,7 +28,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
-] as RangeStrategy[];
+];
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
