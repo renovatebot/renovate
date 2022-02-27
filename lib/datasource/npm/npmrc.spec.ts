@@ -36,6 +36,13 @@ describe('datasource/npm/npmrc', () => {
     });
   });
   describe('convertNpmrcToRules()', () => {
+    it('rejects invalid registries', () => {
+      const res = convertNpmrcToRules(
+        ini.parse('registry=1\n@scope:registry=2\n')
+      );
+      expect(res.hostRules).toHaveLength(0);
+      expect(res.packageRules).toHaveLength(0);
+    });
     it('handles naked auth', () => {
       expect(convertNpmrcToRules(ini.parse('_auth=abc123\n')))
         .toMatchInlineSnapshot(`
