@@ -8,9 +8,9 @@ import {
 import type { HttpOptions } from './types';
 
 export function applyAuthorization(
-  inOptions: HttpOptions['GotOptions']
+  inOptions: HttpOptions['gotOptions']
 ): HttpOptions {
-  const options: HttpOptions['GotOptions'] = { ...inOptions };
+  const options: HttpOptions['gotOptions'] = { ...inOptions };
 
   if (options.headers?.authorization || options.noAuth) {
     return options;

@@ -10,11 +10,8 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import type { HttpOptions } from './types';
 
-function findMatchingRules(
-  options: HttpOptions['GotOptions'],
-  url: string
-): HostRule {
-  const hostType = options?.hostType;
+function findMatchingRules(options: HttpOptions, url: string): HostRule {
+  const hostType = options?.gotOptions?.hostType;
   let res = hostRules.find({ hostType, url });
 
   if (res.token || res.username || res.password) {
@@ -73,47 +70,57 @@ function findMatchingRules(
 // Apply host rules to requests
 export function applyHostRules(
   url: string,
-  inOptions: HttpOptions['GotOptions']
-): HttpOptions['GotOptions'] {
-  const options: HttpOptions['GotOptions'] = { ...inOptions };
+  inOptions: HttpOptions
+): HttpOptions['gotOptions'] {
+  const options: HttpOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
-  if (options.noAuth) {
+  if (options?.gotOptions?.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    options.headers?.authorization ||
-    options.password ||
-    options.token
+    options?.gotOptions?.headers?.authorization ||
+    options?.gotOptions?.password ||
+    options?.gotOptions?.token
   ) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
     logger.trace({ url }, `Applying Basic authentication`);
-    options.username = username;
-    options.password = password;
+    if (options.gotOptions) {
+      options.gotOptions.username = username;
+      options.gotOptions.password = password;
+    }
   } else if (token) {
     logger.trace({ url }, `Applying Bearer authentication`);
-    options.token = token;
-    options.context = { ...options.context, authType };
+    if (options.gotOptions) {
+      options.gotOptions.token = token;
+      options.gotOptions.context = {
+        ...options?.gotOptions?.context,
+        authType,
+      };
+    }
   } else if (enabled === false) {
-    options.enabled = false;
+    if (options.gotOptions) {
+      options.gotOptions.enabled = false;
+    }
   }
   // Apply optional params
-  if (foundRules.abortOnError) {
-    options.abortOnError = foundRules.abortOnError;
+  if (foundRules.abortOnError && options.gotOptions) {
+    options.gotOptions.abortOnError = foundRules.abortOnError;
   }
 
-  if (foundRules.abortIgnoreStatusCodes) {
-    options.abortIgnoreStatusCodes = foundRules.abortIgnoreStatusCodes;
+  if (foundRules.abortIgnoreStatusCodes && options.gotOptions) {
+    options.gotOptions.abortIgnoreStatusCodes =
+      foundRules.abortIgnoreStatusCodes;
   }
 
-  if (foundRules.timeout) {
-    options.timeout = foundRules.timeout;
+  if (foundRules.timeout && options.gotOptions) {
+    options.gotOptions.timeout = foundRules.timeout;
   }
 
-  if (!hasProxy() && foundRules.enableHttp2 === true) {
-    options.http2 = true;
+  if (!hasProxy() && foundRules.enableHttp2 === true && options.gotOptions) {
+    options.gotOptions.http2 = true;
   }
-  return options;
+  return options.gotOptions;
 }
 
 export function getRequestLimit(url: string): number | null {

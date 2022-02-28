@@ -14,6 +14,7 @@ import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
 import type {
   GotJSONOptions,
+  GotOptions,
   HttpOptions,
   HttpPostOptions,
   HttpResponse,
@@ -56,7 +57,7 @@ function applyDefaultHeaders(options: Options): void {
 // `request`.
 async function gotRoutine<T>(
   url: string,
-  options: HttpOptions['GotOptions'],
+  options: GotOptions | undefined,
   requestStats: Partial<RequestStats>
 ): Promise<Response<T>> {
   logger.trace({ url, options }, 'got request');
@@ -75,12 +76,10 @@ async function gotRoutine<T>(
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
-  private options?: HttpOptions['GotOptions'];
+  private options?: HttpOptions;
 
   constructor(private hostType: string, options: HttpOptions = {}) {
-    this.options = merge<HttpOptions['GotOptions']>(options, {
-      context: { hostType },
-    });
+    this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
   protected async request<T>(
@@ -92,7 +91,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
 
-    let options: HttpOptions['GotOptions'] = merge<HttpOptions['GotOptions']>(
+    let options: HttpOptions['gotOptions'] = merge<HttpOptions['gotOptions']>(
       {
         method: 'get',
         ...this.options,
@@ -110,7 +109,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       };
       applyDefaultHeaders(options);
     }
-    options = applyHostRules(url, options);
+    options = applyHostRules(url, { gotOptions: options });
     if (options?.enabled === false) {
       throw new Error(HOST_DISABLED);
     }

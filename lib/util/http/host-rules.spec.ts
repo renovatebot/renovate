@@ -50,7 +50,8 @@ describe('util/http/host-rules', () => {
   });
 
   it('adds token', () => {
-    expect(applyHostRules(url, { ...options })).toMatchInlineSnapshot(`
+    expect(applyHostRules(url, { gotOptions: { ...options } }))
+      .toMatchInlineSnapshot(`
       Object {
         "context": Object {
           "authType": undefined,
@@ -62,7 +63,7 @@ describe('util/http/host-rules', () => {
   });
 
   it('adds auth', () => {
-    expect(applyHostRules(url, { hostType: PlatformId.Gitea }))
+    expect(applyHostRules(url, { gotOptions: { hostType: PlatformId.Gitea } }))
       .toMatchInlineSnapshot(`
       Object {
         "hostType": "gitea",
@@ -73,7 +74,8 @@ describe('util/http/host-rules', () => {
   });
 
   it('adds custom auth', () => {
-    expect(applyHostRules(url, { hostType: 'npm' })).toMatchInlineSnapshot(`
+    expect(applyHostRules(url, { gotOptions: { hostType: 'npm' } }))
+      .toMatchInlineSnapshot(`
       Object {
         "context": Object {
           "authType": "Basic",
@@ -85,7 +87,7 @@ describe('util/http/host-rules', () => {
   });
 
   it('skips', () => {
-    expect(applyHostRules(url, { ...options, token: 'xxx' }))
+    expect(applyHostRules(url, { gotOptions: { ...options, token: 'xxx' } }))
       .toMatchInlineSnapshot(`
       Object {
         "hostType": "github",
@@ -96,7 +98,7 @@ describe('util/http/host-rules', () => {
 
   it('uses http2', () => {
     hostRules.add({ enableHttp2: true });
-    expect(applyHostRules(url, { ...options, token: 'xxx' }))
+    expect(applyHostRules(url, { gotOptions: { ...options, token: 'xxx' } }))
       .toMatchInlineSnapshot(`
       Object {
         "hostType": "github",
@@ -110,7 +112,7 @@ describe('util/http/host-rules', () => {
     process.env.HTTP_PROXY = 'http://proxy';
     bootstrap();
     hostRules.add({ enableHttp2: true });
-    expect(applyHostRules(url, { ...options, token: 'xxx' }))
+    expect(applyHostRules(url, { gotOptions: { ...options, token: 'xxx' } }))
       .toMatchInlineSnapshot(`
       Object {
         "hostType": "github",
@@ -120,7 +122,7 @@ describe('util/http/host-rules', () => {
   });
 
   it('noAuth', () => {
-    expect(applyHostRules(url, { ...options, noAuth: true }))
+    expect(applyHostRules(url, { gotOptions: { ...options, noAuth: true } }))
       .toMatchInlineSnapshot(`
       Object {
         "hostType": "github",
@@ -149,20 +151,26 @@ describe('util/http/host-rules', () => {
       password: 'xxx',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'github-releases' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'github-releases' },
+      })
     ).toEqual({
       hostType: 'github-releases',
       username: 'some',
       password: 'xxx',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'github-tags' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'github-tags' },
+      })
     ).toEqual({
       hostType: 'github-tags',
       username: 'some2',
       password: 'xxx2',
     });
-    expect(applyHostRules(url, { ...options, hostType: 'pod' })).toEqual({
+    expect(
+      applyHostRules(url, { gotOptions: { ...options, hostType: 'pod' } })
+    ).toEqual({
       context: {
         authType: undefined,
       },
@@ -170,7 +178,9 @@ describe('util/http/host-rules', () => {
       token: 'pod-token',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'github-changelog' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'github-changelog' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -182,7 +192,9 @@ describe('util/http/host-rules', () => {
 
   it('fallback to github', () => {
     expect(
-      applyHostRules(url, { ...options, hostType: 'github-tags' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'github-tags' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -191,7 +203,9 @@ describe('util/http/host-rules', () => {
       token: 'token',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'github-changelog' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'github-changelog' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -199,7 +213,9 @@ describe('util/http/host-rules', () => {
       hostType: 'github-changelog',
       token: 'token',
     });
-    expect(applyHostRules(url, { ...options, hostType: 'pod' })).toEqual({
+    expect(
+      applyHostRules(url, { gotOptions: { ...options, hostType: 'pod' } })
+    ).toEqual({
       context: {
         authType: undefined,
       },
@@ -222,7 +238,9 @@ describe('util/http/host-rules', () => {
       token: 'tags-token',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-tags' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-tags' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -231,7 +249,9 @@ describe('util/http/host-rules', () => {
       token: 'tags-token',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-releases' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-releases' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -240,7 +260,9 @@ describe('util/http/host-rules', () => {
       token: 'release-token',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-packages' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-packages' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -252,7 +274,9 @@ describe('util/http/host-rules', () => {
 
   it('fallback to gitlab', () => {
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-tags' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-tags' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -261,7 +285,9 @@ describe('util/http/host-rules', () => {
       token: 'abc',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-releases' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-releases' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -270,7 +296,9 @@ describe('util/http/host-rules', () => {
       token: 'abc',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-packages' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-packages' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -279,7 +307,9 @@ describe('util/http/host-rules', () => {
       token: 'abc',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'gitlab-changelog' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'gitlab-changelog' },
+      })
     ).toEqual({
       context: {
         authType: undefined,
@@ -296,7 +326,9 @@ describe('util/http/host-rules', () => {
       password: 'xxx',
     });
     expect(
-      applyHostRules(url, { ...options, hostType: 'bitbucket-tags' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'bitbucket-tags' },
+      })
     ).toEqual({
       hostType: 'bitbucket-tags',
       username: 'some',
@@ -306,7 +338,9 @@ describe('util/http/host-rules', () => {
 
   it('fallback to bitbucket', () => {
     expect(
-      applyHostRules(url, { ...options, hostType: 'bitbucket-tags' })
+      applyHostRules(url, {
+        gotOptions: { ...options, hostType: 'bitbucket-tags' },
+      })
     ).toEqual({
       context: {
         authType: undefined,

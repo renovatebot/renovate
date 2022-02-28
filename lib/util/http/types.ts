@@ -47,7 +47,7 @@ export interface HttpOptions {
 
   throwHttpErrors?: boolean;
   useCache?: boolean;
-  GotOptions?: GotOptions;
+  gotOptions?: GotOptions;
 }
 
 export interface HttpPostOptions extends HttpOptions {
