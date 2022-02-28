@@ -575,8 +575,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 
 ## description
 
-The description field is used by config presets to describe what they do.
-They are then collated as part of the onboarding description.
+The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
+Descriptions fields embedded within presets are also collated as part of the onboarding description.
 
 ## digest
 
