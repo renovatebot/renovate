@@ -36,7 +36,7 @@ describe('config/presets/local/index', () => {
     it('throws for unsupported platform', async () => {
       await expect(async () => {
         await local.getPreset({
-          packageName: 'some/repo',
+          repo: 'some/repo',
           presetName: 'default',
           baseConfig: {
             platform: 'unsupported-platform',
@@ -47,7 +47,7 @@ describe('config/presets/local/index', () => {
     it('throws for missing platform', async () => {
       await expect(async () => {
         await local.getPreset({
-          packageName: 'some/repo',
+          repo: 'some/repo',
           presetName: 'default',
           baseConfig: {
             platform: undefined,
@@ -58,7 +58,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to azure', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'azure',
@@ -70,7 +70,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to bitbucket', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'bitbucket',
@@ -82,7 +82,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to custom bitbucket-server', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'bitbucket-server',
@@ -97,7 +97,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to gitea', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         baseConfig: {
           platform: 'gitea',
         },
@@ -107,7 +107,7 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to custom gitea', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'gitea',
@@ -120,7 +120,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to github', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         baseConfig: {
           platform: 'github',
         },
@@ -130,7 +130,7 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to custom github', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'github',
@@ -142,8 +142,8 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to github with a tag', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
-        packageTag: 'someTag',
+        repo: 'some/repo',
+        tag: 'someTag',
         baseConfig: {
           platform: 'github',
         },
@@ -153,9 +153,9 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to custom github with a tag', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'github',
           endpoint: 'https://api.github.example.com',
@@ -167,7 +167,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to gitlab', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'GitLab',
@@ -178,7 +178,7 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to custom gitlab', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
         baseConfig: {
           platform: 'gitlab',
@@ -190,9 +190,9 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to gitlab with a tag', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'GitLab',
         },
@@ -202,9 +202,9 @@ describe('config/presets/local/index', () => {
     });
     it('forwards to custom gitlab with a tag', async () => {
       const content = await local.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'default',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'gitlab',
           endpoint: 'https://gitlab.example.com/api/v4',
