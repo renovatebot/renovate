@@ -42,7 +42,10 @@ In order to achieve these goals, preset configs allow for a very modular approac
 ## Preset Hosting
 
 Presets should be hosted in repositories, which usually means the same platform host as Renovate is running against.
-npm-based presets are deprecated and support will be removed in a future major release.
+
+<!-- prettier-ignore -->
+!!! warning
+    npm-based presets are deprecated and support will be removed in a future major release.
 
 You can set a Git tag (like a SemVer) to use a specific release of your shared config.
 
