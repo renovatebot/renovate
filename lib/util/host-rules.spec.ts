@@ -114,17 +114,17 @@ describe('util/host-rules', () => {
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
-      // Initialized generic host rule for github platform
-      add({
-        hostType: PlatformId.Github,
-        matchHost: 'https://api.github.com',
-        token: 'abc',
-      });
       // specific host rule for using other token in different org
       add({
         hostType: PlatformId.Github,
         matchHost: 'https://api.github.com/repos/org-b/',
         token: 'def',
+      });
+      // Initialized generic host rule for github platform
+      add({
+        hostType: PlatformId.Github,
+        matchHost: 'https://api.github.com',
+        token: 'abc',
       });
       expect(
         find({
@@ -236,6 +236,21 @@ describe('util/host-rules', () => {
           url: 'https://nuget.local/api/sub-resource',
         })
       ).toEqual({ token: 'abc' });
+    });
+    it('matches shortest matchHost first', () => {
+      add({
+        matchHost: 'https://nuget.local/api',
+        token: 'longest',
+      } as any);
+      add({
+        matchHost: 'https://nuget.local/',
+        token: 'shortest',
+      } as any);
+      expect(
+        find({
+          url: 'https://nuget.local/api/sub-resource',
+        })
+      ).toEqual({ token: 'longest' });
     });
     it('returns hosts', () => {
       add({
