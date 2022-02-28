@@ -115,7 +115,7 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
   if (!rule1.matchHost || !rule2.matchHost) {
     return 0;
   }
-  return rule2.matchHost.length - rule1.matchHost.length;
+  return rule1.matchHost.length - rule2.matchHost.length;
 }
 
 export function find(search: HostRuleSearch): HostRule {
