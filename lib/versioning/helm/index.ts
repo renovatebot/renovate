@@ -1,3 +1,4 @@
+import type { RangeStrategy } from '../../types/versioning';
 import { api as npm } from '../npm';
 import type { VersioningApi } from '../types';
 
@@ -9,9 +10,9 @@ export const urls = [
   'https://github.com/Masterminds/semver#basic-comparisons',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = [
+export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
-  'extend',
+  'widen',
   'pin',
   'replace',
   'widen',
