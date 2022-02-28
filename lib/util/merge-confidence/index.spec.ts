@@ -81,6 +81,7 @@ describe('util/merge-confidence/index', () => {
         )
       ).toBe('high');
     });
+
     it('returns neutral if no token', async () => {
       expect(
         await getMergeConfidenceLevel(
