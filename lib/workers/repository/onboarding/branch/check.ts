@@ -6,6 +6,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
+import { ensureComment } from '../../../../platform/comment';
 import { PrState } from '../../../../types';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
@@ -110,7 +111,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications.includes('onboardingClose')) {
     // ensure PR comment
-    await platform.ensureComment({
+    await ensureComment({
       number: pr.number,
       topic: `Renovate is disabled`,
       content: `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
