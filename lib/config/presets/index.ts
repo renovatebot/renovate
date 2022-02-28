@@ -37,10 +37,10 @@ const presetSources: Record<string, PresetApi> = {
 };
 
 const nonScopedPresetWithSubdirRegex = regEx(
-  /^(?<repo>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-./]+?))?$/
+  /^(?<repo>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/
 );
 const gitPresetRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<packageTag>[\w\-./]+?))?$/
+  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/
 );
 
 export function replaceArgs(
@@ -78,7 +78,7 @@ export function parsePreset(input: string): ParsedPreset {
   let presetPath: string | undefined;
   let repo: string;
   let presetName: string;
-  let packageTag: string | undefined;
+  let tag: string | undefined;
   let params: string[];
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -156,10 +156,10 @@ export function parsePreset(input: string): ParsedPreset {
     if (!nonScopedPresetWithSubdirRegex.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    ({ repo, presetPath, presetName, packageTag } =
+    ({ repo, presetPath, presetName, tag } =
       nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
   } else {
-    ({ repo, presetName, packageTag } = gitPresetRegex.exec(str)?.groups || {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups || {});
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;
@@ -174,7 +174,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetPath,
     repo,
     presetName,
-    packageTag,
+    tag,
     params,
   };
 }
@@ -192,14 +192,14 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, repo, presetPath, presetName, packageTag, params } =
+  const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     repo,
     presetPath,
     presetName,
     baseConfig,
-    packageTag,
+    tag,
   });
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);

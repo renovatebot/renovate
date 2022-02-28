@@ -68,7 +68,7 @@ describe('config/presets/gitlab/index', () => {
 
       const content = await gitlab.getPreset({
         repo: 'some/repo',
-        packageTag: 'someTag',
+        tag: 'someTag',
       });
       expect(content).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();

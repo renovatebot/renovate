@@ -20,7 +20,7 @@ export function getPreset({
   repo,
   presetName = 'default',
   presetPath,
-  packageTag,
+  tag,
   baseConfig,
 }: PresetConfig): Promise<Preset> {
   const { platform, endpoint } = baseConfig;
@@ -38,6 +38,6 @@ export function getPreset({
     presetName,
     presetPath,
     endpoint,
-    packageTag
+    tag
   );
 }

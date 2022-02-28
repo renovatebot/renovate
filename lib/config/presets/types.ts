@@ -8,7 +8,7 @@ export type PresetConfig = {
   presetPath?: string;
   presetName?: string;
   baseConfig?: RenovateConfig;
-  packageTag?: string;
+  tag?: string;
 };
 
 export interface PresetApi {
@@ -20,7 +20,7 @@ export interface ParsedPreset {
   repo: string;
   presetPath?: string;
   presetName: string;
-  packageTag?: string;
+  tag?: string;
   params?: string[];
 }
 
@@ -28,7 +28,7 @@ export type PresetFetcher = (
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  tag?: string
 ) => Promise<Preset>;
 
 export type FetchPresetConfig = {
@@ -36,6 +36,6 @@ export type FetchPresetConfig = {
   filePreset: string;
   presetPath?: string;
   endpoint: string;
-  packageTag?: string;
+  tag?: string;
   fetch: PresetFetcher;
 };

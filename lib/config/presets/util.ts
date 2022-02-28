@@ -15,7 +15,7 @@ export async function fetchPreset({
   filePreset,
   presetPath,
   endpoint: _endpoint,
-  packageTag = null,
+  tag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
   const endpoint = ensureTrailingSlash(_endpoint);
@@ -29,7 +29,7 @@ export async function fetchPreset({
         repo,
         buildFilePath('default.json'),
         endpoint,
-        packageTag
+        tag
       );
     } catch (err) {
       if (err.message !== PRESET_DEP_NOT_FOUND) {
@@ -39,7 +39,7 @@ export async function fetchPreset({
         repo,
         buildFilePath('renovate.json'),
         endpoint,
-        packageTag
+        tag
       );
       logger.info(
         'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
@@ -50,7 +50,7 @@ export async function fetchPreset({
       repo,
       buildFilePath(`${fileName}.json`),
       endpoint,
-      packageTag
+      tag
     );
   }
 

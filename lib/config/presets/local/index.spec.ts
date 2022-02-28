@@ -143,7 +143,7 @@ describe('config/presets/local/index', () => {
     it('forwards to github with a tag', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'github',
         },
@@ -155,7 +155,7 @@ describe('config/presets/local/index', () => {
       const content = await local.getPreset({
         repo: 'some/repo',
         presetName: 'default',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'github',
           endpoint: 'https://api.github.example.com',
@@ -192,7 +192,7 @@ describe('config/presets/local/index', () => {
       const content = await local.getPreset({
         repo: 'some/repo',
         presetName: 'default',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'GitLab',
         },
@@ -204,7 +204,7 @@ describe('config/presets/local/index', () => {
       const content = await local.getPreset({
         repo: 'some/repo',
         presetName: 'default',
-        packageTag: 'someTag',
+        tag: 'someTag',
         baseConfig: {
           platform: 'gitlab',
           endpoint: 'https://gitlab.example.com/api/v4',

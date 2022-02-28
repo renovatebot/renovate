@@ -18,11 +18,11 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  tag?: string
 ): Promise<Preset> {
   let res: RepoContents;
   try {
-    res = await getRepoContents(repo, fileName, packageTag, {
+    res = await getRepoContents(repo, fileName, tag, {
       baseUrl: endpoint,
     });
   } catch (err) {
@@ -50,14 +50,14 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath: string,
   endpoint = Endpoint,
-  packageTag?: string
+  tag?: string
 ): Promise<Preset> {
   return fetchPreset({
     repo,
     filePreset,
     presetPath,
     endpoint,
-    packageTag,
+    tag,
     fetch: fetchJSONFile,
   });
 }
@@ -66,13 +66,7 @@ export function getPreset({
   repo,
   presetName = 'default',
   presetPath,
-  packageTag = null,
+  tag = null,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(
-    repo,
-    presetName,
-    presetPath,
-    Endpoint,
-    packageTag
-  );
+  return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

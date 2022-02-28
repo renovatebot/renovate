@@ -438,7 +438,7 @@ describe('config/presets/index', () => {
         presetName: 'some-file/subpreset',
         presetPath: undefined,
         presetSource: 'local',
-        packageTag: '1.2.3',
+        tag: '1.2.3',
       });
     });
     it('parses local with subdirectory and tag', () => {
@@ -452,7 +452,7 @@ describe('config/presets/index', () => {
         presetName: 'some-file',
         presetPath: 'some-dir',
         presetSource: 'local',
-        packageTag: '1.2.3',
+        tag: '1.2.3',
       });
     });
 
@@ -467,7 +467,7 @@ describe('config/presets/index', () => {
         presetName: 'preset',
         presetPath: 'path/to',
         presetSource: 'local',
-        packageTag: 'feature/branch',
+        tag: 'feature/branch',
       });
     });
 
@@ -482,7 +482,7 @@ describe('config/presets/index', () => {
         presetName: 'preset/subpreset',
         presetPath: undefined,
         presetSource: 'local',
-        packageTag: 'feature/branch',
+        tag: 'feature/branch',
       });
     });
 
