@@ -20,12 +20,6 @@ export async function getPreset({
   let dep;
   try {
     const { packageUrl } = resolvePackage(packageName);
-    // istanbul ignore if
-    if (!packageUrl.startsWith('https://registry.npmjs.org')) {
-      logger.warn(
-        'npm presets from non-default registries are now deprecated. Please migrate to repository-based presets instead.'
-      );
-    }
     const body = (await http.getJson<NpmResponse>(packageUrl)).body;
     dep = body.versions[body['dist-tags'].latest];
   } catch (err) {
