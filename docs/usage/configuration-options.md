@@ -2755,7 +2755,11 @@ To disable the vulnerability alerts functionality completely, configure like thi
 }
 ```
 
-To enable auto merge, configure like this:
+<!-- prettier-ignore -->
+!!! tip
+    We strongly recommend you have good test coverage before you automerge vulnerability alerts.
+
+To automatically merge vulnerability alert PRs, configure like this:
 
 ```json
 {
