@@ -93,7 +93,7 @@ describe('manager/sbt/extract', () => {
             datasource: 'sbt-plugin',
             depName: 'com.github.gseitz:sbt-release',
             depType: 'plugin',
-            groupName: 'sbtReleaseVersion for com.github.gseitz',
+            groupName: 'sbtReleaseVersion',
             lookupName: 'com.github.gseitz:sbt-release',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',

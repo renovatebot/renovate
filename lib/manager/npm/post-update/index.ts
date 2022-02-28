@@ -541,7 +541,7 @@ export async function getAdditionalFiles(
       (upgrade) => upgrade.npmLock === npmLock
     );
     const res = await npm.generateLockFile(
-      fullLockFileDir,
+      lockFileDir,
       env,
       fileName,
       config,

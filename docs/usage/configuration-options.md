@@ -575,8 +575,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 
 ## description
 
-The description field is used by config presets to describe what they do.
-They are then collated as part of the onboarding description.
+The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
+Descriptions fields embedded within presets are also collated as part of the onboarding description.
 
 ## digest
 
@@ -1839,6 +1839,14 @@ Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behin
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
+## platformCommit
+
+Supports only GitHub App mode and not when using Personal Access Tokens.
+
+To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
+
+The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
+
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
@@ -2099,7 +2107,7 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
@@ -2738,10 +2746,15 @@ For example, to configure custom labels and assignees:
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
+    "automerge": true,
     "assignees": ["@rarkins"]
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
 
 To disable the vulnerability alerts functionality completely, configure like this:
 
