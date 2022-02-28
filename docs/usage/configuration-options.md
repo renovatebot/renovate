@@ -2740,10 +2740,15 @@ For example, to configure custom labels and assignees:
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
+    "automerge": true,
     "assignees": ["@rarkins"]
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
 
 To disable the vulnerability alerts functionality completely, configure like this:
 
@@ -2751,20 +2756,6 @@ To disable the vulnerability alerts functionality completely, configure like thi
 {
   "vulnerabilityAlerts": {
     "enabled": false
-  }
-}
-```
-
-<!-- prettier-ignore -->
-!!! tip
-    We strongly recommend you have good test coverage before you automerge vulnerability alerts.
-
-To automatically merge vulnerability alert PRs, configure like this:
-
-```json
-{
-  "vulnerabilityAlerts": {
-    "automerge": true
   }
 }
 ```
