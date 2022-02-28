@@ -174,6 +174,7 @@ When creating the GitHub App give it the following permissions:
 - Commit statuses: Read & write
 - Dependabot alerts: Read-only
 - Workflows: Read & write
+- Members: Read
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
