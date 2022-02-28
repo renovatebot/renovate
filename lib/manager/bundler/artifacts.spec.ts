@@ -19,11 +19,11 @@ const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../lib/util/exec/env');
-jest.mock('../../../lib/datasource');
-jest.mock('../../../lib/util/fs');
-jest.mock('../../../lib/util/git');
-jest.mock('../../../lib/util/host-rules');
+jest.mock('../../util/exec/env');
+jest.mock('../../datasource');
+jest.mock('../../util/fs');
+jest.mock('../../util/git');
+jest.mock('../../util/host-rules');
 jest.mock('./host-rules');
 
 const adminConfig: RepoGlobalConfig = {

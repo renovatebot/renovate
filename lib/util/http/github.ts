@@ -10,13 +10,19 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../../util/cache/repository';
+import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { parseLinkHeader } from '../url';
 import type { GotLegacyError } from './legacy';
-import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
+import type {
+  GraphqlOptions,
+  HttpPostOptions,
+  HttpResponse,
+  InternalHttpOptions,
+} from './types';
+import { Http } from '.';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -152,15 +158,6 @@ function handleGotError(
     logger.debug({ err }, 'Unknown GitHub error');
   }
   return err;
-}
-
-interface GraphqlOptions {
-  variables?: Record<string, string | number | null>;
-  paginate?: boolean;
-  count?: number;
-  limit?: number;
-  cursor?: string | null;
-  acceptHeader?: string;
 }
 
 interface GraphqlPaginatedContent<T = unknown> {

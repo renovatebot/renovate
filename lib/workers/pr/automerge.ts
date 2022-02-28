@@ -94,6 +94,7 @@ export async function checkAutoMerge(
     }
     if (rebaseRequested) {
       await platform.ensureCommentRemoval({
+        type: 'by-content',
         number: pr.number,
         content: automergeComment,
       });

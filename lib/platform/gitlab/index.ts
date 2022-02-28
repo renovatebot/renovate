@@ -21,8 +21,8 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import type { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
+import type { HttpResponse } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
@@ -1125,26 +1125,26 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval({
-  number: issueNo,
-  topic,
-  content,
-}: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(
-    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
-  );
+export async function ensureCommentRemoval(
+  deleteConfig: EnsureCommentRemovalConfig
+): Promise<void> {
+  const { number: issueNo } = deleteConfig;
+  const key =
+    deleteConfig.type === 'by-topic'
+      ? deleteConfig.topic
+      : deleteConfig.content;
+  logger.debug(`Ensuring comment "${key}" in #${issueNo} is removed`);
 
   const comments = await getComments(issueNo);
-  let commentId: number | null = null;
+  let commentId: number | null | undefined = null;
 
-  const byTopic = (comment: GitlabComment): boolean =>
-    comment.body.startsWith(`### ${topic}\n\n`);
-  const byContent = (comment: GitlabComment): boolean =>
-    comment.body.trim() === content;
-
-  if (topic) {
+  if (deleteConfig.type === 'by-topic') {
+    const byTopic = (comment: GitlabComment): boolean =>
+      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
     commentId = comments.find(byTopic)?.id;
-  } else if (content) {
+  } else if (deleteConfig.type === 'by-content') {
+    const byContent = (comment: GitlabComment): boolean =>
+      comment.body.trim() === deleteConfig.content;
     commentId = comments.find(byContent)?.id;
   }
 
