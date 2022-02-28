@@ -2760,7 +2760,7 @@ To enable auto merge, configure like this:
 ```json
 {
   "vulnerabilityAlerts": {
-      "automerge": true
+    "automerge": true
   }
 }
 ```
