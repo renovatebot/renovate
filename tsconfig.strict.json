@@ -145,6 +145,8 @@
     "lib/manager/flux/artifacts.ts",
     "lib/manager/flux/extract.ts",
     "lib/manager/flux/index.ts",
+    "lib/manager/fvm/extract.ts",
+    "lib/manager/fvm/index.ts",
     "lib/manager/git-submodules/artifacts.ts",
     "lib/manager/git-submodules/extract.ts",
     "lib/manager/git-submodules/index.ts",

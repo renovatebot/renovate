@@ -12,19 +12,27 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { exists, readFile, remove, writeFile } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  exists,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
-  cwd: string
+  lockFileDir: string
 ): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
   let offlineMirror = false;
   let yarnPath: string = null;
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(
+      upath.join(lockFileDir, '.yarnrc'),
+      'utf8'
+    );
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
@@ -42,7 +50,10 @@ export async function checkYarnrc(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
-        await writeFile(`${cwd}/.yarnrc`, scrubbedYarnrc);
+        await writeLocalFile(
+          upath.join(lockFileDir, '.yarnrc'),
+          scrubbedYarnrc
+        );
         yarnPath = null;
       }
     }
@@ -63,12 +74,12 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
 }
 
 export async function generateLockFile(
-  cwd: string,
+  lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = upath.join(cwd, 'yarn.lock');
+  const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
@@ -102,7 +113,7 @@ export async function generateLockFile(
     let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {
-        const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+        const { offlineMirror, yarnPath } = await checkYarnrc(lockFileDir);
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
@@ -145,7 +156,7 @@ export async function generateLockFile(
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: lockFileName,
       extraEnv,
       docker: {
         image: 'node',
@@ -215,7 +226,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -228,7 +239,10 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
+    if (lockFile === null) {
+      throw new Error('Error reading local file');
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

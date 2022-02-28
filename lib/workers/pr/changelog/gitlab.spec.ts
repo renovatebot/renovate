@@ -5,7 +5,7 @@ import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '.';
 
-jest.mock('../../../../lib/datasource/npm');
+jest.mock('../../../datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
   branchName: undefined,
