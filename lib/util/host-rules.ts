@@ -4,6 +4,7 @@ import { logger } from '../logger';
 import type { HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
+import { toBase64 } from './string';
 import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
@@ -58,10 +59,9 @@ export function add(params: HostRule): void {
     }
   });
   if (rule.username && rule.password) {
-    const secret = Buffer.from(`${rule.username}:${rule.password}`).toString(
-      'base64'
+    sanitize.addSecretForSanitizing(
+      toBase64(`${rule.username}:${rule.password}`)
     );
-    sanitize.addSecretForSanitizing(secret);
   }
   hostRules.push(rule);
 }

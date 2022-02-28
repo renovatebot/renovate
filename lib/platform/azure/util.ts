@@ -8,6 +8,7 @@ import { logger } from '../../logger';
 import { HostRule, PrState } from '../../types';
 import type { GitOptions } from '../../types/git';
 import { addSecretForSanitizing } from '../../util/sanitize';
+import { toBase64 } from '../../util/string';
 import type { AzurePr } from './types';
 
 export function getNewBranchName(branchName?: string): string {
@@ -126,10 +127,6 @@ export async function streamToString(
     stream.on('error', (err) => reject(err));
   });
   return p;
-}
-
-function toBase64(from: string): string {
-  return Buffer.from(from).toString('base64');
 }
 
 export function getStorageExtraCloneOpts(config: HostRule): GitOptions {

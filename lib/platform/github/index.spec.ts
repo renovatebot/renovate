@@ -8,6 +8,7 @@ import {
 import type * as _logger from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import type * as _git from '../../util/git';
+import { toBase64 } from '../../util/string';
 import type { CreatePRConfig, Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
@@ -2503,7 +2504,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        content: toBase64(JSON.stringify(data)),
       });
       const res = await github.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -2521,7 +2522,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json5').reply(200, {
-        content: Buffer.from(json5Data).toString('base64'),
+        content: toBase64(json5Data),
       });
       const res = await github.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -2537,7 +2538,7 @@ describe('platform/github/index', () => {
         token: 'token',
       } as any);
       scope.get('/repos/different/repo/contents/file.json').reply(200, {
-        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        content: toBase64(JSON.stringify(data)),
       });
       const res = await github.getJsonFile('file.json', 'different/repo');
       expect(res).toEqual(data);
@@ -2550,7 +2551,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json?ref=dev').reply(200, {
-        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        content: toBase64(JSON.stringify(data)),
       });
       const res = await github.getJsonFile('file.json', 'some/repo', 'dev');
       expect(res).toEqual(data);
@@ -2562,7 +2563,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: Buffer.from('!@#').toString('base64'),
+        content: toBase64('!@#'),
       });
       await expect(github.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();

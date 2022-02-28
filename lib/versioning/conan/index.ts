@@ -1,4 +1,5 @@
 import * as semver from 'semver';
+import type { RangeStrategy } from '../../types/versioning';
 import { api as looseAPI } from '../loose';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
@@ -26,7 +27,12 @@ export const urls = [
   'https://docs.conan.io/en/latest/versioning/version_ranges.html#version-ranges',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['auto', 'bump', 'widen', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'auto',
+  'bump',
+  'widen',
+  'replace',
+];
 
 const MIN = 1;
 const MAX = -1;
