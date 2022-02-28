@@ -99,6 +99,7 @@ describe('workers/branch/index', () => {
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
+        type: 'with-pr',
         pr: partial<Pr>({
           title: '',
           sourceBranch: '',
@@ -381,6 +382,7 @@ describe('workers/branch/index', () => {
       });
       git.branchExists.mockReturnValue(true);
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
         prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
@@ -503,6 +505,7 @@ describe('workers/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
         prBlockedBy: 'NeedsApproval',
       });
       expect(await branchWorker.processBranch(config)).toEqual({
@@ -524,6 +527,7 @@ describe('workers/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
         prBlockedBy: 'AwaitingTests',
       });
       expect(await branchWorker.processBranch(config)).toEqual({
@@ -545,6 +549,7 @@ describe('workers/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('no automerge');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
         prBlockedBy: 'BranchAutomerge',
       });
       expect(await branchWorker.processBranch(config)).toEqual({
@@ -566,6 +571,7 @@ describe('workers/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
         prBlockedBy: 'Error',
       });
       expect(await branchWorker.processBranch(config)).toEqual({
@@ -587,6 +593,7 @@ describe('workers/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
         prBlockedBy: 'whoops' as any,
       });
       expect(await branchWorker.processBranch(config)).toEqual({
