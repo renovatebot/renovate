@@ -21,7 +21,7 @@ export async function getPreset({
   try {
     const { packageUrl } = resolvePackage(packageName);
     // istanbul ignore if
-    if (!packageUrl.startsWith('https://registry.npmjs.org')) {
+    if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
       logger.warn(
         'npm presets from non-default registries are now deprecated. Please migrate to repository-based presets instead.'
       );
