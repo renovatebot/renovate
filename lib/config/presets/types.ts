@@ -4,7 +4,7 @@ import type { RenovateConfig } from '../types';
 export type Preset = RenovateConfig & Record<string, unknown>;
 
 export type PresetConfig = {
-  packageName: string;
+  repo: string;
   presetPath?: string;
   presetName?: string;
   baseConfig?: RenovateConfig;
@@ -17,7 +17,7 @@ export interface PresetApi {
 
 export interface ParsedPreset {
   presetSource: string;
-  packageName: string;
+  repo: string;
   presetPath?: string;
   presetName: string;
   packageTag?: string;
@@ -32,7 +32,7 @@ export type PresetFetcher = (
 ) => Promise<Preset>;
 
 export type FetchPresetConfig = {
-  pkgName: string;
+  repo: string;
   filePreset: string;
   presetPath?: string;
   endpoint: string;

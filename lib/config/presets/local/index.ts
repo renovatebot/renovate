@@ -17,7 +17,7 @@ const resolvers = {
 };
 
 export function getPreset({
-  packageName: pkgName,
+  repo,
   presetName = 'default',
   presetPath,
   packageTag,
@@ -34,7 +34,7 @@ export function getPreset({
     );
   }
   return resolver.getPresetFromEndpoint(
-    pkgName,
+    repo,
     presetName,
     presetPath,
     endpoint,

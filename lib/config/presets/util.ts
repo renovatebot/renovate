@@ -11,7 +11,7 @@ export const PRESET_RENOVATE_CONFIG_NOT_FOUND =
   'preset renovate-config not found';
 
 export async function fetchPreset({
-  pkgName,
+  repo,
   filePreset,
   presetPath,
   endpoint: _endpoint,
@@ -26,7 +26,7 @@ export async function fetchPreset({
   if (fileName === 'default') {
     try {
       jsonContent = await fetch(
-        pkgName,
+        repo,
         buildFilePath('default.json'),
         endpoint,
         packageTag
@@ -36,7 +36,7 @@ export async function fetchPreset({
         throw err;
       }
       jsonContent = await fetch(
-        pkgName,
+        repo,
         buildFilePath('renovate.json'),
         endpoint,
         packageTag
@@ -47,7 +47,7 @@ export async function fetchPreset({
     }
   } else {
     jsonContent = await fetch(
-      pkgName,
+      repo,
       buildFilePath(`${fileName}.json`),
       endpoint,
       packageTag
