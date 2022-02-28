@@ -35,7 +35,7 @@ export async function getDependentPackageFiles(
       upath.normalize(a)
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      normalizeRelativePath(f, r)
+      reframeRelativePathToRootOfRepo(f, r)
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -66,16 +66,26 @@ function recursivelyGetDependentPackageFiles(
   );
 }
 
-// Take the path relative from a package file, and make it relative from the root of the repo
-function normalizeRelativePath(
-  fromPackageFile: string,
-  toPackageFile: string
+// Take the path relative from a project file, and make it relative from the root of the repo
+function reframeRelativePathToRootOfRepo(
+  dependentProjectRelativePath: string,
+  projectReference: string
 ): string {
-  const fromFullPath = `/${fromPackageFile}`;
-  const toFullPath = path.resolve(path.dirname(fromFullPath), toPackageFile);
-  const relativeToPackageFile = path.relative('/', toFullPath);
+  const virtualRepoRoot = '/';
+  const absoluteDependentProjectPath = upath.resolve(
+    virtualRepoRoot,
+    dependentProjectRelativePath
+  );
+  const absoluteProjectReferencePath = upath.resolve(
+    path.dirname(absoluteDependentProjectPath),
+    projectReference
+  );
+  const relativeProjectReferencePath = upath.relative(
+    virtualRepoRoot,
+    absoluteProjectReferencePath
+  );
 
-  return relativeToPackageFile;
+  return relativeProjectReferencePath;
 }
 
 // Get a list of package files in `localDir`
