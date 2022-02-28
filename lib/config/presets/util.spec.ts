@@ -2,7 +2,7 @@ import type { FetchPresetConfig, Preset } from './types';
 import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util';
 
 const config: FetchPresetConfig = {
-  pkgName: 'some/repo',
+  repo: 'some/repo',
   filePreset: 'default',
   endpoint: 'endpoint',
   fetch: undefined,

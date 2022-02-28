@@ -48,9 +48,7 @@ describe('config/presets/gitea/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(
-        gitea.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow();
+      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -60,9 +58,9 @@ describe('config/presets/gitea/index', () => {
         .get(`${basePath}/default.json`)
         .reply(200, {});
 
-      await expect(
-        gitea.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow(PRESET_INVALID_JSON);
+      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        PRESET_INVALID_JSON
+      );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -74,9 +72,9 @@ describe('config/presets/gitea/index', () => {
           content: toBase64('not json'),
         });
 
-      await expect(
-        gitea.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow(PRESET_INVALID_JSON);
+      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        PRESET_INVALID_JSON
+      );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -88,7 +86,7 @@ describe('config/presets/gitea/index', () => {
           content: toBase64('{"foo":"bar"}'),
         });
 
-      const content = await gitea.getPreset({ packageName: 'some/repo' });
+      const content = await gitea.getPreset({ repo: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -101,7 +99,7 @@ describe('config/presets/gitea/index', () => {
           content: toBase64('{"somename":{"foo":"bar"}}'),
         });
       const content = await gitea.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'somefile/somename',
       });
       expect(content).toEqual({ foo: 'bar' });
@@ -119,7 +117,7 @@ describe('config/presets/gitea/index', () => {
         });
 
       const content = await gitea.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'somefile/somename/somesubname',
       });
       expect(content).toEqual({ foo: 'bar' });
@@ -134,7 +132,7 @@ describe('config/presets/gitea/index', () => {
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await gitea.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'custom',
       });
       expect(content).toEqual({ foo: 'bar' });
@@ -149,7 +147,7 @@ describe('config/presets/gitea/index', () => {
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await gitea.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'custom',
         presetPath: 'path',
       });
@@ -166,7 +164,7 @@ describe('config/presets/gitea/index', () => {
         });
       await expect(
         gitea.getPreset({
-          packageName: 'some/repo',
+          repo: 'some/repo',
           presetName: 'somefile/somename/somesubname',
         })
       ).rejects.toThrow(PRESET_NOT_FOUND);
