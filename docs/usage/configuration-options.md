@@ -575,8 +575,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 
 ## description
 
-The description field is used by config presets to describe what they do.
-They are then collated as part of the onboarding description.
+The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
+Descriptions fields embedded within presets are also collated as part of the onboarding description.
 
 ## digest
 
@@ -2740,10 +2740,15 @@ For example, to configure custom labels and assignees:
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
+    "automerge": true,
     "assignees": ["@rarkins"]
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
 
 To disable the vulnerability alerts functionality completely, configure like this:
 
