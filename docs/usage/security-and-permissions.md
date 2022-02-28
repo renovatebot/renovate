@@ -19,6 +19,6 @@
 Renovate can also request users's permission to the following resources.
 These permissions will be requested and authorized on an individual-user basis.
 
-| Permission | Renovate hosted app | Forking Renovate | Why                                                                   |
-| ---------- | :-----------------: | :--------------: | --------------------------------------------------------------------- |
-| email      |       `read`        |    don't know    | Logging in to app dashboard and store your consent against your email |
+| Permission | Renovate hosted app | Forking Renovate | Why                                                      |
+| ---------- | :-----------------: | :--------------: | -------------------------------------------------------- |
+| email      |       `read`        |       N/A        | Per-user consent requested if logging into App dashboard |
