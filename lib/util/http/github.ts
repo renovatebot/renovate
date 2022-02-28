@@ -10,7 +10,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../../util/cache/repository';
+import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
 import { range } from '../range';
 import { regEx } from '../regex';

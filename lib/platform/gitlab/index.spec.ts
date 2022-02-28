@@ -13,6 +13,7 @@ import type { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import type * as _git from '../../util/git';
 import type * as _hostRules from '../../util/host-rules';
+import { toBase64 } from '../../util/string';
 
 const gitlabApiHost = 'https://gitlab.com';
 
@@ -1953,7 +1954,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+          content: toBase64(JSON.stringify(data)),
         });
       const res = await gitlab.getJsonFile('dir/file.json');
       expect(res).toEqual(data);
@@ -1973,7 +1974,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from(json5Data).toString('base64'),
+          content: toBase64(json5Data),
         });
       const res = await gitlab.getJsonFile('dir/file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1988,7 +1989,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+          content: toBase64(JSON.stringify(data)),
         });
       const res = await gitlab.getJsonFile('dir/file.json', 'different%2Frepo');
       expect(res).toEqual(data);
@@ -2003,7 +2004,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev'
         )
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+          content: toBase64(JSON.stringify(data)),
         });
       const res = await gitlab.getJsonFile(
         'dir/file.json',
@@ -2021,7 +2022,7 @@ These updates have all been created already. Click a checkbox below to force a r
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
         )
         .reply(200, {
-          content: Buffer.from('!@#').toString('base64'),
+          content: toBase64('!@#'),
         });
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
