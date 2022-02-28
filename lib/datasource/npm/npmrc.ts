@@ -165,7 +165,7 @@ export function setNpmrc(input?: string): void {
   }
 }
 
-export function resolvePackage(packageName: string): PackageResolution {
+export function resolveRegistryUrl(packageName: string): string {
   let registryUrl = defaultRegistryUrls[0];
   for (const rule of packageRules) {
     const { matchPackagePrefixes, registryUrls } = rule;
@@ -176,9 +176,13 @@ export function resolvePackage(packageName: string): PackageResolution {
       registryUrl = registryUrls[0];
     }
   }
-  registryUrl = ensureTrailingSlash(registryUrl);
+  return registryUrl;
+}
+
+export function resolvePackage(packageName: string): PackageResolution {
+  const registryUrl = resolveRegistryUrl(packageName);
   const packageUrl = url.resolve(
-    registryUrl,
+    ensureTrailingSlash(registryUrl),
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
   );
   return { packageUrl, registryUrl };
