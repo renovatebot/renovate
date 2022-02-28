@@ -14,12 +14,12 @@ const id = 'npm';
 const http = new Http(id);
 
 export async function getPreset({
-  packageName,
+  repo: pkg,
   presetName = 'default',
 }: PresetConfig): Promise<Preset> {
   let dep;
   try {
-    const { packageUrl } = resolvePackage(packageName);
+    const { packageUrl } = resolvePackage(pkg);
     // istanbul ignore if
     if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
       logger.warn(

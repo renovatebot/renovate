@@ -15,7 +15,7 @@ describe('config/presets/npm/index', () => {
   it('should throw if no package', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/nopackage').reply(404);
     await expect(
-      npm.getPreset({ packageName: 'nopackage', presetName: 'default' })
+      npm.getPreset({ repo: 'nopackage', presetName: 'default' })
     ).rejects.toThrow(/dep not found/);
   });
   it('should throw if no renovate-config', async () => {
@@ -47,7 +47,7 @@ describe('config/presets/npm/index', () => {
       .get('/norenovateconfig')
       .reply(200, presetPackage);
     await expect(
-      npm.getPreset({ packageName: 'norenovateconfig', presetName: 'default' })
+      npm.getPreset({ repo: 'norenovateconfig', presetName: 'default' })
     ).rejects.toThrow(/preset renovate-config not found/);
   });
   it('should throw if preset name not found', async () => {
@@ -81,7 +81,7 @@ describe('config/presets/npm/index', () => {
       .reply(200, presetPackage);
     await expect(
       npm.getPreset({
-        packageName: 'presetnamenotfound',
+        repo: 'presetnamenotfound',
         presetName: 'missing',
       })
     ).rejects.toThrow(/preset not found/);
@@ -115,7 +115,7 @@ describe('config/presets/npm/index', () => {
       .scope('https://registry.npmjs.org')
       .get('/workingpreset')
       .reply(200, presetPackage);
-    const res = await npm.getPreset({ packageName: 'workingpreset' });
+    const res = await npm.getPreset({ repo: 'workingpreset' });
     expect(res).toEqual({ rangeStrategy: 'auto' });
   });
 });
