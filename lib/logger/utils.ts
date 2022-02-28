@@ -2,8 +2,8 @@ import { Stream } from 'stream';
 import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
+import { RequestError as HttpError } from 'got';
 import { clone } from '../util/clone';
-import { HttpError } from '../util/http/types';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 

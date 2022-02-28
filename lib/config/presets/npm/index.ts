@@ -19,9 +19,8 @@ export async function getPreset({
 }: PresetConfig): Promise<Preset> {
   let dep;
   try {
-    const { headers, packageUrl } = resolvePackage(packageName);
-    const body = (await http.getJson<NpmResponse>(packageUrl, { headers }))
-      .body;
+    const { packageUrl } = resolvePackage(packageName);
+    const body = (await http.getJson<NpmResponse>(packageUrl)).body;
     dep = body.versions[body['dist-tags'].latest];
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);

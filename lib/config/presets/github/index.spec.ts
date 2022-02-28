@@ -1,6 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
+import { toBase64 } from '../../../util/string';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 
@@ -22,7 +23,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/some-filename.json`)
         .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
+          content: toBase64('{"from":"api"}'),
         });
 
       const res = await github.fetchJSONFile(
@@ -68,7 +69,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
-          content: Buffer.from('not json').toString('base64'),
+          content: toBase64('not json'),
         });
 
       await expect(
@@ -82,7 +83,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
-          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+          content: toBase64('{"foo":"bar"}'),
         });
 
       const content = await github.getPreset({ packageName: 'some/repo' });
@@ -95,7 +96,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
-          content: Buffer.from('{"somename":{"foo":"bar"}}').toString('base64'),
+          content: toBase64('{"somename":{"foo":"bar"}}'),
         });
       const content = await github.getPreset({
         packageName: 'some/repo',
@@ -128,7 +129,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/custom.json`)
         .reply(200, {
-          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+          content: toBase64('{"foo":"bar"}'),
         });
       const content = await github.getPreset({
         packageName: 'some/repo',
@@ -143,7 +144,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/path/custom.json`)
         .reply(200, {
-          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+          content: toBase64('{"foo":"bar"}'),
         });
       const content = await github.getPreset({
         packageName: 'some/repo',
@@ -159,7 +160,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
-          content: Buffer.from('{}').toString('base64'),
+          content: toBase64('{}'),
         });
       await expect(
         github.getPreset({
@@ -177,7 +178,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
+          content: toBase64('{"from":"api"}'),
         });
       expect(
         await github.getPresetFromEndpoint('some/repo', 'default', undefined)
@@ -190,7 +191,7 @@ describe('config/presets/github/index', () => {
         .scope('https://api.github.example.org')
         .get(`${basePath}/default.json`)
         .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
+          content: toBase64('{"from":"api"}'),
         });
       expect(
         await github
@@ -211,7 +212,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/default.json?ref=someTag`)
         .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
+          content: toBase64('{"from":"api"}'),
         });
       expect(
         await github.getPresetFromEndpoint(
@@ -230,7 +231,7 @@ describe('config/presets/github/index', () => {
         .scope('https://api.github.example.org')
         .get(`${basePath}/default.json?ref=someTag`)
         .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
+          content: toBase64('{"from":"api"}'),
         });
       expect(
         await github
