@@ -924,9 +924,9 @@ Example for configuring `docker` auth:
 
 If multiple `hostRules` match a request, then they will be applied in the following order/priority:
 
-- rules with only `hostType` specified
-- rules with only `matchHost` specified (sorted by `matchHost` length if multiple match)
-- rules with both `matchHost` and `hostType` specified (sorted by `matchHost` length if multiple match)
+1. rules with only `hostType` specified
+1. rules with only `matchHost` specified (sorted by `matchHost` length if multiple match)
+1. rules with both `matchHost` and `hostType` specified (sorted by `matchHost` length if multiple match)
 
 To disable requests to a particular host, you can configure a rule like:
 
