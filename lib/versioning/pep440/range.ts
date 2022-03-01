@@ -22,11 +22,9 @@ type UserPolicy = typeof UserPolicy[keyof typeof UserPolicy];
 /**
  * Calculate current update range precision.
  * @param ranges A {@link Range} consists of current range
- * @param newVersion The newly accepted version
  * @returns A {@link UserPolicy}
  */
-function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
-  const newRelease: number[] = parseVersion(newVersion)?.release ?? [];
+function getRangePrecision(ranges: Range[]): UserPolicy {
   const bound: number[] =
     parseVersion((ranges[1] || ranges[0]).version)?.release ?? [];
   let rangePrecision = -1;
@@ -34,7 +32,7 @@ function getRangePrecision(ranges: Range[], newVersion: string): UserPolicy {
   // ie. <1.2.2.3,
   //     >=7
   if (ranges.length === 1) {
-    rangePrecision = newRelease.findIndex((el, index) => el > bound[index]);
+    rangePrecision = bound?.length - 1;
   }
   // Range is defined by both upper and lower bounds.
   if (ranges.length === 2) {
@@ -258,7 +256,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
     if (gte(newVersion, range.version)) {
       // now here things get tricky
       // we calculate the new future version
-      const precision = getRangePrecision([range], newVersion);
+      const precision = getRangePrecision([range]);
       const futureVersion = getFutureVersion(
         precision,
         newVersion,
@@ -367,7 +365,7 @@ function handleWidenStrategy(
   if (satisfies(newVersion, currentValue)) {
     return [currentValue];
   }
-  let rangePrecision = getRangePrecision(ranges, newVersion);
+  let rangePrecision = getRangePrecision(ranges);
   const trimZeros = hasZeroSpecifier(ranges);
   return ranges.map((range) => {
     // newVersion is over the upper bound
@@ -414,7 +412,7 @@ function handleReplaceStrategy(
   return ranges.map((range) => {
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
-      const rangePrecision = getRangePrecision(ranges, newVersion);
+      const rangePrecision = getRangePrecision(ranges);
       let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
