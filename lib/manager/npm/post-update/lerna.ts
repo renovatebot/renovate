@@ -26,7 +26,7 @@ export function getLernaVersion(
 
 export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
-  lockFileDir: string,
+  cwd: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
@@ -75,7 +75,7 @@ export async function generateLockFiles(
     lernaCommand += cmdOptions;
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd: lockFileDir,
+      cwd,
       extraEnv: {
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
