@@ -1,19 +1,15 @@
 import mockDate from 'mockdate';
-import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
-import { NpmDatasource, getNpmrc, resetCache, setNpmrc } from '.';
+import { NpmDatasource, resetCache, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
 
-jest.mock('registry-auth-token');
 jest.mock('delay');
 
-const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> =
-  _registryAuthToken as never;
 let npmResponse: any;
 
 describe('datasource/npm/index', () => {
@@ -237,10 +233,6 @@ describe('datasource/npm/index', () => {
   });
 
   it('should not send an authorization header if public package', async () => {
-    registryAuthToken.mockReturnValueOnce({
-      type: 'Basic',
-      token: '1234',
-    });
     httpMock
       .scope('https://registry.npmjs.org', {
         badheaders: ['authorization'],
@@ -253,17 +245,17 @@ describe('datasource/npm/index', () => {
   });
 
   it('should send an authorization header if provided', async () => {
-    registryAuthToken.mockReturnValueOnce({
-      type: 'Basic',
-      token: '1234',
-    });
     httpMock
       .scope('https://registry.npmjs.org', {
         reqheaders: { authorization: 'Basic 1234' },
       })
       .get('/@foobar%2Fcore')
       .reply(200, { ...npmResponse, name: '@foobar/core' });
-    const res = await getPkgReleases({ datasource, depName: '@foobar/core' });
+    const res = await getPkgReleases({
+      datasource,
+      depName: '@foobar/core',
+      npmrc: '_auth = 1234',
+    });
     expect(res).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -313,8 +305,7 @@ describe('datasource/npm/index', () => {
     const npmrcContent = 'something=something';
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
-    setNpmrc();
-    expect(getNpmrc()).toBeEmptyObject();
+    expect(setNpmrc()).toBeUndefined();
   });
 
   it('should use default registry if missing from npmrc', async () => {

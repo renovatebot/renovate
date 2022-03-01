@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { Pr, platform } from '../../platform';
+import type { Pr } from '../../platform';
+import { ensureComment } from '../../platform/comment';
 import { PrState } from '../../types';
 import { branchExists, deleteBranch } from '../../util/git';
 import * as template from '../../util/template';
@@ -24,7 +25,7 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
           `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
         );
       } else {
-        await platform.ensureComment({
+        await ensureComment({
           number: pr.number,
           topic: config.userStrings.ignoreTopic,
           content,
