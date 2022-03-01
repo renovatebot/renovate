@@ -161,7 +161,7 @@
     "fast-safe-stringify": "2.1.1",
     "find-packages": "8.0.12",
     "find-up": "5.0.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.0.1",
     "git-url-parse": "11.6.0",
     "github-url-from-git": "1.5.0",
     "global-agent": "3.0.0",
