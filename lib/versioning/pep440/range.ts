@@ -32,17 +32,12 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
   // ie. <1.2.2.3,
   //     >=7
   if (ranges.length === 1) {
-    rangePrecision = bound?.length - 1;
+    rangePrecision = bound.length - 1;
   }
   // Range is defined by both upper and lower bounds.
   if (ranges.length === 2) {
     const lowerBound: number[] = parseVersion(ranges[0].version)?.release ?? [];
     rangePrecision = bound.findIndex((el, index) => el > lowerBound[index]);
-  }
-  // Could not calculate user precision
-  // Default to the smallest possible
-  if (rangePrecision === -1) {
-    rangePrecision = bound.length - 1;
   }
   // Tune down Major precision if followed by a zero
   if (
@@ -51,6 +46,12 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
     bound[rangePrecision + 1] === 0
   ) {
     rangePrecision++;
+  }
+  // Could not calculate user precision
+  // Default to the smallest possible
+  // istanbul ignore next
+  if (rangePrecision === -1) {
+    rangePrecision = bound.length - 1;
   }
   const key = UserPolicy[rangePrecision as keyof typeof UserPolicy];
   return UserPolicy[key as keyof typeof UserPolicy];
