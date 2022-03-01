@@ -6,6 +6,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abcdefghijklmnopqrstuvwxyz",
       "host": "registry.npmjs.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -56,7 +57,7 @@ Array [
 exports[`datasource/npm/index should fetch package info from npm 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -94,7 +95,7 @@ Array [
 exports[`datasource/npm/index should handle foobar 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -132,7 +133,7 @@ Array [
 exports[`datasource/npm/index should handle no time 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -169,7 +170,7 @@ Array [
 exports[`datasource/npm/index should not send an authorization header if public package 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -207,7 +208,7 @@ Array [
 exports[`datasource/npm/index should parse repo url (string) 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -240,7 +241,7 @@ Array [
 exports[`datasource/npm/index should parse repo url 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -273,7 +274,7 @@ Array [
 exports[`datasource/npm/index should replace any environment variable in npmrc 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.from-env.com/",
+  "registryUrl": "https://registry.from-env.com",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -310,14 +311,14 @@ Array [
 
 exports[`datasource/npm/index should return deprecated 1`] = `
 Object {
-  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
+  "deprecationMessage": "On registry \`https://registry.npmjs.org\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -338,7 +339,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 `;
 
 exports[`datasource/npm/index should return deprecated 2`] = `
-"On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
+"On registry \`https://registry.npmjs.org\`, the \\"latest\\" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
 
@@ -408,7 +409,7 @@ Array [
 exports[`datasource/npm/index should send an authorization header if provided 1`] = `
 Object {
   "name": "@foobar/core",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -522,7 +523,7 @@ Array [
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://registry.npmjs.org/",
+  "registryUrl": "https://registry.npmjs.org",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",

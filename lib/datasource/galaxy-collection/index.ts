@@ -1,7 +1,7 @@
 import pMap from 'p-map';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import type { HttpResponse } from '../../util/http';
+import type { HttpResponse } from '../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {

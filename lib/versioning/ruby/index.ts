@@ -7,6 +7,7 @@ import {
   valid,
 } from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
+import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
@@ -22,7 +23,12 @@ export const urls = [
   'https://www.devalot.com/articles/2012/04/gem-versions.html',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'pin',
+  'replace',
+];
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {
@@ -74,12 +80,14 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
+
 function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
   return maxSatisfying(versions.map(vtrim), vtrim(range));
 }
+
 function minSatisfyingVersion(
   versions: string[],
   range: string

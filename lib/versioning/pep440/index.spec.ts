@@ -177,7 +177,7 @@ describe('versioning/pep440/index', () => {
       expect(res).toEqual(expected);
     }
   );
-
+  
   test.each`
     version      | range                  | expected
     ${'0.9.9.9'} | ${'>= 1.0.0, < 2.0.0'} | ${true}

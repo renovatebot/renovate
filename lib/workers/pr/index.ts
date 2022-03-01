@@ -7,12 +7,14 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
+import { ensureComment } from '../../platform/comment';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
 import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import { regEx } from '../../util/regex';
+import { nonEmptyStringAndNotWhitespace } from '../../util/string';
 import * as template from '../../util/template';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
@@ -56,9 +58,10 @@ function prepareAssigneesReviewers(
 export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
-  return [...new Set([...labels, ...addLabels])].map((label) =>
-    template.compile(label, config)
-  );
+  return [...new Set([...labels, ...addLabels])]
+    .filter(nonEmptyStringAndNotWhitespace)
+    .map((label) => template.compile(label, config))
+    .filter(nonEmptyStringAndNotWhitespace);
 }
 
 export async function addAssigneesReviewers(
@@ -491,7 +494,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
-        await platform.ensureComment({
+        await ensureComment({
           number: pr.number,
           topic,
           content,

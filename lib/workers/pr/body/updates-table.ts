@@ -1,29 +1,33 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
-import type { BranchConfig } from '../../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 
 type TableDefinition = {
   header: string;
   value: string | undefined;
 };
 
-function getTableDefinition(config: BranchConfig): TableDefinition[] {
+function getRowDefinition(
+  prBodyColumns: string[],
+  upgrade: BranchUpgradeConfig
+): TableDefinition[] {
   const res: TableDefinition[] = [];
-  for (const header of config.prBodyColumns ?? []) {
-    const value = config.prBodyDefinitions?.[header];
-    res.push({ header, value });
+  if (upgrade.prBodyDefinitions) {
+    for (const header of prBodyColumns) {
+      const value = upgrade.prBodyDefinitions[header];
+      res.push({ header, value });
+    }
   }
   return res;
 }
 
 function getNonEmptyColumns(
-  definitions: TableDefinition[],
+  prBodyColumns: string[],
   rows: Record<string, string>[]
 ): string[] {
   const res: string[] = [];
-  for (const column of definitions) {
-    const { header } = column;
+  for (const header of prBodyColumns) {
     for (const row of rows) {
       if (row[header]?.length) {
         if (!res.includes(header)) {
@@ -36,27 +40,36 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
-  const tableDefinitions = getTableDefinition(config);
-  const tableValues = config.upgrades.map((upgrade) => {
-    const res: Record<string, string> = {};
-    for (const column of tableDefinitions) {
-      const { header, value } = column;
-      try {
-        // istanbul ignore else
-        if (value) {
-          res[header] = template
-            .compile(value, upgrade)
-            .replace(regEx(/^``$/), '');
-        } else {
-          res[header] = '';
+  if (config.prBodyColumns === undefined) {
+    logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
+    return '';
+  }
+  const tableValues = config.upgrades
+    .filter((upgrade) => upgrade !== undefined)
+    .map((upgrade) => {
+      const res: Record<string, string> = {};
+      const rowDefinition = getRowDefinition(
+        config.prBodyColumns ?? [],
+        upgrade
+      );
+      for (const column of rowDefinition) {
+        const { header, value } = column;
+        try {
+          // istanbul ignore else
+          if (value) {
+            res[header] = template
+              .compile(value, upgrade)
+              .replace(regEx(/``/g), '');
+          } else {
+            res[header] = '';
+          }
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ header, value, err }, 'Handlebars compilation error');
         }
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ header, value, err }, 'Handlebars compilation error');
       }
-    }
-    return res;
-  });
-  const tableColumns = getNonEmptyColumns(tableDefinitions, tableValues);
+      return res;
+    });
+  const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';

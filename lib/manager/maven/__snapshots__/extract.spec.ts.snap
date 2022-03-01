@@ -209,5 +209,6 @@ Object {
     },
   },
   "packageFile": null,
+  "packageFileVersion": "0.0.1",
 }
 `;

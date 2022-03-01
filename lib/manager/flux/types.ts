@@ -48,6 +48,7 @@ export interface ResourceFluxManifest extends FluxFile {
 export interface SystemFluxManifest extends FluxFile {
   kind: 'system';
   version: string;
+  components: string;
 }
 
 export type FluxManifest = ResourceFluxManifest | SystemFluxManifest;
