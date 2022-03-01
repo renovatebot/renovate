@@ -27,7 +27,7 @@ export function getLernaVersion(
 
 export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
-  cwd: string,
+  lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
@@ -80,7 +80,7 @@ export async function generateLockFiles(
       npm_config_store: env.npm_config_store,
     };
     const execOptions: ExecOptions = {
-      cwd,
+      cwd: lockFileDir,
       extraEnv,
       docker: {
         image: 'node',

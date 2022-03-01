@@ -553,7 +553,7 @@ export async function getAdditionalFiles(
       (upgrade) => upgrade.npmLock === npmLock
     );
     const res = await npm.generateLockFile(
-      fullLockFileDir,
+      lockFileDir,
       env,
       fileName,
       config,
@@ -640,12 +640,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.yarnLock === yarnLock
     );
-    const res = await yarn.generateLockFile(
-      upath.join(localDir, lockFileDir),
-      env,
-      config,
-      upgrades
-    );
+    const res = await yarn.generateLockFile(lockFileDir, env, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
@@ -721,12 +716,7 @@ export async function getAdditionalFiles(
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.pnpmShrinkwrap === pnpmShrinkwrap
     );
-    const res = await pnpm.generateLockFile(
-      upath.join(localDir, lockFileDir),
-      env,
-      config,
-      upgrades
-    );
+    const res = await pnpm.generateLockFile(lockFileDir, env, config, upgrades);
     if (res.error) {
       // istanbul ignore if
       if (res.stdout?.includes(`No compatible version found:`)) {

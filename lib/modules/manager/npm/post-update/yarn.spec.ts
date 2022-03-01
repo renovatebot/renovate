@@ -1,13 +1,13 @@
-import { exec as _exec } from 'child_process';
 import fs from 'fs-extra';
 import {
   ExecSnapshots,
   envMock,
+  exec,
   mockExecAll,
 } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
-import { mocked } from '../../../../../test/util';
-import * as _env from '../../../../util/exec/env';
+import { env } from '../../../../../test/util';
+import { GlobalConfig } from '../../../../config/global';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
@@ -16,9 +16,6 @@ jest.mock('fs-extra', () =>
 jest.mock('child_process');
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
-
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -35,6 +32,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     jest.clearAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    GlobalConfig.set({ localDir: '' });
   });
 
   it.each([
@@ -193,6 +191,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   ])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
+      GlobalConfig.set({ localDir: '.' });
       Fixtures.mock(
         {
           '.yarnrc': null,
