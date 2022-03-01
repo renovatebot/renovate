@@ -1140,6 +1140,27 @@ Object {
       expect(res).toMatchSnapshot();
     });
 
+    it('ignores empty manifest lists', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestListV2,
+          manifests: [],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+      });
+      expect(res).toMatchSnapshot();
+    });
+
     it('ignores unsupported manifest', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
@@ -1170,6 +1191,77 @@ Object {
         .reply(200, { tags: ['latest'] })
         .get('/node/manifests/latest')
         .reply(200, {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+      });
+      expect(res).toMatchSnapshot();
+    });
+
+    it('supports OCI manifests with media type', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(4)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['abc'] })
+        .get('/node/manifests/abc')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestListV2,
+          manifests: [{ digest: 'some-image-digest' }],
+        })
+        .get('/node/manifests/some-image-digest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.ociManifestV1,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+            },
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+      });
+      expect(res).toMatchSnapshot();
+    });
+
+    it('supports OCI manifests without media type', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(4)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['abc'] })
+        .get('/node/manifests/abc')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestListV2,
+          manifests: [{ digest: 'some-image-digest' }],
+        })
+        .get('/node/manifests/some-image-digest')
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+            },
+          },
+        });
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',

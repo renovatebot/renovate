@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/docker/index getReleases ignores empty manifest lists 1`] = `
+Object {
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [],
+}
+`;
+
 exports[`datasource/docker/index getReleases ignores unsupported manifest 1`] = `
 Object {
   "registryUrl": "https://registry.company.com",
@@ -11,6 +18,22 @@ exports[`datasource/docker/index getReleases ignores unsupported schema version 
 Object {
   "registryUrl": "https://registry.company.com",
   "releases": Array [],
+}
+`;
+
+exports[`datasource/docker/index getReleases supports OCI manifests with media type 1`] = `
+Object {
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [],
+  "sourceUrl": "https://github.com/renovatebot/renovate",
+}
+`;
+
+exports[`datasource/docker/index getReleases supports OCI manifests without media type 1`] = `
+Object {
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [],
+  "sourceUrl": "https://github.com/renovatebot/renovate",
 }
 `;
 

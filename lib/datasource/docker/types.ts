@@ -9,6 +9,7 @@ export enum MediaType {
   manifestV1 = 'application/vnd.docker.distribution.manifest.v1+json',
   manifestV2 = 'application/vnd.docker.distribution.manifest.v2+json',
   manifestListV2 = 'application/vnd.docker.distribution.manifest.list.v2+json',
+  ociManifestV1 = 'application/vnd.oci.image.manifest.v1+json',
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -42,6 +43,17 @@ export interface Image extends MediaObject {
   readonly schemaVersion: 2;
   readonly mediaType: MediaType.manifestV2;
 
+  readonly config: MediaObject;
+}
+
+/**
+ * OCI Image Manifest
+ * The same structure as docker image manifest, but mediaType is not required and is not present in the wild.
+ * https://github.com/opencontainers/image-spec/blob/main/manifest.md
+ */
+export interface OciImage {
+  readonly schemaVersion: 2;
+  readonly mediaType?: MediaType.ociManifestV1;
   readonly config: MediaObject;
 }
 

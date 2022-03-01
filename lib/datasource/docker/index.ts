@@ -32,7 +32,13 @@ import {
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
-import { Image, ImageList, MediaType, RegistryRepository } from './types';
+import {
+  Image,
+  ImageList,
+  MediaType,
+  OciImage,
+  RegistryRepository,
+} from './types';
 
 export const DOCKER_HUB = 'https://index.docker.io';
 
@@ -369,7 +375,7 @@ export class DockerDatasource extends Datasource {
         return null;
       }
       headers.accept =
-        'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
+        'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json';
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
         headers,
@@ -444,7 +450,10 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
+    const manifest = JSON.parse(manifestResponse.body) as
+      | ImageList
+      | Image
+      | OciImage;
     if (manifest.schemaVersion !== 2) {
       logger.debug(
         { registry, dockerRepository, tag },
@@ -453,23 +462,36 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    if (
-      manifest.mediaType === MediaType.manifestListV2 &&
-      manifest.manifests.length
-    ) {
-      logger.trace(
-        { registry, dockerRepository, tag },
-        'Found manifest list, using first image'
-      );
-      return this.getConfigDigest(
-        registry,
-        dockerRepository,
-        manifest.manifests[0].digest
-      );
+    if (manifest.mediaType === MediaType.manifestListV2) {
+      if (manifest.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest list, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest list with no manifests - returning'
+        );
+        return null;
+      }
     }
 
     if (
       manifest.mediaType === MediaType.manifestV2 &&
+      is.string(manifest.config?.digest)
+    ) {
+      return manifest.config?.digest;
+    }
+
+    // OCI manifests are not required to specify a mediaType
+    if (
+      (manifest.mediaType === MediaType.ociManifestV1 || !manifest.mediaType) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
