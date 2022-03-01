@@ -1567,10 +1567,10 @@
   resolved "https://registry.yarnpkg.com/@node-redis/bloom/-/bloom-1.0.1.tgz#144474a0b7dc4a4b91badea2cfa9538ce0a1854e"
   integrity sha512-mXEBvEIgF4tUzdIN89LiYsbi6//EdpFA7L8M+DHCvePXg+bfHWi+ct5VI6nHUFQE5+ohm/9wmgihCH3HSkeKsw==
 
-"@node-redis/client@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@node-redis/client/-/client-1.0.3.tgz#ece282b7ee07283d744e6ab1fa72f2d47641402c"
-  integrity sha512-IXNgOG99PHGL3NxN3/e8J8MuX+H08I+OMNmheGmZBXngE0IntaCQwwrd7NzmiHA+zH3SKHiJ+6k3P7t7XYknMw==
+"@node-redis/client@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@node-redis/client/-/client-1.0.4.tgz#fe185750df3bcc07524f63fe8dbc8d14d22d6cbb"
+  integrity sha512-IM/NRAqg7MvNC3bIRQipXGrEarunrdgvrbAzsd3ty93LSHi/M+ybQulOERQi8a3M+P5BL8HenwXjiIoKm6ml2g==
   dependencies:
     cluster-key-slot "1.1.0"
     generic-pool "3.8.2"
@@ -1587,15 +1587,15 @@
   resolved "https://registry.yarnpkg.com/@node-redis/json/-/json-1.0.2.tgz#8ad2d0f026698dc1a4238cc3d1eb099a3bee5ab8"
   integrity sha512-qVRgn8WfG46QQ08CghSbY4VhHFgaTY71WjpwRBGEuqGPfWwfRcIf3OqSpR7Q/45X+v3xd8mvYjywqh0wqJ8T+g==
 
-"@node-redis/search@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@node-redis/search/-/search-1.0.2.tgz#8cfc91006ea787df801d41410283e1f59027f818"
-  integrity sha512-gWhEeji+kTAvzZeguUNJdMSZNH2c5dv3Bci8Nn2f7VGuf6IvvwuZDSBOuOlirLVgayVuWzAG7EhwaZWK1VDnWQ==
+"@node-redis/search@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@node-redis/search/-/search-1.0.3.tgz#7c3d026bf994caf82019fd0c3924cfc09f041a29"
+  integrity sha512-rsrzkGWI84di/uYtEctS/4qLusWt0DESx/psjfB0TFpORDhe7JfC0h8ary+eHulTksumor244bXLRSqQXbFJmw==
 
-"@node-redis/time-series@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@node-redis/time-series/-/time-series-1.0.1.tgz#703149f8fa4f6fff377c61a0873911e7c1ba5cc3"
-  integrity sha512-+nTn6EewVj3GlUXPuD3dgheWqo219jTxlo6R+pg24OeVvFHx9aFGGiyOgj3vBPhWUdRZ0xMcujXV5ki4fbLyMw==
+"@node-redis/time-series@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@node-redis/time-series/-/time-series-1.0.2.tgz#5dd3638374edd85ebe0aa6b0e87addc88fb9df69"
+  integrity sha512-HGQ8YooJ8Mx7l28tD7XjtB3ImLEjlUxG1wC1PAjxu6hPJqjPshUZxAICzDqDjtIbhDTf48WXXUcx8TQJB1XTKA==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1890,15 +1890,15 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@2.0.11":
-  version "2.0.11"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-2.0.11.tgz#0087c52f1954c824c42d51ef85c3ed178b8c6a72"
-  integrity sha512-S99jUoKVsorRIZr1n8o/HMr2qeC9H0g11AmQrojnO0WOv4lTgHvGz88vm69Ik08b4UqUCeZgKAdvj8HcZXrF7w==
+"@pnpm/read-project-manifest@2.0.12":
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-2.0.12.tgz#e13b13bb8b326bf2ccefd84a65cabef63c514714"
+  integrity sha512-hZxgwaiVLSTiTv6igNgD2DhjxSaSoRoqTOUXD20F/JAY2shbFo3E7SQrysJB/5gwMmGbNP7zYCaFRBzANGi7WA==
   dependencies:
     "@pnpm/error" "2.0.0"
     "@pnpm/graceful-fs" "1.0.0"
-    "@pnpm/types" "7.9.0"
-    "@pnpm/write-project-manifest" "2.0.10"
+    "@pnpm/types" "7.10.0"
+    "@pnpm/write-project-manifest" "2.0.11"
     detect-indent "^6.0.0"
     fast-deep-equal "^3.1.3"
     is-windows "^1.0.2"
@@ -1908,17 +1908,17 @@
     sort-keys "^4.2.0"
     strip-bom "^4.0.0"
 
-"@pnpm/types@7.9.0":
-  version "7.9.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-7.9.0.tgz#361374f2d33c13c77cf115c82ecf752bf99fa490"
-  integrity sha512-WJol7zZKMktP8bvoFEh/ANCrYsIDcfpGFgRZmAMeULuskFVND4NLXXIkBqNhtmv+ipt6mVUnsZTGHrVaXrlsNA==
+"@pnpm/types@7.10.0":
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-7.10.0.tgz#c31e00a53c04bbf926e91c60dbe2f2a15a4212cb"
+  integrity sha512-7NKyfwepNccR6f9htiXAw0tt6rCajvtiX5HsTOi3odSFJ04iri43yjh70Ekw25hAynQwRR0rkJ7l6BBNFrJ/2g==
 
-"@pnpm/write-project-manifest@2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-2.0.10.tgz#c020143d83c6a09fc4f649925b8a02f36760eafe"
-  integrity sha512-39fH8i9BY84OuJhovKnC05DZiOEa3gnwhLpt/Gk2RhcD2CDj76NWjKqauyHeAYihpjDWJB92xuLR3gk9qTyzEQ==
+"@pnpm/write-project-manifest@2.0.11":
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-2.0.11.tgz#d1a060845aad1ca611082382217e8766621e3ade"
+  integrity sha512-lE7brQ28dOFKEELfbSU7gHplkCT91+WhlpbHVs/ELviKt4dNq1fIzAdOZb/1/YbQIKZ3TceNzHt82IkyaPvn6Q==
   dependencies:
-    "@pnpm/types" "7.9.0"
+    "@pnpm/types" "7.10.0"
     json5 "^2.1.3"
     write-file-atomic "^3.0.3"
     write-yaml-file "^4.2.0"
@@ -4608,13 +4608,13 @@ filter-obj@^1.1.0:
   resolved "https://registry.yarnpkg.com/filter-obj/-/filter-obj-1.1.0.tgz#9b311112bc6c6127a16e016c6c5d7f19e0805c5b"
   integrity sha1-mzERErxsYSehbgFsbF1/GeCAXFs=
 
-find-packages@8.0.11:
-  version "8.0.11"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-8.0.11.tgz#698a39582fa87247c17473ae2379676eef4ff827"
-  integrity sha512-hWq1DwxfoOxui12Q6wrDX9tVntU6/cjx+Hc6m/w3XsUf47Qmkrt6fkh1Q+xykc81jPXBrWHWHupPNTCzLcfK8g==
+find-packages@8.0.12:
+  version "8.0.12"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-8.0.12.tgz#397aaf2c26602408dbe20be1b48cfcafa40387f3"
+  integrity sha512-iDlQP1wx2YbIzfQ/JEUL27yGsNTfxDfVkynsMiaLXc3alc7CN2Y4ojb66C39hev8OeHo9bNrVTp9/u0aFUmxDA==
   dependencies:
-    "@pnpm/read-project-manifest" "2.0.11"
-    "@pnpm/types" "7.9.0"
+    "@pnpm/read-project-manifest" "2.0.12"
+    "@pnpm/types" "7.10.0"
     fast-glob "^3.2.4"
     p-filter "^2.1.0"
 
@@ -8107,17 +8107,17 @@ redis-parser@3.0.0:
   dependencies:
     redis-errors "^1.0.0"
 
-redis@4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-4.0.3.tgz#f60931175de6f5b5727240a08e58a9ed5cf0f9de"
-  integrity sha512-SJMRXvgiQUYN0HaWwWv002J5ZgkhYXOlbLomzcrL3kP42yRNZ8Jx5nvLYhVpgmf10xcDpanFOxxJkphu2eyIFQ==
+redis@4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-4.0.4.tgz#b567f82f59086df38433982f7f424b48e924ec7a"
+  integrity sha512-KaM1OAj/nGrSeybmmOWSMY0LXTGT6FVWgUZZrd2MYzXKJ+VGtqVaciGQeNMfZiQX+kDM8Ke4uttb54m2rm6V0A==
   dependencies:
     "@node-redis/bloom" "1.0.1"
-    "@node-redis/client" "1.0.3"
+    "@node-redis/client" "1.0.4"
     "@node-redis/graph" "1.0.0"
     "@node-redis/json" "1.0.2"
-    "@node-redis/search" "1.0.2"
-    "@node-redis/time-series" "1.0.1"
+    "@node-redis/search" "1.0.3"
+    "@node-redis/time-series" "1.0.2"
 
 regexp-to-ast@0.5.0:
   version "0.5.0"
