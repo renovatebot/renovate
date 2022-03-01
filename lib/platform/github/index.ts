@@ -22,10 +22,17 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
+import { listCommitTree, pushCommitToRenovateRef } from '../../util/git';
+import type {
+  CommitFilesConfig,
+  CommitResult,
+  CommitSha,
+} from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
+import { fromBase64 } from '../../util/string';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -196,7 +203,7 @@ export async function getRawFile(
   }
   const res = await githubApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
+  const str = fromBase64(buf);
   return str;
 }
 
@@ -1397,25 +1404,25 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval({
-  number: issueNo,
-  topic,
-  content,
-}: EnsureCommentRemovalConfig): Promise<void> {
-  logger.trace(
-    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
-  );
+export async function ensureCommentRemoval(
+  deleteConfig: EnsureCommentRemovalConfig
+): Promise<void> {
+  const { number: issueNo } = deleteConfig;
+  const key =
+    deleteConfig.type === 'by-topic'
+      ? deleteConfig.topic
+      : deleteConfig.content;
+  logger.trace(`Ensuring comment "${key}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
-  let commentId: number | null = null;
+  let commentId: number | null | undefined = null;
 
-  const byTopic = (comment: Comment): boolean =>
-    comment.body.startsWith(`### ${topic}\n\n`);
-  const byContent = (comment: Comment): boolean =>
-    comment.body.trim() === content;
-
-  if (topic) {
+  if (deleteConfig.type === 'by-topic') {
+    const byTopic = (comment: Comment): boolean =>
+      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
     commentId = comments.find(byTopic)?.id;
-  } else if (content) {
+  } else if (deleteConfig.type === 'by-content') {
+    const byContent = (comment: Comment): boolean =>
+      comment.body.trim() === deleteConfig.content;
     commentId = comments.find(byContent)?.id;
   }
 
@@ -1718,4 +1725,74 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;
+}
+
+async function pushFiles(
+  { branchName, message }: CommitFilesConfig,
+  { parentCommitSha, commitSha }: CommitResult
+): Promise<CommitSha | null> {
+  try {
+    // Push the commit to GitHub using a custom ref
+    // The associated blobs will be pushed automatically
+    await pushCommitToRenovateRef(commitSha, branchName);
+    // Get all the blobs which the commit/tree points to
+    // The blob SHAs will be the same locally as on GitHub
+    const treeItems = await listCommitTree(commitSha);
+
+    // For reasons unknown, we need to recreate our tree+commit on GitHub
+    // Attempting to reuse the tree or commit SHA we pushed does not work
+    const treeRes = await githubApi.postJson<{ sha: string }>(
+      `/repos/${config.repository}/git/trees`,
+      { body: { tree: treeItems } }
+    );
+    const treeSha = treeRes.body.sha;
+
+    // Now we recreate the commit using the tree we recreated the step before
+    const commitRes = await githubApi.postJson<{ sha: string }>(
+      `/repos/${config.repository}/git/commits`,
+      { body: { message, tree: treeSha, parents: [parentCommitSha] } }
+    );
+    const remoteCommitSha = commitRes.body.sha;
+
+    // Create branch if it didn't already exist, update it otherwise
+    if (git.branchExists(branchName)) {
+      // This is the equivalent of a git force push
+      // We are using this REST API because the GraphQL API doesn't support force push
+      await githubApi.patchJson(
+        `/repos/${config.repository}/git/refs/heads/${branchName}`,
+        { body: { sha: remoteCommitSha, force: true } }
+      );
+    } else {
+      await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+        body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
+      });
+    }
+
+    return remoteCommitSha;
+  } catch (err) {
+    logger.debug({ branchName, err }, 'Platform-native commit: unknown error');
+    return null;
+  }
+}
+
+export async function commitFiles(
+  config: CommitFilesConfig
+): Promise<CommitSha | null> {
+  const commitResult = await git.prepareCommit(config); // Commit locally and don't push
+  if (!commitResult) {
+    const { branchName, files } = config;
+    logger.debug(
+      { branchName, files: files.map(({ path }) => path) },
+      `Platform-native commit: unable to prepare for commit`
+    );
+    return null;
+  }
+  // Perform the commits using REST API
+  const pushResult = await pushFiles(config, commitResult);
+  if (!pushResult) {
+    return null;
+  }
+  // Because the branch commit was done remotely via REST API, now we git fetch it locally.
+  // We also do this step when committing/pushing using local git tooling.
+  return git.fetchCommit(config);
 }
