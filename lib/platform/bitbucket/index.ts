@@ -32,9 +32,10 @@ import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
 import {
-  Account,
   PrResponse,
+  PrReviewer,
   RepoInfoBody,
+  UserResponse,
   mergeBodyTransformer,
 } from './utils';
 
@@ -49,6 +50,10 @@ const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 const pathSeparator = '/';
 
 let renovateUserUuid: string;
+
+const inactiveReviewersMessage = 'reviewers: Malformed reviewers list';
+const notMemberReviewersMessage =
+  'is not a member of this workspace and cannot be added to this pull request';
 
 export async function initPlatform({
   endpoint,
@@ -70,7 +75,7 @@ export async function initPlatform({
   renovateUserUuid = null;
   try {
     const { uuid } = (
-      await bitbucketHttp.getJson<Account>('/2.0/user', {
+      await bitbucketHttp.getJson<{ uuid: string }>('/2.0/user', {
         username,
         password,
         useCache: false,
@@ -628,75 +633,12 @@ export function ensureComment({
   });
 }
 
-export function ensureCommentRemoval(
-  deleteConfig: EnsureCommentRemovalConfig
-): Promise<void> {
-  return comments.ensureCommentRemoval(config, deleteConfig);
-}
-
-async function sanitizeReviewers(
-  reviewers: Account[],
-  err: any
-): Promise<Account[]> {
-  if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
-    const sanitizedReviewers: Account[] = [];
-
-    for (const msg of err.body.error.fields.reviewers) {
-      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-      if (msg === 'Malformed reviewers list') {
-        logger.debug(
-          { err },
-          'PR contains inactive reviewer accounts. Will try setting only active reviewers'
-        );
-
-        // Validate that each previous PR reviewer account is still active
-        for (const reviewer of reviewers) {
-          const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(`/2.0/users/${reviewer.uuid}`)
-          ).body;
-
-          if (reviewerUser.account_status === 'active') {
-            sanitizedReviewers.push(reviewer);
-          }
-        }
-
-        // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
-      } else if (
-        msg.endsWith(
-          'is not a member of this workspace and cannot be added to this pull request'
-        )
-      ) {
-        logger.debug(
-          { err },
-          'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
-        );
-
-        const workspace = config.repository.split('/')[0];
-
-        // Validate that each previous PR reviewer account is still a member of this workspace
-        for (const reviewer of reviewers) {
-          try {
-            await bitbucketHttp.get(
-              `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
-            );
-
-            sanitizedReviewers.push(reviewer);
-          } catch (err) {
-            // HTTP 404: User cannot be found, or the user is not a member of this workspace.
-            if (err.response?.statusCode !== 404) {
-              throw err;
-            }
-          }
-        }
-      } else {
-        return undefined;
-      }
-    }
-
-    return sanitizedReviewers;
-  }
-
-  return undefined;
+export function ensureCommentRemoval({
+  number: prNo,
+  topic,
+  content,
+}: EnsureCommentRemovalConfig): Promise<void> {
+  return comments.ensureCommentRemoval(config, prNo, topic, content);
 }
 
 // Creates PR and returns PR number
@@ -713,15 +655,15 @@ export async function createPr({
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
-  let reviewers: Account[] = [];
+  let reviewers: { uuid: { raw: string } }[] = [];
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<Account>>(
+      await bitbucketHttp.getJson<utils.PagedResult<Reviewer>>(
         `/2.0/repositories/${config.repository}/default-reviewers`
       )
     ).body;
-    reviewers = reviewersResponse.values.map((reviewer: Account) => ({
+    reviewers = reviewersResponse.values.map((reviewer: Reviewer) => ({
       uuid: reviewer.uuid,
     }));
   }
@@ -759,32 +701,13 @@ export async function createPr({
     }
     return pr;
   } catch (err) /* istanbul ignore next */ {
-    // Try sanitizing reviewers
-    const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
-
-    if (sanitizedReviewers === undefined) {
-      logger.warn({ err }, 'Error creating pull request');
-      throw err;
-    } else {
-      const prRes = (
-        await bitbucketHttp.postJson<PrResponse>(
-          `/2.0/repositories/${config.repository}/pullrequests`,
-          {
-            body: {
-              ...body,
-              reviewers: sanitizedReviewers,
-            },
-          }
-        )
-      ).body;
-      const pr = utils.prInfo(prRes);
-      // istanbul ignore if
-      if (config.prList) {
-        config.prList.push(pr);
-      }
-      return pr;
-    }
+    logger.warn({ err }, 'Error creating pull request');
+    throw err;
   }
+}
+
+interface Reviewer {
+  uuid: { raw: string };
 }
 
 export async function updatePr({
@@ -813,12 +736,61 @@ export async function updatePr({
       }
     );
   } catch (err) {
-    // Try sanitizing reviewers
-    const sanitizedReviewers = await sanitizeReviewers(pr.reviewers, err);
+    if (
+      err.statusCode === 400 &&
+      [inactiveReviewersMessage, notMemberReviewersMessage].some((m) =>
+        err.body?.error?.message.includes(m)
+      )
+    ) {
+      const sanitizedReviewers: PrReviewer[] = [];
 
-    if (sanitizedReviewers === undefined) {
-      throw err;
-    } else {
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      if (err.body?.error?.message.includes(inactiveReviewersMessage)) {
+        logger.warn(
+          { err },
+          'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+        );
+
+        // Validate that each previous PR reviewer account is still active
+        for (const reviewer of pr.reviewers) {
+          const reviewerUser = (
+            await bitbucketHttp.getJson<UserResponse>(
+              `/2.0/users/${reviewer.account_id}`
+            )
+          ).body;
+
+          if (reviewerUser.account_status === 'active') {
+            sanitizedReviewers.push(reviewer);
+          }
+        }
+      }
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
+      if (err.body?.error?.message.includes(notMemberReviewersMessage)) {
+        logger.warn(
+          { err },
+          'PR contains reviewer accounts which are no longer member of this workspace.  Will try setting only member reviewers'
+        );
+
+        const workspace = config.repository.split('/')[0];
+
+        // Validate that each previous PR reviewer account is still a member of this workspace
+        for (const reviewer of pr.reviewers) {
+          try {
+            await bitbucketHttp.head(
+              `/2.0/workspaces/${workspace}/members/${reviewer.account_id}`
+            );
+
+            sanitizedReviewers.push(reviewer);
+          } catch (err) {
+            // HTTP 404: User cannot be found, or the user is not a member of this workspace.
+            if (err.response?.statusCode !== 404) {
+              throw err;
+            }
+          }
+        }
+      }
+
       await bitbucketHttp.putJson(
         `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
         {
@@ -829,6 +801,8 @@ export async function updatePr({
           },
         }
       );
+    } else {
+      throw err;
     }
   }
 

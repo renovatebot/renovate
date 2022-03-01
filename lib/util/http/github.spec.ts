@@ -9,12 +9,12 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as _repositoryCache from '../cache/repository';
-import type { Cache } from '../cache/repository/types';
+import * as _repositoryCache from '../../util/cache/repository';
+import type { Cache } from '../../util/cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
-jest.mock('../cache/repository');
+jest.mock('../../util/cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';

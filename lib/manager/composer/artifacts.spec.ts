@@ -14,7 +14,7 @@ import * as composer from './artifacts';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../../lib/datasource');
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
 

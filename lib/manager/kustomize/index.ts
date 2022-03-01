@@ -5,7 +5,7 @@ import { HelmDatasource } from '../../datasource/helm';
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)kustomization\\.ya?ml$'],
+  fileMatch: ['(^|/)kustomization\\.yaml'],
   pinDigests: false,
 };
 

@@ -14,19 +14,14 @@ const id = 'npm';
 const http = new Http(id);
 
 export async function getPreset({
-  repo: pkg,
+  packageName,
   presetName = 'default',
 }: PresetConfig): Promise<Preset> {
   let dep;
   try {
-    const { packageUrl } = resolvePackage(pkg);
-    // istanbul ignore if
-    if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
-      logger.warn(
-        'npm presets from non-default registries are now deprecated. Please migrate to repository-based presets instead.'
-      );
-    }
-    const body = (await http.getJson<NpmResponse>(packageUrl)).body;
+    const { headers, packageUrl } = resolvePackage(packageName);
+    const body = (await http.getJson<NpmResponse>(packageUrl, { headers }))
+      .body;
     dep = body.versions[body['dist-tags'].latest];
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);

@@ -1,6 +1,5 @@
 import { PlatformId } from '../../constants';
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
-import { Http } from '.';
+import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.bitbucket.org/';
 

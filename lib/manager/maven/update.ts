@@ -1,12 +1,5 @@
-import semver, { ReleaseType } from 'semver';
-import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
-import { replaceAt } from '../../util/string';
-import type {
-  BumpPackageVersionResult,
-  UpdateDependencyConfig,
-  Upgrade,
-} from '../types';
+import type { UpdateDependencyConfig, Upgrade } from '../types';
 
 export function updateAtPosition(
   fileContent: string,
@@ -50,65 +43,4 @@ export function updateDependency({
     return fileContent;
   }
   return `${spaces}${updatedContent}`;
-}
-
-export function bumpPackageVersion(
-  content: string,
-  currentValue: string | undefined,
-  bumpVersion: ReleaseType | string
-): BumpPackageVersionResult {
-  logger.debug(
-    { bumpVersion, currentValue },
-    'Checking if we should bump pom.xml version'
-  );
-  let bumpedContent = content;
-
-  if (!currentValue) {
-    logger.warn('Unable to bump pom.xml version, pom.xml has no version');
-    return { bumpedContent };
-  }
-
-  if (!semver.valid(currentValue)) {
-    logger.warn(
-      { currentValue },
-      'Unable to bump pom.xml version, not a valid semver'
-    );
-    return { bumpedContent };
-  }
-
-  try {
-    const project = new XmlDocument(content);
-    const versionNode = project.childNamed('version');
-    const startTagPosition = versionNode.startTagPosition;
-    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
-
-    const newPomVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
-    if (!newPomVersion) {
-      throw new Error('semver inc failed');
-    }
-
-    logger.debug({ newPomVersion });
-    bumpedContent = replaceAt(
-      content,
-      versionPosition,
-      currentValue,
-      newPomVersion
-    );
-
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.debug('pom.xml version bumped');
-    }
-  } catch (err) {
-    logger.warn(
-      {
-        content,
-        currentValue,
-        bumpVersion,
-      },
-      'Failed to bumpVersion'
-    );
-  }
-  return { bumpedContent };
 }

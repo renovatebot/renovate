@@ -1,11 +1,13 @@
-import { fs } from '../../../test/util';
+import _fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+
+jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec');
-jest.mock('../../util/fs');
 
 const config: UpdateArtifactsConfig = {};
 
@@ -19,7 +21,6 @@ describe('manager/pip_requirements/artifacts', () => {
     jest.resetModules();
     GlobalConfig.set({ localDir: '' });
   });
-
   it('returns null if no updatedDeps were provided', async () => {
     expect(
       await updateArtifacts({
@@ -30,9 +31,8 @@ describe('manager/pip_requirements/artifacts', () => {
       })
     ).toBeNull();
   });
-
   it('returns null if no hashes', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n');
+    fs.readFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
@@ -42,9 +42,8 @@ describe('manager/pip_requirements/artifacts', () => {
       })
     ).toBeNull();
   });
-
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(newPackageFileContent);
+    fs.readFile.mockResolvedValueOnce(newPackageFileContent as any);
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
@@ -54,9 +53,8 @@ describe('manager/pip_requirements/artifacts', () => {
       })
     ).toBeNull();
   });
-
   it('returns updated file', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('new content');
+    fs.readFile.mockResolvedValueOnce('new content' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
@@ -66,11 +64,8 @@ describe('manager/pip_requirements/artifacts', () => {
       })
     ).toHaveLength(1);
   });
-
   it('catches and returns errors', async () => {
-    fs.readLocalFile.mockImplementation(() => {
-      throw new Error('some-error');
-    });
+    fs.readFile.mockResolvedValueOnce('new content' as any);
     expect(
       await updateArtifacts({
         packageFileName: null,

@@ -18,7 +18,6 @@ describe('datasource/npm/get', () => {
     jest.clearAllMocks();
     resetMemCache();
     hostRules.clear();
-    setNpmrc();
   });
 
   describe('has bearer auth', () => {
@@ -86,6 +85,7 @@ describe('datasource/npm/get', () => {
 
   describe('no auth', () => {
     const configs = [
+      `@myco:registry=https://test.org\n_authToken=XXX`,
       `@myco:registry=https://test.org\n//test.org/sub/:_authToken=XXX`,
       `@myco:registry=https://test.org\n//test.org/sub/:_auth=dGVzdDp0ZXN0`,
       `@myco:registry=https://test.org`,

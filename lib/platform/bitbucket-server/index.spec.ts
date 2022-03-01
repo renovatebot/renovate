@@ -947,11 +947,7 @@ describe('platform/bitbucket-server/index', () => {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             });
-          await bitbucket.ensureCommentRemoval({
-            type: 'by-topic',
-            number: 5,
-            topic: 'topic',
-          });
+          await bitbucket.ensureCommentRemoval({ number: 5, topic: 'topic' });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -996,7 +992,6 @@ describe('platform/bitbucket-server/index', () => {
             .reply(200);
 
           await bitbucket.ensureCommentRemoval({
-            type: 'by-topic',
             number: 5,
             topic: 'some-subject',
           });
@@ -1044,7 +1039,6 @@ describe('platform/bitbucket-server/index', () => {
             .reply(200);
 
           await bitbucket.ensureCommentRemoval({
-            type: 'by-content',
             number: 5,
             content: '!merge',
           });
@@ -1081,11 +1075,7 @@ describe('platform/bitbucket-server/index', () => {
               values: [{ action: 'OTHER' }],
             });
 
-          await bitbucket.ensureCommentRemoval({
-            type: 'by-topic',
-            number: 5,
-            topic: 'topic',
-          });
+          await bitbucket.ensureCommentRemoval({ number: 5, topic: 'topic' });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

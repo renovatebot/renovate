@@ -16,17 +16,7 @@ import * as _hostRules from '../lib/util/host-rules';
  * @param module module which is mocked by `jest.mock`
  */
 export function mocked<T>(module: T): jest.Mocked<T> {
-  return module as jest.Mocked<T>;
-}
-
-/**
- * Simple wrapper for getting mocked version of a function
- * @param func function which is mocked by `jest.mock`
- */
-export function mockedFunction<T extends (...args: any[]) => any>(
-  func: T
-): jest.MockedFunction<T> {
-  return func as jest.MockedFunction<T>;
+  return module as never;
 }
 
 /**

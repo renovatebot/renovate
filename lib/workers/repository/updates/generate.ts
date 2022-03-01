@@ -115,7 +115,7 @@ export function generateBranchConfig(
         upgrade.newDigestShort ||
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
-    if (upgrade.isDigest || upgrade.updateType === 'pin') {
+    if (upgrade.isDigest) {
       upgrade.displayFrom = upgrade.currentDigestShort;
       upgrade.displayTo = upgrade.newDigestShort;
     } else if (upgrade.isLockfileUpdate) {

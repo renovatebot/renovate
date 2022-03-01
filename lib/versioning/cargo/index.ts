@@ -1,5 +1,4 @@
 import { logger } from '../../logger';
-import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -10,12 +9,7 @@ export const urls = [
   'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
-  'bump',
-  'widen',
-  'pin',
-  'replace',
-];
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const isVersion = (input: string): boolean => npm.isVersion(input);
 

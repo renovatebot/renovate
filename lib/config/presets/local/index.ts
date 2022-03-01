@@ -17,10 +17,10 @@ const resolvers = {
 };
 
 export function getPreset({
-  repo,
+  packageName: pkgName,
   presetName = 'default',
   presetPath,
-  tag,
+  packageTag,
   baseConfig,
 }: PresetConfig): Promise<Preset> {
   const { platform, endpoint } = baseConfig;
@@ -34,10 +34,10 @@ export function getPreset({
     );
   }
   return resolver.getPresetFromEndpoint(
-    repo,
+    pkgName,
     presetName,
     presetPath,
     endpoint,
-    tag
+    packageTag
   );
 }

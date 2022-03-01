@@ -23,9 +23,9 @@ async function getOnboardingConfig(
 
   // Check for org/renovate-config
   try {
-    const repo = `${orgName}/renovate-config`;
-    await getPreset({ repo, baseConfig: config });
-    orgPreset = `local>${repo}`;
+    const packageName = `${orgName}/renovate-config`;
+    await getPreset({ packageName, baseConfig: config });
+    orgPreset = `local>${packageName}`;
   } catch (err) {
     if (
       err.message !== PRESET_DEP_NOT_FOUND &&
@@ -38,14 +38,14 @@ async function getOnboardingConfig(
   if (!orgPreset) {
     // Check for org/.{{platform}}
     try {
-      const repo = `${orgName}/.${config.platform}`;
+      const packageName = `${orgName}/.${config.platform}`;
       const presetName = 'renovate-config';
       await getPreset({
-        repo,
+        packageName,
         presetName,
         baseConfig: config,
       });
-      orgPreset = `local>${repo}:${presetName}`;
+      orgPreset = `local>${packageName}:${presetName}`;
     } catch (err) {
       if (
         err.message !== PRESET_DEP_NOT_FOUND &&

@@ -899,11 +899,7 @@ describe('platform/azure/index', () => {
     });
     it('deletes comment by topic if found', async () => {
       await initRepo({ repository: 'some/repo' });
-      await azure.ensureCommentRemoval({
-        type: 'by-topic',
-        number: 42,
-        topic: 'some-subject',
-      });
+      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
       expect(gitApiMock.updateThread).toHaveBeenCalledWith(
         { status: 4 },
@@ -914,11 +910,7 @@ describe('platform/azure/index', () => {
     });
     it('deletes comment by content if found', async () => {
       await initRepo({ repository: 'some/repo' });
-      await azure.ensureCommentRemoval({
-        type: 'by-content',
-        number: 42,
-        content: 'some-content',
-      });
+      await azure.ensureCommentRemoval({ number: 42, content: 'some-content' });
       expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
       expect(gitApiMock.updateThread).toHaveBeenCalledWith(
         { status: 4 },
@@ -929,11 +921,7 @@ describe('platform/azure/index', () => {
     });
     it('comment not found', async () => {
       await initRepo({ repository: 'some/repo' });
-      await azure.ensureCommentRemoval({
-        type: 'by-topic',
-        number: 42,
-        topic: 'does-not-exist',
-      });
+      await azure.ensureCommentRemoval({ number: 42, topic: 'does-not-exist' });
       expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
       expect(gitApiMock.updateThread).not.toHaveBeenCalled();
     });

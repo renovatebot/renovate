@@ -16,7 +16,6 @@ import {
 import { logger, removeMeta } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { Pr, platform } from '../../platform';
-import { ensureComment, ensureCommentRemoval } from '../../platform/comment';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getElapsedDays } from '../../util/date';
@@ -434,8 +433,7 @@ export async function processBranch(
         );
       } else {
         // Remove artifacts error comment only if this run has successfully updated artifacts
-        await ensureCommentRemoval({
-          type: 'by-topic',
+        await platform.ensureCommentRemoval({
           number: branchPr.number,
           topic: artifactErrorTopic,
         });
@@ -692,7 +690,7 @@ export async function processBranch(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
           } else {
-            await ensureComment({
+            await platform.ensureComment({
               number: pr.number,
               topic: artifactErrorTopic,
               content,

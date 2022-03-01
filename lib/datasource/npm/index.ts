@@ -7,7 +7,7 @@ import { getDependency } from './get';
 import { setNpmrc } from './npmrc';
 
 export { resetMemCache, resetCache } from './get';
-export { setNpmrc } from './npmrc';
+export { getNpmrc, setNpmrc } from './npmrc';
 
 export const customRegistrySupport = false;
 

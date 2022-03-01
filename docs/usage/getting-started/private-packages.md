@@ -32,8 +32,7 @@ There are four times in Renovate's behavior when it may need credentials:
 Renovate supports config presets, including those which are private.
 
 Although npm presets were the first type supported, they are now deprecated and it is recommend that all users migrate to git-hosted "local" presets instead.
-However if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your bot global config.
-It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
+However if you do still use them, private modules should work if you configure the `npmrc` file including token credentials in your bot global config.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
 The recommended way of using local presets is to configure then using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
@@ -326,35 +325,7 @@ For those found, a command similar to the following is run: `dotnet nuget add so
 
 ### poetry
 
-For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.
-
-```js
-module.exports = {
-  hostRules: [
-    {
-      matchHost: 'pypi.example.com',
-      hostType: 'pypi',
-      username: process.env.PYPI_USERNAME,
-      password: process.env.PYPI_PASSWORD,
-    },
-  ],
-};
-```
-
-If you're self-hosting Renovate via the [GitLab Runner](../getting-started/running.md#gitlab-runner) and want to access packages from private GitLab registries, you can use the GitLab CI job token for authentication:
-
-```js
-module.exports = {
-  hostRules: [
-    {
-      matchHost: 'gitlab.example.com',
-      hostType: 'pypi',
-      username: 'gitlab-ci-token',
-      password: process.env.CI_JOB_TOKEN,
-    },
-  ],
-};
-```
+For every poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`.
 
 ## WhiteSource Renovate Hosted App Encryption
 

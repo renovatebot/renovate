@@ -794,22 +794,21 @@ const platform: Platform = {
     }
   },
 
-  async ensureCommentRemoval(
-    deleteConfig: EnsureCommentRemovalConfig
-  ): Promise<void> {
-    const { number: issue } = deleteConfig;
-    const key =
-      deleteConfig.type === 'by-topic'
-        ? deleteConfig.topic
-        : deleteConfig.content;
-    logger.debug(`Ensuring comment "${key}" in #${issue} is removed`);
+  async ensureCommentRemoval({
+    number: issue,
+    topic,
+    content,
+  }: EnsureCommentRemovalConfig): Promise<void> {
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${issue} is removed`
+    );
     const commentList = await helper.getComments(config.repository, issue);
-
     let comment: helper.Comment | null = null;
-    if (deleteConfig.type === 'by-topic') {
-      comment = findCommentByTopic(commentList, deleteConfig.topic);
-    } else if (deleteConfig.type === 'by-content') {
-      const body = sanitize(deleteConfig.content);
+    const body = sanitize(content);
+
+    if (topic) {
+      comment = findCommentByTopic(commentList, topic);
+    } else if (body) {
       comment = findCommentByContent(commentList, body);
     }
 
@@ -822,10 +821,7 @@ const platform: Platform = {
     try {
       await helper.deleteComment(config.repository, comment.id);
     } catch (err) {
-      logger.warn(
-        { err, issue, config: deleteConfig },
-        'Error deleting comment'
-      );
+      logger.warn({ err, issue, subject: topic }, 'Error deleting comment');
     }
   },
 

@@ -101,7 +101,6 @@ describe('manager/poetry/artifacts', () => {
       password: 'passwordOne',
     });
     hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
-    hostRules.find.mockReturnValueOnce({});
     hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -112,31 +111,7 @@ describe('manager/poetry/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(hostRules.find.mock.calls).toHaveLength(4);
-    expect(execSnapshots).toMatchSnapshot();
-  });
-  it('prioritizes pypi-scoped credentials', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
-    fs.readFile.mockResolvedValueOnce(Buffer.from('[metadata]\n'));
-    const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce(Buffer.from('New poetry.lock'));
-    hostRules.find.mockImplementation((search) => ({
-      password:
-        search.hostType === 'pypi' ? 'scoped-password' : 'unscoped-password',
-    }));
-    const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        updatedDeps,
-        newPackageFileContent: `
-          [[tool.poetry.source]]
-          name = "one"
-          url = "some.url"
-        `,
-        config,
-      })
-    ).not.toBeNull();
+    expect(hostRules.find.mock.calls).toHaveLength(3);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated pyproject.lock', async () => {

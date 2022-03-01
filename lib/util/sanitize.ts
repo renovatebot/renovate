@@ -1,6 +1,3 @@
-import is from '@sindresorhus/is';
-import { toBase64 } from './string';
-
 const secrets = new Set<string>();
 
 export const redactedFields = [
@@ -29,19 +26,9 @@ export function sanitize(input: string): string {
   return output;
 }
 
-const GITHUB_APP_TOKEN_PREFIX = 'x-access-token:';
-
 export function addSecretForSanitizing(secret: string): void {
-  if (!is.nonEmptyString(secret)) {
-    return;
-  }
   secrets.add(secret);
-  secrets.add(toBase64(secret));
-  if (secret.startsWith(GITHUB_APP_TOKEN_PREFIX)) {
-    const trimmedSecret = secret.replace(GITHUB_APP_TOKEN_PREFIX, '');
-    secrets.add(trimmedSecret);
-    secrets.add(toBase64(trimmedSecret));
-  }
+  secrets.add(secret?.replace('x-access-token:', '')); // GitHub App tokens
 }
 
 export function clearSanitizedSecretsList(): void {

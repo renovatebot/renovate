@@ -1,12 +1,12 @@
 import { mocked } from '../../../test/util';
-import * as _repositoryCache from '../cache/repository';
+import * as _repositoryCache from '../../util/cache/repository';
 import type { Cache } from '../cache/repository/types';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
 } from './conflicts-cache';
 
-jest.mock('../cache/repository');
+jest.mock('../../util/cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/conflicts-cache', () => {

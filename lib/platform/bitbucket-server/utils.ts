@@ -2,12 +2,12 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { PrState } from '../../types';
-import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import type {
   HttpOptions,
   HttpPostOptions,
   HttpResponse,
-} from '../../util/http/types';
+} from '../../util/http';
+import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import type { BbsPr, BbsRestPr, BitbucketError } from './types';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =

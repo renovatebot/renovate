@@ -16,11 +16,11 @@ import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import type { HttpResponse } from '../../util/http';
 import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
-import type { HttpResponse } from '../../util/http/types';
 import { newlineRegex, regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
@@ -748,26 +748,27 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval(
-  deleteConfig: EnsureCommentRemovalConfig
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: prNo,
+  topic,
+  content,
+}: EnsureCommentRemovalConfig): Promise<void> {
   try {
-    const { number: prNo } = deleteConfig;
-    const key =
-      deleteConfig.type === 'by-topic'
-        ? deleteConfig.topic
-        : deleteConfig.content;
-    logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${prNo} is removed`
+    );
     const comments = await getComments(prNo);
 
-    let commentId: number | null | undefined = null;
-    if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);
+    const byTopic = (comment: Comment): boolean =>
+      comment.text.startsWith(`### ${topic}\n\n`);
+    const byContent = (comment: Comment): boolean =>
+      comment.text.trim() === content;
+
+    let commentId: number | null = null;
+
+    if (topic) {
       commentId = comments.find(byTopic)?.id;
-    } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.text.trim() === deleteConfig.content;
+    } else if (content) {
       commentId = comments.find(byContent)?.id;
     }
 

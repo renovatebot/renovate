@@ -5,7 +5,7 @@ import {
   requireComposerDependencyInstallation,
 } from './utils';
 
-jest.mock('../../datasource');
+jest.mock('../../../lib/datasource');
 
 describe('manager/composer/utils', () => {
   describe('extractContraints', () => {

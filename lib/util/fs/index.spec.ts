@@ -1,15 +1,14 @@
-import _findUp from 'find-up';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
-import { env, mockedFunction } from '../../../test/util';
+import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
+import * as _env from '../exec/env';
 import {
   ensureCacheDir,
   ensureLocalDir,
   exists,
   findLocalSiblingOrParent,
-  findUpLocal,
   getSubDirectory,
   localPathExists,
   localPathIsFile,
@@ -18,10 +17,8 @@ import {
   writeLocalFile,
 } from '.';
 
-jest.mock('../exec/env');
-jest.mock('find-up');
-
-const findUp = mockedFunction(_findUp);
+jest.mock('../../util/exec/env');
+const env = mocked(_env);
 
 describe('util/fs/index', () => {
   describe('readLocalFile', () => {
@@ -211,30 +208,6 @@ describe('util/fs/index', () => {
       expect(
         await localPathIsFile(__filename.replace('.ts', '.txt'))
       ).toBeFalse();
-    });
-  });
-
-  describe('findUpLocal', () => {
-    beforeEach(() => {
-      GlobalConfig.set({ localDir: '/abs/path/to/local/dir' });
-    });
-
-    it('returns relative path for file', async () => {
-      findUp.mockResolvedValueOnce('/abs/path/to/local/dir/subdir/file.json');
-      const res = await findUpLocal('file.json', 'subdir/subdir2');
-      expect(res).toBe('subdir/file.json');
-    });
-
-    it('returns null if nothing found', async () => {
-      findUp.mockResolvedValueOnce(undefined);
-      const res = await findUpLocal('file.json', 'subdir/subdir2');
-      expect(res).toBeNull();
-    });
-
-    it('returns undefined if found a file outside of localDir', async () => {
-      findUp.mockResolvedValueOnce('/abs/path/to/file.json');
-      const res = await findUpLocal('file.json', 'subdir/subdir2');
-      expect(res).toBeNull();
     });
   });
 });

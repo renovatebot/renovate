@@ -18,22 +18,22 @@ const local = mocked(_local);
 
 const presetIkatyang = loadJsonFixture('renovate-config-ikatyang.json');
 
-npm.getPreset = jest.fn(({ repo, presetName }) => {
-  if (repo === 'renovate-config-ikatyang') {
+npm.getPreset = jest.fn(({ packageName, presetName }) => {
+  if (packageName === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
       'renovate-config'
     ][presetName];
   }
-  if (repo === 'renovate-config-notfound') {
+  if (packageName === 'renovate-config-notfound') {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  if (repo === 'renovate-config-noconfig') {
+  if (packageName === 'renovate-config-noconfig') {
     throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
   }
-  if (repo === 'renovate-config-throw') {
+  if (packageName === 'renovate-config-throw') {
     throw new Error('whoops');
   }
-  if (repo === 'renovate-config-wrongpreset') {
+  if (packageName === 'renovate-config-wrongpreset') {
     throw new Error(PRESET_NOT_FOUND);
   }
   return null;
@@ -244,7 +244,7 @@ describe('config/presets/index', () => {
 
     it('resolves self-hosted presets without baseConfig', async () => {
       config.extends = ['local>username/preset-repo'];
-      local.getPreset = jest.fn(({ repo, presetName, baseConfig }) =>
+      local.getPreset = jest.fn(({ packageName, presetName, baseConfig }) =>
         Promise.resolve({ labels: ['self-hosted resolved'] })
       );
 
@@ -302,7 +302,7 @@ describe('config/presets/index', () => {
     // default namespace
     it('returns default package name', () => {
       expect(presets.parsePreset(':base')).toEqual({
-        repo: 'default',
+        packageName: 'default',
         params: undefined,
         presetName: 'base',
         presetPath: undefined,
@@ -311,7 +311,7 @@ describe('config/presets/index', () => {
     });
     it('parses github', () => {
       expect(presets.parsePreset('github>some/repo')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -320,7 +320,7 @@ describe('config/presets/index', () => {
     });
     it('handles special chars', () => {
       expect(presets.parsePreset('github>some/repo:foo+bar')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'foo+bar',
         presetPath: undefined,
@@ -329,7 +329,7 @@ describe('config/presets/index', () => {
     });
     it('parses github subfiles', () => {
       expect(presets.parsePreset('github>some/repo:somefile')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'somefile',
         presetPath: undefined,
@@ -340,7 +340,7 @@ describe('config/presets/index', () => {
       expect(
         presets.parsePreset('github>some/repo:somefile/somepreset')
       ).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'somefile/somepreset',
         presetPath: undefined,
@@ -353,7 +353,7 @@ describe('config/presets/index', () => {
           'github>some/repo:somefile/somepreset/somesubpreset'
         )
       ).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'somefile/somepreset/somesubpreset',
         presetPath: undefined,
@@ -364,7 +364,7 @@ describe('config/presets/index', () => {
       expect(
         presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
       ).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'somefile',
         presetPath: 'somepath/somesubpath',
@@ -373,7 +373,7 @@ describe('config/presets/index', () => {
     });
     it('parses github toplevel file using subdirectory syntax', () => {
       expect(presets.parsePreset('github>some/repo//somefile')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'somefile',
         presetPath: undefined,
@@ -382,7 +382,7 @@ describe('config/presets/index', () => {
     });
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -391,7 +391,7 @@ describe('config/presets/index', () => {
     });
     it('parses gitea', () => {
       expect(presets.parsePreset('gitea>some/repo')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -400,7 +400,7 @@ describe('config/presets/index', () => {
     });
     it('parses local', () => {
       expect(presets.parsePreset('local>some/repo')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -409,7 +409,7 @@ describe('config/presets/index', () => {
     });
     it('parses local with spaces', () => {
       expect(presets.parsePreset('local>A2B CD/A2B_Renovate')).toEqual({
-        repo: 'A2B CD/A2B_Renovate',
+        packageName: 'A2B CD/A2B_Renovate',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -420,7 +420,7 @@ describe('config/presets/index', () => {
       expect(
         presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
       ).toEqual({
-        repo: 'some-group/some-repo',
+        packageName: 'some-group/some-repo',
         params: undefined,
         presetName: 'some-file',
         presetPath: 'some-dir',
@@ -433,12 +433,12 @@ describe('config/presets/index', () => {
           'local>some-group/some-repo:some-file/subpreset#1.2.3'
         )
       ).toEqual({
-        repo: 'some-group/some-repo',
+        packageName: 'some-group/some-repo',
         params: undefined,
         presetName: 'some-file/subpreset',
         presetPath: undefined,
         presetSource: 'local',
-        tag: '1.2.3',
+        packageTag: '1.2.3',
       });
     });
     it('parses local with subdirectory and tag', () => {
@@ -447,12 +447,12 @@ describe('config/presets/index', () => {
           'local>some-group/some-repo//some-dir/some-file#1.2.3'
         )
       ).toEqual({
-        repo: 'some-group/some-repo',
+        packageName: 'some-group/some-repo',
         params: undefined,
         presetName: 'some-file',
         presetPath: 'some-dir',
         presetSource: 'local',
-        tag: '1.2.3',
+        packageTag: '1.2.3',
       });
     });
 
@@ -462,12 +462,12 @@ describe('config/presets/index', () => {
           'local>PROJECT/repository//path/to/preset#feature/branch'
         )
       ).toEqual({
-        repo: 'PROJECT/repository',
+        packageName: 'PROJECT/repository',
         params: undefined,
         presetName: 'preset',
         presetPath: 'path/to',
         presetSource: 'local',
-        tag: 'feature/branch',
+        packageTag: 'feature/branch',
       });
     });
 
@@ -477,18 +477,18 @@ describe('config/presets/index', () => {
           'local>PROJECT/repository:preset/subpreset#feature/branch'
         )
       ).toEqual({
-        repo: 'PROJECT/repository',
+        packageName: 'PROJECT/repository',
         params: undefined,
         presetName: 'preset/subpreset',
         presetPath: undefined,
         presetSource: 'local',
-        tag: 'feature/branch',
+        packageTag: 'feature/branch',
       });
     });
 
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toEqual({
-        repo: 'some/repo',
+        packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -497,7 +497,7 @@ describe('config/presets/index', () => {
     });
     it('parses local Bitbucket user repo with preset name', () => {
       expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
-        repo: '~john_doe/repo',
+        packageName: '~john_doe/repo',
         params: undefined,
         presetName: 'somefile',
         presetPath: undefined,
@@ -506,7 +506,7 @@ describe('config/presets/index', () => {
     });
     it('parses local Bitbucket user repo', () => {
       expect(presets.parsePreset('local>~john_doe/renovate-config')).toEqual({
-        repo: '~john_doe/renovate-config',
+        packageName: '~john_doe/renovate-config',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -515,7 +515,7 @@ describe('config/presets/index', () => {
     });
     it('returns default package name with params', () => {
       expect(presets.parsePreset(':group(packages/eslint, eslint)')).toEqual({
-        repo: 'default',
+        packageName: 'default',
         params: ['packages/eslint', 'eslint'],
         presetName: 'group',
         presetPath: undefined,
@@ -525,7 +525,7 @@ describe('config/presets/index', () => {
     // scoped namespace
     it('returns simple scope', () => {
       expect(presets.parsePreset('@somescope')).toEqual({
-        repo: '@somescope/renovate-config',
+        packageName: '@somescope/renovate-config',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -534,29 +534,29 @@ describe('config/presets/index', () => {
     });
     it('returns simple scope and params', () => {
       expect(presets.parsePreset('@somescope(param1)')).toEqual({
-        repo: '@somescope/renovate-config',
+        packageName: '@somescope/renovate-config',
         params: ['param1'],
         presetName: 'default',
         presetPath: undefined,
         presetSource: 'npm',
       });
     });
-    it('returns scope with repo and default', () => {
+    it('returns scope with packageName and default', () => {
       expect(presets.parsePreset('@somescope/somepackagename')).toEqual({
-        repo: '@somescope/somepackagename',
+        packageName: '@somescope/somepackagename',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
         presetSource: 'npm',
       });
     });
-    it('returns scope with repo and params and default', () => {
+    it('returns scope with packageName and params and default', () => {
       expect(
         presets.parsePreset(
           '@somescope/somepackagename(param1, param2, param3)'
         )
       ).toEqual({
-        repo: '@somescope/somepackagename',
+        packageName: '@somescope/somepackagename',
         params: ['param1', 'param2', 'param3'],
         presetName: 'default',
         presetPath: undefined,
@@ -565,7 +565,7 @@ describe('config/presets/index', () => {
     });
     it('returns scope with presetName', () => {
       expect(presets.parsePreset('@somescope:somePresetName')).toEqual({
-        repo: '@somescope/renovate-config',
+        packageName: '@somescope/renovate-config',
         params: undefined,
         presetName: 'somePresetName',
         presetPath: undefined,
@@ -574,31 +574,31 @@ describe('config/presets/index', () => {
     });
     it('returns scope with presetName and params', () => {
       expect(presets.parsePreset('@somescope:somePresetName(param1)')).toEqual({
-        repo: '@somescope/renovate-config',
+        packageName: '@somescope/renovate-config',
         params: ['param1'],
         presetName: 'somePresetName',
         presetPath: undefined,
         presetSource: 'npm',
       });
     });
-    it('returns scope with repo and presetName', () => {
+    it('returns scope with packageName and presetName', () => {
       expect(
         presets.parsePreset('@somescope/somepackagename:somePresetName')
       ).toEqual({
-        repo: '@somescope/somepackagename',
+        packageName: '@somescope/somepackagename',
         params: undefined,
         presetName: 'somePresetName',
         presetPath: undefined,
         presetSource: 'npm',
       });
     });
-    it('returns scope with repo and presetName and params', () => {
+    it('returns scope with packageName and presetName and params', () => {
       expect(
         presets.parsePreset(
           '@somescope/somepackagename:somePresetName(param1, param2)'
         )
       ).toEqual({
-        repo: '@somescope/somepackagename',
+        packageName: '@somescope/somepackagename',
         params: ['param1', 'param2'],
         presetName: 'somePresetName',
         presetPath: undefined,
@@ -608,7 +608,7 @@ describe('config/presets/index', () => {
     // non-scoped namespace
     it('returns non-scoped default', () => {
       expect(presets.parsePreset('somepackage')).toEqual({
-        repo: 'renovate-config-somepackage',
+        packageName: 'renovate-config-somepackage',
         params: undefined,
         presetName: 'default',
         presetPath: undefined,
@@ -617,7 +617,7 @@ describe('config/presets/index', () => {
     });
     it('returns non-scoped package name', () => {
       expect(presets.parsePreset('somepackage:webapp')).toEqual({
-        repo: 'renovate-config-somepackage',
+        packageName: 'renovate-config-somepackage',
         params: undefined,
         presetName: 'webapp',
         presetPath: undefined,
@@ -627,7 +627,7 @@ describe('config/presets/index', () => {
     it('returns non-scoped package name full', () => {
       expect(presets.parsePreset('renovate-config-somepackage:webapp')).toEqual(
         {
-          repo: 'renovate-config-somepackage',
+          packageName: 'renovate-config-somepackage',
           params: undefined,
           presetName: 'webapp',
           presetPath: undefined,
@@ -637,7 +637,7 @@ describe('config/presets/index', () => {
     });
     it('returns non-scoped package name with params', () => {
       expect(presets.parsePreset('somepackage:webapp(param1)')).toEqual({
-        repo: 'renovate-config-somepackage',
+        packageName: 'renovate-config-somepackage',
         params: ['param1'],
         presetName: 'webapp',
         presetPath: undefined,

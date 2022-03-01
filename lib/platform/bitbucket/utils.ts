@@ -1,12 +1,12 @@
 import url from 'url';
 import type { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
-import { BitbucketHttp } from '../../util/http/bitbucket';
 import type {
   HttpOptions,
   HttpPostOptions,
   HttpResponse,
-} from '../../util/http/types';
+} from '../../util/http';
+import { BitbucketHttp } from '../../util/http/bitbucket';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
 
@@ -172,7 +172,7 @@ export interface PrResponse {
       name: string;
     };
   };
-  reviewers: Array<Account>;
+  reviewers: Array<PrReviewer>;
   created_on: string;
 }
 
@@ -191,9 +191,15 @@ export function prInfo(pr: PrResponse): Pr {
   };
 }
 
-export interface Account {
-  display_name?: string;
-  uuid: string;
-  nickname?: string;
-  account_status?: string;
+export interface UserResponse {
+  display_name: string;
+  account_id: string;
+  nickname: string;
+  account_status: string;
+}
+
+export interface PrReviewer {
+  display_name: string;
+  account_id: string;
+  nickname: string;
 }

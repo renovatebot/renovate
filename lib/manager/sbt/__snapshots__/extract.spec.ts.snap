@@ -26,7 +26,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -63,7 +63,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -73,7 +73,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-a",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc-a",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -83,7 +83,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-b",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc-b",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -93,7 +93,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-c",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc-c",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -242,7 +242,7 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "groupName": "versionExample",
+      "groupName": "versionExample for org.example",
       "lookupName": "org.example:grault",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -396,7 +396,7 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "groupName": "versionExample",
+      "groupName": "versionExample for org.example",
       "lookupName": "org.example:grault",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",

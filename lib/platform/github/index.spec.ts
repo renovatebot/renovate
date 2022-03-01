@@ -8,7 +8,6 @@ import {
 import type * as _logger from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import type * as _git from '../../util/git';
-import { toBase64 } from '../../util/string';
 import type { CreatePRConfig, Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
@@ -1760,11 +1759,7 @@ describe('platform/github/index', () => {
         .delete('/repos/some/repo/issues/comments/1234')
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      await github.ensureCommentRemoval({
-        type: 'by-topic',
-        number: 42,
-        topic: 'some-subject',
-      });
+      await github.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes comment by content if found', async () => {
@@ -1781,7 +1776,6 @@ describe('platform/github/index', () => {
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       await github.ensureCommentRemoval({
-        type: 'by-content',
         number: 42,
         content: 'some-content',
       });
@@ -2504,7 +2498,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: toBase64(JSON.stringify(data)),
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
       });
       const res = await github.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -2522,7 +2516,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json5').reply(200, {
-        content: toBase64(json5Data),
+        content: Buffer.from(json5Data).toString('base64'),
       });
       const res = await github.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -2538,7 +2532,7 @@ describe('platform/github/index', () => {
         token: 'token',
       } as any);
       scope.get('/repos/different/repo/contents/file.json').reply(200, {
-        content: toBase64(JSON.stringify(data)),
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
       });
       const res = await github.getJsonFile('file.json', 'different/repo');
       expect(res).toEqual(data);
@@ -2551,7 +2545,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json?ref=dev').reply(200, {
-        content: toBase64(JSON.stringify(data)),
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
       });
       const res = await github.getJsonFile('file.json', 'some/repo', 'dev');
       expect(res).toEqual(data);
@@ -2563,7 +2557,7 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: toBase64('!@#'),
+        content: Buffer.from('!@#').toString('base64'),
       });
       await expect(github.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -2578,104 +2572,6 @@ describe('platform/github/index', () => {
 
       await expect(github.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
-  describe('pushFiles', () => {
-    beforeEach(() => {
-      git.prepareCommit.mockImplementation(({ files }) =>
-        Promise.resolve({
-          parentCommitSha: '1234567',
-          commitSha: '7654321',
-          files,
-        })
-      );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
-    });
-    it('returns null if pre-commit phase has failed', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      git.prepareCommit.mockResolvedValueOnce(null);
-
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [
-          { type: 'addition', path: 'foo.bar', contents: 'foobar' },
-          { type: 'deletion', path: 'baz' },
-          { type: 'deletion', path: 'qux' },
-        ],
-        message: 'Foobar',
-      });
-
-      expect(res).toBeNull();
-    });
-    it('returns null on REST error', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      scope.post('/repos/some/repo/git/trees').replyWithError('unknown');
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
-
-      expect(res).toBeNull();
-    });
-    it('commits and returns SHA string', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(false);
-
-      const scope = httpMock.scope(githubApiHost);
-
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-
-      scope
-        .post('/repos/some/repo/git/trees')
-        .reply(200, { sha: '111' })
-        .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .post('/repos/some/repo/git/refs')
-        .reply(200);
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
-
-      expect(res).toBe('0abcdef');
-    });
-    it('performs rebase', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(true);
-
-      const scope = httpMock.scope(githubApiHost);
-
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-
-      scope
-        .post('/repos/some/repo/git/trees')
-        .reply(200, { sha: '111' })
-        .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .patch('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200);
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
-
-      expect(res).toBe('0abcdef');
     });
   });
 });

@@ -292,27 +292,8 @@ function updateRangeValue(
     ).join('.');
     return range.operator + futureVersion + '.*';
   }
-  if (range.operator === '~=') {
-    const baseVersion = parseVersion(range.version)?.release ?? [];
-    const futureVersion = parseVersion(newVersion)?.release ?? [];
-    const baseLen = baseVersion.length;
-    const newVerLen = futureVersion.length;
-    // trim redundant trailing version specifiers
-    if (baseLen < newVerLen) {
-      return (
-        range.operator + futureVersion.slice(0, baseVersion.length).join('.')
-      );
-    }
-    // pad with specifiers
-    if (baseLen > newVerLen) {
-      for (let i = baseLen - newVerLen - 1; i >= 0; i--) {
-        futureVersion.push(0);
-      }
-      return range.operator + futureVersion.join('.');
-    }
-    return range.operator + newVersion;
-  }
-  if (['==', '<='].includes(range.operator)) {
+
+  if (['==', '~=', '<='].includes(range.operator)) {
     return range.operator + newVersion;
   }
 

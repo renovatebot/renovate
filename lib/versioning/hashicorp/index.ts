@@ -1,4 +1,3 @@
-import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -9,12 +8,7 @@ export const urls = [
   'https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
-  'bump',
-  'widen',
-  'pin',
-  'replace',
-];
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function hashicorp2npm(input: string): string {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2

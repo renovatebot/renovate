@@ -38,13 +38,13 @@ export async function fetchJSONFile(
 }
 
 export function getPresetFromEndpoint(
-  repo: string,
+  pkgName: string,
   filePreset: string,
   presetPath: string,
   endpoint: string
 ): Promise<Preset> {
   return fetchPreset({
-    repo,
+    pkgName,
     filePreset,
     presetPath,
     endpoint,

@@ -1,7 +1,6 @@
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
-import { ensureComment, ensureCommentRemoval } from '../../platform/comment';
 import { BranchStatus } from '../../types';
 import {
   deleteBranch,
@@ -94,13 +93,12 @@ export async function checkAutoMerge(
       };
     }
     if (rebaseRequested) {
-      await ensureCommentRemoval({
-        type: 'by-content',
+      await platform.ensureCommentRemoval({
         number: pr.number,
         content: automergeComment,
       });
     }
-    await ensureComment({
+    await platform.ensureComment({
       number: pr.number,
       topic: null,
       content: automergeComment,

@@ -1713,7 +1713,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D",
+    "url": "https://api.bitbucket.org/2.0/users/456",
   },
   Object {
     "headers": Object {
@@ -1724,7 +1724,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D",
+    "url": "https://api.bitbucket.org/2.0/users/123",
   },
   Object {
     "body": Object {
@@ -1753,9 +1753,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
+exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error not due to inactive reviewers 1`] = `"Response code 400 (Bad Request)"`;
 
-exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 2`] = `
+exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error not due to inactive reviewers 2`] = `
 Array [
   Object {
     "headers": Object {

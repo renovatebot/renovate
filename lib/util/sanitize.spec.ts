@@ -3,7 +3,6 @@ import {
   clearSanitizedSecretsList,
   sanitize,
 } from './sanitize';
-import { toBase64 } from './string';
 
 describe('util/sanitize', () => {
   beforeEach(() => {
@@ -11,7 +10,6 @@ describe('util/sanitize', () => {
   });
 
   it('sanitizes empty string', () => {
-    addSecretForSanitizing('');
     expect(sanitize(null as never)).toBeNull();
     expect(sanitize('')).toBe('');
   });
@@ -20,7 +18,7 @@ describe('util/sanitize', () => {
     const username = 'userabc';
     const password = 'password123';
     addSecretForSanitizing(token);
-    const hashed = toBase64(`${username}:${password}`);
+    const hashed = Buffer.from(`${username}:${password}`).toString('base64');
     addSecretForSanitizing(hashed);
     addSecretForSanitizing(password);
 
@@ -32,11 +30,5 @@ describe('util/sanitize', () => {
     const inputX2 = [input, input].join('\n');
     const outputX2 = [output, output].join('\n');
     expect(sanitize(inputX2)).toBe(outputX2);
-  });
-  it('sanitizes github app tokens', () => {
-    addSecretForSanitizing('x-access-token:abc123');
-    expect(sanitize(`hello ${toBase64('abc123')} world`)).toBe(
-      'hello **redacted** world'
-    );
   });
 });

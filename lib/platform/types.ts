@@ -132,18 +132,18 @@ export interface EnsureCommentConfig {
 }
 
 export interface EnsureCommentRemovalConfigByTopic {
-  type: 'by-topic';
   number: number;
   topic: string;
 }
 export interface EnsureCommentRemovalConfigByContent {
-  type: 'by-content';
   number: number;
   content: string;
 }
-export type EnsureCommentRemovalConfig =
-  | EnsureCommentRemovalConfigByTopic
-  | EnsureCommentRemovalConfigByContent;
+export interface EnsureCommentRemovalConfig {
+  number: number;
+  content?: string;
+  topic?: string;
+}
 
 export type EnsureIssueResult = 'updated' | 'created';
 

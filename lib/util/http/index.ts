@@ -1,6 +1,7 @@
 import crypto from 'crypto';
+import type { IncomingHttpHeaders } from 'http';
 import merge from 'deepmerge';
-import got, { Options, RequestError, Response } from 'got';
+import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
@@ -15,16 +16,49 @@ import { getQueue } from './queue';
 import type {
   GotJSONOptions,
   GotOptions,
-  HttpOptions,
-  HttpPostOptions,
-  HttpResponse,
-  InternalHttpOptions,
+  OutgoingHttpHeaders,
   RequestStats,
 } from './types';
+
 // TODO: refactor code to remove this (#9651)
 import './legacy';
 
-export { RequestError as HttpError };
+export interface HttpOptions {
+  body?: any;
+  username?: string;
+  password?: string;
+  baseUrl?: string;
+  headers?: OutgoingHttpHeaders;
+
+  /**
+   * Do not use authentication
+   */
+  noAuth?: boolean;
+
+  throwHttpErrors?: boolean;
+  useCache?: boolean;
+}
+
+export interface HttpPostOptions extends HttpOptions {
+  body: unknown;
+}
+
+export interface InternalHttpOptions extends HttpOptions {
+  json?: Record<string, unknown>;
+  responseType?: 'json' | 'buffer';
+  method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
+}
+
+export interface HttpHeaders extends IncomingHttpHeaders {
+  link?: string | undefined;
+}
+
+export interface HttpResponse<T = string> {
+  statusCode: number;
+  body: T;
+  headers: HttpHeaders;
+  authorization?: boolean;
+}
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>

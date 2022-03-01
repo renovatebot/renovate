@@ -1,7 +1,6 @@
 import semver from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -15,9 +14,9 @@ export const urls = [
   'https://semver.mwl.be',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
+export const supportedRangeStrategies = [
   'bump',
-  'widen',
+  'extend',
   'pin',
   'replace',
   'update-lockfile',

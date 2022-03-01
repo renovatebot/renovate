@@ -1,9 +1,7 @@
-import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
-
 import {
   ascendingRange,
   descendingRange,
@@ -25,12 +23,7 @@ export const id = 'rez';
 export const displayName = 'rez';
 export const urls = ['https://github.com/nerdvegas/rez'];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
-  'bump',
-  'widen',
-  'pin',
-  'replace',
-];
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function equals(a: string, b: string): boolean {
   try {

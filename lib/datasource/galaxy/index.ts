@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import type { HttpResponse } from '../../util/http/types';
+import type { HttpResponse } from '../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GalaxyResult } from './types';

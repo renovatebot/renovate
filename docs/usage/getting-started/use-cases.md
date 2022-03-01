@@ -1,6 +1,6 @@
 # Use Cases
 
-This page describes common use cases for Renovate.
+This page describes common use cases for Renovate, for those who are new and would like to get their heads around the capabilities.
 
 ## Development dependency updates
 
@@ -8,41 +8,24 @@ The original use case, and the most popular one, is for developers to automate d
 
 ### Updating of package files
 
-The term "package file" is used to describe files which contain references to dependencies.
-Package files are managed by a "package manager".
+The term "package file" is used to describe files which contain lists of dependencies, managed by a "package manager".
+Example package files include `package.json` (managed by npm or Yarn), `Gemfile` (managed by Bundler), or `go.mod` (managed by `go` modules).
 
-Example package files include:
-
-- `package.json`, managed by npm or Yarn
-- `Gemfile`, managed by Bundler
-- `go.mod`, managed by `go` modules
-
-#### How Renovate updates a package file
-
-Renovate:
-
-1. Scans your repositories to detect package files and their dependencies
-1. Checks if any newer versions exist
-1. Raises Pull Requests for available updates
-
+Renovate scans repositories to detect package files and their dependencies, checks if any newer versions exist, and then raises Pull Requests for available updates.
 The Pull Requests patch the package files directly, and include Release Notes for the newer versions (if they are available).
 
-By default:
-
-- You'll get separate Pull Requests for each dependency
-- Major updates are kept separate from non-major updates
+By default, you'll get separate Pull Requests for each dependency, and major updates will be separated out from non-major.
 
 ### Package managers with lock files
 
 Many package managers support "lock files", which "freeze" the entire dependency tree including transitive dependencies.
 npm, Yarn, Bundler, Composer, Poetry, Pipenv, and Cargo all support or use lock files.
 
-If you use a lock file then changes to your package file must come with a compatible change to the lock file.
-Renovate can patch/update package files directly, but a lock file is too complex to "reverse engineer".
-Therefore Renovate lets the package manager do the lock file update.
+When lock files exist, changes to package files must come with a compatible change to the associated lock file.
+Renovate can patch/update package files directly, but a lock file is too complex to "reverse engineer" so therefore Renovate lets the package manager itself do the lock file update.
 A simplified example:
 
-1. The repository has a `package.json` and `package-lock.json` with version `1.0.0` of a dependency
+1. The repository has a `package.json` and `package-lock.json` containing version `1.0.0` of a dependency
 1. Renovate sees that version `1.1.0` is available
 1. Renovate patches the `package.json` to change the dependency's version from `1.0.0` to `1.1.0`
 1. Renovate runs `npm install` to let `npm` update the `package-lock.json`
@@ -51,14 +34,13 @@ A simplified example:
 
 ### Custom dependency extraction
 
-Renovate supports 60+ types of package files.
-Not all dependencies are detected by default, this can be because:
+Renovate supports 60+ types of package files, but sometimes dependencies are not detected by Renovate by default due to either:
 
-- The package manager/file format is not supported, or
+- The package manager/file format is not yet supported, or
 - The file format is not a standard or is proprietary
 
-If your dependencies are not detected by default, you can use use our "regex" manager to set your own custom patterns to extract dependencies.
-You configure the regex manager by telling it:
+In these cases you can use our "regex" manager to set your own custom patterns to extract dependencies.
+You can configure the regex manager by telling it:
 
 - Which file pattern(s) to match
 - How to identify the dependency name and version from within the file
@@ -72,23 +54,15 @@ Renovate is increasingly used for purposes which are traditionally described as 
 
 ### DevOps / Infrastructure as Code updates
 
-It's common for repositories to have DevOps-related files like CI/CD configs, or "Infrastructure as Code" (IaC) files.
-Examples of IaC files are Docker, Kubernetes or Terraform files.
-Renovate handles IaC files as "package managers" and "package files" and can detect and update them.
+Repositories today consist of more than just development dependencies, and commonly include DevOps-related files like CI/CD configs or "Infrastructure as Code" (IaC) files like Docker, Kubernetes or Terraform files.
+Renovate considers these all to be forms of "package managers" and "package files" and therefore detects and updates them accordingly.
 
-#### Docker-compatible images
-
-Docker-compatible images are a key building block of modern software.
-These images are commonly found in CI/CD pipeline configs or referenced in IaC files.
-Renovate detects these IaC files and then queries Docker registries to determine if newer tags or digests exists.
-
-#### Tag-based updating
+Docker-compatible images are one of the key building blocks of modern software and so are most commonly found, in both CI/CD pipeline configs as well as referenced in IaC files.
+Renovate will detect these IaC files and then query Docker registries to determine if newer tags or digests exists.
 
 An example of tag-based updating would be `node` images from Docker Hub.
 These are typically tagged using their version, like `14.17.4` but can also have more elaborate tags like `14.17.4-alpine3.11`.
 Renovate handles both these tag scenarios and will propose updates such as from `14.17.4` to `14.7.5`, or from `14.17.4-alpine3.11` to `14.17.5-alpine3.11`.
-
-#### Docker digests
 
 A better example of Renovate's power is when updating Docker digests.
 While humans could be reasonably expected to check and update versions like `14.17.4`, looking up image digests and updating them manually is impractical to do at scale.
@@ -96,93 +70,65 @@ Renovate can not only keep Docker digests updated, but it can even be configured
 
 ### Internal package updates
 
-Your company typically has dozens of repositories, if not hundreds or thousands.
-These repositories usally rely on other repositories and may have upstream or downstream internal dependencies.
+Companies typically have at least dozens of repositories, if not hundreds or thousands.
+In most cases, these repositories do not operate in isolation and may have upstream or downstream internal dependencies.
 In such cases, it is best practice to:
 
 - Update downstream links as soon as possible, and
 - Keep internal version use as consistent as possible
 
-You can use Renovate to achieve this best practice.
-Renovate detects and updates internal dependencies just like external or Open Source dependencies.
+Renovate is often used to achieve both the above best practices by detecting and updating internal dependencies just like external or Open Source dependencies.
 
-#### Example of internal package update
+An example from Renovate itself is the use of submodule updating to automate the process of updating Renovate's documentation:
 
-We automatically update our documentation site with Renovate bot.
-We use Renovate's git submodule support to do this.
-
-- Our main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) contains most of the Markdown documentation files
-- The documentation build repository [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) has a submodule link to our main repository `renovatebot/renovate`
+- Renovate's main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) contains the majority of Markdown documentation files
+- Renovate's documentation build repository [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) contains a submodule link to `renovatebot/renovate`
 - Submodule updates are performed automatically whenever detected
 - After the automatic update is merged, the documentation site is rebuilt and pushed live
 
-We also use Renovate's "automerge" feature.
-It allows us to automatically merge the submodule update without needing manual approval, manual merging, or even without getting a PR at all.
-
-Automerge is particularly useful for internal dependencies where it's best to use the approach of "if it passes tests then merge it".
+The above use case makes use of Renovate's "automerge" feature, which allows for fully automated updates without needing manual approval, merging, or even a PR at all if desired.
+Automerge is particularly useful for internal dependencies when it's best to use the approach of "if it passes tests then merge it".
 
 To learn more about "automerge" read the [key concepts, automerge](https://docs.renovatebot.com/key-concepts/automerge/) documentation.
 
 ## Advanced configuration
 
-The capabilities listed below are commonly needed for all the above use cases.
+The below capabilities are common across the above use cases.
 
 ### Batched updates
 
-Renovate defaults to separating each dependency update into its own PR.
-But you may want to batch or "group" updates together.
-For example, group all patch updates into one PR or even all non-major updates together (patches and minor updates).
+Renovate defaults to separating each dependency update into its own PR, but some users prefer to batch or "group" updates together.
+For example, group all patch updates into one PR or even perhaps all non-major updates together (patches and minor updates).
 
-You can configure batched updates by setting a `groupName` as part of `packageRules`.
+Renovate supports this capability using the `groupName` configuration as part of `packageRules`.
 
 ### Scheduled updates
 
-You may want to limit the times when Renovate is allowed to raise updates.
-This can help to reduce "noise" during your working hours, and reduce the chance of CI contention.
-You can tell Renovate to "not bother you" during times when you're using the CI resources, or want to focus on your work.
+Some users prefer to limit which hours of the day or week during which Renovate will raise updates.
+This may be to reduce "noise" during working hours, but also to reduce the chance of CI contention at times when developers are likely to be waiting on tests to finish.
 
-You can set the time ranges during which Renovate creates updates in the `schedule` field.
+Renovate allows users to define time ranges during which to create updates using the `schedule` field.
 
-### On-demand updates via Dependency Dashboard
+### On-demand updates
 
-You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
+Renovate's "Dependency Dashboard" capability can be used on platforms which support dynamic Markdown checkboxes (GitHub, GitLab, and Gitea).
+When enabled, an issue titled "Dependency Dashboard" is created which lists all updates which are pending, in progress, or were previously closed ignored.
 
-- GitHub
-- GitLab
-- Gitea
+Importantly, it also enables the concept of "Dependency Dashboard Approval", meaning that configured PRs won't be raised automatically and will instead only be created once the corresponding checkbox is clicked on the dashboard.
+This can be an improvement in two ways:
 
-When you enable the Dependency Dashboard, an issue titled "Dependency Dashboard" will be created.
-This issue lists all updates which are pending, in progress, or were previously closed ignored.
+- By not raising PRs automatically, it can allow users to request them on-demand at times when they are ready to take action on them, and
+- Offering an alternative to permanently ignoring/disabling certain types of updates, such as major updates
 
-If you want to get an update ahead of schedule, or want to retry a previously closed update, you can click on the update's checkbox in the Dependency Dashboard.
-
-### Dependency Dashboard Approval
-
-If you enable the Dependency Dashboard you can opt-in to a different workflow for some, or even all of your packages.
-We call this the "Dependency Dashboard Approval" workflow.
-
-Here's how it works:
-
-- You tell Renovate which package updates need "Dashboard Approval" by setting a custom `packageRule`
-- Renovate only raises updates for packages that need "Dashboard Approval" after you click on the corresponding checkbox on the dashboard
-
-#### Benefits of using Dependency Dashboard Approval
-
-Benefits of using Dependency Dashboard Approval:
-
-- By not raising PRs automatically, it allows you to request updates on-demand when you're ready, and
-- It offers you an alternative to permanently ignoring/disabling certain types of updates, like major updates
-
-When you use the Dependency Dashboard Approval workflow you have full visibility and control over your updates.
+By having this dashboard concept it gives users both visibility and control over updates.
 
 ### Configuration presets
 
-You may run Renovate on many, or even all your repositories.
-This also means that you might want a similar config for all of your repositories.
-You can use configuration "presets" to avoid duplicating your configuration accross your repositories.
+It's common that users run Renovate on many repositories and therefore want a (mostly) similar config across their repositories.
+Renovate supports the concept of configuration "presets" to avoid users needing to duplicate configuration across all such repos.
 
 Configuration presets are JSON configuration files which are committed to repositories and then referenced from others.
-Renovate includes over 100 built-in presets, like the default recommended `config:base` preset.
+Renovate also includes over 100 built-in presets, including the default recommended `config:base` preset.
 
 The typical workflow for a company is:
 

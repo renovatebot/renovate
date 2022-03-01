@@ -10,18 +10,13 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const systemDep = updatedDeps[0];
-  if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
+  if (!isSystemManifest(packageFileName) || !updatedDeps[0]?.newVersion) {
     return null;
   }
   const existingFileContent = await readLocalFile(packageFileName);
   try {
     logger.debug(`Updating Flux system manifests`);
-    const args: string[] = ['--export'];
-    if (systemDep.managerData?.components) {
-      args.push('--components', quote(systemDep.managerData.components));
-    }
-    const cmd = `flux install ${args.join(' ')} > ${quote(packageFileName)}`;
+    const cmd = `flux install --export > ${quote(packageFileName)}`;
     const execOptions: ExecOptions = {
       docker: {
         image: 'sidecar',

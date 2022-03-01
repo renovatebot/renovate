@@ -1,6 +1,5 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import type { RangeStrategy } from '../../types/versioning';
 import { regEx } from '../../util/regex';
 import type { VersioningApi } from '../types';
 import { getNewValue, toSemverRange } from './range';
@@ -9,12 +8,7 @@ export const id = 'swift';
 export const displayName = 'Swift';
 export const urls = ['https://swift.org/package-manager/'];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
-  'bump',
-  'widen',
-  'pin',
-  'replace',
-];
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const { is: isStable } = stable;
 

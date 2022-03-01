@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { BitbucketHttp } from '../../util/http/bitbucket';
-import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
+import type { EnsureCommentConfig } from '../types';
 import { Config, accumulateValues } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
@@ -116,26 +116,26 @@ export async function ensureComment({
 
 export async function ensureCommentRemoval(
   config: CommentsConfig,
-  deleteConfig: EnsureCommentRemovalConfig
+  prNo: number,
+  topic?: string,
+  content?: string
 ): Promise<void> {
   try {
-    const { number: prNo } = deleteConfig;
-    const key =
-      deleteConfig.type === 'by-topic'
-        ? deleteConfig.topic
-        : deleteConfig.content;
-    logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${prNo} is removed`
+    );
     const comments = await getComments(config, prNo);
+
+    const byTopic = (comment: Comment): boolean =>
+      comment.content.raw.startsWith(`### ${topic}\n\n`);
+    const byContent = (comment: Comment): boolean =>
+      comment.content.raw.trim() === content;
 
     let commentId: number | undefined = undefined;
 
-    if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.content.raw.startsWith(`### ${deleteConfig.topic}\n\n`);
+    if (topic) {
       commentId = comments.find(byTopic)?.id;
-    } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.content.raw.trim() === deleteConfig.content;
+    } else if (content) {
       commentId = comments.find(byContent)?.id;
     }
 

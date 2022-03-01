@@ -247,10 +247,6 @@ export function extractPackage(
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
-  if (project.childNamed('version')) {
-    result.packageFileVersion = project.valueWithPath('version').trim();
-  }
-
   return result;
 }
 

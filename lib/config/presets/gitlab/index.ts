@@ -32,15 +32,15 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string
+  packageTag?: string
 ): Promise<Preset> {
   let url = endpoint;
   let ref = '';
   try {
     const urlEncodedRepo = encodeURIComponent(repo);
     const urlEncodedPkgName = encodeURIComponent(fileName);
-    if (is.nonEmptyString(tag)) {
-      ref = `?ref=${tag}`;
+    if (is.nonEmptyString(packageTag)) {
+      ref = `?ref=${packageTag}`;
     } else {
       const defaultBranchName = await getDefaultBranchName(
         urlEncodedRepo,
@@ -64,27 +64,33 @@ export async function fetchJSONFile(
 }
 
 export function getPresetFromEndpoint(
-  repo: string,
+  pkgName: string,
   presetName: string,
   presetPath: string,
   endpoint = Endpoint,
-  tag?: string
+  packageTag?: string
 ): Promise<Preset> {
   return fetchPreset({
-    repo,
+    pkgName,
     filePreset: presetName,
     presetPath,
     endpoint,
-    tag,
+    packageTag,
     fetch: fetchJSONFile,
   });
 }
 
 export function getPreset({
-  repo,
+  packageName: pkgName,
   presetPath,
   presetName = 'default',
-  tag = null,
+  packageTag = null,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
+  return getPresetFromEndpoint(
+    pkgName,
+    presetName,
+    presetPath,
+    Endpoint,
+    packageTag
+  );
 }

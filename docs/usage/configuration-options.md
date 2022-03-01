@@ -316,11 +316,11 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
-Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
+Currently this setting supports `helmv3`, `npm` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
-Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
+Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
 For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
@@ -575,8 +575,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 
 ## description
 
-The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
-Descriptions fields embedded within presets are also collated as part of the onboarding description.
+The description field is used by config presets to describe what they do.
+They are then collated as part of the onboarding description.
 
 ## digest
 
@@ -921,12 +921,6 @@ Example for configuring `docker` auth:
   ]
 }
 ```
-
-If multiple `hostRules` match a request, then they will be applied in the following order/priority:
-
-1. rules with only `hostType` specified
-1. rules with only `matchHost` specified (sorted by `matchHost` length if multiple match)
-1. rules with both `matchHost` and `hostType` specified (sorted by `matchHost` length if multiple match)
 
 To disable requests to a particular host, you can configure a rule like:
 
@@ -1839,14 +1833,6 @@ Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behin
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
-## platformCommit
-
-Supports only GitHub App mode and not when using Personal Access Tokens.
-
-To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
-
-The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
-
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
@@ -2107,7 +2093,7 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
+- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
@@ -2746,15 +2732,10 @@ For example, to configure custom labels and assignees:
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
-    "automerge": true,
     "assignees": ["@rarkins"]
   }
 }
 ```
-
-<!-- prettier-ignore -->
-!!! warning
-    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
 
 To disable the vulnerability alerts functionality completely, configure like this:
 

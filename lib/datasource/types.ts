@@ -17,16 +17,18 @@ export interface DigestConfig {
   currentDigest?: string;
 }
 
-export interface GetReleasesConfig {
+export interface ReleasesConfigBase {
   npmrc?: string;
+  defaultRegistryUrls?: string[];
+  registryUrls?: string[];
+}
+
+export interface GetReleasesConfig extends ReleasesConfigBase {
   lookupName: string;
   registryUrl?: string;
 }
 
-export interface GetPkgReleasesConfig {
-  npmrc?: string;
-  defaultRegistryUrls?: string[];
-  registryUrls?: string[];
+export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   datasource: string;
   depName: string;
   lookupName?: string;

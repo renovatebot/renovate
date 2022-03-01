@@ -37,10 +37,10 @@ const presetSources: Record<string, PresetApi> = {
 };
 
 const nonScopedPresetWithSubdirRegex = regEx(
-  /^(?<repo>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/
+  /^(?<packageName>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-./]+?))?$/
 );
 const gitPresetRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/
+  /^(?<packageName>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<packageTag>[\w\-./]+?))?$/
 );
 
 export function replaceArgs(
@@ -76,9 +76,9 @@ export function parsePreset(input: string): ParsedPreset {
   let str = input;
   let presetSource: string;
   let presetPath: string | undefined;
-  let repo: string;
+  let packageName: string;
   let presetName: string;
-  let tag: string | undefined;
+  let packageTag: string | undefined;
   let params: string[];
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -128,18 +128,18 @@ export function parsePreset(input: string): ParsedPreset {
     presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
   ) {
     presetSource = 'internal';
-    [repo, presetName] = str.split(':');
+    [packageName, presetName] = str.split(':');
   } else if (str.startsWith(':')) {
     // default namespace
     presetSource = 'internal';
-    repo = 'default';
+    packageName = 'default';
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
-    [, repo] = regEx(/(@.*?)(:|$)/).exec(str);
-    str = str.slice(repo.length);
-    if (!repo.includes('/')) {
-      repo += '/renovate-config';
+    [, packageName] = regEx(/(@.*?)(:|$)/).exec(str);
+    str = str.slice(packageName.length);
+    if (!packageName.includes('/')) {
+      packageName += '/renovate-config';
     }
     if (str === '') {
       presetName = 'default';
@@ -156,13 +156,14 @@ export function parsePreset(input: string): ParsedPreset {
     if (!nonScopedPresetWithSubdirRegex.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    ({ repo, presetPath, presetName, tag } =
+    ({ packageName, presetPath, presetName, packageTag } =
       nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups || {});
+    ({ packageName, presetName, packageTag } =
+      gitPresetRegex.exec(str)?.groups || {});
 
-    if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
-      repo = `renovate-config-${repo}`;
+    if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
+      packageName = `renovate-config-${packageName}`;
     }
     if (!is.nonEmptyString(presetName)) {
       presetName = 'default';
@@ -172,9 +173,9 @@ export function parsePreset(input: string): ParsedPreset {
   return {
     presetSource,
     presetPath,
-    repo,
+    packageName,
     presetName,
-    tag,
+    packageTag,
     params,
   };
 }
@@ -192,14 +193,20 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, repo, presetPath, presetName, tag, params } =
-    parsePreset(preset);
+  const {
+    presetSource,
+    packageName,
+    presetPath,
+    presetName,
+    packageTag,
+    params,
+  } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
-    repo,
+    packageName,
     presetPath,
     presetName,
     baseConfig,
-    tag,
+    packageTag,
   });
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);

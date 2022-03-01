@@ -3,7 +3,7 @@ import { MavenDatasource } from '../../datasource/maven';
 import * as mavenVersioning from '../../versioning/maven';
 
 export { extractAllPackageFiles } from './extract';
-export { bumpPackageVersion, updateDependency } from './update';
+export { updateDependency } from './update';
 
 export const language = ProgrammingLanguage.Java;
 

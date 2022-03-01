@@ -13,7 +13,7 @@ import { exec } from '.';
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
-jest.mock('../../datasource');
+jest.mock('../../../lib/datasource');
 
 interface TestInput {
   processEnv: Record<string, string>;

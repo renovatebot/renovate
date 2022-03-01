@@ -1,7 +1,6 @@
 import * as httpMock from '../../../test/http-mock';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
-import { toBase64 } from '../../util/string';
 import * as ght from './gitea-helper';
 
 describe('platform/gitea/gitea-helper', () => {
@@ -130,7 +129,7 @@ describe('platform/gitea/gitea-helper', () => {
 
   const mockContents: ght.RepoContents = {
     path: 'dummy.txt',
-    content: toBase64('top secret'),
+    content: Buffer.from('top secret').toString('base64'),
     contentString: 'top secret',
   };
 
