@@ -127,10 +127,10 @@ query(
 }
 `;
 
-export const vulnerabilityAlertsQuery = `
+export const vulnerabilityAlertsQuery = (filterByState: boolean): string => `
 query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
-    vulnerabilityAlerts(last: 100, states: [OPEN]) {
+    vulnerabilityAlerts(last: 100, ${filterByState ? 'states: [OPEN]' : ''}) {
       edges {
         node {
           dismissReason

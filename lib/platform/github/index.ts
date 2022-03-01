@@ -1672,10 +1672,18 @@ export function massageMarkdown(input: string): string {
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
+
+  const gheSupportsStateFilter = semver.satisfies(
+    platformConfig.gheVersion,
+    '~3.0.25 || ~3.1.17 || ~3.2.9 || ~3.3.4'
+  );
+  const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
+  const query = vulnerabilityAlertsQuery(filterByState);
+
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
-    }>(vulnerabilityAlertsQuery, 'vulnerabilityAlerts', {
+    }>(query, 'vulnerabilityAlerts', {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
