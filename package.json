@@ -159,7 +159,7 @@
     "emojibase-regex": "6.0.1",
     "extract-zip": "2.0.1",
     "fast-safe-stringify": "2.1.1",
-    "find-packages": "8.0.11",
+    "find-packages": "8.0.12",
     "find-up": "5.0.0",
     "fs-extra": "10.0.0",
     "git-url-parse": "11.6.0",
