@@ -1,8 +1,8 @@
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { isVersion } from '../../modules/versioning/semver';
 import type { SkipReason } from '../../types';
 import { newlineRegex, regEx } from '../../util/regex';
-import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {

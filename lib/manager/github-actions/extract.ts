@@ -1,7 +1,7 @@
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import * as dockerVersioning from '../../modules/versioning/docker';
 import { newlineRegex, regEx } from '../../util/regex';
-import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 

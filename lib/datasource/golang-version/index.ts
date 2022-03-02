@@ -1,7 +1,10 @@
+import {
+  isVersion,
+  id as semverVersioningId,
+} from '../../modules/versioning/semver';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
-import { isVersion, id as semverVersioningId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 

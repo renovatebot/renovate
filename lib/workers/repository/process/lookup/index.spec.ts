@@ -14,11 +14,11 @@ import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { NpmDatasource } from '../../../../datasource/npm';
 import { PackagistDatasource } from '../../../../datasource/packagist';
 import { PypiDatasource } from '../../../../datasource/pypi';
-import { id as dockerVersioningId } from '../../../../versioning/docker';
-import { id as gitVersioningId } from '../../../../versioning/git';
-import { id as npmVersioningId } from '../../../../versioning/npm';
-import { id as pep440VersioningId } from '../../../../versioning/pep440';
-import { id as poetryVersioningId } from '../../../../versioning/poetry';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
+import { id as gitVersioningId } from '../../../../modules/versioning/git';
+import { id as npmVersioningId } from '../../../../modules/versioning/npm';
+import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
+import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 

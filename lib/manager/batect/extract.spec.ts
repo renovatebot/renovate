@@ -1,8 +1,8 @@
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import { id as dockerVersioning } from '../../versioning/docker';
-import { id as semverVersioning } from '../../versioning/semver';
+import { id as dockerVersioning } from '../../modules/versioning/docker';
+import { id as semverVersioning } from '../../modules/versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';

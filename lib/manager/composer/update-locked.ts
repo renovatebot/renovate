@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { api as composer } from '../../versioning/composer';
+import { api as composer } from '../../modules/versioning/composer';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import type { ComposerLock } from './types';
 

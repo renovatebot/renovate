@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadJsonFixture } from '../../../test/util';
-import * as versioning from '../../versioning/docker';
+import * as versioning from '../../modules/versioning/docker';
 import { JenkinsPluginsDatasource } from '.';
 
 const jenkinsPluginsVersions = loadJsonFixture('plugin-versions.json');

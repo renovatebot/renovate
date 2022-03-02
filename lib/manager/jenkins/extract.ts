@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
+import * as mavenVersioning from '../../modules/versioning/maven';
 import { isSkipComment } from '../../util/ignore';
 import { newlineRegex, regEx } from '../../util/regex';
-import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
 

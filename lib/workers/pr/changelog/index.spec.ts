@@ -1,8 +1,8 @@
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
 import { PlatformId } from '../../../constants';
+import * as semverVersioning from '../../../modules/versioning/semver';
 import * as hostRules from '../../../util/host-rules';
-import * as semverVersioning from '../../../versioning/semver';
 import type { BranchConfig } from '../../types';
 import { ChangeLogError, getChangeLogJSON } from '.';
 

@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { id as versioning } from '../../versioning/loose';
+import { id as versioning } from '../../modules/versioning/loose';
 import type { RepologyPackage } from './types';
 import { RepologyDatasource } from './index';
 

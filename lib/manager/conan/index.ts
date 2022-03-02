@@ -1,6 +1,6 @@
 export { extractPackageFile } from './extract';
 import { ConanDatasource } from '../../datasource/conan';
-import * as conan from '../../versioning/conan';
+import * as conan from '../../modules/versioning/conan';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)conanfile\\.(txt|py)$'],

@@ -1,6 +1,6 @@
+import * as rubyVersioning from '../../modules/versioning/ruby';
 import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
-import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { InternalRubyGemsDatasource } from './get';

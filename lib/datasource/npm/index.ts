@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as npmVersioning from '../../versioning/npm';
+import * as npmVersioning from '../../modules/versioning/npm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { id } from './common';

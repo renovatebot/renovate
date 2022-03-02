@@ -1,8 +1,8 @@
 import semver from 'semver';
 import { GoDatasource } from '../../datasource/go';
 import { logger } from '../../logger';
+import { isVersion } from '../../modules/versioning/semver';
 import { newlineRegex, regEx } from '../../util/regex';
-import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
 function getDep(

@@ -1,7 +1,7 @@
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import { SbtPluginDatasource } from '../../datasource/sbt-plugin';
-import * as ivyVersioning from '../../versioning/ivy';
+import * as ivyVersioning from '../../modules/versioning/ivy';
 
 export { extractPackageFile } from './extract';
 export { bumpPackageVersion } from './update';

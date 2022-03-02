@@ -6,6 +6,10 @@ import { parse } from 'auth-header';
 import hasha from 'hasha';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import {
+  api as dockerVersioning,
+  id as dockerVersioningId,
+} from '../../modules/versioning/docker';
 import type { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
@@ -25,10 +29,6 @@ import {
   parseUrl,
   trimTrailingSlash,
 } from '../../util/url';
-import {
-  api as dockerVersioning,
-  id as dockerVersioningId,
-} from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';

@@ -2,9 +2,9 @@ import { load } from 'js-yaml';
 import upath from 'upath';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
+import { id as dockerVersioning } from '../../modules/versioning/docker';
+import { id as semverVersioning } from '../../modules/versioning/semver';
 import { readLocalFile } from '../../util/fs';
-import { id as dockerVersioning } from '../../versioning/docker';
-import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {

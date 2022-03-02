@@ -5,9 +5,9 @@ import {
   SbtPluginDatasource,
   defaultRegistryUrls as sbtPluginDefaultRegistries,
 } from '../../datasource/sbt-plugin';
+import { get } from '../../modules/versioning';
+import * as mavenVersioning from '../../modules/versioning/maven';
 import { regEx } from '../../util/regex';
-import { get } from '../../versioning';
-import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParseContext, ParseOptions } from './types';
 

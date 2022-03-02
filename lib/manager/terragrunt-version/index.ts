@@ -1,5 +1,5 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as hashicorpVersioning from '../../versioning/hashicorp';
+import * as hashicorpVersioning from '../../modules/versioning/hashicorp';
 
 export { extractPackageFile } from './extract';
 

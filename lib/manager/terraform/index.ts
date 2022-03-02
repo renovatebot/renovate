@@ -4,7 +4,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
-import * as hashicorpVersioning from '../../versioning/hashicorp';
+import * as hashicorpVersioning from '../../modules/versioning/hashicorp';
 
 export { updateArtifacts } from './lockfile';
 export { extractPackageFile } from './extract';

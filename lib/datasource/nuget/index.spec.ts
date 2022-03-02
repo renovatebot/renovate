@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
+import { id as versioning } from '../../modules/versioning/nuget';
 import * as _hostRules from '../../util/host-rules';
-import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
 import { NugetDatasource } from '.';
 

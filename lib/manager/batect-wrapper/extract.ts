@@ -1,7 +1,7 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { logger } from '../../logger';
+import { id as semverVersioning } from '../../modules/versioning/semver';
 import { regEx } from '../../util/regex';
-import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
 const VERSION_REGEX = regEx(/^\s+VERSION="(.*)"$/m);

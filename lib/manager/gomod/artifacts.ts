@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { isValid } from '../../modules/versioning/semver';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
@@ -12,7 +13,6 @@ import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
 import { find, getAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { createURLFromHostOrURL, validateUrl } from '../../util/url';
-import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
   UpdateArtifact,

@@ -1,5 +1,5 @@
+import { compare } from '../../modules/versioning/maven/compare';
 import { regEx } from '../../util/regex';
-import { compare } from '../../versioning/maven/compare';
 
 const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/gi;
 

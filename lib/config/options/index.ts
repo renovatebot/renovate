@@ -1,9 +1,9 @@
 import { PlatformId } from '../../constants';
 import { getManagers } from '../../manager';
 import { getPlatformList } from '../../modules/platform';
-import { getVersioningList } from '../../versioning';
-import * as dockerVersioning from '../../versioning/docker';
-import * as pep440Versioning from '../../versioning/pep440';
+import { getVersioningList } from '../../modules/versioning';
+import * as dockerVersioning from '../../modules/versioning/docker';
+import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [

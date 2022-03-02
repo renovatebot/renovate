@@ -1,5 +1,5 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { id as versioning } from '../../versioning/semver';
+import { id as versioning } from '../../modules/versioning/semver';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';

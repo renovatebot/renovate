@@ -2,8 +2,8 @@ import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { id as versioning } from '../../modules/versioning/maven';
 import * as hostRules from '../../util/host-rules';
-import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';
 
 const datasource = MavenDatasource.id;

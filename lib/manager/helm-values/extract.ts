@@ -1,6 +1,6 @@
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
-import { id as dockerVersioning } from '../../versioning/docker';
+import { id as dockerVersioning } from '../../modules/versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { HelmDockerImageDependency } from './types';

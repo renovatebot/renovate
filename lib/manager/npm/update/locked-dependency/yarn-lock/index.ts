@@ -1,6 +1,6 @@
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
+import { api as semver } from '../../../../../modules/versioning/npm';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
 import { getLockedDependencies } from './get-locked';
 import { replaceConstraintVersion } from './replace';

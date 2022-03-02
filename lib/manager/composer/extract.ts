@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { logger } from '../../logger';
+import { api as semverComposer } from '../../modules/versioning/composer';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
-import { api as semverComposer } from '../../versioning/composer';
 import type { PackageDependency, PackageFile } from '../types';
 import type {
   ComposerConfig,

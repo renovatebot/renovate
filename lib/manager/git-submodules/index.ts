@@ -1,5 +1,5 @@
 import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as gitVersioning from '../../versioning/git';
+import * as gitVersioning from '../../modules/versioning/git';
 
 export { default as extractPackageFile } from './extract';
 export { default as updateDependency } from './update';

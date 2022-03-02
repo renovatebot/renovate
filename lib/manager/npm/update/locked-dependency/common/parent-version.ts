@@ -3,7 +3,7 @@ import {
   getPkgReleases,
 } from '../../../../../datasource';
 import { logger } from '../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
+import { api as semver } from '../../../../../modules/versioning/npm';
 
 /**
  * Finds the first stable version of parentName after parentStartingVersion which either:

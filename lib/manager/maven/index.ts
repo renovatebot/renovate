@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { MavenDatasource } from '../../datasource/maven';
-import * as mavenVersioning from '../../versioning/maven';
+import * as mavenVersioning from '../../modules/versioning/maven';
 
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';

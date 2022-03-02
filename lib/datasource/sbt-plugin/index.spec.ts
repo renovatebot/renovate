@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
-import * as mavenVersioning from '../../versioning/maven';
+import * as mavenVersioning from '../../modules/versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-package/util';
 import { SbtPluginDatasource } from '.';

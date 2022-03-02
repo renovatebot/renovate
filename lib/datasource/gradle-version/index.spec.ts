@@ -1,8 +1,8 @@
 import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadJsonFixture, partial } from '../../../test/util';
+import { id as versioning } from '../../modules/versioning/gradle';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { id as versioning } from '../../versioning/gradle';
 import { GradleVersionDatasource } from '.';
 
 const allResponse: any = loadJsonFixture('all.json');

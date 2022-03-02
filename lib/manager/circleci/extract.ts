@@ -1,7 +1,7 @@
 import { OrbDatasource } from '../../datasource/orb';
 import { logger } from '../../logger';
+import * as npmVersioning from '../../modules/versioning/npm';
 import { newlineRegex, regEx } from '../../util/regex';
-import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 

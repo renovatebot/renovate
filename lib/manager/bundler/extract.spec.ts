@@ -1,5 +1,5 @@
 import { fs, loadFixture } from '../../../test/util';
-import { isValid } from '../../versioning/ruby';
+import { isValid } from '../../modules/versioning/ruby';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');

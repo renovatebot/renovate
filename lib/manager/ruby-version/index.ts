@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as rubyVersioning from '../../versioning/ruby';
+import * as rubyVersioning from '../../modules/versioning/ruby';
 
 export { extractPackageFile } from './extract';
 

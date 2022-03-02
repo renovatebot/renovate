@@ -1,5 +1,5 @@
 import { CdnJsDatasource } from '../../datasource/cdnjs';
-import * as semverVersioning from '../../versioning/semver';
+import * as semverVersioning from '../../modules/versioning/semver';
 import { extractPackageFile } from './extract';
 
 export { extractPackageFile };

@@ -5,6 +5,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { isValid } from '../../modules/versioning/ruby';
 import type { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
 import { exec } from '../../util/exec';
@@ -18,7 +19,6 @@ import {
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { addSecretForSanitizing } from '../../util/sanitize';
-import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   findAllAuthenticatable,

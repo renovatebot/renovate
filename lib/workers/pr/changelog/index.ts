@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import * as allVersioning from '../../../versioning';
+import * as allVersioning from '../../../modules/versioning';
 import type { BranchUpgradeConfig } from '../../types';
 import { getInRangeReleases } from './releases';
 import * as sourceGithub from './source-github';

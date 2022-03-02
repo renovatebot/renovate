@@ -1,10 +1,10 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import * as ivyVersioning from '../../modules/versioning/ivy';
+import { compare } from '../../modules/versioning/maven/compare';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
-import * as ivyVersioning from '../../versioning/ivy';
-import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';

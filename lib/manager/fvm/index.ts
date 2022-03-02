@@ -1,5 +1,5 @@
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as semverVersioning from '../../versioning/semver';
+import * as semverVersioning from '../../modules/versioning/semver';
 
 export { extractPackageFile } from './extract';
 

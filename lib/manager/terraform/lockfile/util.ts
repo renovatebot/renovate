@@ -1,6 +1,6 @@
+import { get as getVersioning } from '../../../modules/versioning';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
   LineNumbers,

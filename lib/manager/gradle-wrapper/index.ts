@@ -1,5 +1,5 @@
 import { GradleVersionDatasource } from '../../datasource/gradle-version';
-import { id as versioning } from '../../versioning/gradle';
+import { id as versioning } from '../../modules/versioning/gradle';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';

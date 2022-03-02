@@ -1,7 +1,7 @@
 import { ProgrammingLanguage } from '../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
-import * as npmVersioning from '../../versioning/npm';
+import * as npmVersioning from '../../modules/versioning/npm';
 
 export { detectGlobalConfig } from './detect';
 export { extractAllPackageFiles } from './extract';

@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { DockerDatasource } from '../../datasource/docker';
-import * as dockerVersioning from '../../versioning/docker';
+import * as dockerVersioning from '../../modules/versioning/docker';
 
 export { extractPackageFile } from './extract';
 

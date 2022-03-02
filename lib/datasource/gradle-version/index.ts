@@ -1,6 +1,6 @@
+import * as gradleVersioning from '../../modules/versioning/gradle';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
-import * as gradleVersioning from '../../versioning/gradle';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GradleRelease } from './types';

@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { MavenDatasource } from '../../datasource/maven';
-import * as gradleVersioning from '../../versioning/gradle';
+import * as gradleVersioning from '../../modules/versioning/gradle';
 import type {
   ExtractConfig,
   PackageFile,

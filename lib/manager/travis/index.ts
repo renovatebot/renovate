@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as nodeVersioning from '../../versioning/node';
+import * as nodeVersioning from '../../modules/versioning/node';
 
 export { extractPackageFile } from './extract';
 

@@ -1,7 +1,7 @@
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
+import { api as semver } from '../../../../../modules/versioning/npm';
 import { regEx } from '../../../../../util/regex';
-import { api as semver } from '../../../../../versioning/npm';
 import type { PackageLockOrEntry, ParentDependency } from './types';
 
 // Finds all parent dependencies for a given depName@currentVersion

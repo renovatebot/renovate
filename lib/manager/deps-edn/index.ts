@@ -1,5 +1,5 @@
 import { ClojureDatasource } from '../../datasource/clojure';
-import * as mavenVersioning from '../../versioning/maven';
+import * as mavenVersioning from '../../modules/versioning/maven';
 import { extractPackageFile } from './extract';
 
 export { extractPackageFile };

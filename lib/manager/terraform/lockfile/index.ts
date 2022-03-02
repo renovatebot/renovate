@@ -2,7 +2,7 @@ import pMap from 'p-map';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { logger } from '../../../logger';
-import { get as getVersioning } from '../../../versioning';
+import { get as getVersioning } from '../../../modules/versioning';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
 import { massageProviderLookupName } from '../util';
 import { TerraformProviderHash } from './hash';

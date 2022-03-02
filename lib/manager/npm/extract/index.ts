@@ -5,10 +5,10 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
 import { logger } from '../../../logger';
+import * as nodeVersioning from '../../../modules/versioning/node';
+import { isValid, isVersion } from '../../../modules/versioning/npm';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
-import * as nodeVersioning from '../../../versioning/node';
-import { isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
   NpmLockFiles,

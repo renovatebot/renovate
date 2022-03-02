@@ -1,5 +1,5 @@
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as dockerVersioning from '../../versioning/docker';
+import * as dockerVersioning from '../../modules/versioning/docker';
 
 export { extractPackageFile } from './extract';
 

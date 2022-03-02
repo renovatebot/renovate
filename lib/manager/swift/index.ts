@@ -1,5 +1,5 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as swiftVersioning from '../../versioning/swift';
+import * as swiftVersioning from '../../modules/versioning/swift';
 
 export { extractPackageFile } from './extract';
 

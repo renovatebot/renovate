@@ -1,10 +1,10 @@
 import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../logger';
+import * as pep440 from '../../modules/versioning/pep440';
 import { parse } from '../../util/html';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
-import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';

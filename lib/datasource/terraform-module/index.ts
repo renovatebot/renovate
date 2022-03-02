@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
+import * as hashicorpVersioning from '../../modules/versioning/hashicorp';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
-import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
 import type { RegistryRepository, TerraformRelease } from './types';

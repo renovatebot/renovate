@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
+import type { VersioningApi } from '../../../../modules/versioning';
 import { getElapsedDays } from '../../../../util/date';
 import {
   getMergeConfidenceLevel,
@@ -9,7 +10,6 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import { applyPackageRules } from '../../../../util/package-rules';
-import type { VersioningApi } from '../../../../versioning';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 

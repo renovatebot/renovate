@@ -1,5 +1,5 @@
 import { DartDatasource } from '../../datasource/dart';
-import * as npmVersioning from '../../versioning/npm';
+import * as npmVersioning from '../../modules/versioning/npm';
 
 export { extractPackageFile } from './extract';
 

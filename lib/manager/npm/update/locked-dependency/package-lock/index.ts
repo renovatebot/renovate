@@ -1,7 +1,7 @@
 import detectIndent from 'detect-indent';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
+import { api as semver } from '../../../../../modules/versioning/npm';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
 import { updateDependency } from '../../dependency';
 import { findFirstParentVersion } from '../common/parent-version';

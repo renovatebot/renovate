@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
+import * as helmVersioning from '../../modules/versioning/helm';
 import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
-import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { findSourceUrl } from './common';

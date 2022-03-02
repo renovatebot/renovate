@@ -1,7 +1,7 @@
 import { DescribeImagesCommand, EC2Client, Image } from '@aws-sdk/client-ec2';
+import * as amazonMachineImageVersioning from '../../modules/versioning/aws-machine-image';
 import { cache } from '../../util/cache/package/decorator';
 import { Lazy } from '../../util/lazy';
-import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 

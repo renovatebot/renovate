@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { HexDatasource } from '../../datasource/hex';
-import * as hexVersioning from '../../versioning/hex';
+import * as hexVersioning from '../../modules/versioning/hex';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';

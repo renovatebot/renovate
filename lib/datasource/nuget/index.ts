@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import * as nugetVersioning from '../../versioning/nuget';
+import * as nugetVersioning from '../../modules/versioning/nuget';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { parseRegistryUrl } from './common';

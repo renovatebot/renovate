@@ -2,13 +2,13 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
+import * as allVersioning from '../modules/versioning';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import { trimTrailingSlash } from '../util/url';
-import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
 import type {

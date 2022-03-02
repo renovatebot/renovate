@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
+import * as hexVersioning from '../../modules/versioning/hex';
 import { cache } from '../../util/cache/package/decorator';
 import type { HttpResponse } from '../../util/http/types';
-import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HexRelease } from './types';

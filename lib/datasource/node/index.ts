@@ -1,6 +1,6 @@
+import { id as versioning } from '../../modules/versioning/node';
 import { cache } from '../../util/cache/package/decorator';
 import { joinUrlParts } from '../../util/url';
-import { id as versioning } from '../../versioning/node';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';

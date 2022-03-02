@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import * as conan from '../../versioning/conan';
+import * as conan from '../../modules/versioning/conan';
 import type { GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';

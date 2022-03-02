@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
+import { isVersion } from '../../modules/versioning/ruby';
 import { newlineRegex } from '../../util/regex';
-import { isVersion } from '../../versioning/ruby';
 
 const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))'); // TODO #12872  (?<=re)	after text matching
 export function extractLockFileEntries(

@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
-import * as rubyVersioning from '../../versioning/ruby';
+import * as rubyVersioning from '../../modules/versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';

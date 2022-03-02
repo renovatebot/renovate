@@ -7,8 +7,8 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
 import { logger } from '../../logger';
+import * as dockerVersioning from '../../modules/versioning/docker';
 import { regEx } from '../../util/regex';
-import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { UrlParsedResult } from './types';
 

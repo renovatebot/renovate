@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadJsonFixture } from '../../../test/util';
+import * as composerVersioning from '../../modules/versioning/composer';
+import { id as versioning } from '../../modules/versioning/loose';
 import * as _hostRules from '../../util/host-rules';
-import * as composerVersioning from '../../versioning/composer';
-import { id as versioning } from '../../versioning/loose';
 import { PackagistDatasource } from '.';
 
 jest.mock('../../util/host-rules');

@@ -1,10 +1,10 @@
 import URL from 'url';
 import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
+import * as allVersioning from '../../../modules/versioning';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import { regEx } from '../../../util/regex';
-import * as allVersioning from '../../../versioning';
 import type { BranchUpgradeConfig } from '../../types';
 import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';

@@ -2,14 +2,14 @@ import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
+import * as pep440Versioning from '../../modules/versioning/pep440';
+import * as poetryVersioning from '../../modules/versioning/poetry';
 import type { SkipReason } from '../../types';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
 } from '../../util/fs';
-import * as pep440Versioning from '../../versioning/pep440';
-import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import type {
   PoetryFile,

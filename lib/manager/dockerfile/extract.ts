@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../logger';
+import * as ubuntuVersioning from '../../modules/versioning/ubuntu';
 import { regEx } from '../../util/regex';
-import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
 const variableMarker = '$';

@@ -2,7 +2,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
-import * as rubyVersioning from '../../versioning/ruby';
+import * as rubyVersioning from '../../modules/versioning/ruby';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';

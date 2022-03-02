@@ -5,7 +5,7 @@ import {
   loadFixture,
   loadJsonFixture,
 } from '../../../test/util';
-import * as rubyVersioning from '../../versioning/ruby';
+import * as rubyVersioning from '../../modules/versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import { RubyGemsDatasource } from '.';
 

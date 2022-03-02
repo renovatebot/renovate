@@ -3,10 +3,10 @@ import os from 'os';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import gradleVersioning from '../../modules/versioning/gradle';
+import { id as npmVersioning } from '../../modules/versioning/npm';
 import { chmod } from '../../util/fs';
 import { newlineRegex, regEx } from '../../util/regex';
-import gradleVersioning from '../../versioning/gradle';
-import { id as npmVersioning } from '../../versioning/npm';
 import type { GradleVersionExtract } from './types';
 
 export const extraEnv = {
