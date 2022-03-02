@@ -13,7 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
-      'workarounds:ignoreDotNet7'
+      'workarounds:ignoreDotNet7',
     ],
   },
   mavenCommonsAncientVersion: {
