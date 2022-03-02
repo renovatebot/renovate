@@ -619,9 +619,10 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prBlockedBy, pr } = await ensurePr(config);
-    branchPr = pr;
-    if (prBlockedBy) {
+    const ensurePrResult = await ensurePr(config);
+    if (ensurePrResult.type === 'without-pr') {
+      const { prBlockedBy } = ensurePrResult;
+      branchPr = null;
       if (prBlockedBy === 'RateLimited' && !config.isVulnerabilityAlert) {
         logger.debug('Reached PR limit - skipping PR creation');
         return {
@@ -654,7 +655,9 @@ export async function processBranch(
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
       return { branchExists, prBlockedBy, result: BranchResult.Error };
     }
-    if (pr) {
+    if (ensurePrResult.type === 'with-pr') {
+      const { pr } = ensurePrResult;
+      branchPr = pr;
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
