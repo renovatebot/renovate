@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { BranchStatus } from '../../types';
 import type { BranchConfig } from '../types';
 

@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import { mocked } from '../../../../test/util';
-import { setPlatformApi } from '../../../platform';
-import * as _azureApi from '../../../platform/azure/azure-got-wrapper';
+import { setPlatformApi } from '../../../modules/platform';
+import * as _azureApi from '../../../modules/platform/azure/azure-got-wrapper';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as azure from '.';
 

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { Pr, platform } from '../../../platform';
+import { Pr, platform } from '../../../modules/platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';

@@ -5,7 +5,7 @@ import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../datasource/docker';
-import * as _platform from '../../platform';
+import * as _platform from '../../modules/platform';
 import * as _repositoryWorker from '../repository';
 import * as _configParser from './config/parse';
 import * as _limits from './limits';

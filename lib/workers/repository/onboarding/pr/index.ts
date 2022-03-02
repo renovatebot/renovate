@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../manager/types';
-import { platform } from '../../../../platform';
+import { platform } from '../../../../modules/platform';
 import { emojify } from '../../../../util/emoji';
 import {
   deleteBranch,

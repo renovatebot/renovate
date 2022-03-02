@@ -1,7 +1,7 @@
 import type { RenovateConfig } from '../../config/types';
 import { PlatformId } from '../../constants';
-import * as platform from '../../platform';
-import * as _ghApi from '../../platform/github';
+import * as platform from '../../modules/platform';
+import * as _ghApi from '../../modules/platform/github';
 import * as _hostRules from '../../util/host-rules';
 import { autodiscoverRepositories } from './autodiscover';
 

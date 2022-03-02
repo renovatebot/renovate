@@ -16,7 +16,7 @@ import {
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';

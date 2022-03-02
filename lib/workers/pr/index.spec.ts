@@ -1,6 +1,6 @@
 import { getConfig, git, mocked, partial, platform } from '../../../test/util';
 import { PlatformId } from '../../constants';
-import type { Pr } from '../../platform/types';
+import type { Pr } from '../../modules/platform/types';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
 import type { BranchConfig } from '../types';

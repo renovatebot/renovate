@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { branchExists } from '../../../util/git';

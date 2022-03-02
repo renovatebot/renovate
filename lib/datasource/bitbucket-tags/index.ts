@@ -1,4 +1,4 @@
-import type * as utils from '../../platform/bitbucket/utils';
+import type * as utils from '../../modules/platform/bitbucket/utils';
 import { cache } from '../../util/cache/package/decorator';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../util/url';

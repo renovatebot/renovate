@@ -1,4 +1,4 @@
-import { getPlatformList } from '../../lib/platform';
+import { getPlatformList } from '../../lib/modules/platform';
 import { readFile, updateFile } from '../utils';
 import { replaceContent } from './utils';
 

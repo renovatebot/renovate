@@ -1,5 +1,5 @@
 import * as manager from '../../manager';
-import * as platform from '../../platform';
+import * as platform from '../../modules/platform';
 import { getOptions } from '.';
 
 jest.unmock('../../platform');

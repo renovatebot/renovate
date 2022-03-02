@@ -8,7 +8,7 @@ import {
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../manager/types';
-import type { Pr } from '../../../../platform';
+import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 import { ensureOnboardingPr } from '.';
 

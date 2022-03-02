@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { configRegexPredicate, isConfigRegex } from '../../util/regex';
 
 // istanbul ignore next
