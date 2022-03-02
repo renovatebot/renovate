@@ -21,7 +21,7 @@ import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
-import type { EnsurePrResult } from '../pr';
+import type { ResultWithPr } from '../pr';
 import * as _prAutomerge from '../pr/automerge';
 import type { Pr } from '../repository/onboarding/branch/check';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -637,8 +637,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({ ...config, automerge: true });
@@ -657,8 +658,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({
@@ -681,8 +683,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -701,8 +704,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -722,8 +726,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -743,8 +748,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -763,8 +769,9 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -897,8 +904,9 @@ describe('workers/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
         pr: {},
-      } as EnsurePrResult);
+      } as ResultWithPr);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: true });
       expect(

@@ -764,7 +764,7 @@ describe('workers/pr/index', () => {
       config.upgrades.push(config.upgrades[0]);
       const result = await prWorker.ensurePr(config);
       isResultWithPr(result);
-      expect(result).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should create privateRepo PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
