@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
+      'workarounds:ignoreDotNet7'
     ],
   },
   mavenCommonsAncientVersion: {
@@ -85,6 +86,16 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['alpine'],
         matchCurrentVersion: '<20000000',
         allowedVersions: '<20000000',
+      },
+    ],
+  },
+  ignoreDotNet7: {
+    description: 'Ignore dotnet 7 preview releases',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackagePrefixes: ['mcr.microsoft.com/dotnet/'],
+        allowedVersions: '!/^7\\.0/',
       },
     ],
   },
