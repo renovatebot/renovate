@@ -24,7 +24,11 @@ Object {
 exports[`datasource/docker/index getReleases supports OCI manifests with media type 1`] = `
 Object {
   "registryUrl": "https://registry.company.com",
-  "releases": Array [],
+  "releases": Array [
+    Object {
+      "version": "1",
+    },
+  ],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
 `;
@@ -32,7 +36,11 @@ Object {
 exports[`datasource/docker/index getReleases supports OCI manifests without media type 1`] = `
 Object {
   "registryUrl": "https://registry.company.com",
-  "releases": Array [],
+  "releases": Array [
+    Object {
+      "version": "1",
+    },
+  ],
   "sourceUrl": "https://github.com/renovatebot/renovate",
 }
 `;

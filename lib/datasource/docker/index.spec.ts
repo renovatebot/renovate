@@ -1205,8 +1205,8 @@ Object {
         .times(4)
         .reply(200)
         .get('/node/tags/list?n=10000')
-        .reply(200, { tags: ['abc'] })
-        .get('/node/manifests/abc')
+        .reply(200, { tags: ['1'] })
+        .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestListV2,
@@ -1241,8 +1241,8 @@ Object {
         .times(4)
         .reply(200)
         .get('/node/tags/list?n=10000')
-        .reply(200, { tags: ['abc'] })
-        .get('/node/manifests/abc')
+        .reply(200, { tags: ['1'] })
+        .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
           mediaType: MediaType.manifestListV2,
