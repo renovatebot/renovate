@@ -2,5 +2,5 @@
 
 /lib/manager/git-submodules/           @JamieMagee
 
-/lib/platform/azure/                   @JamieMagee
-/lib/platform/gitea/                   @ppmathis
+/lib/modules/platform/azure/                   @JamieMagee
+/lib/modules/platform/gitea/                   @ppmathis

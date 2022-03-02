@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignee to the issue 1`] = `
+exports[`modules/platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignee to the issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -27,7 +27,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+exports[`modules/platform/gitlab/index addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -65,7 +65,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index addAssignees(issueNo, assignees) should swallow error 1`] = `
+exports[`modules/platform/gitlab/index addAssignees(issueNo, assignees) should swallow error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -81,7 +81,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) adds approval rule to ignore all approvals 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) adds approval rule to ignore all approvals 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -196,7 +196,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -283,7 +283,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) does not try to create already existing approval rule 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) does not try to create already existing approval rule 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -381,7 +381,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
@@ -392,7 +392,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 2`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -452,7 +452,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
@@ -463,7 +463,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 2`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -523,7 +523,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
@@ -534,7 +534,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) returns the PR 2`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) returns the PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -582,7 +582,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) silently ignores approval rules adding errors 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) silently ignores approval rules adding errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -697,7 +697,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
@@ -709,7 +709,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 2`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -757,7 +757,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
@@ -769,7 +769,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 2`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -817,7 +817,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) uses default branch 1`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses default branch 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
@@ -828,7 +828,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index createPr(branchName, title, body) uses default branch 2`] = `
+exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses default branch 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -876,7 +876,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index deleteLabel(issueNo, label) should delete the label 1`] = `
+exports[`modules/platform/gitlab/index deleteLabel(issueNo, label) should delete the label 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -908,7 +908,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureComment add comment if not found 1`] = `
+exports[`modules/platform/gitlab/index ensureComment add comment if not found 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -954,7 +954,7 @@ content",
 ]
 `;
 
-exports[`platform/gitlab/index ensureComment add updates comment if necessary 1`] = `
+exports[`modules/platform/gitlab/index ensureComment add updates comment if necessary 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1000,7 +1000,7 @@ content",
 ]
 `;
 
-exports[`platform/gitlab/index ensureComment handles comment with no description 1`] = `
+exports[`modules/platform/gitlab/index ensureComment handles comment with no description 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1027,7 +1027,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureComment skips comment 1`] = `
+exports[`modules/platform/gitlab/index ensureComment skips comment 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1054,45 +1054,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureCommentRemoval deletes comment by content if found 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "DELETE",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234",
-  },
-]
-`;
-
-exports[`platform/gitlab/index ensureCommentRemoval deletes comment by topic if found 1`] = `
+exports[`modules/platform/gitlab/index ensureCommentRemoval deletes comment by content if found 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1130,7 +1092,45 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() creates confidential issue 1`] = `
+exports[`modules/platform/gitlab/index ensureCommentRemoval deletes comment by topic if found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "DELETE",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234",
+  },
+]
+`;
+
+exports[`modules/platform/gitlab/index ensureIssue() creates confidential issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1165,7 +1165,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() creates issue 1`] = `
+exports[`modules/platform/gitlab/index ensureIssue() creates issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1200,7 +1200,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() sets issue labels 1`] = `
+exports[`modules/platform/gitlab/index ensureIssue() sets issue labels 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1235,7 +1235,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() skips update if unchanged 1`] = `
+exports[`modules/platform/gitlab/index ensureIssue() skips update if unchanged 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1262,7 +1262,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() updates confidential issue 1`] = `
+exports[`modules/platform/gitlab/index ensureIssue() updates confidential issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1308,7 +1308,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() updates issue 1`] = `
+exports[`modules/platform/gitlab/index ensureIssue() updates issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1354,7 +1354,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssue() updates issue with labels 1`] = `
+exports[`modules/platform/gitlab/index ensureIssue() updates issue with labels 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1400,7 +1400,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index ensureIssueClosing() closes issue 1`] = `
+exports[`modules/platform/gitlab/index ensureIssueClosing() closes issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1432,13 +1432,13 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index filterUnavailableUsers(users) filters users that are busy 1`] = `
+exports[`modules/platform/gitlab/index filterUnavailableUsers(users) filters users that are busy 1`] = `
 Array [
   "john",
 ]
 `;
 
-exports[`platform/gitlab/index filterUnavailableUsers(users) filters users that are busy 2`] = `
+exports[`modules/platform/gitlab/index filterUnavailableUsers(users) filters users that are busy 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1465,13 +1465,13 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index filterUnavailableUsers(users) keeps users with failing requests 1`] = `
+exports[`modules/platform/gitlab/index filterUnavailableUsers(users) keeps users with failing requests 1`] = `
 Array [
   "maria",
 ]
 `;
 
-exports[`platform/gitlab/index filterUnavailableUsers(users) keeps users with failing requests 2`] = `
+exports[`modules/platform/gitlab/index filterUnavailableUsers(users) keeps users with failing requests 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1487,13 +1487,13 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index filterUnavailableUsers(users) keeps users with missing availability 1`] = `
+exports[`modules/platform/gitlab/index filterUnavailableUsers(users) keeps users with missing availability 1`] = `
 Array [
   "maria",
 ]
 `;
 
-exports[`platform/gitlab/index filterUnavailableUsers(users) keeps users with missing availability 2`] = `
+exports[`modules/platform/gitlab/index filterUnavailableUsers(users) keeps users with missing availability 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1509,7 +1509,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findIssue() finds issue 1`] = `
+exports[`modules/platform/gitlab/index findIssue() finds issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1536,7 +1536,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findIssue() returns null if no issue 1`] = `
+exports[`modules/platform/gitlab/index findIssue() returns null if no issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1552,7 +1552,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findPr(branchName, prTitle, state) returns true if no title and all state 1`] = `
+exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) returns true if no title and all state 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1568,7 +1568,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findPr(branchName, prTitle, state) returns true if not open 1`] = `
+exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) returns true if not open 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1584,7 +1584,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findPr(branchName, prTitle, state) returns true if open and with title 1`] = `
+exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) returns true if open and with title 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1600,7 +1600,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findPr(branchName, prTitle, state) returns true with deprecated draft prefix title 1`] = `
+exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) returns true with deprecated draft prefix title 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1616,7 +1616,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findPr(branchName, prTitle, state) returns true with draft prefix title 1`] = `
+exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) returns true with draft prefix title 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1632,7 +1632,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index findPr(branchName, prTitle, state) returns true with title 1`] = `
+exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) returns true with title 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1648,7 +1648,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchPr(branchName) should return null if no PR exists 1`] = `
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1675,7 +1675,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
 Object {
   "body": undefined,
   "displayNumber": "Merge Request #91",
@@ -1691,7 +1691,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getBranchPr(branchName) should return the PR object 2`] = `
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1729,62 +1729,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchPr(branchName) should strip deprecated draft prefix from title 1`] = `
-Object {
-  "body": undefined,
-  "displayNumber": "Merge Request #91",
-  "hasAssignees": false,
-  "hasReviewers": false,
-  "isDraft": true,
-  "labels": undefined,
-  "number": 91,
-  "sha": undefined,
-  "sourceBranch": "some-branch",
-  "state": "open",
-  "targetBranch": "master",
-  "title": "some change",
-}
-`;
-
-exports[`platform/gitlab/index getBranchPr(branchName) should strip deprecated draft prefix from title 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1",
-  },
-]
-`;
-
-exports[`platform/gitlab/index getBranchPr(branchName) should strip draft prefix from title 1`] = `
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip deprecated draft prefix from title 1`] = `
 Object {
   "body": undefined,
   "displayNumber": "Merge Request #91",
@@ -1801,7 +1746,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getBranchPr(branchName) should strip draft prefix from title 2`] = `
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip deprecated draft prefix from title 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1839,7 +1784,62 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) maps custom statuses to yellow 1`] = `
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draft prefix from title 1`] = `
+Object {
+  "body": undefined,
+  "displayNumber": "Merge Request #91",
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "isDraft": true,
+  "labels": undefined,
+  "number": 91,
+  "sha": undefined,
+  "sourceBranch": "some-branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "some change",
+}
+`;
+
+exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draft prefix from title 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1",
+  },
+]
+`;
+
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) maps custom statuses to yellow 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1866,7 +1866,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns failure if any mandatory jobs fails 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns failure if any mandatory jobs fails 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1893,7 +1893,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns failure if any mandatory jobs fails and one job is skipped 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns failure if any mandatory jobs fails and one job is skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1920,7 +1920,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns pending if no results 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns pending if no results 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1947,7 +1947,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if all are optional 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if all are optional 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1974,7 +1974,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if all are success 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if all are success 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2001,7 +2001,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if job is skipped 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if job is skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2028,7 +2028,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if optional jobs fail 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if optional jobs fail 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2055,7 +2055,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns yellow if there are no jobs expect skipped 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns yellow if there are no jobs expect skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2082,7 +2082,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) throws repository-changed 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatus(branchName, ignoreTests) throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2098,34 +2098,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatusCheck returns null if no matching results 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
-]
-`;
-
-exports[`platform/gitlab/index getBranchStatusCheck returns null if no results 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatusCheck returns null if no matching results 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2152,7 +2125,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatusCheck returns status if name found 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatusCheck returns null if no results 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2179,7 +2152,34 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getJsonFile() returns file content 1`] = `
+exports[`modules/platform/gitlab/index getBranchStatusCheck returns status if name found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitlab/index getJsonFile() returns file content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2206,7 +2206,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getJsonFile() returns file content from branch or tag 1`] = `
+exports[`modules/platform/gitlab/index getJsonFile() returns file content from branch or tag 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2233,7 +2233,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getJsonFile() returns file content from given repo 1`] = `
+exports[`modules/platform/gitlab/index getJsonFile() returns file content from given repo 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2260,7 +2260,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getJsonFile() returns file content in json5 format 1`] = `
+exports[`modules/platform/gitlab/index getJsonFile() returns file content in json5 format 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2287,7 +2287,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getJsonFile() throws on errors 1`] = `
+exports[`modules/platform/gitlab/index getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2314,7 +2314,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getJsonFile() throws on malformed JSON 1`] = `
+exports[`modules/platform/gitlab/index getJsonFile() throws on malformed JSON 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2341,7 +2341,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getPr(prNo) removes deprecated draft prefix from returned title 1`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) removes deprecated draft prefix from returned title 1`] = `
 Object {
   "body": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -2358,7 +2358,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getPr(prNo) removes deprecated draft prefix from returned title 2`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) removes deprecated draft prefix from returned title 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2374,7 +2374,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getPr(prNo) removes draft prefix from returned title 1`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) removes draft prefix from returned title 1`] = `
 Object {
   "body": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -2391,7 +2391,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getPr(prNo) removes draft prefix from returned title 2`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) removes draft prefix from returned title 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2407,7 +2407,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getPr(prNo) returns the PR 1`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -2423,7 +2423,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getPr(prNo) returns the PR 2`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) returns the PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2439,7 +2439,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getPr(prNo) returns the PR with nonexisting branch 1`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisting branch 1`] = `
 Object {
   "body": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -2455,7 +2455,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getPr(prNo) returns the PR with nonexisting branch 2`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisting branch 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2471,7 +2471,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] = `
 Object {
   "body": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -2487,7 +2487,7 @@ Object {
 }
 `;
 
-exports[`platform/gitlab/index getPr(prNo) returns the mergeable PR 2`] = `
+exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2514,7 +2514,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getRepoForceRebase should return false 1`] = `
+exports[`modules/platform/gitlab/index getRepoForceRebase should return false 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2530,7 +2530,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getRepoForceRebase should return true 1`] = `
+exports[`modules/platform/gitlab/index getRepoForceRebase should return true 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2546,14 +2546,14 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getRepos should return an array of repos 1`] = `
+exports[`modules/platform/gitlab/index getRepos should return an array of repos 1`] = `
 Array [
   "a/b",
   "c/d",
 ]
 `;
 
-exports[`platform/gitlab/index getRepos should return an array of repos 2`] = `
+exports[`modules/platform/gitlab/index getRepos should return an array of repos 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2569,7 +2569,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getRepos should throw an error if it receives an error 1`] = `
+exports[`modules/platform/gitlab/index getRepos should throw an error if it receives an error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2585,14 +2585,14 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initPlatform() should accept custom endpoint 1`] = `
+exports[`modules/platform/gitlab/index initPlatform() should accept custom endpoint 1`] = `
 Object {
   "endpoint": "https://gitlab.renovatebot.com/",
   "gitAuthor": "Renovate Bot <a@b.com>",
 }
 `;
 
-exports[`platform/gitlab/index initPlatform() should accept custom endpoint 2`] = `
+exports[`modules/platform/gitlab/index initPlatform() should accept custom endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2619,14 +2619,14 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initPlatform() should default to gitlab.com 1`] = `
+exports[`modules/platform/gitlab/index initPlatform() should default to gitlab.com 1`] = `
 Object {
   "endpoint": "https://gitlab.com/api/v4/",
   "gitAuthor": "Renovate Bot <a@b.com>",
 }
 `;
 
-exports[`platform/gitlab/index initPlatform() should default to gitlab.com 2`] = `
+exports[`modules/platform/gitlab/index initPlatform() should default to gitlab.com 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2653,7 +2653,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initPlatform() should throw if auth fails 1`] = `
+exports[`modules/platform/gitlab/index initPlatform() should throw if auth fails 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2669,7 +2669,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should escape all forward slashes in project names 1`] = `
+exports[`modules/platform/gitlab/index initRepo should escape all forward slashes in project names 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2685,7 +2685,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should fall back if http_url_to_repo is empty 1`] = `
+exports[`modules/platform/gitlab/index initRepo should fall back if http_url_to_repo is empty 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2701,7 +2701,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should fall back respecting when GITLAB_IGNORE_REPO_URL is set 1`] = `
+exports[`modules/platform/gitlab/index initRepo should fall back respecting when GITLAB_IGNORE_REPO_URL is set 1`] = `
 Array [
   Array [
     Object {
@@ -2716,7 +2716,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should fall back respecting when GITLAB_IGNORE_REPO_URL is set 2`] = `
+exports[`modules/platform/gitlab/index initRepo should fall back respecting when GITLAB_IGNORE_REPO_URL is set 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2754,7 +2754,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if MRs are disabled 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if MRs are disabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2770,7 +2770,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if receiving an error 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if receiving an error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2786,7 +2786,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if repository access is disabled 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if repository access is disabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2802,7 +2802,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if repository has empty_repo property 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if repository has empty_repo property 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2818,7 +2818,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if repository is a mirror 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if repository is a mirror 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2834,7 +2834,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if repository is archived 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if repository is archived 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2850,7 +2850,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw an error if repository is empty 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw an error if repository is empty 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2866,7 +2866,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should throw if ssh_url_to_repo is not present but gitUrl is set to ssh 1`] = `
+exports[`modules/platform/gitlab/index initRepo should throw if ssh_url_to_repo is not present but gitUrl is set to ssh 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2882,7 +2882,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 1`] = `
+exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2898,7 +2898,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 2`] = `
+exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 2`] = `
 Array [
   Array [
     Object {
@@ -2913,7 +2913,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index massageMarkdown(input) returns updated pr body 1`] = `
+exports[`modules/platform/gitlab/index massageMarkdown(input) returns updated pr body 1`] = `
 "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
 
   Merge Requests are the best, here are some MRs.
@@ -2926,7 +2926,7 @@ These updates have all been created already. Click a checkbox below to force a r
 "
 `;
 
-exports[`platform/gitlab/index mergePr(pr) merges the PR 1`] = `
+exports[`modules/platform/gitlab/index mergePr(pr) merges the PR 1`] = `
 Array [
   Object {
     "body": Object {
@@ -2947,7 +2947,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index setBranchStatus sets branch status green 1`] = `
+exports[`modules/platform/gitlab/index setBranchStatus sets branch status green 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2993,7 +2993,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index setBranchStatus sets branch status red 1`] = `
+exports[`modules/platform/gitlab/index setBranchStatus sets branch status red 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3039,7 +3039,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index setBranchStatus sets branch status yellow 1`] = `
+exports[`modules/platform/gitlab/index setBranchStatus sets branch status yellow 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3085,7 +3085,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index updatePr(prNo, title, body) closes the PR 1`] = `
+exports[`modules/platform/gitlab/index updatePr(prNo, title, body) closes the PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3141,7 +3141,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index updatePr(prNo, title, body) retains draft status when draft uses current prefix 1`] = `
+exports[`modules/platform/gitlab/index updatePr(prNo, title, body) retains draft status when draft uses current prefix 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3196,7 +3196,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index updatePr(prNo, title, body) retains draft status when draft uses deprecated prefix 1`] = `
+exports[`modules/platform/gitlab/index updatePr(prNo, title, body) retains draft status when draft uses deprecated prefix 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3251,7 +3251,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index updatePr(prNo, title, body) updates the PR 1`] = `
+exports[`modules/platform/gitlab/index updatePr(prNo, title, body) updates the PR 1`] = `
 Array [
   Object {
     "headers": Object {

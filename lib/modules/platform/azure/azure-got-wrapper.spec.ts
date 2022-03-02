@@ -7,7 +7,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    hostRules = require('../../util/host-rules');
+    hostRules = require('../../../util/host-rules');
     azure = require('./azure-got-wrapper');
   });
 

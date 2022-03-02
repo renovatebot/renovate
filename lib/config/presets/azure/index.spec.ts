@@ -5,8 +5,8 @@ import * as _azureApi from '../../../modules/platform/azure/azure-got-wrapper';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as azure from '.';
 
-jest.unmock('../../../platform');
-jest.mock('../../../platform/azure/azure-got-wrapper');
+jest.unmock('../../../modules/platform');
+jest.mock('../../../modules/platform/azure/azure-got-wrapper');
 
 const azureApi = mocked(_azureApi);
 

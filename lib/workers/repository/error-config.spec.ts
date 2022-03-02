@@ -6,7 +6,7 @@ import type { Pr } from '../../modules/platform';
 import { PrState } from '../../types';
 import { raiseConfigWarningIssue } from './error-config';
 
-jest.mock('../../platform');
+jest.mock('../../modules/platform');
 
 let config: RenovateConfig;
 beforeEach(() => {

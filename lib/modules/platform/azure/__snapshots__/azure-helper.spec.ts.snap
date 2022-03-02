@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/azure/azure-helper getAzureBranchObj should get the branch object 1`] = `
+exports[`modules/platform/azure/azure-helper getAzureBranchObj should get the branch object 1`] = `
 Object {
   "name": "refs/heads/branchName",
   "oldObjectId": "132",
 }
 `;
 
-exports[`platform/azure/azure-helper getAzureBranchObj should get the branch object when ref missing 1`] = `
+exports[`modules/platform/azure/azure-helper getAzureBranchObj should get the branch object when ref missing 1`] = `
 Object {
   "name": "refs/heads/branchName",
   "oldObjectId": "0000000000000000000000000000000000000000",
 }
 `;
 
-exports[`platform/azure/azure-helper getCommitDetails should get commit details 1`] = `
+exports[`modules/platform/azure/azure-helper getCommitDetails should get commit details 1`] = `
 Object {
   "parents": Array [
     "123456",
@@ -22,9 +22,9 @@ Object {
 }
 `;
 
-exports[`platform/azure/azure-helper getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
+exports[`modules/platform/azure/azure-helper getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
 
-exports[`platform/azure/azure-helper getRef should get the ref with full ref name 1`] = `
+exports[`modules/platform/azure/azure-helper getRef should get the ref with full ref name 1`] = `
 Array [
   Object {
     "objectId": "132",
@@ -32,7 +32,7 @@ Array [
 ]
 `;
 
-exports[`platform/azure/azure-helper getRef should get the ref with short ref name 1`] = `
+exports[`modules/platform/azure/azure-helper getRef should get the ref with short ref name 1`] = `
 Array [
   Object {
     "objectId": 132,

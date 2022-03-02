@@ -166,13 +166,13 @@ describe('modules/platform/gitea/index', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('../../util/git');
-    jest.mock('../../logger');
+    jest.mock('../../../util/git');
+    jest.mock('../../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../../logger')).logger as any;
-    gitvcs = require('../../util/git');
+    gitvcs = require('../../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 

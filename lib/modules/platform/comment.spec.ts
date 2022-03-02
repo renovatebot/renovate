@@ -4,7 +4,7 @@ import type { Cache } from '../../util/cache/repository/types';
 import { ensureComment, ensureCommentRemoval } from './comment';
 
 jest.mock('.');
-jest.mock('../util/cache/repository');
+jest.mock('../../util/cache/repository');
 
 const cache = mocked(_cache);
 

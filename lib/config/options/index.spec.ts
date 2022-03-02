@@ -2,7 +2,7 @@ import * as manager from '../../manager';
 import * as platform from '../../modules/platform';
 import { getOptions } from '.';
 
-jest.unmock('../../platform');
+jest.unmock('../../modules/platform');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
@@ -30,7 +30,7 @@ describe('config/options/index', () => {
   });
 
   it('supportedPlatforms should have valid names', () => {
-    jest.unmock('../../platform');
+    jest.unmock('../../modules/platform');
     const opts = getOptions();
     const platformList = Array.from(platform.getPlatforms().keys());
 

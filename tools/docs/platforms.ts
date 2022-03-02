@@ -10,7 +10,7 @@ export async function generatePlatforms(dist: string): Promise<void> {
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
   for (const platform of platforms) {
-    const readme = await readFile(`lib/platform/${platform}/index.md`);
+    const readme = await readFile(`lib/modules/platform/${platform}/index.md`);
     await updateFile(`${dist}/modules/platform/${platform}/index.md`, readme);
   }
 

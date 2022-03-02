@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/gitea/gitea-helper addReviewers should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper addReviewers should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint 1`] = `
 Array [
   Object {
     "body": Object {},
@@ -18,7 +18,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper closeIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper closeIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -38,7 +38,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper closePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper closePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -58,7 +58,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper createComment should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper createComment should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -78,7 +78,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper createCommitStatus should call /api/v1/repos/[repo]/statuses/[commit] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper createCommitStatus should call /api/v1/repos/[repo]/statuses/[commit] endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -101,7 +101,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper createIssue should call /api/v1/repos/[repo]/issues endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper createIssue should call /api/v1/repos/[repo]/issues endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -126,7 +126,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper createPR should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper createPR should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -156,7 +156,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper deleteComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper deleteComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -171,7 +171,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getBranch should call /api/v1/repos/[repo]/branches/[branch] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getBranch should call /api/v1/repos/[repo]/branches/[branch] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -186,7 +186,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getBranch should properly escape branch names 1`] = `
+exports[`modules/platform/gitea/gitea-helper getBranch should properly escape branch names 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -201,7 +201,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should call /api/v1/repos/[repo]/commits/[branch]/statuses endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should call /api/v1/repos/[repo]/commits/[branch]/statuses endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -216,7 +216,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 1`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -231,43 +231,8 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 2`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 2`] = `
 Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitea.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitea.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
-  },
-]
-`;
-
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 3`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitea.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
-  },
   Object {
     "headers": Object {
       "accept": "application/json",
@@ -291,18 +256,8 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 4`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 3`] = `
 Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitea.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
-  },
   Object {
     "headers": Object {
       "accept": "application/json",
@@ -336,18 +291,8 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 5`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 4`] = `
 Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitea.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
-  },
   Object {
     "headers": Object {
       "accept": "application/json",
@@ -391,18 +336,8 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 6`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 5`] = `
 Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitea.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
-  },
   Object {
     "headers": Object {
       "accept": "application/json",
@@ -456,7 +391,72 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getComments should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 6`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getComments should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -471,7 +471,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getCurrentUser should call /api/v1/user endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getCurrentUser should call /api/v1/user endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -486,7 +486,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -501,7 +501,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getOrgLabels should call /api/v1/orgs/[org]/labels endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getOrgLabels should call /api/v1/orgs/[org]/labels endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -516,7 +516,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getPR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getPR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -531,7 +531,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getRepo should call /api/v1/repos/[repo] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getRepo should call /api/v1/repos/[repo] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -546,7 +546,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getRepoContents should call /api/v1/repos/[repo]/contents/[file] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getRepoContents should call /api/v1/repos/[repo]/contents/[file] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -561,7 +561,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getRepoContents should properly escape paths 1`] = `
+exports[`modules/platform/gitea/gitea-helper getRepoContents should properly escape paths 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -576,7 +576,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getRepoContents should support passing reference by query 1`] = `
+exports[`modules/platform/gitea/gitea-helper getRepoContents should support passing reference by query 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -591,7 +591,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getRepoLabels should call /api/v1/repos/[repo]/labels endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getRepoLabels should call /api/v1/repos/[repo]/labels endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -606,7 +606,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper getVersion should call /api/v1/version endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper getVersion should call /api/v1/version endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -621,7 +621,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper mergePR should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper mergePR should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -641,7 +641,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchIssues should call /api/v1/repos/[repo]/issues endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchIssues should call /api/v1/repos/[repo]/issues endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -656,7 +656,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchIssues should construct proper query parameters 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchIssues should construct proper query parameters 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -671,7 +671,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchPRs should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchPRs should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -686,7 +686,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchPRs should construct proper query parameters 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchPRs should construct proper query parameters 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -701,7 +701,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchRepos should abort if ok flag was not set 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchRepos should abort if ok flag was not set 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -716,7 +716,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchRepos should call /api/v1/repos/search endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchRepos should call /api/v1/repos/search endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -731,7 +731,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper searchRepos should construct proper query parameters 1`] = `
+exports[`modules/platform/gitea/gitea-helper searchRepos should construct proper query parameters 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -746,7 +746,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper unassignLabel should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper unassignLabel should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -761,7 +761,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper updateComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper updateComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -781,7 +781,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper updateIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper updateIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -806,7 +806,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper updateIssueLabels should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper updateIssueLabels should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint 1`] = `
 Array [
   Object {
     "body": Object {
@@ -829,7 +829,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-helper updatePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
+exports[`modules/platform/gitea/gitea-helper updatePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
 Array [
   Object {
     "body": Object {

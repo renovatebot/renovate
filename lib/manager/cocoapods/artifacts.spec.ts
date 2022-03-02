@@ -12,7 +12,7 @@ jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/fs');
-jest.mock('../../platform');
+jest.mock('../../modules/platform');
 jest.mock('../../datasource');
 
 const datasource = mocked(_datasource);

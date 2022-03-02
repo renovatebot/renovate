@@ -28,13 +28,13 @@ describe('modules/platform/gitlab/index', () => {
     jest.resetModules();
     jest.resetAllMocks();
     gitlab = await import('.');
-    jest.mock('../../logger');
+    jest.mock('../../../logger');
     logger = (await import('../../../logger')).logger as never;
-    jest.mock('../../util/host-rules');
+    jest.mock('../../../util/host-rules');
     jest.mock('delay');
-    hostRules = require('../../util/host-rules');
-    jest.mock('../../util/git');
-    git = require('../../util/git');
+    hostRules = require('../../../util/host-rules');
+    jest.mock('../../../util/git');
+    git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(

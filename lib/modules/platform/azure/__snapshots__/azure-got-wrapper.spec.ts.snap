@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/azure/azure-got-wrapper gitApi should set bearer token and endpoint 1`] = `
+exports[`modules/platform/azure/azure-got-wrapper gitApi should set bearer token and endpoint 1`] = `
 WebApi {
   "authHandler": BearerCredentialHandler {
     "allowCrossOriginAuthentication": true,
@@ -68,7 +68,7 @@ WebApi {
 }
 `;
 
-exports[`platform/azure/azure-got-wrapper gitApi should set password and endpoint 1`] = `
+exports[`modules/platform/azure/azure-got-wrapper gitApi should set password and endpoint 1`] = `
 WebApi {
   "authHandler": BasicCredentialHandler {
     "allowCrossOriginAuthentication": true,
@@ -139,7 +139,7 @@ WebApi {
 }
 `;
 
-exports[`platform/azure/azure-got-wrapper gitApi should set personal access token and endpoint 1`] = `
+exports[`modules/platform/azure/azure-got-wrapper gitApi should set personal access token and endpoint 1`] = `
 WebApi {
   "authHandler": BearerCredentialHandler {
     "allowCrossOriginAuthentication": true,

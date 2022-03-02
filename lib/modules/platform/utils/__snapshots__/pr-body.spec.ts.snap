@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/utils/pr-body .smartTruncate truncates to 300 not smart 1`] = `
+exports[`modules/platform/utils/pr-body .smartTruncate truncates to 300 not smart 1`] = `
 "This PR contains the following updates:
 
 | Package | Type | Update | Change |
@@ -17,7 +17,7 @@ exports[`platform/utils/pr-body .smartTruncate truncates to 300 not smart 1`] = 
 ### [\`v19."
 `;
 
-exports[`platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
+exports[`modules/platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 "This PR contains the following updates:
 
 | Package | Type | Update | Change |

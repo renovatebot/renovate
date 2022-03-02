@@ -25,13 +25,13 @@ describe('modules/platform/bitbucket/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('../../util/git');
-    jest.mock('../../util/host-rules');
-    jest.mock('../../logger');
-    hostRules = require('../../util/host-rules');
+    jest.mock('../../../util/git');
+    jest.mock('../../../util/host-rules');
+    jest.mock('../../../logger');
+    hostRules = require('../../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../../logger')).logger as any;
-    git = require('../../util/git');
+    git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     // clean up hostRules

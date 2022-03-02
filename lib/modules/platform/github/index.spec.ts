@@ -23,10 +23,10 @@ describe('modules/platform/github/index', () => {
     jest.resetModules();
     jest.unmock('.');
     jest.mock('delay');
-    jest.mock('../../util/host-rules');
+    jest.mock('../../../util/host-rules');
     github = await import('.');
     hostRules = mocked(await import('../../../util/host-rules'));
-    jest.mock('../../util/git');
+    jest.mock('../../../util/git');
     git = mocked(await import('../../../util/git'));
     logger = mocked(await import('../../../logger'));
     git.branchExists.mockReturnValue(true);

@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/bitbucket/index addAssignees() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket/index addAssignees() does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket/index addReviewers should add the given reviewers to the PR 1`] = `
+exports[`modules/platform/bitbucket/index addReviewers should add the given reviewers to the PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -53,7 +53,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index createPr() posts PR 1`] = `
+exports[`modules/platform/bitbucket/index createPr() posts PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -113,11 +113,11 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index ensureComment() does not throw 1`] = `false`;
+exports[`modules/platform/bitbucket/index ensureComment() does not throw 1`] = `false`;
 
-exports[`platform/bitbucket/index ensureCommentRemoval() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket/index ensureCommentRemoval() does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket/index ensureIssue() creates new issue 1`] = `
+exports[`modules/platform/bitbucket/index ensureIssue() creates new issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -175,7 +175,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index ensureIssue() noop for existing issue 1`] = `
+exports[`modules/platform/bitbucket/index ensureIssue() noop for existing issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -218,7 +218,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index ensureIssue() updates existing issues 1`] = `
+exports[`modules/platform/bitbucket/index ensureIssue() updates existing issues 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -280,7 +280,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index ensureIssueClosing() closes issue 1`] = `
+exports[`modules/platform/bitbucket/index ensureIssueClosing() closes issue 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -339,7 +339,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index ensureIssueClosing() does not throw 1`] = `
+exports[`modules/platform/bitbucket/index ensureIssueClosing() does not throw 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -355,14 +355,14 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index findIssue() does not throw 1`] = `
+exports[`modules/platform/bitbucket/index findIssue() does not throw 1`] = `
 Object {
   "body": "content",
   "number": 25,
 }
 `;
 
-exports[`platform/bitbucket/index findIssue() does not throw 2`] = `
+exports[`modules/platform/bitbucket/index findIssue() does not throw 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -389,7 +389,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index findIssue() returns null if no issues 1`] = `
+exports[`modules/platform/bitbucket/index findIssue() returns null if no issues 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -416,7 +416,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index findPr() finds pr 1`] = `
+exports[`modules/platform/bitbucket/index findPr() finds pr 1`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -429,7 +429,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket/index findPr() finds pr 2`] = `
+exports[`modules/platform/bitbucket/index findPr() finds pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -456,7 +456,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 1`] = `
+exports[`modules/platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -470,7 +470,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 2`] = `
+exports[`modules/platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -508,7 +508,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchPr() returns null if no PR for branch 1`] = `
+exports[`modules/platform/bitbucket/index getBranchPr() returns null if no PR for branch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -535,7 +535,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatus() getBranchStatus 3 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatus() getBranchStatus 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -573,7 +573,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatus() getBranchStatus 4 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatus() getBranchStatus 4 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -611,7 +611,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatus() getBranchStatus 5 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatus() getBranchStatus 5 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -649,7 +649,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatus() getBranchStatus 6 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatus() getBranchStatus 6 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -687,7 +687,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatusCheck() getBranchStatusCheck 1 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatusCheck() getBranchStatusCheck 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -725,7 +725,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatusCheck() getBranchStatusCheck 2 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatusCheck() getBranchStatusCheck 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -763,7 +763,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getBranchStatusCheck() getBranchStatusCheck 3 1`] = `
+exports[`modules/platform/bitbucket/index getBranchStatusCheck() getBranchStatusCheck 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -801,7 +801,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getIssueList() does not throw 1`] = `
+exports[`modules/platform/bitbucket/index getIssueList() does not throw 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -828,7 +828,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getIssueList() get issues 1`] = `
+exports[`modules/platform/bitbucket/index getIssueList() get issues 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -855,7 +855,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getIssueList() get issues 2`] = `
+exports[`modules/platform/bitbucket/index getIssueList() get issues 2`] = `
 Array [
   Object {
     "content": Object {
@@ -874,7 +874,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getIssueList() has no issues 1`] = `
+exports[`modules/platform/bitbucket/index getIssueList() has no issues 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -890,7 +890,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() returns file content 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() returns file content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -916,7 +916,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() returns file content from branch or tag 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() returns file content from branch or tag 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -942,7 +942,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() returns file content from branch with a slash in its name 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() returns file content from branch with a slash in its name 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -979,7 +979,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() returns file content from given repo 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() returns file content from given repo 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1005,7 +1005,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() returns file content in json5 format 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() returns file content in json5 format 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1031,7 +1031,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() throws on errors 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() throws on errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1057,7 +1057,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getJsonFile() throws on malformed JSON 1`] = `
+exports[`modules/platform/bitbucket/index getJsonFile() throws on malformed JSON 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1083,7 +1083,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getPr() canRebase 1`] = `
+exports[`modules/platform/bitbucket/index getPr() canRebase 1`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -1097,7 +1097,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket/index getPr() canRebase 2`] = `
+exports[`modules/platform/bitbucket/index getPr() canRebase 2`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -1111,7 +1111,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket/index getPr() canRebase 3`] = `
+exports[`modules/platform/bitbucket/index getPr() canRebase 3`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -1125,7 +1125,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket/index getPr() canRebase 4`] = `
+exports[`modules/platform/bitbucket/index getPr() canRebase 4`] = `
 Array [
   Object {
     "headers": Object {
@@ -1174,7 +1174,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getPr() exists 1`] = `
+exports[`modules/platform/bitbucket/index getPr() exists 1`] = `
 Object {
   "body": "summary",
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -1188,7 +1188,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket/index getPr() exists 2`] = `
+exports[`modules/platform/bitbucket/index getPr() exists 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1215,7 +1215,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getPrList() filters PR list by author 1`] = `
+exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 1`] = `
 Array [
   Object {
     "body": undefined,
@@ -1230,7 +1230,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getPrList() filters PR list by author 2`] = `
+exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1268,7 +1268,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index getRepos() returns repos 1`] = `
+exports[`modules/platform/bitbucket/index getRepos() returns repos 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1284,20 +1284,20 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index initPlatform() should init 1`] = `
+exports[`modules/platform/bitbucket/index initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://api.bitbucket.org/",
 }
 `;
 
-exports[`platform/bitbucket/index initRepo() works 1`] = `
+exports[`modules/platform/bitbucket/index initRepo() works 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/bitbucket/index initRepo() works 2`] = `
+exports[`modules/platform/bitbucket/index initRepo() works 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1313,9 +1313,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket/index mergePr() posts Merge with auto 1`] = `
+exports[`modules/platform/bitbucket/index mergePr() posts Merge with auto 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1347,7 +1347,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index mergePr() posts Merge with fast-forward 1`] = `
+exports[`modules/platform/bitbucket/index mergePr() posts Merge with fast-forward 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1380,7 +1380,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index mergePr() posts Merge with merge-commit 1`] = `
+exports[`modules/platform/bitbucket/index mergePr() posts Merge with merge-commit 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1413,7 +1413,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index mergePr() posts Merge with optional merge strategy 1`] = `
+exports[`modules/platform/bitbucket/index mergePr() posts Merge with optional merge strategy 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1445,7 +1445,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index mergePr() posts Merge with squash 1`] = `
+exports[`modules/platform/bitbucket/index mergePr() posts Merge with squash 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1478,7 +1478,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index setBranchStatus() posts status 1`] = `
+exports[`modules/platform/bitbucket/index setBranchStatus() posts status 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1547,7 +1547,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() closes PR 1`] = `
+exports[`modules/platform/bitbucket/index updatePr() closes PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1601,7 +1601,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() puts PR 1`] = `
+exports[`modules/platform/bitbucket/index updatePr() puts PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1651,7 +1651,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() removes inactive reviewers when updating pr 1`] = `
+exports[`modules/platform/bitbucket/index updatePr() removes inactive reviewers when updating pr 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1753,9 +1753,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
+exports[`modules/platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
 
-exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 2`] = `
+exports[`modules/platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1805,9 +1805,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 1`] = `"Response code 500 (Internal Server Error)"`;
+exports[`modules/platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 1`] = `"Response code 500 (Internal Server Error)"`;
 
-exports[`platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 2`] = `
+exports[`modules/platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 2`] = `
 Array [
   Object {
     "headers": Object {

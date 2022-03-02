@@ -25,17 +25,17 @@ describe('modules/platform/azure/index', () => {
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
     jest.mock('./azure-helper');
-    jest.mock('../../util/git');
-    jest.mock('../../util/host-rules');
-    jest.mock('../../logger');
+    jest.mock('../../../util/git');
+    jest.mock('../../../util/host-rules');
+    jest.mock('../../../logger');
     jest.mock('delay');
-    hostRules = require('../../util/host-rules');
-    require('../../util/sanitize').sanitize = jest.fn((input) => input);
+    hostRules = require('../../../util/host-rules');
+    require('../../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
     logger = (await import('../../../logger')).logger as never;
-    git = require('../../util/git');
+    git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({

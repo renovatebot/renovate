@@ -202,11 +202,11 @@ describe('modules/platform/bitbucket-server/index', () => {
         // reset module
         jest.resetModules();
         jest.mock('delay');
-        jest.mock('../../util/git');
-        jest.mock('../../util/host-rules');
-        hostRules = require('../../util/host-rules');
+        jest.mock('../../../util/git');
+        jest.mock('../../../util/host-rules');
+        hostRules = require('../../../util/host-rules');
         bitbucket = await import('.');
-        git = require('../../util/git');
+        git = require('../../../util/git');
         git.branchExists.mockReturnValue(true);
         git.isBranchStale.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(
