@@ -54,11 +54,13 @@ export function migrateConfig(
             );
         }
       } else if (key === 'matchStrings' && is.array(val)) {
-        migratedConfig.matchStrings = val.map((matchString) => {
-          return is.string(matchString)
-            ? matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
-            : matchString;
-        });
+        migratedConfig.matchStrings = val
+          .map(
+            (matchString) =>
+              is.string(matchString) &&
+              matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
+          )
+          .filter(Boolean);
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
