@@ -2437,6 +2437,57 @@ describe('platform/github/index', () => {
       expect(res).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns array if found on GHE', async () => {
+      const gheApiHost = 'https://ghe.renovatebot.com';
+
+      httpMock
+        .scope(gheApiHost)
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+
+      httpMock
+        .scope(gheApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              vulnerabilityAlerts: {
+                edges: [
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH', references: [] },
+                      securityVulnerability: {
+                        package: {
+                          ecosystem: 'NPM',
+                          name: 'left-pad',
+                          range: '0.0.2',
+                        },
+                        vulnerableVersionRange: '0.0.2',
+                        firstPatchedVersion: { identifier: '0.0.3' },
+                      },
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    } as VulnerabilityAlert,
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+      await github.initPlatform({
+        endpoint: gheApiHost,
+        token: '123test',
+      });
+
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns empty if disabled', async () => {
       // prettier-ignore
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: { repository: {} }} );

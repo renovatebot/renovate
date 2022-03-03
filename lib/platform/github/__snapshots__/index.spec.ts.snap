@@ -6602,6 +6602,9 @@ Array [
           "vulnerabilityAlerts": Object {
             "__args": Object {
               "last": "100",
+              "states": Array [
+                "OPEN",
+              ],
             },
             "edges": Object {
               "node": Object {
@@ -6641,7 +6644,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "700",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6669,6 +6672,9 @@ Array [
           "vulnerabilityAlerts": Object {
             "__args": Object {
               "last": "100",
+              "states": Array [
+                "OPEN",
+              ],
             },
             "edges": Object {
               "node": Object {
@@ -6708,7 +6714,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "700",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6719,8 +6725,41 @@ Array [
 ]
 `;
 
-exports[`platform/github/index getVulnerabilityAlerts() returns empty if disabled 1`] = `
+exports[`platform/github/index getVulnerabilityAlerts() returns array if found on GHE 1`] = `
 Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "ghe.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://ghe.renovatebot.com/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "ghe.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://ghe.renovatebot.com/user",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "ghe.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://ghe.renovatebot.com/user/emails",
+  },
   Object {
     "graphql": Object {
       "query": Object {
@@ -6775,7 +6814,77 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "686",
+      "content-type": "application/json",
+      "host": "ghe.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://ghe.renovatebot.com/graphql",
+  },
+]
+`;
+
+exports[`platform/github/index getVulnerabilityAlerts() returns empty if disabled 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "vulnerabilityAlerts": Object {
+            "__args": Object {
+              "last": "100",
+              "states": Array [
+                "OPEN",
+              ],
+            },
+            "edges": Object {
+              "node": Object {
+                "dismissReason": null,
+                "securityAdvisory": Object {
+                  "description": null,
+                  "identifiers": Object {
+                    "type": null,
+                    "value": null,
+                  },
+                  "references": Object {
+                    "url": null,
+                  },
+                  "severity": null,
+                },
+                "securityVulnerability": Object {
+                  "firstPatchedVersion": Object {
+                    "identifier": null,
+                  },
+                  "package": Object {
+                    "ecosystem": null,
+                    "name": null,
+                  },
+                  "vulnerableVersionRange": null,
+                },
+                "vulnerableManifestFilename": null,
+                "vulnerableManifestPath": null,
+                "vulnerableRequirements": null,
+              },
+            },
+          },
+        },
+      },
+      "variables": Object {},
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "700",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6803,6 +6912,9 @@ Array [
           "vulnerabilityAlerts": Object {
             "__args": Object {
               "last": "100",
+              "states": Array [
+                "OPEN",
+              ],
             },
             "edges": Object {
               "node": Object {
@@ -6842,7 +6954,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "700",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
