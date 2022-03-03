@@ -37,9 +37,35 @@ describe('manager/argocd/extract', () => {
         validApplicationSet,
         'applicationsets.yml'
       );
-      expect(result).not.toBeNull();
-      expect(result.deps).toBeArrayOfSize(4);
-      expect(result.deps).toMatchSnapshot();
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.4.1',
+            datasource: 'helm',
+            depName: 'kube-state-metrics',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+          },
+          {
+            currentValue: '10.14.2',
+            datasource: 'helm',
+            depName: 'traefik',
+            registryUrls: ['https://helm.traefik.io/traefik'],
+          },
+          {
+            currentValue: 'v1.2.0',
+            datasource: 'git-tags',
+            depName: 'https://git.example.com/foo/bar.git',
+          },
+          {
+            currentValue: '6.0.0',
+            datasource: 'helm',
+            depName: 'podinfo',
+            registryUrls: ['https://stefanprodan.github.io/podinfo'],
+          },
+        ],
+      });
     });
   });
 });
