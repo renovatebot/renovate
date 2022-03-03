@@ -9,7 +9,7 @@ import {
   versionLikeSubstring,
 } from './utils';
 
-describe('modules/manager/gradle/shallow/utils', () => {
+describe('modules/manager/gradle/utils', () => {
   it('versionLikeSubstring', () => {
     [
       '1.2.3',

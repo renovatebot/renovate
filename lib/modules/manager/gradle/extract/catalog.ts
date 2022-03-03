@@ -1,12 +1,12 @@
 import { parse } from '@iarna/toml';
 import deepmerge from 'deepmerge';
-import { hasKey } from '../../../../../util/object';
-import type { PackageDependency } from '../../../types';
-import type { GradleManagerData } from '../types';
+import { hasKey } from '../../../../util/object';
+import type { PackageDependency } from '../../types';
 import type {
   GradleCatalog,
   GradleCatalogArtifactDescriptor,
   GradleCatalogModuleDescriptor,
+  GradleManagerData,
   VersionPointer,
 } from '../types';
 

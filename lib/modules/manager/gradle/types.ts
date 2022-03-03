@@ -1,4 +1,4 @@
-import type { PackageDependency } from '../../types';
+import type { PackageDependency } from '../types';
 import type { TokenType } from './common';
 
 export interface GradleManagerData {

@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../../../test/util';
+import { loadFixture } from '../../../../test/util';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -7,7 +7,7 @@ import {
 } from './common';
 import { parseGradle, parseProps } from './parser';
 
-describe('modules/manager/gradle/shallow/parser', () => {
+describe('modules/manager/gradle/parser', () => {
   it('handles end of input', () => {
     expect(parseGradle('version = ').deps).toBeEmpty();
     expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
@@ -116,7 +116,7 @@ describe('modules/manager/gradle/shallow/parser', () => {
     });
 
     it('parses fixture from "gradle" manager', () => {
-      const content = loadFixture('build.gradle.example1', '../deep/');
+      const content = loadFixture('build.gradle.example1');
       const { deps } = parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
         content.slice(managerData.fileReplacePosition).indexOf(currentValue)

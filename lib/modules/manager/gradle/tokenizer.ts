@@ -1,5 +1,5 @@
 import moo from 'moo';
-import { regEx } from '../../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { TokenType } from './common';
 import type { StringInterpolation, Token } from './types';
 

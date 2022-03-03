@@ -1,9 +1,8 @@
 import url from 'url';
 import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import type { PackageDependency } from '../../types';
-import type { GradleManagerData } from './types';
+import { logger } from '../../../logger';
+import { newlineRegex, regEx } from '../../../util/regex';
+import type { PackageDependency } from '../types';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -13,6 +12,7 @@ import {
 } from './common';
 import { tokenize } from './tokenizer';
 import type {
+  GradleManagerData,
   MatchConfig,
   PackageVariables,
   ParseGradleResult,

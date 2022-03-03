@@ -1,19 +1,15 @@
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import { readLocalFile } from '../../../../util/fs';
-import {
-  MavenDatasource,
-  defaultRegistryUrls,
-} from '../../../datasource/maven';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFile,
-} from '../../types';
-import type { GradleManagerData } from './types';
+import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
+import { MavenDatasource, defaultRegistryUrls } from '../../datasource/maven';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
-import type { PackageVariables, VariableRegistry } from './types';
+import type {
+  GradleManagerData,
+  PackageVariables,
+  VariableRegistry,
+} from './types';
 import {
   getVars,
   isGradleFile,

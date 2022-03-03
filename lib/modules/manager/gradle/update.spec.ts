@@ -1,6 +1,6 @@
-import { updateDependency } from '..';
+import { updateDependency } from '.';
 
-describe('modules/manager/gradle/shallow/update', () => {
+describe('modules/manager/gradle/update', () => {
   it('replaces', () => {
     expect(
       updateDependency({

@@ -1,5 +1,5 @@
-import { logger } from '../../../../logger';
-import type { UpdateDependencyConfig } from '../../types';
+import { logger } from '../../../logger';
+import type { UpdateDependencyConfig } from '../types';
 import type { GradleManagerData } from './types';
 import { versionLikeSubstring } from './utils';
 

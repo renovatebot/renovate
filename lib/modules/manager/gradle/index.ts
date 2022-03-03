@@ -2,8 +2,8 @@ import { ProgrammingLanguage } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import * as gradleVersioning from '../../versioning/gradle';
 
-export { extractAllPackageFiles } from './shallow/extract';
-export { updateDependency } from './shallow/update';
+export { extractAllPackageFiles } from './extract';
+export { updateDependency } from './update';
 
 export const language = ProgrammingLanguage.Java;
 

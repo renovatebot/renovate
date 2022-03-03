@@ -5,7 +5,7 @@ function tokenTypes(input): string[] {
   return extractRawTokens(input).map((token) => token.type);
 }
 
-describe('modules/manager/gradle/shallow/tokenizer', () => {
+describe('modules/manager/gradle/tokenizer', () => {
   it('extractTokens', () => {
     const samples = {
       ' ': [TokenType.Space],

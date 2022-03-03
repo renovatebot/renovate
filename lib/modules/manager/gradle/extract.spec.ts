@@ -1,6 +1,6 @@
-import { extractAllPackageFiles } from '..';
-import { fs, loadFixture } from '../../../../../test/util';
-import type { ExtractConfig } from '../../types';
+import { fs, loadFixture } from '../../../../test/util';
+import type { ExtractConfig } from '../types';
+import { extractAllPackageFiles } from '.';
 
 jest.mock('../../../../util/fs');
 
@@ -13,7 +13,7 @@ function mockFs(files: Record<string, string>): void {
   });
 }
 
-describe('modules/manager/gradle/shallow/extract', () => {
+describe('modules/manager/gradle/extract', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });
