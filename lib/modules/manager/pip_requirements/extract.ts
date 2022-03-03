@@ -88,8 +88,8 @@ export function extractPackageFile(
           ...dep,
           depName,
           currentValue: currentVersion,
-          currentVersion: currentVersion,
-          packageName: packageName,
+          currentVersion,
+          packageName,
           datasource: GitTagsDatasource.id,
         };
         return dep;

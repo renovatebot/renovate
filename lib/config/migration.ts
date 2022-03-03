@@ -122,6 +122,11 @@ export function migrateConfig(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}'
         );
+      } else if (is.string(val) && val.includes('{{lookupName}}')) {
+        migratedConfig[key] = val.replace(
+          regEx(/{{lookupName}}/g),
+          '{{packageName}}'
+        );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{depNameShort}}/g),
