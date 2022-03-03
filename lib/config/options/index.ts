@@ -209,15 +209,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'deepExtract',
-    description: `Enable extraction of dependencies using package managers.`,
-    type: 'boolean',
-    default: false,
-    cli: false,
-    env: false,
-    supportedManagers: ['gradle'],
-  },
-  {
     name: 'repositoryCache',
     description: 'Option to do repository extract caching.',
     globalOnly: true,

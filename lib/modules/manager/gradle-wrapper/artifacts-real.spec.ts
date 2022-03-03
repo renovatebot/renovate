@@ -6,7 +6,7 @@ import { git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { StatusResult } from '../../../util/git/types';
-import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
+import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gradleWrapper from '.';
 
