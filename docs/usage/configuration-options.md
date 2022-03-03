@@ -456,16 +456,6 @@ If you need to _override_ constraints that Renovate detects from the repository,
 !!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
-## deepExtract
-
-<!-- prettier-ignore -->
-!!! warning
-    The `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
-
-If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
-
-This option applies only to the `gradle` manager.
-
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.
