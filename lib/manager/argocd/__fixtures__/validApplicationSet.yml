@@ -33,8 +33,8 @@ spec:
               service:
                 spec:
                   loadBalancerIP: 1.2.3.4
-        repoURL: gs://helm-charts-internal
-        targetRevision: 0.0.2
+        repoURL: https://helm.traefik.io/traefik
+        targetRevision: 10.14.2
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
