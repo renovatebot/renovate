@@ -10,7 +10,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
-import type { GradleManagerData } from '../types';
+import type { GradleManagerData } from './types';
 import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
 import type { PackageVariables, VariableRegistry } from './types';

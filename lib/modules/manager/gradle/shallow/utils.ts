@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import type { GradleManagerData } from '../types';
+import type { GradleManagerData } from './types';
 import { TokenType } from './common';
 import type { PackageVariables, Token, VariableRegistry } from './types';
 

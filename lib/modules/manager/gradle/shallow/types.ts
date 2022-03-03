@@ -1,6 +1,10 @@
 import type { PackageDependency } from '../../types';
-import type { GradleManagerData } from '../types';
 import type { TokenType } from './common';
+
+export interface GradleManagerData {
+  fileReplacePosition?: number;
+  packageFile?: string;
+}
 
 export interface VariableData extends GradleManagerData {
   key: string;
