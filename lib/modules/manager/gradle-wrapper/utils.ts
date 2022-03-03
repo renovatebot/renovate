@@ -14,6 +14,7 @@ export const extraEnv = {
     '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
 };
 
+// istanbul ignore next
 export function gradleWrapperFileName(): string {
   if (
     os.platform() === 'win32' &&
