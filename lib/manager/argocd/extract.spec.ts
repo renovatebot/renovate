@@ -4,6 +4,7 @@ import { extractPackageFile } from './extract';
 const validApplication = Fixtures.get('validApplication.yml');
 const malformedApplication = Fixtures.get('malformedApplications.yml');
 const randomManifest = Fixtures.get('randomManifest.yml');
+const validApplicationSet = Fixtures.get('validApplicationSet.yml');
 
 describe('manager/argocd/extract', () => {
   describe('extractPackageFile()', () => {
@@ -28,6 +29,16 @@ describe('manager/argocd/extract', () => {
       const result = extractPackageFile(validApplication, 'applications.yml');
       expect(result).not.toBeNull();
       expect(result.deps).toBeArrayOfSize(3);
+      expect(result.deps).toMatchSnapshot();
+    });
+
+    it('supports applicationsets', () => {
+      const result = extractPackageFile(
+        validApplicationSet,
+        'applicationsets.yml'
+      );
+      expect(result).not.toBeNull();
+      expect(result.deps).toBeArrayOfSize(4);
       expect(result.deps).toMatchSnapshot();
     });
   });

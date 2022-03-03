@@ -25,3 +25,37 @@ Array [
   },
 ]
 `;
+
+exports[`manager/argocd/extract extractPackageFile() supports applicationsets 1`] = `
+Array [
+  Object {
+    "currentValue": "2.4.1",
+    "datasource": "helm",
+    "depName": "kube-state-metrics",
+    "registryUrls": Array [
+      "https://prometheus-community.github.io/helm-charts",
+    ],
+  },
+  Object {
+    "currentValue": "0.0.2",
+    "datasource": "helm",
+    "depName": "traefik",
+    "registryUrls": Array [
+      "gs://helm-charts-internal",
+    ],
+  },
+  Object {
+    "currentValue": "v1.2.0",
+    "datasource": "git-tags",
+    "depName": "https://git.example.com/foo/bar.git",
+  },
+  Object {
+    "currentValue": "6.0.0",
+    "datasource": "helm",
+    "depName": "podinfo",
+    "registryUrls": Array [
+      "https://stefanprodan.github.io/podinfo",
+    ],
+  },
+]
+`;
