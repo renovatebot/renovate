@@ -37,11 +37,11 @@ Array [
     ],
   },
   Object {
-    "currentValue": "0.0.2",
+    "currentValue": "10.14.2",
     "datasource": "helm",
     "depName": "traefik",
     "registryUrls": Array [
-      "gs://helm-charts-internal",
+      "https://helm.traefik.io/traefik",
     ],
   },
   Object {
