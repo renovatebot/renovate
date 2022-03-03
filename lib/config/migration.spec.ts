@@ -44,6 +44,7 @@ describe('config/migration', () => {
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        deepExtract: true,
         ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
