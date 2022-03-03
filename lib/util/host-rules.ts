@@ -110,6 +110,14 @@ function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
   return hostname === rule.matchHost || hostname.endsWith(dotPrefixedMatchHost);
 }
 
+function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
+  // istanbul ignore if: won't happen in practice
+  if (!rule1.matchHost || !rule2.matchHost) {
+    return 0;
+  }
+  return rule1.matchHost.length - rule2.matchHost.length;
+}
+
 export function find(search: HostRuleSearch): HostRule {
   if (!(search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
@@ -130,6 +138,7 @@ export function find(search: HostRuleSearch): HostRule {
     });
   hostRules
     .filter((rule) => isHostOnlyRule(rule) && matchesHost(rule, search))
+    .sort(prioritizeLongestMatchHost)
     .forEach((rule) => {
       res = merge(res, rule);
     });
@@ -141,6 +150,7 @@ export function find(search: HostRuleSearch): HostRule {
         matchesHostType(rule, search) &&
         matchesHost(rule, search)
     )
+    .sort(prioritizeLongestMatchHost)
     .forEach((rule) => {
       res = merge(res, rule);
     });

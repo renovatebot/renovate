@@ -46,9 +46,7 @@ describe('config/presets/github/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(
-        github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow();
+      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -58,9 +56,9 @@ describe('config/presets/github/index', () => {
         .get(`${basePath}/default.json`)
         .reply(200, {});
 
-      await expect(
-        github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow(PRESET_INVALID_JSON);
+      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        PRESET_INVALID_JSON
+      );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -72,9 +70,9 @@ describe('config/presets/github/index', () => {
           content: toBase64('not json'),
         });
 
-      await expect(
-        github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow(PRESET_INVALID_JSON);
+      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        PRESET_INVALID_JSON
+      );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -86,7 +84,7 @@ describe('config/presets/github/index', () => {
           content: toBase64('{"foo":"bar"}'),
         });
 
-      const content = await github.getPreset({ packageName: 'some/repo' });
+      const content = await github.getPreset({ repo: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -99,7 +97,7 @@ describe('config/presets/github/index', () => {
           content: toBase64('{"somename":{"foo":"bar"}}'),
         });
       const content = await github.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'somefile/somename',
       });
       expect(content).toEqual({ foo: 'bar' });
@@ -117,7 +115,7 @@ describe('config/presets/github/index', () => {
         });
 
       const content = await github.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'somefile/somename/somesubname',
       });
       expect(content).toEqual({ foo: 'bar' });
@@ -132,7 +130,7 @@ describe('config/presets/github/index', () => {
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await github.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'custom',
       });
       expect(content).toEqual({ foo: 'bar' });
@@ -147,7 +145,7 @@ describe('config/presets/github/index', () => {
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await github.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetName: 'custom',
         presetPath: 'path',
       });
@@ -164,7 +162,7 @@ describe('config/presets/github/index', () => {
         });
       await expect(
         github.getPreset({
-          packageName: 'some/repo',
+          repo: 'some/repo',
           presetName: 'somefile/somename/somesubname',
         })
       ).rejects.toThrow(PRESET_NOT_FOUND);

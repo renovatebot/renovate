@@ -16,6 +16,7 @@ import {
 import { logger, removeMeta } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { Pr, platform } from '../../platform';
+import { ensureComment, ensureCommentRemoval } from '../../platform/comment';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getElapsedDays } from '../../util/date';
@@ -433,7 +434,7 @@ export async function processBranch(
         );
       } else {
         // Remove artifacts error comment only if this run has successfully updated artifacts
-        await platform.ensureCommentRemoval({
+        await ensureCommentRemoval({
           type: 'by-topic',
           number: branchPr.number,
           topic: artifactErrorTopic,
@@ -618,9 +619,10 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prBlockedBy, pr } = await ensurePr(config);
-    branchPr = pr;
-    if (prBlockedBy) {
+    const ensurePrResult = await ensurePr(config);
+    if (ensurePrResult.type === 'without-pr') {
+      const { prBlockedBy } = ensurePrResult;
+      branchPr = null;
       if (prBlockedBy === 'RateLimited' && !config.isVulnerabilityAlert) {
         logger.debug('Reached PR limit - skipping PR creation');
         return {
@@ -653,7 +655,9 @@ export async function processBranch(
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
       return { branchExists, prBlockedBy, result: BranchResult.Error };
     }
-    if (pr) {
+    if (ensurePrResult.type === 'with-pr') {
+      const { pr } = ensurePrResult;
+      branchPr = pr;
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -691,7 +695,7 @@ export async function processBranch(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
           } else {
-            await platform.ensureComment({
+            await ensureComment({
               number: pr.number,
               topic: artifactErrorTopic,
               content,

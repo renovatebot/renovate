@@ -7,6 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
+import { ensureComment } from '../../platform/comment';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
@@ -144,12 +145,12 @@ export function getPlatformPrOptions(
 }
 
 export type ResultWithPr = {
+  type: 'with-pr';
   pr: Pr;
-  prBlockedBy?: never;
 };
 
 export type ResultWithoutPr = {
-  pr?: never;
+  type: 'without-pr';
   prBlockedBy: PrBlockedBy;
 };
 
@@ -216,14 +217,14 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prBlockedBy: 'BranchAutomerge' };
+      return { type: 'without-pr', prBlockedBy: 'BranchAutomerge' };
     }
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
     if ((await getBranchStatus()) !== BranchStatus.green) {
       logger.debug(`Branch status isn't green - not creating PR`);
-      return { prBlockedBy: 'AwaitingTests' };
+      return { type: 'without-pr', prBlockedBy: 'AwaitingTests' };
     }
     logger.debug('Branch status success');
   } else if (
@@ -231,7 +232,7 @@ export async function ensurePr(
     !existingPr &&
     dependencyDashboardCheck !== 'approvePr'
   ) {
-    return { prBlockedBy: 'NeedsApproval' };
+    return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
   } else if (
     config.prCreation === 'not-pending' &&
     !existingPr &&
@@ -256,6 +257,7 @@ export async function ensurePr(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
         return {
+          type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
         };
       }
@@ -384,7 +386,7 @@ export async function ensurePr(
           noWhitespaceOrHeadings(stripEmojis(prBody))
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
-        return { pr: existingPr };
+        return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
       if (existingPrTitle !== newPrTitle) {
@@ -416,9 +418,7 @@ export async function ensurePr(
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
-      return {
-        pr: existingPr,
-      };
+      return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if
@@ -438,7 +438,7 @@ export async function ensurePr(
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
-          return { prBlockedBy: 'RateLimited' };
+          return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
@@ -462,7 +462,7 @@ export async function ensurePr(
         )
       ) {
         logger.warn('A pull requests already exists');
-        return { prBlockedBy: 'Error' };
+        return { type: 'without-pr', prBlockedBy: 'Error' };
       }
       if (err.statusCode === 502) {
         logger.warn(
@@ -475,7 +475,7 @@ export async function ensurePr(
           await deleteBranch(branchName);
         }
       }
-      return { prBlockedBy: 'Error' };
+      return { type: 'without-pr', prBlockedBy: 'Error' };
     }
     if (
       config.branchAutomergeFailureMessage &&
@@ -493,7 +493,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
-        await platform.ensureComment({
+        await ensureComment({
           number: pr.number,
           topic,
           content,
@@ -513,7 +513,7 @@ export async function ensurePr(
       await addAssigneesReviewers(config, pr);
     }
     logger.debug(`Created ${pr.displayNumber}`);
-    return { pr };
+    return { type: 'with-pr', pr };
   } catch (err) {
     // istanbul ignore if
     if (
@@ -528,8 +528,8 @@ export async function ensurePr(
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
   if (existingPr) {
-    return { pr: existingPr };
+    return { type: 'with-pr', pr: existingPr };
   }
   // istanbul ignore next
-  return { prBlockedBy: 'Error' };
+  return { type: 'without-pr', prBlockedBy: 'Error' };
 }

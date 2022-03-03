@@ -59,7 +59,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
           if (value) {
             res[header] = template
               .compile(value, upgrade)
-              .replace(regEx(/^``$/), '');
+              .replace(regEx(/``/g), '');
           } else {
             res[header] = '';
           }

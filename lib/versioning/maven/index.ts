@@ -1,3 +1,4 @@
+import type { RangeStrategy } from '../../types/versioning';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   EXCLUDING_POINT,
@@ -22,7 +23,12 @@ export const urls = [
   'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'pin',
+  'replace',
+];
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 

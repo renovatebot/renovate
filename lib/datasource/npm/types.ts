@@ -1,8 +1,10 @@
+import type { PackageRule } from '../../config/types';
 import type { HostRule } from '../../types';
 import type { Release, ReleaseResult } from '../types';
 
 export interface NpmrcRules {
   hostRules?: HostRule[];
+  packageRules?: PackageRule[];
 }
 
 export interface NpmResponse {
