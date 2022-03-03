@@ -1,0 +1,20 @@
+import { ensureTrailingSlash } from '../../../util/url';
+
+const defaultSourceUrlBase = 'https://github.com/';
+
+export function getSourceUrlBase(registryUrl: string): string {
+  // default to GitHub.com if no GHE host is specified.
+  return ensureTrailingSlash(registryUrl ?? defaultSourceUrlBase);
+}
+
+export function getApiBaseUrl(registryUrl: string): string {
+  const sourceUrlBase = getSourceUrlBase(registryUrl);
+  return sourceUrlBase === defaultSourceUrlBase
+    ? `https://api.github.com/`
+    : `${sourceUrlBase}api/v3/`;
+}
+
+export function getSourceUrl(lookupName: string, registryUrl?: string): string {
+  const sourceUrlBase = getSourceUrlBase(registryUrl);
+  return `${sourceUrlBase}${lookupName}`;
+}

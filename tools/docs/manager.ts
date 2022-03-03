@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '../../lib/config/types';
-import { getManagers } from '../../lib/manager';
+import { getManagers } from '../../lib/modules/manager';
 import { readFile, updateFile } from '../utils';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
@@ -66,7 +66,7 @@ sidebar_label: ${displayName}
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
     }
     const managerReadmeContent = await readFile(
-      `lib/manager/${manager}/readme.md`
+      `lib/modules/manager/${manager}/readme.md`
     );
     if (manager !== 'regex') {
       md += '\n## Additional Information\n\n';

@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
-import { MavenDatasource } from '../../../datasource/maven';
-import type { PackageFile } from '../../../manager/types';
+import { MavenDatasource } from '../../../modules/datasource/maven';
+import type { PackageFile } from '../../../modules/manager/types';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
 

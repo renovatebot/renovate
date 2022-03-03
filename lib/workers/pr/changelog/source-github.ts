@@ -1,12 +1,12 @@
 import URL from 'url';
 import { PlatformId } from '../../../constants';
-import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
+import type { Release } from '../../../modules/datasource/types';
+import * as allVersioning from '../../../modules/versioning';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import * as allVersioning from '../../../versioning';
 import type { BranchUpgradeConfig } from '../../types';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';

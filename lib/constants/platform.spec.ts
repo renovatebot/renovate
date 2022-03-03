@@ -1,10 +1,10 @@
-import { BitBucketTagsDatasource } from '../datasource/bitbucket-tags';
-import { GithubReleasesDatasource } from '../datasource/github-releases';
-import { GithubTagsDatasource } from '../datasource/github-tags';
-import { GitlabPackagesDatasource } from '../datasource/gitlab-packages';
-import { GitlabReleasesDatasource } from '../datasource/gitlab-releases';
-import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
-import { PodDatasource } from '../datasource/pod';
+import { BitBucketTagsDatasource } from '../modules/datasource/bitbucket-tags';
+import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
+import { GithubTagsDatasource } from '../modules/datasource/github-tags';
+import { GitlabPackagesDatasource } from '../modules/datasource/gitlab-packages';
+import { GitlabReleasesDatasource } from '../modules/datasource/gitlab-releases';
+import { GitlabTagsDatasource } from '../modules/datasource/gitlab-tags';
+import { PodDatasource } from '../modules/datasource/pod';
 import { id as GITHUB_CHANGELOG_ID } from '../workers/pr/changelog/github';
 import { id as GITLAB_CHANGELOG_ID } from '../workers/pr/changelog/gitlab';
 import {

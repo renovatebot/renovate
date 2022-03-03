@@ -1,5 +1,5 @@
 import { git, platform } from '../../../test/util';
-import type { Pr } from '../../platform';
+import type { Pr } from '../../modules/platform';
 import { PrState } from '../../types';
 import type { BranchConfig } from '../types';
 import { shouldReuseExistingBranch } from './reuse';

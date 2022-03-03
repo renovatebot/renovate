@@ -1,7 +1,7 @@
 import { defaultConfig, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
-import { NpmDatasource } from '../../../datasource/npm';
-import type { LookupUpdate } from '../../../manager/types';
+import { NpmDatasource } from '../../../modules/datasource/npm';
+import type { LookupUpdate } from '../../../modules/manager/types';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 

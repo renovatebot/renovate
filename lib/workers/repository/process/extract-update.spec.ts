@@ -1,6 +1,6 @@
 import hasha from 'hasha';
 import { git, mocked } from '../../../../test/util';
-import type { PackageFile } from '../../../manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';

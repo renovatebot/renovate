@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { commitAndPush } from '../../platform/commit';
+import { commitAndPush } from '../../modules/platform/commit';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
 

@@ -14,9 +14,12 @@ import {
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
 import { logger, removeMeta } from '../../logger';
-import { getAdditionalFiles } from '../../manager/npm/post-update';
-import { Pr, platform } from '../../platform';
-import { ensureComment, ensureCommentRemoval } from '../../platform/comment';
+import { getAdditionalFiles } from '../../modules/manager/npm/post-update';
+import { Pr, platform } from '../../modules/platform';
+import {
+  ensureComment,
+  ensureCommentRemoval,
+} from '../../modules/platform/comment';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getElapsedDays } from '../../util/date';

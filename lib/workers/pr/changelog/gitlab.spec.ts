@@ -1,11 +1,11 @@
 import * as httpMock from '../../../../test/http-mock';
 import { PlatformId } from '../../../constants';
+import * as semverVersioning from '../../../modules/versioning/semver';
 import * as hostRules from '../../../util/host-rules';
-import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '.';
 
-jest.mock('../../../datasource/npm');
+jest.mock('../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
   branchName: undefined,

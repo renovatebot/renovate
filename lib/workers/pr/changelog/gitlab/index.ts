@@ -1,7 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
-import type { GitlabRelease } from '../../../../datasource/gitlab-releases/types';
-import type { GitlabTag } from '../../../../datasource/gitlab-tags/types';
 import { logger } from '../../../../logger';
+import type { GitlabRelease } from '../../../../modules/datasource/gitlab-releases/types';
+import type { GitlabTag } from '../../../../modules/datasource/gitlab-tags/types';
 import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../util/http/gitlab';
 import { ensureTrailingSlash } from '../../../../util/url';
