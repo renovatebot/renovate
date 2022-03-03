@@ -80,11 +80,16 @@ export async function updateArtifacts({
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
         // need to reset version, otherwise we have a checksum mismatch
+        const checksum = await getDistributionChecksum(distributionUrl);
         await writeLocalFile(
           packageFileName,
-          newPackageFileContent.replace(config.newValue, config.currentValue)
+          newPackageFileContent
+            .replace(config.newValue, config.currentValue)
+            .replace(
+              /distributionSha256Sum=.*/,
+              `distributionSha256Sum=${checksum}`
+            )
         );
-        const checksum = await getDistributionChecksum(distributionUrl);
         cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
     } else {
