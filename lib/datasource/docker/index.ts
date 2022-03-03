@@ -37,6 +37,7 @@ import {
   ImageList,
   MediaType,
   OciImage,
+  OciImageList,
   RegistryRepository,
 } from './types';
 
@@ -374,8 +375,12 @@ export class DockerDatasource extends Datasource {
         logger.debug('No docker auth found - returning');
         return null;
       }
-      headers.accept =
-        'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json';
+      headers.accept = [
+        MediaType.manifestListV2,
+        MediaType.manifestV2,
+        MediaType.ociManifestV1,
+        MediaType.ociManifestIndexV1,
+      ].join(', ');
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
         headers,
@@ -453,6 +458,7 @@ export class DockerDatasource extends Datasource {
     const manifest = JSON.parse(manifestResponse.body) as
       | ImageList
       | Image
+      | OciImageList
       | OciImage;
     if (manifest.schemaVersion !== 2) {
       logger.debug(
@@ -489,9 +495,35 @@ export class DockerDatasource extends Datasource {
       return manifest.config?.digest;
     }
 
+    // OCI image lists are not required to specify a mediaType
+    if (
+      manifest.mediaType === MediaType.ociManifestIndexV1 ||
+      (!manifest.mediaType && hasKey('manifests', manifest))
+    ) {
+      const imageList = manifest as OciImageList;
+      if (imageList.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest index, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest index with no manifests - returning'
+        );
+        return null;
+      }
+    }
+
     // OCI manifests are not required to specify a mediaType
     if (
-      (manifest.mediaType === MediaType.ociManifestV1 || !manifest.mediaType) &&
+      (manifest.mediaType === MediaType.ociManifestV1 ||
+        (!manifest.mediaType && hasKey('config', manifest))) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;

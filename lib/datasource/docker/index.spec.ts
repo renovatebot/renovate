@@ -1209,7 +1209,7 @@ Object {
         .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType: MediaType.ociManifestIndexV1,
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
@@ -1245,7 +1245,7 @@ Object {
         .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType: MediaType.ociManifestIndexV1,
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')

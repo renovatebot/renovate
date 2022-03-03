@@ -3,6 +3,7 @@
 /**
  * Media Types
  * https://docs.docker.com/registry/spec/manifest-v2-2/#media-types
+ * https://github.com/opencontainers/image-spec/blob/main/media-types.md
  */
 // eslint-disable-next-line typescript-enum/no-enum
 export enum MediaType {
@@ -10,13 +11,14 @@ export enum MediaType {
   manifestV2 = 'application/vnd.docker.distribution.manifest.v2+json',
   manifestListV2 = 'application/vnd.docker.distribution.manifest.list.v2+json',
   ociManifestV1 = 'application/vnd.oci.image.manifest.v1+json',
+  ociManifestIndexV1 = 'application/vnd.oci.image.index.v1+json',
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
 export interface MediaObject {
   readonly digest: string;
   readonly mediaType: MediaType;
-  readonly site: number;
+  readonly size: number;
 }
 
 export interface ImageListImage extends MediaObject {
@@ -47,6 +49,18 @@ export interface Image extends MediaObject {
 }
 
 /**
+ * OCI content descriptor
+ * https://github.com/opencontainers/image-spec/blob/main/descriptor.md
+ */
+export interface OciDescriptor {
+  readonly mediaType?: MediaType;
+  readonly digest: string;
+  readonly size: number;
+  readonly urls: string[];
+  readonly annotations: Record<string, string>;
+}
+
+/**
  * OCI Image Manifest
  * The same structure as docker image manifest, but mediaType is not required and is not present in the wild.
  * https://github.com/opencontainers/image-spec/blob/main/manifest.md
@@ -54,7 +68,25 @@ export interface Image extends MediaObject {
 export interface OciImage {
   readonly schemaVersion: 2;
   readonly mediaType?: MediaType.ociManifestV1;
-  readonly config: MediaObject;
+  readonly config: OciDescriptor;
+  readonly layers: OciDescriptor[];
+  readonly annotations: Record<string, string>;
+}
+
+export interface OciImageListManifest extends OciDescriptor {
+  readonly mediaType?: MediaType.ociManifestV1 | MediaType.ociManifestIndexV1;
+  readonly platform: Record<string, unknown>;
+}
+
+/**
+ * OCI Image List
+ * mediaType is not required.
+ * https://github.com/opencontainers/image-spec/blob/main/image-index.md
+ */
+export interface OciImageList {
+  readonly schemaVersion: 2;
+  readonly mediaType?: MediaType.ociManifestIndexV1;
+  readonly manifests: OciImageListManifest[];
 }
 
 export interface RegistryRepository {
