@@ -8,7 +8,7 @@ Object {
       "currentValue": "0.1.0",
       "datasource": "docker",
       "depName": "library",
-      "lookupName": "ghcr.io/ankitabhopatkar13/library",
+      "packageName": "ghcr.io/ankitabhopatkar13/library",
     },
     Object {
       "currentValue": "0.8.1",
@@ -67,7 +67,7 @@ Object {
       "currentValue": "2.2.0",
       "datasource": "docker",
       "depName": "oci-example",
-      "lookupName": "quay.example.com/organization/oci-example",
+      "packageName": "quay.example.com/organization/oci-example",
     },
   ],
   "packageFileVersion": "0.1.0",

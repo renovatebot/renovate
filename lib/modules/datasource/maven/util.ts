@@ -179,11 +179,11 @@ export async function downloadMavenXml(
   return { authorization, xml: new XmlDocument(rawContent) };
 }
 
-export function getDependencyParts(lookupName: string): MavenDependency {
-  const [group, name] = lookupName.split(':');
+export function getDependencyParts(packageName: string): MavenDependency {
+  const [group, name] = packageName.split(':');
   const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
   return {
-    display: lookupName,
+    display: packageName,
     group,
     name,
     dependencyUrl,

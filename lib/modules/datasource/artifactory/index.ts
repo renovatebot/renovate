@@ -23,22 +23,22 @@ export class ArtifactoryDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}:${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!registryUrl) {
       logger.warn(
-        { lookupName },
+        { packageName },
         'artifactory datasource requires custom registryUrl. Skipping datasource'
       );
       return null;
     }
 
-    const url = joinUrlParts(registryUrl, lookupName);
+    const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],
@@ -82,12 +82,12 @@ export class ArtifactoryDatasource extends Datasource {
 
       if (result.releases.length) {
         logger.trace(
-          { registryUrl, lookupName, versions: result.releases.length },
+          { registryUrl, packageName, versions: result.releases.length },
           'artifactory: Found versions'
         );
       } else {
         logger.trace(
-          { registryUrl, lookupName },
+          { registryUrl, packageName },
           'artifactory: No versions found'
         );
       }
@@ -96,7 +96,7 @@ export class ArtifactoryDatasource extends Datasource {
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
           logger.warn(
-            { registryUrl, lookupName },
+            { registryUrl, packageName },
             'artifactory: `Not Found` error'
           );
           return null;

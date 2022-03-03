@@ -35,7 +35,7 @@ describe('modules/datasource/artifactory/index', () => {
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
-        lookupName: testLookupName,
+        packageName: testLookupName,
       });
       expect(res?.releases).toHaveLength(4);
       expect(res).toMatchSnapshot({
@@ -51,7 +51,7 @@ describe('modules/datasource/artifactory/index', () => {
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
-        lookupName: testLookupName,
+        packageName: testLookupName,
       });
       expect(res?.releases).toHaveLength(4);
       expect(res).toMatchSnapshot({
@@ -76,7 +76,7 @@ describe('modules/datasource/artifactory/index', () => {
         registryUrls: [testRegistryUrl, secondRegistryUrl],
         depName: testLookupName,
         datasource,
-        lookupName: testLookupName,
+        packageName: testLookupName,
       });
       expect(res?.releases).toHaveLength(5);
       expect(res).toMatchSnapshot();
@@ -86,11 +86,11 @@ describe('modules/datasource/artifactory/index', () => {
       const res = await getPkgReleases({
         datasource,
         depName: testLookupName,
-        lookupName: testLookupName,
+        packageName: testLookupName,
       });
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        { lookupName: 'project' },
+        { packageName: 'project' },
         'artifactory datasource requires custom registryUrl. Skipping datasource'
       );
       expect(res).toBeNull();
@@ -105,7 +105,7 @@ describe('modules/datasource/artifactory/index', () => {
         await getPkgReleases({
           ...testConfig,
           datasource,
-          lookupName: testLookupName,
+          packageName: testLookupName,
         })
       ).toBeNull();
     });
@@ -116,13 +116,13 @@ describe('modules/datasource/artifactory/index', () => {
         await getPkgReleases({
           ...testConfig,
           datasource,
-          lookupName: testLookupName,
+          packageName: testLookupName,
         })
       ).toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         {
-          lookupName: 'project',
+          packageName: 'project',
           registryUrl: 'https://jfrog.company.com/artifactory',
         },
         'artifactory: `Not Found` error'
@@ -135,7 +135,7 @@ describe('modules/datasource/artifactory/index', () => {
         getPkgReleases({
           ...testConfig,
           datasource,
-          lookupName: testLookupName,
+          packageName: testLookupName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -148,7 +148,7 @@ describe('modules/datasource/artifactory/index', () => {
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
-        lookupName: testLookupName,
+        packageName: testLookupName,
       });
       expect(res).toBeNull();
     });

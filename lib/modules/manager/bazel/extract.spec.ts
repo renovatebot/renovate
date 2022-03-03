@@ -19,26 +19,28 @@ describe('modules/manager/bazel/extract', () => {
     it('extracts github tags', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE2'));
       expect(res.deps).toMatchSnapshot([
-        { lookupName: 'lmirosevic/GBDeviceInfo' },
-        { lookupName: 'nelhage/rules_boost' },
-        { lookupName: 'lmirosevic/GBDeviceInfo' },
-        { lookupName: 'nelhage/rules_boost' },
+        { packageName: 'lmirosevic/GBDeviceInfo' },
+        { packageName: 'nelhage/rules_boost' },
+        { packageName: 'lmirosevic/GBDeviceInfo' },
+        { packageName: 'nelhage/rules_boost' },
       ]);
     });
     it('handle comments and strings', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE3'));
-      expect(res.deps).toMatchSnapshot([{ lookupName: 'nelhage/rules_boost' }]);
+      expect(res.deps).toMatchSnapshot([
+        { packageName: 'nelhage/rules_boost' },
+      ]);
     });
     it('extracts dependencies from *.bzl files', () => {
       const res = extractPackageFile(Fixtures.get('repositories.bzl'));
       expect(res.deps).toMatchSnapshot([
         {
           currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
-          lookupName: 'google/subpar',
+          packageName: 'google/subpar',
         },
         {
           currentValue: '0.6.0',
-          lookupName: 'bazelbuild/bazel-skylib',
+          packageName: 'bazelbuild/bazel-skylib',
         },
       ]);
     });
@@ -61,7 +63,7 @@ describe('modules/manager/bazel/extract', () => {
             'sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548',
           currentValue: 'v1.0.0-alpha31.cli-migrations',
           depType: 'container_pull',
-          lookupName: 'hasura/graphql-engine',
+          packageName: 'hasura/graphql-engine',
           registryUrls: ['index.docker.io'],
         },
       ]);
@@ -79,7 +81,9 @@ go_repository(
         `
       );
       expect(successStory.deps[0].datasource).toBe('go');
-      expect(successStory.deps[0].lookupName).toBe('github.com/test/uuid-fork');
+      expect(successStory.deps[0].packageName).toBe(
+        'github.com/test/uuid-fork'
+      );
 
       const badStory = extractPackageFile(
         `

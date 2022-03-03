@@ -59,7 +59,7 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: 'v1.2.3',
         datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
-        lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+        packageName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
     it('should extract the depName if the URL includes a port number', () => {
@@ -70,7 +70,7 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: 'v1.2.3',
         datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com:7999/user/test-repo',
-        lookupName: 'ssh://git@bitbucket.com:7999/user/test-repo',
+        packageName: 'ssh://git@bitbucket.com:7999/user/test-repo',
       });
     });
     it('should extract the version of a non http base with subdir', () => {
@@ -81,7 +81,7 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: 'v1.2.3',
         datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
-        lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+        packageName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
     it('should extract out the version of an github base', () => {

@@ -144,7 +144,7 @@ export class SbtPackageDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -152,7 +152,7 @@ export class SbtPackageDatasource extends Datasource {
       return null;
     }
 
-    const [groupId, artifactId] = lookupName.split(':');
+    const [groupId, artifactId] = packageName.split(':');
     const groupIdSplit = groupId.split('.');
     const artifactIdSplit = artifactId.split('_');
     const [artifact, scalaVersion] = artifactIdSplit;
@@ -193,7 +193,7 @@ export class SbtPackageDatasource extends Datasource {
     }
 
     logger.debug(
-      `No versions found for ${lookupName} in ${searchRoots.length} repositories`
+      `No versions found for ${packageName} in ${searchRoots.length} repositories`
     );
     return null;
   }

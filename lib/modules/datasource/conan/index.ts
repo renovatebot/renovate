@@ -52,15 +52,15 @@ export class ConanDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}:${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const depName = lookupName.split('/')[0];
-    const userAndChannel = '@' + lookupName.split('@')[1];
+    const depName = packageName.split('/')[0];
+    const userAndChannel = '@' + packageName.split('@')[1];
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl

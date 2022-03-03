@@ -9,7 +9,7 @@ describe('modules/manager/nodenv/extract', () => {
           currentValue: '8.4.0',
           datasource: 'github-tags',
           depName: 'node',
-          lookupName: 'nodejs/node',
+          packageName: 'nodejs/node',
         },
       ]);
     });
@@ -20,7 +20,7 @@ describe('modules/manager/nodenv/extract', () => {
           currentValue: '8.4',
           datasource: 'github-tags',
           depName: 'node',
-          lookupName: 'nodejs/node',
+          packageName: 'nodejs/node',
         },
       ]);
     });
@@ -31,7 +31,7 @@ describe('modules/manager/nodenv/extract', () => {
           currentValue: 'latestn',
           datasource: 'github-tags',
           depName: 'node',
-          lookupName: 'nodejs/node',
+          packageName: 'nodejs/node',
         },
       ]);
     });

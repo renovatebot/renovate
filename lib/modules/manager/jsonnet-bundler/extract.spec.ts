@@ -38,13 +38,13 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
         deps: [
           {
             depName: 'prometheus-operator',
-            lookupName:
+            packageName:
               'https://github.com/prometheus-operator/prometheus-operator.git',
             currentValue: 'v0.50.0',
           },
           {
             depName: 'kube-prometheus',
-            lookupName:
+            packageName:
               'ssh://git@github.com/prometheus-operator/kube-prometheus.git',
             currentValue: 'v0.9.0',
           },
@@ -57,7 +57,7 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
         deps: [
           {
             depName: 'prometheus-operator-mixin',
-            lookupName:
+            packageName:
               'https://github.com/prometheus-operator/prometheus-operator',
             currentValue: 'v0.50.0',
           },

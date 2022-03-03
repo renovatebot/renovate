@@ -31,17 +31,17 @@ export class PypiDatasource extends Datasource {
   override readonly registryStrategy = 'merge';
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult = null;
     const hostUrl = ensureTrailingSlash(registryUrl);
-    const normalizedLookupName = PypiDatasource.normalizeName(lookupName);
+    const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
     // not all simple indexes use this identifier, but most do
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
       logger.trace(
-        { lookupName, hostUrl },
+        { packageName, hostUrl },
         'Looking up pypi simple dependency'
       );
       dependency = await this.getSimpleDependency(
@@ -49,7 +49,7 @@ export class PypiDatasource extends Datasource {
         hostUrl
       );
     } else {
-      logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
+      logger.trace({ packageName, hostUrl }, 'Looking up pypi api dependency');
       try {
         // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
         dependency = await this.getDependency(normalizedLookupName, hostUrl);
@@ -60,7 +60,7 @@ export class PypiDatasource extends Datasource {
 
         // error contacting json-style api -- attempt to fallback to a simple-style api
         logger.trace(
-          { lookupName, hostUrl },
+          { packageName, hostUrl },
           'Looking up pypi simple dependency via fallback'
         );
         dependency = await this.getSimpleDependency(

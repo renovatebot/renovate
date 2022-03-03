@@ -20,7 +20,7 @@ Configuration-wise, it works like this:
 
 - You must capture the `currentValue` of the dependency in a named capture group
 - You must have either a `depName` capture group or a `depNameTemplate` config field
-- You can optionally have a `lookupName` capture group or a `lookupNameTemplate` if it differs from `depName`
+- You can optionally have a `packageName` capture group or a `packageNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `depType` capture group or a `depTypeTemplate` config field
 - You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default

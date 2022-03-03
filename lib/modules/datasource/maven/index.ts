@@ -317,7 +317,7 @@ export class MavenDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -325,7 +325,7 @@ export class MavenDatasource extends Datasource {
       return null;
     }
 
-    const dependency = getDependencyParts(lookupName);
+    const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);

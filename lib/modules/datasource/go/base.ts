@@ -25,30 +25,30 @@ export class BaseGoDatasource {
   static async getDatasource(goModule: string): Promise<DataSource | null> {
     if (goModule.startsWith('gopkg.in/')) {
       const [pkg] = goModule.replace('gopkg.in/', '').split('.');
-      const lookupName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
+      const packageName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
       return {
         datasource: GithubTagsDatasource.id,
-        lookupName,
+        packageName,
         registryUrl: 'https://github.com',
       };
     }
 
     if (goModule.startsWith('github.com/')) {
       const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
+      const packageName = split[1] + '/' + split[2];
       return {
         datasource: GithubTagsDatasource.id,
-        lookupName,
+        packageName,
         registryUrl: 'https://github.com',
       };
     }
 
     if (goModule.startsWith('bitbucket.org/')) {
       const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
+      const packageName = split[1] + '/' + split[2];
       return {
         datasource: BitBucketTagsDatasource.id,
-        lookupName,
+        packageName,
         registryUrl: 'https://bitbucket.org',
       };
     }
@@ -75,7 +75,7 @@ export class BaseGoDatasource {
       if (goSourceUrl?.startsWith('https://github.com/')) {
         return {
           datasource: GithubTagsDatasource.id,
-          lookupName: goSourceUrl
+          packageName: goSourceUrl
             .replace('https://github.com/', '')
             .replace(regEx(/\/$/), ''),
           registryUrl: 'https://github.com',
@@ -95,7 +95,7 @@ export class BaseGoDatasource {
             return {
               datasource: GitlabTagsDatasource.id,
               registryUrl: gitlabUrl,
-              lookupName: gitlabModuleName.substring(
+              packageName: gitlabModuleName.substring(
                 0,
                 gitlabModuleName.indexOf('.git')
               ),
@@ -104,14 +104,14 @@ export class BaseGoDatasource {
           return {
             datasource: GitlabTagsDatasource.id,
             registryUrl: gitlabUrl,
-            lookupName: gitlabModuleName,
+            packageName: gitlabModuleName,
           };
         }
 
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl: gitlabUrl,
-          lookupName: gitlabUrlName,
+          packageName: gitlabUrlName,
         };
       }
 
@@ -125,14 +125,14 @@ export class BaseGoDatasource {
 
         // split the go module from the URL: host/go/module -> go/module
         const split = goModule.split('/');
-        const lookupName = split[1] + '/' + split[2];
+        const packageName = split[1] + '/' + split[2];
 
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl,
-          lookupName,
+          packageName,
         };
       }
     } else {
@@ -152,7 +152,7 @@ export class BaseGoDatasource {
         const parsedUrl = URL.parse(goImportURL);
 
         // split the go module from the URL: host/go/module -> go/module
-        const lookupName = trimTrailingSlash(parsedUrl.pathname)
+        const packageName = trimTrailingSlash(parsedUrl.pathname)
           .replace(regEx(/\.git$/), '')
           .split('/')
           .slice(-2)
@@ -161,7 +161,7 @@ export class BaseGoDatasource {
         return {
           datasource: GithubTagsDatasource.id,
           registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-          lookupName,
+          packageName,
         };
       }
 

@@ -35,7 +35,7 @@ export function extractResource(base: string): PackageDependency | null {
   return {
     datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
-    lookupName: match.groups.url,
+    packageName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
 }

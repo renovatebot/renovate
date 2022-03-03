@@ -189,7 +189,7 @@ export async function extractPackageFile(
     if (depType === 'engines' || depType === 'packageManager') {
       if (depName === 'node') {
         dep.datasource = GithubTagsDatasource.id;
-        dep.lookupName = 'nodejs/node';
+        dep.packageName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
         constraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
@@ -200,7 +200,7 @@ export async function extractPackageFile(
           dep.currentValue.startsWith('2') ||
           dep.currentValue.startsWith('3')
         ) {
-          dep.lookupName = '@yarnpkg/cli';
+          dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
@@ -212,7 +212,7 @@ export async function extractPackageFile(
         constraints.pnpm = dep.currentValue;
       } else if (depName === 'vscode') {
         dep.datasource = GithubTagsDatasource.id;
-        dep.lookupName = 'microsoft/vscode';
+        dep.packageName = 'microsoft/vscode';
         constraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = 'unknown-engines';
@@ -227,7 +227,7 @@ export async function extractPackageFile(
     if (depType === 'volta') {
       if (depName === 'node') {
         dep.datasource = GithubTagsDatasource.id;
-        dep.lookupName = 'nodejs/node';
+        dep.packageName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
@@ -248,10 +248,10 @@ export async function extractPackageFile(
       hasFancyRefs = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
-        dep.lookupName = valSplit[0];
+        dep.packageName = valSplit[0];
         dep.currentValue = valSplit[1];
       } else if (valSplit.length === 3) {
-        dep.lookupName = valSplit[0] + '@' + valSplit[1];
+        dep.packageName = valSplit[0] + '@' + valSplit[1];
         dep.currentValue = valSplit[2];
       } else {
         logger.debug('Invalid npm package alias: ' + dep.currentValue);
@@ -312,7 +312,7 @@ export async function extractPackageFile(
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = depRefPart;
       dep.datasource = GithubTagsDatasource.id;
-      dep.lookupName = githubOwnerRepo;
+      dep.packageName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
       regEx(/^[0-9a-f]{7}$/).test(depRefPart) ||
@@ -322,7 +322,7 @@ export async function extractPackageFile(
       dep.currentValue = null;
       dep.currentDigest = depRefPart;
       dep.datasource = GithubTagsDatasource.id;
-      dep.lookupName = githubOwnerRepo;
+      dep.packageName = githubOwnerRepo;
     } else {
       dep.skipReason = 'unversioned-reference';
       return dep;

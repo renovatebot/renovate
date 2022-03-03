@@ -398,10 +398,10 @@ Array [
     "datasource": "crate",
     "depName": "boolector-solver",
     "depType": "dependencies",
-    "lookupName": "boolector",
     "managerData": Object {
       "nestedVersion": true,
     },
+    "packageName": "boolector",
   },
 ]
 `;

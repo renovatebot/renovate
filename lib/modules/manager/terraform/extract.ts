@@ -28,7 +28,7 @@ import {
 } from './util';
 
 const dependencyBlockExtractionRegex = regEx(
-  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/
+  /^\s*(?<type>[a-z_]+)\s+("(?<packageName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/
 );
 const contentCheckList = [
   'module "',
@@ -75,7 +75,7 @@ export async function extractPackageFile(
             result = extractTerraformProvider(
               lineNumber,
               lines,
-              terraformDependency.groups.lookupName
+              terraformDependency.groups.packageName
             );
             break;
           }
@@ -83,7 +83,7 @@ export async function extractPackageFile(
             result = extractTerraformModule(
               lineNumber,
               lines,
-              terraformDependency.groups.lookupName
+              terraformDependency.groups.packageName
             );
             break;
           }

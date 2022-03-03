@@ -246,7 +246,7 @@ describe('modules/manager/gradle/shallow/extract', () => {
             depType: 'plugin',
             currentValue: '1.17.0',
             commitMessageTopic: 'plugin detekt',
-            lookupName:
+            packageName:
               'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
             managerData: {
               fileReplacePosition: 21,
@@ -262,7 +262,7 @@ describe('modules/manager/gradle/shallow/extract', () => {
             depType: 'plugin',
             currentValue: '0.5.0',
             commitMessageTopic: 'plugin publish-on-central',
-            lookupName:
+            packageName:
               'org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin',
             managerData: {
               fileReplacePosition: 68,
@@ -354,7 +354,7 @@ describe('modules/manager/gradle/shallow/extract', () => {
             depType: 'plugin',
             currentValue: '1.5.21',
             commitMessageTopic: 'plugin kotlinJvm',
-            lookupName:
+            packageName:
               'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
             managerData: {
               fileReplacePosition: 661,
@@ -370,7 +370,7 @@ describe('modules/manager/gradle/shallow/extract', () => {
             depType: 'plugin',
             currentValue: '1.5.21',
             commitMessageTopic: 'plugin kotlinSerialization',
-            lookupName:
+            packageName:
               'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
             managerData: {
               fileReplacePosition: 21,
@@ -386,7 +386,7 @@ describe('modules/manager/gradle/shallow/extract', () => {
             depType: 'plugin',
             currentValue: '0.3.0',
             commitMessageTopic: 'plugin multiJvm',
-            lookupName:
+            packageName:
               'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
             managerData: {
               fileReplacePosition: 822,

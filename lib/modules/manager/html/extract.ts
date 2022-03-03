@@ -18,7 +18,7 @@ export function extractDep(tag: string): PackageDependency | null {
   const dep: PackageDependency = {
     datasource: CdnJsDatasource.id,
     depName,
-    lookupName: `${depName}/${asset}`,
+    packageName: `${depName}/${asset}`,
     currentValue,
     replaceString: tag,
   };

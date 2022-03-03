@@ -21,10 +21,10 @@ export class HexDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${HexDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -32,12 +32,12 @@ export class HexDatasource extends Datasource {
       return null;
     }
 
-    // Get dependency name from lookupName.
-    // If the dependency is private lookupName contains organization name as following:
+    // Get dependency name from packageName.
+    // If the dependency is private packageName contains organization name as following:
     // hexPackageName:organizationName
     // hexPackageName is used to pass it in hex dep url
     // organizationName is used for accessing to private deps
-    const [hexPackageName, organizationName] = lookupName.split(':');
+    const [hexPackageName, organizationName] = packageName.split(':');
     const organizationUrlPrefix = organizationName
       ? `repos/${organizationName}/`
       : '';
@@ -53,7 +53,7 @@ export class HexDatasource extends Datasource {
     const hexRelease: HexRelease = response.body;
 
     if (!hexRelease) {
-      logger.warn({ datasource: 'hex', lookupName }, `Invalid response body`);
+      logger.warn({ datasource: 'hex', packageName }, `Invalid response body`);
       return null;
     }
 

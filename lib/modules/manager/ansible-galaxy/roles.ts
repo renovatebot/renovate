@@ -56,15 +56,15 @@ function finalize(dependency: PackageDependency): boolean {
     dep.datasource = GitTagsDatasource.id;
     dep.depName = sourceMatch.groups.depName.replace(regEx(/.git$/), '');
     // remove leading `git+` from URLs like `git+https://...`
-    dep.lookupName = source.replace(regEx(/git\+/), '');
+    dep.packageName = source.replace(regEx(/git\+/), '');
   } else if (galaxyDepRegex.exec(source)) {
     dep.datasource = GalaxyDatasource.id;
     dep.depName = dep.managerData.src;
-    dep.lookupName = dep.managerData.src;
+    dep.packageName = dep.managerData.src;
   } else if (galaxyDepRegex.exec(dep.managerData.name)) {
     dep.datasource = GalaxyDatasource.id;
     dep.depName = dep.managerData.name;
-    dep.lookupName = dep.managerData.name;
+    dep.packageName = dep.managerData.name;
   } else {
     dep.skipReason = 'no-source-match';
     return false;

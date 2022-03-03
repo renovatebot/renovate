@@ -27,8 +27,8 @@ export class GoProxyDatasource extends Datasource {
     key: (config: GetReleasesConfig) => GoProxyDatasource.getCacheKey(config),
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const { lookupName } = config;
-    logger.trace(`goproxy.getReleases(${lookupName})`);
+    const { packageName } = config;
+    logger.trace(`goproxy.getReleases(${packageName})`);
 
     const goproxy = process.env.GOPROXY;
     const proxyList = this.parseGoproxy(goproxy);
@@ -36,8 +36,8 @@ export class GoProxyDatasource extends Datasource {
 
     let result: ReleaseResult | null = null;
 
-    if (noproxy?.test(lookupName)) {
-      logger.debug(`Fetching ${lookupName} via GONOPROXY match`);
+    if (noproxy?.test(packageName)) {
+      logger.debug(`Fetching ${packageName} via GONOPROXY match`);
       result = await this.direct.getReleases(config);
       return result;
     }
@@ -51,10 +51,10 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const versions = await this.listVersions(url, lookupName);
+        const versions = await this.listVersions(url, packageName);
         const queue = versions.map((version) => async (): Promise<Release> => {
           try {
-            return await this.versionInfo(url, lookupName, version);
+            return await this.versionInfo(url, packageName, version);
           } catch (err) {
             logger.trace({ err }, `Can't obtain data from ${url}`);
             return { version };
@@ -62,7 +62,7 @@ export class GoProxyDatasource extends Datasource {
         });
         const releases = await pAll(queue, { concurrency: 5 });
         if (releases.length) {
-          const datasource = await BaseGoDatasource.getDatasource(lookupName);
+          const datasource = await BaseGoDatasource.getDatasource(packageName);
           const sourceUrl = getSourceUrl(datasource);
           result = { releases, sourceUrl };
           break;
@@ -198,8 +198,8 @@ export class GoProxyDatasource extends Datasource {
     return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
-  async listVersions(baseUrl: string, lookupName: string): Promise<string[]> {
-    const url = `${baseUrl}/${this.encodeCase(lookupName)}/@v/list`;
+  async listVersions(baseUrl: string, packageName: string): Promise<string[]> {
+    const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
     const { body } = await this.http.get(url);
     return body
       .split(regEx(/\s+/))
@@ -209,10 +209,10 @@ export class GoProxyDatasource extends Datasource {
 
   async versionInfo(
     baseUrl: string,
-    lookupName: string,
+    packageName: string,
     version: string
   ): Promise<Release> {
-    const url = `${baseUrl}/${this.encodeCase(lookupName)}/@v/${version}.info`;
+    const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/${version}.info`;
     const res = await this.http.getJson<VersionInfo>(url);
 
     const result: Release = {
@@ -226,9 +226,9 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
-  static getCacheKey({ lookupName }: GetReleasesConfig): string {
+  static getCacheKey({ packageName }: GetReleasesConfig): string {
     const goproxy = process.env.GOPROXY;
     const noproxy = GoProxyDatasource.parseNoproxy();
-    return `${lookupName}@@${goproxy}@@${noproxy?.toString()}`;
+    return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

@@ -8,7 +8,7 @@ describe('modules/manager/cdnurl/extract', () => {
         {
           depName: 'prop-types',
           currentValue: '15.6.1',
-          lookupName: 'prop-types/prop-types.min.js',
+          packageName: 'prop-types/prop-types.min.js',
         },
         { depName: 'react', currentValue: '16.3.2' },
         { depName: 'react-dom', currentValue: '16.3.2' },

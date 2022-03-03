@@ -12,7 +12,7 @@ describe('modules/datasource/helm/index', () => {
       jest.resetAllMocks();
     });
 
-    it('returns null if lookupName was not provided', async () => {
+    it('returns null if packageName was not provided', async () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
@@ -142,7 +142,7 @@ describe('modules/datasource/helm/index', () => {
       expect(releases).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null if lookupName is not in index.yaml', async () => {
+    it('returns null if packageName is not in index.yaml', async () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')

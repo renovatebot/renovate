@@ -30,13 +30,13 @@ export class CrateDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}/${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
       CrateDatasource.areReleasesCacheable(registryUrl),
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -48,7 +48,7 @@ export class CrateDatasource extends Datasource {
     }
 
     const registryInfo = await CrateDatasource.fetchRegistryInfo({
-      lookupName,
+      packageName,
       registryUrl,
     });
     if (!registryInfo) {
@@ -58,12 +58,12 @@ export class CrateDatasource extends Datasource {
 
     const dependencyUrl = CrateDatasource.getDependencyUrl(
       registryInfo,
-      lookupName
+      packageName
     );
 
     const payload = await this.fetchCrateRecordsPayload(
       registryInfo,
-      lookupName
+      packageName
     );
     const lines = payload
       .split(newlineRegex) // break into lines
@@ -94,12 +94,12 @@ export class CrateDatasource extends Datasource {
 
   public async fetchCrateRecordsPayload(
     info: RegistryInfo,
-    lookupName: string
+    packageName: string
   ): Promise<string> {
     if (info.clonePath) {
       const path = upath.join(
         info.clonePath,
-        ...CrateDatasource.getIndexSuffix(lookupName)
+        ...CrateDatasource.getIndexSuffix(packageName)
       );
       return readFile(path, 'utf8');
     }
@@ -107,7 +107,7 @@ export class CrateDatasource extends Datasource {
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(lookupName).join('/');
+        CrateDatasource.getIndexSuffix(packageName).join('/');
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
@@ -123,20 +123,20 @@ export class CrateDatasource extends Datasource {
    */
   private static getDependencyUrl(
     info: RegistryInfo,
-    lookupName: string
+    packageName: string
   ): string {
     switch (info.flavor) {
       case RegistryFlavor.CratesIo:
-        return `https://crates.io/crates/${lookupName}`;
+        return `https://crates.io/crates/${packageName}`;
       case RegistryFlavor.Cloudsmith: {
         // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
         const tokens = info.url.pathname.split('/');
         const org = tokens[2];
         const repo = tokens[3];
-        return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${lookupName}`;
+        return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${packageName}`;
       }
       default:
-        return `${info.rawUrl}/${lookupName}`;
+        return `${info.rawUrl}/${packageName}`;
     }
   }
 
@@ -161,7 +161,7 @@ export class CrateDatasource extends Datasource {
    * url and clones it to cache.
    */
   private static async fetchRegistryInfo({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
     // istanbul ignore if
@@ -235,7 +235,7 @@ export class CrateDatasource extends Datasource {
           await clonePromise;
         } catch (err) {
           logger.warn(
-            { err, lookupName, registryUrl },
+            { err, packageName, registryUrl },
             'failed cloning git registry'
           );
           memCache.set(cacheKeyForError, err);
@@ -247,7 +247,7 @@ export class CrateDatasource extends Datasource {
       if (!clonePath) {
         const err = memCache.get(cacheKeyForError);
         logger.warn(
-          { err, lookupName, registryUrl },
+          { err, packageName, registryUrl },
           'Previous git clone failed, bailing out.'
         );
 
@@ -268,19 +268,19 @@ export class CrateDatasource extends Datasource {
     return registryUrl === 'https://crates.io';
   }
 
-  public static getIndexSuffix(lookupName: string): string[] {
-    const len = lookupName.length;
+  public static getIndexSuffix(packageName: string): string[] {
+    const len = packageName.length;
 
     if (len === 1) {
-      return ['1', lookupName];
+      return ['1', packageName];
     }
     if (len === 2) {
-      return ['2', lookupName];
+      return ['2', packageName];
     }
     if (len === 3) {
-      return ['3', lookupName[0], lookupName];
+      return ['3', packageName[0], packageName];
     }
 
-    return [lookupName.slice(0, 2), lookupName.slice(2, 4), lookupName];
+    return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
   }
 }

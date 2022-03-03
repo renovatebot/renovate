@@ -35,7 +35,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
         })
       ).toMatchSnapshot({
         depName: 'user/repo',
-        lookupName: 'https://github.com/user/repo.git',
+        packageName: 'https://github.com/user/repo.git',
       });
     });
 

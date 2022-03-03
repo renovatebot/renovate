@@ -42,19 +42,19 @@ export class GitlabPackagesDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}-${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}-${packageName}`,
   })
   async getReleases({
     registryUrl,
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const [projectName, packageName] = lookupName.split(':', 2);
+    const [projectPart, packagePart] = packageName.split(':', 2);
 
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
       registryUrl,
-      projectName,
-      packageName
+      projectPart,
+      packagePart
     );
 
     const result: ReleaseResult = {
@@ -70,7 +70,7 @@ export class GitlabPackagesDatasource extends Datasource {
       result.releases = response
         // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
         // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-        .filter((r) => r.name === packageName)
+        .filter((r) => r.name === packagePart)
         .map(({ version, created_at }) => ({
           version,
           releaseTimestamp: created_at,

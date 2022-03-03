@@ -81,11 +81,11 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         updatedDeps: [
           {
             depName: 'foo',
-            lookupName: 'https://github.com/foo/foo.git',
+            packageName: 'https://github.com/foo/foo.git',
           },
           {
             depName: 'foo',
-            lookupName: 'ssh://git@github.com/foo/foo.git',
+            packageName: 'ssh://git@github.com/foo/foo.git',
             managerData: {
               subdir: 'bar',
             },

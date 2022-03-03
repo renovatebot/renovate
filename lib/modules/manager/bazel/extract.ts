@@ -242,7 +242,7 @@ export function extractPackageFile(
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
         dep.datasource = GithubReleasesDatasource.id;
-        dep.lookupName = repo;
+        dep.packageName = repo;
         deps.push(dep);
       }
     } else if (
@@ -254,13 +254,13 @@ export function extractPackageFile(
       dep.depName = depName;
       dep.currentValue = currentValue || commit.substr(0, 7);
       dep.datasource = GoDatasource.id;
-      dep.lookupName = importpath;
+      dep.packageName = importpath;
       if (remote) {
         const remoteMatch = regEx(
           /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/
         ).exec(remote);
         if (remoteMatch && remoteMatch[0].length === remote.length) {
-          dep.lookupName = remote.replace('https://', '');
+          dep.packageName = remote.replace('https://', '');
         } else {
           dep.skipReason = 'unsupported-remote';
         }
@@ -287,7 +287,7 @@ export function extractPackageFile(
         dep.currentValue = parsedUrl.currentValue;
       }
       dep.datasource = parsedUrl.datasource;
-      dep.lookupName = dep.repo;
+      dep.packageName = dep.repo;
       deps.push(dep);
     } else if (
       depType === 'container_pull' &&
@@ -301,7 +301,7 @@ export function extractPackageFile(
       dep.depName = depName;
       dep.versioning = dockerVersioning.id;
       dep.datasource = DockerDatasource.id;
-      dep.lookupName = repository;
+      dep.packageName = repository;
       dep.registryUrls = [registry];
       deps.push(dep);
     } else {

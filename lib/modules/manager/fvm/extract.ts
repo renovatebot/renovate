@@ -34,7 +34,7 @@ export function extractPackageFile(
     depName: 'flutter',
     currentValue: fvmConfig.flutterSdkVersion,
     datasource: GithubTagsDatasource.id,
-    lookupName: 'flutter/flutter',
+    packageName: 'flutter/flutter',
   };
   return { deps: [dep] };
 }

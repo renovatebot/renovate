@@ -38,7 +38,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               depName,
               currentValue,
               datasource: OrbDatasource.id,
-              lookupName: orbName,
+              packageName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
               versioning: npmVersioning.id,
               rangeStrategy: 'pin',

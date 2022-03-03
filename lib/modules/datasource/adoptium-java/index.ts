@@ -53,16 +53,16 @@ export class AdoptiumJavaDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}:${getImageType(lookupName)}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}:${getImageType(packageName)}`,
   })
   async getReleases({
     registryUrl,
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const imageType = getImageType(lookupName);
+    const imageType = getImageType(packageName);
     logger.trace(
-      { registryUrl, lookupName, imageType },
+      { registryUrl, packageName, imageType },
       'fetching java release'
     );
     const url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`;

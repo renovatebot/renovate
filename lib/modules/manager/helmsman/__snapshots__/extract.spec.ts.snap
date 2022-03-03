@@ -7,7 +7,7 @@ Object {
       "currentValue": "19.0.3",
       "datasource": "helm",
       "depName": "kube-prometheus",
-      "lookupName": "kube-prometheus-stack",
+      "packageName": "kube-prometheus-stack",
       "registryUrls": Array [
         "https://prometheus-community.github.io/helm-charts",
       ],
@@ -16,7 +16,7 @@ Object {
       "currentValue": "2.6.0",
       "datasource": "helm",
       "depName": "loki",
-      "lookupName": "loki",
+      "packageName": "loki",
       "registryUrls": Array [
         "https://grafana.github.io/helm-charts",
       ],
@@ -25,7 +25,7 @@ Object {
       "currentValue": "0.7.7",
       "datasource": "helm",
       "depName": "tempo",
-      "lookupName": "tempo",
+      "packageName": "tempo",
       "registryUrls": Array [
         "https://grafana.github.io/helm-charts",
       ],
@@ -34,7 +34,7 @@ Object {
       "currentValue": "0.6.0",
       "datasource": "helm",
       "depName": "otlp-collector",
-      "lookupName": "opentelemetry-collector",
+      "packageName": "opentelemetry-collector",
       "registryUrls": Array [
         "https://open-telemetry.github.io/opentelemetry-helm-charts",
       ],
@@ -43,7 +43,7 @@ Object {
       "currentValue": "0.25.0",
       "datasource": "helm",
       "depName": "strimzi-operator",
-      "lookupName": "strimzi-kafka-operator",
+      "packageName": "strimzi-kafka-operator",
       "registryUrls": Array [
         "https://strimzi.io/charts/",
       ],
@@ -57,7 +57,7 @@ Object {
       "currentValue": "2.6.0",
       "datasource": "helm",
       "depName": "loki-no-registry-ref",
-      "lookupName": "loki",
+      "packageName": "loki",
       "skipReason": "no-repository",
     },
     Object {

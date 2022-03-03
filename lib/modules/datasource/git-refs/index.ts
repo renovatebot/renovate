@@ -19,13 +19,13 @@ export class GitRefsDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GitRefsDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   override async getReleases({
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const rawRefs: RawRefs[] = await GitDatasource.getRawRefs(
-      { lookupName },
+      { packageName },
       this.id
     );
 
@@ -35,7 +35,7 @@ export class GitRefsDatasource extends Datasource {
 
     const uniqueRefs = [...new Set(refs)];
 
-    const sourceUrl = lookupName
+    const sourceUrl = packageName
       .replace(regEx(/\.git$/), '')
       .replace(regEx(/\/$/), '');
 
@@ -52,11 +52,11 @@ export class GitRefsDatasource extends Datasource {
   }
 
   override async getDigest(
-    { lookupName }: DigestConfig,
+    { packageName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
     const rawRefs: RawRefs[] = await GitDatasource.getRawRefs(
-      { lookupName },
+      { packageName },
       this.id
     );
     let ref: RawRefs;

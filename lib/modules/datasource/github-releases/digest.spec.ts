@@ -6,10 +6,10 @@ import type { DigestAsset } from './types';
 import { GithubReleasesDatasource } from '.';
 
 describe('modules/datasource/github-releases/digest', () => {
-  const lookupName = 'some/dep';
+  const packageName = 'some/dep';
   const releaseMock = new GitHubReleaseMocker(
     'https://api.github.com',
-    lookupName
+    packageName
   );
   const githubReleases = new GithubReleasesDatasource();
 
@@ -37,7 +37,7 @@ describe('modules/datasource/github-releases/digest', () => {
       // Small assets like this digest file may be downloaded twice
       httpMock
         .scope('https://api.github.com')
-        .get(`/repos/${lookupName}/releases/download/v1.0.0/SHASUMS.txt`)
+        .get(`/repos/${packageName}/releases/download/v1.0.0/SHASUMS.txt`)
         .reply(200, '');
 
       const digestAsset = await githubReleases.findDigestAsset(

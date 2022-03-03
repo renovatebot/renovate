@@ -385,7 +385,7 @@ export async function validateConfig(
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
-                'lookupNameTemplate',
+                'packageNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',

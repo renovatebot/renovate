@@ -157,7 +157,7 @@ export class GithubReleasesDatasource extends Datasource {
     namespace: 'datasource-github-releases',
     key: (
       {
-        lookupName: repo,
+        packageName: repo,
         currentValue,
         currentDigest,
         registryUrl,
@@ -180,7 +180,7 @@ export class GithubReleasesDatasource extends Datasource {
    */
   override async getDigest(
     {
-      lookupName: repo,
+      packageName: repo,
       currentValue,
       currentDigest,
       registryUrl,
@@ -220,7 +220,7 @@ export class GithubReleasesDatasource extends Datasource {
 
   @cache({
     namespace: 'datasource-github-releases',
-    key: ({ lookupName: repo, registryUrl }: GetReleasesConfig) =>
+    key: ({ packageName: repo, registryUrl }: GetReleasesConfig) =>
       `${registryUrl}:${repo}:tags`,
   })
   /**
@@ -234,7 +234,7 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Return a dependency object containing sourceUrl string and releases array
    */
   async getReleases({
-    lookupName: repo,
+    packageName: repo,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);

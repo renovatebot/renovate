@@ -111,7 +111,7 @@ Array [
 
 exports[`modules/datasource/galaxy-collection/index getReleases returns null for empty lookup 1`] = `Array []`;
 
-exports[`modules/datasource/galaxy-collection/index getReleases returns null for null lookupName  1`] = `Array []`;
+exports[`modules/datasource/galaxy-collection/index getReleases returns null for null packageName  1`] = `Array []`;
 
 exports[`modules/datasource/galaxy-collection/index getReleases returns null for unexpected data at base 1`] = `
 Array [

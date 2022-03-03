@@ -44,11 +44,11 @@ export async function extractPackageFile(
 
           if (dep.datasource === HexDatasource.id) {
             dep.currentValue = currentValue;
-            dep.lookupName = depName;
+            dep.packageName = depName;
           }
 
           if (organization) {
-            dep.lookupName += ':' + organization;
+            dep.packageName += ':' + organization;
           }
 
           if (dep.datasource !== HexDatasource.id) {

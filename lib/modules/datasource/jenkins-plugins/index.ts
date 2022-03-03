@@ -25,17 +25,17 @@ export class JenkinsPluginsDatasource extends Datasource {
     'https://updates.jenkins.io/current/plugin-versions.json';
 
   async getReleases({
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const plugins = await this.getJenkinsPluginInfo();
-    const plugin = plugins[lookupName];
+    const plugin = plugins[packageName];
     if (!plugin) {
       return null;
     }
 
     const result = clone(plugin);
     const versions = await this.getJenkinsPluginVersions();
-    const releases = versions[lookupName];
+    const releases = versions[packageName];
     result.releases = releases ? clone(releases) : [];
     return result;
   }

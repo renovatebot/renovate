@@ -38,9 +38,12 @@ export function analyseTerraformModule(dep: PackageDependency): void {
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
 
   if (githubRefMatch) {
-    dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
+    dep.packageName = githubRefMatch.groups.project.replace(
+      regEx(/\.git$/),
+      ''
+    );
     dep.depType = 'module';
-    dep.depName = 'github.com/' + dep.lookupName;
+    dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = GithubTagsDatasource.id;
   } else if (bitbucketRefMatch) {
@@ -49,7 +52,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       bitbucketRefMatch.groups.workspace +
       '/' +
       bitbucketRefMatch.groups.project;
-    dep.lookupName = dep.depName;
+    dep.packageName = dep.depName;
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
   } else if (gitTagsRefMatch) {
@@ -58,10 +61,10 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       logger.debug('Terraform module contains subdirectory');
       dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
       const tempLookupName = gitTagsRefMatch.groups.url.split('//');
-      dep.lookupName = tempLookupName[0] + '//' + tempLookupName[1];
+      dep.packageName = tempLookupName[0] + '//' + tempLookupName[1];
     } else {
       dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-      dep.lookupName = gitTagsRefMatch.groups.url;
+      dep.packageName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;

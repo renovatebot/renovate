@@ -446,7 +446,7 @@ describe('modules/manager/npm/extract/index', () => {
             datasource: 'github-tags',
             depName: 'node',
             depType: 'volta',
-            lookupName: 'nodejs/node',
+            packageName: 'nodejs/node',
             prettyDepType: 'volta',
             versioning: 'node',
           },
@@ -596,8 +596,8 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          { lookupName: 'foo' },
-          { lookupName: '@foo/bar' },
+          { packageName: 'foo' },
+          { packageName: '@foo/bar' },
           { depName: 'c' },
         ],
       });
@@ -641,7 +641,7 @@ describe('modules/manager/npm/extract/index', () => {
             datasource: 'npm',
             depName: 'yarn',
             depType: 'packageManager',
-            lookupName: '@yarnpkg/cli',
+            packageName: '@yarnpkg/cli',
             prettyDepType: 'packageManager',
           },
         ],

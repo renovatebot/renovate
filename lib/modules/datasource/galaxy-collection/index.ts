@@ -23,13 +23,13 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const [namespace, projectName] = lookupName.split('.');
+    const [namespace, projectName] = packageName.split('.');
 
     const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
@@ -42,7 +42,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     if (!baseUrlResponse || !baseUrlResponse.body) {
       logger.warn(
-        { dependency: lookupName },
+        { dependency: packageName },
         `Received invalid data from ${baseUrl}`
       );
       return null;
@@ -100,7 +100,7 @@ export class GalaxyCollectionDatasource extends Datasource {
               return release;
             } catch (err) {
               logger.warn(
-                { dependency: lookupName, err },
+                { dependency: packageName, err },
                 `Received invalid data from ${versionsUrl}${basicRelease.version}/`
               );
               return null;

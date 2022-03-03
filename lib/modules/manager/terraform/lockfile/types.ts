@@ -1,5 +1,5 @@
 export interface ProviderLock {
-  lookupName: string;
+  packageName: string;
   registryUrl: string;
   version: string;
   constraints: string;

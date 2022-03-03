@@ -14,18 +14,18 @@ export enum GoproxyFallback {
 
 export function getSourceUrl(dataSource?: DataSource): string | undefined {
   if (dataSource) {
-    const { datasource, registryUrl, lookupName } = dataSource;
+    const { datasource, registryUrl, packageName } = dataSource;
 
     if (datasource === GithubTagsDatasource.id) {
-      return githubSourceUrl(lookupName, registryUrl);
+      return githubSourceUrl(packageName, registryUrl);
     }
 
     if (datasource === GitlabTagsDatasource.id) {
-      return gitlabSourceUrl(lookupName, registryUrl);
+      return gitlabSourceUrl(packageName, registryUrl);
     }
 
     if (datasource === BitBucketTagsDatasource.id) {
-      return BitBucketTagsDatasource.getSourceUrl(lookupName, registryUrl);
+      return BitBucketTagsDatasource.getSourceUrl(packageName, registryUrl);
     }
   }
 
