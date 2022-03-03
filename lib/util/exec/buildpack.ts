@@ -1,7 +1,7 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
-import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
+import { getPkgReleases } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
 import { id as npmVersioningId } from '../../modules/versioning/npm';

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
-import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
+import type { Release } from '../../../../modules/datasource';
 import type { VersioningApi } from '../../../../modules/versioning';
 import { getElapsedDays } from '../../../../util/date';
 import {

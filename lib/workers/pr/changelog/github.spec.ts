@@ -5,7 +5,7 @@ import * as hostRules from '../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../types';
 import { ChangeLogError, getChangeLogJSON } from '.';
 
-jest.mock('../../../datasource/npm');
+jest.mock('../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
   branchName: undefined,

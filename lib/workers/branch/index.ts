@@ -14,7 +14,7 @@ import {
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
 import { logger, removeMeta } from '../../logger';
-import { getAdditionalFiles } from '../../manager/npm/post-update';
+import { getAdditionalFiles } from '../../modules/manager/npm/post-update';
 import { Pr, platform } from '../../modules/platform';
 import {
   ensureComment,

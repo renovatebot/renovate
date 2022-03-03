@@ -1,5 +1,5 @@
 import { PlatformId } from '../../constants';
-import { getManagers } from '../../manager';
+import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import * as dockerVersioning from '../../modules/versioning/docker';

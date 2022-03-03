@@ -1,5 +1,5 @@
 import { getConfig, mocked } from '../../../../../test/util';
-import type { Release } from '../../../../datasource';
+import type { Release } from '../../../../modules/datasource';
 import * as allVersioning from '../../../../modules/versioning';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';

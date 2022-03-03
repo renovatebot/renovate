@@ -14,8 +14,8 @@ import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
 } from '../../../constants/error-messages';
-import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
+import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';

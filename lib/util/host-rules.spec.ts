@@ -1,5 +1,5 @@
 import { PlatformId } from '../constants';
-import { NugetDatasource } from '../datasource/nuget';
+import { NugetDatasource } from '../modules/datasource/nuget';
 import { add, clear, find, findAll, getAll, hosts } from './host-rules';
 
 describe('util/host-rules', () => {

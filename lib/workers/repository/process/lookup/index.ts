@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
 import {
   Release,
   getDatasourceList,
@@ -10,9 +11,8 @@ import {
   getPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
-} from '../../../../datasource';
-import { logger } from '../../../../logger';
-import { getRangeStrategy } from '../../../../manager';
+} from '../../../../modules/datasource';
+import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';

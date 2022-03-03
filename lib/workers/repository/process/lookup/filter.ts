@@ -1,7 +1,7 @@
 import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
+import type { Release } from '../../../../modules/datasource/types';
 import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';

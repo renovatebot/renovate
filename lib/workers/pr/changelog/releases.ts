@@ -1,9 +1,9 @@
+import { logger } from '../../../logger';
 import {
   Release,
   getPkgReleases,
   isGetPkgReleasesConfig,
-} from '../../../datasource';
-import { logger } from '../../../logger';
+} from '../../../modules/datasource';
 import { VersioningApi, get } from '../../../modules/versioning';
 import type { BranchUpgradeConfig } from '../../types';
 

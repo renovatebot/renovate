@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
+import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';

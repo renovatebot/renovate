@@ -6,13 +6,13 @@ import type {
   RenovateSharedConfig,
   ValidationMessage,
 } from '../config/types';
-import type { Release } from '../datasource/types';
+import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
   LookupUpdate,
   PackageDependency,
   PackageFile,
-} from '../manager/types';
+} from '../modules/manager/types';
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence';

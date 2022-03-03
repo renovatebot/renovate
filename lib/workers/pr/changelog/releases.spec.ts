@@ -1,5 +1,5 @@
 import { partial } from '../../../../test/util';
-import * as datasource from '../../../datasource';
+import * as datasource from '../../../modules/datasource';
 import * as dockerVersioning from '../../../modules/versioning/docker';
 import * as npmVersioning from '../../../modules/versioning/npm';
 import type { BranchUpgradeConfig } from '../../types';

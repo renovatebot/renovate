@@ -1,7 +1,7 @@
 import URL from 'url';
 import { PlatformId } from '../../../constants';
-import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
+import type { Release } from '../../../modules/datasource/types';
 import * as allVersioning from '../../../modules/versioning';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';

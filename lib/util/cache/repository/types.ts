@@ -1,4 +1,4 @@
-import type { PackageFile } from '../../../manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { GitConflictsCache } from '../../git/types';
 

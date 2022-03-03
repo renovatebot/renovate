@@ -7,7 +7,7 @@ import * as _npm from '../npm';
 import * as internal from '.';
 
 jest.mock('./npm');
-jest.mock('../../../datasource/npm');
+jest.mock('../../../modules/datasource/npm');
 
 const npm = mocked(_npm);
 npm.getPreset = jest.fn((_) => null);

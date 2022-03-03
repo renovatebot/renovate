@@ -1,6 +1,6 @@
-import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import type { LookupUpdate } from '../../../../manager/types';
+import type { Release } from '../../../../modules/datasource/types';
+import type { LookupUpdate } from '../../../../modules/manager/types';
 import type { VersioningApi } from '../../../../modules/versioning';
 import type { RollbackConfig } from './types';
 

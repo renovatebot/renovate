@@ -4,7 +4,7 @@ This document describes the steps to take if you want to add a new language/pack
 
 ## Code structure
 
-Each package manager lives under `lib/manager/*`, and is often tightly coupled to datasources under `lib/datasource/*`.
+Each package manager lives under `lib/modules/manager/*`, and is often tightly coupled to datasources under `lib/modules/datasource/*`.
 
 Versioning logic (e.g. SemVer, PEP 440) lives under `lib/modules/versioning/*`.
 

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';

@@ -6,7 +6,7 @@ import * as hostRules from '../../../util/host-rules';
 import type { BranchConfig } from '../../types';
 import { ChangeLogError, getChangeLogJSON } from '.';
 
-jest.mock('../../../datasource/npm');
+jest.mock('../../../modules/datasource/npm');
 
 const githubApiHost = 'https://api.github.com';
 
