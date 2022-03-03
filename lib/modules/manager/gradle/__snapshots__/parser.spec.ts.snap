@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/gradle/shallow/parser calculations parses fixture from "gradle" manager 1`] = `
+exports[`modules/manager/gradle/parser calculations parses fixture from "gradle" manager 1`] = `
 Array [
   Object {
     "currentValue": "1.5.2.RELEASE",

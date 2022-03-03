@@ -171,6 +171,7 @@
     "lib/modules/manager/gradle/index.ts",
     "lib/modules/manager/gradle/parser.ts",
     "lib/modules/manager/gradle/update.ts",
+    "lib/modules/manager/gradle/__testutil__/gradle.ts",
     "lib/modules/manager/helm-requirements/extract.ts",
     "lib/modules/manager/helm-requirements/index.ts",
     "lib/modules/manager/helm-values/extract.ts",

@@ -2,7 +2,7 @@ import { fs, loadFixture } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles } from '.';
 
-jest.mock('../../../../util/fs');
+jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/gradle/shallow/extract extracts from cross-referenced files 1`] = `
+exports[`modules/manager/gradle/extract extracts from cross-referenced files 1`] = `
 Array [
   Object {
     "datasource": "maven",

@@ -39,7 +39,7 @@ function determineJavaVersion(): number {
     } catch (e) {
       error = e;
     }
-    if (javaVersionCommand.error) {
+    if (javaVersionCommand?.error) {
       error = javaVersionCommand.error;
     }
     if (error) {
