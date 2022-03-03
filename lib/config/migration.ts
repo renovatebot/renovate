@@ -447,20 +447,6 @@ export function migrateConfig(
         }
       }
     }
-    if (is.array(migratedConfig.regexManagers)) {
-      const renameMap = {
-        lookupNameTemplate: 'packageNameTemplate',
-      };
-      for (const manager of migratedConfig.regexManagers) {
-        for (const [oldKey, ruleVal] of Object.entries(manager)) {
-          const newKey = renameMap[oldKey];
-          if (newKey) {
-            manager[newKey] = ruleVal;
-            delete manager[oldKey];
-          }
-        }
-      }
-    }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;
