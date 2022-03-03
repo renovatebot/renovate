@@ -4,7 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { exec } from '../../../../util/exec';
 import { extraEnv } from '../../gradle-wrapper/utils';
-import { ifSystemSupportsGradle } from './__testutil__/gradle';
+import { ifSystemSupportsGradle } from '../__testutil__/gradle';
 import {
   GRADLE_DEPENDENCY_REPORT_FILENAME,
   createRenovateGradlePlugin,

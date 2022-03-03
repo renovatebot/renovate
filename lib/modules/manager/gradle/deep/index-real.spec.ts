@@ -3,7 +3,7 @@ import tmp, { DirectoryResult } from 'tmp-promise';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import type { ExtractConfig } from '../../types';
-import { ifSystemSupportsGradle } from './__testutil__/gradle';
+import { ifSystemSupportsGradle } from '../__testutil__/gradle';
 import * as manager from '.';
 
 const fixtures = 'lib/modules/manager/gradle/deep/__fixtures__';
