@@ -51,6 +51,32 @@ Object {
 }
 `;
 
+exports[`config/migration it migrates regexManagers 1`] = `
+Object {
+  "regexManagers": Array [
+    Object {
+      "fileMatch": Array [
+        "(^|/|\\\\.)Dockerfile$",
+        "(^|/)Dockerfile\\\\.[^/]*$",
+      ],
+      "matchStrings": Array [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<?packageName>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
+      ],
+    },
+    Object {
+      "fileMatch": Array [
+        "(^|/|\\\\.)Dockerfile$",
+        "(^|/)Dockerfile\\\\.[^/]*$",
+      ],
+      "matchStrings": Array [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<holder>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
+      ],
+      "packageNameTemplate": "{{{holder}}}",
+    },
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 Object {
   "schedule": "after 5:00pm on wednesday and thursday",

@@ -380,64 +380,64 @@ Array [
     "currentValue": "3.2.1",
     "datasource": "git-tags",
     "depName": "g",
-    "lookupName": "g.git",
     "managerData": Object {
       "lineNumber": 9,
     },
+    "packageName": "g.git",
   },
   Object {
     "currentValue": "0.0.1",
     "datasource": "github-tags",
     "depName": "h",
-    "lookupName": "foo/foo",
     "managerData": Object {
       "lineNumber": 10,
     },
+    "packageName": "foo/foo",
   },
   Object {
     "currentValue": "0.0.1",
     "datasource": "github-tags",
     "depName": "i",
-    "lookupName": "foo/foo",
     "managerData": Object {
       "lineNumber": 11,
     },
+    "packageName": "foo/foo",
   },
   Object {
     "currentValue": "0.1.0",
     "datasource": "gitlab-tags",
     "depName": "j",
-    "lookupName": "bar/bar",
     "managerData": Object {
       "lineNumber": 12,
     },
+    "packageName": "bar/bar",
   },
   Object {
     "currentValue": "0.1.0",
     "datasource": "gitlab-tags",
     "depName": "k",
-    "lookupName": "bar/bar",
     "managerData": Object {
       "lineNumber": 13,
     },
+    "packageName": "bar/bar",
   },
   Object {
     "currentValue": "1.0.0",
     "datasource": "git-tags",
     "depName": "l",
-    "lookupName": "https://example.com/baz/baz.git",
     "managerData": Object {
       "lineNumber": 14,
     },
+    "packageName": "https://example.com/baz/baz.git",
   },
   Object {
     "currentValue": "1.0.0",
     "datasource": "git-tags",
     "depName": "m",
-    "lookupName": "git@example.com:baz/baz.git",
     "managerData": Object {
       "lineNumber": 15,
     },
+    "packageName": "git@example.com:baz/baz.git",
   },
 ]
 `;

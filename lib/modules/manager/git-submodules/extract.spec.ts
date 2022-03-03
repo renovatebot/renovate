@@ -57,7 +57,7 @@ describe('modules/manager/git-submodules/extract', () => {
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', {});
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[2].lookupName).toBe(
+      expect(res.deps[2].packageName).toBe(
         'https://github.com/renovatebot/renovate-config.git'
       );
     });

@@ -79,7 +79,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           };
           if (repo) {
             dep.datasource = GithubTagsDatasource.id;
-            dep.lookupName = repo;
+            dep.packageName = repo;
           }
           deps.push(dep);
         }

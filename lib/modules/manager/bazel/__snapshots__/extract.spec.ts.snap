@@ -8,7 +8,6 @@ Array [
     "datasource": "docker",
     "depName": "hasura",
     "depType": "container_pull",
-    "lookupName": "hasura/graphql-engine",
     "managerData": Object {
       "def": "container_pull(
           name=\\"hasura\\",
@@ -19,6 +18,7 @@ Array [
           tag=\\"v1.0.0-alpha31.cli-migrations\\"
         )",
     },
+    "packageName": "hasura/graphql-engine",
     "registryUrls": Array [
       "index.docker.io",
     ],
@@ -34,7 +34,6 @@ Array [
     "datasource": "github-tags",
     "depName": "subpar",
     "depType": "http_archive",
-    "lookupName": "google/subpar",
     "managerData": Object {
       "def": "http_archive(
             name = \\"subpar\\",
@@ -44,6 +43,7 @@ Array [
             urls = [\\"https://github.com/google/subpar/archive/0356bef3fbbabec5f0e196ecfacdeb6db62d48c0.tar.gz\\"],
         )",
     },
+    "packageName": "google/subpar",
     "repo": "google/subpar",
   },
   Object {
@@ -51,7 +51,6 @@ Array [
     "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
-    "lookupName": "bazelbuild/bazel-skylib",
     "managerData": Object {
       "def": "http_archive(
             name = \\"bazel_skylib\\",
@@ -60,6 +59,7 @@ Array [
             urls = [\\"https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz\\"],
         )",
     },
+    "packageName": "bazelbuild/bazel-skylib",
     "repo": "bazelbuild/bazel-skylib",
   },
 ]
@@ -72,7 +72,6 @@ Array [
     "datasource": "github-tags",
     "depName": "GBDeviceInfo",
     "depType": "http_archive",
-    "lookupName": "lmirosevic/GBDeviceInfo",
     "managerData": Object {
       "def": "http_archive(
     name = \\"GBDeviceInfo\\",
@@ -81,6 +80,7 @@ Array [
     strip_prefix = \\"GBDeviceInfo-6.3.0/GBDeviceInfo\\"
 )",
     },
+    "packageName": "lmirosevic/GBDeviceInfo",
     "repo": "lmirosevic/GBDeviceInfo",
   },
   Object {
@@ -88,7 +88,6 @@ Array [
     "datasource": "github-tags",
     "depName": "com_github_nelhage_rules_boost",
     "depType": "http_archive",
-    "lookupName": "nelhage/rules_boost",
     "managerData": Object {
       "def": "http_archive(
     name = \\"com_github_nelhage_rules_boost\\",
@@ -97,6 +96,7 @@ Array [
     strip_prefix = \\"rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3\\",
 )",
     },
+    "packageName": "nelhage/rules_boost",
     "repo": "nelhage/rules_boost",
   },
   Object {
@@ -104,7 +104,6 @@ Array [
     "datasource": "github-tags",
     "depName": "GBDeviceInfo-zip",
     "depType": "http_archive",
-    "lookupName": "lmirosevic/GBDeviceInfo",
     "managerData": Object {
       "def": "http_archive(
     name = \\"GBDeviceInfo-zip\\",
@@ -113,6 +112,7 @@ Array [
     strip_prefix = \\"GBDeviceInfo-6.3.0/GBDeviceInfo\\"
 )",
     },
+    "packageName": "lmirosevic/GBDeviceInfo",
     "repo": "lmirosevic/GBDeviceInfo",
   },
   Object {
@@ -120,7 +120,6 @@ Array [
     "datasource": "github-tags",
     "depName": "com_github_nelhage_rules_boost-zip",
     "depType": "http_archive",
-    "lookupName": "nelhage/rules_boost",
     "managerData": Object {
       "def": "http_archive(
     name = \\"com_github_nelhage_rules_boost-zip\\",
@@ -129,6 +128,7 @@ Array [
     strip_prefix = \\"rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3\\",
 )",
     },
+    "packageName": "nelhage/rules_boost",
     "repo": "nelhage/rules_boost",
   },
 ]
@@ -141,7 +141,6 @@ Array [
     "datasource": "go",
     "depName": "com_github_bitly_go-nsq",
     "depType": "go_repository",
-    "lookupName": "github.com/bitly/go-nsq",
     "managerData": Object {
       "def": "go_repository(
     name = \\"com_github_bitly_go-nsq\\",
@@ -149,6 +148,7 @@ Array [
     tag = \\"v1.0.5\\"
 )",
     },
+    "packageName": "github.com/bitly/go-nsq",
   },
   Object {
     "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
@@ -158,7 +158,6 @@ Array [
     "depName": "com_github_google_uuid",
     "depType": "go_repository",
     "digestOneAndOnly": true,
-    "lookupName": "github.com/google/uuid",
     "managerData": Object {
       "def": "go_repository(
    name = \\"com_github_google_uuid\\",
@@ -166,13 +165,13 @@ Array [
    commit = \\"dec09d789f3dba190787f8b4454c7d3c936fed9e\\"
 )",
     },
+    "packageName": "github.com/google/uuid",
   },
   Object {
     "currentValue": "v2",
     "datasource": "go",
     "depName": "com_gopkgin_mgo_v2",
     "depType": "go_repository",
-    "lookupName": "gopkg.in/mgo.v2",
     "managerData": Object {
       "def": "go_repository(
     name = \\"com_gopkgin_mgo_v2\\",
@@ -180,13 +179,13 @@ Array [
     tag = \\"v2\\"
 )",
     },
+    "packageName": "gopkg.in/mgo.v2",
   },
   Object {
     "currentValue": "0.3.1",
     "datasource": "github-releases",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_nodejs",
     "managerData": Object {
       "def": "git_repository(
     name = \\"build_bazel_rules_nodejs\\",
@@ -194,13 +193,13 @@ Array [
     tag = \\"0.3.1\\",
 )",
     },
+    "packageName": "bazelbuild/rules_nodejs",
   },
   Object {
     "currentValue": "0.6.1",
     "datasource": "github-releases",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_typescript",
     "managerData": Object {
       "def": "git_repository(
     name = \\"build_bazel_rules_typescript\\",
@@ -208,13 +207,13 @@ Array [
     tag = \\"0.6.1\\",
 )",
     },
+    "packageName": "bazelbuild/rules_typescript",
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
-    "lookupName": "GoogleContainerTools/distroless",
     "managerData": Object {
       "def": "http_archive(
     name=\\"distroless\\",
@@ -223,6 +222,7 @@ Array [
     urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
 )",
     },
+    "packageName": "GoogleContainerTools/distroless",
     "repo": "GoogleContainerTools/distroless",
   },
   Object {
@@ -230,7 +230,6 @@ Array [
     "datasource": "github-tags",
     "depName": "bazel_toolchains",
     "depType": "http_archive",
-    "lookupName": "bazelbuild/bazel-toolchains",
     "managerData": Object {
       "def": "http_archive(
   name = \\"bazel_toolchains\\",
@@ -242,6 +241,7 @@ Array [
     ],
 )",
     },
+    "packageName": "bazelbuild/bazel-toolchains",
     "repo": "bazelbuild/bazel-toolchains",
   },
   Object {
@@ -249,7 +249,6 @@ Array [
     "datasource": "github-releases",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_sass",
     "managerData": Object {
       "def": "git_repository(
     name = \\"io_bazel_rules_sass\\",
@@ -257,13 +256,13 @@ Array [
     tag = \\"0.0.3\\",
 )",
     },
+    "packageName": "bazelbuild/rules_sass",
   },
   Object {
     "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
     "datasource": "github-releases",
     "depName": "com_github_bazelbuild_buildtools",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/buildtools",
     "managerData": Object {
       "def": "git_repository(
     name = \\"com_github_bazelbuild_buildtools\\",
@@ -272,13 +271,13 @@ Array [
     commit = \\"b3b620e8bcff18ed3378cd3f35ebeb7016d71f71\\",
 )",
     },
+    "packageName": "bazelbuild/buildtools",
   },
   Object {
     "currentValue": "0.7.1",
     "datasource": "github-releases",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
-    "lookupName": "bazelbuild/rules_go",
     "managerData": Object {
       "def": "http_archive(
     name = \\"io_bazel_rules_go\\",
@@ -286,6 +285,7 @@ Array [
     sha256 = \\"341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c\\",
 )",
     },
+    "packageName": "bazelbuild/rules_go",
     "repo": "bazelbuild/rules_go",
   },
   Object {
@@ -293,7 +293,6 @@ Array [
     "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
-    "lookupName": "bazelbuild/bazel-skylib",
     "managerData": Object {
       "def": "http_archive(
     name = \\"bazel_skylib\\",
@@ -305,6 +304,7 @@ Array [
     ],
 )",
     },
+    "packageName": "bazelbuild/bazel-skylib",
     "repo": "bazelbuild/bazel-skylib",
   },
   Object {
@@ -312,7 +312,6 @@ Array [
     "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
-    "lookupName": "GoogleContainerTools/distroless",
     "managerData": Object {
       "def": "http_archive(
     name=\\"distroless\\",
@@ -321,6 +320,7 @@ Array [
     urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
 )",
     },
+    "packageName": "GoogleContainerTools/distroless",
     "repo": "GoogleContainerTools/distroless",
   },
   Object {
@@ -329,7 +329,6 @@ Array [
     "datasource": "docker",
     "depName": "py3_image_base",
     "depType": "container_pull",
-    "lookupName": "distroless/python3-debian10",
     "managerData": Object {
       "def": "container_pull(
     name = \\"py3_image_base\\",
@@ -339,6 +338,7 @@ Array [
     tag = \\"latest\\",
 )",
     },
+    "packageName": "distroless/python3-debian10",
     "registryUrls": Array [
       "gcr.io",
     ],
@@ -349,7 +349,6 @@ Array [
     "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_file",
-    "lookupName": "GoogleContainerTools/distroless",
     "managerData": Object {
       "def": "http_file(
     name=\\"distroless\\",
@@ -358,6 +357,7 @@ Array [
     urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
 )",
     },
+    "packageName": "GoogleContainerTools/distroless",
     "repo": "GoogleContainerTools/distroless",
   },
 ]
@@ -370,7 +370,6 @@ Array [
     "datasource": "github-tags",
     "depName": "com_github_nelhage_rules_boost",
     "depType": "http_archive",
-    "lookupName": "nelhage/rules_boost",
     "managerData": Object {
       "def": "http_archive(
     name = \\"com_github_nelhage_rules_boost\\",
@@ -379,6 +378,7 @@ Array [
     strip_prefix = \\"rules_boost-98495a618246683c9058dd87c2c78a2c06087999\\",
 )",
     },
+    "packageName": "nelhage/rules_boost",
     "repo": "nelhage/rules_boost",
   },
 ]

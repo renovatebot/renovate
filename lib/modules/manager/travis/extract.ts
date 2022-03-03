@@ -20,7 +20,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     deps = doc.node_js.map((currentValue) => ({
       depName: 'node',
       datasource: GithubTagsDatasource.id,
-      lookupName: 'nodejs/node',
+      packageName: 'nodejs/node',
       currentValue: currentValue.toString(),
     }));
   }
@@ -44,7 +44,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           deps.push({
             depName: 'node',
             datasource: GithubTagsDatasource.id,
-            lookupName: 'nodejs/node',
+            packageName: 'nodejs/node',
             currentValue: currentValue.toString(),
           });
         });
@@ -52,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push({
           depName: 'node',
           datasource: GithubTagsDatasource.id,
-          lookupName: 'nodejs/node',
+          packageName: 'nodejs/node',
           currentValue: item.node_js.toString(),
         });
       }

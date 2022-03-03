@@ -81,7 +81,7 @@ export async function confirmIfDepUpdated(
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {
-  return deps.map((dep) => `${dep.depName}${dep.lookupName}`).join(',');
+  return deps.map((dep) => `${dep.depName}${dep.packageName}`).join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(

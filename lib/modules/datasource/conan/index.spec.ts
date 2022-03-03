@@ -36,7 +36,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'fakepackage/1.2@_/_',
+          packageName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
     });
@@ -50,7 +50,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'fakepackage/1.2@_/_',
+          packageName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
     });
@@ -65,7 +65,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'poco/1.2@_/_',
+          packageName: 'poco/1.2@_/_',
         })
       ).toBeNull();
     });
@@ -79,7 +79,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'fakepackage/1.2@_/_',
+          packageName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
     });
@@ -93,7 +93,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'poco/1.2@_/_',
+          packageName: 'poco/1.2@_/_',
         })
       ).toEqual({
         registryUrl: 'https://not.conan.io',
@@ -129,7 +129,7 @@ describe('modules/datasource/conan/index', () => {
           ...config,
           registryUrls: [defaultRegistryUrl],
           depName: 'poco',
-          lookupName: 'poco/1.2@_/_',
+          packageName: 'poco/1.2@_/_',
         })
       ).toEqual({
         registryUrl: 'https://center.conan.io',
@@ -164,7 +164,7 @@ describe('modules/datasource/conan/index', () => {
           ...config,
           registryUrls: [defaultRegistryUrl],
           depName: 'poco',
-          lookupName: 'poco/1.2@foo/bar',
+          packageName: 'poco/1.2@foo/bar',
         })
       ).toBeNull();
     });
@@ -178,7 +178,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'poco/1.2@un/matched',
+          packageName: 'poco/1.2@un/matched',
         })
       ).toBeNull();
     });
@@ -192,7 +192,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'bad/1.2@_/_',
+          packageName: 'bad/1.2@_/_',
         })
       ).toEqual({
         registryUrl: 'https://not.conan.io',
@@ -214,7 +214,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'poco/1.2@_/_',
+          packageName: 'poco/1.2@_/_',
         })
       ).toBeNull();
     });
@@ -229,7 +229,7 @@ describe('modules/datasource/conan/index', () => {
       expect(
         await getPkgReleases({
           ...config,
-          lookupName: 'poco/1.2@_/_',
+          packageName: 'poco/1.2@_/_',
         })
       ).toBeNull();
     });

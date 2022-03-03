@@ -6,7 +6,7 @@ export function extractPackageFile(content: string): PackageFile {
     depName: 'node',
     currentValue: content.trim(),
     datasource: GithubTagsDatasource.id,
-    lookupName: 'nodejs/node',
+    packageName: 'nodejs/node',
   };
   return { deps: [dep] };
 }

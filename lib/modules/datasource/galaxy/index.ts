@@ -18,13 +18,14 @@ export class GalaxyDatasource extends Datasource {
 
   @cache({
     namespace: 'datasource-galaxy',
-    key: (getReleasesConfig: GetReleasesConfig) => getReleasesConfig.lookupName,
+    key: (getReleasesConfig: GetReleasesConfig) =>
+      getReleasesConfig.packageName,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const lookUp = lookupName.split('.');
+    const lookUp = packageName.split('.');
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
@@ -47,7 +48,7 @@ export class GalaxyDatasource extends Datasource {
 
     if (!body) {
       logger.warn(
-        { dependency: lookupName },
+        { dependency: packageName },
         `Received invalid data from ${galaxyAPIUrl}`
       );
       return null;
@@ -56,14 +57,14 @@ export class GalaxyDatasource extends Datasource {
     // istanbul ignore if
     if (body.results.length > 1) {
       logger.warn(
-        { dependency: lookupName },
+        { dependency: packageName },
         `Received multiple results from ${galaxyAPIUrl}`
       );
       return null;
     }
     if (body.results.length === 0) {
       logger.info(
-        { dependency: lookupName },
+        { dependency: packageName },
         `Received no results from ${galaxyAPIUrl}`
       );
       return null;

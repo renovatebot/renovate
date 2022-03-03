@@ -66,7 +66,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
       return {
         datasource,
         depName,
-        lookupName: `${account}/${repo.replace(regEx(/\.git$/), '')}`,
+        packageName: `${account}/${repo.replace(regEx(/\.git$/), '')}`,
         currentValue: tag,
       };
     }
@@ -75,7 +75,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   return {
     datasource: GitTagsDatasource.id,
     depName,
-    lookupName: git,
+    packageName: git,
     currentValue: tag,
   };
 }

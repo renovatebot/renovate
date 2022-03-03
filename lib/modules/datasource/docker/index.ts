@@ -223,19 +223,19 @@ async function getECRAuthToken(
 }
 
 export function getRegistryRepository(
-  lookupName: string,
+  packageName: string,
   registryUrl: string
 ): RegistryRepository {
   if (registryUrl !== DOCKER_HUB) {
     const registryEndingWithSlash = ensureTrailingSlash(
       registryUrl.replace(regEx(/^https?:\/\//), '')
     );
-    if (lookupName.startsWith(registryEndingWithSlash)) {
+    if (packageName.startsWith(registryEndingWithSlash)) {
       let registryHost = trimTrailingSlash(registryUrl);
       if (!regEx(/^https?:\/\//).test(registryHost)) {
         registryHost = `https://${registryHost}`;
       }
-      let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
+      let dockerRepository = packageName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
       const { origin, pathname } = parseUrl(fullUrl);
       registryHost = origin;
@@ -247,7 +247,7 @@ export function getRegistryRepository(
     }
   }
   let registryHost: string;
-  const split = lookupName.split('/');
+  const split = packageName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registryHost] = split;
     split.shift();
@@ -744,11 +744,11 @@ export class DockerDatasource extends Datasource {
    *  - Return the digest as a string
    */
   override async getDigest(
-    { registryUrl, lookupName }: GetReleasesConfig,
+    { registryUrl, packageName }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
-      lookupName,
+      packageName,
       registryUrl
     );
     logger.debug(
@@ -799,7 +799,7 @@ export class DockerDatasource extends Datasource {
       logger.debug(
         {
           err,
-          lookupName,
+          packageName,
           newTag,
         },
         'Unknown Error looking up docker image digest'
@@ -822,11 +822,11 @@ export class DockerDatasource extends Datasource {
    * This function will filter only tags that contain a semver version
    */
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
-      lookupName,
+      packageName,
       registryUrl
     );
     const tags = await this.getTags(registryHost, dockerRepository);

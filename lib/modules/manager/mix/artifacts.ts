@@ -49,9 +49,9 @@ export async function updateArtifacts({
 
   const organizations = new Set<string>();
 
-  for (const { lookupName } of updatedDeps) {
-    if (lookupName) {
-      const [, organization] = lookupName.split(':');
+  for (const { packageName } of updatedDeps) {
+    if (packageName) {
+      const [, organization] = packageName.split(':');
 
       if (organization) {
         organizations.add(organization);

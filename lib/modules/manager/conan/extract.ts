@@ -54,12 +54,12 @@ export function extractPackageFile(content: string): PackageFile | null {
               userAndChannel = matches.groups.userChannel;
               replaceString = `${depName}/${currentValue}${userAndChannel}`;
             }
-            const lookupName = `${depName}/${currentValue}${userAndChannel}`;
+            const packageName = `${depName}/${currentValue}${userAndChannel}`;
 
             dep = {
               ...dep,
               depName,
-              lookupName,
+              packageName,
               currentValue,
               replaceString,
               depType,

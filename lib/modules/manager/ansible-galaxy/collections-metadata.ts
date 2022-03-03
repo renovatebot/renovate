@@ -20,7 +20,7 @@ export function extractCollectionsMetaDataFile(
         const dep: PackageDependency = {
           depType: 'galaxy-collection',
           datasource: GalaxyCollectionDatasource.id,
-          depName: galaxyRegExResult.groups.lookupName,
+          depName: galaxyRegExResult.groups.packageName,
           currentValue: galaxyRegExResult.groups.version,
         };
         deps.push(dep);

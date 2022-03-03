@@ -61,7 +61,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
 
   // generate Lock objects from slices
   const locks = contentSlices.map((slice) => {
-    let lookupName = '';
+    let packageName = '';
     let registryUrl = '';
     let version = '';
     let constraints = '';
@@ -88,7 +88,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
 
       const providerStartLineResult = providerStartLineRegex.exec(line);
       if (providerStartLineResult) {
-        lookupName = `${providerStartLineResult.groups.namespace}/${providerStartLineResult.groups.depName}`;
+        packageName = `${providerStartLineResult.groups.namespace}/${providerStartLineResult.groups.depName}`;
         registryUrl = providerStartLineResult.groups.registryUrl;
         return;
       }
@@ -108,7 +108,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
     });
 
     const lock: ProviderLock = {
-      lookupName,
+      packageName,
       registryUrl: `https://${registryUrl}`,
       version,
       constraints,

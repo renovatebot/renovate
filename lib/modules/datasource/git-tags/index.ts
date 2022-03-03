@@ -15,12 +15,12 @@ export class GitTagsDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GitTagsDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const rawRefs = await GitDatasource.getRawRefs({ lookupName }, this.id);
+    const rawRefs = await GitDatasource.getRawRefs({ packageName }, this.id);
 
     if (rawRefs === null) {
       return null;
@@ -33,7 +33,7 @@ export class GitTagsDatasource extends Datasource {
         newDigest: ref.hash,
       }));
 
-    const sourceUrl = lookupName
+    const sourceUrl = packageName
       .replace(regEx(/\.git$/), '')
       .replace(regEx(/\/$/), '');
 
@@ -46,10 +46,10 @@ export class GitTagsDatasource extends Datasource {
   }
 
   override async getDigest(
-    { lookupName }: DigestConfig,
+    { packageName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    const rawRefs = await GitDatasource.getRawRefs({ lookupName }, this.id);
+    const rawRefs = await GitDatasource.getRawRefs({ packageName }, this.id);
     const findValue = newValue || 'HEAD';
     const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
     if (ref) {

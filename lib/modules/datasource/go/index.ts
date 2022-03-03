@@ -22,7 +22,7 @@ export class GoDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
-    key: ({ lookupName }: Partial<DigestConfig>) => `${lookupName}-digest`,
+    key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return process.env.GOPROXY
@@ -42,13 +42,13 @@ export class GoDatasource extends Datasource {
    */
   @cache({
     namespace: GoDatasource.id,
-    key: ({ lookupName }: Partial<DigestConfig>) => `${lookupName}-digest`,
+    key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   override async getDigest(
-    { lookupName }: Partial<DigestConfig>,
+    { packageName }: Partial<DigestConfig>,
     value?: string
   ): Promise<string | null> {
-    const source = await BaseGoDatasource.getDatasource(lookupName);
+    const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
       return null;
     }

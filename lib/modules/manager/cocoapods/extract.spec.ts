@@ -23,17 +23,17 @@ describe('modules/manager/cocoapods/extract', () => {
         { depName: 'f', skipReason: 'git-dependency' },
         { depName: 'g', datasource: 'git-tags', currentValue: '3.2.1' },
         { depName: 'h', currentValue: '0.0.1', datasource: 'github-tags' },
-        { depName: 'i', lookupName: 'foo/foo', datasource: 'github-tags' },
-        { depName: 'j', lookupName: 'bar/bar', datasource: 'gitlab-tags' },
-        { depName: 'k', lookupName: 'bar/bar', datasource: 'gitlab-tags' },
+        { depName: 'i', packageName: 'foo/foo', datasource: 'github-tags' },
+        { depName: 'j', packageName: 'bar/bar', datasource: 'gitlab-tags' },
+        { depName: 'k', packageName: 'bar/bar', datasource: 'gitlab-tags' },
         {
           depName: 'l',
-          lookupName: 'https://example.com/baz/baz.git',
+          packageName: 'https://example.com/baz/baz.git',
           datasource: 'git-tags',
         },
         {
           depName: 'm',
-          lookupName: 'git@example.com:baz/baz.git',
+          packageName: 'git@example.com:baz/baz.git',
           datasource: 'git-tags',
         },
       ]);

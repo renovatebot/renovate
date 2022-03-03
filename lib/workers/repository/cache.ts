@@ -20,7 +20,7 @@ function generateBranchUpgradeCache(
   const {
     datasource,
     depName,
-    lookupName,
+    packageName,
     fixedVersion,
     currentVersion,
     newVersion,
@@ -31,7 +31,7 @@ function generateBranchUpgradeCache(
   return {
     datasource,
     depName,
-    lookupName,
+    packageName,
     fixedVersion,
     currentVersion,
     newVersion,

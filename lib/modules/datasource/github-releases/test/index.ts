@@ -4,7 +4,7 @@ import type { GithubRelease } from '../types';
 export class GitHubReleaseMocker {
   constructor(
     private readonly githubApiHost: string,
-    private readonly lookupName: string
+    private readonly packageName: string
   ) {}
 
   release(version: string): GithubRelease {
@@ -22,7 +22,7 @@ export class GitHubReleaseMocker {
       assets: [],
     } as GithubRelease;
     for (const assetFn of Object.keys(assets)) {
-      const assetPath = `/repos/${this.lookupName}/releases/download/${version}/${assetFn}`;
+      const assetPath = `/repos/${this.packageName}/releases/download/${version}/${assetFn}`;
       const assetData = assets[assetFn];
       releaseData.assets.push({
         name: assetFn,
@@ -37,7 +37,7 @@ export class GitHubReleaseMocker {
     }
     httpMock
       .scope(this.githubApiHost)
-      .get(`/repos/${this.lookupName}/releases/tags/${version}`)
+      .get(`/repos/${this.packageName}/releases/tags/${version}`)
       .optionally()
       .reply(200, releaseData);
     return releaseData;

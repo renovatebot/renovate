@@ -6,7 +6,7 @@ import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { HelmsmanDocument } from './types';
 
-const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<lookupName>[^/]*)$');
+const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
 function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
   const dep: PackageDependency = {
@@ -30,11 +30,11 @@ function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
     return dep;
   }
 
-  if (!is.nonEmptyString(regexResult.groups.lookupName)) {
+  if (!is.nonEmptyString(regexResult.groups.packageName)) {
     dep.skipReason = 'invalid-name';
     return dep;
   }
-  dep.lookupName = regexResult.groups.lookupName;
+  dep.packageName = regexResult.groups.packageName;
 
   const registryUrl = doc.helmRepos[regexResult.groups.registryRef];
   if (!is.nonEmptyString(registryUrl)) {

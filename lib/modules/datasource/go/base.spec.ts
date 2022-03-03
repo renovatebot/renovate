@@ -12,16 +12,16 @@ const hostRules = mocked(_hostRules);
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
     test.each`
-      module                     | datasource          | lookupName
+      module                     | datasource          | packageName
       ${'gopkg.in/foo'}          | ${'github-tags'}    | ${'go-foo/foo'}
       ${'gopkg.in/foo/bar'}      | ${'github-tags'}    | ${'foo/bar'}
       ${'github.com/foo/bar'}    | ${'github-tags'}    | ${'foo/bar'}
       ${'bitbucket.org/foo/bar'} | ${'bitbucket-tags'} | ${'foo/bar'}
     `(
-      '$module -> $datasource: $lookupName',
-      async ({ module, datasource, lookupName }) => {
+      '$module -> $datasource: $packageName',
+      async ({ module, datasource, packageName }) => {
         const res = await BaseGoDatasource.getDatasource(module);
-        expect(res).toMatchObject({ datasource, lookupName });
+        expect(res).toMatchObject({ datasource, packageName });
       }
     );
   });
@@ -91,7 +91,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GithubTagsDatasource.id,
-          lookupName: 'golang/text',
+          packageName: 'golang/text',
           registryUrl: 'https://github.com',
         });
       });
@@ -108,7 +108,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GithubTagsDatasource.id,
-          lookupName: 'example/module',
+          packageName: 'example/module',
           registryUrl: 'https://git.enterprise.com',
         });
       });
@@ -125,7 +125,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          lookupName: 'group/subgroup',
+          packageName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
       });
@@ -142,7 +142,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          lookupName: 'group/subgroup/private',
+          packageName: 'group/subgroup/private',
           registryUrl: 'https://gitlab.com',
         });
       });
@@ -161,7 +161,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          lookupName: 'golang/text',
+          packageName: 'golang/text',
           registryUrl: 'https://gitlab.com',
         });
       });
@@ -178,7 +178,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          lookupName: 'group/subgroup',
+          packageName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
       });
@@ -196,7 +196,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          lookupName: 'golang/myrepo',
+          packageName: 'golang/myrepo',
           registryUrl: 'https://my.custom.domain',
         });
       });
@@ -214,7 +214,7 @@ describe('modules/datasource/go/base', () => {
         expect(res).toEqual({
           datasource: 'github-tags',
           registryUrl: 'https://github.com',
-          lookupName: 'fyne-io/fyne',
+          packageName: 'fyne-io/fyne',
         });
       });
     });

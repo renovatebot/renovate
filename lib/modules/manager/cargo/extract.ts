@@ -27,7 +27,7 @@ function extractFromSection(
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     let registryUrls: string[] | undefined;
-    let lookupName: string | undefined;
+    let packageName: string | undefined;
 
     if (typeof currentValue !== 'string') {
       const version = currentValue.version;
@@ -35,7 +35,7 @@ function extractFromSection(
       const git = currentValue.git;
       const registryName = currentValue.registry;
 
-      lookupName = currentValue.package;
+      packageName = currentValue.package;
 
       if (version) {
         currentValue = version;
@@ -81,8 +81,8 @@ function extractFromSection(
     if (target) {
       dep.target = target;
     }
-    if (lookupName) {
-      dep.lookupName = lookupName;
+    if (packageName) {
+      dep.packageName = packageName;
     }
     deps.push(dep);
   });

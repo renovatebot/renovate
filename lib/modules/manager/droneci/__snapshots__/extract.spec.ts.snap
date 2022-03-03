@@ -12,13 +12,13 @@ Array [
     "replaceString": "elixir:1.8.1-alpine",
   },
   Object {
-    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
     "depType": "docker",
-    "lookupName": "amd64/node",
+    "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
   },
   Object {

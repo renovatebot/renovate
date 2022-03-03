@@ -22,7 +22,7 @@ export function extractRepository(
     datasource: GitTagsDatasource.id,
     depName: repository.name,
     depType: 'gitTags',
-    lookupName: `https://github.com/${repository.name}.git`,
+    packageName: `https://github.com/${repository.name}.git`,
     replaceString: repository.ref,
   };
 }

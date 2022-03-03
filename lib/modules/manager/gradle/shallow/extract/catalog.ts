@@ -184,7 +184,7 @@ export function parseCatalog(
     const dependency = {
       depType: 'plugin',
       depName,
-      lookupName: `${depName}:${depName}.gradle.plugin`,
+      packageName: `${depName}:${depName}.gradle.plugin`,
       registryUrls: ['https://plugins.gradle.org/m2/'],
       currentValue,
       commitMessageTopic: `plugin ${pluginName}`,

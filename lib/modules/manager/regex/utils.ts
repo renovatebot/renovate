@@ -6,7 +6,7 @@ import type { ExtractionTemplate } from './types';
 
 export const validMatchFields = [
   'depName',
-  'lookupName',
+  'packageName',
   'currentValue',
   'currentDigest',
   'datasource',

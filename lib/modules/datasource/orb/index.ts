@@ -5,8 +5,8 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { OrbRelease } from './types';
 
 const query = `
-query($lookupName: String!) {
-  orb(name: $lookupName) {
+query($packageName: String!) {
+  orb(name: $packageName) {
     name,
     homeUrl,
     versions {
@@ -30,10 +30,10 @@ export class OrbDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -43,7 +43,7 @@ export class OrbDatasource extends Datasource {
     const url = `${registryUrl}graphql-unstable`;
     const body = {
       query,
-      variables: { lookupName },
+      variables: { packageName },
     };
     const res: OrbRelease = (
       await this.http.postJson<{ data: { orb: OrbRelease } }>(url, {
@@ -51,13 +51,13 @@ export class OrbDatasource extends Datasource {
       })
     ).body.data.orb;
     if (!res) {
-      logger.debug({ lookupName }, 'Failed to look up orb');
+      logger.debug({ packageName }, 'Failed to look up orb');
       return null;
     }
     // Simplify response before caching and returning
     const homepage = res.homeUrl?.length
       ? res.homeUrl
-      : `https://circleci.com/developer/orbs/orb/${lookupName}`;
+      : `https://circleci.com/developer/orbs/orb/${packageName}`;
     const releases = res.versions.map(({ version, createdAt }) => ({
       version,
       releaseTimestamp: createdAt ?? null,

@@ -316,7 +316,7 @@ Array [
 ]
 `;
 
-exports[`modules/datasource/terraform-provider/index getReleases processes real data from lookupName 1`] = `
+exports[`modules/datasource/terraform-provider/index getReleases processes real data from packageName 1`] = `
 Object {
   "homepage": "https://registry.company.com/providers/hashicorp/azurerm",
   "registryUrl": "https://registry.company.com",
@@ -333,7 +333,7 @@ Object {
 }
 `;
 
-exports[`modules/datasource/terraform-provider/index getReleases processes real data from lookupName 2`] = `
+exports[`modules/datasource/terraform-provider/index getReleases processes real data from packageName 2`] = `
 Array [
   Object {
     "headers": Object {

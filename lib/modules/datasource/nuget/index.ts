@@ -23,18 +23,18 @@ export class NugetDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult> {
-    logger.trace(`nuget.getReleases(${lookupName})`);
+    logger.trace(`nuget.getReleases(${packageName})`);
     const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
     if (protocolVersion === 2) {
-      return v2.getReleases(this.http, feedUrl, lookupName);
+      return v2.getReleases(this.http, feedUrl, packageName);
     }
     if (protocolVersion === 3) {
       const queryUrl = await v3.getResourceUrl(this.http, feedUrl);
       if (queryUrl) {
-        return v3.getReleases(this.http, feedUrl, queryUrl, lookupName);
+        return v3.getReleases(this.http, feedUrl, queryUrl, packageName);
       }
     }
     return null;

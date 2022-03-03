@@ -95,14 +95,14 @@ Array [
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
     "depType": "Kustomization",
-    "lookupName": "https://moredhel/remote-kustomize.git",
+    "packageName": "https://moredhel/remote-kustomize.git",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
     "depType": "Kustomization",
-    "lookupName": "https://moredhel/remote-kustomize.git",
+    "packageName": "https://moredhel/remote-kustomize.git",
   },
 ]
 `;

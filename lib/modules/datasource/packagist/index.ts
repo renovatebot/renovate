@@ -33,11 +33,11 @@ export class PackagistDatasource extends Datasource {
   override readonly registryStrategy = 'hunt';
 
   public override getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult> {
-    logger.trace(`getReleases(${lookupName})`);
-    return this.packageLookup(registryUrl, lookupName);
+    logger.trace(`getReleases(${packageName})`);
+    return this.packageLookup(registryUrl, packageName);
   }
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not

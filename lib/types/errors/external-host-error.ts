@@ -5,7 +5,7 @@ export class ExternalHostError extends Error {
 
   err: Error;
 
-  lookupName?: string;
+  packageName?: string;
 
   reason?: string;
 

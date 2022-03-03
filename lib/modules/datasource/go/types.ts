@@ -3,7 +3,7 @@ import type { GoproxyFallback } from './common';
 export interface DataSource {
   datasource: string;
   registryUrl: string;
-  lookupName: string;
+  packageName: string;
 }
 
 export interface VersionInfo {

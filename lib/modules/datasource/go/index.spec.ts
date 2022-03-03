@@ -56,7 +56,7 @@ describe('modules/datasource/go/index', () => {
       getReleasesDirectMock.mockResolvedValue(expected);
 
       const res = await datasource.getReleases({
-        lookupName: 'golang.org/foo/bar',
+        packageName: 'golang.org/foo/bar',
       });
 
       expect(res).toBe(expected);
@@ -71,7 +71,7 @@ describe('modules/datasource/go/index', () => {
       process.env.GOPROXY = 'https://proxy.golang.org,direct';
 
       const res = await datasource.getReleases({
-        lookupName: 'golang.org/foo/bar',
+        packageName: 'golang.org/foo/bar',
       });
 
       expect(res).toBe(expected);
@@ -97,7 +97,7 @@ describe('modules/datasource/go/index', () => {
         .get('/y/text?go-get=1')
         .reply(200, '');
       const res = await datasource.getDigest(
-        { lookupName: 'golang.org/y/text' },
+        { packageName: 'golang.org/y/text' },
         null
       );
       expect(res).toBeNull();
@@ -109,7 +109,7 @@ describe('modules/datasource/go/index', () => {
         .get('/y/text?go-get=1')
         .reply(200, loadFixture('go-get-github.html'));
       const res = await datasource.getDigest(
-        { lookupName: 'golang.org/y/text' },
+        { packageName: 'golang.org/y/text' },
         null
       );
       expect(res).toBeNull();
@@ -122,7 +122,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, loadFixture('go-get-gitlab.html'));
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
-        { lookupName: 'gitlab.com/group/subgroup' },
+        { packageName: 'gitlab.com/group/subgroup' },
         null
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
@@ -135,7 +135,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, loadFixture('go-get-gitlab.html'));
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
-        { lookupName: 'gitlab.com/group/subgroup' },
+        { packageName: 'gitlab.com/group/subgroup' },
         branch
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
@@ -147,7 +147,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, loadFixture('go-get-github.html'));
       getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
-        { lookupName: 'golang.org/x/text' },
+        { packageName: 'golang.org/x/text' },
         null
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
@@ -157,7 +157,7 @@ describe('modules/datasource/go/index', () => {
       getDigestBitbucketMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
         {
-          lookupName: 'bitbucket.org/golang/text',
+          packageName: 'bitbucket.org/golang/text',
         },
         null
       );

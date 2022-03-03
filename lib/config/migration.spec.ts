@@ -669,6 +669,31 @@ describe('config/migration', () => {
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
+  it('it migrates regexManagers', () => {
+    const config: RenovateConfig = {
+      regexManagers: [
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+        },
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+          lookupNameTemplate: '{{{holder}}}',
+        } as any,
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
+  });
 
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {

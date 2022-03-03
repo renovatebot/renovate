@@ -510,7 +510,7 @@ Object {
       "depName": "awesome/vcs",
       "depType": "require",
       "lockedVersion": "1.1.0",
-      "lookupName": "https://my-vcs.example/my-vcs-repo",
+      "packageName": "https://my-vcs.example/my-vcs-repo",
     },
     Object {
       "currentValue": ">=7.0.2",
@@ -518,7 +518,7 @@ Object {
       "depName": "awesome/git",
       "depType": "require",
       "lockedVersion": "1.2.0",
-      "lookupName": "git@my-git.example:my-git-repo",
+      "packageName": "git@my-git.example:my-git-repo",
     },
   ],
   "lockFiles": Array [
@@ -585,14 +585,14 @@ Object {
       "datasource": "git-tags",
       "depName": "awesome/vcs",
       "depType": "require",
-      "lookupName": "https://my-vcs.example/my-vcs-repo",
+      "packageName": "https://my-vcs.example/my-vcs-repo",
     },
     Object {
       "currentValue": ">=7.0.2",
       "datasource": "git-tags",
       "depName": "awesome/git",
       "depType": "require",
-      "lookupName": "https://my-git.example/my-git-repo",
+      "packageName": "https://my-git.example/my-git-repo",
     },
   ],
   "registryUrls": Array [

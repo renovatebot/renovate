@@ -23,13 +23,13 @@ export class NpmDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
     npmrc,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (is.string(npmrc)) {
       setNpmrc(npmrc);
     }
-    const res = await getDependency(this.http, lookupName);
+    const res = await getDependency(this.http, packageName);
     if (res) {
       res.tags = res['dist-tags'];
       delete res['dist-tags'];

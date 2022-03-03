@@ -19,9 +19,9 @@ describe('modules/datasource/metadata', () => {
     };
 
     const datasource = PypiDatasource.id;
-    const lookupName = 'django';
+    const packageName = 'django';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       changelogUrl:
         'https://github.com/django/django/tree/master/docs/releases',
@@ -42,9 +42,9 @@ describe('modules/datasource/metadata', () => {
     };
 
     const datasource = PypiDatasource.id;
-    const lookupName = 'mkdocs';
+    const packageName = 'mkdocs';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://github.com/mkdocs/mkdocs',
     });
@@ -64,9 +64,9 @@ describe('modules/datasource/metadata', () => {
       ],
     };
     const datasource = PypiDatasource.id;
-    const lookupName = 'django-filter';
+    const packageName = 'django-filter';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://github.com/carltongibson/django-filter',
     });
@@ -86,9 +86,9 @@ describe('modules/datasource/metadata', () => {
       ],
     };
     const datasource = PypiDatasource.id;
-    const lookupName = 'django-filter';
+    const packageName = 'django-filter';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://github.com/some/repo',
     });
@@ -106,9 +106,9 @@ describe('modules/datasource/metadata', () => {
       ],
     };
     const datasource = NpmDatasource.id;
-    const lookupName = 'dropzone';
+    const packageName = 'dropzone';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://gitlab.com/meno/dropzone',
     });
@@ -125,9 +125,9 @@ describe('modules/datasource/metadata', () => {
       ],
     };
     const datasource = NpmDatasource.id;
-    const lookupName = 'dropzone';
+    const packageName = 'dropzone';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://gitlab-nope',
     });
@@ -144,9 +144,9 @@ describe('modules/datasource/metadata', () => {
       ],
     };
     const datasource = NpmDatasource.id;
-    const lookupName = 'dropzone';
+    const packageName = 'dropzone';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://nope-nope-nope',
     });
@@ -163,9 +163,9 @@ describe('modules/datasource/metadata', () => {
       ],
     };
     const datasource = NpmDatasource.id;
-    const lookupName = 'dropzone';
+    const packageName = 'dropzone';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep).not.toContainKey('sourceUrl');
     expect(dep).toMatchSnapshot();
   });
@@ -176,9 +176,9 @@ describe('modules/datasource/metadata', () => {
       releases: [{ version: '1.9.3' }],
     };
     const datasource = MavenDatasource.id;
-    const lookupName = 'io.mockk:mockk';
+    const packageName = 'io.mockk:mockk';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep.sourceUrl).toBe('https://github.com/mockk/mockk');
   });
 
@@ -189,9 +189,9 @@ describe('modules/datasource/metadata', () => {
       sourceUrl: undefined,
     };
     const datasource = MavenDatasource.id;
-    const lookupName = 'io.mockk:mockk';
+    const packageName = 'io.mockk:mockk';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep.sourceUrl).toBe('https://github.com/mockk/mockk');
     expect(dep.homepage).toBeUndefined();
   });
@@ -202,9 +202,9 @@ describe('modules/datasource/metadata', () => {
       releases: [{ version: '5.7.0' }],
     };
     const datasource = MavenDatasource.id;
-    const lookupName = 'dropzone';
+    const packageName = 'dropzone';
 
-    addMetaData(dep, datasource, lookupName);
+    addMetaData(dep, datasource, packageName);
     expect(dep.sourceUrl).toBe('https://gitlab.com/meno/dropzone');
   });
 

@@ -197,7 +197,7 @@ function parseDepExpr(
     groupOp === '%%' && scalaVersion
       ? `${resolveToken(rawArtifactId)}_${scalaVersion}`
       : resolveToken(rawArtifactId);
-  const lookupName = `${groupId}:${artifactId}`;
+  const packageName = `${groupId}:${artifactId}`;
   const currentValue = resolveToken(rawVersion);
 
   if (!depType && rawScope) {
@@ -206,7 +206,7 @@ function parseDepExpr(
 
   const result: PackageDependency = {
     depName,
-    lookupName,
+    packageName,
     currentValue,
   };
 
@@ -246,7 +246,7 @@ function parseSbtLine(
       dep = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        lookupName: 'org.scala-lang:scala-library',
+        packageName: 'org.scala-lang:scala-library',
         currentValue: rawScalaVersion,
         separateMinorPatch: true,
       };

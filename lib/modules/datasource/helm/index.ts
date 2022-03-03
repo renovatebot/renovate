@@ -86,7 +86,7 @@ export class HelmDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl: helmRepository,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -99,11 +99,11 @@ export class HelmDatasource extends Datasource {
       logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
       return null;
     }
-    const releases = repositoryData[lookupName];
+    const releases = repositoryData[packageName];
     if (!releases) {
       logger.debug(
-        { dependency: lookupName },
-        `Entry ${lookupName} doesn't exist in index.yaml from ${helmRepository}`
+        { dependency: packageName },
+        `Entry ${packageName} doesn't exist in index.yaml from ${helmRepository}`
       );
       return null;
     }

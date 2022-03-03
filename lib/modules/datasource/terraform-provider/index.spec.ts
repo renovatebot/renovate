@@ -80,7 +80,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('processes real data from lookupName', async () => {
+    it('processes real data from packageName', async () => {
       httpMock
         .scope('https://registry.company.com')
         .get('/v1/providers/hashicorp/azurerm')
@@ -90,7 +90,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
         depName: 'azure',
-        lookupName: 'hashicorp/azurerm',
+        packageName: 'hashicorp/azurerm',
         registryUrls: ['https://registry.company.com'],
       });
       expect(res).toMatchSnapshot();

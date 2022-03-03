@@ -21,12 +21,12 @@ export class GitlabTagsDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${getDepHost(registryUrl)}:${packageName}`,
   })
   async getReleases({
     registryUrl,
-    lookupName: repo,
+    packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depHost = getDepHost(registryUrl);
 
@@ -66,11 +66,11 @@ export class GitlabTagsDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${getDepHost(registryUrl)}:${packageName}`,
   })
   override async getDigest(
-    { lookupName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: Partial<DigestConfig>,
     newValue?: string
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);

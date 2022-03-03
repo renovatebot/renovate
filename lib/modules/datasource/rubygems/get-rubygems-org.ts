@@ -22,15 +22,15 @@ export class RubyGemsOrgDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.debug(`getRubygemsOrgDependency(${lookupName})`);
+    logger.debug(`getRubygemsOrgDependency(${packageName})`);
     await this.syncVersions();
-    if (!packageReleases[lookupName]) {
+    if (!packageReleases[packageName]) {
       return null;
     }
     const dep: ReleaseResult = {
-      releases: packageReleases[lookupName].map((version) => ({
+      releases: packageReleases[packageName].map((version) => ({
         version,
       })),
     };

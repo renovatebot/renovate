@@ -7,13 +7,13 @@ Object {
       "currentValue": "6",
       "datasource": "github-tags",
       "depName": "node",
-      "lookupName": "nodejs/node",
+      "packageName": "nodejs/node",
     },
     Object {
       "currentValue": "8",
       "datasource": "github-tags",
       "depName": "node",
-      "lookupName": "nodejs/node",
+      "packageName": "nodejs/node",
     },
   ],
 }

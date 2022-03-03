@@ -126,11 +126,11 @@ export function getDep(
     const specialPrefixes = ['amd64', 'arm64', 'library'];
     for (const prefix of specialPrefixes) {
       if (dep.depName.startsWith(`${prefix}/`)) {
-        dep.lookupName = dep.depName;
+        dep.packageName = dep.depName;
         dep.depName = dep.depName.replace(`${prefix}/`, '');
         if (specifyReplaceString) {
           dep.autoReplaceStringTemplate =
-            '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+            '{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
         }
       }
     }
@@ -144,10 +144,10 @@ export function getDep(
   if (quayRegex.test(dep.depName)) {
     const depName = dep.depName.replace(quayRegex, 'quay.io');
     if (depName !== dep.depName) {
-      dep.lookupName = dep.depName;
+      dep.packageName = dep.depName;
       dep.depName = depName;
       dep.autoReplaceStringTemplate =
-        '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+        '{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
     }
   }
 

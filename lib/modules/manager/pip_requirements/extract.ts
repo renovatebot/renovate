@@ -81,7 +81,7 @@ export function extractPackageFile(
         // we need to replace the / with a :
         const scmPath = gitPackageMatches.groups.scmPath;
         const delimiter = gitPackageMatches.groups.delimiter;
-        const lookupName = gitPackageMatches.groups.gitUrl
+        const packageName = gitPackageMatches.groups.gitUrl
           .replace(`${delimiter}${scmPath}`, `:${scmPath}`)
           .replace(`@${currentVersion}`, '');
         dep = {
@@ -89,7 +89,7 @@ export function extractPackageFile(
           depName,
           currentValue: currentVersion,
           currentVersion: currentVersion,
-          lookupName: lookupName,
+          packageName: packageName,
           datasource: GitTagsDatasource.id,
         };
         return dep;

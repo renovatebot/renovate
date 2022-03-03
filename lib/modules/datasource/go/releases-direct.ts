@@ -36,19 +36,19 @@ export class GoDirectDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${GoDirectDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const { lookupName } = config;
+    const { packageName } = config;
 
     let res: ReleaseResult = null;
 
-    logger.trace(`go.getReleases(${lookupName})`);
-    const source = await BaseGoDatasource.getDatasource(lookupName);
+    logger.trace(`go.getReleases(${packageName})`);
+    const source = await BaseGoDatasource.getDatasource(packageName);
 
     if (!source) {
       logger.info(
-        { lookupName },
+        { packageName },
         'Unsupported go host - cannot look up versions'
       );
       return null;
@@ -85,7 +85,7 @@ export class GoDirectDatasource extends Datasource {
      * and that tag should be used instead of just va.b.c, although for compatibility
      * the old behaviour stays the same.
      */
-    const nameParts = lookupName.replace(regEx(/\/v\d+$/), '').split('/');
+    const nameParts = packageName.replace(regEx(/\/v\d+$/), '').split('/');
     logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
 
     // If it has more than 3 parts it's a submodule or subgroup (gitlab only)

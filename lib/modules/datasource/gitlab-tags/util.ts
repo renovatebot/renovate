@@ -7,7 +7,10 @@ export function getDepHost(registryUrl: string = defaultRegistryUrl): string {
   return registryUrl.replace(regEx(/\/api\/v4$/), '');
 }
 
-export function getSourceUrl(lookupName: string, registryUrl?: string): string {
+export function getSourceUrl(
+  packageName: string,
+  registryUrl?: string
+): string {
   const depHost = getDepHost(registryUrl);
-  return joinUrlParts(depHost, lookupName);
+  return joinUrlParts(depHost, packageName);
 }

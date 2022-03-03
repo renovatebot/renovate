@@ -53,6 +53,12 @@ export function migrateConfig(
               (item) => item !== 'prEditNotification'
             );
         }
+      } else if (key === 'matchStrings' && is.array(val)) {
+        migratedConfig.matchStrings = val.map((matchString) => {
+          return is.string(matchString)
+            ? matchString.replace(regEx(/<?lookupName>/g), '<?packageName>')
+            : matchString;
+        });
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
@@ -437,6 +443,20 @@ export function migrateConfig(
           if (newKey) {
             packageRule[newKey] = ruleVal;
             delete packageRule[oldKey];
+          }
+        }
+      }
+    }
+    if (is.array(migratedConfig.regexManagers)) {
+      const renameMap = {
+        lookupNameTemplate: 'packageNameTemplate',
+      };
+      for (const manager of migratedConfig.regexManagers) {
+        for (const [oldKey, ruleVal] of Object.entries(manager)) {
+          const newKey = renameMap[oldKey];
+          if (newKey) {
+            manager[newKey] = ruleVal;
+            delete manager[oldKey];
           }
         }
       }

@@ -5,8 +5,8 @@ export const defaultRegistryUrl = 'https://api.adoptium.net/';
 
 export const datasource = 'adoptium-java';
 
-export function getImageType(lookupName: string): string {
-  switch (lookupName) {
+export function getImageType(packageName: string): string {
+  switch (packageName) {
     case 'java-jre':
       return 'jre';
     default:
