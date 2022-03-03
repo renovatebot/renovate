@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/docker/index getReleases ignores empty OCI manifest indexes 1`] = `
+Object {
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [],
+}
+`;
+
 exports[`datasource/docker/index getReleases ignores empty manifest lists 1`] = `
 Object {
   "registryUrl": "https://registry.company.com",

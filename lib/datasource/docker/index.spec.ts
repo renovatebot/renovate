@@ -1269,6 +1269,27 @@ Object {
       expect(res).toMatchSnapshot();
     });
 
+    it('ignores empty OCI manifest indexes', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.ociManifestIndexV1,
+          manifests: [],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+      });
+      expect(res).toMatchSnapshot();
+    });
+
     it('supports redirect', async () => {
       httpMock
         .scope('https://registry.company.com/v2', {
