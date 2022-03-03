@@ -60,7 +60,7 @@ Object {
         "(^|/)Dockerfile\\\\.[^/]*$",
       ],
       "matchStrings": Array [
-        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<?packageName>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<packageName>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
       ],
     },
     Object {
