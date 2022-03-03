@@ -56,7 +56,7 @@ export function migrateConfig(
       } else if (key === 'matchStrings' && is.array(val)) {
         migratedConfig.matchStrings = val.map((matchString) => {
           return is.string(matchString)
-            ? matchString.replace(regEx(/<?lookupName>/g), '<?packageName>')
+            ? matchString.replace(regEx(/\\?<lookupName>/g), '?<packageName>')
             : matchString;
         });
       } else if (key.startsWith('masterIssue')) {
