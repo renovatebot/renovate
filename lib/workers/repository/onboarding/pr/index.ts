@@ -11,12 +11,12 @@ import {
   isBranchModified,
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
+import type { BranchConfig } from '../../../types';
 import {
   addAssigneesReviewers,
   getPlatformPrOptions,
   prepareLabels,
-} from '../../../pr';
-import type { BranchConfig } from '../../../types';
+} from '../../update/pr';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
