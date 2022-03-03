@@ -6,23 +6,23 @@ import {
   partial,
 } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import { DockerDatasource } from '../../../../datasource/docker';
-import { GitRefsDatasource } from '../../../../datasource/git-refs';
-import { GitDatasource } from '../../../../datasource/git-refs/base';
-import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../../../datasource/github-tags';
-import { NpmDatasource } from '../../../../datasource/npm';
-import { PackagistDatasource } from '../../../../datasource/packagist';
-import { PypiDatasource } from '../../../../datasource/pypi';
-import { id as dockerVersioningId } from '../../../../versioning/docker';
-import { id as gitVersioningId } from '../../../../versioning/git';
-import { id as npmVersioningId } from '../../../../versioning/npm';
-import { id as pep440VersioningId } from '../../../../versioning/pep440';
-import { id as poetryVersioningId } from '../../../../versioning/poetry';
+import { DockerDatasource } from '../../../../modules/datasource/docker';
+import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
+import { GitDatasource } from '../../../../modules/datasource/git-refs/base';
+import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
+import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
+import { NpmDatasource } from '../../../../modules/datasource/npm';
+import { PackagistDatasource } from '../../../../modules/datasource/packagist';
+import { PypiDatasource } from '../../../../modules/datasource/pypi';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
+import { id as gitVersioningId } from '../../../../modules/versioning/git';
+import { id as npmVersioningId } from '../../../../modules/versioning/npm';
+import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
+import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
-jest.mock('../../../../datasource/docker');
+jest.mock('../../../../modules/datasource/docker');
 
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
@@ -1538,7 +1538,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
     it('handles git submodule update', async () => {
-      jest.mock('../../../../datasource/git-refs', () => ({
+      jest.mock('../../../../modules/datasource/git-refs', () => ({
         GitRefsDatasource: jest.fn(() => ({
           getReleases: jest.fn().mockResolvedValue({
             releases: [

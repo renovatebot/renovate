@@ -1,6 +1,6 @@
 import ignore from 'ignore';
 import { logger } from '../../logger';
-import type { Pr } from '../../platform';
+import type { Pr } from '../../modules/platform';
 import { readLocalFile } from '../../util/fs';
 import { getBranchFiles } from '../../util/git';
 import { newlineRegex, regEx } from '../../util/regex';

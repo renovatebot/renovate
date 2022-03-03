@@ -1,7 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
-import type { GithubRelease } from '../../../../datasource/github-releases/types';
-import type { GitHubTag } from '../../../../datasource/github-tags/types';
 import { logger } from '../../../../logger';
+import type { GithubRelease } from '../../../../modules/datasource/github-releases/types';
+import type { GitHubTag } from '../../../../modules/datasource/github-tags/types';
 import type {
   GithubGitBlob,
   GithubGitTree,

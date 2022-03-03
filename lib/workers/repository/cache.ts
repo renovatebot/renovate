@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,

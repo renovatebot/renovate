@@ -1,0 +1,526 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/terraform-provider/index getBuilds processes real data 1`] = `
+Array [
+  Object {
+    "arch": "arm64",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "darwin",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+  Object {
+    "arch": "amd64",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "linux",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+  Object {
+    "arch": "arm",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "linux",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+  Object {
+    "arch": "amd64",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "windows",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getBuilds processes real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/versions",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/darwin/arm64",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/linux/amd64",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/linux/arm",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/windows/amd64",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getBuilds return null if the retrieval of a single build fails 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/versions",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/darwin/arm64",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/linux/amd64",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/linux/arm",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/2.6.1/download/windows/amd64",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getBuilds returns null for empty result 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm/versions",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getBuilds returns null if a version is requested which is not available 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/Telmate/proxmox/versions",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes data with alternative backend 1`] = `
+Object {
+  "registryUrl": "https://releases.hashicorp.com",
+  "releases": Array [
+    Object {
+      "version": "1.19.0",
+    },
+    Object {
+      "version": "1.20.0",
+    },
+    Object {
+      "version": "2.0.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-google-beta",
+}
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes data with alternative backend 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/google-beta",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real data 1`] = `
+Object {
+  "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
+  "registryUrl": "https://registry.terraform.io",
+  "releases": Array [
+    Object {
+      "version": "2.52.0",
+    },
+    Object {
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
+      "version": "2.53.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
+}
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real data from lookupName 1`] = `
+Object {
+  "homepage": "https://registry.company.com/providers/hashicorp/azurerm",
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [
+    Object {
+      "version": "2.52.0",
+    },
+    Object {
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
+      "version": "2.53.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
+}
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real data from lookupName 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.company.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.company.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v1/providers/hashicorp/azurerm",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases returns null for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases returns null for empty result 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases returns null for error in service discovery 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases returns null for unknown error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases simulate failing secondary release source 1`] = `null`;
+
+exports[`modules/datasource/terraform-provider/index getReleases simulate failing secondary release source 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/.well-known/terraform.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "registry.terraform.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/datadog",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "releases.hashicorp.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;

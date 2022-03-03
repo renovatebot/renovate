@@ -2,11 +2,11 @@ import { Fixtures } from '../../../test/fixtures';
 import { defaultConfig } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-import { extractPackageFile } from '../../manager/html';
+import { extractPackageFile } from '../../modules/manager/html';
 import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
-const sampleHtml = Fixtures.get('sample.html', `../../manager/html`);
+const sampleHtml = Fixtures.get('sample.html', `../../modules/manager/html`);
 
 jest.mock('fs-extra', () => Fixtures.fsExtra());
 

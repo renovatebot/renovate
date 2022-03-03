@@ -1,4 +1,4 @@
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
 import { ensureTrailingSlash } from '../../../util/url';
