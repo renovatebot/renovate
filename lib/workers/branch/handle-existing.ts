@@ -1,7 +1,7 @@
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import type { Pr } from '../../platform';
-import { ensureComment } from '../../platform/comment';
+import type { Pr } from '../../modules/platform';
+import { ensureComment } from '../../modules/platform/comment';
 import { PrState } from '../../types';
 import { branchExists, deleteBranch } from '../../util/git';
 import * as template from '../../util/template';

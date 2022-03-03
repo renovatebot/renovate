@@ -1,7 +1,7 @@
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { BranchStatus } from '../../types';
 import { mergeBranch } from '../../util/git';
 import { resolveBranchStatus } from './status-checks';

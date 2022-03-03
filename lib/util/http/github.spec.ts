@@ -8,7 +8,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
 import * as _repositoryCache from '../cache/repository';
 import type { Cache } from '../cache/repository/types';
 import * as hostRules from '../host-rules';

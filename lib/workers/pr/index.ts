@@ -6,8 +6,8 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { PlatformPrOptions, Pr, platform } from '../../platform';
-import { ensureComment } from '../../platform/comment';
+import { PlatformPrOptions, Pr, platform } from '../../modules/platform';
+import { ensureComment } from '../../modules/platform/comment';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';

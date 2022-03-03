@@ -1,5 +1,5 @@
 import { getConfig, git, mocked, partial } from '../../../test/util';
-import { Pr, platform as _platform } from '../../platform';
+import { Pr, platform as _platform } from '../../modules/platform';
 import { BranchStatus } from '../../types';
 import type { BranchConfig } from '../types';
 import * as prAutomerge from './automerge';

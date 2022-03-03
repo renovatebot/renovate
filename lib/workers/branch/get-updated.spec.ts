@@ -1,10 +1,10 @@
 import { defaultConfig, git, mocked } from '../../../test/util';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as _composer from '../../manager/composer';
-import * as _gitSubmodules from '../../manager/git-submodules';
-import * as _helmv3 from '../../manager/helmv3';
-import * as _npm from '../../manager/npm';
-import * as _poetry from '../../manager/poetry';
+import { GitRefsDatasource } from '../../modules/datasource/git-refs';
+import * as _composer from '../../modules/manager/composer';
+import * as _gitSubmodules from '../../modules/manager/git-submodules';
+import * as _helmv3 from '../../modules/manager/helmv3';
+import * as _npm from '../../modules/manager/npm';
+import * as _poetry from '../../modules/manager/poetry';
 import type { BranchConfig } from '../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -16,11 +16,11 @@ const npm = mocked(_npm);
 const poetry = mocked(_poetry);
 const autoReplace = mocked(_autoReplace);
 
-jest.mock('../../manager/composer');
-jest.mock('../../manager/helmv3');
-jest.mock('../../manager/npm');
-jest.mock('../../manager/git-submodules');
-jest.mock('../../manager/poetry');
+jest.mock('../../modules/manager/composer');
+jest.mock('../../modules/manager/helmv3');
+jest.mock('../../modules/manager/npm');
+jest.mock('../../modules/manager/git-submodules');
+jest.mock('../../modules/manager/poetry');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 

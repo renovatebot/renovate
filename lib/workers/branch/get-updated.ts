@@ -1,8 +1,11 @@
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { get } from '../../manager';
-import type { ArtifactError, PackageDependency } from '../../manager/types';
+import { get } from '../../modules/manager';
+import type {
+  ArtifactError,
+  PackageDependency,
+} from '../../modules/manager/types';
 import { getFile } from '../../util/git';
 import type { FileAddition, FileChange } from '../../util/git/types';
 import type { BranchConfig } from '../types';

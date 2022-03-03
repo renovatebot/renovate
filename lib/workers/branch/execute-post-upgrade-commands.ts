@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { GlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
-import type { ArtifactError } from '../../manager/types';
+import type { ArtifactError } from '../../modules/manager/types';
 import { exec } from '../../util/exec';
 import { localPathIsFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';

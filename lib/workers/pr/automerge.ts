@@ -1,7 +1,10 @@
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { Pr, platform } from '../../platform';
-import { ensureComment, ensureCommentRemoval } from '../../platform/comment';
+import { Pr, platform } from '../../modules/platform';
+import {
+  ensureComment,
+  ensureCommentRemoval,
+} from '../../modules/platform/comment';
 import { BranchStatus } from '../../types';
 import {
   deleteBranch,

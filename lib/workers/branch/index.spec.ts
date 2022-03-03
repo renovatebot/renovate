@@ -12,8 +12,8 @@ import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import * as _npmPostExtract from '../../manager/npm/post-update';
-import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
+import * as _npmPostExtract from '../../modules/manager/npm/post-update';
+import type { WriteExistingFilesResult } from '../../modules/manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import type { FileChange, StatusResult } from '../../util/git/types';
@@ -39,7 +39,7 @@ jest.mock('./get-updated');
 jest.mock('./schedule');
 jest.mock('./check-existing');
 jest.mock('./reuse');
-jest.mock('../../manager/npm/post-update');
+jest.mock('../../modules/manager/npm/post-update');
 jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');

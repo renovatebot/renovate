@@ -1,10 +1,10 @@
+import { logger } from '../../../logger';
 import {
   Release,
   getPkgReleases,
   isGetPkgReleasesConfig,
-} from '../../../datasource';
-import { logger } from '../../../logger';
-import { VersioningApi, get } from '../../../versioning';
+} from '../../../modules/datasource';
+import { VersioningApi, get } from '../../../modules/versioning';
 import type { BranchUpgradeConfig } from '../../types';
 
 function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {

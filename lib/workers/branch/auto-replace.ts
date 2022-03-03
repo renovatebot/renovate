@@ -1,7 +1,7 @@
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { get } from '../../manager';
-import type { PackageDependency } from '../../manager/types';
+import { get } from '../../modules/manager';
+import type { PackageDependency } from '../../modules/manager/types';
 import { writeLocalFile } from '../../util/fs';
 import { escapeRegExp, regEx } from '../../util/regex';
 import { matchAt, replaceAt } from '../../util/string';
