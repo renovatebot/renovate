@@ -9,7 +9,7 @@ import { logger } from '../../../logger';
 import type { Cache } from './types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
-export const CACHE_REVISION = 9;
+export const CACHE_REVISION = 10;
 
 let repositoryCache: RepositoryCacheConfig | undefined = 'disabled';
 let cacheFileName: string | null = null;

@@ -13,7 +13,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
   describe('requests', () => {
     const baseUrl = 'https://proxy.golang.org';
-    const lookupName = 'github.com/go-kit/kit';
+    const packageName = 'github.com/go-kit/kit';
 
     it('listVersions', async () => {
       httpMock
@@ -21,7 +21,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/github.com/go-kit/kit/@v/list')
         .reply(200, loadFixture('go-kit.list.txt'));
 
-      const versions = await datasource.listVersions(baseUrl, lookupName);
+      const versions = await datasource.listVersions(baseUrl, packageName);
 
       expect(versions).not.toBeEmpty();
       expect(versions).toHaveLength(10);
@@ -36,7 +36,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       const release = await datasource.versionInfo(
         baseUrl,
-        lookupName,
+        packageName,
         'v0.5.0'
       );
 
@@ -286,7 +286,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, []);
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/google/btree',
+        packageName: 'github.com/google/btree',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
@@ -311,7 +311,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/google/btree',
+        packageName: 'github.com/google/btree',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
@@ -336,7 +336,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(410);
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/google/btree',
+        packageName: 'github.com/google/btree',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
@@ -363,7 +363,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/google/btree',
+        packageName: 'github.com/google/btree',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
@@ -402,7 +402,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/google/btree',
+        packageName: 'github.com/google/btree',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toEqual({
@@ -438,7 +438,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .replyWithError('unknown');
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/foo/bar',
+        packageName: 'github.com/foo/bar',
       });
 
       expect(httpMock.getTrace()).toMatchSnapshot([
@@ -474,7 +474,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, []);
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/foo/bar',
+        packageName: 'github.com/foo/bar',
       });
 
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -503,7 +503,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(410);
 
       const res = await datasource.getReleases({
-        lookupName: 'github.com/foo/bar',
+        packageName: 'github.com/foo/bar',
       });
 
       expect(httpMock.getTrace()).toMatchSnapshot([

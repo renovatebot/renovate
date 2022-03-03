@@ -58,14 +58,14 @@ describe('modules/datasource/github-releases/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports ghe', async () => {
-      const lookupName = 'some/dep';
+      const packageName = 'some/dep';
       httpMock
         .scope(githubEnterpriseApiHost)
-        .get(`/api/v3/repos/${lookupName}/releases?per_page=100`)
+        .get(`/api/v3/repos/${packageName}/releases?per_page=100`)
         .reply(200, responseBody);
       const res = await githubReleases.getReleases({
         registryUrl: 'https://git.enterprise.com',
-        lookupName,
+        packageName,
       });
       httpMock.getTrace();
       expect(res).toMatchSnapshot();

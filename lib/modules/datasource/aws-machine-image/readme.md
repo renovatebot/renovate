@@ -2,7 +2,7 @@
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API (valid credentials required).
 
-Because there is no general `lookupName`, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified JSON as a `lookupName`.
+Because there is no general `packageName`, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified JSON as a `packageName`.
 
 Example:
 
@@ -38,7 +38,7 @@ module.exports = {
     {
       fileMatch: ['.*'],
       matchStrings: [
-        '.*amiFilter=(?<lookupName>.*?)\\n(.*currentImageName=(?<currentDigest>.*?)\\n)?(.*\\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
+        '.*amiFilter=(?<packageName>.*?)\\n(.*currentImageName=(?<currentDigest>.*?)\\n)?(.*\\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
       ],
       datasourceTemplate: 'aws-machine-image',
       versioningTemplate: 'aws-machine-image',
@@ -57,7 +57,7 @@ Or as JSON:
         'fileMatch': ['.*'],
         'matchStrings':
           [
-            ".*amiFilter=(?<lookupName>.*?)\\n(.*currentImageName=(?<currentDigest>.*?)\\n)?(.*\\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
+            ".*amiFilter=(?<packageName>.*?)\\n(.*currentImageName=(?<currentDigest>.*?)\\n)?(.*\\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
           ],
         'datasourceTemplate': 'aws-machine-image',
         'versioningTemplate': 'aws-machine-image',

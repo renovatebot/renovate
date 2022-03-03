@@ -117,11 +117,11 @@ describe('modules/manager/mix/artifacts', () => {
       updatedDeps: [
         {
           depName: 'private_package',
-          lookupName: 'private_package:renovate_test',
+          packageName: 'private_package:renovate_test',
         },
         {
           depName: 'other_package',
-          lookupName: 'other_package:unauthorized_organization',
+          packageName: 'other_package:unauthorized_organization',
         },
       ],
       newPackageFileContent: '{}',

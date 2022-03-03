@@ -21,7 +21,7 @@ Array [
     "datasource": "git-tags",
     "depName": "user/repo",
     "depType": "gitTags",
-    "lookupName": "https://github.com/user/repo.git",
+    "packageName": "https://github.com/user/repo.git",
     "replaceString": "refs/tags/v0.5.1",
   },
   Object {
@@ -53,7 +53,7 @@ Object {
   "datasource": "git-tags",
   "depName": "user/repo",
   "depType": "gitTags",
-  "lookupName": "https://github.com/user/repo.git",
+  "packageName": "https://github.com/user/repo.git",
   "replaceString": "refs/tags/v1.0.0",
 }
 `;

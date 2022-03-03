@@ -119,7 +119,7 @@ export default async function extractPackageFile(
       );
       deps.push({
         depName: path,
-        lookupName: getHttpUrl(subModuleUrl),
+        packageName: getHttpUrl(subModuleUrl),
         currentValue,
         currentDigest,
       });

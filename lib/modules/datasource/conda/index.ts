@@ -22,16 +22,16 @@ export class CondaDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}:${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.trace({ registryUrl, lookupName }, 'fetching conda package');
+    logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    const url = `${registryUrl}${lookupName}`;
+    const url = `${registryUrl}${packageName}`;
 
     const result: ReleaseResult = {
       releases: [],

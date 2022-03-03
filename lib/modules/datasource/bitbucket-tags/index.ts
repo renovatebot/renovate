@@ -38,21 +38,21 @@ export class BitBucketTagsDatasource extends Datasource {
     )}:${repo}:${type}`;
   }
 
-  static getSourceUrl(lookupName: string, registryUrl?: string): string {
+  static getSourceUrl(packageName: string, registryUrl?: string): string {
     const url = BitBucketTagsDatasource.getRegistryURL(registryUrl);
     const normalizedUrl = ensureTrailingSlash(url);
-    return `${normalizedUrl}${lookupName}`;
+    return `${normalizedUrl}${packageName}`;
   }
 
   // getReleases fetches list of tags for the repository
   @cache({
     namespace: BitBucketTagsDatasource.cacheNamespace,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'tags'),
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      BitBucketTagsDatasource.getCacheKey(registryUrl, packageName, 'tags'),
   })
   async getReleases({
     registryUrl,
-    lookupName: repo,
+    packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
 
@@ -110,11 +110,11 @@ export class BitBucketTagsDatasource extends Datasource {
   // however, if newValue is provided, then getTagCommit is called
   @cache({
     namespace: BitBucketTagsDatasource.cacheNamespace,
-    key: ({ registryUrl, lookupName }: DigestConfig) =>
-      BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'digest'),
+    key: ({ registryUrl, packageName }: DigestConfig) =>
+      BitBucketTagsDatasource.getCacheKey(registryUrl, packageName, 'digest'),
   })
   override async getDigest(
-    { lookupName: repo, registryUrl }: DigestConfig,
+    { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
     if (newValue?.length) {

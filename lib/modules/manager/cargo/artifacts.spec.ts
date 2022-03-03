@@ -108,7 +108,7 @@ describe('modules/manager/cargo/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('updates Cargo.lock based on the lookupName, when given', async () => {
+  it('updates Cargo.lock based on the packageName, when given', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
@@ -117,7 +117,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'renamedDep1',
-        lookupName: 'dep1',
+        packageName: 'dep1',
       },
     ];
     expect(

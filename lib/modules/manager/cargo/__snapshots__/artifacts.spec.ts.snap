@@ -127,7 +127,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/cargo/artifacts updates Cargo.lock based on the lookupName, when given 1`] = `
+exports[`modules/manager/cargo/artifacts updates Cargo.lock based on the packageName, when given 1`] = `
 Array [
   Object {
     "cmd": "cargo update --manifest-path Cargo.toml --workspace",

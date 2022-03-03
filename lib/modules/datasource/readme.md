@@ -15,7 +15,7 @@ The minimum exported interface for a datasource is a function called `getRelease
 
 The config contains:
 
-- `lookupName`: the package's full name including scope if present (e.g. `@foo/bar`)
+- `packageName`: the package's full name including scope if present (e.g. `@foo/bar`)
 - `registryUrls`: an array of registry Urls to try
 
 `getReleases` should return an object containing:

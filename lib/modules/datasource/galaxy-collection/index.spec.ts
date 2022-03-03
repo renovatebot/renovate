@@ -127,7 +127,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('returns null for null lookupName ', async () => {
+    it('returns null for null packageName ', async () => {
       expect(
         await getPkgReleases({
           datasource,

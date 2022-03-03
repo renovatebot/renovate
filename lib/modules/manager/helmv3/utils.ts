@@ -14,7 +14,7 @@ export function parseRepository(
     switch (url.protocol) {
       case 'oci:':
         res.datasource = DockerDatasource.id;
-        res.lookupName = `${repositoryURL.replace('oci://', '')}/${depName}`;
+        res.packageName = `${repositoryURL.replace('oci://', '')}/${depName}`;
         break;
       case 'file:':
         res.skipReason = 'local-dependency';

@@ -92,18 +92,18 @@ function massageTimestamps(dep: ReleaseResult): void {
 export function addMetaData(
   dep: ReleaseResult,
   datasource: string,
-  lookupName: string
+  packageName: string
 ): void {
   massageTimestamps(dep);
 
-  const lookupNameLowercase = lookupName.toLowerCase();
+  const packageNameLowercase = packageName.toLowerCase();
   const manualChangelogUrl =
-    manualChangelogUrls[datasource]?.[lookupNameLowercase];
+    manualChangelogUrls[datasource]?.[packageNameLowercase];
   if (manualChangelogUrl) {
     dep.changelogUrl = manualChangelogUrl;
   }
 
-  const manualSourceUrl = manualSourceUrls[datasource]?.[lookupNameLowercase];
+  const manualSourceUrl = manualSourceUrls[datasource]?.[packageNameLowercase];
   if (manualSourceUrl) {
     dep.sourceUrl = manualSourceUrl;
   }

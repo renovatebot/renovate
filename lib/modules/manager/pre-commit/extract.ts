@@ -77,7 +77,7 @@ function extractDependency(
   depName?: string;
   depType?: string;
   datasource?: string;
-  lookupName?: string;
+  packageName?: string;
   skipReason?: SkipReason;
   currentValue?: string;
 } {
@@ -101,7 +101,7 @@ function extractDependency(
         ...sourceDef,
         depName,
         depType: 'repository',
-        lookupName: depName,
+        packageName: depName,
         currentValue: tag,
       };
     }
@@ -114,7 +114,7 @@ function extractDependency(
     depName: undefined,
     depType: 'repository',
     datasource: undefined,
-    lookupName: undefined,
+    packageName: undefined,
     skipReason: 'invalid-url',
     currentValue: tag,
   };

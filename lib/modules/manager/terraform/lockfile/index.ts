@@ -24,7 +24,7 @@ async function updateAllLocks(
       const updateConfig: GetPkgReleasesConfig = {
         versioning: 'hashicorp',
         datasource: 'terraform-provider',
-        depName: lock.lookupName,
+        depName: lock.packageName,
       };
       const { releases } = await getPkgReleases(updateConfig);
       const versioning = getVersioning(updateConfig.versioning);
@@ -43,7 +43,7 @@ async function updateAllLocks(
         newConstraint: lock.constraints,
         newHashes: await TerraformProviderHash.createHashes(
           lock.registryUrl,
-          lock.lookupName,
+          lock.packageName,
           newVersion
         ),
         ...lock,
@@ -87,21 +87,21 @@ export async function updateArtifacts({
       );
       for (const dep of providerDeps) {
         massageProviderLookupName(dep);
-        const { registryUrls, newVersion, newValue, lookupName } = dep;
+        const { registryUrls, newVersion, newValue, packageName } = dep;
 
         const registryUrl = registryUrls
           ? registryUrls[0]
           : TerraformProviderDatasource.defaultRegistryUrls[0];
         const newConstraint = isPinnedVersion(newValue) ? newVersion : newValue;
         const updateLock = locks.find(
-          (value) => value.lookupName === lookupName
+          (value) => value.packageName === packageName
         );
         const update: ProviderLockUpdate = {
           newVersion,
           newConstraint,
           newHashes: await TerraformProviderHash.createHashes(
             registryUrl,
-            lookupName,
+            packageName,
             newVersion
           ),
           ...updateLock,

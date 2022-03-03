@@ -47,6 +47,7 @@ export class MigrationsService {
     ['multipleMajorPrs', 'separateMultipleMajor'],
     ['separatePatchReleases', 'separateMinorPatch'],
     ['versionScheme', 'versioning'],
+    ['lookupNameTemplate', 'packageNameTemplate'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [

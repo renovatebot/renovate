@@ -2093,9 +2093,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'lookupNameTemplate',
+    name: 'packageNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
+      'Optional packageName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,

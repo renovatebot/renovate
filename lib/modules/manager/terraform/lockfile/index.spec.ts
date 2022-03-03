@@ -76,7 +76,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       updatedDeps: [
         {
           depName: 'hashicorp/aws',
-          lookupName: 'hashicorp/aws',
+          packageName: 'hashicorp/aws',
           depType: 'provider',
           newVersion: '3.36.0',
           newValue: '3.36.0',
@@ -108,7 +108,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       updatedDeps: [
         {
           depName: 'hashicorp/aws',
-          lookupName: 'hashicorp/aws',
+          packageName: 'hashicorp/aws',
           depType: 'required_provider',
           newVersion: '3.36.0',
           newValue: '3.36.0',
@@ -132,7 +132,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       updatedDeps: [
         {
           depName: 'terraform-aws-modules/vpc/aws',
-          lookupName: 'terraform-aws-modules/vpc/aws',
+          packageName: 'terraform-aws-modules/vpc/aws',
           depType: 'module',
           newVersion: '3.36.0',
           newValue: '3.36.0',
@@ -159,7 +159,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         {
           depName: 'azurerm',
           depType: 'provider',
-          lookupName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.example.com'],
           newVersion: '2.56.0',
           newValue: '~> 2.50',
@@ -191,7 +191,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       updatedDeps: [
         {
           depName: 'random',
-          lookupName: 'hashicorp/random',
+          packageName: 'hashicorp/random',
           depType: 'provider',
           newVersion: '3.1.0',
           newValue: '~> 3.0',
@@ -223,7 +223,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       updatedDeps: [
         {
           depName: 'random',
-          lookupName: 'hashicorp/random',
+          packageName: 'hashicorp/random',
           depType: 'provider',
           newVersion: '3.1.0',
           newValue: '~> 3.0',
@@ -255,28 +255,28 @@ describe('modules/manager/terraform/lockfile/index', () => {
       updatedDeps: [
         {
           depName: 'aws',
-          lookupName: 'hashicorp/aws',
+          packageName: 'hashicorp/aws',
           depType: 'provider',
           newVersion: '3.1.0',
           newValue: '~> 3.0',
         },
         {
           depName: 'random',
-          lookupName: 'hashicorp/random',
+          packageName: 'hashicorp/random',
           depType: 'provider',
           newVersion: '3.1.0',
           newValue: '~> 3.0',
         },
         {
           depName: 'azurerm',
-          lookupName: 'hashicorp/azurerm',
+          packageName: 'hashicorp/azurerm',
           depType: 'provider',
           newVersion: '2.56.0',
           newValue: '~> 2.50',
         },
         {
           depName: 'proxmox',
-          lookupName: 'Telmate/proxmox',
+          packageName: 'Telmate/proxmox',
           depType: 'provider',
           newVersion: '2.7.0',
           newValue: '~> 2.7.0',

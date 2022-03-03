@@ -66,11 +66,11 @@ export class AwsMachineImageDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: ({ lookupName }: GetReleasesConfig, newValue: string) =>
-      `getDigest:${lookupName}:${newValue ?? ''}`,
+    key: ({ packageName }: GetReleasesConfig, newValue: string) =>
+      `getDigest:${packageName}:${newValue ?? ''}`,
   })
   override async getDigest(
-    { lookupName: serializedAmiFilter }: GetReleasesConfig,
+    { packageName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
@@ -90,16 +90,16 @@ export class AwsMachineImageDataSource extends Datasource {
       return null;
     }
 
-    const res = await this.getReleases({ lookupName: serializedAmiFilter });
+    const res = await this.getReleases({ packageName: serializedAmiFilter });
     return res?.releases?.[0]?.newDigest ?? /* istanbul ignore next */ null;
   }
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => `getReleases:${lookupName}`,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
-    lookupName: serializedAmiFilter,
+    packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
     const latestImage = images[images.length - 1];

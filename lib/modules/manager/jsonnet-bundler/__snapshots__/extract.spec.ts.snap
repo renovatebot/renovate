@@ -6,18 +6,18 @@ Object {
     Object {
       "currentValue": "v0.50.0",
       "depName": "prometheus-operator",
-      "lookupName": "https://github.com/prometheus-operator/prometheus-operator.git",
       "managerData": Object {
         "subdir": "jsonnet/prometheus-operator",
       },
+      "packageName": "https://github.com/prometheus-operator/prometheus-operator.git",
     },
     Object {
       "currentValue": "v0.9.0",
       "depName": "kube-prometheus",
-      "lookupName": "ssh://git@github.com/prometheus-operator/kube-prometheus.git",
       "managerData": Object {
         "subdir": "jsonnet/kube-prometheus",
       },
+      "packageName": "ssh://git@github.com/prometheus-operator/kube-prometheus.git",
     },
   ],
 }
@@ -29,10 +29,10 @@ Object {
     Object {
       "currentValue": "v0.50.0",
       "depName": "prometheus-operator-mixin",
-      "lookupName": "https://github.com/prometheus-operator/prometheus-operator",
       "managerData": Object {
         "subdir": "jsonnet/mixin",
       },
+      "packageName": "https://github.com/prometheus-operator/prometheus-operator",
     },
   ],
 }

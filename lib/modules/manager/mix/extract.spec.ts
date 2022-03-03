@@ -28,7 +28,7 @@ describe('modules/manager/mix/extract', () => {
             depName: 'secret',
             currentValue: '~> 1.0',
             datasource: 'hex',
-            lookupName: 'secret:acme',
+            packageName: 'secret:acme',
           },
           { depName: 'ex_doc', currentValue: '>2.1.0 and <=3.0.0' },
           { depName: 'jason', currentValue: '>= 1.0.0' },

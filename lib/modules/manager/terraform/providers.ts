@@ -90,9 +90,9 @@ export function analyzeTerraformProvider(
       dep.registryUrls = [`https://releases.hashicorp.com`];
     } else if (source.groups.hostname) {
       dep.registryUrls = [`https://${source.groups.hostname}`];
-      dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
+      dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
     } else {
-      dep.lookupName = dep.managerData.source;
+      dep.packageName = dep.managerData.source;
     }
   }
   massageProviderLookupName(dep);

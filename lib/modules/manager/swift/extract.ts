@@ -145,22 +145,22 @@ export function extractPackageFile(
   let state: string = null;
   let match = getMatch(restStr, state);
 
-  let lookupName: string = null;
+  let packageName: string = null;
   let currentValue: string = null;
 
   function yieldDep(): void {
-    const depName = getDepName(lookupName);
+    const depName = getDepName(packageName);
     if (depName && currentValue) {
       const dep: PackageDependency = {
         datasource: GitTagsDatasource.id,
         depName,
-        lookupName,
+        packageName,
         currentValue,
       };
 
       deps.push(dep);
     }
-    lookupName = null;
+    packageName = null;
     currentValue = null;
   }
 
@@ -225,7 +225,9 @@ export function extractPackageFile(
           yieldDep();
           state = null;
         } else if (label === STRING_LITERAL) {
-          lookupName = substr.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
+          packageName = substr
+            .replace(regEx(/^"/), '')
+            .replace(regEx(/"$/), '');
           state = '.package(url: [depName]';
         } else if (label === PACKAGE) {
           yieldDep();

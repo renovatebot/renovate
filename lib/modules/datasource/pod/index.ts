@@ -18,10 +18,10 @@ const enum URLFormatOptions {
   WithoutSpecsWithoutShard,
 }
 
-function shardParts(lookupName: string): string[] {
+function shardParts(packageName: string): string[] {
   return crypto
     .createHash('md5')
-    .update(lookupName)
+    .update(packageName)
     .digest('hex')
     .slice(0, 3)
     .split('');
@@ -32,7 +32,7 @@ const githubRegex = regEx(
 );
 
 function releasesGithubUrl(
-  lookupName: string,
+  packageName: string,
   opts: {
     hostURL: string;
     account: string;
@@ -46,22 +46,22 @@ function releasesGithubUrl(
     hostURL && hostURL !== 'https://github.com'
       ? `${hostURL}/api/v3/repos`
       : 'https://api.github.com/repos';
-  const shard = shardParts(lookupName).join('/');
+  const shard = shardParts(packageName).join('/');
   // `Specs` in the pods repo URL is a new requirement for legacy support also allow pod repo URL without `Specs`
-  const lookupNamePath = useSpecs ? `Specs/${lookupName}` : lookupName;
+  const packageNamePath = useSpecs ? `Specs/${packageName}` : packageName;
   const shardPath = useSpecs
-    ? `Specs/${shard}/${lookupName}`
-    : `${shard}/${lookupName}`;
-  const suffix = useShard ? shardPath : lookupNamePath;
+    ? `Specs/${shard}/${packageName}`
+    : `${shard}/${packageName}`;
+  const suffix = useShard ? shardPath : packageNamePath;
   return `${prefix}/${account}/${repo}/contents/${suffix}`;
 }
 
-function handleError(lookupName: string, err: HttpError): void {
-  const errorData = { lookupName, err };
+function handleError(packageName: string, err: HttpError): void {
+  const errorData = { packageName, err };
 
   const statusCode = err.response?.statusCode;
   if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
-    logger.warn({ lookupName, err }, `CocoaPods registry failure`);
+    logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
@@ -88,8 +88,8 @@ function isDefaultRepo(url: string): boolean {
   return false;
 }
 
-function releasesCDNUrl(lookupName: string, registryUrl: string): string {
-  const shard = shardParts(lookupName).join('_');
+function releasesCDNUrl(packageName: string, registryUrl: string): string {
+  const shard = shardParts(packageName).join('_');
   return `${registryUrl}/all_pods_versions_${shard}.txt`;
 }
 
@@ -109,7 +109,7 @@ export class PodDatasource extends Datasource {
 
   private async requestCDN(
     url: string,
-    lookupName: string
+    packageName: string
   ): Promise<string | null> {
     try {
       const resp = await this.http.get(url);
@@ -117,7 +117,7 @@ export class PodDatasource extends Datasource {
         return resp.body;
       }
     } catch (err) {
-      handleError(lookupName, err);
+      handleError(packageName, err);
     }
 
     return null;
@@ -125,7 +125,7 @@ export class PodDatasource extends Datasource {
 
   private async requestGithub<T = unknown>(
     url: string,
-    lookupName: string
+    packageName: string
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJson<T>(url);
@@ -133,21 +133,21 @@ export class PodDatasource extends Datasource {
         return resp.body;
       }
     } catch (err) {
-      handleError(lookupName, err);
+      handleError(packageName, err);
     }
 
     return null;
   }
 
   private async getReleasesFromGithub(
-    lookupName: string,
+    packageName: string,
     opts: { hostURL: string; account: string; repo: string },
     useShard = true,
     useSpecs = true,
     urlFormatOptions = URLFormatOptions.WithShardWithSpec
   ): Promise<ReleaseResult | null> {
-    const url = releasesGithubUrl(lookupName, { ...opts, useShard, useSpecs });
-    const resp = await this.requestGithub<{ name: string }[]>(url, lookupName);
+    const url = releasesGithubUrl(packageName, { ...opts, useShard, useSpecs });
+    const resp = await this.requestGithub<{ name: string }[]>(url, packageName);
     if (resp) {
       const releases = resp.map(({ name }) => ({ version: name }));
       return { releases };
@@ -157,7 +157,7 @@ export class PodDatasource extends Datasource {
     switch (urlFormatOptions) {
       case URLFormatOptions.WithShardWithSpec:
         return this.getReleasesFromGithub(
-          lookupName,
+          packageName,
           opts,
           true,
           false,
@@ -165,7 +165,7 @@ export class PodDatasource extends Datasource {
         );
       case URLFormatOptions.WithShardWithoutSpec:
         return this.getReleasesFromGithub(
-          lookupName,
+          packageName,
           opts,
           false,
           true,
@@ -173,7 +173,7 @@ export class PodDatasource extends Datasource {
         );
       case URLFormatOptions.WithSpecsWithoutShard:
         return this.getReleasesFromGithub(
-          lookupName,
+          packageName,
           opts,
           false,
           false,
@@ -186,17 +186,17 @@ export class PodDatasource extends Datasource {
   }
 
   private async getReleasesFromCDN(
-    lookupName: string,
+    packageName: string,
     registryUrl: string
   ): Promise<ReleaseResult | null> {
-    const url = releasesCDNUrl(lookupName, registryUrl);
-    const resp = await this.requestCDN(url, lookupName);
+    const url = releasesCDNUrl(packageName, registryUrl);
+    const resp = await this.requestCDN(url, packageName);
     if (resp) {
       const lines = resp.split(newlineRegex);
       for (let idx = 0; idx < lines.length; idx += 1) {
         const line = lines[idx];
         const [name, ...versions] = line.split('/');
-        if (name === lookupName.replace(regEx(/\/.*$/), '')) {
+        if (name === packageName.replace(regEx(/\/.*$/), '')) {
           const releases = versions.map((version) => ({ version }));
           return { releases };
         }
@@ -208,14 +208,14 @@ export class PodDatasource extends Datasource {
   @cache({
     ttlMinutes: 30,
     namespace: `datasource-${PodDatasource.id}`,
-    key: ({ lookupName, registryUrl }: GetReleasesConfig) =>
-      `${registryUrl}:${lookupName}`,
+    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const podName = lookupName.replace(regEx(/\/.*$/), '');
+    const podName = packageName.replace(regEx(/\/.*$/), '');
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
     baseUrl = massageGithubUrl(baseUrl);
     // In order to not abuse github API limits, query CDN instead

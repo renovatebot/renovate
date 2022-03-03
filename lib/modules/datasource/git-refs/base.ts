@@ -16,17 +16,17 @@ export class GitDatasource {
 
   @cache({
     namespace: `datasource-${GitDatasource.id}`,
-    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   static async getRawRefs(
-    { lookupName }: GetReleasesConfig,
+    { packageName }: GetReleasesConfig,
     hostType: string
   ): Promise<RawRefs[] | null> {
     const git = simpleGit(simpleGitConfig());
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
-      getRemoteUrlWithToken(lookupName, hostType),
+      getRemoteUrlWithToken(packageName, hostType),
     ]);
     if (!lsRemote) {
       return null;

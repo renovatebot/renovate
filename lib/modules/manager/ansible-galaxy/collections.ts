@@ -65,7 +65,7 @@ function handleGitDep(
     );
     dep.depName = `${nameMatch.groups.hostname}/${massagedDepName}`;
     // remove leading `git+` from URLs like `git+https://...`
-    dep.lookupName = source.replace(regEx(/git\+/), '');
+    dep.packageName = source.replace(regEx(/git\+/), '');
 
     // if version is declared using version appendix `<source url>,v1.2.0`, use it
     if (nameMatch.groups.version) {

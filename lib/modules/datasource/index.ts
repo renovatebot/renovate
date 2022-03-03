@@ -35,19 +35,19 @@ function getDatasourceFor(datasource: string): DatasourceApi {
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
 // TODO: fix error Type
-function logError(datasource: string, lookupName: string, err: any): void {
+function logError(datasource: string, packageName: string, err: any): void {
   const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
-    logger.debug({ datasource, lookupName, url }, 'Datasource 404');
+    logger.debug({ datasource, packageName, url }, 'Datasource 404');
   } else if (statusCode === 401 || statusCode === 403) {
-    logger.debug({ datasource, lookupName, url }, 'Datasource unauthorized');
+    logger.debug({ datasource, packageName, url }, 'Datasource unauthorized');
   } else if (errCode) {
     logger.debug(
-      { datasource, lookupName, url, errCode },
+      { datasource, packageName, url, errCode },
       'Datasource connection error'
     );
   } else {
-    logger.debug({ datasource, lookupName, err }, 'Datasource unknown error');
+    logger.debug({ datasource, packageName, err }, 'Datasource unknown error');
   }
 }
 
@@ -56,7 +56,7 @@ async function getRegistryReleases(
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<ReleaseResult> {
-  const cacheKey = `${datasource.id} ${registryUrl} ${config.lookupName}`;
+  const cacheKey = `${datasource.id} ${registryUrl} ${config.packageName}`;
   if (datasource.caching) {
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
@@ -270,12 +270,12 @@ async function fetchReleases(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logError(datasource.id, config.lookupName, err);
+    logError(datasource.id, config.packageName, err);
   }
   if (!dep || dequal(dep, { releases: [] })) {
     return null;
   }
-  addMetaData(dep, datasourceName, config.lookupName);
+  addMetaData(dep, datasourceName, config.packageName);
   dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }
@@ -283,8 +283,8 @@ async function fetchReleases(
 function getRawReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
-  const { datasource, lookupName, registryUrls } = config;
-  const cacheKey = `${cacheNamespace}${datasource}${lookupName}${String(
+  const { datasource, packageName, registryUrls } = config;
+  const cacheKey = `${cacheNamespace}${datasource}${packageName}${String(
     registryUrls
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
@@ -305,9 +305,9 @@ export async function getPkgReleases(
     logger.warn('No datasource found');
     return null;
   }
-  const lookupName = config.lookupName || config.depName;
-  if (!lookupName) {
-    logger.error({ config }, 'Datasource getReleases without lookupName');
+  const packageName = config.packageName || config.depName;
+  if (!packageName) {
+    logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
   }
   let res: ReleaseResult;
@@ -315,13 +315,13 @@ export async function getPkgReleases(
     res = clone(
       await getRawReleases({
         ...config,
-        lookupName,
+        packageName,
       })
     );
   } catch (e) /* istanbul ignore next */ {
     if (e instanceof ExternalHostError) {
       e.hostType = config.datasource;
-      e.lookupName = lookupName;
+      e.packageName = packageName;
     }
     throw e;
   }
@@ -395,13 +395,13 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const lookupName = config.lookupName ?? config.depName;
+  const packageName = config.packageName ?? config.depName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
     config.registryUrls
   );
-  return { lookupName, registryUrl, currentValue, currentDigest };
+  return { packageName, registryUrl, currentValue, currentDigest };
 }
 
 export function getDigest(

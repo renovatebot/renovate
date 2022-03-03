@@ -67,7 +67,7 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns a dep for rubygems.org package hit', async () => {
       const newparams = {
         ...params,
-        lookupName: '1pass',
+        packageName: '1pass',
         registryUrls: [],
       };
       httpMock
@@ -102,7 +102,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         ...params,
-        lookupName: '1pass',
+        packageName: '1pass',
         registryUrls: [],
       });
       expect(res).not.toBeNull();

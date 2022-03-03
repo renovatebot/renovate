@@ -22,7 +22,7 @@ export function extractPackageFile(content: string): PackageFile {
     deps.push({
       datasource: CdnJsDatasource.id,
       depName,
-      lookupName: `${depName}/${asset}`,
+      packageName: `${depName}/${asset}`,
       currentValue,
     });
   }

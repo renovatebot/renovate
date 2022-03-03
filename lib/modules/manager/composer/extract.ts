@@ -123,9 +123,9 @@ export async function extractPackageFile(
           composerJson[depType] as Record<string, string>
         )) {
           const currentValue = version.trim();
-          // Default datasource and lookupName
+          // Default datasource and packageName
           let datasource = PackagistDatasource.id;
-          let lookupName = depName;
+          let packageName = depName;
 
           // Check custom repositories by type
           if (repositories[depName]) {
@@ -133,7 +133,7 @@ export async function extractPackageFile(
               case 'vcs':
               case 'git':
                 datasource = GitTagsDatasource.id;
-                lookupName = repositories[depName].url;
+                packageName = repositories[depName].url;
                 break;
             }
           }
@@ -143,8 +143,8 @@ export async function extractPackageFile(
             currentValue,
             datasource,
           };
-          if (depName !== lookupName) {
-            dep.lookupName = lookupName;
+          if (depName !== packageName) {
+            dep.packageName = packageName;
           }
           if (!depName.includes('/')) {
             dep.skipReason = 'unsupported';

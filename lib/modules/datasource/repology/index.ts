@@ -186,11 +186,11 @@ export class RepologyDatasource extends Datasource {
   }
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // Ensure lookup name contains both repository and package
-    const [repoName, pkgName] = lookupName.split('/', 2);
+    const [repoName, pkgName] = packageName.split('/', 2);
     if (!repoName || !pkgName) {
       throw new ExternalHostError(
         new Error(
@@ -216,10 +216,10 @@ export class RepologyDatasource extends Datasource {
     } catch (err) {
       if (err.message === HOST_DISABLED) {
         // istanbul ignore next
-        logger.trace({ lookupName, err }, 'Host disabled');
+        logger.trace({ packageName, err }, 'Host disabled');
       } else {
         logger.warn(
-          { lookupName, err },
+          { packageName, err },
           'Repology lookup failed with unexpected error'
         );
       }

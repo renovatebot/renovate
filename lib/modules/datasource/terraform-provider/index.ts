@@ -25,7 +25,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     'https://releases.hashicorp.com',
   ];
 
-  static repositoryRegex = regEx(/^hashicorp\/(?<lookupName>\S+)$/);
+  static repositoryRegex = regEx(/^hashicorp\/(?<packageName>\S+)$/);
 
   constructor() {
     super(TerraformProviderDatasource.id);
@@ -46,21 +46,21 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       }/${TerraformProviderDatasource.getRepository(getReleasesConfig)}`,
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
     if (!registryUrl) {
       return null;
     }
-    logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
+    logger.debug({ packageName }, 'terraform-provider.getDependencies()');
     let dep: ReleaseResult | null = null;
     const registryHost = parseUrl(registryUrl)?.host;
     if (registryHost === 'releases.hashicorp.com') {
-      dep = await this.queryReleaseBackend(lookupName, registryUrl);
+      dep = await this.queryReleaseBackend(packageName, registryUrl);
     } else {
       const repository = TerraformProviderDatasource.getRepository({
-        lookupName,
+        packageName,
       });
       dep = await this.queryRegistry(registryUrl, repository);
     }
@@ -68,8 +68,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return dep;
   }
 
-  private static getRepository({ lookupName }: GetReleasesConfig): string {
-    return lookupName.includes('/') ? lookupName : `hashicorp/${lookupName}`;
+  private static getRepository({ packageName }: GetReleasesConfig): string {
+    return packageName.includes('/') ? packageName : `hashicorp/${packageName}`;
   }
 
   private async queryRegistry(
@@ -104,10 +104,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   // TODO: add long term cache (#9590)
   private async queryReleaseBackend(
-    lookupName: string,
+    packageName: string,
     registryURL: string
   ): Promise<ReleaseResult | null> {
-    const backendLookUpName = `terraform-provider-${lookupName}`;
+    const backendLookUpName = `terraform-provider-${packageName}`;
     const backendURL = registryURL + `/index.json`;
     const res = (
       await this.http.getJson<TerraformProviderReleaseBackend>(backendURL)
@@ -145,8 +145,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         // non hashicorp builds are not supported with releases.hashicorp.com
         return null;
       }
-      const lookupName = repositoryRegexResult.lookupName;
-      const backendLookUpName = `terraform-provider-${lookupName}`;
+      const packageName = repositoryRegexResult.packageName;
+      const backendLookUpName = `terraform-provider-${packageName}`;
       let versionReleaseBackend: VersionDetailResponse;
       try {
         versionReleaseBackend = await this.getReleaseBackendIndex(

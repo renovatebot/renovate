@@ -30,7 +30,7 @@ describe('modules/manager/fvm/extract', () => {
           currentValue: '2.10.1',
           datasource: 'github-tags',
           depName: 'flutter',
-          lookupName: 'flutter/flutter',
+          packageName: 'flutter/flutter',
         },
       ]);
     });
@@ -44,7 +44,7 @@ describe('modules/manager/fvm/extract', () => {
           currentValue: 'stable',
           datasource: 'github-tags',
           depName: 'flutter',
-          lookupName: 'flutter/flutter',
+          packageName: 'flutter/flutter',
         },
       ]);
     });

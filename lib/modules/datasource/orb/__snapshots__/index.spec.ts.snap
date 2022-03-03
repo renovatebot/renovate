@@ -54,11 +54,11 @@ Array [
     "graphql": Object {
       "query": Object {
         "__vars": Object {
-          "$lookupName": "String!",
+          "$packageName": "String!",
         },
         "orb": Object {
           "__args": Object {
-            "name": "$lookupName",
+            "name": "$packageName",
           },
           "homeUrl": null,
           "name": null,
@@ -69,13 +69,13 @@ Array [
         },
       },
       "variables": Object {
-        "lookupName": "hyper-expanse/library-release-workflows",
+        "packageName": "hyper-expanse/library-release-workflows",
       },
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "231",
+      "content-length": "234",
       "content-type": "application/json",
       "host": "circleci.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -140,11 +140,11 @@ Array [
     "graphql": Object {
       "query": Object {
         "__vars": Object {
-          "$lookupName": "String!",
+          "$packageName": "String!",
         },
         "orb": Object {
           "__args": Object {
-            "name": "$lookupName",
+            "name": "$packageName",
           },
           "homeUrl": null,
           "name": null,
@@ -155,13 +155,13 @@ Array [
         },
       },
       "variables": Object {
-        "lookupName": "hyper-expanse/library-release-workflows",
+        "packageName": "hyper-expanse/library-release-workflows",
       },
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "231",
+      "content-length": "234",
       "content-type": "application/json",
       "host": "circleci.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -178,11 +178,11 @@ Array [
     "graphql": Object {
       "query": Object {
         "__vars": Object {
-          "$lookupName": "String!",
+          "$packageName": "String!",
         },
         "orb": Object {
           "__args": Object {
-            "name": "$lookupName",
+            "name": "$packageName",
           },
           "homeUrl": null,
           "name": null,
@@ -193,13 +193,13 @@ Array [
         },
       },
       "variables": Object {
-        "lookupName": "hyper-expanse/library-release-workflows",
+        "packageName": "hyper-expanse/library-release-workflows",
       },
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "231",
+      "content-length": "234",
       "content-type": "application/json",
       "host": "circleci.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -216,11 +216,11 @@ Array [
     "graphql": Object {
       "query": Object {
         "__vars": Object {
-          "$lookupName": "String!",
+          "$packageName": "String!",
         },
         "orb": Object {
           "__args": Object {
-            "name": "$lookupName",
+            "name": "$packageName",
           },
           "homeUrl": null,
           "name": null,
@@ -231,13 +231,13 @@ Array [
         },
       },
       "variables": Object {
-        "lookupName": "hyper-expanse/library-release-workflows",
+        "packageName": "hyper-expanse/library-release-workflows",
       },
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "231",
+      "content-length": "234",
       "content-type": "application/json",
       "host": "circleci.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -254,11 +254,11 @@ Array [
     "graphql": Object {
       "query": Object {
         "__vars": Object {
-          "$lookupName": "String!",
+          "$packageName": "String!",
         },
         "orb": Object {
           "__args": Object {
-            "name": "$lookupName",
+            "name": "$packageName",
           },
           "homeUrl": null,
           "name": null,
@@ -269,13 +269,13 @@ Array [
         },
       },
       "variables": Object {
-        "lookupName": "hyper-expanse/library-release-wonkflows",
+        "packageName": "hyper-expanse/library-release-wonkflows",
       },
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "231",
+      "content-length": "234",
       "content-type": "application/json",
       "host": "circleci.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -292,11 +292,11 @@ Array [
     "graphql": Object {
       "query": Object {
         "__vars": Object {
-          "$lookupName": "String!",
+          "$packageName": "String!",
         },
         "orb": Object {
           "__args": Object {
-            "name": "$lookupName",
+            "name": "$packageName",
           },
           "homeUrl": null,
           "name": null,
@@ -307,13 +307,13 @@ Array [
         },
       },
       "variables": Object {
-        "lookupName": "hyper-expanse/library-release-workflows",
+        "packageName": "hyper-expanse/library-release-workflows",
       },
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "231",
+      "content-length": "234",
       "content-type": "application/json",
       "host": "circleci.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

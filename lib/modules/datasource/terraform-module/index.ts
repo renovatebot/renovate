@@ -28,7 +28,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       TerraformModuleDatasource.getCacheKey(getReleasesConfig),
   })
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
@@ -37,7 +37,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     }
 
     const { registry, repository } =
-      TerraformModuleDatasource.getRegistryRepository(lookupName, registryUrl);
+      TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     logger.trace(
       { registry, terraformRepository: repository },
       'terraform-module.getReleases()'
@@ -86,11 +86,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   }
 
   private static getRegistryRepository(
-    lookupName: string,
+    packageName: string,
     registryUrl = ''
   ): RegistryRepository {
     let registry: string;
-    const split = lookupName.split('/');
+    const split = packageName.split('/');
     if (split.length > 3 && split[0].includes('.')) {
       [registry] = split;
       split.shift();
@@ -108,11 +108,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   }
 
   private static getCacheKey({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): string {
     const { registry, repository } =
-      TerraformModuleDatasource.getRegistryRepository(lookupName, registryUrl);
+      TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     return `${registry}/${repository}`;
   }
 }

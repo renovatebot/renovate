@@ -18,14 +18,14 @@ export class GitlabReleasesDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GitlabReleasesDatasource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}/${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}/${packageName}`,
   })
   async getReleases({
     registryUrl,
-    lookupName,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const urlEncodedRepo = encodeURIComponent(lookupName);
+    const urlEncodedRepo = encodeURIComponent(packageName);
     const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
 
     try {
@@ -34,7 +34,7 @@ export class GitlabReleasesDatasource extends Datasource {
       ).body;
 
       return {
-        sourceUrl: `${registryUrl}/${lookupName}`,
+        sourceUrl: `${registryUrl}/${packageName}`,
         releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
           const release: Release = {
             registryUrl,

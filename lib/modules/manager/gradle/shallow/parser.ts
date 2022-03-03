@@ -208,7 +208,7 @@ function processPlugin({
   const plugin = pluginName.value;
   const depName =
     methodName.value === 'kotlin' ? `org.jetbrains.kotlin.${plugin}` : plugin;
-  const lookupName =
+  const packageName =
     methodName.value === 'kotlin'
       ? `org.jetbrains.kotlin.${plugin}:org.jetbrains.kotlin.${plugin}.gradle.plugin`
       : `${plugin}:${plugin}.gradle.plugin`;
@@ -216,7 +216,7 @@ function processPlugin({
   const dep: PackageDependency<GradleManagerData> = {
     depType: 'plugin',
     depName,
-    lookupName,
+    packageName,
     registryUrls: ['https://plugins.gradle.org/m2/'],
     commitMessageTopic: `plugin ${depName}`,
   };

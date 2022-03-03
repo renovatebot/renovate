@@ -14,7 +14,10 @@ export function getApiBaseUrl(registryUrl: string): string {
     : `${sourceUrlBase}api/v3/`;
 }
 
-export function getSourceUrl(lookupName: string, registryUrl?: string): string {
+export function getSourceUrl(
+  packageName: string,
+  registryUrl?: string
+): string {
   const sourceUrlBase = getSourceUrlBase(registryUrl);
-  return `${sourceUrlBase}${lookupName}`;
+  return `${sourceUrlBase}${packageName}`;
 }

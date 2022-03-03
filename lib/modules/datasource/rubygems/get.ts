@@ -22,13 +22,13 @@ export class InternalRubyGemsDatasource extends Datasource {
   private knownFallbackHosts = ['rubygems.pkg.github.com', 'gitlab.com'];
 
   override getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (this.knownFallbackHosts.includes(parseUrl(registryUrl)?.hostname)) {
-      return this.getDependencyFallback(lookupName, registryUrl);
+      return this.getDependencyFallback(packageName, registryUrl);
     }
-    return this.getDependency(lookupName, registryUrl);
+    return this.getDependency(packageName, registryUrl);
   }
 
   async getDependencyFallback(

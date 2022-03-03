@@ -2,7 +2,7 @@ import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
   datasource?: string;
-  lookupName?: string;
+  packageName?: string;
   depName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
@@ -11,7 +11,7 @@ export interface GetDigestInputConfig {
 }
 
 export interface DigestConfig {
-  lookupName: string;
+  packageName: string;
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
@@ -19,7 +19,7 @@ export interface DigestConfig {
 
 export interface GetReleasesConfig {
   npmrc?: string;
-  lookupName: string;
+  packageName: string;
   registryUrl?: string;
 }
 
@@ -29,7 +29,7 @@ export interface GetPkgReleasesConfig {
   registryUrls?: string[];
   datasource: string;
   depName: string;
-  lookupName?: string;
+  packageName?: string;
   versioning?: string;
   extractVersion?: string;
   constraints?: Record<string, string>;
@@ -94,7 +94,7 @@ export interface DatasourceApi extends ModuleApi {
 
   /**
    * Whether to perform caching in the datasource index/wrapper or not.
-   * true: datasoure index wrapper should cache all results (based on registryUrl/lookupName)
+   * true: datasoure index wrapper should cache all results (based on registryUrl/packageName)
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean;

@@ -131,7 +131,7 @@ describe('modules/manager/cargo/extract', () => {
 
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
-      expect(res.deps[0].lookupName).toBe('boolector');
+      expect(res.deps[0].packageName).toBe('boolector');
     });
   });
 });

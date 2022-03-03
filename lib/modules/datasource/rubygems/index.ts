@@ -31,18 +31,18 @@ export class RubyGemsDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${RubyGemsDatasource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}/${lookupName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}/${packageName}`,
   })
   getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (parseUrl(registryUrl)?.hostname === 'rubygems.org') {
-      return this.rubyGemsOrgDatasource.getReleases({ lookupName });
+      return this.rubyGemsOrgDatasource.getReleases({ packageName });
     }
     return this.internalRubyGemsDatasource.getReleases({
-      lookupName,
+      packageName,
       registryUrl,
     });
   }

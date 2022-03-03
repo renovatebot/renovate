@@ -19,11 +19,11 @@ export class CdnJsDatasource extends Datasource {
   // this.handleErrors will always throw
 
   async getReleases({
-    lookupName,
+    packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // Each library contains multiple assets, so we cache at the library level instead of per-asset
-    const library = lookupName.split('/')[0];
+    const library = packageName.split('/')[0];
     const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
     let result: ReleaseResult | null = null;
     try {
@@ -33,7 +33,7 @@ export class CdnJsDatasource extends Datasource {
       if (!assets) {
         return null;
       }
-      const assetName = lookupName.replace(`${library}/`, '');
+      const assetName = packageName.replace(`${library}/`, '');
       const releases = assets
         .filter(({ files }) => files.includes(assetName))
         .map(({ version, sri }) => ({ version, newDigest: sri?.[assetName] }));

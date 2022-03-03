@@ -49,7 +49,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depType: 'dependencies',
         depName: 'hapi',
         npmPackageAlias: true,
-        lookupName: '@hapi/hapi',
+        packageName: '@hapi/hapi',
         currentValue: '18.3.0',
         newValue: '18.3.1',
       };

@@ -219,13 +219,13 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile('FROM quay.io:1234/node\n').deps;
       expect(res[0]).toMatchInlineSnapshot(`
         Object {
-          "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "currentDigest": undefined,
           "currentValue": undefined,
           "datasource": "docker",
           "depName": "quay.io/node",
           "depType": "final",
-          "lookupName": "quay.io:1234/node",
+          "packageName": "quay.io:1234/node",
           "replaceString": "quay.io:1234/node",
         }
       `);
@@ -599,13 +599,13 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "18.04",
             "datasource": "docker",
             "depName": "ubuntu",
             "depType": "final",
-            "lookupName": "amd64/ubuntu",
+            "packageName": "amd64/ubuntu",
             "replaceString": "amd64/ubuntu:18.04",
             "versioning": "ubuntu",
           },

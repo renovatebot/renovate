@@ -32,7 +32,7 @@ export interface CustomExtractConfig extends ExtractConfig {
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
-  lookupNameTemplate?: string;
+  packageNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
   depTypeTemplate?: string;
@@ -103,7 +103,7 @@ export interface Package<T> extends ManagerData<T> {
   fileReplacePosition?: number;
   groupName?: string;
   lineNumber?: number;
-  lookupName?: string;
+  packageName?: string;
   repo?: string;
   target?: string;
   versioning?: string;

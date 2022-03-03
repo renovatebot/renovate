@@ -2329,9 +2329,9 @@ It will be compiled using Handlebars and the regex `groups` result.
 If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
-### lookupNameTemplate
+### packageNameTemplate
 
-`lookupName` is used for looking up dependency versions.
+`packageName` is used for looking up dependency versions.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 

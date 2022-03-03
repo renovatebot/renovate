@@ -50,15 +50,15 @@ export function checkIfStringIsPath(path: string): boolean {
 }
 
 export function massageProviderLookupName(dep: PackageDependency): void {
-  if (!dep.lookupName) {
-    dep.lookupName = dep.depName;
+  if (!dep.packageName) {
+    dep.packageName = dep.depName;
   }
-  if (!dep.lookupName.includes('/')) {
-    dep.lookupName = `hashicorp/${dep.lookupName}`;
+  if (!dep.packageName.includes('/')) {
+    dep.packageName = `hashicorp/${dep.packageName}`;
   }
 
   // handle cases like `Telmate/proxmox`
-  dep.lookupName = dep.lookupName.toLowerCase();
+  dep.packageName = dep.packageName.toLowerCase();
 }
 
 export function getLockedVersion(
@@ -70,7 +70,8 @@ export function getLockedVersion(
     : TerraformProviderDatasource.defaultRegistryUrls[0];
   const foundLock = locks.find(
     (lock) =>
-      lock.lookupName === dep.lookupName && lock.registryUrl === depRegistryUrl
+      lock.packageName === dep.packageName &&
+      lock.registryUrl === depRegistryUrl
   );
   if (foundLock) {
     return foundLock.version;

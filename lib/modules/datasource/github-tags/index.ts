@@ -78,7 +78,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
    * Returns the latest commit hash for the repository.
    */
   override getDigest(
-    { lookupName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: Partial<DigestConfig>,
     newValue?: string
   ): Promise<string | null> {
     return newValue
@@ -89,12 +89,12 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
   @cache({
     ttlMinutes: 10,
     namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: ({ registryUrl, lookupName: repo }: GetReleasesConfig) =>
+    key: ({ registryUrl, packageName: repo }: GetReleasesConfig) =>
       `${registryUrl}:${repo}:tags`,
   })
   async getTags({
     registryUrl,
-    lookupName: repo,
+    packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
     // tag
