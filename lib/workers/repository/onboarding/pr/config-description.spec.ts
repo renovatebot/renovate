@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import type { PackageFile } from '../../../../manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {

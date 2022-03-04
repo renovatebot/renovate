@@ -23,6 +23,7 @@ import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
+    'deepExtract',
     'gitFs',
     'groupBranchName',
     'groupCommitMessage',
@@ -47,6 +48,7 @@ export class MigrationsService {
     ['multipleMajorPrs', 'separateMultipleMajor'],
     ['separatePatchReleases', 'separateMinorPatch'],
     ['versionScheme', 'versioning'],
+    ['lookupNameTemplate', 'packageNameTemplate'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [

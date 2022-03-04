@@ -5,8 +5,8 @@ import {
   REPOSITORY_NO_CONFIG,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../platform';
-import { ensureComment } from '../../../../platform/comment';
+import { platform } from '../../../../modules/platform';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { PrState } from '../../../../types';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
