@@ -1,8 +1,8 @@
-import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
-import type { LookupUpdate } from '../../../../manager/types';
+import type { Release } from '../../../../modules/datasource';
+import type { LookupUpdate } from '../../../../modules/manager/types';
+import type { VersioningApi } from '../../../../modules/versioning';
 import type { RangeStrategy } from '../../../../types';
-import type { VersioningApi } from '../../../../versioning';
 import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
 

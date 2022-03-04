@@ -1,12 +1,12 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
-import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
-import * as allVersioning from '../../versioning';
-import { id as composerVersioningId } from '../../versioning/composer';
-import { id as npmVersioningId } from '../../versioning/npm';
-import { id as pep440VersioningId } from '../../versioning/pep440';
-import { id as semverVersioningId } from '../../versioning/semver';
+import { getPkgReleases } from '../../modules/datasource';
+import * as allVersioning from '../../modules/versioning';
+import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as npmVersioningId } from '../../modules/versioning/npm';
+import { id as pep440VersioningId } from '../../modules/versioning/pep440';
+import { id as semverVersioningId } from '../../modules/versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {

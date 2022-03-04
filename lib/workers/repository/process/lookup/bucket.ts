@@ -1,4 +1,4 @@
-import type { VersioningApi } from '../../../../versioning/types';
+import type { VersioningApi } from '../../../../modules/versioning/types';
 
 export interface BucketConfig {
   separateMajorMinor?: boolean;
