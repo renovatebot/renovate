@@ -37,6 +37,7 @@ const contentCheckList = [
   ' "helm_release" ',
   ' "docker_image" ',
   'required_version',
+  'terraform_version',
 ];
 
 export async function extractPackageFile(

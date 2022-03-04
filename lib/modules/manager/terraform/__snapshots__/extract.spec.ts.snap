@@ -447,6 +447,20 @@ Object {
 }
 `;
 
+exports[`modules/manager/terraform/extract extractPackageFile() extracts terraform_version for tfe_workspace 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.1.6",
+      "datasource": "github-tags",
+      "depName": "hashicorp/terraform",
+      "depType": "required_version",
+      "extractVersion": "v(?<version>.*)$",
+    },
+  ],
+}
+`;
+
 exports[`modules/manager/terraform/extract extractPackageFile() test terraform block with only requirement_terraform_version 1`] = `
 Object {
   "deps": Array [
