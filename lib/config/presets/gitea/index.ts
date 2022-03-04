@@ -2,8 +2,9 @@ import { logger } from '../../../logger';
 import {
   RepoContents,
   getRepoContents,
-} from '../../../platform/gitea/gitea-helper';
+} from '../../../modules/platform/gitea/gitea-helper';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
 import {
   PRESET_DEP_NOT_FOUND,
@@ -17,11 +18,11 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  tag?: string
 ): Promise<Preset> {
   let res: RepoContents;
   try {
-    res = await getRepoContents(repo, fileName, packageTag, {
+    res = await getRepoContents(repo, fileName, tag, {
       baseUrl: endpoint,
     });
   } catch (err) {
@@ -36,7 +37,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   try {
-    const content = Buffer.from(res.content, 'base64').toString();
+    const content = fromBase64(res.content);
     const parsed = JSON.parse(content);
     return parsed;
   } catch (err) {
@@ -45,33 +46,27 @@ export async function fetchJSONFile(
 }
 
 export function getPresetFromEndpoint(
-  pkgName: string,
+  repo: string,
   filePreset: string,
   presetPath: string,
   endpoint = Endpoint,
-  packageTag?: string
+  tag?: string
 ): Promise<Preset> {
   return fetchPreset({
-    pkgName,
+    repo,
     filePreset,
     presetPath,
     endpoint,
-    packageTag,
+    tag,
     fetch: fetchJSONFile,
   });
 }
 
 export function getPreset({
-  packageName: pkgName,
+  repo,
   presetName = 'default',
   presetPath,
-  packageTag = null,
+  tag = null,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(
-    pkgName,
-    presetName,
-    presetPath,
-    Endpoint,
-    packageTag
-  );
+  return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

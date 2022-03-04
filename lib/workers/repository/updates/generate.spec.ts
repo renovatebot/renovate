@@ -1,6 +1,7 @@
 import { defaultConfig, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
-import * as datasourceNpm from '../../../datasource/npm';
+import { NpmDatasource } from '../../../modules/datasource/npm';
+import type { LookupUpdate } from '../../../modules/manager/types';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
@@ -341,6 +342,20 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
     });
+    it('pins digest to table', () => {
+      const branch = [
+        partial<LookupUpdate & BranchUpgradeConfig>({
+          ...defaultConfig,
+          depName: 'foo-image',
+          newDigest: 'abcdefg987612345',
+          currentDigest: '',
+          updateType: 'pin',
+        }),
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].displayFrom).toBe('');
+      expect(res.upgrades[0].displayTo).toBe('abcdefg');
+    });
     it('fixes different messages', () => {
       const branch = [
         {
@@ -502,7 +517,7 @@ describe('workers/repository/updates/generate', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: '@types/some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -515,7 +530,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -525,7 +540,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -570,7 +585,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -659,6 +674,20 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toMatchSnapshot('some-title (patch)');
+    });
+    it('combines prBodyColumns', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          branchName: 'some-branch',
+          prBodyColumns: ['column-a', 'column-b'],
+        },
+        {
+          branchName: 'some-branch',
+          prBodyColumns: ['column-c', 'column-b', 'column-a'],
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prBodyColumns).toEqual(['column-a', 'column-b', 'column-c']);
     });
     it('sorts upgrades, without position first', () => {
       const branch: BranchUpgradeConfig[] = [

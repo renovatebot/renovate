@@ -46,21 +46,21 @@ export function migrateConfig(
     ];
     const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'pathRules') {
-        if (is.array(val)) {
-          migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-            ? migratedConfig.packageRules
-            : [];
-          migratedConfig.packageRules = val.concat(migratedConfig.packageRules);
-        }
-        delete migratedConfig.pathRules;
-      } else if (key === 'suppressNotifications') {
+      if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
           migratedConfig.suppressNotifications =
             migratedConfig.suppressNotifications.filter(
               (item) => item !== 'prEditNotification'
             );
         }
+      } else if (key === 'matchStrings' && is.array(val)) {
+        migratedConfig.matchStrings = val
+          .map(
+            (matchString) =>
+              is.string(matchString) &&
+              matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
+          )
+          .filter(Boolean);
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
@@ -68,24 +68,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (parentKey === 'hostRules' && key === 'platform') {
-        migratedConfig.hostType = val;
-        delete migratedConfig.platform;
-      } else if (parentKey === 'hostRules' && key === 'endpoint') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.endpoint;
-      } else if (parentKey === 'hostRules' && key === 'host') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.host;
-      } else if (parentKey === 'hostRules' && key === 'baseUrl') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.baseUrl;
-      } else if (parentKey === 'hostRules' && key === 'hostName') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.hostName;
-      } else if (parentKey === 'hostRules' && key === 'domainName') {
-        migratedConfig.matchHost ||= val;
-        delete migratedConfig.domainName;
       } else if (key === 'packageRules' && is.plainObject(val)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -141,6 +123,11 @@ export function migrateConfig(
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}'
+        );
+      } else if (is.string(val) && val.includes('{{lookupName}}')) {
+        migratedConfig[key] = val.replace(
+          regEx(/{{lookupName}}/g),
+          '{{packageName}}'
         );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
