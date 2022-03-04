@@ -456,16 +456,6 @@ If you need to _override_ constraints that Renovate detects from the repository,
 !!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
-## deepExtract
-
-<!-- prettier-ignore -->
-!!! warning
-    The `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
-
-If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
-
-This option applies only to the `gradle` manager.
-
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.
@@ -575,8 +565,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 
 ## description
 
-The description field is used by config presets to describe what they do.
-They are then collated as part of the onboarding description.
+The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
+Descriptions fields embedded within presets are also collated as part of the onboarding description.
 
 ## digest
 
@@ -921,6 +911,12 @@ Example for configuring `docker` auth:
   ]
 }
 ```
+
+If multiple `hostRules` match a request, then they will be applied in the following order/priority:
+
+1. rules with only `hostType` specified
+1. rules with only `matchHost` specified (sorted by `matchHost` length if multiple match)
+1. rules with both `matchHost` and `hostType` specified (sorted by `matchHost` length if multiple match)
 
 To disable requests to a particular host, you can configure a rule like:
 
@@ -1833,6 +1829,14 @@ Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behin
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
+## platformCommit
+
+Supports only GitHub App mode and not when using Personal Access Tokens.
+
+To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
+
+The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
+
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
@@ -2093,7 +2097,7 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
@@ -2315,9 +2319,9 @@ It will be compiled using Handlebars and the regex `groups` result.
 If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
-### lookupNameTemplate
+### packageNameTemplate
 
-`lookupName` is used for looking up dependency versions.
+`packageName` is used for looking up dependency versions.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
@@ -2732,10 +2736,15 @@ For example, to configure custom labels and assignees:
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
+    "automerge": true,
     "assignees": ["@rarkins"]
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
 
 To disable the vulnerability alerts functionality completely, configure like this:
 

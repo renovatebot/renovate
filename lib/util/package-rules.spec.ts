@@ -1,8 +1,8 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
 import { ProgrammingLanguage } from '../constants';
 
-import { DockerDatasource } from '../datasource/docker';
-import { OrbDatasource } from '../datasource/orb';
+import { DockerDatasource } from '../modules/datasource/docker';
+import { OrbDatasource } from '../modules/datasource/orb';
 import { applyPackageRules } from './package-rules';
 
 type TestConfig = PackageRuleInputConfig & {

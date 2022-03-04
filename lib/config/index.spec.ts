@@ -1,6 +1,6 @@
 import { getConfig } from './defaults';
 
-jest.mock('../datasource/npm');
+jest.mock('../modules/datasource/npm');
 try {
   jest.mock('../../config.js');
 } catch (err) {

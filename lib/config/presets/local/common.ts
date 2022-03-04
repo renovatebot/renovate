@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Preset } from '../types';
 import {
@@ -38,13 +38,13 @@ export async function fetchJSONFile(
 }
 
 export function getPresetFromEndpoint(
-  pkgName: string,
+  repo: string,
   filePreset: string,
   presetPath: string,
   endpoint: string
 ): Promise<Preset> {
   return fetchPreset({
-    pkgName,
+    repo,
     filePreset,
     presetPath,
     endpoint,

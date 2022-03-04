@@ -127,7 +127,7 @@ const staticGroups = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchPackagePrefixes: ['mcr.microsoft.com/dotnet/core/'],
+        matchPackagePrefixes: ['mcr.microsoft.com/dotnet/'],
         groupName: '.NET Core Docker containers',
       },
     ],

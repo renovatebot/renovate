@@ -11,11 +11,11 @@ export const PRESET_RENOVATE_CONFIG_NOT_FOUND =
   'preset renovate-config not found';
 
 export async function fetchPreset({
-  pkgName,
+  repo,
   filePreset,
   presetPath,
   endpoint: _endpoint,
-  packageTag = null,
+  tag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
   const endpoint = ensureTrailingSlash(_endpoint);
@@ -26,20 +26,20 @@ export async function fetchPreset({
   if (fileName === 'default') {
     try {
       jsonContent = await fetch(
-        pkgName,
+        repo,
         buildFilePath('default.json'),
         endpoint,
-        packageTag
+        tag
       );
     } catch (err) {
       if (err.message !== PRESET_DEP_NOT_FOUND) {
         throw err;
       }
       jsonContent = await fetch(
-        pkgName,
+        repo,
         buildFilePath('renovate.json'),
         endpoint,
-        packageTag
+        tag
       );
       logger.info(
         'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
@@ -47,10 +47,10 @@ export async function fetchPreset({
     }
   } else {
     jsonContent = await fetch(
-      pkgName,
+      repo,
       buildFilePath(`${fileName}.json`),
       endpoint,
-      packageTag
+      tag
     );
   }
 
