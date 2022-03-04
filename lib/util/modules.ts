@@ -20,7 +20,7 @@ function relatePath(here: string, there: string): string {
     result.push('..');
   }
   for (let y = idx; y < thereParts.length; y += 1) {
-    result.push(thereParts[idx]);
+    result.push(thereParts[y]);
   }
   return result.join('/');
 }

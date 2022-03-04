@@ -1,4 +1,4 @@
-import { getVersioningList } from '../../lib/versioning';
+import { getVersioningList } from '../../lib/modules/versioning';
 import { readFile, updateFile } from '../utils';
 import { formatDescription, formatUrls, replaceContent } from './utils';
 
@@ -18,7 +18,7 @@ export async function generateVersioning(dist: string): Promise<void> {
     '.\n\n';
   for (const versioning of versioningList) {
     const definition = (await import(
-      `../../lib/versioning/${versioning}`
+      `../../lib/modules/versioning/${versioning}`
     )) as Versioning;
     const { id, displayName, urls, supportsRanges, supportedRangeStrategies } =
       definition;
@@ -28,7 +28,7 @@ export async function generateVersioning(dist: string): Promise<void> {
     versioningContent += `**Ranges/Constraints:**\n\n`;
     if (supportsRanges) {
       versioningContent += `✅ Ranges are supported.\n\nValid \`rangeStrategy\` values are: ${(
-        supportedRangeStrategies || []
+        supportedRangeStrategies ?? []
       )
         .map((strategy: string) => `\`${strategy}\``)
         .join(', ')}\n\n`;
