@@ -38,6 +38,7 @@ const repoGroups = {
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
+  groovy: 'https://github.com/apache/groovy',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   'mdc-react': 'material-components/material-components-web-react',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
@@ -91,6 +92,7 @@ const repoGroups = {
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
+  fela: 'https://github.com/robinweser/fela',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
   fontsource: 'https://github.com/fontsource/fontsource',
@@ -129,10 +131,17 @@ const repoGroups = {
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
-  'material-ui': 'https://github.com/mui-org/material-ui',
+  'material-ui': [
+    'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
+    'https://github.com/mui/material-ui',
+  ],
+  'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
-  nest: 'https://github.com/nestjs/nest',
+  nest: [
+    'https://github.com/nestjs/nest',
+    'https://github.com/nestjs/passport',
+  ],
   netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
@@ -153,7 +162,10 @@ const repoGroups = {
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  parcel: 'https://github.com/parcel-bundler/parcel',
+  'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
+  pixijs: 'https://github.com/pixijs/pixi.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
@@ -172,8 +184,10 @@ const repoGroups = {
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  'sitecore-jss': 'https://github.com/Sitecore/jss',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
+  'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',
@@ -184,7 +198,7 @@ const repoGroups = {
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
-  vue: 'https://github.com/vuejs/vue',
+  vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
@@ -194,6 +208,7 @@ const repoGroups = {
 };
 
 const patternGroups = {
+  'apache-camel': '^org.apache.camel:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   wordpress: '^@wordpress/',

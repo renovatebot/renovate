@@ -3,7 +3,8 @@ import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
-import { Http, HttpResponse, InternalHttpOptions } from '.';
+import type { HttpResponse, InternalHttpOptions } from './types';
+import { Http } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {

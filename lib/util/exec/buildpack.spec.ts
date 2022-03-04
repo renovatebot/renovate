@@ -1,6 +1,6 @@
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import * as _datasource from '../../datasource';
+import * as _datasource from '../../modules/datasource';
 import {
   generateInstallCommands,
   isDynamicInstall,
@@ -8,7 +8,7 @@ import {
 } from './buildpack';
 import type { ToolConstraint } from './types';
 
-jest.mock('../../../lib/datasource');
+jest.mock('../../modules/datasource');
 
 const datasource = mocked(_datasource);
 

@@ -88,7 +88,7 @@ Because of how it works, it functions on public repositories only and additional
 
 ##### Benefits
 
-Forking Renovate needs only `read` level access to any repository it runs on.
+Forking Renovate needs only `read` level access to the code of any repository it runs on.
 
 ##### Drawbacks
 
@@ -128,7 +128,9 @@ If you are configuring using environment variables, there are two possibilities:
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
-Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+<!-- prettier-ignore -->
+!!! note
+    It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 #### Using `config.js`
 
@@ -172,6 +174,7 @@ When creating the GitHub App give it the following permissions:
 - Commit statuses: Read & write
 - Dependabot alerts: Read-only
 - Workflows: Read & write
+- Members: Read
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
@@ -190,8 +193,11 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 **`token:"x-access-token:${github-app-installation}"`**
 
 The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
-**Note** The installation tokens expire after 1 hour and need to be regenerated regularly.
-Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+<!-- prettier-ignore -->
+!!! note
+    The installation tokens expire after 1 hour and need to be regenerated regularly.
+    Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
@@ -214,6 +220,8 @@ Give the bot App password the following permission scopes:
 - [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
 - [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
 - [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
+
+The bot also needs to be able to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
 
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also be sure to configure the `username` for your bot account too.
@@ -247,7 +255,10 @@ This account can actually be _any_ account on GitHub, and needs only read-only a
 It's used when fetching release notes for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token as you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+<!-- prettier-ignore -->
+!!! note
+    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token.
+    Otherwise you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 

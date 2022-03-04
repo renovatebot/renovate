@@ -32,10 +32,10 @@ export const groups: Record<string, Record<string, Preset>> = {
 };
 
 export function getPreset({
-  packageName: pkgName,
+  repo,
   presetName,
 }: PresetConfig): Preset | undefined {
-  return groups[pkgName]
-    ? groups[pkgName][presetName]
+  return groups[repo] && presetName
+    ? groups[repo][presetName]
     : /* istanbul ignore next */ undefined;
 }

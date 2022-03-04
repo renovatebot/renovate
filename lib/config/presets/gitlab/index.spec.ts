@@ -16,7 +16,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock.scope(gitlabApiHost).get(`${basePath}/branches`).reply(500);
       await expect(
         gitlab.getPreset({
-          packageName: 'some/repo',
+          repo: 'some/repo',
           presetName: 'non-default',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -33,9 +33,9 @@ describe('config/presets/gitlab/index', () => {
         .reply(404, null)
         .get(`${basePath}/files/renovate.json/raw?ref=master`)
         .reply(404, null);
-      await expect(
-        gitlab.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
+      await expect(gitlab.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        PRESET_DEP_NOT_FOUND
+      );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -55,7 +55,7 @@ describe('config/presets/gitlab/index', () => {
         .get(`${basePath}/files/default.json/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
-      const content = await gitlab.getPreset({ packageName: 'some/repo' });
+      const content = await gitlab.getPreset({ repo: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -67,8 +67,8 @@ describe('config/presets/gitlab/index', () => {
         .reply(200, { foo: 'bar' }, {});
 
       const content = await gitlab.getPreset({
-        packageName: 'some/repo',
-        packageTag: 'someTag',
+        repo: 'some/repo',
+        tag: 'someTag',
       });
       expect(content).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -91,7 +91,7 @@ describe('config/presets/gitlab/index', () => {
         .reply(200, { foo: 'bar' }, {});
 
       const content = await gitlab.getPreset({
-        packageName: 'some/repo',
+        repo: 'some/repo',
         presetPath: 'path',
         presetName: 'custom',
       });

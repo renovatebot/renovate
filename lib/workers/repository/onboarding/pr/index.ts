@@ -1,16 +1,22 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../manager/types';
-import { platform } from '../../../../platform';
+import type { PackageFile } from '../../../../modules/manager/types';
+import { platform } from '../../../../modules/platform';
 import { emojify } from '../../../../util/emoji';
-import { deleteBranch, isBranchModified } from '../../../../util/git';
+import {
+  deleteBranch,
+  isBranchConflicted,
+  isBranchModified,
+} from '../../../../util/git';
+import * as template from '../../../../util/template';
+import type { BranchConfig } from '../../../types';
 import {
   addAssigneesReviewers,
   getPlatformPrOptions,
   prepareLabels,
-} from '../../../pr';
-import type { BranchConfig } from '../../../types';
+} from '../../update/pr';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
@@ -76,7 +82,11 @@ If you need any further assistance then you can also [request help here](${confi
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
-    if (existingPr?.isConflicted) {
+    const isConflicted = await isBranchConflicted(
+      config.baseBranch,
+      config.onboardingBranch
+    );
+    if (isConflicted) {
       configDesc += emojify(
         `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );
@@ -94,15 +104,11 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
-  // istanbul ignore if
-  if (config.prHeader) {
-    const prHeader = String(config.prHeader || '');
-    prBody = `${prHeader}\n\n${prBody}`;
+  if (is.string(config.prHeader)) {
+    prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
-  // istanbul ignore if
-  if (config.prFooter) {
-    const prFooter = String(config.prFooter);
-    prBody = `${prBody}\n---\n\n${prFooter}\n`;
+  if (is.string(config.prFooter)) {
+    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
   logger.trace('prBody:\n' + prBody);
 

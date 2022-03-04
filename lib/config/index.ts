@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import { get, getLanguageList, getManagerList } from '../manager';
+import { get, getLanguageList, getManagerList } from '../modules/manager';
 import * as options from './options';
 import type { AllConfig, RenovateConfig, RenovateConfigStage } from './types';
 import { mergeChildConfig } from './utils';

@@ -44,6 +44,7 @@ describe('config/migration', () => {
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        deepExtract: true,
         ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
@@ -85,7 +86,8 @@ describe('config/migration', () => {
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,
-        commitMessage: '{{semanticPrefix}}some commit message {{depNameShort}}',
+        commitMessage:
+          '{{semanticPrefix}}some commit message {{depNameShort}} {{lookupName}}',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
         pathRules: [
@@ -652,27 +654,6 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
   });
-  it('it migrates hostRules fields', () => {
-    const config: RenovateConfig = {
-      hostRules: [
-        { baseUrl: 'https://some.domain.com', token: '123test' },
-        { domainName: 'domain.com', token: '123test' },
-        { hostName: 'some.domain.com', token: '123test' },
-      ],
-    } as any;
-    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-      config,
-      defaultConfig
-    );
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({
-      hostRules: [
-        { matchHost: 'https://some.domain.com', token: '123test' },
-        { matchHost: 'domain.com', token: '123test' },
-        { matchHost: 'some.domain.com', token: '123test' },
-      ],
-    });
-  });
   it('it migrates presets', () => {
     GlobalConfig.set({
       migratePresets: {
@@ -690,31 +671,30 @@ describe('config/migration', () => {
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
-
-  it('it migrates composerIgnorePlatformReqs values', () => {
-    let config: TestRenovateConfig;
-    let res: MigratedConfig;
-
-    config = {
-      composerIgnorePlatformReqs: true,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-
-    config = {
-      composerIgnorePlatformReqs: false,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
-
-    config = {
-      composerIgnorePlatformReqs: [],
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeFalse();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+  it('it migrates regexManagers', () => {
+    const config: RenovateConfig = {
+      regexManagers: [
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+        },
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+          lookupNameTemplate: '{{{holder}}}',
+        } as any,
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
   });
 
   it('it migrates gradle-lite', () => {

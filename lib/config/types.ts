@@ -54,18 +54,20 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
-  semanticCommitScope?: string;
+  semanticCommitScope?: string | null;
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
+  platformCommit?: boolean;
 }
 
 // Config options used only within the global worker
@@ -79,6 +81,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
@@ -153,7 +156,7 @@ export interface CustomManager {
   matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
-  lookupNameTemplate?: string;
+  packageNameTemplate?: string;
   versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
 }
@@ -202,6 +205,7 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;

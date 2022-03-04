@@ -3,8 +3,9 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
 
 interface DependencyDashboard {
@@ -95,10 +96,15 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  allBranches: BranchConfig[]
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
+  const branches = allBranches.filter(
+    (branch) =>
+      branch.result !== BranchResult.Automerged &&
+      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
+  );
   if (
     !(
       config.dependencyDashboard ||
@@ -128,9 +134,7 @@ export async function ensureDependencyDashboard(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
-  const hasBranches =
-    is.nonEmptyArray(branches) &&
-    branches.some((branch) => branch.result !== BranchResult.Automerged);
+  const hasBranches = is.nonEmptyArray(branches);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -145,7 +149,8 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
   if (config.dependencyDashboardHeader?.length) {
-    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+    issueBody +=
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);
@@ -167,7 +172,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -312,7 +317,10 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardFooter?.length) {
-    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
+    issueBody +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
   }
 
   if (config.dependencyDashboardIssue) {
