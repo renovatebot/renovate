@@ -2,7 +2,8 @@ import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
+import { ensureComment } from '../../../modules/platform/comment';
 import { PrState } from '../../../types';
 import {
   deleteBranch,
@@ -34,7 +35,7 @@ async function cleanUpBranches(
           if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
-            await platform.ensureComment({
+            await ensureComment({
               number: pr.number,
               topic: 'Autoclosing Skipped',
               content:

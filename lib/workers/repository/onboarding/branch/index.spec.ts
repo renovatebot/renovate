@@ -12,7 +12,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
-import type { Pr } from '../../../../platform';
+import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
@@ -23,7 +23,7 @@ import { checkOnboardingBranch } from '.';
 const rebase: any = _rebase;
 const configModule: any = _config;
 
-jest.mock('../../../../workers/repository/onboarding/branch/rebase');
+jest.mock('../../../repository/onboarding/branch/rebase');
 jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');

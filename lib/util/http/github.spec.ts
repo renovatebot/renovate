@@ -8,13 +8,13 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as _repositoryCache from '../../util/cache/repository';
-import type { Cache } from '../../util/cache/repository/types';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
+import * as _repositoryCache from '../cache/repository';
+import type { Cache } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
-jest.mock('../../util/cache/repository');
+jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';

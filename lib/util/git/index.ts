@@ -21,9 +21,9 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
-import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
@@ -787,6 +787,18 @@ async function handleCommitAuth(localDir: string): Promise<void> {
   await writeGitAuthor();
 }
 
+/**
+ *
+ * Prepare local branch with commit
+ *
+ * 0. Hard reset
+ * 1. Creates local branch with `origin/` prefix
+ * 2. Perform `git add` (respecting mode) and `git remove` for each file
+ * 3. Perform commit
+ * 4. Check whether resulting commit is empty or not (due to .gitignore)
+ * 5. If not empty, return commit info for further processing
+ *
+ */
 export async function prepareCommit({
   branchName,
   files,

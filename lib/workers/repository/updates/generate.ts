@@ -37,16 +37,16 @@ function getTableValues(
   if (!upgrade.commitBodyTable) {
     return null;
   }
-  const { datasource, lookupName, depName, currentVersion, newVersion } =
+  const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = lookupName || depName;
+  const name = packageName || depName;
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
   logger.debug(
     {
       datasource,
-      lookupName,
+      packageName,
       depName,
       currentVersion,
       newVersion,
@@ -115,7 +115,7 @@ export function generateBranchConfig(
         upgrade.newDigestShort ||
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
-    if (upgrade.isDigest) {
+    if (upgrade.isDigest || upgrade.updateType === 'pin') {
       upgrade.displayFrom = upgrade.currentDigestShort;
       upgrade.displayTo = upgrade.newDigestShort;
     } else if (upgrade.isLockfileUpdate) {
