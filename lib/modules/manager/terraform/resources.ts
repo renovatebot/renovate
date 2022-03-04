@@ -2,8 +2,8 @@ import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
-import type { ExtractionResult, ResourceManagerData } from './types';
 import { analyseTerraformVersion } from './required-version';
+import type { ExtractionResult, ResourceManagerData } from './types';
 import {
   checkIfStringIsPath,
   keyValueExtractionRegex,
