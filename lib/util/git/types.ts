@@ -3,7 +3,7 @@ import type { GitOptions } from '../../types/git';
 export type { DiffResult, StatusResult } from 'simple-git';
 
 export interface GitAuthor {
-  name?: string;
+  name?: string | null;
   address?: string;
 }
 
@@ -73,9 +73,43 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string;
   force?: boolean;
+  platformCommit?: boolean;
+}
+
+export type BranchName = string;
+export type TargetBranchName = BranchName;
+export type SourceBranchName = BranchName;
+
+export type GitConflictsCache = Record<TargetBranchName, TargetBranchConflicts>;
+
+export interface TargetBranchConflicts {
+  targetBranchSha: CommitSha;
+  sourceBranches: Record<SourceBranchName, SourceBranchConflict>;
+}
+
+export interface SourceBranchConflict {
+  sourceBranchSha: CommitSha;
+  isConflicted: boolean;
 }
 
 export interface CommitResult {
-  sha: string;
+  parentCommitSha: string;
+  commitSha: string;
   files: FileChange[];
+}
+
+export interface TreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: string;
+}
+
+/**
+ * Represents a git authentication rule in the form of e.g.:
+ * git config --global url."https://api@github.com/".insteadOf "https://github.com/"
+ */
+export interface AuthenticationRule {
+  url: string;
+  insteadOf: string;
 }

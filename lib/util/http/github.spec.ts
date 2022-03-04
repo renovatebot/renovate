@@ -8,13 +8,13 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
-import * as _repositoryCache from '../../util/cache/repository';
-import type { Cache } from '../../util/cache/repository/types';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
+import * as _repositoryCache from '../cache/repository';
+import type { Cache } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
-jest.mock('../../util/cache/repository');
+jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
@@ -77,10 +77,10 @@ describe('util/http/github', () => {
     });
 
     it('supports different datasources', async () => {
-      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      const githubApiDatasource = new GithubHttp(GithubReleasesDatasource.id);
       hostRules.add({ hostType: 'github', token: 'abc' });
       hostRules.add({
-        hostType: GITHUB_RELEASES_ID,
+        hostType: GithubReleasesDatasource.id,
         token: 'def',
       });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);

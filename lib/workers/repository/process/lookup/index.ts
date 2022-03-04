@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
 import {
   Release,
   getDatasourceList,
@@ -10,14 +11,13 @@ import {
   getPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
-} from '../../../../datasource';
-import { logger } from '../../../../logger';
-import { getRangeStrategy } from '../../../../manager';
+} from '../../../../modules/datasource';
+import { getRangeStrategy } from '../../../../modules/manager';
+import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
-import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -103,6 +103,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioning.isVersion(release.version)
       );
+
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -319,7 +320,7 @@ export async function lookupUpdates(
       res.fixedVersion = currentValue.replace(regEx(/^=+/), '');
     }
     // Add digests if necessary
-    if (supportsDigests(config)) {
+    if (supportsDigests(config.datasource)) {
       if (currentDigest) {
         if (!digestOneAndOnly || !res.updates.length) {
           // digest update
@@ -364,6 +365,12 @@ export async function lookupUpdates(
           update.isLockfileUpdate ||
           (update.newDigest && !update.newDigest.startsWith(currentDigest))
       );
+    // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
+    if (config.rangeStrategy === 'in-range-only') {
+      res.updates = res.updates.filter(
+        (update) => update.newValue === currentValue
+      );
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
       throw err;

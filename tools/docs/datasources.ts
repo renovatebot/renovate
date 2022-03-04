@@ -1,4 +1,4 @@
-import { getDatasources } from '../../lib/datasource';
+import { getDatasources } from '../../lib/modules/datasource';
 import { readFile, updateFile } from '../utils';
 import {
   formatDescription,
