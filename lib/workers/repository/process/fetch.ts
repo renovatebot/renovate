@@ -2,9 +2,12 @@ import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
-import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
-import type { PackageDependency, PackageFile } from '../../../manager/types';
+import { getDefaultConfig } from '../../../modules/datasource';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../../modules/manager/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
@@ -16,8 +19,11 @@ async function fetchDepUpdates(
 ): Promise<PackageDependency> {
   let dep = clone(indep);
   dep.updates = [];
-  if (!is.nonEmptyString(dep.depName?.trim())) {
-    dep.skipReason = 'missing-depname';
+  if (is.string(dep.depName)) {
+    dep.depName = dep.depName.trim();
+  }
+  if (!is.nonEmptyString(dep.depName)) {
+    dep.skipReason = 'invalid-name';
   }
   if (dep.skipReason) {
     return dep;
