@@ -2,7 +2,7 @@ import * as defaultsParser from '../../../../config/defaults';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
-import { detectAllGlobalConfig } from '../../../../manager';
+import { detectAllGlobalConfig } from '../../../../modules/manager';
 import { ensureDir, getSubDirectory, readFile } from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
