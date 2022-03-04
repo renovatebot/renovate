@@ -37,13 +37,15 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
       expect(res).toMatchSnapshot({
         deps: [
           {
-            depName: 'prometheus-operator',
+            depName:
+              'github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator',
             packageName:
               'https://github.com/prometheus-operator/prometheus-operator.git',
             currentValue: 'v0.50.0',
           },
           {
-            depName: 'kube-prometheus',
+            depName:
+              'github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus',
             packageName:
               'ssh://git@github.com/prometheus-operator/kube-prometheus.git',
             currentValue: 'v0.9.0',
@@ -56,7 +58,8 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
       expect(res).toMatchSnapshot({
         deps: [
           {
-            depName: 'prometheus-operator-mixin',
+            depName:
+              'github.com/prometheus-operator/prometheus-operator/jsonnet/mixin',
             packageName:
               'https://github.com/prometheus-operator/prometheus-operator',
             currentValue: 'v0.50.0',

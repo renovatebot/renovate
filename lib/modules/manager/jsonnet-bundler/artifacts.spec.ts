@@ -80,11 +80,11 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [
           {
-            depName: 'foo',
+            depName: 'github.com/foo/foo',
             packageName: 'https://github.com/foo/foo.git',
           },
           {
-            depName: 'foo',
+            depName: 'github.com/foo/foo',
             packageName: 'ssh://git@github.com/foo/foo.git',
             managerData: {
               subdir: 'bar',

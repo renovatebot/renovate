@@ -1,11 +1,9 @@
+import { posix } from 'path';
+import { URL } from 'url';
+
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Dependency, JsonnetFile } from './types';
-
-const gitUrl = regEx(
-  /(ssh:\/\/git@|https:\/\/)([\w.]+)\/([\w:/\-~]*)\/(?<depName>[\w:/-]+)(\.git)?/
-);
 
 export function extractPackageFile(
   content: string,
@@ -45,11 +43,16 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
     return null;
   }
 
-  const match = gitUrl.exec(dependency.source.git.remote);
+  const gitRemote = new URL(dependency.source.git.remote);
+
+  const depName = posix.join(
+    gitRemote.host,
+    gitRemote.pathname.replace(/\.git$/, ''),
+    dependency.source.git.subdir
+  );
 
   return {
-    depName:
-      dependency.name || match.groups.depName || dependency.source.git.remote,
+    depName,
     packageName: dependency.source.git.remote,
     currentValue: dependency.version,
     managerData: { subdir: dependency.source.git.subdir },
