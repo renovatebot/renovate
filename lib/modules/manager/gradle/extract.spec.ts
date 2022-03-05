@@ -242,6 +242,22 @@ describe('modules/manager/gradle/extract', () => {
             },
           },
           {
+            depName: 'com.github.siom79.japicmp:japicmp',
+            groupName: 'com.github.siom79.japicmp',
+            currentValue: '0.15.+',
+            managerData: {
+              fileReplacePosition: 552,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'guava',
+            skipReason: 'multiple-constraint-dep',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
             depName: 'io.gitlab.arturbosch.detekt',
             depType: 'plugin',
             currentValue: '1.17.0',

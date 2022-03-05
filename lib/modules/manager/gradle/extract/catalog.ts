@@ -1,5 +1,6 @@
 import { parse } from '@iarna/toml';
 import deepmerge from 'deepmerge';
+import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
 import type { PackageDependency } from '../../types';
 import type {
@@ -28,6 +29,7 @@ function isArtifactDescriptor(
 interface VersionExtract {
   currentValue?: string;
   fileReplacePosition?: number;
+  skipReason?: SkipReason;
 }
 
 function extractVersion({
@@ -48,17 +50,49 @@ function extractVersion({
   versionSubContent: string;
 }): VersionExtract {
   if (!version) {
-    return {};
-  }
-  const currentValue =
-    typeof version === 'string' ? version : versions[version.ref];
-
-  const fileReplacePosition =
-    typeof version === 'string'
-      ? depStartIndex + findIndexAfter(depSubContent, depName, currentValue)
-      : versionStartIndex +
+    return { skipReason: 'no-version' };
+  } else if (typeof version === 'string') {
+    const fileReplacePosition =
+      depStartIndex + findIndexAfter(depSubContent, depName, version);
+    return { currentValue: version, fileReplacePosition };
+  } else if (typeof version === 'object') {
+    if (version.ref) {
+      // everything else is ignored
+      const currentValue = versions[version.ref];
+      const fileReplacePosition =
+        versionStartIndex +
         findIndexAfter(versionSubContent, version.ref, currentValue);
-  return { currentValue, fileReplacePosition };
+      return { currentValue, fileReplacePosition };
+    }
+
+    // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
+    // https://docs.gradle.org/current/userguide/rich_versions.html
+    const versionKeys = ['require', 'prefer', 'strictly'];
+    let found = false;
+    let currentValue;
+    let fileReplacePosition;
+
+    for (const key of versionKeys) {
+      if (key in version) {
+        if (found) {
+          // Currently, we only support one version constraint at a time
+          return { skipReason: 'multiple-constraint-dep' };
+        }
+        found = true;
+
+        currentValue = version[key];
+        fileReplacePosition =
+          depStartIndex +
+          findIndexAfter(depSubContent, version[key], currentValue);
+      }
+    }
+
+    if (found) {
+      return { currentValue, fileReplacePosition };
+    }
+  }
+
+  return { skipReason: 'unknown-version' };
 }
 
 function extractDependency({
@@ -100,7 +134,7 @@ function extractDependency({
     };
   }
 
-  const { currentValue, fileReplacePosition } = extractVersion({
+  const { currentValue, fileReplacePosition, skipReason } = extractVersion({
     version: descriptor.version,
     versions,
     depStartIndex,
@@ -110,10 +144,10 @@ function extractDependency({
     versionSubContent,
   });
 
-  if (!currentValue) {
+  if (skipReason) {
     return {
       depName,
-      skipReason: 'no-version',
+      skipReason: skipReason,
     };
   }
 

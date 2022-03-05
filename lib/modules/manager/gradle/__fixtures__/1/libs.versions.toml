@@ -8,6 +8,8 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 mockito = { group = "org.mockito", name = "mockito-core", version = "3.10.0" }
+japicmp = { module = "com.github.siom79.japicmp:japicmp", version.require = "0.15.+" }
+guava = { module = "com.google.guava:guava", version.require = "30.1.1-jre", version.prefer = "31.1-jre" }
 
 [bundles]
 kotest = [ "kotest-runner-junit5", "kotest-assertions-core-jvm" ]
