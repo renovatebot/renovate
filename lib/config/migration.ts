@@ -219,9 +219,6 @@ export function migrateConfig(
         migratedConfig.major = migratedConfig.major || {};
         migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
-      } else if (key === 'renovateFork' && is.boolean(val)) {
-        delete migratedConfig.renovateFork;
-        migratedConfig.includeForks = val;
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
