@@ -14,6 +14,7 @@ import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
+import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
@@ -64,6 +65,7 @@ export class MigrationsService {
     RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
+    RenovateForkMigration,
     RequiredStatusChecksMigration,
     SemanticCommitsMigration,
     TrustLevelMigration,
