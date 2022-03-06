@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../logger';
 
 // Return true if the match string is found at index in content
@@ -23,11 +22,6 @@ export function replaceAt(
     newString +
     content.substr(index + oldString.length)
   );
-}
-
-// Return true if the input is non-empty and not whitespace string
-export function nonEmptyStringAndNotWhitespace(input: unknown): boolean {
-  return is.nonEmptyString(input) && !is.emptyStringOrWhitespace(input);
 }
 
 /**

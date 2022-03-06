@@ -1,4 +1,4 @@
-import { getManagerList } from '../../manager';
+import { getManagerList } from '../../modules/manager';
 import type { ValidationMessage } from '../types';
 import type { CheckManagerArgs } from './types';
 

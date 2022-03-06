@@ -1,4 +1,4 @@
-import { DockerDatasource } from '../../../../datasource/docker';
+import { DockerDatasource } from '../../../../modules/datasource/docker';
 import getArgv from './__fixtures__/argv';
 import * as cli from './cli';
 import type { ParseConfigOptions } from './types';

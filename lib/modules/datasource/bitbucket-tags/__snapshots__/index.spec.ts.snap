@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/bitbucket-tags/index getDigest returns commits from bitbucket cloud 1`] = `"123"`;
+
+exports[`modules/datasource/bitbucket-tags/index getDigest returns commits from bitbucket cloud 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/commits/master",
+  },
+]
+`;
+
+exports[`modules/datasource/bitbucket-tags/index getDigest with no commits returns commits from bitbucket cloud 1`] = `null`;
+
+exports[`modules/datasource/bitbucket-tags/index getDigest with no commits returns commits from bitbucket cloud 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/commits/master",
+  },
+]
+`;
+
+exports[`modules/datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 1`] = `
+Object {
+  "registryUrl": "https://bitbucket.org",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "2020-11-19T09:05:35.000Z",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+    Object {
+      "gitRef": "v1.1.1",
+      "version": "v1.1.1",
+    },
+  ],
+  "sourceUrl": "https://bitbucket.org/some/dep2",
+}
+`;
+
+exports[`modules/datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/refs/tags",
+  },
+]
+`;
+
+exports[`modules/datasource/bitbucket-tags/index getTagCommit returns tags commit hash from bitbucket cloud 1`] = `"123"`;
+
+exports[`modules/datasource/bitbucket-tags/index getTagCommit returns tags commit hash from bitbucket cloud 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/refs/tags/v1.0.0",
+  },
+]
+`;
