@@ -181,7 +181,7 @@ function extractDependency({
   if (skipReason) {
     return {
       depName,
-      skipReason: skipReason,
+      skipReason,
     };
   }
 
