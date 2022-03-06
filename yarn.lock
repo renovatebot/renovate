@@ -1878,10 +1878,17 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@pnpm/error@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/error/-/error-2.0.0.tgz#2ca140a3bd26b070405e8eec70e121e65a1475e0"
-  integrity sha512-mgj4h0LWGpDPZwsEH75VFQhr2Njut3PcaCQatERIoO3zmKGqCsLfla9cWYH9+zn0fcwnKhnJ+FBzoiY2LhnCtw==
+"@pnpm/constants@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/constants/-/constants-5.0.0.tgz#52f4d14d1ec3accd397b9e49eef377d0d39020e6"
+  integrity sha512-VhUGKR5jvAtoBHgHAB3Kfc9g42ocVUws9iOafGAQ+xjR8uLokUCReXDpLXRRtrqw8N8yyh3gLNpCJs/AYadA1g==
+
+"@pnpm/error@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/error/-/error-2.1.0.tgz#b309bd4025150943fffb5e86a11b177b87a09989"
+  integrity sha512-IxtPG61WgxsDNbtWW+128RiRo6WHhm7Dm2vm77xxC/zEi/uQ35Uf59olhVT3m2/ETDw/iz7Lv1RpvPYTsglX9g==
+  dependencies:
+    "@pnpm/constants" "5.0.0"
 
 "@pnpm/graceful-fs@1.0.0":
   version "1.0.0"
@@ -1890,12 +1897,12 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@2.0.12":
-  version "2.0.12"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-2.0.12.tgz#e13b13bb8b326bf2ccefd84a65cabef63c514714"
-  integrity sha512-hZxgwaiVLSTiTv6igNgD2DhjxSaSoRoqTOUXD20F/JAY2shbFo3E7SQrysJB/5gwMmGbNP7zYCaFRBzANGi7WA==
+"@pnpm/read-project-manifest@2.0.13":
+  version "2.0.13"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-2.0.13.tgz#0fec7dbf25e95ae1aa6dfe926b2435ab34cba857"
+  integrity sha512-RLZJ6aMBBjEyN/T1n6V3VxSa3qmt/ytEAW9IAUZ9nwlSNZTn5i7nHvYnjdd+N+B6UwxVjWjWAgwGPYxppxzdZw==
   dependencies:
-    "@pnpm/error" "2.0.0"
+    "@pnpm/error" "2.1.0"
     "@pnpm/graceful-fs" "1.0.0"
     "@pnpm/types" "7.10.0"
     "@pnpm/write-project-manifest" "2.0.11"
@@ -4604,12 +4611,12 @@ filter-obj@^1.1.0:
   resolved "https://registry.yarnpkg.com/filter-obj/-/filter-obj-1.1.0.tgz#9b311112bc6c6127a16e016c6c5d7f19e0805c5b"
   integrity sha1-mzERErxsYSehbgFsbF1/GeCAXFs=
 
-find-packages@8.0.12:
-  version "8.0.12"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-8.0.12.tgz#397aaf2c26602408dbe20be1b48cfcafa40387f3"
-  integrity sha512-iDlQP1wx2YbIzfQ/JEUL27yGsNTfxDfVkynsMiaLXc3alc7CN2Y4ojb66C39hev8OeHo9bNrVTp9/u0aFUmxDA==
+find-packages@8.0.13:
+  version "8.0.13"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-8.0.13.tgz#e3e26196b7108bfd172b8e7ff39fe4566857f65e"
+  integrity sha512-quqz6Q25rbTusGKWVb4aKX+cYBoerAEGU+HUvW6CbPPNWkuPbrCmQUSCNKTgEjhoOi2IaRbzkGJhdnSI8Ztpkw==
   dependencies:
-    "@pnpm/read-project-manifest" "2.0.12"
+    "@pnpm/read-project-manifest" "2.0.13"
     "@pnpm/types" "7.10.0"
     fast-glob "^3.2.4"
     p-filter "^2.1.0"
