@@ -1,0 +1,180 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/bitbucket/comments ensureComment() add comment if not found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+  Object {
+    "body": Object {
+      "content": Object {
+        "raw": "### topic
+
+content",
+      },
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "42",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureComment() add updates comment if necessary 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+  Object {
+    "body": Object {
+      "content": Object {
+        "raw": "### some-subject
+
+some
+content",
+      },
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "55",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments/5",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureComment() does not throw 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/comments?pagelen=100",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureComment() skips comment 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureCommentRemoval() deletes comment by content if found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "DELETE",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments/5",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureCommentRemoval() deletes comment by topic if found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "DELETE",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments/5",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureCommentRemoval() deletes nothing 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket/comments ensureCommentRemoval() does not throw 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+  },
+]
+`;

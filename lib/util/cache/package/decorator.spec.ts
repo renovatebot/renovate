@@ -1,6 +1,6 @@
 import os from 'os';
 import { mock } from 'jest-mock-extended';
-import type { GetReleasesConfig } from '../../../datasource';
+import type { GetReleasesConfig } from '../../../modules/datasource';
 import * as memCache from '../memory';
 import { cache } from './decorator';
 import * as packageCache from '.';

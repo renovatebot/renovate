@@ -4,8 +4,8 @@ import { fs, logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
-import * as datasourceDocker from '../../datasource/docker';
-import * as _platform from '../../platform';
+import { DockerDatasource } from '../../modules/datasource/docker';
+import * as _platform from '../../modules/platform';
 import * as _repositoryWorker from '../repository';
 import * as _configParser from './config/parse';
 import * as _limits from './limits';
@@ -43,6 +43,7 @@ describe('workers/global/index', () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       repositories: [],
       globalExtends: [':pinVersions'],
+      hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
     });
     presets.resolveConfigPresets.mockResolvedValueOnce({});
     await expect(globalWorker.start()).resolves.toBe(0);
@@ -81,7 +82,7 @@ describe('workers/global/index', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
           username: 'some-user',
           password: 'some-password',
         },
@@ -100,7 +101,7 @@ describe('workers/global/index', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: datasourceDocker.id,
+          hostType: DockerDatasource.id,
           username: 'some-user',
           password: 'some-password',
         },

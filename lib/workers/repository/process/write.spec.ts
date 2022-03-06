@@ -1,7 +1,7 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
-import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
+import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
 

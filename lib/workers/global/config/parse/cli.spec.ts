@@ -1,4 +1,4 @@
-import * as datasourceDocker from '../../../../datasource/docker';
+import { DockerDatasource } from '../../../../modules/datasource/docker';
 import getArgv from './__fixtures__/argv';
 import * as cli from './cli';
 import type { ParseConfigOptions } from './types';
@@ -78,13 +78,13 @@ describe('workers/global/config/parse/cli', () => {
     });
     it('parses json lists correctly', () => {
       argv.push(
-        `--host-rules=[{"matchHost":"docker.io","hostType":"${datasourceDocker.id}","username":"user","password":"password"}]`
+        `--host-rules=[{"matchHost":"docker.io","hostType":"${DockerDatasource.id}","username":"user","password":"password"}]`
       );
       expect(cli.getConfig(argv)).toEqual({
         hostRules: [
           {
             matchHost: 'docker.io',
-            hostType: datasourceDocker.id,
+            hostType: DockerDatasource.id,
             username: 'user',
             password: 'password',
           },

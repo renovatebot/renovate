@@ -1,0 +1,405 @@
+{
+  "minified": "composer/2.0",
+  "packages": {
+    "drewm/mailchimp-api": [
+      {
+        "name": "drewm/mailchimp-api",
+        "description": "Super-simple, minimum abstraction MailChimp API v3 wrapper",
+        "keywords": [],
+        "homepage": "https://github.com/drewm/mailchimp-api",
+        "version": "v2.5.4",
+        "version_normalized": "2.5.4.0",
+        "license": [
+          "MIT"
+        ],
+        "authors": [
+          {
+            "name": "Drew McLellan",
+            "email": "drew.mclellan@gmail.com",
+            "homepage": "http://allinthehead.com/"
+          }
+        ],
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "c6cdfab4ca6ddbc3b260913470bd0a4a5cb84c7a"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/c6cdfab4ca6ddbc3b260913470bd0a4a5cb84c7a",
+          "reference": "c6cdfab4ca6ddbc3b260913470bd0a4a5cb84c7a",
+          "shasum": ""
+        },
+        "type": "library",
+        "time": "2019-08-06T09:24:58+00:00",
+        "autoload": {
+          "psr-4": {
+            "DrewM\\MailChimp\\": "src"
+          }
+        },
+        "require": {
+          "php": ">=5.3",
+          "ext-curl": "*",
+          "ext-json": "*"
+        },
+        "require-dev": {
+          "phpunit/phpunit": "7.0.*",
+          "vlucas/phpdotenv": "^2.0"
+        },
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/master"
+        }
+      },
+      {
+        "version": "v2.5.3",
+        "version_normalized": "2.5.3.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "a6519cafba509e754e748d93f3532ad7f3aa515a"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/a6519cafba509e754e748d93f3532ad7f3aa515a",
+          "reference": "a6519cafba509e754e748d93f3532ad7f3aa515a",
+          "shasum": ""
+        },
+        "time": "2019-03-28T15:20:43+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.5.3"
+        }
+      },
+      {
+        "version": "v2.5.2",
+        "version_normalized": "2.5.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "3e290e5640f56292b06403f3f4d3574e1e777948"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/3e290e5640f56292b06403f3f4d3574e1e777948",
+          "reference": "3e290e5640f56292b06403f3f4d3574e1e777948",
+          "shasum": ""
+        },
+        "time": "2019-03-26T09:00:38+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.5.2"
+        }
+      },
+      {
+        "version": "v2.5.1",
+        "version_normalized": "2.5.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "40296b5ea9d8b53e6478891e11dff30c1ef96cdc"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/40296b5ea9d8b53e6478891e11dff30c1ef96cdc",
+          "reference": "40296b5ea9d8b53e6478891e11dff30c1ef96cdc",
+          "shasum": ""
+        },
+        "time": "2019-03-19T11:43:38+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/master"
+        }
+      },
+      {
+        "version": "v2.5",
+        "version_normalized": "2.5.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "f532fa26cd6e7d17c9ba40a757d8c6bfee47dace"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/f532fa26cd6e7d17c9ba40a757d8c6bfee47dace",
+          "reference": "f532fa26cd6e7d17c9ba40a757d8c6bfee47dace",
+          "shasum": ""
+        },
+        "time": "2018-02-16T15:31:05+00:00",
+        "require": {
+          "php": ">=5.3",
+          "ext-curl": "*"
+        },
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.5"
+        }
+      },
+      {
+        "version": "v2.4",
+        "version_normalized": "2.4.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "fe480bb652f85270227bf6d639b0026a531f21fc"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/fe480bb652f85270227bf6d639b0026a531f21fc",
+          "reference": "fe480bb652f85270227bf6d639b0026a531f21fc",
+          "shasum": ""
+        },
+        "time": "2017-02-16T13:24:20+00:00",
+        "require-dev": {
+          "phpunit/phpunit": "4.0.*",
+          "vlucas/phpdotenv": "^2.0"
+        },
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/master"
+        }
+      },
+      {
+        "version": "v2.3",
+        "version_normalized": "2.3.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "6a5373378f8e61284be81d6424d22fb2a3a1ff9e"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/6a5373378f8e61284be81d6424d22fb2a3a1ff9e",
+          "reference": "6a5373378f8e61284be81d6424d22fb2a3a1ff9e",
+          "shasum": ""
+        },
+        "time": "2016-12-21T14:50:24+00:00"
+      },
+      {
+        "version": "v2.2.4",
+        "version_normalized": "2.2.4.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "89b7dbc54b7ba8c2e249d6e63f66d22ecb8070f8"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/89b7dbc54b7ba8c2e249d6e63f66d22ecb8070f8",
+          "reference": "89b7dbc54b7ba8c2e249d6e63f66d22ecb8070f8",
+          "shasum": ""
+        },
+        "time": "2016-07-01T15:53:33+00:00"
+      },
+      {
+        "version": "v2.2.3",
+        "time": "2016-07-01T15:53:33.000Z",
+        "version_normalized": "2.2.3.0"
+      },
+      {
+        "version": "v2.2.2",
+        "version_normalized": "2.2.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "6ebcfd131fd6f3cac69be9fccb6c3f8102736952"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/6ebcfd131fd6f3cac69be9fccb6c3f8102736952",
+          "reference": "6ebcfd131fd6f3cac69be9fccb6c3f8102736952",
+          "shasum": ""
+        },
+        "time": "2016-07-01T09:58:24+00:00"
+      },
+      {
+        "version": "v2.2.1",
+        "version_normalized": "2.2.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "a2bf78208c49b205482c5ca884cb45a8cd266d5c"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/a2bf78208c49b205482c5ca884cb45a8cd266d5c",
+          "reference": "a2bf78208c49b205482c5ca884cb45a8cd266d5c",
+          "shasum": ""
+        },
+        "time": "2016-04-23T18:00:21+00:00"
+      },
+      {
+        "version": "v2.2",
+        "version_normalized": "2.2.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "590fb71e3493b5daba382c44f714f2e25d785814"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/590fb71e3493b5daba382c44f714f2e25d785814",
+          "reference": "590fb71e3493b5daba382c44f714f2e25d785814",
+          "shasum": ""
+        },
+        "time": "2016-04-23T12:43:28+00:00"
+      },
+      {
+        "version": "v2.1.3",
+        "version_normalized": "2.1.3.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "6188e2be5827efb6595f63ad6f01a26e84bd39f7"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/6188e2be5827efb6595f63ad6f01a26e84bd39f7",
+          "reference": "6188e2be5827efb6595f63ad6f01a26e84bd39f7",
+          "shasum": ""
+        },
+        "time": "2016-04-12T09:09:47+00:00",
+        "require": {
+          "php": ">=5.3"
+        },
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.1.3"
+        }
+      },
+      {
+        "version": "v2.1.2",
+        "version_normalized": "2.1.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "f4539014e9cc96eab0f187f52eb60499518a31bb"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/f4539014e9cc96eab0f187f52eb60499518a31bb",
+          "reference": "f4539014e9cc96eab0f187f52eb60499518a31bb",
+          "shasum": ""
+        },
+        "time": "2016-04-06T12:41:37+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/master"
+        }
+      },
+      {
+        "version": "v2.1.1",
+        "version_normalized": "2.1.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "86f529eba05a7e4c3a3e091aed8ff056137e6251"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/86f529eba05a7e4c3a3e091aed8ff056137e6251",
+          "reference": "86f529eba05a7e4c3a3e091aed8ff056137e6251",
+          "shasum": ""
+        },
+        "time": "2016-04-06T08:37:20+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.1.1"
+        }
+      },
+      {
+        "version": "v2.1",
+        "version_normalized": "2.1.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "a9bf617afb5a9bcb2601f5cc23b01a7b581d5659"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/a9bf617afb5a9bcb2601f5cc23b01a7b581d5659",
+          "reference": "a9bf617afb5a9bcb2601f5cc23b01a7b581d5659",
+          "shasum": ""
+        },
+        "time": "2016-01-30T16:12:54+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.1"
+        }
+      },
+      {
+        "version": "v2.0",
+        "version_normalized": "2.0.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "a2eb58b615aff713fcb1714e33f321712c5be3c8"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/a2eb58b615aff713fcb1714e33f321712c5be3c8",
+          "reference": "a2eb58b615aff713fcb1714e33f321712c5be3c8",
+          "shasum": ""
+        },
+        "time": "2016-01-17T13:08:01+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v2.0"
+        }
+      },
+      {
+        "description": "Super-simple, minimum abstraction MailChimp API v2 wrapper",
+        "version": "v1.1",
+        "version_normalized": "1.1.0.0",
+        "authors": [
+          {
+            "name": "Drew McLellan",
+            "homepage": "http://allinthehead.com/"
+          }
+        ],
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "707d555962442b21a75683a56bdb7cebd0a19f72"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/707d555962442b21a75683a56bdb7cebd0a19f72",
+          "reference": "707d555962442b21a75683a56bdb7cebd0a19f72",
+          "shasum": ""
+        },
+        "time": "2015-07-07T15:38:25+00:00",
+        "autoload": {
+          "psr-0": {
+            "Drewm": "src/"
+          }
+        },
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/v1.1"
+        },
+        "require-dev": "__unset"
+      },
+      {
+        "version": "v1.0",
+        "version_normalized": "1.0.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/drewm/mailchimp-api.git",
+          "reference": "0b763f05fe18610061b8289a399a9d0569036a50"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/0b763f05fe18610061b8289a399a9d0569036a50",
+          "reference": "0b763f05fe18610061b8289a399a9d0569036a50",
+          "shasum": ""
+        },
+        "time": "2014-05-30T16:51:39+00:00",
+        "support": {
+          "issues": "https://github.com/drewm/mailchimp-api/issues",
+          "source": "https://github.com/drewm/mailchimp-api/tree/master"
+        }
+      }
+    ]
+  }
+}

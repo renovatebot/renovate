@@ -90,7 +90,7 @@ export const allowedFields = {
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
   logJSON: 'ChangeLogResult object for the upgrade',
-  lookupName: 'The full name that was used to look up the dependency.',
+  packageName: 'The full name that was used to look up the dependency.',
   newDigest: 'The new digest value',
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
@@ -161,9 +161,9 @@ function getFilteredObject(input: CompileInput): FilteredObject {
   for (const field of allAllowed) {
     const value = obj[field];
     if (is.array(value)) {
-      res[field] = value.map((element) =>
-        getFilteredObject(element as CompileInput)
-      );
+      res[field] = value
+        .filter(is.plainObject)
+        .map((element) => getFilteredObject(element as CompileInput));
     } else if (is.plainObject(value)) {
       res[field] = getFilteredObject(value);
     } else if (!is.undefined(value)) {
