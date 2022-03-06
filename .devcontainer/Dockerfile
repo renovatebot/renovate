@@ -1,4 +1,4 @@
-FROM containerbase/node:14.19.0@sha256:fee770b8a7748cf2a76cb084f05989a23c275d4b7d641a7c5732208936328694
+FROM containerbase/node:14.19.0@sha256:83447e328a40da1b79345ff6cb883be59059d58f1e778eae6dc12951fe375546
 
 
 # renovate: datasource=npm
