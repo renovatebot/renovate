@@ -30,7 +30,7 @@ function replaceAsString(
   const searchString = `"${oldValue}"`;
   let newString = `"${newValue}"`;
 
-  if (oldValue.match(patchReg)) {
+  if (patchReg.test(oldValue)) {
     //todo tests
     // "patch:lodash@npm:4.16.0#patches/lodash.patch".replace(new RegExp("(patch:lodash@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#");
     // "patch:metro@0.58.0#./.patches/metro.patch".replace(new RegExp("(patch:metro@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#";
