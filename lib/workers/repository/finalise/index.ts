@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '../../../config/types';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
 import { pruneStaleBranches } from './prune';

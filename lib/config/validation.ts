@@ -1,8 +1,11 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
-import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
+import {
+  hasValidSchedule,
+  hasValidTimezone,
+} from '../workers/repository/update/branch/schedule';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
@@ -382,7 +385,7 @@ export async function validateConfig(
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
-                'lookupNameTemplate',
+                'packageNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',

@@ -2,8 +2,8 @@ import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
-import { ensureComment } from '../../../platform/comment';
+import { platform } from '../../../modules/platform';
+import { ensureComment } from '../../../modules/platform/comment';
 import { PrState } from '../../../types';
 import {
   deleteBranch,

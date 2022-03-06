@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../config';
 import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
-import * as allVersioning from '../versioning';
+import * as allVersioning from '../modules/versioning';
 import { configRegexPredicate, regEx } from './regex';
 
 function matchesRule(
