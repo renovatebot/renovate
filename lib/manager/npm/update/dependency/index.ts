@@ -1,8 +1,11 @@
 import { dequal } from 'dequal';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../logger';
+import { regEx } from '../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
+
+const patchReg = regEx('patch:.*@(npm:)?.*#.*');
 
 function replaceAsString(
   parsedContents: PackageJson,
@@ -25,7 +28,20 @@ function replaceAsString(
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
-  const newString = `"${newValue}"`;
+  let newString = `"${newValue}"`;
+
+  if (oldValue.match(patchReg)) {
+    //todo tests
+    // "patch:lodash@npm:4.16.0#patches/lodash.patch".replace(new RegExp("(patch:lodash@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#");
+    // "patch:metro@0.58.0#./.patches/metro.patch".replace(new RegExp("(patch:metro@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#";
+    // "patch:metro@^0.58.0#./.patches/metro.patch".replace(new RegExp("(patch:metro@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#");
+    const regex = new RegExp('(patch:' + depName + '@(npm:)?).*#');
+    const patch = oldValue.replace(regex, '$1' + newValue + '#');
+    if (patch) {
+      parsedContents[depType][depName] = patch;
+      newString = `"${patch}"`;
+    }
+  }
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
