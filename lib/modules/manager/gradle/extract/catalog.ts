@@ -93,7 +93,7 @@ function extractLiteralVersion({
     const fileReplacePosition =
       depStartIndex + findIndexAfter(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
-  } else if (is.object(version)) {
+  } else if (is.plainObject(version)) {
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html
     // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
@@ -114,7 +114,7 @@ function extractLiteralVersion({
         }
         found = true;
 
-        currentValue = version[key];
+        currentValue = version[key] as string;
         fileReplacePosition =
           depStartIndex +
           findIndexAfter(depSubContent, sectionKey, currentValue);
