@@ -5,7 +5,7 @@ import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { platform as _platform } from '../lib/platform';
+import { platform as _platform } from '../lib/modules/platform';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';

@@ -1,9 +1,9 @@
 import { PlatformId } from '../../constants';
-import { getManagers } from '../../manager';
-import { getPlatformList } from '../../platform';
-import { getVersioningList } from '../../versioning';
-import * as dockerVersioning from '../../versioning/docker';
-import * as pep440Versioning from '../../versioning/pep440';
+import { getManagers } from '../../modules/manager';
+import { getPlatformList } from '../../modules/platform';
+import { getVersioningList } from '../../modules/versioning';
+import * as dockerVersioning from '../../modules/versioning/docker';
+import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -207,15 +207,6 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     cli: false,
     env: false,
-  },
-  {
-    name: 'deepExtract',
-    description: `Enable extraction of dependencies using package managers.`,
-    type: 'boolean',
-    default: false,
-    cli: false,
-    env: false,
-    supportedManagers: ['gradle'],
   },
   {
     name: 'repositoryCache',
@@ -2093,9 +2084,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'lookupNameTemplate',
+    name: 'packageNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
+      'Optional packageName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
