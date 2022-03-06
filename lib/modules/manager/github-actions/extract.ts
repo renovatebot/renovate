@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)\s*['"]?(?:#\s+(?:renovate:\s+)?tag=(?<tag>.+?))?)\s*?$/
+  /^\s+-?\s+?uses: (?<replaceString>(?<quoteType>['"])?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[^#'"\s]+)['"]?(?:\s*#\s+(?:renovate:\s+)?tag=(?<tag>.+))?)\s*?/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -39,7 +39,9 @@ export function extractPackageFile(content: string): PackageFile | null {
         path = '',
         tag,
         replaceString,
+        quoteType,
       } = tagMatch.groups;
+      const quoteInsert = quoteType || '';
       const dep: PackageDependency = {
         depName,
         commitMessageTopic: '{{{depName}}} action',
@@ -47,7 +49,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
+        autoReplaceStringTemplate: `${quoteInsert}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quoteInsert}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quoteInsert}{{/unless}}`,
       };
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;
