@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build
-        uses: actions/docker/cli@master
+        uses: actions/docker/cli@master # i should be ignored
         run: build -t conventional-commits .
   node_6_test:
     name: Node 6 Test
