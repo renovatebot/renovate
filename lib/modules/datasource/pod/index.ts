@@ -215,6 +215,7 @@ export class PodDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
     if (!registryUrl) {
       return null;
     }
