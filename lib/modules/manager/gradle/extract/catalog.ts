@@ -8,6 +8,8 @@ import type {
   GradleCatalogArtifactDescriptor,
   GradleCatalogModuleDescriptor,
   GradleManagerData,
+  GradleVersionCatalogVersion,
+  GradleVersionPointerTarget,
   VersionPointer,
 } from '../types';
 
@@ -26,6 +28,12 @@ function isArtifactDescriptor(
   return hasKey('group', obj);
 }
 
+function isVersionPointer(
+  obj: GradleVersionCatalogVersion
+): obj is VersionPointer {
+  return hasKey('ref', obj);
+}
+
 interface VersionExtract {
   currentValue?: string;
   fileReplacePosition?: number;
@@ -41,36 +49,61 @@ function extractVersion({
   versionStartIndex,
   versionSubContent,
 }: {
-  version: string | VersionPointer;
-  versions: Record<string, string>;
+  version: GradleVersionCatalogVersion;
+  versions: Record<string, GradleVersionPointerTarget>;
   depStartIndex: number;
   depSubContent: string;
   depName: string;
   versionStartIndex: number;
   versionSubContent: string;
 }): VersionExtract {
+  if (isVersionPointer(version)) {
+    // everything else is ignored
+    return extractLiteralVersion({
+      version: versions[version.ref],
+      depStartIndex: versionStartIndex,
+      depSubContent: versionSubContent,
+      sectionKey: version.ref,
+    });
+  } else {
+    return extractLiteralVersion({
+      version: version,
+      depStartIndex,
+      depSubContent,
+      sectionKey: depName,
+    });
+  }
+}
+
+function extractLiteralVersion({
+  version,
+  depStartIndex,
+  depSubContent,
+  sectionKey,
+}: {
+  version: GradleVersionPointerTarget;
+  depStartIndex: number;
+  depSubContent: string;
+  sectionKey: string;
+}): VersionExtract {
   if (!version) {
     return { skipReason: 'no-version' };
   } else if (typeof version === 'string') {
     const fileReplacePosition =
-      depStartIndex + findIndexAfter(depSubContent, depName, version);
+      depStartIndex + findIndexAfter(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
   } else if (typeof version === 'object') {
-    if (version.ref) {
-      // everything else is ignored
-      const currentValue = versions[version.ref];
-      const fileReplacePosition =
-        versionStartIndex +
-        findIndexAfter(versionSubContent, version.ref, currentValue);
-      return { currentValue, fileReplacePosition };
-    }
-
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html
+    // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
     const versionKeys = ['require', 'prefer', 'strictly'];
     let found = false;
-    let currentValue;
-    let fileReplacePosition;
+    let currentValue: string;
+    let fileReplacePosition: number;
+
+    if (version.reject || version.rejectAll) {
+      return { skipReason: 'unsupported-version' };
+    }
 
     for (const key of versionKeys) {
       if (key in version) {
@@ -83,7 +116,7 @@ function extractVersion({
         currentValue = version[key];
         fileReplacePosition =
           depStartIndex +
-          findIndexAfter(depSubContent, version[key], currentValue);
+          findIndexAfter(depSubContent, sectionKey, currentValue);
       }
     }
 
@@ -108,7 +141,7 @@ function extractDependency({
     | string
     | GradleCatalogModuleDescriptor
     | GradleCatalogArtifactDescriptor;
-  versions: Record<string, string>;
+  versions: Record<string, GradleVersionPointerTarget>;
   depStartIndex: number;
   depSubContent: string;
   depName: string;
@@ -205,7 +238,7 @@ export function parseCatalog(
       typeof pluginDescriptor === 'string'
         ? pluginDescriptor.split(':')
         : [pluginDescriptor.id, pluginDescriptor.version];
-    const { currentValue, fileReplacePosition } = extractVersion({
+    const { currentValue, fileReplacePosition, skipReason } = extractVersion({
       version,
       versions,
       depStartIndex: pluginsStartIndex,
@@ -215,7 +248,7 @@ export function parseCatalog(
       versionSubContent,
     });
 
-    const dependency = {
+    const dependencyBase = {
       depType: 'plugin',
       depName,
       packageName: `${depName}:${depName}.gradle.plugin`,
@@ -224,6 +257,21 @@ export function parseCatalog(
       commitMessageTopic: `plugin ${pluginName}`,
       managerData: { fileReplacePosition },
     };
+
+    let dependency: PackageDependency<GradleManagerData>;
+    if (skipReason) {
+      dependency = {
+        ...dependencyBase,
+        skipReason,
+      };
+    } else {
+      dependency = {
+        ...dependencyBase,
+        currentValue,
+        managerData: { fileReplacePosition },
+      };
+    }
+
     extractedDeps.push(dependency);
   }
   return extractedDeps.map((dep) =>
