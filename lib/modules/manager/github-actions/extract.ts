@@ -41,7 +41,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         replaceString,
         quoteType,
       } = tagMatch.groups;
-      const quoteInsert = quoteType || '';
+      const quoteInsert = quoteType ?? '';
       const dep: PackageDependency = {
         depName,
         commitMessageTopic: '{{{depName}}} action',
