@@ -83,14 +83,6 @@ export class GoProxyDatasource extends Datasource {
       }
     }
 
-    if (result) {
-      const datasource = await BaseGoDatasource.getDatasource(packageName);
-      const sourceUrl = datasource ? getSourceUrl(datasource) : undefined;
-      if (sourceUrl) {
-        result.sourceUrl = sourceUrl;
-      }
-    }
-
     return result;
   }
 
