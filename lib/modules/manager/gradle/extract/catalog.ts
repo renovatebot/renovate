@@ -1,4 +1,5 @@
 import { parse } from '@iarna/toml';
+import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
@@ -88,11 +89,11 @@ function extractLiteralVersion({
 }): VersionExtract {
   if (!version) {
     return { skipReason: 'no-version' };
-  } else if (typeof version === 'string') {
+  } else if (is.string(version)) {
     const fileReplacePosition =
       depStartIndex + findIndexAfter(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
-  } else if (typeof version === 'object') {
+  } else if (is.object(version)) {
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html
     // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
