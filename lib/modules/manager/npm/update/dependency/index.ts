@@ -35,7 +35,7 @@ function replaceAsString(
     // "patch:lodash@npm:4.16.0#patches/lodash.patch".replace(new RegExp("(patch:lodash@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#");
     // "patch:metro@0.58.0#./.patches/metro.patch".replace(new RegExp("(patch:metro@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#";
     // "patch:metro@^0.58.0#./.patches/metro.patch".replace(new RegExp("(patch:metro@(npm:)?[><=~^]+).*#"), "$1"+newValue+"#");
-    const regex = new RegExp('(patch:' + depName + '@(npm:)?).*#');
+    const regex = new regEx('(patch:' + depName + '@(npm:)?).*#');
     const patch = oldValue.replace(regex, '$1' + newValue + '#');
     if (patch) {
       parsedContents[depType][depName] = patch;
