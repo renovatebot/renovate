@@ -2032,12 +2032,7 @@
     lodash "^4.17.4"
     read-pkg-up "^7.0.0"
 
-"@sindresorhus/is@4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.5.0.tgz#7c8293e2268de42d7037249a9e4f905dc890539b"
-  integrity sha512-ZzlL5VTnHZJl8wMWEaYk/13hwMNKLylTSPZRz8+0HIwfRTQMnFgUahDNRRV+rTmPADxQZYxna/nQcStNSCccKg==
-
-"@sindresorhus/is@^4.0.0":
+"@sindresorhus/is@4.6.0", "@sindresorhus/is@^4.0.0":
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
