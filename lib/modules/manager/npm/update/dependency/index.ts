@@ -1,9 +1,7 @@
 import { dequal } from 'dequal';
 import type { PackageJson } from 'type-fest';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { matchAt, replaceAt } from '../../../../util/string';
 import { logger } from '../../../../../logger';
+import { regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
