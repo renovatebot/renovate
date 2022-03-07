@@ -23,8 +23,6 @@ import type {
   PrBlockedBy,
 } from '../../../types';
 import { resolveBranchStatus } from '../branch/status-checks';
-import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
-import type { BranchConfig, BranchUpgradeConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
