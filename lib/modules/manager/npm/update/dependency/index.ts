@@ -6,6 +6,7 @@ import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
 const patchReg = regEx('patch:.*@(npm:)?.*#.*');
+const noSupportRe = regEx('^(file|link|portal|exec|http|https):.*');
 
 function replaceAsString(
   parsedContents: PackageJson,
@@ -32,12 +33,14 @@ function replaceAsString(
 
   if (patchReg.test(oldValue)) {
     const regex = regEx('(patch:' + depName + '@(npm:)?).*#');
-    const patch = oldValue.replace(regex, '$1' + newValue + '#');
+    const match = regex.exec(oldValue);
+    const patch = oldValue.replace(regex, match[1] + newValue + '#');
     if (patch) {
       parsedContents[depType][depName] = patch;
       newString = `"${patch}"`;
     }
   }
+
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
@@ -101,6 +104,11 @@ export function updateDependency({
     }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
+      return fileContent;
+    }
+    // istanbul ignore if
+    if (noSupportRe.test(oldVersion)) {
+      logger.trace('Version protocol is not supported');
       return fileContent;
     }
     let newFileContent = replaceAsString(
