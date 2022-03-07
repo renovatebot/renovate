@@ -646,6 +646,16 @@ const staticGroups = {
       },
     ],
   },
+  rustCrypto: {
+    description: 'Group RustCrypto crates' ,
+    packagesRules: [
+      {
+        matchDatasources: ['crate'],
+        matchSourceUrlPrefixes: ['https://github.com/RustCrypto'],
+        groupName: 'crypto crates',
+      }
+    ]
+  }
 };
 
 const config: any = { ...staticGroups };
