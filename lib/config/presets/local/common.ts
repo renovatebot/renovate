@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Preset } from '../types';
 import {

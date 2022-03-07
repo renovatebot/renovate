@@ -44,6 +44,7 @@ describe('config/migration', () => {
         onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
+        deepExtract: true,
         ignoreNpmrcFile: true,
         separateMajorReleases: true,
         separatePatchReleases: true,
@@ -85,7 +86,8 @@ describe('config/migration', () => {
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,
-        commitMessage: '{{semanticPrefix}}some commit message {{depNameShort}}',
+        commitMessage:
+          '{{semanticPrefix}}some commit message {{depNameShort}} {{lookupName}}',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
         pathRules: [
@@ -668,6 +670,31 @@ describe('config/migration', () => {
     );
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
+  });
+  it('it migrates regexManagers', () => {
+    const config: RenovateConfig = {
+      regexManagers: [
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+        },
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+          lookupNameTemplate: '{{{holder}}}',
+        } as any,
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
   });
 
   it('it migrates gradle-lite', () => {

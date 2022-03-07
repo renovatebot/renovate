@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import {
   RepoContents,
   getRepoContents,
-} from '../../../platform/gitea/gitea-helper';
+} from '../../../modules/platform/gitea/gitea-helper';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';

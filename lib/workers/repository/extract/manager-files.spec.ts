@@ -1,11 +1,11 @@
 import { fs, getConfig, mocked } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
-import * as _html from '../../../manager/html';
+import * as _html from '../../../modules/manager/html';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
 jest.mock('./file-match');
-jest.mock('../../../manager/html');
+jest.mock('../../../modules/manager/html');
 jest.mock('../../../util/fs');
 
 const fileMatch = mocked(_fileMatch);
