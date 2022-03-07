@@ -249,7 +249,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     globalOnly: true,
     allowedValues: ['extract', 'lookup', 'full'],
-    default: '',
+    default: null,
   },
   {
     name: 'printConfig',

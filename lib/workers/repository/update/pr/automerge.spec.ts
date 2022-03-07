@@ -3,6 +3,7 @@ import { Pr, platform as _platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import * as prAutomerge from './automerge';
+import { GlobalConfig } from '../../../../config/global';
 
 jest.mock('../../../../util/git');
 
@@ -102,6 +103,27 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(res).toEqual({
         automerged: false,
         prAutomergeBlockReason: 'Conflicted',
+      });
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun lookup should not automerge', async () => {
+      GlobalConfig.set({ dryRun: 'lookup' });
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      });
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun full should not automerge', async () => {
+      config.automerge = true;
+      GlobalConfig.set({ dryRun: 'full' });
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
       });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });

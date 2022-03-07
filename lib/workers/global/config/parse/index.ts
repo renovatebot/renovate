@@ -22,6 +22,19 @@ export async function parseConfigs(
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = envParser.getConfig(env);
 
+  if (cliConfig?.dryRun === 'true') {
+    cliConfig.dryRun = 'full';
+  }
+  if (envConfig?.dryRun === 'true') {
+    envConfig.dryRun = 'full';
+  }
+  if (cliConfig?.dryRun === 'false') {
+    cliConfig.dryRun = null;
+  }
+  if (envConfig?.dryRun === 'false') {
+    envConfig.dryRun = null;
+  }
+
   let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 

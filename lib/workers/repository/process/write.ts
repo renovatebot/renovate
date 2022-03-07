@@ -37,7 +37,10 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     let branchExisted;
     let res;
-    if (GlobalConfig.get('dryRun') === 'full') {
+    if (
+      GlobalConfig.get('dryRun') !== 'extract' ||
+      GlobalConfig.get('dryRun') !== 'lookup'
+    ) {
       branchExisted = branchExists(branch.branchName);
       res = await processBranch(branch);
     }
