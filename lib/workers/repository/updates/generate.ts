@@ -37,16 +37,16 @@ function getTableValues(
   if (!upgrade.commitBodyTable) {
     return null;
   }
-  const { datasource, lookupName, depName, currentVersion, newVersion } =
+  const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = lookupName || depName;
+  const name = packageName || depName;
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
   logger.debug(
     {
       datasource,
-      lookupName,
+      packageName,
       depName,
       currentVersion,
       newVersion,

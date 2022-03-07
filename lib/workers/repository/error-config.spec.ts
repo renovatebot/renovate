@@ -2,11 +2,11 @@ import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import type { Pr } from '../../platform';
+import type { Pr } from '../../modules/platform';
 import { PrState } from '../../types';
 import { raiseConfigWarningIssue } from './error-config';
 
-jest.mock('../../platform');
+jest.mock('../../modules/platform');
 
 let config: RenovateConfig;
 beforeEach(() => {

@@ -53,6 +53,14 @@ export function migrateConfig(
               (item) => item !== 'prEditNotification'
             );
         }
+      } else if (key === 'matchStrings' && is.array(val)) {
+        migratedConfig.matchStrings = val
+          .map(
+            (matchString) =>
+              is.string(matchString) &&
+              matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
+          )
+          .filter(Boolean);
       } else if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
@@ -115,6 +123,11 @@ export function migrateConfig(
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}'
+        );
+      } else if (is.string(val) && val.includes('{{lookupName}}')) {
+        migratedConfig[key] = val.replace(
+          regEx(/{{lookupName}}/g),
+          '{{packageName}}'
         );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
@@ -206,9 +219,6 @@ export function migrateConfig(
         migratedConfig.major = migratedConfig.major || {};
         migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
-      } else if (key === 'renovateFork' && is.boolean(val)) {
-        delete migratedConfig.renovateFork;
-        migratedConfig.includeForks = val;
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
