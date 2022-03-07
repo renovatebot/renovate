@@ -3,9 +3,9 @@ import Graph from 'graph-data-structure';
 import minimatch from 'minimatch';
 import upath from 'upath';
 import xmldoc from 'xmldoc';
-import { logger } from '../../logger';
-import { readLocalFile } from '../../util/fs';
-import { getFileList } from '../../util/git';
+import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
+import { getFileList } from '../../../util/git';
 
 // Get all package files at any level of ancestry that depend on `packageFileName`
 export async function getDependentPackageFiles(
