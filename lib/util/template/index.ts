@@ -90,7 +90,7 @@ export const allowedFields = {
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
   logJSON: 'ChangeLogResult object for the upgrade',
-  lookupName: 'The full name that was used to look up the dependency.',
+  packageName: 'The full name that was used to look up the dependency.',
   newDigest: 'The new digest value',
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',

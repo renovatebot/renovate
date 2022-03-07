@@ -1,10 +1,11 @@
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
-import { processBranch } from '../../branch';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
+import { processBranch } from '../update/branch';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
+import { GlobalConfig } from '../../../config/global';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -34,8 +35,12 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
-    const branchExisted = branchExists(branch.branchName);
-    const res = await processBranch(branch);
+    let branchExisted;
+    let res;
+    if (GlobalConfig.get('dryRun') === 'full') {
+      branchExisted = branchExists(branch.branchName);
+      res = await processBranch(branch);
+    }
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;

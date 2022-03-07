@@ -9,7 +9,7 @@ import {
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
-import type { Platform } from '../../platform';
+import type { Platform } from '../../modules/platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 

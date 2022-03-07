@@ -1,9 +1,9 @@
 import * as httpMock from '../../../../test/http-mock';
-import { setPlatformApi } from '../../../platform';
+import { setPlatformApi } from '../../../modules/platform';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as bitbucket from '.';
 
-jest.unmock('../../../platform');
+jest.unmock('../../../modules/platform');
 
 const baseUrl = 'https://api.bitbucket.org';
 const basePath = '/2.0/repositories/some/repo/src/HEAD';

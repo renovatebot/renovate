@@ -1,7 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
 import { PlatformId } from '../../constants';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases';
+import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
 

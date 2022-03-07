@@ -157,7 +157,7 @@ export interface CustomManager {
   matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
-  lookupNameTemplate?: string;
+  packageNameTemplate?: string;
   versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
 }

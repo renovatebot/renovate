@@ -1,6 +1,6 @@
-import { resolvePackage } from '../../../datasource/npm/npmrc';
-import type { NpmResponse } from '../../../datasource/npm/types';
 import { logger } from '../../../logger';
+import { resolvePackage } from '../../../modules/datasource/npm/npmrc';
+import type { NpmResponse } from '../../../modules/datasource/npm/types';
 import { Http } from '../../../util/http';
 import type { Preset, PresetConfig } from '../types';
 import {

@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../manager/types';
-import { platform } from '../../../../platform';
+import type { PackageFile } from '../../../../modules/manager/types';
+import { platform } from '../../../../modules/platform';
 import { emojify } from '../../../../util/emoji';
 import {
   deleteBranch,
@@ -11,12 +11,12 @@ import {
   isBranchModified,
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
+import type { BranchConfig } from '../../../types';
 import {
   addAssigneesReviewers,
   getPlatformPrOptions,
   prepareLabels,
-} from '../../../pr';
-import type { BranchConfig } from '../../../types';
+} from '../../update/pr';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
