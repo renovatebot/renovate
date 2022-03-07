@@ -57,7 +57,7 @@ function applyDefaultHeaders(options: Options): void {
 // `request`.
 async function gotRoutine<T>(
   url: string,
-  options: GotOptions | undefined,
+  options: GotOptions,
   requestStats: Partial<RequestStats>
 ): Promise<Response<T>> {
   logger.trace({ url, options }, 'got request');
@@ -91,7 +91,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
 
-    let options: HttpOptions['gotOptions'] = merge<HttpOptions['gotOptions']>(
+    let options: GotOptions = merge<GotOptions>(
       {
         method: 'get',
         ...this.options,
@@ -99,16 +99,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       },
       httpOptions
     );
-
-    if (options) {
-      if (process.env.NODE_ENV === 'test') {
-        options.retry = 0;
-      }
-      options.hooks = {
-        beforeRedirect: [removeAuthorization],
-      };
-      applyDefaultHeaders(options);
+    if (process.env.NODE_ENV === 'test') {
+      options.retry = 0;
     }
+    options.hooks = {
+      beforeRedirect: [removeAuthorization],
+    };
+    applyDefaultHeaders(options);
     options = applyHostRules(url, { gotOptions: options });
     if (options?.enabled === false) {
       throw new Error(HOST_DISABLED);

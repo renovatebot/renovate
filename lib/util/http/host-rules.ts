@@ -8,7 +8,7 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import type { HttpOptions } from './types';
+import type { GotOptions, HttpOptions } from './types';
 
 function findMatchingRules(options: HttpOptions, url: string): HostRule {
   const hostType = options?.gotOptions?.hostType;
@@ -71,11 +71,11 @@ function findMatchingRules(options: HttpOptions, url: string): HostRule {
 export function applyHostRules(
   url: string,
   inOptions: HttpOptions
-): HttpOptions['gotOptions'] {
+): GotOptions {
   const options: HttpOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
-  if (options?.gotOptions?.noAuth) {
+  if (options?.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
     options?.gotOptions?.headers?.authorization ||
@@ -120,7 +120,7 @@ export function applyHostRules(
   if (!hasProxy() && foundRules.enableHttp2 === true && options.gotOptions) {
     options.gotOptions.http2 = true;
   }
-  return options.gotOptions;
+  return options?.gotOptions;
 }
 
 export function getRequestLimit(url: string): number | null {
