@@ -20,7 +20,7 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
     content +=
       '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
     if (!config.suppressNotifications.includes('prIgnoreNotification')) {
-      if (GlobalConfig.get('dryRun')) {
+      if (GlobalConfig.get('dryRun') === 'full') {
         logger.info(
           `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
         );
@@ -33,7 +33,7 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
       }
     }
     if (branchExists(config.branchName)) {
-      if (GlobalConfig.get('dryRun')) {
+      if (GlobalConfig.get('dryRun') === 'full') {
         logger.info('DRY-RUN: Would delete branch ' + config.branchName);
       } else {
         await deleteBranch(config.branchName);

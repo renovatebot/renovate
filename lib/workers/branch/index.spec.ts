@@ -485,7 +485,7 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      GlobalConfig.set({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);

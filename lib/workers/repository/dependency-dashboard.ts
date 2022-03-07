@@ -117,7 +117,7 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
-    if (GlobalConfig.get('dryRun')) {
+    if (GlobalConfig.get('dryRun') === 'full') {
       logger.info(
         { title: config.dependencyDashboardTitle },
         'DRY-RUN: Would close Dependency Dashboard'
@@ -136,7 +136,7 @@ export async function ensureDependencyDashboard(
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches = is.nonEmptyArray(branches);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (GlobalConfig.get('dryRun')) {
+    if (GlobalConfig.get('dryRun') === 'full') {
       logger.info(
         { title: config.dependencyDashboardTitle },
         'DRY-RUN: Would close Dependency Dashboard'
@@ -345,12 +345,12 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  if (GlobalConfig.get('dryRun')) {
+  if (GlobalConfig.get('dryRun') === 'full') {
     logger.info(
       { title: config.dependencyDashboardTitle },
       'DRY-RUN: Would ensure Dependency Dashboard'
     );
-  } else {
+  } else if (!GlobalConfig.get('dryRun')) {
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle,
       reuseTitle,
