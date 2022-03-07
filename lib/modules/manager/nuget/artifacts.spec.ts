@@ -19,7 +19,7 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules');
-jest.mock('../../util/git');
+jest.mock('../../../util/git');
 jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;

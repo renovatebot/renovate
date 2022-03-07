@@ -14,7 +14,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('/tmp/repo'),
 };
 
-describe('manager/nuget/package-tree', () => {
+describe('modules/manager/nuget/package-tree', () => {
   describe('getDependentPackageFiles()', () => {
     beforeEach(() => {
       GlobalConfig.set(adminConfig);
