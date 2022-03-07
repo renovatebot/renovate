@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { initPlatform } from '../../platform';
+import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';

@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
@@ -20,7 +20,7 @@ function generateBranchUpgradeCache(
   const {
     datasource,
     depName,
-    lookupName,
+    packageName,
     fixedVersion,
     currentVersion,
     newVersion,
@@ -31,7 +31,7 @@ function generateBranchUpgradeCache(
   return {
     datasource,
     depName,
-    lookupName,
+    packageName,
     fixedVersion,
     currentVersion,
     newVersion,
