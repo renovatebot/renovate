@@ -122,18 +122,51 @@ function applyProps(
   depPackageFile: string,
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
+  let result = dep;
+  let anyChange = false;
+
+  do {
+    const [returnedResult, returnedAnyChange] = applyPropsInternal(
+      result,
+      depPackageFile,
+      props
+    );
+    result = returnedResult;
+    anyChange = returnedAnyChange;
+  } while (anyChange);
+
+  if (containsPlaceholder(result.depName)) {
+    result.skipReason = 'name-placeholder';
+  } else if (containsPlaceholder(result.currentValue)) {
+    result.skipReason = 'version-placeholder';
+  }
+
+  return result;
+}
+
+function applyPropsInternal(
+  dep: PackageDependency<Record<string, any>>,
+  depPackageFile: string,
+  props: MavenProp
+): [PackageDependency<Record<string, any>>, boolean] {
+  let anyChange = false;
+
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${.*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];
-      return propValue ? propValue.val : substr;
+      if (propValue) {
+        anyChange = true;
+        return propValue.val;
+      }
+      return substr;
     });
 
   const depName = replaceAll(dep.depName);
   const registryUrls = dep.registryUrls.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
-  let propSource = null;
+  let propSource = dep.propSource;
   let groupName = null;
   const currentValue = dep.currentValue.replace(
     regEx(/^\${.*?}$/),
@@ -146,6 +179,7 @@ function applyProps(
         }
         fileReplacePosition = propValue.fileReplacePosition;
         propSource = propValue.packageFile;
+        anyChange = true;
         return propValue.val;
       }
       return substr;
@@ -165,17 +199,11 @@ function applyProps(
     result.groupName = groupName;
   }
 
-  if (containsPlaceholder(depName)) {
-    result.skipReason = 'name-placeholder';
-  } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = 'version-placeholder';
-  }
-
   if (propSource && depPackageFile !== propSource) {
     result.editFile = propSource;
   }
 
-  return result;
+  return [result, anyChange];
 }
 
 function resolveParentFile(packageFile: string, parentPath: string): string {

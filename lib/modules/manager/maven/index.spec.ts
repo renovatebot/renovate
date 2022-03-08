@@ -10,6 +10,7 @@ const pomParent = loadFixture('parent.pom.xml');
 const pomChild = loadFixture('child.pom.xml');
 const origContent = loadFixture('grouping.pom.xml');
 const settingsContent = loadFixture('mirror.settings.xml');
+const recursiveProps = loadFixture('recursive_props.pom.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -169,6 +170,15 @@ describe('modules/manager/maven/index', () => {
 
       expect(updatedDep.registryUrls).toContain('http://example.com/');
       expect(updatedDep.currentValue).toEqual(newValue);
+    });
+
+    it('should apply props recursively', () => {
+      const [{ deps }] = resolveParents([extractPackage(recursiveProps)]);
+      const dep = deps.find(
+        ({ depName }) =>
+          depName === 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7'
+      );
+      expect(dep).toBeDefined();
     });
 
     it('should include registryUrls from parent pom files', async () => {
