@@ -1242,7 +1242,7 @@ const options: RenovateOptions[] = [
     default: {
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
-      commitMessageTopic: '{{{depName}}} commit digest',
+      commitMessageTopic: '{{{depName}}} digest',
     },
     cli: false,
     mergeable: true,
