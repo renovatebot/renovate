@@ -4,12 +4,14 @@ import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('delay');
 const conflictsCache = mocked(_conflictsCache);
 
 // Class is no longer exported
@@ -73,7 +75,11 @@ describe('util/git/index', () => {
 
   let tmpDir: tmp.DirectoryResult;
 
+  const OLD_ENV = process.env;
+
   beforeEach(async () => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
@@ -99,7 +105,57 @@ describe('util/git/index', () => {
   });
 
   afterAll(async () => {
+    process.env = OLD_ENV;
     await base.cleanup();
+  });
+
+  describe('gitRetry', () => {
+    it('returns result if git returns successfully', async () => {
+      const gitFunc = jest.fn().mockImplementation((args) => {
+        if (args === undefined) {
+          return 'some result';
+        } else {
+          return 'different result';
+        }
+      });
+      expect(await git.gitRetry(() => gitFunc())).toBe('some result');
+      expect(await git.gitRetry(() => gitFunc('arg'))).toBe('different result');
+      expect(gitFunc).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries the func call if ExternalHostError thrown', async () => {
+      process.env.NODE_ENV = '';
+      const gitFunc = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        })
+        .mockImplementationOnce(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        })
+        .mockImplementationOnce(() => 'some result');
+      expect(await git.gitRetry(() => gitFunc())).toBe('some result');
+      expect(gitFunc).toHaveBeenCalledTimes(3);
+    });
+
+    it('retries the func call up to retry count if ExternalHostError thrown', async () => {
+      process.env.NODE_ENV = '';
+      const gitFunc = jest.fn().mockImplementation(() => {
+        throw new Error('The remote end hung up unexpectedly');
+      });
+      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
+        'The remote end hung up unexpectedly'
+      );
+      expect(gitFunc).toHaveBeenCalledTimes(6);
+    });
+
+    it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
+      const gitFunc = jest.fn().mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
+      expect(gitFunc).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('validateGitVersion()', () => {
@@ -751,6 +807,60 @@ describe('util/git/index', () => {
           ],
         ]);
       });
+    });
+  });
+
+  describe('Renovate non-branch refs', () => {
+    const lsRenovateRefs = async (): Promise<string[]> =>
+      (await Git(tmpDir.path).raw(['ls-remote', 'origin', 'refs/renovate/*']))
+        .split(newlineRegex)
+        .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
+        .filter(Boolean);
+
+    it('creates renovate ref', async () => {
+      const commit = git.getBranchCommit('develop');
+
+      await git.pushCommitToRenovateRef(commit, 'foo/bar');
+
+      const funnyRefs = await lsRenovateRefs();
+      expect(funnyRefs).toContain('refs/renovate/foo/bar');
+    });
+
+    it('clears pushed Renovate refs', async () => {
+      const commit = git.getBranchCommit('develop');
+      await git.pushCommitToRenovateRef(commit, 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar');
+      await git.pushCommitToRenovateRef(commit, 'baz');
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toBeEmpty();
+    });
+
+    it('clears remote Renovate refs', async () => {
+      const commit = git.getBranchCommit('develop');
+      const tmpGit = Git(tmpDir.path);
+      await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
+      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
+
+      await git.pushCommitToRenovateRef(commit, 'bbb');
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toBeEmpty();
+    });
+  });
+
+  describe('listCommitTree', () => {
+    it('creates non-branch ref', async () => {
+      const commit = git.getBranchCommit('develop');
+      const res = await git.listCommitTree(commit);
+      expect(res).toEqual([
+        {
+          mode: '100644',
+          path: 'past_file',
+          sha: '913705ab2ca79368053a476efa48aa6912d052c5',
+          type: 'blob',
+        },
+      ]);
     });
   });
 });

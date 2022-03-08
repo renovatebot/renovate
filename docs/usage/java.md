@@ -29,7 +29,8 @@ Renovate does not support:
 - Gradle versions older than version 5.0
 - Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML
 - Catalogs with version ranges
-- Catalogs using the `required`, `strictly`, `preferred`, `reject`, and `rejectAll` version declarations
+- Catalogs versions using `reject`, and `rejectAll` constraints
+- Catalogs versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
 - Catalogs outside the `gradle` folder whose names do not end in `.versions.toml`
 
@@ -86,9 +87,6 @@ Renovate will also parse `settings.xml` files in the following locations:
 Any repository URLs found within will be added as `registryUrls` to extracted dependencies.
 
 ## Custom registry support, and authentication
-
-Unless using `deepExtract`, Renovate does not make use of authentication credentials available to Gradle.
-Note: the `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 The manager for Gradle makes use of the `maven` datasource.
 Renovate can be configured to access additional repositories and access repositories authenticated.

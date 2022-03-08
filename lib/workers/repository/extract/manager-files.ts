@@ -5,8 +5,8 @@ import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
-} from '../../../manager';
-import type { PackageFile } from '../../../manager/types';
+} from '../../../modules/manager';
+import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(

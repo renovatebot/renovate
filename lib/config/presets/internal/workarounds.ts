@@ -8,9 +8,11 @@ export const presets: Record<string, Preset> = {
     extends: [
       'workarounds:mavenCommonsAncientVersion',
       'workarounds:ignoreSpringCloudNumeric',
+      'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
+      'workarounds:doNotUpgradeFromAlpineStableToEdge',
     ],
   },
   mavenCommonsAncientVersion: {
@@ -32,6 +34,16 @@ export const presets: Record<string, Preset> = {
           'org.springframework.cloud:spring-cloud-starter-parent',
         ],
         allowedVersions: '/^[A-Z]/',
+      },
+    ],
+  },
+  ignoreWeb3jCoreWithOldReleaseTimestamp: {
+    description: 'Ignore web3j 5.0.0 release',
+    packageRules: [
+      {
+        matchDatasources: ['maven'],
+        matchPackageNames: ['org.web3j:core'],
+        allowedVersions: '!/^5\\.0\\.0/',
       },
     ],
   },
@@ -62,6 +74,17 @@ export const presets: Record<string, Preset> = {
       {
         matchHost: 'repology.org',
         concurrentRequestLimit: 1,
+      },
+    ],
+  },
+  doNotUpgradeFromAlpineStableToEdge: {
+    description: 'Do not upgrade from Alpine stable to edge',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['alpine'],
+        matchCurrentVersion: '<20000000',
+        allowedVersions: '<20000000',
       },
     ],
   },
