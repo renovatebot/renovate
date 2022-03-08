@@ -38,7 +38,7 @@ export async function writeUpdates(
     let branchExisted;
     let res;
     if (
-      GlobalConfig.get('dryRun') !== 'extract' ||
+      GlobalConfig.get('dryRun') !== 'extract' &&
       GlobalConfig.get('dryRun') !== 'lookup'
     ) {
       branchExisted = branchExists(branch.branchName);
