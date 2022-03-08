@@ -38,4 +38,4 @@ For example, if you want to use at least npm `8.1.0` and also allow newer versio
 }
 ```
 
-Alternatively, the npm version can also be configured via the [constraints option](https://docs.renovatebot.com/configuration-options/#constraints).
+Alternatively, the npm version can also be configured via the [`constraints` option](https://docs.renovatebot.com/configuration-options/#constraints).
