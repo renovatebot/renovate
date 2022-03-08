@@ -134,6 +134,7 @@
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "2.2.5",
+    "@jamiemagee/osv-offline": "1.2.0",
     "@renovatebot/pep440": "2.1.1",
     "@renovatebot/ruby-semver": "1.1.2",
     "@sindresorhus/is": "4.6.0",
