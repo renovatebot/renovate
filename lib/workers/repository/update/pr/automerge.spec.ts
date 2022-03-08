@@ -106,16 +106,6 @@ describe('workers/repository/update/pr/automerge', () => {
       });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
-    it('dryRun lookup should not automerge', async () => {
-      GlobalConfig.set({ dryRun: 'lookup' });
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      const res = await prAutomerge.checkAutoMerge(pr, config);
-      expect(res).toEqual({
-        automerged: false,
-        prAutomergeBlockReason: 'DryRun',
-      });
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
     it('dryRun full should not automerge', async () => {
       config.automerge = true;
       GlobalConfig.set({ dryRun: 'full' });
@@ -125,6 +115,41 @@ describe('workers/repository/update/pr/automerge', () => {
         automerged: false,
         prAutomergeBlockReason: 'DryRun',
       });
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun lookup should not automerge', async () => {
+      const expectedResult = {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      GlobalConfig.set({ dryRun: 'lookup' });
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual(expectedResult);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun lookup pr-comment', async () => {
+      config.automergeType = 'pr-comment';
+      const expectedResult = {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      GlobalConfig.set({ dryRun: 'lookup' });
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual(expectedResult);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun full pr-comment', async () => {
+      config.automergeType = 'pr-comment';
+      const expectedResult = {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      GlobalConfig.set({ dryRun: 'full' });
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual(expectedResult);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });
