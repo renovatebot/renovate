@@ -54,7 +54,10 @@ export async function renovateRepository(
         return recursiveRes;
       }
       logger.debug(`Automerged but already retried once`);
-    } else {
+    } else if (
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
+    ) {
       await ensureDependencyDashboard(config, branches);
     }
     await finaliseRepo(config, branchList);

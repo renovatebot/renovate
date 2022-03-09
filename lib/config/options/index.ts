@@ -245,10 +245,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dryRun',
     description:
-      '"extract": Performs extract only, prints results, exits.\n' +
-      '"lookup": Performs extract and lookup, but exits before running through branches.\n' +
-      '"full": Perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.\n' +
-      'Default value = null',
+      'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.',
     type: 'string',
     globalOnly: true,
     allowedValues: ['extract', 'lookup', 'full'],

@@ -23,15 +23,23 @@ export async function parseConfigs(
   const envConfig = envParser.getConfig(env);
 
   if (cliConfig?.dryRun === 'true') {
+    logger.warn('cli config dryRun property has been changed to full');
     cliConfig.dryRun = 'full';
   }
   if (envConfig?.dryRun === 'true') {
+    logger.warn('env config dryRun property has been changed to full');
     envConfig.dryRun = 'full';
   }
   if (cliConfig?.dryRun === 'false') {
+    logger.warn(
+      'cli config dryRun property has been changed to null, running with normal mood.'
+    );
     cliConfig.dryRun = null;
   }
   if (envConfig?.dryRun === 'false') {
+    logger.warn(
+      'env config dryRun property has been changed to null, running with normal mood.'
+    );
     envConfig.dryRun = null;
   }
 
