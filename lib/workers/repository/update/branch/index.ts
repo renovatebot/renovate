@@ -431,11 +431,11 @@ export async function processBranch(
     } else if (config.updatedArtifacts?.length && branchPr) {
       // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
       // istanbul ignore if
-      if (GlobalConfig.get('dryRun') === 'full') {
+      if (GlobalConfig.get('dryRun')) {
         logger.info(
           `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
         );
-      } else if (!GlobalConfig.get('dryRun')) {
+      } else {
         // Remove artifacts error comment only if this run has successfully updated artifacts
         await ensureCommentRemoval({
           type: 'by-topic',
@@ -512,9 +512,9 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        if (GlobalConfig.get('dryRun') === 'full') {
+        if (GlobalConfig.get('dryRun')) {
           logger.info('DRY-RUN: Would delete branch' + config.branchName);
-        } else if (!GlobalConfig.get('dryRun')) {
+        } else {
           await deleteBranchSilently(config.branchName);
         }
         logger.debug('Branch is automerged - returning');
@@ -693,11 +693,11 @@ export async function processBranch(
             config.suppressNotifications.includes('lockFileErrors')
           )
         ) {
-          if (GlobalConfig.get('dryRun') === 'full') {
+          if (GlobalConfig.get('dryRun')) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
-          } else if (!GlobalConfig.get('dryRun')) {
+          } else {
             await ensureComment({
               number: pr.number,
               topic: artifactErrorTopic,

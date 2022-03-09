@@ -75,7 +75,7 @@ describe('workers/repository/process/write', () => {
       limits.getBranchesRemaining.mockResolvedValueOnce(0);
       GlobalConfig.set({ dryRun: 'extract' });
       await writeUpdates({ config }, branches);
-      expect(branchExists).toHaveBeenCalledTimes(1);
+      expect(branchExists).toHaveBeenCalledTimes(0);
       expect(processBranch).toHaveBeenCalledTimes(0);
     });
     it('dryRun lookup no branch', async () => {
@@ -83,7 +83,7 @@ describe('workers/repository/process/write', () => {
       limits.getBranchesRemaining.mockResolvedValueOnce(0);
       GlobalConfig.set({ dryRun: 'lookup' });
       await writeUpdates({ config }, branches);
-      expect(branchExists).toHaveBeenCalledTimes(1);
+      expect(branchExists).toHaveBeenCalledTimes(0);
       expect(processBranch).toHaveBeenCalledTimes(0);
     });
   });

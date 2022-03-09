@@ -42,6 +42,12 @@ export async function renovateRepository(
     const { branches, branchList, packageFiles } = await extractDependencies(
       config
     );
+    if (
+      GlobalConfig.get('dryRun') === 'lookup' ||
+      GlobalConfig.get('dryRun') === 'extract'
+    ) {
+      return repoResult;
+    }
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches);
     setMeta({ repository: config.repository });
@@ -54,10 +60,7 @@ export async function renovateRepository(
         return recursiveRes;
       }
       logger.debug(`Automerged but already retried once`);
-    } else if (
-      GlobalConfig.get('dryRun') !== 'lookup' &&
-      GlobalConfig.get('dryRun') !== 'extract'
-    ) {
+    } else {
       await ensureDependencyDashboard(config, branches);
     }
     await finaliseRepo(config, branchList);

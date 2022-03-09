@@ -26,7 +26,7 @@ export async function createOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (GlobalConfig.get('dryRun') === 'full') {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }

@@ -33,7 +33,7 @@ export async function tryBranchAutomerge(
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);
     try {
-      if (GlobalConfig.get('dryRun') === 'full') {
+      if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
       } else {
         await mergeBranch(config.branchName);

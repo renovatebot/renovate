@@ -63,9 +63,9 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
-      } else if (GlobalConfig.get('dryRun') === 'full') {
+      } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
-      } else if (!GlobalConfig.get('dryRun')) {
+      } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
       }

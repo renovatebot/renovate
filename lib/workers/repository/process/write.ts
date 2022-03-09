@@ -35,15 +35,14 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
-    let branchExisted;
-    let res;
     if (
-      GlobalConfig.get('dryRun') !== 'extract' &&
-      GlobalConfig.get('dryRun') !== 'lookup'
+      GlobalConfig.get('dryRun') === 'extract' ||
+      GlobalConfig.get('dryRun') === 'lookup'
     ) {
-      branchExisted = branchExists(branch.branchName);
-      res = await processBranch(branch);
+      return 'done';
     }
+    const branchExisted = branchExists(branch.branchName);
+    const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;

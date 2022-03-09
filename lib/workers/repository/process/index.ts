@@ -104,11 +104,13 @@ export async function extractDependencies(
     logger.debug('No baseBranches');
     const packageFiles = await extract(config);
     addSplit('extract');
-    if (GlobalConfig.get('dryRun') !== 'extract') {
-      res = await lookup(config, packageFiles);
-      addSplit('lookup');
+    if (GlobalConfig.get('dryRun') === 'extract') {
+      res.packageFiles = packageFiles;
+      return res;
     }
+    res = await lookup(config, packageFiles);
   }
+  addSplit('lookup');
   return res;
 }
 

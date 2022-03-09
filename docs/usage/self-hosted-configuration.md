@@ -292,9 +292,9 @@ Like this:
 
 ## dryRun
 
-"extract": Performs extract only, prints results, exits.
-"lookup": Performs extract and lookup, but exits before running through branches.
-"full": Perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.
+"extract": Performs extract only, prints results, exits.<br>
+"lookup": Performs extract and lookup, but exits before running through branches.<br>
+"full": Perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.<br>
 Default value = null.
 
 ## endpoint

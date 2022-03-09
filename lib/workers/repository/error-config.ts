@@ -39,7 +39,7 @@ export async function raiseConfigWarningIssue(
         logger.warn({ err }, 'Error updating onboarding PR');
       }
     }
-  } else if (GlobalConfig.get('dryRun') === 'full') {
+  } else if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would ensure config error issue');
   } else {
     const once = false;
