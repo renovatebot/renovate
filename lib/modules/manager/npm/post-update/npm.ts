@@ -1,3 +1,4 @@
+import detectIndent from 'detect-indent';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -123,6 +124,26 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readFile(upath.join(cwd, filename), 'utf8');
+
+    // Massage lockfile counterparts of package.json that were modified
+    // because npm install was called with an explicit version for rangeStrategy = update-lockfile
+    if (lockUpdates.length) {
+      let detectedIndent: string;
+      let lockFileParsed: any;
+      try {
+        detectedIndent = detectIndent(lockFile).indent || '  ';
+        lockFileParsed = JSON.parse(lockFile);
+      } catch (err) {
+        logger.warn({ err }, 'Error parsing npm lock file');
+      }
+      if (lockFileParsed) {
+        lockUpdates.forEach((lockUpdate) => {
+          lockFileParsed.packages[''][lockUpdate.depType][lockUpdate.depName] =
+            lockUpdate.newValue;
+        });
+        lockFile = JSON.stringify(lockFileParsed, null, detectedIndent);
+      }
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
