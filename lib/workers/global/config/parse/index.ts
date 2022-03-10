@@ -32,7 +32,7 @@ export async function parseConfigs(
   }
   if (cliConfig?.dryRun === 'false' || cliConfig?.dryRun === 'null') {
     logger.warn(
-      'cli config dryRun property has been changed to null, running with normal mood.'
+      'cli config dryRun property has been changed to null, running with normal mode.'
     );
     cliConfig.dryRun = null;
   }
