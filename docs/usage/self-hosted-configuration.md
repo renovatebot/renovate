@@ -292,12 +292,14 @@ Like this:
 
 ## dryRun
 
+`dryRun` Preview the behavior of Renovate in logs, without making any changes to the repository files
+
 You can choose from the following behaviors for the `dryRun` config option:
 
-- `null`: Performs a regular renovate run include creating/updating/deleting branches and PRs, this is the default value
-- `"extract"`: Performs extract only, prints results, exits
-- `"lookup"`: Performs extract and lookup, but exits before running through branches
-- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs.
+- `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
+- `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
+- `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
+- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
 
 ## endpoint
 
