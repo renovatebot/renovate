@@ -775,7 +775,10 @@ For now, you can only use this option on the GitLab platform.
 
 ## followTag
 
-Caution: advanced functionality. Only use it if you're sure you know what you're doing.
+<!-- prettier-ignore -->
+!!! warning
+    Advanced functionality.
+    Only use this if you're sure you know what you're doing.
 
 This functionality requires that the datasource to support distribution streams/tags, such as npm does.
 
