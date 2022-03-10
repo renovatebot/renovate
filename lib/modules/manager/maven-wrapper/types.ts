@@ -1,4 +1,9 @@
-export interface MavenVersionExtract {
+type Version = {
   url: string;
   version: string;
+};
+
+export interface MavenVersionExtract {
+  maven?: Version;
+  wrapper?: Version;
 }
