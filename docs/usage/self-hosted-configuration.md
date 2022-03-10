@@ -292,10 +292,12 @@ Like this:
 
 ## dryRun
 
-"extract": Performs extract only, prints results, exits.<br>
-"lookup": Performs extract and lookup, but exits before running through branches.<br>
-"full": Perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.<br>
-Default value = null.
+You can choose from the following behaviors for the `dryRun` config option:
+
+- `null`: Performs a regular renovate run include creating/updating/deleting branches and PRs, this is the default value
+- `"extract"`: Performs extract only, prints results, exits
+- `"lookup"`: Performs extract and lookup, but exits before running through branches
+- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs.
 
 ## endpoint
 

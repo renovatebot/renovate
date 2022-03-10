@@ -30,13 +30,13 @@ export async function parseConfigs(
     logger.warn('env config dryRun property has been changed to full');
     envConfig.dryRun = 'full';
   }
-  if (cliConfig?.dryRun === 'false') {
+  if (cliConfig?.dryRun === 'false' || cliConfig?.dryRun === 'null') {
     logger.warn(
       'cli config dryRun property has been changed to null, running with normal mood.'
     );
     cliConfig.dryRun = null;
   }
-  if (envConfig?.dryRun === 'false') {
+  if (envConfig?.dryRun === 'false' || envConfig?.dryRun === 'null') {
     logger.warn(
       'env config dryRun property has been changed to null, running with normal mood.'
     );
