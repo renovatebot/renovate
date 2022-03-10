@@ -124,13 +124,19 @@ function applyProps(
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
+  const alreadySeenProps: string[] = [];
 
   do {
-    const [returnedResult, returnedAnyChange] = applyPropsInternal(
+    const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
       result,
       depPackageFile,
-      props
+      props,
+      alreadySeenProps
     );
+    if (fatal) {
+      dep.skipReason = 'recursive-placeholder';
+      return dep;
+    }
     result = returnedResult;
     anyChange = returnedAnyChange;
   } while (anyChange);
@@ -147,9 +153,11 @@ function applyProps(
 function applyPropsInternal(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
-  props: MavenProp
-): [PackageDependency<Record<string, any>>, boolean] {
+  props: MavenProp,
+  alreadySeenProps: string[]
+): [PackageDependency<Record<string, any>>, boolean, boolean] {
   let anyChange = false;
+  let fatal = false;
 
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${.*?}/g), (substr) => {
@@ -157,6 +165,11 @@ function applyPropsInternal(
       const propValue = props[propKey];
       if (propValue) {
         anyChange = true;
+        if (alreadySeenProps.find((it) => it === propKey)) {
+          fatal = true;
+        } else {
+          alreadySeenProps.push(propKey);
+        }
         return propValue.val;
       }
       return substr;
@@ -180,6 +193,11 @@ function applyPropsInternal(
         fileReplacePosition = propValue.fileReplacePosition;
         propSource = propValue.packageFile;
         anyChange = true;
+        if (alreadySeenProps.find((it) => it === propKey)) {
+          fatal = true;
+        } else {
+          alreadySeenProps.push(propKey);
+        }
         return propValue.val;
       }
       return substr;
@@ -203,7 +221,7 @@ function applyPropsInternal(
     result.editFile = propSource;
   }
 
-  return [result, anyChange];
+  return [result, anyChange, fatal];
 }
 
 function resolveParentFile(packageFile: string, parentPath: string): string {

@@ -1,58 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>com.example</groupId>
-  <artifactId>renovate-bugs</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <name>Renovate bugs</name>
+  <groupId>org.example</groupId>
+  <artifactId>ExamplePomFile</artifactId>
 
   <properties>
-    <encoding>UTF-8</encoding>
-
     <scala.version.major>2.13</scala.version.major>
     <scala.version.minor>7</scala.version.minor>
     <scala.version>${scala.version.major}.${scala.version.minor}</scala.version>
 
     <maven-scalac-scapegoat.version>1.4.11</maven-scalac-scapegoat.version>
-    <maven-scala.version>4.5.6</maven-scala.version>
   </properties>
 
-  <build>
-    <sourceDirectory>src/main/scala</sourceDirectory>
-    <testSourceDirectory>src/test/scala</testSourceDirectory>
-
-    <plugins>
-      <plugin>
-        <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId>
-        <version>${maven-scala.version}</version>
-        <configuration>
-          <compilerPlugins>
-            <compilerPlugin>
-              <groupId>com.sksamuel.scapegoat</groupId>
-              <artifactId>scalac-scapegoat-plugin_${scala.version}</artifactId>
-              <version>${maven-scalac-scapegoat.version}</version>
-            </compilerPlugin>
-          </compilerPlugins>
-          <args>
-            <arg>-P:scapegoat:dataDir:${project.build.directory}</arg>
-            <arg>-P:scapegoat:reports:xml</arg>
-            <arg>-P:scapegoat:minimalWarnLevel:Warning</arg>
-          </args>
-        </configuration>
-        <executions>
-          <execution>
-            <id>source-compile</id>
-            <goals>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <dependencies>
+    <dependency>
+      <groupId>com.sksamuel.scapegoat</groupId>
+      <artifactId>scalac-scapegoat-plugin_${scala.version}</artifactId>
+      <version>${maven-scalac-scapegoat.version}</version>
+    </dependency>
+  </dependencies>
 </project>
