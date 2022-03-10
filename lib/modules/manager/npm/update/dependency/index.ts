@@ -6,7 +6,6 @@ import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
 const patchReg = regEx('patch:.*@(npm:)?.*#.*');
-const noSupportRe = regEx('^(file|link|portal|exec|http|https):.*');
 
 function replaceAsString(
   parsedContents: PackageJson,
@@ -106,11 +105,7 @@ export function updateDependency({
       logger.trace('Version is already updated');
       return fileContent;
     }
-    // istanbul ignore if
-    if (noSupportRe.test(oldVersion)) {
-      logger.trace('Version protocol is not supported');
-      return fileContent;
-    }
+
     let newFileContent = replaceAsString(
       parsedContents,
       fileContent,

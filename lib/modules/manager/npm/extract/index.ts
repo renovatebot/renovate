@@ -29,7 +29,7 @@ function parseDepName(depType: string, key: string): string {
   const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
   return depName;
 }
-
+const noSupportRe = regEx('^(file|link|portal|exec):.*');
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
 );
@@ -185,6 +185,13 @@ export async function extractPackageFile(
       dep.skipReason = 'invalid-value';
       return dep;
     }
+
+    // istanbul ignore if
+    if (noSupportRe.test(input.trim())) {
+      dep.skipReason = 'unsupported';
+      return dep;
+    }
+
     dep.currentValue = input.trim();
     if (depType === 'engines' || depType === 'packageManager') {
       if (depName === 'node') {
