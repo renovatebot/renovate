@@ -38,7 +38,7 @@ export async function parseConfigs(
   }
   if (envConfig?.dryRun === 'false' || envConfig?.dryRun === 'null') {
     logger.warn(
-      'env config dryRun property has been changed to null, running with normal mood.'
+      'env config dryRun property has been changed to null, running with normal mode.'
     );
     envConfig.dryRun = null;
   }
