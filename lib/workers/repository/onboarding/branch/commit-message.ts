@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '../../../../config/types';
-import { CommitMessage } from '../../model/commit-message';
+import type { CommitMessage } from '../../model/commit-message';
 import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class OnboardingCommitMessageFactory {
