@@ -292,7 +292,7 @@ Like this:
 
 ## dryRun
 
-`dryRun` Preview the behavior of Renovate in logs, without making any changes to the repository files.
+Use `dryRun` to preview the behavior of Renovate in logs, without making any changes to the repository files.
 
 You can choose from the following behaviors for the `dryRun` config option:
 
