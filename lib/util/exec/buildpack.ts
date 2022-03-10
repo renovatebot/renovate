@@ -1,18 +1,34 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
-import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
-import * as allVersioning from '../../versioning';
-import { id as composerVersioningId } from '../../versioning/composer';
-import { id as npmVersioningId } from '../../versioning/npm';
-import { id as semverVersioningId } from '../../versioning/semver';
+import { getPkgReleases } from '../../modules/datasource';
+import * as allVersioning from '../../modules/versioning';
+import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as npmVersioningId } from '../../modules/versioning/npm';
+import { id as pep440VersioningId } from '../../modules/versioning/pep440';
+import { id as semverVersioningId } from '../../modules/versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bundler: {
+    datasource: 'rubygems',
+    depName: 'bundler',
+    versioning: 'ruby',
+  },
   composer: {
     datasource: 'github-releases',
     depName: 'composer/composer',
     versioning: composerVersioningId,
+  },
+  flux: {
+    datasource: 'github-releases',
+    depName: 'fluxcd/flux2',
+    versioning: semverVersioningId,
+  },
+  helm: {
+    datasource: 'github-releases',
+    depName: 'helm/helm',
+    versioning: semverVersioningId,
   },
   jb: {
     datasource: 'github-releases',
@@ -29,6 +45,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     depName: 'pnpm',
     versioning: npmVersioningId,
+  },
+  poetry: {
+    datasource: 'pypi',
+    depName: 'poetry',
+    versioning: pep440VersioningId,
   },
 };
 
@@ -82,7 +103,9 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
   const versions = releases.map((r) => r.version);
   const resolvedVersion = versions
-    .filter((v) => !constraint || versioning.matches(v, constraint))
+    .filter((v) =>
+      constraint ? versioning.matches(v, constraint) : versioning.isStable(v)
+    )
     .pop();
 
   if (resolvedVersion) {

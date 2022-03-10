@@ -77,6 +77,7 @@ export const allowedFields = {
     'The depName field sanitized for use in branches after removing spaces and special characters',
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
+  displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
   isLockfileUpdate: 'true if the branch is a lock file update',
@@ -89,7 +90,7 @@ export const allowedFields = {
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
   logJSON: 'ChangeLogResult object for the upgrade',
-  lookupName: 'The full name that was used to look up the dependency.',
+  packageName: 'The full name that was used to look up the dependency.',
   newDigest: 'The new digest value',
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
@@ -148,9 +149,11 @@ const allowedFieldsList = Object.keys(allowedFields)
 
 type CompileInput = Record<string, unknown>;
 
-function getFilteredObject(input: CompileInput): any {
+type FilteredObject = Record<string, CompileInput | CompileInput[] | unknown>;
+
+function getFilteredObject(input: CompileInput): FilteredObject {
   const obj = clone(input);
-  const res = {};
+  const res: FilteredObject = {};
   const allAllowed = [
     ...Object.keys(allowedFields),
     ...exposedConfigOptions,
@@ -158,9 +161,9 @@ function getFilteredObject(input: CompileInput): any {
   for (const field of allAllowed) {
     const value = obj[field];
     if (is.array(value)) {
-      res[field] = value.map((element) =>
-        getFilteredObject(element as CompileInput)
-      );
+      res[field] = value
+        .filter(is.plainObject)
+        .map((element) => getFilteredObject(element as CompileInput));
     } else if (is.plainObject(value)) {
       res[field] = getFilteredObject(value);
     } else if (!is.undefined(value)) {

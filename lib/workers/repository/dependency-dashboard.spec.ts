@@ -9,7 +9,7 @@ import {
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
-import type { Platform } from '../../platform';
+import type { Platform } from '../../modules/platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 
@@ -144,6 +144,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
+      config.dependencyDashboardHeader = 'This is a header';
       config.dependencyDashboardFooter = 'And this is a footer';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
@@ -159,18 +160,28 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('open or update Dependency Dashboard when rules contain approvals', async () => {
       const branches: BranchConfig[] = [];
+      config.repository = 'test';
       config.packageRules = [
         {
           dependencyDashboardApproval: true,
         },
         {},
       ];
-      config.dependencyDashboardFooter = 'And this is a footer';
+      config.dependencyDashboardHeader =
+        'This is a header for platform:{{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for repository:{{repository}}';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        /platform:github/
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        /repository:test/
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -516,6 +527,7 @@ describe('workers/repository/dependency-dashboard', () => {
         ## Awaiting Schedule
 
         These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 
          - [x] <!-- rebase-all-open-prs -->'

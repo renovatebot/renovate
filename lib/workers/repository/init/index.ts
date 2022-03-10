@@ -1,7 +1,7 @@
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
