@@ -717,7 +717,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+      'Additional Git authors which are ignored by Renovate. Must conform to RFC5322.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1242,7 +1242,7 @@ const options: RenovateOptions[] = [
     default: {
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
-      commitMessageTopic: '{{{depName}}} commit hash',
+      commitMessageTopic: '{{{depName}}} digest',
     },
     cli: false,
     mergeable: true,
@@ -2180,7 +2180,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitNoVerify',
     description:
-      'Which git commands will be run with the `--no-verify` option.',
+      'Which Git commands will be run with the `--no-verify` option.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -2199,7 +2199,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitUrl',
     description:
-      'Overrides the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
+      'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
@@ -2237,7 +2237,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'platformCommit',
-    description: `Use platform API to perform commits instead of using git directly.`,
+    description: `Use platform API to perform commits instead of using Git directly.`,
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],
