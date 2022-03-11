@@ -18,6 +18,7 @@ const lockedVersion = loadFixture('lockedVersion.tf');
 const lockedVersionLockfile = loadFixture('rangeStrategy.hcl');
 const terraformBlock = loadFixture('terraformBlock.tf');
 const tfeWorkspaceBlock = loadFixture('tfeWorkspaceTerraformVersion.tf');
+const tfeWorkspaceNoVersion = loadFixture('tfeWorkspaceNoTerraformVersion.tf');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -110,6 +111,15 @@ describe('modules/manager/terraform/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+    });
+
+    it('test tfe_workspace without terraform_version', async () => {
+      const res = await extractPackageFile(
+        tfeWorkspaceNoVersion,
+        'tfeWorkspaceNoTerraformVersion.tf',
+        {}
+      );
+      expect(res).toMatchSnapshot();
     });
   });
 });
