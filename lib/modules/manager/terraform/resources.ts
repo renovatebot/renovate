@@ -113,6 +113,7 @@ export function analyseTerraformResource(
 
     case TerraformResourceTypes.tfe_workspace:
       analyseTerraformVersion(dep);
+      dep.depType = 'tfe_workspace';
       break;
 
     default:
