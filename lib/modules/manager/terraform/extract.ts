@@ -37,7 +37,7 @@ const contentCheckList = [
   ' "helm_release" ',
   ' "docker_image" ',
   'required_version',
-  'terraform_version',
+  'terraform_version', // part of  tfe_workspace
 ];
 
 export async function extractPackageFile(
