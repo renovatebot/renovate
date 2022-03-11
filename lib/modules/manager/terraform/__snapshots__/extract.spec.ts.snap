@@ -454,7 +454,7 @@ Object {
       "currentValue": "1.1.6",
       "datasource": "github-tags",
       "depName": "hashicorp/terraform",
-      "depType": "required_version",
+      "depType": "tfe_workspace",
       "extractVersion": "v(?<version>.*)$",
     },
   ],
