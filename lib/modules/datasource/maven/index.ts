@@ -289,9 +289,8 @@ export class MavenDatasource extends Datasource {
               release.releaseTimestamp = res.toISOString();
             }
 
-            if (res !== 'not-found' && res !== 'error') {
-              newReleaseMap[version] = release;
-            }
+            newReleaseMap[version] =
+              res !== 'not-found' && res !== 'error' ? release : null;
           }
         );
 
@@ -302,7 +301,7 @@ export class MavenDatasource extends Datasource {
     }
 
     for (const version of Object.keys(releaseMap)) {
-      releaseMap[version] ||= newReleaseMap[version] ?? null;
+      releaseMap[version] = newReleaseMap[version] ?? null;
     }
 
     return releaseMap;

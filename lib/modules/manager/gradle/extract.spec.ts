@@ -219,7 +219,7 @@ describe('modules/manager/gradle/extract', () => {
             groupName: 'io.kotest',
             currentValue: '4.6.0',
             managerData: {
-              fileReplacePosition: 39,
+              fileReplacePosition: 51,
               packageFile: 'gradle/libs.versions.toml',
             },
           },
@@ -228,7 +228,7 @@ describe('modules/manager/gradle/extract', () => {
             groupName: 'io.kotest',
             currentValue: '4.6.0',
             managerData: {
-              fileReplacePosition: 39,
+              fileReplacePosition: 51,
               packageFile: 'gradle/libs.versions.toml',
             },
           },
@@ -237,7 +237,30 @@ describe('modules/manager/gradle/extract', () => {
             groupName: 'org.mockito',
             currentValue: '3.10.0',
             managerData: {
-              fileReplacePosition: 460,
+              fileReplacePosition: 474,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.github.siom79.japicmp:japicmp',
+            groupName: 'com.github.siom79.japicmp',
+            currentValue: '0.15.+',
+            managerData: {
+              fileReplacePosition: 561,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'guava',
+            skipReason: 'multiple-constraint-dep',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'gson',
+            skipReason: 'unsupported-version',
+            managerData: {
               packageFile: 'gradle/libs.versions.toml',
             },
           },
@@ -265,13 +288,28 @@ describe('modules/manager/gradle/extract', () => {
             packageName:
               'org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin',
             managerData: {
-              fileReplacePosition: 68,
+              fileReplacePosition: 82,
               packageFile: 'gradle/libs.versions.toml',
             },
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
               'https://plugins.gradle.org/m2/',
             ],
+          },
+          {
+            depName: 'org.ajoberstar.grgit',
+            depType: 'plugin',
+            commitMessageTopic: 'plugin grgit',
+            packageName:
+              'org.ajoberstar.grgit:org.ajoberstar.grgit.gradle.plugin',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+            skipReason: 'unknown-version',
           },
         ],
       },
