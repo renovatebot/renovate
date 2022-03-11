@@ -25,15 +25,16 @@ Terraform range constraints are supported:
 
 For fine-grained control, e.g. to turn off only parts of this manager, you can use the following `depTypes`:
 
-| resource                    |       depType       |                                                        Notes                                                         |
-| --------------------------- | :-----------------: | :------------------------------------------------------------------------------------------------------------------: |
-| Terraform provider          |     `provider`      |                                                                                                                      |
-| required Terraform provider | `required_provider` |                                                                                                                      |
-| required Terraform version  | `required_version`  | This handles both `required_version` in terraform blocks as well as `terraform_version` in `tfe_workspace` resources |
-| Terraform module            |      `module`       |                                                                                                                      |
-| Helm release                |   `helm_release`    |                                                                                                                      |
-| Docker container            | `docker_container`  |                                                                                                                      |
-| Docker image                |   `docker_image`    |                                                                                                                      |
-| Docker service              |  `docker_service`   |                                                                                                                      |
+| resource                    |       depType       |                                   Notes                                    |
+| --------------------------- | :-----------------: | :------------------------------------------------------------------------: |
+| Terraform provider          |     `provider`      |                                                                            |
+| required Terraform provider | `required_provider` |                                                                            |
+| required Terraform version  | `required_version`  |          This handles the `required_version` in terraform blocks           |
+| TFE workspace               |   `tfe_workspace`   | This handles the `terraform_version` argument in `tfe_workspace` resources |
+| Terraform module            |      `module`       |                                                                            |
+| Helm release                |   `helm_release`    |                                                                            |
+| Docker container            | `docker_container`  |                                                                            |
+| Docker image                |   `docker_image`    |                                                                            |
+| Docker service              |  `docker_service`   |                                                                            |
 
 If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
