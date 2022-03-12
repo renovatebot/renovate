@@ -17,6 +17,7 @@ import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
@@ -68,6 +69,7 @@ export class MigrationsService {
     RenovateForkMigration,
     RequiredStatusChecksMigration,
     SemanticCommitsMigration,
+    SuppressNotificationsMigration,
     TrustLevelMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,
