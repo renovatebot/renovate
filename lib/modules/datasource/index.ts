@@ -250,7 +250,9 @@ async function fetchReleases(
     if (is.string(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
-    registryUrls = [resolveRegistryUrl(config.packageName)];
+    if (!is.nonEmptyArray(registryUrls)) {
+      registryUrls = [resolveRegistryUrl(config.packageName)];
+    }
   }
   const datasource = getDatasourceFor(datasourceName);
   registryUrls = resolveRegistryUrls(
