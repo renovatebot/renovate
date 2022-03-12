@@ -6,7 +6,6 @@ import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
-import { resolvePackage } from './npmrc';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
 
 let memcache: Record<string, string> = {};
@@ -53,6 +52,7 @@ function getPackageSource(repository: any): PackageSource {
 
 export async function getDependency(
   http: Http,
+  registryUrl: string,
   packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
@@ -63,7 +63,6 @@ export async function getDependency(
     return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
-  const { registryUrl } = resolvePackage(packageName);
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
   // Now check the persistent cache

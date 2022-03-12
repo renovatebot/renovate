@@ -3,7 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { getDependency, resetMemCache } from './get';
-import { setNpmrc } from './npmrc';
+import { resolvePackage, setNpmrc } from './npmrc';
 
 function getPath(s = ''): string {
   const [x] = s.split('\n');
@@ -44,7 +44,8 @@ describe('modules/datasource/npm/get', () => {
         .reply(200, { name: '@myco/test' });
 
       setNpmrc(npmrc);
-      await getDependency(http, '@myco/test');
+      const { registryUrl } = resolvePackage('@myco/test');
+      await getDependency(http, registryUrl, '@myco/test');
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBe('Bearer XXX');
@@ -76,7 +77,8 @@ describe('modules/datasource/npm/get', () => {
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
-      await getDependency(http, '@myco/test');
+      const { registryUrl } = resolvePackage('@myco/test');
+      await getDependency(http, registryUrl, '@myco/test');
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
@@ -99,7 +101,8 @@ describe('modules/datasource/npm/get', () => {
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
-      await getDependency(http, '@myco/test');
+      const { registryUrl } = resolvePackage('@myco/test');
+      await getDependency(http, registryUrl, '@myco/test');
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBeUndefined();
@@ -125,7 +128,8 @@ describe('modules/datasource/npm/get', () => {
       .get(getPath(npmrc))
       .reply(200, { name: '@myco/test' });
     setNpmrc(npmrc);
-    await getDependency(http, '@myco/test');
+    const { registryUrl } = resolvePackage('@myco/test');
+    await getDependency(http, registryUrl, '@myco/test');
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -146,7 +150,8 @@ describe('modules/datasource/npm/get', () => {
       .get('/renovate')
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
-    await getDependency(http, 'renovate');
+    const { registryUrl } = resolvePackage('renovate');
+    await getDependency(http, registryUrl, 'renovate');
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -168,7 +173,8 @@ describe('modules/datasource/npm/get', () => {
       .get('/renovate')
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
-    await getDependency(http, 'renovate');
+    const { registryUrl } = resolvePackage('renovate');
+    await getDependency(http, registryUrl, 'renovate');
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -181,7 +187,8 @@ describe('modules/datasource/npm/get', () => {
       .scope('https://test.org')
       .get('/none')
       .reply(200, { name: '@myco/test' });
-    expect(await getDependency(http, 'none')).toBeNull();
+    let { registryUrl } = resolvePackage('none');
+    expect(await getDependency(http, registryUrl, 'none')).toBeNull();
 
     httpMock
       .scope('https://test.org')
@@ -192,7 +199,8 @@ describe('modules/datasource/npm/get', () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-    expect(await getDependency(http, '@myco/test')).toBeDefined();
+    ({ registryUrl } = resolvePackage('@myco/test'));
+    expect(await getDependency(http, registryUrl, '@myco/test')).toBeDefined();
 
     httpMock
       .scope('https://test.org')
@@ -202,34 +210,40 @@ describe('modules/datasource/npm/get', () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-    expect(await getDependency(http, '@myco/test2')).toBeDefined();
+    ({ registryUrl } = resolvePackage('@myco/test2'));
+    expect(await getDependency(http, registryUrl, '@myco/test2')).toBeDefined();
 
     httpMock.scope('https://test.org').get('/error-401').reply(401);
-    expect(await getDependency(http, 'error-401')).toBeNull();
+    ({ registryUrl } = resolvePackage('error-401'));
+    expect(await getDependency(http, registryUrl, 'error-401')).toBeNull();
 
     httpMock.scope('https://test.org').get('/error-402').reply(402);
-    expect(await getDependency(http, 'error-402')).toBeNull();
+    ({ registryUrl } = resolvePackage('error-402'));
+    expect(await getDependency(http, registryUrl, 'error-402')).toBeNull();
 
     httpMock.scope('https://test.org').get('/error-404').reply(404);
-    expect(await getDependency(http, 'error-404')).toBeNull();
+    ({ registryUrl } = resolvePackage('error-404'));
+    expect(await getDependency(http, registryUrl, 'error-404')).toBeNull();
 
     httpMock.scope('https://test.org').get('/error4').reply(200, null);
-    expect(await getDependency(http, 'error4')).toBeNull();
+    ({ registryUrl } = resolvePackage('error4'));
+    expect(await getDependency(http, registryUrl, 'error4')).toBeNull();
 
     setNpmrc();
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
-    await expect(getDependency(http, 'npm-parse-error')).rejects.toThrow(
-      ExternalHostError
-    );
+    ({ registryUrl } = resolvePackage('npm-parse-error'));
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error')
+    ).rejects.toThrow(ExternalHostError);
 
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/npm-error-402')
       .reply(402);
-    expect(await getDependency(http, 'npm-error-402')).toBeNull();
+    expect(await getDependency(http, registryUrl, 'npm-error-402')).toBeNull();
 
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -249,8 +263,8 @@ describe('modules/datasource/npm/get', () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-
-    const dep = await getDependency(http, '@neutrinojs/react');
+    const { registryUrl } = resolvePackage('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
     expect(dep.sourceDirectory).toBe('packages/react');
@@ -300,8 +314,8 @@ describe('modules/datasource/npm/get', () => {
         },
         'dist-tags': { latest: '2.0.0' },
       });
-
-    const dep = await getDependency(http, 'vue');
+    const { registryUrl } = resolvePackage('vue');
+    const dep = await getDependency(http, registryUrl, 'vue');
 
     expect(dep.sourceUrl).toBe('https://github.com/vuejs/vue.git');
     expect(dep.releases[0].sourceUrl).toBeUndefined();
@@ -326,8 +340,8 @@ describe('modules/datasource/npm/get', () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-
-    const dep = await getDependency(http, '@neutrinojs/react');
+    const { registryUrl } = resolvePackage('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
     expect(dep.sourceDirectory).toBe('packages/foo');
@@ -364,8 +378,8 @@ describe('modules/datasource/npm/get', () => {
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
       });
-
-    const dep = await getDependency(http, '@neutrinojs/react');
+    const { registryUrl } = resolvePackage('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep.sourceUrl).toBe(
       'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react'
