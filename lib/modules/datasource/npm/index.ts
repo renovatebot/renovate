@@ -4,7 +4,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { id } from './common';
 import { getDependency } from './get';
-import { resolvePackage, setNpmrc } from './npmrc';
+import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
 export { resetMemCache, resetCache } from './get';
 export { setNpmrc } from './npmrc';
@@ -29,7 +29,7 @@ export class NpmDatasource extends Datasource {
     if (is.string(npmrc)) {
       setNpmrc(npmrc);
     }
-    const { registryUrl } = resolvePackage(packageName);
+    const registryUrl = resolveRegistryUrl(packageName);
     const res = await getDependency(this.http, registryUrl, packageName);
     if (res) {
       res.tags = res['dist-tags'];
