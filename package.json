@@ -250,7 +250,7 @@
     "@types/xmldoc": "1.1.6",
     "@typescript-eslint/eslint-plugin": "5.12.1",
     "@typescript-eslint/parser": "5.12.1",
-    "aws-sdk-client-mock": "0.6.0",
+    "aws-sdk-client-mock": "0.6.1",
     "callsite": "1.0.0",
     "conventional-changelog-conventionalcommits": "4.6.3",
     "cross-env": "7.0.3",

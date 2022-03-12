@@ -3078,10 +3078,10 @@ auth-header@1.0.0:
   resolved "https://registry.yarnpkg.com/auth-header/-/auth-header-1.0.0.tgz#ea24fdc5588e1eb8b750df8655a396aa48fc9076"
   integrity sha512-CPPazq09YVDUNNVWo4oSPTQmtwIzHusZhQmahCKvIsk0/xH6U3QsMAv3sM+7+Q0B1K2KJ/Q38OND317uXs4NHA==
 
-aws-sdk-client-mock@0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock/-/aws-sdk-client-mock-0.6.0.tgz#bdca5b74d5a4c5f1a113d23e896e72eef737633a"
-  integrity sha512-VCIvPD8ue5+bLQW31cyDim4xtS7Ks5TJ1p1Gug1TBxPqX2gJE/uEe0Y3o368DLODn7/mGArWYg6QjacXOe5BGw==
+aws-sdk-client-mock@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock/-/aws-sdk-client-mock-0.6.1.tgz#93dfbacb77a05a8a35118ab12bc5ebf8004eb2ed"
+  integrity sha512-btIUFY9XWz6nTKkeCBP0tetdIp8zBSD9KkmO3rePwegCKs7InFSxfhrSVZNJ8yFoX6zyZCWsBsctCWma0PRTFg==
   dependencies:
     "@types/sinon" "10.0.10"
     sinon "^11.1.1"
