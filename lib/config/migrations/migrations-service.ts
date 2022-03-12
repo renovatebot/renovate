@@ -9,6 +9,7 @@ import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
@@ -60,6 +61,7 @@ export class MigrationsService {
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
+    PackageRulesMigration,
     PathRulesMigration,
     PinVersionsMigration,
     RaiseDeprecationWarningsMigration,
