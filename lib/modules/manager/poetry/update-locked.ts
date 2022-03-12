@@ -8,16 +8,16 @@ export function updateLockedDependency(
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = extractLockFileEntries(lockFileContent);
-    if (locked.get(depName) === newVersion) {
+    const locked = extractLockFileEntries(lockFileContent || '');
+    if (depName && locked[depName] === newVersion) {
       return { status: 'already-updated' };
     }
     return { status: 'unsupported' };
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'bundler.updateLockedDependency() error');
+    logger.debug({ err }, 'poetry.updateLockedDependency() error');
     return { status: 'update-failed' };
   }
 }

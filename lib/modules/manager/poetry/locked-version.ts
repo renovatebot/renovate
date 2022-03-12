@@ -5,7 +5,7 @@ import type { PoetryLock } from './types';
 export function extractLockFileEntries(
   lockFileContent: string
 ): Record<string, string> {
-  let poetryLockfile: PoetryLock;
+  let poetryLockfile: PoetryLock = {};
   try {
     poetryLockfile = parse(lockFileContent);
   } catch (err) {
@@ -16,7 +16,9 @@ export function extractLockFileEntries(
   if (poetryLockfile?.package) {
     // Create a package->PoetryLockSection mapping
     for (const poetryPackage of poetryLockfile.package) {
-      lockfileMapping[poetryPackage.name] = poetryPackage.version;
+      if (poetryPackage.name && poetryPackage.version) {
+        lockfileMapping[poetryPackage.name] = poetryPackage.version;
+      }
     }
   }
   return lockfileMapping;
