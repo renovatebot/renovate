@@ -11,6 +11,8 @@ import { trimTrailingSlash } from '../../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
+import { setNpmrc } from './npm';
+import { resolveRegistryUrl } from './npm/npmrc';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -239,15 +241,22 @@ async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
+  let { registryUrls } = config;
   if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
+  if (datasourceName === 'npm') {
+    if (is.string(config.npmrc)) {
+      setNpmrc(config.npmrc);
+    }
+    registryUrls = [resolveRegistryUrl(config.packageName)];
+  }
   const datasource = getDatasourceFor(datasourceName);
-  const registryUrls = resolveRegistryUrls(
+  registryUrls = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
-    config.registryUrls
+    registryUrls
   );
   let dep: ReleaseResult = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
