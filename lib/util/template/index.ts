@@ -90,7 +90,7 @@ export const allowedFields = {
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
   logJSON: 'ChangeLogResult object for the upgrade',
-  packageName: 'The full name that was used to look up the dependency.',
+  manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
@@ -106,6 +106,7 @@ export const allowedFields = {
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
+  packageName: 'The full name that was used to look up the dependency.',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
