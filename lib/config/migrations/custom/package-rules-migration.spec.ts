@@ -11,4 +11,16 @@ describe('config/migrations/custom/package-rules-migration', () => {
       }
     );
   });
+
+  it('should not migrate non object value', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: null,
+      } as any,
+      {
+        packageRules: null,
+      },
+      false
+    );
+  });
 });
