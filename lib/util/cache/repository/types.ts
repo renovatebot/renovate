@@ -1,5 +1,5 @@
 import type { PackageFile } from '../../../modules/manager/types';
-import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import type { RepoInitConfig } from '../../../workers/repository/config/types';
 import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {

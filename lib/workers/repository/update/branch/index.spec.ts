@@ -22,7 +22,7 @@ import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { BranchResult } from '../../../types';
-import type { Pr } from '../../onboarding/branch/check';
+import type { Pr } from '../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
 import * as _prAutomerge from '../pr/automerge';

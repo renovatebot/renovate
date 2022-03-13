@@ -2,14 +2,14 @@ import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import * as _process from './process';
-import type { ExtractResult } from './process/extract-update';
+import * as _process from './lookup';
+import type { ExtractResult } from './lookup/extract-update';
 import { renovateRepository } from '.';
 
 const process = mocked(_process);
 
-jest.mock('./init');
-jest.mock('./process');
+jest.mock('./config');
+jest.mock('./lookup');
 jest.mock('./result');
 jest.mock('./error');
 

@@ -9,14 +9,14 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { initRepo } from './config';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
-import { initRepo } from './init';
-import { ensureOnboardingPr } from './onboarding/pr';
-import { extractDependencies, updateRepo } from './process';
+import { extractDependencies, updateRepo } from './lookup';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
+import { ensureOnboardingPr } from './update/onboarding/pr';
 
 // istanbul ignore next
 export async function renovateRepository(
