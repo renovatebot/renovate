@@ -81,7 +81,9 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  return isVersion(version) && isVersion(other) && version === other;
+  const ver = getVersionByCodename(version);
+  const otherVer = getVersionByCodename(other);
+  return isVersion(ver) && isVersion(otherVer) && ver === otherVer;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
