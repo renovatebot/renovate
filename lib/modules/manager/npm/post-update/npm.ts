@@ -126,7 +126,7 @@ export async function generateLockFile(
     lockFile = await readFile(upath.join(cwd, filename), 'utf8');
 
     // Massage lockfile counterparts of package.json that were modified
-    // because npm install was called with an explicit version for rangeStrategy = update-lockfile
+    // because npm install was called with an explicit version for rangeStrategy=update-lockfile
     if (lockUpdates.length) {
       let detectedIndent: string;
       let lockFileParsed: any;
@@ -138,8 +138,15 @@ export async function generateLockFile(
       }
       if (lockFileParsed && lockFileParsed?.lockfileVersion === 2) {
         lockUpdates.forEach((lockUpdate) => {
-          lockFileParsed.packages[''][lockUpdate.depType][lockUpdate.depName] =
-            lockUpdate.newValue;
+          if (
+            lockFileParsed.packages?.['']?.[lockUpdate.depType]?.[
+              lockUpdate.depName
+            ]
+          ) {
+            lockFileParsed.packages[''][lockUpdate.depType][
+              lockUpdate.depName
+            ] = lockUpdate.newValue;
+          }
         });
         lockFile = JSON.stringify(lockFileParsed, null, detectedIndent);
       }
