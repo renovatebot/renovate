@@ -29,5 +29,10 @@ export function getVersionByCodename(input: string): string {
 }
 
 export function getCodenameByVersion(input: string): string | undefined {
-  return versionToCodename.get(input);
+  const codename = versionToCodename.get(input);
+  if (codename) {
+    return codename;
+  }
+  // istanbul ignore next
+  return input;
 }
