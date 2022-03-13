@@ -5,7 +5,7 @@ export class AutomergePatchMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName = 'automergePatch';
 
-  override run(value): void {
+  override run(value: unknown): void {
     const patch = this.get('patch');
 
     const newPatch = is.object(patch) ? patch : {};
