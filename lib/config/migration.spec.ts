@@ -333,23 +333,6 @@ describe('config/migration', () => {
       ).toBeFalse();
     });
 
-    it('migrates packageRules objects', () => {
-      const config = {
-        packageRules: {
-          packageNames: ['typescript'],
-          updateTypes: ['major'],
-          commitMessage:
-            'fix(package): update peerDependency to accept typescript ^{{newValueMajor}} {{newValueMajor}}',
-        },
-      } as any;
-      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-        config,
-        defaultConfig
-      );
-      expect(isMigrated).toBeTrue();
-      expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.packageRules).toHaveLength(1);
-    });
     it('migrates node to travis', () => {
       const config: TestRenovateConfig = {
         node: {
@@ -558,26 +541,6 @@ describe('config/migration', () => {
       expect(res.migratedConfig).toMatchObject({
         extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
       });
-    });
-    it('migrates combinations of packageRules', () => {
-      let config: TestRenovateConfig;
-      let res: MigratedConfig;
-
-      config = {
-        packages: [{ matchPackagePatterns: ['*'] }],
-        packageRules: { matchPackageNames: [] },
-      } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig.packageRules).toHaveLength(2);
-
-      config = {
-        packageRules: { matchPpackageNames: [] },
-        packages: [{ matchPackagePatterns: ['*'] }],
-      } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig.packageRules).toHaveLength(2);
     });
     it('it migrates packageRules', () => {
       const config: TestRenovateConfig = {
