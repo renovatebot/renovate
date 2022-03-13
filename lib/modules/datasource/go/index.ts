@@ -1,4 +1,7 @@
+import is from '@sindresorhus/is';
 import { cache } from '../../../util/cache/package/decorator';
+import { addSecretForSanitizing } from '../../../util/sanitize';
+import { parseUrl } from '../../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GithubTagsDatasource } from '../github-tags';
@@ -71,5 +74,16 @@ export class GoDatasource extends Datasource {
         return null;
       }
     }
+  }
+}
+
+// istanbul ignore if
+if (is.string(process.env.GOPROXY)) {
+  const uri = parseUrl(process.env.GOPROXY);
+  if (uri.username) {
+    addSecretForSanitizing(uri.username, 'global');
+  }
+  if (uri.password) {
+    addSecretForSanitizing(uri.password, 'global');
   }
 }
