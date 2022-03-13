@@ -205,10 +205,6 @@ export function migrateConfig(
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'automergePatch') {
-        migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = !!val;
-        delete migratedConfig[key];
       } else if (
         key === 'automerge' &&
         is.string(val) &&

@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { AutomergeMajorMigration } from './custom/automerge-major-migration';
+import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
@@ -57,6 +58,7 @@ export class MigrationsService {
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
     AutomergeMajorMigration,
+    AutomergePatchMigration,
     AutomergeTypeMigration,
     BinarySourceMigration,
     CompatibilityMigration,
