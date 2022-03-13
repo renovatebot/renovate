@@ -198,10 +198,6 @@ export function migrateConfig(
           }
         }
         delete migratedConfig.unpublishSafe;
-      } else if (key === 'automergeMinor') {
-        migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = !!val;
-        delete migratedConfig[key];
       } else if (key === 'automergeMajor') {
         migratedConfig.major = migratedConfig.major || {};
         migratedConfig.major.automerge = !!val;
