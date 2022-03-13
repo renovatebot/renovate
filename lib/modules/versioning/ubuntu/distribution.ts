@@ -2,9 +2,13 @@ import dataFiles from '../../../data-files.generated';
 
 export type UbuntuDistroInfo = Record<string, string>;
 
+// Data file generated with:
+// ubuntu-distro-info --all -f | sed -r 's/Ubuntu|"|LTS //g; s/([0-9]+.[0-9]+) /\1=/; s/.*/\L&/; s/(=[a-z]*) [a-z]*/\1/g; s/^[ \t]*//' | jo
+const dataFile = 'data/ubuntu-distro-info.json';
+
 const ubuntuDistroInfo: UbuntuDistroInfo = JSON.parse(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  dataFiles.get('data/ubuntu-distro-info.json')!
+  dataFiles.get(dataFile)!
 );
 
 const codenameToVersion = new Map<string, string>();
