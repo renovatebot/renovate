@@ -6,7 +6,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${undefined} | ${false}
     ${null}      | ${false}
     ${''}        | ${false}
-    ${'xenial'}  | ${false}
+    ${'xenial'}  | ${true}
     ${'04.10'}   | ${true}
     ${'05.04'}   | ${true}
     ${'05.10'}   | ${true}
