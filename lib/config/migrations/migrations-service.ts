@@ -2,6 +2,8 @@ import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
+import { AutomergeMajorMigration } from './custom/automerge-major-migration';
+import { AutomergeTypeMigration } from './custom/automerge-type-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
@@ -17,6 +19,7 @@ import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
@@ -53,6 +56,8 @@ export class MigrationsService {
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
+    AutomergeMajorMigration,
+    AutomergeTypeMigration,
     BinarySourceMigration,
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
@@ -68,6 +73,7 @@ export class MigrationsService {
     RenovateForkMigration,
     RequiredStatusChecksMigration,
     SemanticCommitsMigration,
+    SuppressNotificationsMigration,
     TrustLevelMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,

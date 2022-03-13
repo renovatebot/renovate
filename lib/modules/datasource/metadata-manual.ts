@@ -82,6 +82,13 @@ export const manualSourceUrls: Record<string, Record<string, string>> = {
     'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
     'gitea/gitea': 'https://github.com/go-gitea/gitea',
     'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
+    'mcr.microsoft.com/dotnet/aspnet': 'https://github.com/dotnet/aspnetcore',
+    'mcr.microsoft.com/dotnet/monitor':
+      'https://github.com/dotnet/dotnet-monitor',
+    'mcr.microsoft.com/dotnet/runtime': 'https://github.com/dotnet/runtime',
+    'mcr.microsoft.com/dotnet/runtime-deps':
+      'https://github.com/dotnet/runtime',
+    'mcr.microsoft.com/dotnet/sdk': 'https://github.com/dotnet/sdk',
     node: 'https://github.com/nodejs/node',
     registry: 'https://github.com/distribution/distribution',
     traefik: 'https://github.com/containous/traefik',
