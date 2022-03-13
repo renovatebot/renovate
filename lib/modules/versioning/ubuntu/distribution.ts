@@ -4,11 +4,11 @@ export type UbuntuDistroInfo = Record<string, string>;
 
 // Data file generated with:
 // ubuntu-distro-info --all -f | sed -r 's/Ubuntu|"|LTS //g; s/([0-9]+.[0-9]+) /\1=/; s/.*/\L&/; s/(=[a-z]*) [a-z]*/\1/g; s/^[ \t]*//' | jo
-const dataFile = 'data/ubuntu-distro-info.json';
+const ubuntuJsonKey = 'data/ubuntu-distro-info.json';
 
 const ubuntuDistroInfo: UbuntuDistroInfo = JSON.parse(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  dataFiles.get(dataFile)!
+  dataFiles.get(ubuntuJsonKey)!
 );
 
 const codenameToVersion = new Map<string, string>();
@@ -21,7 +21,7 @@ for (const version of Object.keys(ubuntuDistroInfo)) {
 }
 
 export function isCodename(input: string): boolean {
-  return !!codenameToVersion.get(input);
+  return codenameToVersion.has(input);
 }
 
 export function getVersionByCodename(input: string): string {
