@@ -17,11 +17,11 @@ for (const version of Object.keys(ubuntuDistroInfo)) {
 }
 
 export function isCodename(input: string): boolean {
-  return !!codenameToVersion.get(input?.toLocaleLowerCase());
+  return !!codenameToVersion.get(input);
 }
 
 export function getVersionByCodename(input: string): string {
-  const ver = codenameToVersion.get(input?.toLocaleLowerCase());
+  const ver = codenameToVersion.get(input);
   if (ver) {
     return ver;
   }
