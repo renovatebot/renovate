@@ -4,7 +4,7 @@ import {
   getCodenameByVersion,
   getVersionByCodename,
   isCodename,
-} from './codenameData';
+} from './distribution';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
