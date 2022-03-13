@@ -122,18 +122,64 @@ function applyProps(
   depPackageFile: string,
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
+  let result = dep;
+  let anyChange = false;
+  const alreadySeenProps: string[] = [];
+
+  do {
+    const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
+      result,
+      depPackageFile,
+      props,
+      alreadySeenProps
+    );
+    if (fatal) {
+      dep.skipReason = 'recursive-placeholder';
+      return dep;
+    }
+    result = returnedResult;
+    anyChange = returnedAnyChange;
+  } while (anyChange);
+
+  if (containsPlaceholder(result.depName)) {
+    result.skipReason = 'name-placeholder';
+  } else if (containsPlaceholder(result.currentValue)) {
+    result.skipReason = 'version-placeholder';
+  }
+
+  return result;
+}
+
+function applyPropsInternal(
+  dep: PackageDependency<Record<string, any>>,
+  depPackageFile: string,
+  props: MavenProp,
+  alreadySeenProps: string[]
+): [PackageDependency<Record<string, any>>, boolean, boolean] {
+  let anyChange = false;
+  let fatal = false;
+
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${.*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];
-      return propValue ? propValue.val : substr;
+      if (propValue) {
+        anyChange = true;
+        if (alreadySeenProps.find((it) => it === propKey)) {
+          fatal = true;
+        } else {
+          alreadySeenProps.push(propKey);
+        }
+        return propValue.val;
+      }
+      return substr;
     });
 
   const depName = replaceAll(dep.depName);
   const registryUrls = dep.registryUrls.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
-  let propSource = null;
+  let propSource = dep.propSource;
   let groupName = null;
   const currentValue = dep.currentValue.replace(
     regEx(/^\${.*?}$/),
@@ -146,6 +192,12 @@ function applyProps(
         }
         fileReplacePosition = propValue.fileReplacePosition;
         propSource = propValue.packageFile;
+        anyChange = true;
+        if (alreadySeenProps.find((it) => it === propKey)) {
+          fatal = true;
+        } else {
+          alreadySeenProps.push(propKey);
+        }
         return propValue.val;
       }
       return substr;
@@ -165,17 +217,11 @@ function applyProps(
     result.groupName = groupName;
   }
 
-  if (containsPlaceholder(depName)) {
-    result.skipReason = 'name-placeholder';
-  } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = 'version-placeholder';
-  }
-
   if (propSource && depPackageFile !== propSource) {
     result.editFile = propSource;
   }
 
-  return result;
+  return [result, anyChange, fatal];
 }
 
 function resolveParentFile(packageFile: string, parentPath: string): string {

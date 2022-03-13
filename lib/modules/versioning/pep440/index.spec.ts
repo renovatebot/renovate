@@ -165,6 +165,9 @@ describe('modules/versioning/pep440/index', () => {
     ${'~=7.2'}              | ${'replace'}     | ${'7.2.0'}     | ${'8.0.1'}   | ${'~=8.0'}
     ${'~=7.2'}              | ${'replace'}     | ${'7.2.0'}     | ${'8'}       | ${'~=8.0'}
     ${'~=7.2.0'}            | ${'replace'}     | ${'7.2.0'}     | ${'8.2'}     | ${'~=8.2.0'}
+    ${'==3.2.*,>=3.2.2'}    | ${'replace'}     | ${'3.2.2'}     | ${'4.1.1'}   | ${'==4.1.*'}
+    ${'==3.2.*,>=3.2.2'}    | ${'replace'}     | ${'3.2.2'}     | ${'4.0.0'}   | ${'==4.0.*'}
+    ${'>=1.0.0,<1.1.0'}     | ${'replace'}     | ${'1.0.0'}     | ${'1.2.0'}   | ${'>=1.2.0,<1.3.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
