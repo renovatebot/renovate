@@ -202,10 +202,6 @@ export function migrateConfig(
         migratedConfig.minor = migratedConfig.minor || {};
         migratedConfig.minor.automerge = !!val;
         delete migratedConfig[key];
-      } else if (key === 'automergeMajor') {
-        migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = !!val;
-        delete migratedConfig[key];
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
