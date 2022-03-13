@@ -125,12 +125,9 @@ function minSatisfyingVersion(
 }
 
 function getNewValue(newValueConfig: NewValueConfig): string {
-  let newVer = newValueConfig.newVersion;
-  if (isCodename(newValueConfig.currentValue)) {
-    if (isCodename(newVer)) {
-      return newVer;
-    }
-    newVer = getCodenameByVersion(newVer) ?? newVer;
+  const newVer = newValueConfig.newVersion;
+  if (isCodename(newValueConfig.currentValue) && !isCodename(newVer)) {
+    return getCodenameByVersion(newVer) ?? newVer;
   }
   return newVer;
 }
