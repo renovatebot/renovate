@@ -1,5 +1,8 @@
 import { logger } from '../../../logger';
-import { resolvePackage } from '../../../modules/datasource/npm/npmrc';
+import {
+  resolvePackageUrl,
+  resolveRegistryUrl,
+} from '../../../modules/datasource/npm/npmrc';
 import type { NpmResponse } from '../../../modules/datasource/npm/types';
 import { Http } from '../../../util/http';
 import type { Preset, PresetConfig } from '../types';
@@ -19,7 +22,8 @@ export async function getPreset({
 }: PresetConfig): Promise<Preset> {
   let dep;
   try {
-    const { packageUrl } = resolvePackage(pkg);
+    const registryUrl = resolveRegistryUrl(pkg);
+    const packageUrl = resolvePackageUrl(registryUrl, pkg);
     // istanbul ignore if
     if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
       logger.warn(
