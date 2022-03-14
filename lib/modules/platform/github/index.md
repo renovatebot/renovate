@@ -1,6 +1,6 @@
 # GitHub and GitHub Enterprise
 
-## Authentication (Enterprise Server)
+## Authentication
 
 First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
