@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
@@ -35,12 +34,6 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
-    if (
-      GlobalConfig.get('dryRun') === 'extract' ||
-      GlobalConfig.get('dryRun') === 'lookup'
-    ) {
-      return 'done';
-    }
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;

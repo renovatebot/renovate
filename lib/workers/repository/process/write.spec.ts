@@ -1,10 +1,8 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { branchExists } from '../../../util/git';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import * as _branchWorker from '../update/branch';
-import { processBranch } from '../update/branch';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
 
@@ -69,22 +67,6 @@ describe('workers/repository/process/write', () => {
       GlobalConfig.set({ dryRun: 'full' });
       await writeUpdates({ config }, branches);
       expect(isLimitReached(Limit.Branches)).toBeTrue();
-    });
-    it('dryRun extract no branch', async () => {
-      const branches: BranchConfig[] = [{}] as never;
-      limits.getBranchesRemaining.mockResolvedValueOnce(0);
-      GlobalConfig.set({ dryRun: 'extract' });
-      await writeUpdates({ config }, branches);
-      expect(branchExists).toHaveBeenCalledTimes(0);
-      expect(processBranch).toHaveBeenCalledTimes(0);
-    });
-    it('dryRun lookup no branch', async () => {
-      const branches: BranchConfig[] = [{}] as never;
-      limits.getBranchesRemaining.mockResolvedValueOnce(0);
-      GlobalConfig.set({ dryRun: 'lookup' });
-      await writeUpdates({ config }, branches);
-      expect(branchExists).toHaveBeenCalledTimes(0);
-      expect(processBranch).toHaveBeenCalledTimes(0);
     });
   });
 });

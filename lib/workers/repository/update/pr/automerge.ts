@@ -87,16 +87,10 @@ export async function checkAutoMerge(
   if (automergeType === 'pr-comment') {
     logger.debug(`Applying automerge comment: ${automergeComment}`);
     // istanbul ignore if
-    if (GlobalConfig.get('dryRun') === 'full') {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
       );
-      return {
-        automerged: false,
-        prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
-      };
-    }
-    if (GlobalConfig.get('dryRun') === 'lookup') {
       return {
         automerged: false,
         prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
@@ -118,16 +112,10 @@ export async function checkAutoMerge(
   }
   // Let's merge this
   // istanbul ignore if
-  if (GlobalConfig.get('dryRun') === 'full') {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
       `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
     );
-    return {
-      automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
-    };
-  }
-  if (GlobalConfig.get('dryRun') === 'lookup') {
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
