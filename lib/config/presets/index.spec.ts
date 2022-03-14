@@ -128,7 +128,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe('Preset is invalid json (org/repo)');
+      expect(e.validationError).toBe('Preset is invalid JSON (org/repo)');
       expect(e.validationMessage).toBeUndefined();
     });
 
