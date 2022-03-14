@@ -46,14 +46,7 @@ export function migrateConfig(
     ];
     const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'suppressNotifications') {
-        if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
-          migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications.filter(
-              (item) => item !== 'prEditNotification'
-            );
-        }
-      } else if (key === 'matchStrings' && is.array(val)) {
+      if (key === 'matchStrings' && is.array(val)) {
         migratedConfig.matchStrings = val
           .map(
             (matchString) =>
@@ -205,27 +198,9 @@ export function migrateConfig(
           }
         }
         delete migratedConfig.unpublishSafe;
-      } else if (
-        key === 'automergeType' &&
-        is.string(val) &&
-        val.startsWith('branch-')
-      ) {
-        migratedConfig.automergeType = 'branch';
-      } else if (key === 'automergeMinor') {
-        migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = !!val;
-        delete migratedConfig[key];
-      } else if (key === 'automergeMajor') {
-        migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = !!val;
-        delete migratedConfig[key];
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'automergePatch') {
-        migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = !!val;
-        delete migratedConfig[key];
       } else if (
         key === 'automerge' &&
         is.string(val) &&
@@ -259,9 +234,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'packageName') {
-        migratedConfig.packageNames = [val];
-        delete migratedConfig.packageName;
       } else if (key === 'packagePattern') {
         migratedConfig.packagePatterns = [val];
         delete migratedConfig.packagePattern;

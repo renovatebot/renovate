@@ -47,8 +47,3 @@ export interface NpmDependency extends ReleaseResult {
 }
 
 export type Npmrc = Record<string, any>;
-
-export interface PackageResolution {
-  packageUrl: string;
-  registryUrl: string;
-}
