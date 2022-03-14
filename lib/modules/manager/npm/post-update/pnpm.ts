@@ -6,6 +6,7 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { readFile, remove } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import type { NpmPackage } from '../extract/types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
@@ -26,9 +27,21 @@ export async function generateLockFile(
       (upgrade) =>
         upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
     );
+    let pnpmEngine;
+    const rootPackageJson = upath.join(cwd, 'package.json');
+    const content = await readFile(rootPackageJson, 'utf8');
+    if (content) {
+      const packageJson: NpmPackage = JSON.parse(content);
+      const engines = packageJson?.engines;
+      pnpmEngine = engines['pnpm'];
+    }
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
-      constraint: pnpmUpdate ? pnpmUpdate.newValue : config.constraints?.pnpm,
+      constraint: pnpmUpdate
+        ? pnpmUpdate.newValue
+        : pnpmEngine
+        ? pnpmEngine
+        : config.constraints?.pnpm,
     };
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {

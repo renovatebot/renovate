@@ -1,5 +1,6 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
+import { Fixtures } from '../../../../../test/fixtures';
 import { mocked } from '../../../../../test/util';
 import * as _env from '../../../../util/exec/env';
 import * as _fs from '../../../../util/fs/proxies';
@@ -10,6 +11,8 @@ jest.mock('child_process');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs/proxies');
 jest.mock('./node-version');
+
+const readFixture = (x: string): string => Fixtures.get(x, '.');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
@@ -76,5 +79,48 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
     // TODO: check docker preCommands
+  });
+
+  it('uses constraint version if parent json has constraints', async () => {
+    const childPkgJson = readFixture('parent/package.json');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => childPkgJson) as never;
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        depType: 'packageManager',
+        depName: 'pnpm',
+        newValue: '6.32.0',
+      },
+    ]);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe(
+      '{\n' +
+        '  "name": "parent",\n' +
+        '  "version": "1.0.0",\n' +
+        '  "engines": {\n' +
+        '    "pnpm": "=6.16.0"\n' +
+        '  }\n' +
+        '}\n'
+    );
+    expect(execSnapshots).toMatchSnapshot([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: {
+          cwd: 'some-folder',
+          encoding: 'utf-8',
+          env: {
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 });

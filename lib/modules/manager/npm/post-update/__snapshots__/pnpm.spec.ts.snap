@@ -92,6 +92,29 @@ Array [
 ]
 `;
 
+exports[`modules/manager/npm/post-update/pnpm uses constraint version if parent json has constraints 1`] = `
+Array [
+  Object {
+    "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "options": Object {
+      "cwd": "some-folder",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`modules/manager/npm/post-update/pnpm uses the new version if packageManager is updated 1`] = `
 Array [
   Object {
