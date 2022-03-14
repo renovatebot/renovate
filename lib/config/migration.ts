@@ -198,21 +198,9 @@ export function migrateConfig(
           }
         }
         delete migratedConfig.unpublishSafe;
-      } else if (key === 'automergeMinor') {
-        migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = !!val;
-        delete migratedConfig[key];
-      } else if (key === 'automergeMajor') {
-        migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = !!val;
-        delete migratedConfig[key];
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'automergePatch') {
-        migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = !!val;
-        delete migratedConfig[key];
       } else if (
         key === 'automerge' &&
         is.string(val) &&
@@ -246,9 +234,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'packageName') {
-        migratedConfig.packageNames = [val];
-        delete migratedConfig.packageName;
       } else if (key === 'packagePattern') {
         migratedConfig.packagePatterns = [val];
         delete migratedConfig.packagePattern;
