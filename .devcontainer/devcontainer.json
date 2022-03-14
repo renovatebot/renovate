@@ -15,5 +15,6 @@
     "seccomp=unconfined",
     "--privileged"
   ],
-  "postCreateCommand": "yarn install"
+  "postCreateCommand": "yarn install",
+  "remoteUser": "user"
 }
