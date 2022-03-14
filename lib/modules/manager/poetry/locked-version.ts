@@ -9,7 +9,7 @@ export function extractLockFileEntries(
   try {
     poetryLockfile = parse(lockFileContent);
   } catch (err) {
-    logger.debug({ err }, 'Error parsing pyproject.toml file');
+    logger.debug({ err }, 'Error parsing poetry.lock file');
   }
 
   const lockfileMapping: Record<string, string> = {};
