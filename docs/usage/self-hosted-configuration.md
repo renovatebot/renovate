@@ -638,10 +638,6 @@ You might need to set a `username` if you use:
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not specify `username`.
 
-<!-- prettier-ignore  -->
-!!! caution
-    If you use a Personal Access Token (PAT) and want to set a custom `username` (not recommended!), then make sure that Renovate's `username` matches the PAT username.
-
 ## writeDiscoveredRepos
 
 Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
