@@ -295,7 +295,7 @@ export async function resolveConfigPresets(
           } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
             error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
           } else if (err.message === PRESET_INVALID_JSON) {
-            error.validationError = `Preset is invalid json (${preset})`;
+            error.validationError = `Preset is invalid JSON (${preset})`;
           } else {
             error.validationError = `Preset caused unexpected error (${preset})`;
           }
