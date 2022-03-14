@@ -14,7 +14,7 @@ export function extractLockFileEntries(
 
   const lockfileMapping: Record<string, string> = {};
   if (poetryLockfile?.package) {
-    // Create a package->PoetryLockSection mapping
+    // Create a package->version mapping
     for (const poetryPackage of poetryLockfile.package) {
       if (poetryPackage.name && poetryPackage.version) {
         lockfileMapping[poetryPackage.name] = poetryPackage.version;

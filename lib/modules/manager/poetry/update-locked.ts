@@ -10,14 +10,9 @@ export function updateLockedDependency(
   logger.debug(
     `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
-  try {
-    const locked = extractLockFileEntries(lockFileContent || '');
-    if (depName && locked[depName] === newVersion) {
-      return { status: 'already-updated' };
-    }
-    return { status: 'unsupported' };
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'poetry.updateLockedDependency() error');
-    return { status: 'update-failed' };
+  const locked = extractLockFileEntries(lockFileContent || '');
+  if (depName && locked[depName] === newVersion) {
+    return { status: 'already-updated' };
   }
+  return { status: 'unsupported' };
 }
