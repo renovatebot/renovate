@@ -97,7 +97,7 @@ Renovate can not only keep Docker digests updated, but it can even be configured
 ### Internal package updates
 
 Your company typically has dozens of repositories, if not hundreds or thousands.
-These repositories usally rely on other repositories and may have upstream or downstream internal dependencies.
+These repositories usually rely on other repositories and may have upstream or downstream internal dependencies.
 In such cases, it is best practice to:
 
 - Update downstream links as soon as possible, and
