@@ -80,10 +80,10 @@ export class GoDatasource extends Datasource {
 // istanbul ignore if
 if (is.string(process.env.GOPROXY)) {
   const uri = parseUrl(process.env.GOPROXY);
-  if (uri.username) {
+  if (uri?.username) {
     addSecretForSanitizing(uri.username, 'global');
   }
-  if (uri.password) {
+  if (uri?.password) {
     addSecretForSanitizing(uri.password, 'global');
   }
 }
