@@ -301,6 +301,8 @@ You can choose from the following behaviors for the `dryRun` config option:
 - `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
 - `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
 
+Information provided mainly in debug log level.
+
 ## endpoint
 
 ## executionTimeout
