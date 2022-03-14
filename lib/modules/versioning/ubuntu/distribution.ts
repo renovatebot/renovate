@@ -7,16 +7,13 @@ export type UbuntuDistroInfo = Record<string, string>;
 const ubuntuJsonKey = 'data/ubuntu-distro-info.json';
 
 const ubuntuDistroInfo: UbuntuDistroInfo = JSON.parse(
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  dataFiles.get(ubuntuJsonKey)!
+  dataFiles?.get(ubuntuJsonKey) ?? ''
 );
 
 const codenameToVersion = new Map<string, string>();
-const versionToCodename = new Map<string, string>();
 
 for (const version of Object.keys(ubuntuDistroInfo)) {
   const codename = ubuntuDistroInfo[version];
-  versionToCodename.set(version, codename);
   codenameToVersion.set(codename, version);
 }
 
@@ -33,7 +30,7 @@ export function getVersionByCodename(input: string): string {
 }
 
 export function getCodenameByVersion(input: string): string | undefined {
-  const codename = versionToCodename.get(input);
+  const codename = ubuntuDistroInfo[input];
   if (codename) {
     return codename;
   }
