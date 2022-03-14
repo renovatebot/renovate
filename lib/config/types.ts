@@ -239,6 +239,7 @@ export type UpdateType =
   | 'patch'
   | 'pin'
   | 'digest'
+  | 'pinDigest'
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'

@@ -1248,6 +1248,20 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'pinDigest',
+    description:
+      'Configuration to apply when pinning a digest (no change in tag/version).',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-digest',
+      commitMessageExtra: 'to {{newDigestShort}}',
+      commitMessageTopic: '{{{depName}}} digest',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
     name: 'rollback',
     description: 'Configuration to apply when rolling back a version.',
     stage: 'package',

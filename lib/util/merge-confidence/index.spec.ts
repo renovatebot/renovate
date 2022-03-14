@@ -180,5 +180,16 @@ describe('util/merge-confidence/index', () => {
         )
       ).toBe('neutral');
     });
+    it('returns high if pinning digest', async () => {
+      expect(
+        await getMergeConfidenceLevel(
+          'npm',
+          'renovate',
+          '25.0.1',
+          '25.0.1',
+          'pinDigest'
+        )
+      ).toBe('high');
+    });
   });
 });
