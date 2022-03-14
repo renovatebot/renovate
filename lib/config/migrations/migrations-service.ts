@@ -5,6 +5,7 @@ import { RenamePropertyMigration } from './base/rename-property-migration';
 import { AutomergeMajorMigration } from './custom/automerge-major-migration';
 import { AutomergeMigration } from './custom/automerge-migration';
 import { AutomergeMinorMigration } from './custom/automerge-minor-migration';
+import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
@@ -13,6 +14,7 @@ import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { PackageNameMigration } from './custom/package-name-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
@@ -61,6 +63,7 @@ export class MigrationsService {
     AutomergeMajorMigration,
     AutomergeMigration,
     AutomergeMinorMigration,
+    AutomergePatchMigration,
     AutomergeTypeMigration,
     BinarySourceMigration,
     CompatibilityMigration,
@@ -69,6 +72,7 @@ export class MigrationsService {
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
+    PackageNameMigration,
     PathRulesMigration,
     PinVersionsMigration,
     RaiseDeprecationWarningsMigration,

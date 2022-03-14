@@ -201,10 +201,6 @@ export function migrateConfig(
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'automergePatch') {
-        migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = !!val;
-        delete migratedConfig[key];
       } else if (key === 'packages') {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -213,9 +209,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'packageName') {
-        migratedConfig.packageNames = [val];
-        delete migratedConfig.packageName;
       } else if (key === 'packagePattern') {
         migratedConfig.packagePatterns = [val];
         delete migratedConfig.packagePattern;
