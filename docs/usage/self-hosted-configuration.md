@@ -631,7 +631,16 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## username
 
-Mandatory if a GitHub app token is in use using the CLI.
+You might need to set a custom `username` if you use:
+
+- The Bitbucket platform, or
+- use the GitHub App with CLI (required)
+
+If you're using a Personal Access Token (PAT) to authenticate then we recommend you keep the `username` at its default value.
+
+<!-- prettier-ignore  -->
+!!! caution
+    If you use a Personal Access Token (PAT) and want to set a custom `username` (not recommended!), then make sure that Renovate's `username` matches the PAT username.
 
 ## writeDiscoveredRepos
 
