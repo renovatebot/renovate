@@ -234,9 +234,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'packagePattern') {
-        migratedConfig.packagePatterns = [val];
-        delete migratedConfig.packagePattern;
       } else if (key === 'baseBranch') {
         migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
         delete migratedConfig.baseBranch;
