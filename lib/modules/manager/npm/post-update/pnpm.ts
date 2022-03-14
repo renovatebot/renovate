@@ -35,10 +35,14 @@ export async function generateLockFile(
       const engines = packageJson?.engines;
       pnpmEngine = engines['pnpm'];
     }
-    pnpmEngine = pnpmEngine ? pnpmEngine : config.constraints?.pnpm;
+    if (pnpmUpdate?.newValue) {
+      pnpmEngine = pnpmUpdate.newValue;
+    }
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
-      constraint: pnpmUpdate ? pnpmUpdate.newValue : pnpmEngine,
+      constraint: config.constraints?.pnpm
+        ? config.constraints.pnpm
+        : pnpmEngine,
     };
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {

@@ -97,24 +97,24 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   it('uses constraint version if parent json has constraints', async () => {
     const childPkgJson = readFixture('parent/package.json');
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => childPkgJson) as never;
-    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
-      {
-        depType: 'packageManager',
-        depName: 'pnpm',
-        newValue: '6.32.0',
-      },
-    ]);
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
-    expect(res.lockFile).toBe(
-      '{\n' +
-        '  "name": "parent",\n' +
-        '  "version": "1.0.0",\n' +
-        '  "engines": {\n' +
-        '    "pnpm": "=6.16.0"\n' +
-        '  }\n' +
-        '}\n'
+    const configTemp = { cacheDir: 'some-cache-dir' };
+    fs.readFile = jest
+      .fn()
+      .mockReturnValueOnce(childPkgJson)
+      .mockReturnValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      configTemp,
+      [
+        {
+          depType: 'packageManager',
+          depName: 'pnpm',
+        },
+      ]
     );
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot([
       {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
