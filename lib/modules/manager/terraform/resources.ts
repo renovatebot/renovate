@@ -112,8 +112,12 @@ export function analyseTerraformResource(
       break;
 
     case TerraformResourceTypes.tfe_workspace:
-      analyseTerraformVersion(dep);
-      dep.depType = 'tfe_workspace';
+      if (dep.currentValue) {
+        analyseTerraformVersion(dep);
+        dep.depType = 'tfe_workspace';
+      } else {
+        dep.skipReason = 'no-version';
+      }
       break;
 
     default:

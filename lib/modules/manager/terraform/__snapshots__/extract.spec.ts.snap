@@ -447,7 +447,7 @@ Object {
 }
 `;
 
-exports[`modules/manager/terraform/extract extractPackageFile() extracts terraform_version for tfe_workspace 1`] = `
+exports[`modules/manager/terraform/extract extractPackageFile() extracts terraform_version for tfe_workspace and ignores missing terraform_version keys 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -456,6 +456,9 @@ Object {
       "depName": "hashicorp/terraform",
       "depType": "tfe_workspace",
       "extractVersion": "v(?<version>.*)$",
+    },
+    Object {
+      "skipReason": "no-version",
     },
   ],
 }
@@ -475,8 +478,6 @@ Object {
   ],
 }
 `;
-
-exports[`modules/manager/terraform/extract extractPackageFile() test tfe_workspace without terraform_version 1`] = `null`;
 
 exports[`modules/manager/terraform/extract extractPackageFile() update lockfile constraints with range strategy update-lockfile 1`] = `
 Object {
