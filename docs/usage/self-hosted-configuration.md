@@ -631,12 +631,12 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## username
 
-You might need to set a custom `username` if you use:
+You might need to set a `username` if you use:
 
 - The Bitbucket platform, or
 - use the GitHub App with CLI (required)
 
-If you're using a Personal Access Token (PAT) to authenticate then we recommend you keep the `username` at its default value.
+If you're using a Personal Access Token (PAT) to authenticate then you should not specify `username`.
 
 <!-- prettier-ignore  -->
 !!! caution
