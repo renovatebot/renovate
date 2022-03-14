@@ -302,7 +302,7 @@ export async function resolveConfigPresets(
           // istanbul ignore if
           if (existingPresets.length) {
             error.validationError +=
-              'Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
+              '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
           }
           logger.info(
             { validationError: error.validationError },
