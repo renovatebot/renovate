@@ -19,7 +19,7 @@ describe('util/sanitize', () => {
     const token = '123testtoken';
     const username = 'userabc';
     const password = 'password123';
-    addSecretForSanitizing(token);
+    addSecretForSanitizing(token, 'global');
     const hashed = toBase64(`${username}:${password}`);
     addSecretForSanitizing(hashed);
     addSecretForSanitizing(password);
