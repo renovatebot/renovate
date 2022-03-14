@@ -3,6 +3,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { updateLockedDependency } from './update-locked';
 
 export const supportedDatasources = [PypiDatasource.id];
 

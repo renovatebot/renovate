@@ -2,6 +2,7 @@ import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import { analyseTerraformVersion } from './required-version';
 import type { ExtractionResult, ResourceManagerData } from './types';
 import {
   checkIfStringIsPath,
@@ -32,10 +33,15 @@ export function extractTerraformResource(
 
   const typeMatch = resourceTypeExtractionRegex.exec(line);
 
+  // Sets the resourceType, e.g. "helm_release" 'resource "helm_release" "test_release"'
   dep.managerData.resourceType =
     TerraformResourceTypes[typeMatch?.groups?.type] ??
     TerraformResourceTypes.unknown;
 
+  /**
+   * Iterates over all lines of the resource to extract the relevant key value pairs,
+   * e.g. the chart name for helm charts or the terraform_version for tfe_workspace
+   */
   do {
     lineNumber += 1;
     line = lines[lineNumber];
@@ -49,6 +55,7 @@ export function extractTerraformResource(
           dep.managerData[kvMatch.groups.key] = kvMatch.groups.value;
           break;
         case 'version':
+        case 'terraform_version':
           dep.currentValue = kvMatch.groups.value;
           break;
         default:
@@ -102,6 +109,15 @@ export function analyseTerraformResource(
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
       dep.datasource = HelmDatasource.id;
+      break;
+
+    case TerraformResourceTypes.tfe_workspace:
+      if (dep.currentValue) {
+        analyseTerraformVersion(dep);
+        dep.depType = 'tfe_workspace';
+      } else {
+        dep.skipReason = 'no-version';
+      }
       break;
 
     default:
