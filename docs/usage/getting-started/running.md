@@ -164,7 +164,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [GitHub (Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
 - [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 
-#### Running as a GitHub App
+### Running as a GitHub App
 
 Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
 
