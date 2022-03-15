@@ -103,7 +103,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       httpMock
         .scope('https://api.bitbucket.org/')
-        .get('/2.0/repositories/golang/text/refs/tags')
+        .get('/2.0/repositories/golang/text/refs/tags?pagelen=100')
         .reply(200, {
           pagelen: 2,
           page: 1,
