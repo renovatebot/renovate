@@ -4,10 +4,8 @@ import minimatch from 'minimatch';
 import shell from 'shelljs';
 
 const options = {
-  algorithm: 'md5',
+  algorithm: 'sha256',
 };
-const hashMap = 'export const hashMap = new Map();';
-let hashes = [];
 
 /**
  * @param {string} managerName
@@ -32,35 +30,47 @@ async function getFileHash(managerName, fileAddr) {
  * @returns {Promise<string|undefined>}
  */
 export async function getHash(manager) {
-  let hashes = [];
-  let files = await fs.readdir(`./lib/modules/manager/${manager}`);
+  try {
+    let hashes = [];
+    let files = await fs.readdir(`./lib/modules/manager/${manager}`);
 
-  if (files.includes('__snapshots__')) {
-    const snapshots = await fs.readdir(
-      `./lib/modules/manager/${manager}/__snapshots__`
-    );
+    if (files.includes('__snapshots__')) {
+      const snapshots = await fs.readdir(
+        `./lib/modules/manager/${manager}/__snapshots__`
+      );
 
-    for (const snap of snapshots) {
-      const hash = getFileHash(manager, `__snapshots__/${snap}`);
+      for (const snap of snapshots) {
+        const hash = getFileHash(manager, `__snapshots__/${snap}`);
+        hashes.push(hash);
+      }
+    }
+
+    files = files.filter((fileName) => minimatch(fileName, '*.spec.ts'));
+    for (const file of files) {
+      const hash = getFileHash(manager, file);
       hashes.push(hash);
     }
+
+    hashes = (await Promise.all(hashes))
+      .map((hash) => (hash ? hash : ''))
+      .filter(Boolean);
+
+    if (hashes.length) {
+      return hasha(hashes, options);
+    } else {
+      throw new Error(`Couldn't generate hash for ${manager}`);
+    }
+  } catch (err) {
+    shell.echo('ERROR:', err.message);
+    return undefined;
   }
-
-  files = files.filter((fileName) => minimatch(fileName, '*.spec.ts'));
-  for (const file of files) {
-    const hash = getFileHash(manager, file);
-    hashes.push(hash);
-  }
-
-  hashes = hashes.filter(Boolean);
-  hashes = await Promise.all(hashes); //faster than using await in a for loop
-
-  return hasha(hashes, options);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
+    const hashMap = 'export const hashMap = new Map();';
+    let hashes = [];
     //get manager-list
     const managerList = (
       await fs.readdir('./lib/modules/manager', { withFileTypes: true })
@@ -73,9 +83,7 @@ export async function getHash(manager) {
       const hash = getHash(manager);
       hashes.push(hash);
     }
-    hashes = await Promise.all(hashes); //faster than using await in a for loop
-
-    hashes = hashes.map(
+    hashes = (await Promise.all(hashes)).map(
       (hash, index) => `hashMap.set('${managerList[index]}', '${hash}');`
     );
 
