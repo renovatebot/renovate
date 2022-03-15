@@ -542,7 +542,9 @@ async function getClosedPrs(): Promise<PrMap> {
   const prList = await getPrList();
   const result: PrMap = {};
   for (const pr of prList) {
-    result[pr.number] = pr;
+    if (pr.state === 'closed') {
+      result[pr.number] = pr;
+    }
   }
   return result;
 }
