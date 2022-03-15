@@ -29,7 +29,7 @@ export function getVersionByCodename(input: string): string {
   return input;
 }
 
-export function getCodenameByVersion(input: string): string | undefined {
+export function getCodenameByVersion(input: string): string {
   const codename = ubuntuDistroInfo[input];
   if (codename) {
     return codename;
