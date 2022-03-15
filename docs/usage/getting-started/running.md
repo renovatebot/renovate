@@ -153,11 +153,20 @@ Regardless of platform, you need to select a user account for `renovate` to assu
 It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
 It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
-#### GitHub (Enterprise Server)
+#### Docs
 
-Read the [`github` platform docs](https://docs.renovatebot.com/modules/platform/github/).
+Read the platform-specific docs to learn how to setup authentication on your platform.
 
-##### Running as a GitHub App
+| Platform                   | Link to documentation                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| Azure DevOps               | [`azure`](https://docs.renovatebot.com/modules/platform/azure/)                       |
+| Bitbucket Cloud            | [`bitbucket-cloud`](https://docs.renovatebot.com/modules/platform/bitbucket/)         |
+| Bitbucket Server           | [`bitbucket-server`](https://docs.renovatebot.com/modules/platform/bitbucket-server/) |
+| Gitea                      | [`gitea`](https://docs.renovatebot.com/modules/platform/gitea/)                       |
+| GitHub (Enterprise Server) | [`github`](https://docs.renovatebot.com/modules/platform/github/)                     |
+| GitLab                     | [`gitlab`](https://docs.renovatebot.com/modules/platform/gitlab/)                     |
+
+#### Running as a GitHub App
 
 Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
 
@@ -201,26 +210,6 @@ The token needs to be prefixed with `x-access-token` and be a [GitHub App Instal
 List of repositories to run on.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
-
-#### GitLab
-
-Read the [`gitlab` platform docs](https://docs.renovatebot.com/modules/platform/gitlab/).
-
-#### Bitbucket Cloud
-
-Read the [`bitbucket-cloud` platform docs](https://docs.renovatebot.com/modules/platform/bitbucket/).
-
-#### Bitbucket Server
-
-Read the [`bitbucket-server` platform docs](https://docs.renovatebot.com/modules/platform/bitbucket-server/).
-
-#### Azure DevOps
-
-Read the [`azure` platform docs](https://docs.renovatebot.com/modules/platform/azure/).
-
-#### Gitea
-
-Read the [`gitea` platform docs](https://docs.renovatebot.com/modules/platform/gitea/).
 
 ### GitHub.com token for release notes
 
