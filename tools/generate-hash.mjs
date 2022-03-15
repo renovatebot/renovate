@@ -12,7 +12,7 @@ let hashes = [];
 /**
  * @param {string} managerName
  * @param {string} fileAddr
- * @returns {Promise<string>}
+ * @returns {Promise<string|undefined>}
  */
 async function getFileHash(managerName, fileAddr) {
   try {
@@ -29,7 +29,7 @@ async function getFileHash(managerName, fileAddr) {
 /**
  *
  * @param {string} manager
- * @returns {Promise<string>}
+ * @returns {Promise<string|undefined>}
  */
 export async function getHash(manager) {
   let hashes = [];
