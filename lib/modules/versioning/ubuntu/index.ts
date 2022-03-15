@@ -124,12 +124,16 @@ function minSatisfyingVersion(
   return getSatisfyingVersion(versions, range);
 }
 
-function getNewValue(newValueConfig: NewValueConfig): string {
-  const newVer = newValueConfig.newVersion;
-  if (isCodename(newValueConfig.currentValue) && !isCodename(newVer)) {
-    return getCodenameByVersion(newVer) ?? newVer;
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (isCodename(currentValue)) {
+    return getCodenameByVersion(newVersion);
   }
-  return newVer;
+  return getVersionByCodename(newVersion);
 }
 
 function sortVersions(version: string, other: string): number {
