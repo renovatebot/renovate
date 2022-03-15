@@ -4,7 +4,7 @@
 
 Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for your bot account.
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
-Also configure the `username` for your bot account too, if you decided not to name it `@renovate-bot`.
+Also configure the `username` for your bot account, if you decided not to name it `@renovate-bot`.
 Don't forget to configure `platform=bitbucket-server` somewhere in config.
 
 If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
