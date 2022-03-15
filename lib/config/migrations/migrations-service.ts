@@ -7,6 +7,7 @@ import { AutomergeMigration } from './custom/automerge-migration';
 import { AutomergeMinorMigration } from './custom/automerge-minor-migration';
 import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
+import { BaseBranchMigration } from './custom/base-branch-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
@@ -66,6 +67,7 @@ export class MigrationsService {
     AutomergeMinorMigration,
     AutomergePatchMigration,
     AutomergeTypeMigration,
+    BaseBranchMigration,
     BinarySourceMigration,
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
