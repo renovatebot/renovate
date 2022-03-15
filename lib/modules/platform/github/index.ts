@@ -55,7 +55,6 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import {
-  closedPrsQuery,
   enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
@@ -74,7 +73,7 @@ import type {
   GhRestPr,
   LocalRepoConfig,
   PlatformConfig,
-  PrList,
+  PrMap,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
@@ -539,51 +538,16 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-async function getClosedPrs(): Promise<PrList> {
-  if (!config.closedPrList) {
-    config.closedPrList = {};
-    try {
-      // prettier-ignore
-      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        closedPrsQuery,
-        'pullRequests',
-        {
-          variables: {
-            owner: config.repositoryOwner,
-            name: config.repositoryName,
-          },
-        }
-      );
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!nodes?.length) {
-        logger.debug('getClosedPrs(): no graphql data');
-        return {};
-      }
-      for (const pr of nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = pr.state.toLowerCase();
-        pr.sourceBranch = pr.headRefName;
-        delete pr.headRefName;
-        pr.comments = pr.comments.nodes.map((comment) => ({
-          id: comment.databaseId,
-          body: comment.body,
-        }));
-        pr.body = 'dummy body'; // just in case
-        config.closedPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'getClosedPrs(): error');
-    }
+async function getClosedPrs(): Promise<PrMap> {
+  const prList = await getPrList();
+  const result: PrMap = {};
+  for (const pr of prList) {
+    result[pr.number] = pr;
   }
-  return config.closedPrList;
+  return result;
 }
 
-async function getOpenPrs(): Promise<PrList> {
+async function getOpenPrs(): Promise<PrMap> {
   // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
@@ -1318,11 +1282,6 @@ async function deleteComment(commentId: number): Promise<void> {
 }
 
 async function getComments(issueNo: number): Promise<Comment[]> {
-  const pr = (await getClosedPrs())[issueNo];
-  if (pr) {
-    logger.debug('Returning closed PR list comments');
-    return pr.comments;
-  }
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `repos/${

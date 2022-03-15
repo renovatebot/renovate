@@ -20,11 +20,7 @@ export interface Comment {
   body: string;
 }
 
-export interface GhPr extends Pr {
-  comments: Comment[];
-}
-
-export interface GhRestPr extends GhPr {
+export interface GhRestPr extends Pr {
   head: {
     ref: string;
     sha: string;
@@ -41,7 +37,7 @@ export interface GhRestPr extends GhPr {
   node_id: string;
 }
 
-export interface GhGraphQlPr extends GhPr {
+export interface GhGraphQlPr extends Pr {
   reviewRequests: any;
   assignees: any;
   mergeStateStatus: string;
@@ -68,9 +64,9 @@ export interface LocalRepoConfig {
   parentRepo: string;
   forkMode?: boolean;
   forkToken?: string;
-  closedPrList: PrList | null;
-  openPrList: PrList | null;
-  prList: GhPr[] | null;
+  closedPrList: PrMap | null;
+  openPrList: PrMap | null;
+  prList: Pr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
@@ -85,7 +81,7 @@ export interface LocalRepoConfig {
 }
 
 export type BranchProtection = any;
-export type PrList = Record<number, GhPr>;
+export type PrMap = Record<number, Pr>;
 
 export interface GhRepo {
   isFork: boolean;

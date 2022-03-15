@@ -40,9 +40,6 @@ describe('modules/platform/github/index', () => {
   });
 
   const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');
-  const graphqlClosedPullRequests = loadFixture(
-    'graphql/pullrequests-closed.json'
-  );
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
@@ -540,7 +537,6 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice() // getOpenPrs() and getClosedPrs()
         .reply(200, {
           data: { repository: { pullRequests: { pageInfo: {} } } },
         })
@@ -556,19 +552,7 @@ describe('modules/platform/github/index', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             state: PrState.Open,
           },
-        ])
-        .get('/repos/some/repo/pulls/91')
-        .reply(200, {
-          number: 91,
-          additions: 1,
-          deletions: 1,
-          commits: 1,
-          base: {
-            sha: '1234',
-          },
-          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          state: PrState.Open,
-        });
+        ]);
 
       await github.initRepo({
         repository: 'some/repo',
@@ -582,7 +566,6 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice() // getOpenPrs() and getClosedPrs()
         .reply(200, {
           data: { repository: { pullRequests: { pageInfo: {} } } },
         })
@@ -605,24 +588,17 @@ describe('modules/platform/github/index', () => {
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(201)
-        .get('/repos/some/repo/pulls/91')
-        .reply(200, {
-          number: 91,
-          additions: 1,
-          deletions: 1,
-          commits: 1,
-          base: {
-            sha: '1234',
-          },
-          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          state: PrState.Open,
-        });
+        .get('/repos/some/repo/pulls/91');
 
       await github.initRepo({
         repository: 'some/repo',
       } as any);
       const pr = await github.getBranchPr('somebranch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'somebranch',
+        sourceRepo: 'some/repo',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('aborts reopen if PR is too old', async () => {
@@ -705,7 +681,6 @@ describe('modules/platform/github/index', () => {
       forkInitRepoMock(scope, 'some/repo', true);
       scope
         .post('/graphql')
-        .twice() // getOpenPrs() and getClosedPrs()
         .reply(200, {
           data: { repository: { pullRequests: { pageInfo: {} } } },
         })
@@ -722,18 +697,6 @@ describe('modules/platform/github/index', () => {
             state: PrState.Open,
           },
         ])
-        .get('/repos/some/repo/pulls/90')
-        .reply(200, {
-          number: 90,
-          additions: 1,
-          deletions: 1,
-          commits: 1,
-          base: {
-            sha: '1234',
-          },
-          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-          state: PrState.Open,
-        })
         .patch('/repos/forked/repo/git/refs/heads/master')
         .reply(200);
       await github.initRepo({
@@ -1646,10 +1609,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
         .post('/repos/some/repo/issues/42/comments')
@@ -1669,8 +1628,17 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, graphqlClosedPullRequests)
+        .get('/repos/some/repo/issues/2499/comments?per_page=100')
+        .reply(200, [
+          {
+            id: 419928791,
+            body: '[![CLA assistant check](https://cla-assistant.io/pull/badge/signed)](https://cla-assistant.io/renovatebot/renovate?pullRequest=2500) <br/>All committers have signed the CLA.',
+          },
+          {
+            id: 420006957,
+            body: ':tada: This PR is included in version 13.63.5 :tada:\n\nThe release is available on:\n- [npm package (@latest dist-tag)](https://www.npmjs.com/package/renovate)\n- [GitHub release](https://github.com/renovatebot/renovate/releases/tag/13.63.5)\n\nYour **[semantic-release](https://github.com/semantic-release/semantic-release)** bot :package::rocket:',
+          },
+        ])
         .post('/repos/some/repo/issues/2499/comments')
         .reply(200);
       await github.initRepo({
@@ -1687,10 +1655,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .patch('/repos/some/repo/issues/comments/1234')
@@ -1709,10 +1673,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
       await github.initRepo({
@@ -1729,10 +1689,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
       await github.initRepo({
@@ -1751,10 +1707,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/repos/some/repo/issues/comments/1234')
@@ -1771,10 +1723,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
         .delete('/repos/some/repo/issues/comments/1234')
@@ -2109,11 +2057,32 @@ describe('modules/platform/github/index', () => {
       scope
         .post('/graphql')
         .reply(200, graphqlOpenPullRequests)
-        .post('/graphql')
-        .reply(200, graphqlClosedPullRequests);
-      await github.initRepo({
-        repository: 'some/repo',
-      } as any);
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
+            number: 2500,
+            head: {
+              ref: 'renovate/jest-monorepo',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'chore(deps): update dependency jest to v23.6.0',
+            state: PrState.Closed,
+            merged_at: DateTime.now().minus({ minutes: 10 }).toISO(),
+            closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
+          },
+          {
+            number: 2499,
+            head: {
+              ref: 'renovate/delay-4.x',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'build(deps): update dependency delay to v4.0.1',
+            state: PrState.Closed,
+            merged_at: DateTime.now().minus({ minutes: 10 }).toISO(),
+            closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' } as any);
       const pr = await github.getPr(2499);
       expect(pr).toBeDefined();
       expect(pr).toMatchSnapshot();
@@ -2126,8 +2095,9 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200)
         .post('/graphql')
-        .twice()
-        .reply(404);
+        .reply(404)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.getPr(1234);
       expect(pr).toBeNull();
@@ -2145,8 +2115,9 @@ describe('modules/platform/github/index', () => {
           merged_at: 'sometime',
         })
         .post('/graphql')
-        .twice()
-        .reply(404);
+        .reply(404)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, []);
       await github.initRepo({
         repository: 'some/repo',
         token: 'token',
@@ -2168,8 +2139,9 @@ describe('modules/platform/github/index', () => {
           commits: 1,
         })
         .post('/graphql')
-        .twice()
-        .reply(404);
+        .reply(404)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, []);
       await github.initRepo({
         repository: 'some/repo',
         token: 'token',
@@ -2190,8 +2162,9 @@ describe('modules/platform/github/index', () => {
           commits: 1,
         })
         .post('/graphql')
-        .twice()
-        .reply(404);
+        .reply(404)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, []);
       await github.initRepo({
         repository: 'some/repo',
         token: 'token',
