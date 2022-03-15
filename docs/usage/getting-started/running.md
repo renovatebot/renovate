@@ -155,16 +155,14 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### Docs
 
-Read the platform-specific docs to learn how to setup authentication on your platform.
+Read the platform-specific docs to learn how to setup authentication on your platform:
 
-| Platform                   | Link to documentation                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------- |
-| Azure DevOps               | [`azure`](https://docs.renovatebot.com/modules/platform/azure/)                       |
-| Bitbucket Cloud            | [`bitbucket-cloud`](https://docs.renovatebot.com/modules/platform/bitbucket/)         |
-| Bitbucket Server           | [`bitbucket-server`](https://docs.renovatebot.com/modules/platform/bitbucket-server/) |
-| Gitea                      | [`gitea`](https://docs.renovatebot.com/modules/platform/gitea/)                       |
-| GitHub (Enterprise Server) | [`github`](https://docs.renovatebot.com/modules/platform/github/)                     |
-| GitLab                     | [`gitlab`](https://docs.renovatebot.com/modules/platform/gitlab/)                     |
+- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
+- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
+- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
+- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [GitHub (Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
+- [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 
 #### Running as a GitHub App
 
