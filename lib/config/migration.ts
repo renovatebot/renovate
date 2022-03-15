@@ -196,31 +196,6 @@ export function migrateConfig(
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (
-        key === 'automerge' &&
-        is.string(val) &&
-        ['none', 'patch', 'minor', 'any'].includes(val)
-      ) {
-        delete migratedConfig.automerge;
-        if (val === 'none') {
-          migratedConfig.automerge = false;
-        } else if (val === 'patch') {
-          migratedConfig.patch = migratedConfig.patch || {};
-          migratedConfig.patch.automerge = true;
-          migratedConfig.minor = migratedConfig.minor || {};
-          migratedConfig.minor.automerge = false;
-          migratedConfig.major = migratedConfig.major || {};
-          migratedConfig.major.automerge = false;
-        } else if (val === 'minor') {
-          migratedConfig.minor = migratedConfig.minor || {};
-          migratedConfig.minor.automerge = true;
-          migratedConfig.major = migratedConfig.major || {};
-          migratedConfig.major.automerge = false;
-        } /* istanbul ignore else: we can never go to else */ else if (
-          val === 'any'
-        ) {
-          migratedConfig.automerge = true;
-        }
       } else if (key === 'packages') {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
@@ -229,9 +204,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'packagePattern') {
-        migratedConfig.packagePatterns = [val];
-        delete migratedConfig.packagePattern;
       } else if (key === 'baseBranch') {
         migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
         delete migratedConfig.baseBranch;

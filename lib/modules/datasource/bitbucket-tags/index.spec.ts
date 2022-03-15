@@ -28,7 +28,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       };
       httpMock
         .scope('https://api.bitbucket.org')
-        .get('/2.0/repositories/some/dep2/refs/tags')
+        .get('/2.0/repositories/some/dep2/refs/tags?pagelen=100')
         .reply(200, body);
       const res = await getPkgReleases({
         datasource,
