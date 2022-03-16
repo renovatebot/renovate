@@ -15,6 +15,7 @@ export const redactedFields = [
   'gitPrivateKey',
   'forkToken',
   'password',
+  'Private-token',
 ];
 
 export function sanitize(input: string): string {
