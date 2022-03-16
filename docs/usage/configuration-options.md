@@ -1834,11 +1834,13 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## platformCommit
 
-Supports only GitHub App mode and not when using Personal Access Tokens.
+If you're authenticating Renovate as an app, then you can use this option to automatically sign the commits that Renovate creates.
+This option only works if you:
 
-To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
+- Use GitHub App mode, and
+- Are _not_ using a Personal Access Token (PAT) to authenticate Renovate
 
-The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
+Remember to set the `gitAuthor` or `gitIgnoredAuthors` or both to prevent errors.
 
 ## postUpdateOptions
 
