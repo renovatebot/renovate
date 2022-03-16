@@ -1,6 +1,31 @@
 > :warning: **This datasource is _experimental_**: Be aware that its syntax and behavior may change at any time!
 
-This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API (valid credentials required).
+This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
+
+As this datasource relies on the AWS-SDK, so the configuration looks similar to other AWS Tools and the common configuration options are supported, for example:
+
+- Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
+- Provide credentials via `AWS_ACCESS_KEY_ID`and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
+- Select the profile to use via `AWS_PROFILE` environment variable
+- ...
+
+see [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for further information on configuration options.
+
+The least privileges required for this datasource are
+
+```json
+...
+  {
+    "Sid": "AllowEc2ImageLookup",
+    "Effect": "Allow",
+    "Action": ["ec2:DescribeImages"],
+    "Resource": "*"
+  },
+...
+]
+```
+
+see [AWS IAM Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonec2.html) for further information.
 
 Because there is no general `packageName`, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified JSON as a `packageName`.
 
