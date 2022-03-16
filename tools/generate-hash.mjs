@@ -20,7 +20,7 @@ async function getFileHash(managerName, fileAddr) {
     );
     return hash;
   } catch (err) {
-    // logger.debug(`Couldn't resolve hash for ${managerName} -> ${fileName}`)
+    shell.echo(`ERROR: Unable to generate hash for ${managerName}/${fileAddr}`);
     return undefined;
   }
 }
@@ -52,7 +52,7 @@ export async function getHash(manager) {
     }
 
     hashes = (await Promise.all(hashes))
-      .map((hash) => (hash ? hash : ''))
+      .map((hash) => (hash ? hash : '')) // used in null-checking
       .filter(Boolean);
 
     if (hashes.length) {
@@ -78,11 +78,11 @@ export async function getHash(manager) {
       .filter((file) => file.isDirectory())
       .map((file) => file.name);
 
-    //store hashes in hashMap {key->manager, value->hash}
     for (const manager of managerList) {
       const hash = getHash(manager);
       hashes.push(hash);
     }
+    //store hashes in hashMap {key->manager, value->hash}
     hashes = (await Promise.all(hashes)).map(
       (hash, index) => `hashMap.set('${managerList[index]}', '${hash}');`
     );
