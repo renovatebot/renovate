@@ -3,8 +3,13 @@
 ## Authentication
 
 First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=azure` somewhere in config.
+Let Renovate use your PAT by doing _one_ of the following:
+
+- Set your PAT as a `token` in your `config.js` file
+- Set your PAT as an environment variable `RENOVATE_TOKEN`
+- Set your PAT when you run Renovate in the CLI with `--token=`
+
+Remember to set `platform=azure` somewhere in your Renovate config file.
 
 ## Features awaiting implementation
 
