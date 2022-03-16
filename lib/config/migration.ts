@@ -133,15 +133,6 @@ export function migrateConfig(
           migratedConfig.npmrc = '';
         }
       } else if (
-        key === 'branchName' &&
-        is.string(val) &&
-        val?.includes('{{managerBranchPrefix}}')
-      ) {
-        migratedConfig.branchName = val.replace(
-          '{{managerBranchPrefix}}',
-          '{{additionalBranchPrefix}}'
-        );
-      } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
         val.includes('{{')
