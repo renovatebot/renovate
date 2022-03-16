@@ -535,18 +535,36 @@ describe('modules/platform/github/index', () => {
     it('should return the PR object', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
-        {
-          number: 90,
-          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-          state: PrState.Closed,
-        },
-        {
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
+            number: 90,
+            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+            state: PrState.Open,
+          },
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            state: PrState.Open,
+          },
+        ])
+        .get('/repos/some/repo/pulls/91')
+        .reply(200, {
           number: 91,
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          base: {
+            sha: '1234',
+          },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          state: PrState.Closed,
-        },
-      ]);
+          state: PrState.Open,
+        });
 
       await github.initRepo({
         repository: 'some/repo',
