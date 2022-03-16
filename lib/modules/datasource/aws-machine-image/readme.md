@@ -2,7 +2,7 @@
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
 
-As this datasource relies on the AWS-SDK, so the configuration looks similar to other AWS Tools and the common configuration options are supported, for example:
+As this datasource relies on the AWS-SDK for javascript, the configuration looks similar to other AWS Tools and the common configuration options are supported, for example:
 
 - Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
 - Provide credentials via `AWS_ACCESS_KEY_ID`and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
@@ -11,7 +11,7 @@ As this datasource relies on the AWS-SDK, so the configuration looks similar to 
 
 see [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for further information on configuration options.
 
-The least privileges required for this datasource are
+The least IAM privileges required for this datasource are
 
 ```json
 ...
