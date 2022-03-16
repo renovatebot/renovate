@@ -32,7 +32,14 @@ import {
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
-import { Image, ImageList, MediaType, RegistryRepository } from './types';
+import {
+  Image,
+  ImageList,
+  MediaType,
+  OciImage,
+  OciImageList,
+  RegistryRepository,
+} from './types';
 
 export const DOCKER_HUB = 'https://index.docker.io';
 
@@ -368,8 +375,12 @@ export class DockerDatasource extends Datasource {
         logger.debug('No docker auth found - returning');
         return null;
       }
-      headers.accept =
-        'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
+      headers.accept = [
+        MediaType.manifestListV2,
+        MediaType.manifestV2,
+        MediaType.ociManifestV1,
+        MediaType.ociManifestIndexV1,
+      ].join(', ');
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
         headers,
@@ -444,7 +455,11 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
+    const manifest = JSON.parse(manifestResponse.body) as
+      | ImageList
+      | Image
+      | OciImageList
+      | OciImage;
     if (manifest.schemaVersion !== 2) {
       logger.debug(
         { registry, dockerRepository, tag },
@@ -453,23 +468,62 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    if (
-      manifest.mediaType === MediaType.manifestListV2 &&
-      manifest.manifests.length
-    ) {
-      logger.trace(
-        { registry, dockerRepository, tag },
-        'Found manifest list, using first image'
-      );
-      return this.getConfigDigest(
-        registry,
-        dockerRepository,
-        manifest.manifests[0].digest
-      );
+    if (manifest.mediaType === MediaType.manifestListV2) {
+      if (manifest.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest list, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest list with no manifests - returning'
+        );
+        return null;
+      }
     }
 
     if (
       manifest.mediaType === MediaType.manifestV2 &&
+      is.string(manifest.config?.digest)
+    ) {
+      return manifest.config?.digest;
+    }
+
+    // OCI image lists are not required to specify a mediaType
+    if (
+      manifest.mediaType === MediaType.ociManifestIndexV1 ||
+      (!manifest.mediaType && hasKey('manifests', manifest))
+    ) {
+      const imageList = manifest as OciImageList;
+      if (imageList.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest index, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest index with no manifests - returning'
+        );
+        return null;
+      }
+    }
+
+    // OCI manifests are not required to specify a mediaType
+    if (
+      (manifest.mediaType === MediaType.ociManifestV1 ||
+        (!manifest.mediaType && hasKey('config', manifest))) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
