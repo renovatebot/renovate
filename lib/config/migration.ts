@@ -133,15 +133,6 @@ export function migrateConfig(
           migratedConfig.npmrc = '';
         }
       } else if (
-        key === 'branchName' &&
-        is.string(val) &&
-        val?.includes('{{managerBranchPrefix}}')
-      ) {
-        migratedConfig.branchName = val.replace(
-          '{{managerBranchPrefix}}',
-          '{{additionalBranchPrefix}}'
-        );
-      } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
         val.includes('{{')
@@ -209,9 +200,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'baseBranch') {
-        migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
-        delete migratedConfig.baseBranch;
       } else if (key === 'schedule' && val) {
         // massage to array first
         const schedules = is.string(val) ? [val] : [...(val as string[])];
