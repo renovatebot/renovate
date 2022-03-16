@@ -482,7 +482,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 ```
 
 Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
-This issue contains a list of all PRs pending, open, closed (unmerged) or in error.
+This issue has a list of all PRs pending, open, closed (unmerged) or in error.
 The goal of this issue is to give visibility into all updates that Renovate is managing.
 
 Examples of what having a Dependency Dashboard will allow you to do:
@@ -749,7 +749,7 @@ Set this to `false` if you want to disable release notes fetching.
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
 At other times, the possible files is too vague for Renovate to have any default.
-For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them contain a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
+For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
 Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about.
 For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`.
@@ -1192,7 +1192,7 @@ For example, consider this config:
 }
 ```
 
-It would take the entire `"config:base"` preset - which contains a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
 ## ignoreScripts
 
@@ -1217,7 +1217,7 @@ Also check out the `followTag` configuration option above if you wish Renovate t
 ## includeForks
 
 By default, Renovate will skip over any repositories that are forked.
-This includes if the forked repository contain a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
 
 If you are using the hosted WhiteSource Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
@@ -2571,7 +2571,7 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## stabilityDays
 
-If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.
+If this is set to a non-zero value, _and_ an update has a release timestamp header, then Renovate will check if the "stability days" have passed.
 
 Note: Renovate will wait for the set number of `stabilityDays` to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x `stabilityDays`.

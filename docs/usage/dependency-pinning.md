@@ -159,12 +159,12 @@ The lock file has only delayed the inevitable problem, and provides much less vi
 
 ![all-dead](assets/images/all-dead.jpg)
 
-If the `package.json` contains a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
+If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
 The upside is that the lockfile will hold back `foobar` to `1.1.0` unless it's forced to upgrade, so the break is postponed.
 The downside is _how_ you will discover the break eventually.
 
-The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it contains, so you might run something like `yarn upgrade foobar`.
+The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it has, so you might run something like `yarn upgrade foobar`.
 Then you might either discover the break during your development or when you push your new development to CI for testing.
 In this case, hopefully you'll guess it's `foobar` that broke it and not your own code.
 
