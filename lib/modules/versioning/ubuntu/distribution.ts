@@ -3,7 +3,7 @@ import dataFiles from '../../../data-files.generated';
 export type UbuntuDistroInfo = Record<string, string>;
 
 // Data file generated with:
-// ubuntu-distro-info --all -f | sed -r 's/Ubuntu|"|LTS //g; s/([0-9]+.[0-9]+) /\1=/; s/.*/\L&/; s/(=[a-z]*) [a-z]*/\1/g; s/^[ \t]*//' | jo
+// ubuntu-distro-json-generate.sh
 const ubuntuJsonKey = 'data/ubuntu-distro-info.json';
 
 const ubuntuDistroInfo: UbuntuDistroInfo = JSON.parse(
