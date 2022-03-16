@@ -146,7 +146,7 @@ You could configure Renovate to automerge all but major this way:
 ```
 
 Also note that this option can be combined with other nested settings, such as dependency type.
-So for example you could elect to automerge all (passing) `devDependencies` only this way:
+So for example you could choose to automerge all (passing) `devDependencies` only this way:
 
 ```json
 {
