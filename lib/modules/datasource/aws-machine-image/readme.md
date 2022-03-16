@@ -22,7 +22,6 @@ The least IAM privileges required for this datasource are
     "Resource": "*"
   },
 ...
-]
 ```
 
 see [AWS IAM Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonec2.html) for further information.
