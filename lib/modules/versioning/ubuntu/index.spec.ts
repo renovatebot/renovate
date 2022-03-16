@@ -362,7 +362,8 @@ describe('modules/versioning/ubuntu/index', () => {
     ${undefined} | ${undefined}  | ${undefined}   | ${'foobar'} | ${'foobar'}
     ${'xenial'}  | ${undefined}  | ${undefined}   | ${'20.04'}  | ${'focal'}
     ${'xenial'}  | ${undefined}  | ${undefined}   | ${'focal'}  | ${'focal'}
-    ${undefined} | ${undefined}  | ${undefined}   | ${'foobar'} | ${'foobar'}
+    ${'16.04'}   | ${undefined}  | ${undefined}   | ${'20.04'}  | ${'20.04'}
+    ${'16.04'}   | ${undefined}  | ${undefined}   | ${'focal'}  | ${'20.04'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
