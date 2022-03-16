@@ -43,7 +43,7 @@ A second reason for using ranges applies to "libraries" that are published as np
 In this case, it is usually a bad idea to pin all your dependencies because it will introduce an unnecessarily narrow range (one release!) and cause most users of your package to bloat their `node_modules` with duplicates.
 
 For example, you might have pinned `foobar` to version `1.1.0` and another author pinned his/her `foobar` dependency to `1.2.2`.
-Any user of both your packages will end up with npm attempting to install two separate versions of `foobar`, which might not even work.
+Any user of both your packages will end up with npm trying to install two separate versions of `foobar`, which might not even work.
 Even if both projects use a service like Renovate to keep their pinned dependencies up to date with the very latest versions, it's still not a good idea - there will always be times when one package has updated/released before the other one and they will be out of sync.
 e.g. there might be a space of 30 minutes where your package specifies foobar `1.1.0` and the other one specifies `1.1.1` and your joint downstream users end up with a duplicate.
 
