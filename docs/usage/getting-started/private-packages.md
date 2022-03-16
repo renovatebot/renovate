@@ -49,7 +49,7 @@ In summary, the recommended approach to private presets is:
 
 ## Dependency Version Lookups
 
-Whenever Renovate detects that a project uses a particular dependency, it attempts to look up that dependency to see if any new versions exist.
+Whenever Renovate detects that a project uses a particular dependency, it tries to look up that dependency to see if any new versions exist.
 If such a package is private, then Renovate must be configured with the relevant credentials.
 Renovate does not use any package managers for this step and performs all HTTP(S) lookups itself, including insertion of authentication headers.
 

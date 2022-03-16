@@ -24,7 +24,7 @@ You can store your Renovate configuration file in one of the following locations
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
-When renovating a repository, Renovate will try to detect the configuration files in the order listed above, and stop after the first one is found.
+When renovating a repository, Renovate tries to detect the configuration files in the order listed above, and stops after the first one is found.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
@@ -118,7 +118,7 @@ Must be valid usernames on the platform in use.
 
 ## assigneesFromCodeOwners
 
-If enabled Renovate will try to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
+If enabled Renovate tries to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
 See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
@@ -164,7 +164,7 @@ Important: Renovate won't automerge on GitHub if a PR has a negative review outs
 <!-- prettier-ignore -->
 !!! note
     On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
-    Renovate will try to delay until Azure is in the expected state, however if it takes too long it will continue.
+    Renovate tries to delay until Azure is in the expected state, however if it takes too long it will continue.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 ## automergeComment
@@ -945,7 +945,7 @@ A preset alternative to the above is:
 <!-- prettier-ignore -->
 !!! note
     Disabling a host is only 100% effective if added to self-hosted config.
-    Renovate currently still checks its _cache_ for results first before making connection attempts, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
+    Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
 
 ### abortIgnoreStatusCodes
 
@@ -2433,7 +2433,7 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 
 ## reviewersFromCodeOwners
 
-If enabled Renovate will try to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
+If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
 See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
@@ -2643,7 +2643,7 @@ Please see the above link for valid timezone names.
 
 ## transitiveRemediation
 
-When enabled, Renovate will attempt to remediate vulnerabilities even if they exist only in transitive dependencies.
+When enabled, Renovate tries to remediate vulnerabilities even if they exist only in transitive dependencies.
 
 Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
 When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
@@ -2673,7 +2673,7 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 ## updatePinnedDependencies
 
-By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
+By default, Renovate will try to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
 
 ## useBaseBranchConfig
@@ -2730,7 +2730,7 @@ For this to work, you must first ensure you have enabled "[Dependency graph](htt
 Additionally, if you are running Renovate in app mode then you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
 If you are the account admin, browse to the app (e.g. [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and verify that read access to "vulnerability alerts" is mentioned.
 
-Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate will attempt to raise fix PRs accordingly.
+Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs accordingly.
 
 Use the `vulnerabilityAlerts` configuration object if you want to customise vulnerability-fix PRs specifically.
 For example, to configure custom labels and assignees:
