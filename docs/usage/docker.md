@@ -119,7 +119,7 @@ For example:
 
 ### Ubuntu codenames
 
-Renovate understands [Ubuntu release codename](https://wiki.ubuntu.com/Releases) tags and will offer upgrading them to the latest LTS release available (e.g. from `ubuntu:xenial` to `ubuntu:focal`).
+Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release (e.g. from `ubuntu:xenial` to `ubuntu:focal`).
 
 For this to work you must follow this naming scheme:
 
