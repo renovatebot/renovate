@@ -250,8 +250,8 @@ If instead you use an alternative registry or need an `.npmrc` file for some oth
 Renovate will then use the following logic:
 
 1. If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
-1. If an `npmrc` string is present and has `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
-1. If an `npmrc` string is present but doesn't have `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+1. If an `npmrc` string is present and has a `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+1. If an `npmrc` string is present but doesn't have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
 
 #### Encrypted entire .npmrc file into config
 
