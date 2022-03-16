@@ -19,7 +19,7 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 ### File Matching
 
 Most managers have a default `fileMatch` array.
-The `fileMatch` array contains regular expression strings that match against the repository file list.
+The `fileMatch` array has regular expression strings that match against the repository file list.
 
 #### Managers with no default fileMatch
 

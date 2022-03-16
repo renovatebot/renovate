@@ -16,7 +16,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 ## How It Works
 
 1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
-1. Matching files are parsed, Renovate checks if the file(s) contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+1. Matching files are parsed, Renovate checks if the file(s) have any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
 1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
 ## Preservation of Version Precision
@@ -66,7 +66,7 @@ You can tell Renovate to use the `pep440` versioning scheme with this set of `pa
 ```
 
 If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
-Renovate will perform a best-effort sort of the versions, regardless of whether they contain letters or digits.
+Renovate will perform a best-effort sort of the versions, regardless of whether they have letters or digits.
 
 If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
 This approach uses regex capture group syntax to specify which part of the version string is major, minor, patch, pre-release, or compatibility.

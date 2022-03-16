@@ -131,7 +131,7 @@ e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in
 
 ### Coverage
 
-The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
+The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
