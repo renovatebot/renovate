@@ -119,14 +119,14 @@ For example:
 
 ### Ubuntu codenames
 
-Renovate understands [Ubuntu release codename](https://wiki.ubuntu.com/Releases) tags and will offer upgrading them to the latest LTS release available (e.g. from `ubuntu:xenial` to `ubuntu:focal`) as long as it is inline with the following naming scheme:
+Renovate understands [Ubuntu release codename](https://wiki.ubuntu.com/Releases) tags and will offer upgrading them to the latest LTS release available (e.g. from `ubuntu:xenial` to `ubuntu:focal`).
 
-- First term of the full codename is used (e.g. `bionic` for `Bionic Beaver` release)
-- Codename is all lowercase
+For this to work you must follow this naming scheme:
 
-#### Example
+- The first term of the full codename is used (e.g. `bionic` for `Bionic Beaver` release)
+- The codename is in lowercase
 
-Renovate will offer to upgrade the following `Dockerfile` layer
+For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
 ```dockerfile
 FROM ubuntu:yakkety
