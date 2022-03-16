@@ -106,7 +106,7 @@ export async function extractDependencies(
     addSplit('extract');
     if (GlobalConfig.get('dryRun') === 'extract') {
       res.packageFiles = packageFiles;
-      logger.debug({ packageFiles }, 'Extracted dependencies');
+      logger.info({ packageFiles }, 'Extracted dependencies');
       return res;
     }
     res = await lookup(config, packageFiles);
