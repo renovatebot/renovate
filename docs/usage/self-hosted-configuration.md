@@ -642,7 +642,12 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## username
 
-Mandatory if a GitHub app token is in use using the CLI.
+You might need to set a `username` if you use:
+
+- The Bitbucket platform, or
+- use the GitHub App with CLI (required)
+
+If you're using a Personal Access Token (PAT) to authenticate then you should not specify `username`.
 
 ## writeDiscoveredRepos
 
