@@ -3155,18 +3155,7 @@ Array [
 ]
 `;
 
-exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object 1`] = `
-Object {
-  "closedAt": undefined,
-  "createdAt": undefined,
-  "number": 91,
-  "sha": undefined,
-  "sourceBranch": "somebranch",
-  "sourceRepo": "some/repo",
-  "state": "open",
-  "title": undefined,
-}
-`;
+exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object 1`] = `null`;
 
 exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object 2`] = `
 Array [
@@ -3226,106 +3215,10 @@ Array [
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "__vars": Object {
-          "$count": "Int",
-          "$cursor": "String",
-          "$name": "String!",
-          "$owner": "String!",
-        },
-        "repository": Object {
-          "__args": Object {
-            "name": "$name",
-            "owner": "$owner",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "after": "$cursor",
-              "first": "$count",
-              "orderBy": Object {
-                "direction": "DESC",
-                "field": "UPDATED_AT",
-              },
-              "states": Array [
-                "OPEN",
-              ],
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-            "pageInfo": Object {
-              "endCursor": null,
-              "hasNextPage": null,
-            },
-          },
-        },
-      },
-      "variables": Object {
-        "count": 100,
-        "cursor": null,
-        "name": "repo",
-        "owner": "some",
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "content-length": "915",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
 ]
 `;
 
-exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object in fork mode 1`] = `
-Object {
-  "closedAt": undefined,
-  "createdAt": undefined,
-  "number": 90,
-  "sha": undefined,
-  "sourceBranch": "somebranch",
-  "sourceRepo": "other/repo",
-  "state": "open",
-  "title": undefined,
-}
-`;
+exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object in fork mode 1`] = `null`;
 
 exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object in fork mode 2`] = `
 Array [
@@ -3423,91 +3316,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "__vars": Object {
-          "$count": "Int",
-          "$cursor": "String",
-          "$name": "String!",
-          "$owner": "String!",
-        },
-        "repository": Object {
-          "__args": Object {
-            "name": "$name",
-            "owner": "$owner",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "after": "$cursor",
-              "first": "$count",
-              "orderBy": Object {
-                "direction": "DESC",
-                "field": "UPDATED_AT",
-              },
-              "states": Array [
-                "OPEN",
-              ],
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-            "pageInfo": Object {
-              "endCursor": null,
-              "hasNextPage": null,
-            },
-          },
-        },
-      },
-      "variables": Object {
-        "count": 100,
-        "cursor": null,
-        "name": "repo",
-        "owner": "some",
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "content-length": "915",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
   },
 ]
 `;
@@ -4483,19 +4291,6 @@ Array [
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return PR from closed graphql result 1`] = `
-Object {
-  "closedAt": "2022-03-15T21:11:04.600+03:00",
-  "createdAt": undefined,
-  "number": 2499,
-  "sha": undefined,
-  "sourceBranch": "renovate/delay-4.x",
-  "sourceRepo": "some/repo",
-  "state": "merged",
-  "title": "build(deps): update dependency delay to v4.0.1",
-}
-`;
-
-exports[`modules/platform/github/index getPr(prNo) should return PR from closed graphql result 2`] = `
 Array [
   Object {
     "graphql": Object {

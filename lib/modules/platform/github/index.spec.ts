@@ -535,24 +535,18 @@ describe('modules/platform/github/index', () => {
     it('should return the PR object', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
-        .reply(200, [
-          {
-            number: 90,
-            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: PrState.Open,
-          },
-          {
-            number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: PrState.Open,
-          },
-        ]);
+      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
+        {
+          number: 90,
+          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+          state: PrState.Closed,
+        },
+        {
+          number: 91,
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: PrState.Closed,
+        },
+      ]);
 
       await github.initRepo({
         repository: 'some/repo',
@@ -680,21 +674,17 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: PrState.Open,
+            state: PrState.Closed,
           },
           {
             number: 91,
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: PrState.Open,
+            state: PrState.Closed,
           },
         ])
         .patch('/repos/forked/repo/git/refs/heads/master')
@@ -2085,7 +2075,13 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' } as any);
       const pr = await github.getPr(2499);
       expect(pr).toBeDefined();
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 2499,
+        sourceBranch: 'renovate/delay-4.x',
+        sourceRepo: 'some/repo',
+        state: 'merged',
+        title: 'build(deps): update dependency delay to v4.0.1',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should return null if no PR is returned from GitHub', async () => {

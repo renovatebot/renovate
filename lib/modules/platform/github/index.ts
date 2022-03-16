@@ -542,7 +542,7 @@ async function getClosedPrs(): Promise<PrMap> {
   const prList = await getPrList();
   const result: PrMap = {};
   for (const pr of prList) {
-    if (pr.state === 'closed') {
+    if (pr.state === 'closed' || pr.state === 'merged') {
       result[pr.number] = pr;
     }
   }
@@ -623,7 +623,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const closedPrs = await getClosedPrs();
   const closedPr = closedPrs[prNo];
   if (closedPr) {
-    logger.debug('Returning from graphql closed PR list');
+    logger.debug('Returning from PR list');
     return closedPr;
   }
   logger.debug(
