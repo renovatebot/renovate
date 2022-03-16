@@ -117,6 +117,26 @@ If you wish to enable major versions then add the preset `docker:enableMajor` to
 Renovate has some Docker-specific intelligence when it comes to versions.
 For example:
 
+### Ubuntu codenames
+
+Renovate understands [Ubuntu release codename](https://wiki.ubuntu.com/Releases) tags and will offer upgrading them to the latest LTS release available (e.g. from `ubuntu:xenial` to `ubuntu:focal`) as long as it is inline with the following naming scheme:
+
+- First term of the full codename is used (e.g. `bionic` for `Bionic Beaver` release)
+- Codename is all lowercase
+
+####Example:<br>
+Renovate will offer to upgrade the following `Dockerfile` layer
+
+```dockerfile
+FROM ubuntu:yakkety
+```
+
+To
+
+```dockerfile
+FROM ubuntu:focal
+```
+
 ## Configuring/Disabling
 
 If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object.
