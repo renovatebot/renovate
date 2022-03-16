@@ -136,7 +136,7 @@ export async function generateLockFile(
       } catch (err) {
         logger.warn({ err }, 'Error parsing npm lock file');
       }
-      if (lockFileParsed && lockFileParsed?.lockfileVersion === 2) {
+      if (lockFileParsed?.lockfileVersion === 2) {
         lockUpdates.forEach((lockUpdate) => {
           if (
             lockFileParsed.packages?.['']?.[lockUpdate.depType]?.[
