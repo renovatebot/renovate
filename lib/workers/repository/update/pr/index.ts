@@ -413,7 +413,7 @@ export async function ensurePr(
       // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
-      } else if (!GlobalConfig.get('dryRun')) {
+      } else {
         await platform.updatePr({
           number: existingPr.number,
           prTitle,
@@ -435,7 +435,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
-      } else if (!GlobalConfig.get('dryRun')) {
+      } else {
         if (
           !dependencyDashboardCheck &&
           isLimitReached(Limit.PullRequests) &&
@@ -496,7 +496,7 @@ export async function ensurePr(
       // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
-      } else if (!GlobalConfig.get('dryRun')) {
+      } else {
         await ensureComment({
           number: pr.number,
           topic,
@@ -516,12 +516,7 @@ export async function ensurePr(
     } else {
       await addAssigneesReviewers(config, pr);
     }
-    if (
-      GlobalConfig.get('dryRun') !== 'lookup' &&
-      GlobalConfig.get('dryRun') !== 'extract'
-    ) {
-      logger.debug(`Created ${pr.displayNumber}`);
-    }
+    logger.debug(`Created ${pr.displayNumber}`);
     return { type: 'with-pr', pr };
   } catch (err) {
     // istanbul ignore if
