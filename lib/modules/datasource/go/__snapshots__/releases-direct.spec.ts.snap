@@ -120,7 +120,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/refs/tags",
+    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/refs/tags?pagelen=100",
   },
 ]
 `;

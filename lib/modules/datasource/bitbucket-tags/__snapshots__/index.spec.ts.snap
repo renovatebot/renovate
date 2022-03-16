@@ -86,7 +86,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/refs/tags",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/dep2/refs/tags?pagelen=100",
   },
 ]
 `;

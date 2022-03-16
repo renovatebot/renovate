@@ -19,7 +19,7 @@ Array [
 exports[`modules/datasource/npm/index should fetch package info from custom registry 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://npm.mycustomregistry.com/",
+  "registryUrl": "https://npm.mycustomregistry.com",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -561,7 +561,7 @@ Array [
 exports[`modules/datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/",
+  "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
@@ -600,7 +600,7 @@ Array [
 exports[`modules/datasource/npm/index should use host rules by hostName if provided 1`] = `
 Object {
   "name": "foobar",
-  "registryUrl": "https://npm.mycustomregistry.com/",
+  "registryUrl": "https://npm.mycustomregistry.com",
   "releases": Array [
     Object {
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
