@@ -124,7 +124,7 @@ Renovate understands [Ubuntu release codename](https://wiki.ubuntu.com/Releases)
 - First term of the full codename is used (e.g. `bionic` for `Bionic Beaver` release)
 - Codename is all lowercase
 
-####Example:<br>
+####Example:
 Renovate will offer to upgrade the following `Dockerfile` layer
 
 ```dockerfile
