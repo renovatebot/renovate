@@ -15,7 +15,7 @@ If you want to use these package managers to update your lockfiles, you must ens
 npm install -g yarn pnpm
 ```
 
-The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the appropriate version before running Renovate.
+The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the correct version before running Renovate.
 
 ### Docker
 
