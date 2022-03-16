@@ -9,7 +9,7 @@ As this datasource relies on the AWS-SDK for JavaScript, the configuration looks
 - Select the profile to use via `AWS_PROFILE` environment variable
 - ...
 
-see [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for further information on configuration options.
+See [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for further information on configuration options.
 
 The least IAM privileges required for this datasource are
 
