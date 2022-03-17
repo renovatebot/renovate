@@ -21,7 +21,6 @@ The least IAM privileges required for this datasource are
     "Action": ["ec2:DescribeImages"],
     "Resource": "*"
   },
-...
 ```
 
 See [AWS IAM Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonec2.html) for further information.
