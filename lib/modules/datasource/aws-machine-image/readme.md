@@ -11,7 +11,7 @@ As this datasource relies on the AWS-SDK for JavaScript, the configuration looks
 
 See [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for further information on configuration options.
 
-The least IAM privileges required for this datasource are
+The least IAM privileges required for this datasource are:
 
 ```json
 ...
