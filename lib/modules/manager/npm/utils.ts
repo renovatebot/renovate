@@ -15,6 +15,6 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
   return { detectedIndent, lockFileParsed };
 }
 
-export function composeLockFile(lockFile: any, detectedIndent: string): string {
-  return JSON.stringify(lockFile, null, detectedIndent);
+export function composeLockFile(lockFile: any, indent: string): string {
+  return JSON.stringify(lockFile, null, indent);
 }
