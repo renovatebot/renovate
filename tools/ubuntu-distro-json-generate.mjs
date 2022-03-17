@@ -28,13 +28,18 @@ const ubuntuDistroInfo = shell.exec(
 /**
  *
  * @param {string} file
- * @param {string} code
+ * @param {string} newJsonData
  */
-async function updateFile(file, code) {
-  const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
-  if (code !== oldCode) {
+async function updateJsonFile(file, newJsonData) {
+  let oldJson = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
+
+  // Eliminate formatting
+  oldJson = oldJson?.replace(/[\s\r?\n]/g, '') ?? null;
+  newJsonData = newJsonData.replace(/[\s\r?\n]/g, '');
+
+  if (oldJson !== newJsonData) {
     shell.echo('Updating ubuntu-distro-info.json');
-    await fs.writeFile(file, code);
+    await fs.writeFile(file, newJsonData);
   } else {
     shell.echo('ubuntu-distro-info.json is up to date.');
   }
@@ -43,7 +48,7 @@ async function updateFile(file, code) {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
-    await updateFile(
+    await updateJsonFile(
       `../data/ubuntu-distro-info.json`,
       ubuntuDistroInfo.toString()
     );
