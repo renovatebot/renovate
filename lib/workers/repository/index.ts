@@ -43,44 +43,48 @@ export async function renovateRepository(
       config
     );
     if (
-      GlobalConfig.get('dryRun') === 'lookup' ||
-      GlobalConfig.get('dryRun') === 'extract'
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      return repoResult;
-    }
-    await ensureOnboardingPr(config, packageFiles, branches);
-    const res = await updateRepo(config, branches);
-    setMeta({ repository: config.repository });
-    addSplit('update');
-    await setBranchCache(branches);
-    if (res === 'automerged') {
-      if (canRetry) {
-        logger.info('Renovating repository again after automerge result');
-        const recursiveRes = await renovateRepository(repoConfig, false);
-        return recursiveRes;
+      await ensureOnboardingPr(config, packageFiles, branches);
+      const res = await updateRepo(config, branches);
+      setMeta({ repository: config.repository });
+      addSplit('update');
+      await setBranchCache(branches);
+      if (res === 'automerged') {
+        if (canRetry) {
+          logger.info('Renovating repository again after automerge result');
+          const recursiveRes = await renovateRepository(repoConfig, false);
+          return recursiveRes;
+        }
+        logger.debug(`Automerged but already retried once`);
+      } else {
+        await ensureDependencyDashboard(config, branches);
       }
-      logger.debug(`Automerged but already retried once`);
-    } else {
-      await ensureDependencyDashboard(config, branches);
+      await finaliseRepo(config, branchList);
+      repoResult = processResult(config, res);
     }
-    await finaliseRepo(config, branchList);
-    repoResult = processResult(config, res);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (localDir && !repoConfig.persistRepoData) {
-    try {
-      await deleteLocalFile('.');
-    } catch (err) /* istanbul ignore if */ {
-      logger.warn({ err }, 'localDir deletion error');
+  if (
+    GlobalConfig.get('dryRun') !== 'lookup' &&
+    GlobalConfig.get('dryRun') !== 'extract'
+  ) {
+    if (localDir && !repoConfig.persistRepoData) {
+      try {
+        await deleteLocalFile('.');
+      } catch (err) /* istanbul ignore if */ {
+        logger.warn({ err }, 'localDir deletion error');
+      }
     }
-  }
-  try {
-    await fs.remove(privateCacheDir());
-  } catch (err) /* istanbul ignore if */ {
-    logger.warn({ err }, 'privateCacheDir deletion error');
+    try {
+      await fs.remove(privateCacheDir());
+    } catch (err) /* istanbul ignore if */ {
+      logger.warn({ err }, 'privateCacheDir deletion error');
+    }
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
