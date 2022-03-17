@@ -642,6 +642,7 @@ const staticGroups = {
     packageRules: [
       {
         matchPackageNames: ['@types/jest'],
+        matchUpdateTypes: nonPinUpdateTypes,
         groupName: 'jest monorepo',
       },
     ],
