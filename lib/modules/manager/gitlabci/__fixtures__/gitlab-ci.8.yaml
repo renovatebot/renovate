@@ -1,0 +1,33 @@
+job1:
+  image: ruby:2.6
+    services:
+        - name: mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778
+          command:
+              - something:thatIsNotAnImage
+              - -something2
+              - -something3
+              - -something4
+
+job2:
+  image: ruby:2.6
+    services:
+        - acme/app@sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+job3:
+  image: ruby:2.6
+    services:
+        - foo/postgresql:12.3-1
+
+job4:
+  image: ruby:2.6
+    services:
+        - node:latest
+
+job5:
+  image: node:latest
+  services:
+    - name: selenium/standalone-firefox:latest
+      alias: firefox
+    - name: registry.gitlab.com/organization/private-api:latest
+      alias: backend-api
+    - postgres:9.6.19
