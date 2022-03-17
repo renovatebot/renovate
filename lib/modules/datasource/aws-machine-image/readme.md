@@ -5,7 +5,7 @@ This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazo
 As this datasource relies on the AWS-SDK for JavaScript, the configuration looks similar to other AWS Tools and the common configuration options are supported, for example:
 
 - Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
-- Provide credentials via `AWS_ACCESS_KEY_ID`and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
+- Provide credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
 - Select the profile to use via `AWS_PROFILE` environment variable
 - ...
 
