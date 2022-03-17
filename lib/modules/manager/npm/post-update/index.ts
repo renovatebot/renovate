@@ -29,6 +29,7 @@ import { ensureTrailingSlash } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
+import { composeLockFile, parseLockFile } from '../utils';
 import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
@@ -169,15 +170,13 @@ export async function writeExistingFiles(
       } else {
         logger.debug(`Writing ${npmLock}`);
         let existingNpmLock: string;
-        let detectedIndent: string;
-        let npmLockParsed: any;
         try {
           existingNpmLock = await getFile(npmLock);
-          detectedIndent = detectIndent(existingNpmLock).indent || '  ';
-          npmLockParsed = JSON.parse(existingNpmLock);
         } catch (err) {
-          logger.warn({ err }, 'Error parsing npm lock file');
+          logger.warn({ err }, 'Error reading npm lock file');
         }
+        const { detectedIndent, lockFileParsed: npmLockParsed } =
+          parseLockFile(existingNpmLock);
         if (npmLockParsed) {
           const packageNames = Object.keys(npmLockParsed?.packages || {}); // lockfileVersion=2
           const widens = [];
@@ -221,11 +220,7 @@ export async function writeExistingFiles(
           }
           if (lockFileChanged) {
             logger.debug('Massaging npm lock file before writing to disk');
-            existingNpmLock = JSON.stringify(
-              npmLockParsed,
-              null,
-              detectedIndent
-            );
+            existingNpmLock = composeLockFile(npmLockParsed, detectedIndent);
           }
           await outputFile(npmLockPath, existingNpmLock);
         }

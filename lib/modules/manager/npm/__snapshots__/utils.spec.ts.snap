@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/npm/utils composes lockfile string out of an object 1`] = `
+"{
+  \\"lockfileVersion\\": 2,
+  \\"name\\": \\"lockfile-parsing\\",
+  \\"packages\\": {
+    \\"\\": {
+      \\"license\\": \\"ISC\\",
+      \\"name\\": \\"lockfile-parsing\\",
+      \\"version\\": \\"1.0.0\\"
+    }
+  },
+  \\"requires\\": true,
+  \\"version\\": \\"1.0.0\\"
+}"
+`;
+
+exports[`modules/manager/npm/utils parses lockfile string into an object 1`] = `
+Object {
+  "detectedIndent": "  ",
+  "lockFileParsed": Object {
+    "lockfileVersion": 2,
+    "name": "lockfile-parsing",
+    "packages": Object {
+      "": Object {
+        "license": "ISC",
+        "name": "lockfile-parsing",
+        "version": "1.0.0",
+      },
+    },
+    "requires": true,
+    "version": "1.0.0",
+  },
+}
+`;
