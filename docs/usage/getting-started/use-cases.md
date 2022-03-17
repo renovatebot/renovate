@@ -61,7 +61,7 @@ If your dependencies are not detected by default, you can use use our "regex" ma
 You configure the regex manager by telling it:
 
 - Which file pattern(s) to match
-- How to identify the dependency name and version from within the file
+- How to find the dependency name and version from within the file
 - Which datasource (e.g. Docker registry, npm registry, etc) to use to look up new versions
 
 The end result is that Renovate can keep dependencies in custom file formats up-to-date as long as the dependency datasource is known to Renovate.
