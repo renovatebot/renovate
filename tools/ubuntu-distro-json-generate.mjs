@@ -37,12 +37,13 @@ async function updateJsonFile(file, newJsonData) {
   oldJson = oldJson?.replace(/[\s\r?\n]/g, '') ?? null;
   newJsonData = newJsonData.replace(/[\s\r?\n]/g, '');
 
-  if (oldJson !== newJsonData) {
-    shell.echo('Updating ubuntu-distro-info.json');
-    await fs.writeFile(file, newJsonData);
-  } else {
+  if (oldJson === newJsonData) {
     shell.echo('ubuntu-distro-info.json is up to date.');
+    return;
   }
+
+  shell.echo('Updating ubuntu-distro-info.json');
+  await fs.writeFile(file, newJsonData);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
