@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/npm/utils composes lockfile string out of an object 1`] = `
+exports[`modules/manager/npm/utils composeLockFile composes lockfile string out of an object 1`] = `
 "{
   \\"lockfileVersion\\": 2,
   \\"name\\": \\"lockfile-parsing\\",
@@ -16,7 +16,14 @@ exports[`modules/manager/npm/utils composes lockfile string out of an object 1`]
 }"
 `;
 
-exports[`modules/manager/npm/utils parses lockfile string into an object 1`] = `
+exports[`modules/manager/npm/utils parseLockFile can deal with invalid lockfiles 1`] = `
+Object {
+  "detectedIndent": "  ",
+  "lockFileParsed": undefined,
+}
+`;
+
+exports[`modules/manager/npm/utils parseLockFile parses lockfile string into an object 1`] = `
 Object {
   "detectedIndent": "  ",
   "lockFileParsed": Object {

@@ -2,27 +2,37 @@ import { loadFixture } from '../../../../test/util';
 import { composeLockFile, parseLockFile } from './utils';
 
 describe('modules/manager/npm/utils', () => {
-  it('parses lockfile string into an object', () => {
-    const lockFile = loadFixture('lockfile-parsing/package-lock.json');
-    const parseLockFileResult = parseLockFile(lockFile);
-    expect(parseLockFileResult).toMatchSnapshot();
+  describe('parseLockFile', () => {
+    it('parses lockfile string into an object', () => {
+      const lockFile = loadFixture('lockfile-parsing/package-lock.json');
+      const parseLockFileResult = parseLockFile(lockFile);
+      expect(parseLockFileResult).toMatchSnapshot();
+    });
+
+    it('can deal with invalid lockfiles', () => {
+      const lockFile = '';
+      const parseLockFileResult = parseLockFile(lockFile);
+      expect(parseLockFileResult).toMatchSnapshot();
+    });
   });
 
-  it('composes lockfile string out of an object', () => {
-    const lockFile = {
-      lockfileVersion: 2,
-      name: 'lockfile-parsing',
-      packages: {
-        '': {
-          license: 'ISC',
-          name: 'lockfile-parsing',
-          version: '1.0.0',
+  describe('composeLockFile', () => {
+    it('composes lockfile string out of an object', () => {
+      const lockFile = {
+        lockfileVersion: 2,
+        name: 'lockfile-parsing',
+        packages: {
+          '': {
+            license: 'ISC',
+            name: 'lockfile-parsing',
+            version: '1.0.0',
+          },
         },
-      },
-      requires: true,
-      version: '1.0.0',
-    };
-    const lockFileComposed = composeLockFile(lockFile, '  ');
-    expect(lockFileComposed).toMatchSnapshot();
+        requires: true,
+        version: '1.0.0',
+      };
+      const lockFileComposed = composeLockFile(lockFile, '  ');
+      expect(lockFileComposed).toMatchSnapshot();
+    });
   });
 });
