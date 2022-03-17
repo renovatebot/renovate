@@ -85,5 +85,5 @@ We welcome any ideas you may have.
 
 ## Acknowledgments
 
-Thank you to Nejc Habjan for bringing this security challenge to our attention, and also to his colleagues at Siemens for their assistance researching the risks.
+Thank you to Nejc Habjan for bringing this security challenge to our attention, and also to his colleagues at Siemens for their help researching the risks.
 Thanks also to the GitLab security team for being responsive to our questions.

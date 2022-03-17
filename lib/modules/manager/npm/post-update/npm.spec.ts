@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import upath from 'upath';
 
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { mocked } from '../../../../../test/util';
+import { loadFixture, mocked } from '../../../../../test/util';
 import * as _env from '../../../../util/exec/env';
 import * as _fs from '../../../../util/fs/proxies';
 import * as npmHelper from './npm';
@@ -59,6 +59,33 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('performs lock file updates retaining the package.json counterparts', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() =>
+      loadFixture('update-lockfile-massage-1/package-lock.json')
+    ) as never;
+    const skipInstalls = true;
+    const updates = [
+      {
+        depName: 'postcss',
+        depType: 'dependencies',
+        newVersion: '8.4.8',
+        newValue: '^8.0.0',
+        isLockfileUpdate: true,
+      },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls },
+      updates
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
+    expect(res.lockFile).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates', async () => {
