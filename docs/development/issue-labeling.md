@@ -65,7 +65,7 @@ Use the `type:help` label for issues which should be converted to a discussion p
 
 Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can identify any which are missing one.
 
-Add the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
+Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.
 
 ### Priority
 
@@ -82,7 +82,7 @@ Add the `breaking` label for Issues or PRs which contain changes that are not ba
 
 Use these to assign a priority level to an issue.
 Incoming issues are labeled `priority-5-triage` by default, this label should be replaced with a proper priority (low/normal/important/critical).
-Make a best-effort attempt to select a proper priority.
+Try to select the proper priority.
 Nothing bad will happen if you select a "wrong" priority.
 At a high level: critical = needs immediate fix, important = to be prioritized ahead of others, normal = default priority, low = trivial issue, or impacts a very small % of the user base.
 
