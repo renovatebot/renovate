@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import type { ParseLockFileResult } from './types';
 
 export function parseLockFile(lockFile: string): ParseLockFileResult {
-  const detectedIndent: string = detectIndent(lockFile).indent || '  ';
+  const detectedIndent = detectIndent(lockFile).indent || '  ';
 
   let lockFileParsed: any;
   try {
