@@ -1012,6 +1012,34 @@ Object {
       expect(res.releases).toHaveLength(1);
     });
 
+    it('use specific ACR scope to fetch docker image tag', async () => {
+      const tags = ['1.0.0'];
+
+      httpMock
+        .scope('https://12345.azurecr.io/')
+        .get('/v2/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://12345.azurecr.io/oauth2/token",service="12345.azurecr.io"',
+        })
+        .get(
+          '/oauth2/token?service=12345.azurecr.io&scope=repository:my/node:pull,metadata_read'
+        )
+        .reply(200, { token: 'some-token ' })
+        .get('/v2/my/node/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/v2/')
+        .reply(200)
+        .get('/v2/my/node/manifests/1.0.0')
+        .reply(200);
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: '12345.azurecr.io/my/node',
+      });
+      expect(res.releases).toHaveLength(1);
+    });
+
     it('returns null on error', async () => {
       httpMock
         .scope(baseUrl)

@@ -44,6 +44,7 @@ import {
 export const DOCKER_HUB = 'https://index.docker.io';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
+export const acrRegex = regEx(/(?:^|\.)azurecr\.io/);
 
 function isDockerHost(host: string): boolean {
   const regex = regEx(/(?:^|\.)docker\.io$/);
@@ -135,7 +136,12 @@ export async function getAuthHeaders(
       return opts.headers;
     }
 
-    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
+    let actions = 'pull';
+    if (acrRegex.test(registryHost)) {
+      actions += ',metadata_read';
+    }
+
+    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:${actions}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
