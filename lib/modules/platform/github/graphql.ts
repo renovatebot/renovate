@@ -19,51 +19,6 @@ query($owner: String!, $name: String!) {
 }
 `;
 
-export const openPrsQuery = `
-query($owner: String!, $name: String!, $count: Int, $cursor: String) {
-  repository(owner: $owner, name: $name) {
-    pullRequests(
-      states: [OPEN],
-      orderBy: {
-        field: UPDATED_AT,
-        direction: DESC
-      },
-      first: $count,
-      after: $cursor
-    ) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      nodes {
-        number
-        headRefName
-        baseRefName
-        title
-        mergeStateStatus
-        labels(last: 100) {
-          nodes {
-            name
-          }
-        }
-        assignees {
-          totalCount
-        }
-        reviewRequests {
-          totalCount
-        }
-        body
-        reviews(first: 1, states: [CHANGES_REQUESTED]){
-          nodes{
-            state
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
 export const getIssuesQuery = `
 query(
   $owner: String!,

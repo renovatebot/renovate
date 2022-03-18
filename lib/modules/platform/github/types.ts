@@ -81,7 +81,7 @@ export interface LocalRepoConfig {
 }
 
 export type BranchProtection = any;
-export type PrMap = Record<number, Pr>;
+export type PrMap = Pr[];
 
 export interface GhRepo {
   isFork: boolean;

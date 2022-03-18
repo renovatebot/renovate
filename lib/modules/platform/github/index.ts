@@ -57,7 +57,6 @@ import { smartTruncate } from '../utils/pr-body';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
-  openPrsQuery,
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
@@ -68,7 +67,6 @@ import type {
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
-  GhGraphQlPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -479,6 +477,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
+  const g = git;
   await git.initRepo({
     ...config,
     url,
@@ -540,73 +539,12 @@ export async function getRepoForceRebase(): Promise<boolean> {
 
 async function getClosedPrs(): Promise<PrMap> {
   const prList = await getPrList();
-  const result: PrMap = {};
-  for (const pr of prList) {
-    if (pr.state === 'closed' || pr.state === 'merged') {
-      result[pr.number] = pr;
-    }
-  }
-  return result;
+  return prList.filter((pr) => pr.state === 'closed' || pr.state === 'merged');
 }
 
 async function getOpenPrs(): Promise<PrMap> {
-  // The graphql query is supported in the current oldest GHE version 2.19
-  if (!config.openPrList) {
-    config.openPrList = {};
-    try {
-      // prettier-ignore
-      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        openPrsQuery,
-        'pullRequests',
-        {
-          variables: {
-            owner: config.repositoryOwner,
-            name: config.repositoryName,
-          },
-          acceptHeader: 'application/vnd.github.merge-info-preview+json',
-        }
-      );
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!nodes?.length) {
-        logger.debug('getOpenPrs(): no graphql data');
-        return {};
-      }
-      for (const pr of nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = PrState.Open;
-        pr.sourceBranch = pr.headRefName;
-        delete pr.headRefName;
-        pr.targetBranch = pr.baseRefName;
-        delete pr.baseRefName;
-        // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
-        const hasNegativeReview = pr.reviews?.nodes?.length > 0;
-        // istanbul ignore if
-        if (hasNegativeReview) {
-          pr.cannotMergeReason = `PR has a negative review`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
-          pr.cannotMergeReason = `pr.mergeStateStatus = ${pr.mergeStateStatus}`;
-        }
-        if (pr.labels) {
-          pr.labels = pr.labels.nodes.map((label) => label.name);
-        }
-        pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
-        delete pr.assignees;
-        pr.hasReviewers = !!(pr.reviewRequests?.totalCount > 0);
-        delete pr.reviewRequests;
-        delete pr.mergeStateStatus;
-        config.openPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'getOpenPrs(): error');
-    }
-  }
-  return config.openPrList;
+  const prList = await getPrList();
+  return prList.filter((pr) => pr.state === 'open');
 }
 
 // Gets details for a PR
