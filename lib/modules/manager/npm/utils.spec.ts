@@ -1,4 +1,5 @@
 import { loadFixture } from '../../../../test/util';
+import type { LockFile } from './types';
 import { composeLockFile, parseLockFile } from './utils';
 
 describe('modules/manager/npm/utils', () => {
@@ -36,7 +37,7 @@ describe('modules/manager/npm/utils', () => {
 
   describe('composeLockFile', () => {
     it('composes lockfile string out of an object', () => {
-      const lockFile = {
+      const lockFile: LockFile = {
         lockfileVersion: 2,
         name: 'lockfile-parsing',
         packages: {

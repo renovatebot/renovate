@@ -1,6 +1,6 @@
 import detectIndent from 'detect-indent';
 import { logger } from '../../../logger';
-import type { ParseLockFileResult } from './types';
+import type { LockFile, ParseLockFileResult } from './types';
 
 export function parseLockFile(lockFile: string): ParseLockFileResult {
   const detectedIndent = detectIndent(lockFile).indent || '  ';
@@ -15,6 +15,6 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
   return { detectedIndent, lockFileParsed };
 }
 
-export function composeLockFile(lockFile: any, indent: string): string {
+export function composeLockFile(lockFile: LockFile, indent: string): string {
   return JSON.stringify(lockFile, null, indent);
 }

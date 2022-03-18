@@ -1,4 +1,5 @@
 interface LockFilePackage {
+  name?: string;
   version?: string;
   resolved?: string;
   integrity?: string;
@@ -40,9 +41,10 @@ interface LockFile1 {
   name: string;
   version: string;
   lockfileVersion: 1;
+  requires?: boolean; // not documented
   packageIntegrity?: string;
   preserveSymlinks?: string;
-  dependencies: LockFileDependencies;
+  dependencies?: LockFileDependencies;
 }
 
 // https://docs.npmjs.com/cli/v7/configuring-npm/package-lock-json#file-format
@@ -51,8 +53,9 @@ interface LockFile2 {
   name: string;
   version: string;
   lockfileVersion: 2;
-  packages: LockFilePackages;
-  dependencies: LockFileDependencies;
+  requires?: boolean; // not documented
+  packages?: LockFilePackages;
+  dependencies?: LockFileDependencies;
 }
 
 // currently only hinted in the npm v7 and v8 docs
@@ -60,10 +63,11 @@ interface LockFile3 {
   name: string;
   version: string;
   lockfileVersion: 3;
-  packages: LockFilePackages;
+  requires?: boolean; // not documented
+  packages?: LockFilePackages;
 }
 
-type LockFile = LockFile1 | LockFile2 | LockFile3;
+export type LockFile = LockFile1 | LockFile2 | LockFile3;
 
 export interface ParseLockFileResult {
   detectedIndent: string;
