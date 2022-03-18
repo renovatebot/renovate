@@ -10,8 +10,9 @@ const options = {
 /**
  * @param {string} managerName
  * @param {string} fileAddr
- * @returns {Promise<string|undefined>}
+ * @returns {Promise<string>}
  */
+// eslint-disable-next-line consistent-return
 async function getFileHash(managerName, fileAddr) {
   try {
     const hash = await hasha.fromFile(
@@ -20,15 +21,18 @@ async function getFileHash(managerName, fileAddr) {
     );
     return hash;
   } catch (err) {
-    shell.echo(`ERROR: Unable to generate hash for ${managerName}/${fileAddr}`);
-    return undefined;
+    shell.echo(
+      `ERROR: Unable to generate hash for manager/${managerName}/${fileAddr}`
+    );
+    process.exit(1);
   }
 }
 /**
  *
  * @param {string} manager
- * @returns {Promise<string|undefined>}
+ * @returns {Promise<string>}
  */
+// eslint-disable-next-line consistent-return
 export async function getHash(manager) {
   try {
     let hashes = [];
@@ -58,11 +62,11 @@ export async function getHash(manager) {
     if (hashes.length) {
       return hasha(hashes, options);
     } else {
-      throw new Error(`Couldn't generate hash for ${manager}`);
+      throw new Error(`Unable to generate hash for manager/${manager}`);
     }
   } catch (err) {
     shell.echo('ERROR:', err.message);
-    return undefined;
+    process.exit(1);
   }
 }
 
@@ -94,6 +98,6 @@ export async function getHash(manager) {
     );
   } catch (err) {
     shell.echo('ERROR:', err.message);
-    process.exit(1); //unsure about exiting
+    process.exit(1);
   }
 })();
