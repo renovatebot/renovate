@@ -21,5 +21,5 @@ You do not need to ever configure/override datasources directly, but you may use
 
 ## Supported Datasources
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->

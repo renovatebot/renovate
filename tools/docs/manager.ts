@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '../../lib/config/types';
-import { getManagers } from '../../lib/manager';
+import { getManagers } from '../../lib/modules/manager';
 import { readFile, updateFile } from '../utils';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
@@ -18,10 +18,10 @@ export async function generateManagers(dist: string): Promise<void> {
   const managers = getManagers();
   const allLanguages: Record<string, string[]> = {};
   for (const [manager, definition] of managers) {
-    const language = definition.language || 'other';
+    const language = definition.language ?? 'other';
     allLanguages[language] = allLanguages[language] || [];
     allLanguages[language].push(manager);
-    const { defaultConfig } = definition;
+    const { defaultConfig, supportedDatasources } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
     let md = `---
@@ -39,7 +39,7 @@ sidebar_label: ${displayName}
         md += `{\n  "${manager}": {\n    "enabled": true\n  }\n}`;
         md += '\n```\n\n';
         md +=
-          'If you encounter any bugs, please [raise a bug report](https://github.com/renovatebot/renovate/issues/new?template=3-Bug_report.md). If you find that it works well, then feedback on that would be welcome too.\n\n';
+          'If you find any bugs, please [raise a bug report](https://github.com/renovatebot/renovate/issues/new?template=3-Bug_report.md). If you find that it works well, then feedback on that would be welcome too.\n\n';
       }
       md += '## File Matching\n\n';
       if (!Array.isArray(fileMatch) || fileMatch.length === 0) {
@@ -56,10 +56,17 @@ sidebar_label: ${displayName}
         }
       }
       md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
+      md += '## Supported datasources\n\n';
+      const escapedDatasources = (supportedDatasources || [])
+        .map(
+          (datasource) =>
+            `[\`${datasource}\`](../../datasource/#${datasource}-datasource)`
+        )
+        .join(', ');
+      md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
     }
-
     const managerReadmeContent = await readFile(
-      `lib/manager/${manager}/readme.md`
+      `lib/modules/manager/${manager}/readme.md`
     );
     if (manager !== 'regex') {
       md += '\n## Additional Information\n\n';

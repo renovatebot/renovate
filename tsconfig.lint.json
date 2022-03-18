@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig",
-  "include": [".eslintrc.js", "**/*.ts", "**/*.js", "**/*.mjs"]
+  "include": [".eslintrc.js", "**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"]
 }

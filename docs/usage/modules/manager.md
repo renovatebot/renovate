@@ -11,7 +11,7 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 
 ## Supported Managers
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
 
 ## Configuring Managers
@@ -19,7 +19,7 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 ### File Matching
 
 Most managers have a default `fileMatch` array.
-The `fileMatch` array contains regular expression strings that match against the repository file list.
+The `fileMatch` array has regular expression strings that match against the repository file list.
 
 #### Managers with no default fileMatch
 

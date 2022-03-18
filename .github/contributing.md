@@ -17,7 +17,7 @@ If you've found a **bug** or have a **feature request** then please create an is
 
 If you would like to fix a bug or implement a feature, please fork the repository and create a Pull Request.
 To learn how to setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
-Also skim the [docs/development](../docs/development/) folder, it contains a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
+Also skim the [docs/development](../docs/development/) folder, it has a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
 
 Before you start any Pull Request, it's recommended that you open a [discussion](https://github.com/renovatebot/renovate/discussions) first if you have any doubts about requirements or implementation.
 That way you can be sure that the maintainer(s) agree on what to change and how, and you can hopefully get a quick merge afterwards.
@@ -32,10 +32,31 @@ This makes it harder for us to review your work because we don't know what has c
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
+If you are updating your PR branch from within the GitHub PR interface, then only use the default "Update branch" button.
+
 Force pushing a PR is OK when:
 
 - you need to make large changes on a PR which require a full review anyway
 - you need to bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
+
+## Apply maintainer provided review suggestions
+
+Maintainers can suggest changes while reviewing your pull request, please follow these steps to apply them:
+
+1. Batch the suggestions into a logical group by clicking on the **Add suggestion to batch** button
+2. Click on the **Commit suggestions** button
+
+Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request#applying-suggested-changes) to learn more.
+
+## Resolve review comments instead of commenting
+
+A maintainer/contributor can ask you to make changes, without providing a suggestion that you can apply.
+In this case you need to do some work yourself to address the feedback.
+
+Once you've done the work, resolve the conversation by clicking on the **Resolve conversation** button in the PR overview.
+Avoid posting comments like "I've done the work", or "Done".
+
+Read the [GitHub Docs, resolving conversations](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#resolving-conversations) to learn more.
 
 ## Re-requesting a review
 
@@ -45,11 +66,13 @@ Read more about this in the [GitHub docs, Re-requesting a review](https://docs.g
 
 ## Slack collaboration with maintainers
 
-Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
+The codebase can be difficult to navigate, especially for a first-time contributor.
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
 Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
+
+Important: this Slack group is restricted to development questions only in order to keep the volume of messages lower - all technical support questions should still be posted to this repository's Discussions instead.
 
 ## Legal
 

@@ -42,8 +42,8 @@ If it's so simple then it shouldn't take you much time to commit it to a repo.
 
 A good minimal reproduction:
 
-- Uses the fewest amount of repository files and dependencies possible
+- Uses the fewest number of repository files and dependencies possible
 - Reduces the Renovate config to the minimum necessary
-- Contains a `readme.md` file that explains current behavior and expected behavior
+- Has a `readme.md` file that explains current behavior and expected behavior
 
 Sometimes you may find it easiest to start with a fork and then remove files/config until the bug no longer reproduces, but other times it may be simplest to start with an empty repository with a couple of files you copy over manually from your main repository.

@@ -3,10 +3,11 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { initPlatform } from '../../platform';
+import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
+import * as hostRules from '../../util/host-rules';
 import { Limit, setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -42,6 +43,13 @@ async function checkVersions(): Promise<void> {
   }
 }
 
+function setGlobalHostRules(config: RenovateConfig): void {
+  if (config.hostRules) {
+    logger.debug('Setting global hostRules');
+    config.hostRules.forEach((rule) => hostRules.add(rule));
+  }
+}
+
 export async function globalInitialize(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -49,12 +57,13 @@ export async function globalInitialize(
   await checkVersions();
   config = await initPlatform(config);
   config = await setDirectories(config);
-  packageCache.init(config);
+  await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
+  setGlobalHostRules(config);
   return config;
 }
 
-export function globalFinalize(config: RenovateConfig): void {
-  packageCache.cleanup(config);
+export async function globalFinalize(config: RenovateConfig): Promise<void> {
+  await packageCache.cleanup(config);
 }

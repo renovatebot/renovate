@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import fs from 'fs-extra';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -18,7 +20,12 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       return JSON5.parse(await readFile(file, 'utf8'));
     case '.js': {
       const tmpConfig = await import(file);
-      return tmpConfig.default ? tmpConfig.default : tmpConfig;
+      let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
+      // Allow the config to be a function
+      if (is.function_(config)) {
+        config = config();
+      }
+      return config;
     }
     default:
       throw new Error('Unsupported file type');
@@ -26,10 +33,19 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 }
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
-  let configFile = env.RENOVATE_CONFIG_FILE || 'config.js';
+  let configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
   }
+
+  if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
+    logger.fatal(
+      { configFile },
+      `Custom config file specified in RENOVATE_CONFIG_FILE must exist`
+    );
+    process.exit(1);
+  }
+
   logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
   try {
@@ -38,6 +54,11 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
+      process.exit(1);
+    } else if (err instanceof ReferenceError) {
+      logger.fatal(
+        `Error parsing config file due to unresolved variable(s): ${err.message}`
+      );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {
       logger.fatal(err.message);

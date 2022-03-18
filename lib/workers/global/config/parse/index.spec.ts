@@ -4,7 +4,7 @@ import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 
-jest.mock('../../../../datasource/npm');
+jest.mock('../../../../modules/datasource/npm');
 jest.mock('../../../../util/fs');
 jest.mock('./host-rules-from-env');
 try {

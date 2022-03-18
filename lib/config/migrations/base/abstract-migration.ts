@@ -3,10 +3,9 @@ import type { RenovateConfig } from '../../types';
 import type { Migration } from '../types';
 
 export abstract class AbstractMigration implements Migration {
+  readonly deprecated: boolean = false;
   abstract readonly propertyName: string;
-
   private readonly originalConfig: RenovateConfig;
-
   private readonly migratedConfig: RenovateConfig;
 
   constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
@@ -45,7 +44,7 @@ export abstract class AbstractMigration implements Migration {
     this.setHard(this.propertyName, value);
   }
 
-  protected delete(property: string): void {
+  protected delete(property = this.propertyName): void {
     delete this.migratedConfig[property];
   }
 }

@@ -1,10 +1,10 @@
-import { loadFixture } from '../../test/util';
+import { Fixtures } from '../../test/fixtures';
 import { decryptConfig } from './decrypt';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
-const privateKey = loadFixture('private.pem', '.');
-const privateKeyPgp = loadFixture('private-pgp.pem', '.');
+const privateKey = Fixtures.get('private.pem');
+const privateKeyPgp = Fixtures.get('private-pgp.pem');
 const repository = 'abc/def';
 
 describe('config/decrypt', () => {

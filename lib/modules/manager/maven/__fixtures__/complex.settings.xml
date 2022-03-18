@@ -1,0 +1,74 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <mirrors>
+    <mirror>
+      <id>my-maven-repo</id>
+      <url>https://artifactory.company.com/artifactory/my-maven-repo</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+    <mirror>
+      <id>my-maven-repo-v2</id>
+      <url>https://repo.adobe.com/nexus/content/groups/public</url>
+      <mirrorOf>custom-repo</mirrorOf>
+    </mirror>
+  </mirrors>
+  <profiles>
+    <profile>
+      <id>adobe-public</id>
+      <repositories>
+        <repository>
+          <id>adobe-public-releases</id>
+          <name>Adobe Public Repository</name>
+          <url>https://repo.adobe.com/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>adobe-public-releases-v2</id>
+          <name>Adobe Public Repository v2</name>
+          <url>https://repo.adobe.com/v2/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
+      <id>adobe-public-v2</id>
+      <repositories>
+        <repository>
+          <id>adobe-public-releases-v3</id>
+          <name>Adobe Public Repository</name>
+          <url>https://repo.adobe.com/v3/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>adobe-public-releases-v4</id>
+          <name>Adobe Public Repository v2</name>
+          <url>https://repo.adobe.com/v4/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>

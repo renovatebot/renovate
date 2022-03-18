@@ -1,5 +1,5 @@
 import { KnownProps, parse } from 'editorconfig';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import type { CodeFormat } from './code-format';
 import { IndentationType } from './indentation-type';
@@ -7,7 +7,7 @@ import { IndentationType } from './indentation-type';
 export class EditorConfig {
   public static async getCodeFormat(fileName: string): Promise<CodeFormat> {
     const { localDir } = GlobalConfig.get();
-    const knownProps = await parse(join(localDir, fileName));
+    const knownProps = await parse(upath.join(localDir, fileName));
 
     return {
       indentationSize: EditorConfig.getIndentationSize(knownProps),

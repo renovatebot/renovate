@@ -8,6 +8,10 @@ description: Node.js versions support in Renovate
 Renovate can upgrade the [Node.js](https://nodejs.org/en/) runtime used by your project.
 This way you're using the latest bug fixes, performance improvements, security mitigations, etc.
 
+## LTS codenames
+
+Renovate understands [codenames for Node.js LTS releases](https://github.com/nodejs/Release/blob/main/CODENAMES.md) and will offer upgrades for them (e.g. from `fermium` to `gallium`) as long as the `node` versioning scheme is being used.
+
 ## File Support
 
 Renovate can manage the Node.js version in the following files:
@@ -33,3 +37,5 @@ For example, if you want to use at least npm `8.1.0` and also allow newer versio
   }
 }
 ```
+
+Alternatively, the npm version can also be configured via the [`constraints` option](https://docs.renovatebot.com/configuration-options/#constraints).

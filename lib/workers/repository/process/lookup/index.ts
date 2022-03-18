@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
 import {
   Release,
   getDatasourceList,
@@ -10,15 +11,13 @@ import {
   getPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
-} from '../../../../datasource';
-import { logger } from '../../../../logger';
-import { getRangeStrategy } from '../../../../manager';
-import { SkipReason } from '../../../../types';
+} from '../../../../modules/datasource';
+import { getRangeStrategy } from '../../../../modules/manager';
+import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
-import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -61,7 +60,7 @@ export async function lookupUpdates(
       !isGetPkgReleasesConfig(config) ||
       !getDatasourceList().includes(datasource)
     ) {
-      res.skipReason = SkipReason.InvalidConfig;
+      res.skipReason = 'invalid-config';
       return res;
     }
     const isValid = is.string(currentValue) && versioning.isValid(currentValue);
@@ -70,7 +69,7 @@ export async function lookupUpdates(
         !updatePinnedDependencies &&
         versioning.isSingleVersion(currentValue)
       ) {
-        res.skipReason = SkipReason.IsPinned;
+        res.skipReason = 'is-pinned';
         return res;
       }
 
@@ -104,6 +103,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioning.isVersion(release.version)
       );
+
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -215,7 +215,7 @@ export async function lookupUpdates(
       }
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion)) {
-        res.skipReason = SkipReason.InvalidVersion;
+        res.skipReason = 'invalid-version';
         return res;
       }
       // Filter latest, unstable, etc
@@ -304,12 +304,12 @@ export async function lookupUpdates(
         `Dependency ${depName} has unsupported value ${currentValue}`
       );
       if (!pinDigests && !currentDigest) {
-        res.skipReason = SkipReason.InvalidValue;
+        res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
       }
     } else {
-      res.skipReason = SkipReason.InvalidValue;
+      res.skipReason = 'invalid-value';
     }
 
     // Record if the dep is fixed to a version
@@ -320,7 +320,7 @@ export async function lookupUpdates(
       res.fixedVersion = currentValue.replace(regEx(/^=+/), '');
     }
     // Add digests if necessary
-    if (supportsDigests(config)) {
+    if (supportsDigests(config.datasource)) {
       if (currentDigest) {
         if (!digestOneAndOnly || !res.updates.length) {
           // digest update
@@ -365,6 +365,12 @@ export async function lookupUpdates(
           update.isLockfileUpdate ||
           (update.newDigest && !update.newDigest.startsWith(currentDigest))
       );
+    // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
+    if (config.rangeStrategy === 'in-range-only') {
+      res.updates = res.updates.filter(
+        (update) => update.newValue === currentValue
+      );
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
       throw err;
@@ -388,7 +394,7 @@ export async function lookupUpdates(
       },
       'lookupUpdates error'
     );
-    res.skipReason = SkipReason.InternalError;
+    res.skipReason = 'internal-error';
   }
   return res;
 }

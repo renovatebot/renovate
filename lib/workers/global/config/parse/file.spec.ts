@@ -1,8 +1,9 @@
 import fs from 'fs';
+import fsExtra from 'fs-extra';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/file';
+import customConfig from './__fixtures__/config';
 import * as file from './file';
 
 describe('workers/global/config/parse/file', () => {
@@ -18,7 +19,18 @@ describe('workers/global/config/parse/file', () => {
 
   describe('.getConfig()', () => {
     it.each([
-      ['custom config file with extension', 'file.js'],
+      ['custom js config file', 'config.js'],
+      ['custom js config file exporting a Promise', 'config-promise.js'],
+      ['custom js config file exporting a function', 'config-function.js'],
+      // The next two are different syntactic ways of expressing the same thing
+      [
+        'custom js config file exporting a function returning a Promise',
+        'config-function-promise.js',
+      ],
+      [
+        'custom js config file exporting an async function',
+        'config-async-function.js',
+      ],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s', async (fileType, filePath) => {
@@ -29,7 +41,7 @@ describe('workers/global/config/parse/file', () => {
     });
 
     it('migrates', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/file2.js');
+      const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
@@ -78,6 +90,29 @@ describe('workers/global/config/parse/file', () => {
       const configFile = upath.resolve(tmp.path, './file4.js');
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
+
+    it('fatal error and exit if config.js contains unresolved env var', async () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+
+      const configFile = upath.resolve(
+        __dirname,
+        './__fixtures__/config-ref-error.js-invalid'
+      );
+      const tmpDir = tmp.path;
+      await fsExtra.ensureDir(tmpDir);
+
+      const tmpConfigFile = upath.resolve(tmpDir, 'config-ref-error.js');
+      await fsExtra.copy(configFile, tmpConfigFile);
+
+      await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
+
+      expect(logger.fatal).toHaveBeenCalledWith(
+        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
