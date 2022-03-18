@@ -34,8 +34,8 @@ async function updateJsonFile(file, newData) {
   let oldData = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
 
   // Eliminate formatting
-  const newDataClean = newData.replace(/[\s\r?\n]/g, '');
-  oldData = oldData?.replace(/[\s\r?\n]/g, '') ?? null;
+  const newDataClean = newData.replace(/\s/g, '');
+  oldData = oldData?.replace(/\s/g, '') ?? null;
 
   if (oldData === newDataClean) {
     shell.echo('ubuntu-distro-info.json is up to date.');
