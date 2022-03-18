@@ -29,8 +29,8 @@ interface LockFileDependency {
 }
 
 interface LockFileBase {
-  name: string;
-  version: string;
+  name?: string;
+  version?: string;
   requires?: boolean; // not documented
 }
 
