@@ -46,7 +46,7 @@ interface LockFile2 {
   version: string;
   lockfileVersion: 2;
   requires?: boolean; // not documented
-  packages?: Record<string, LockFilePackage>;
+  packages: Record<string, LockFilePackage>;
   dependencies?: Record<string, LockFileDependency>;
 }
 
@@ -56,7 +56,7 @@ interface LockFile3 {
   version: string;
   lockfileVersion: 3;
   requires?: boolean; // not documented
-  packages?: Record<string, LockFilePackage>;
+  packages: Record<string, LockFilePackage>;
 }
 
 export type LockFile = LockFile1 | LockFile2 | LockFile3;
