@@ -256,7 +256,7 @@
     "cross-env": "7.0.3",
     "diff": "5.0.0",
     "emojibase-data": "7.0.1",
-    "eslint": "8.10.0",
+    "eslint": "8.11.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-formatter-gha": "1.4.1",
     "eslint-import-resolver-typescript": "2.5.0",
