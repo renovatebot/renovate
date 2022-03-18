@@ -28,12 +28,15 @@ interface LockFileDependency {
   dependencies?: Record<string, LockFileDependency>;
 }
 
-// https://docs.npmjs.com/cli/v6/configuring-npm/package-lock-json#file-format
-interface LockFile1 {
+interface LockFileBase {
   name: string;
   version: string;
-  lockfileVersion: 1;
   requires?: boolean; // not documented
+}
+
+// https://docs.npmjs.com/cli/v6/configuring-npm/package-lock-json#file-format
+interface LockFile1 extends LockFileBase {
+  lockfileVersion: 1;
   packageIntegrity?: string;
   preserveSymlinks?: string;
   dependencies?: Record<string, LockFileDependency>;
@@ -41,21 +44,15 @@ interface LockFile1 {
 
 // https://docs.npmjs.com/cli/v7/configuring-npm/package-lock-json#file-format
 // https://docs.npmjs.com/cli/v8/configuring-npm/package-lock-json#file-format
-interface LockFile2 {
-  name: string;
-  version: string;
+interface LockFile2 extends LockFileBase {
   lockfileVersion: 2;
-  requires?: boolean; // not documented
   packages: Record<string, LockFilePackage>;
   dependencies?: Record<string, LockFileDependency>;
 }
 
 // currently only hinted in the npm v7 and v8 docs
-interface LockFile3 {
-  name: string;
-  version: string;
+interface LockFile3 extends LockFileBase {
   lockfileVersion: 3;
-  requires?: boolean; // not documented
   packages: Record<string, LockFilePackage>;
 }
 
