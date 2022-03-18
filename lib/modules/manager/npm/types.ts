@@ -10,15 +10,11 @@ interface LockFilePackage {
   inBundle?: boolean;
   hasInstallScript?: boolean;
   hasShrinkwrap?: boolean;
-  bin?: string | { [index: string]: string };
+  bin?: string | Record<string, string>;
   license?: string;
-  engines?: { [index: string]: string };
-  dependencies?: { [index: string]: string };
-  optionalDependencies?: { [index: string]: string };
-}
-
-interface LockFilePackages {
-  [index: string]: LockFilePackage;
+  engines?: Record<string, string>;
+  dependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
 }
 
 interface LockFileDependency {
@@ -28,12 +24,8 @@ interface LockFileDependency {
   bundled?: boolean;
   dev?: boolean;
   optional?: boolean;
-  requires?: { [index: string]: string };
-  dependencies?: LockFileDependencies;
-}
-
-interface LockFileDependencies {
-  [index: string]: LockFileDependency;
+  requires?: Record<string, string>;
+  dependencies?: Record<string, LockFileDependency>;
 }
 
 // https://docs.npmjs.com/cli/v6/configuring-npm/package-lock-json#file-format
@@ -44,7 +36,7 @@ interface LockFile1 {
   requires?: boolean; // not documented
   packageIntegrity?: string;
   preserveSymlinks?: string;
-  dependencies?: LockFileDependencies;
+  dependencies?: Record<string, LockFileDependency>;
 }
 
 // https://docs.npmjs.com/cli/v7/configuring-npm/package-lock-json#file-format
@@ -54,8 +46,8 @@ interface LockFile2 {
   version: string;
   lockfileVersion: 2;
   requires?: boolean; // not documented
-  packages?: LockFilePackages;
-  dependencies?: LockFileDependencies;
+  packages?: Record<string, LockFilePackage>;
+  dependencies?: Record<string, LockFileDependency>;
 }
 
 // currently only hinted in the npm v7 and v8 docs
@@ -64,7 +56,7 @@ interface LockFile3 {
   version: string;
   lockfileVersion: 3;
   requires?: boolean; // not documented
-  packages?: LockFilePackages;
+  packages?: Record<string, LockFilePackage>;
 }
 
 export type LockFile = LockFile1 | LockFile2 | LockFile3;
