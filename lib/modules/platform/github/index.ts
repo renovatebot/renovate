@@ -78,13 +78,12 @@ import type {
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
 
-let githubApi = new githubHttp.GithubHttp();
+const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
 export function resetConfigs(): void {
-  githubApi = new githubHttp.GithubHttp();
   config = {} as never;
   platformConfig = {
     hostType: PlatformId.Github,
