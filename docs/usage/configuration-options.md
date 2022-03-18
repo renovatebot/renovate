@@ -164,7 +164,7 @@ Important: Renovate won't automerge on GitHub if a PR has a negative review outs
 <!-- prettier-ignore -->
 !!! note
     On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
-    Renovate tries to delay until Azure is in the expected state, but if it takes too long it will continue.
+    Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 ## automergeComment
