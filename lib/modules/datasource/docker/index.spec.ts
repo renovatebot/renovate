@@ -64,48 +64,40 @@ describe('modules/datasource/docker/index', () => {
         'registry:5000/org/package',
         'https://index.docker.io'
       );
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "dockerRepository": "org/package",
-          "registryHost": "https://registry:5000",
-        }
-      `);
+      expect(res).toStrictEqual({
+        dockerRepository: 'org/package',
+        registryHost: 'https://registry:5000',
+      });
     });
     it('supports registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
         'https://my.local.registry/prefix'
       );
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "dockerRepository": "prefix/image",
-          "registryHost": "https://my.local.registry",
-        }
-      `);
+      expect(res).toStrictEqual({
+        dockerRepository: 'prefix/image',
+        registryHost: 'https://my.local.registry',
+      });
     });
     it('supports http registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
         'http://my.local.registry/prefix'
       );
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "dockerRepository": "prefix/image",
-          "registryHost": "http://my.local.registry",
-        }
-      `);
+      expect(res).toStrictEqual({
+        dockerRepository: 'prefix/image',
+        registryHost: 'http://my.local.registry',
+      });
     });
     it('supports schemeless registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
         'my.local.registry/prefix'
       );
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "dockerRepository": "prefix/image",
-          "registryHost": "https://my.local.registry",
-        }
-      `);
+      expect(res).toStrictEqual({
+        dockerRepository: 'prefix/image',
+        registryHost: 'https://my.local.registry',
+      });
     });
   });
   describe('getAuthHeaders', () => {
@@ -129,11 +121,12 @@ describe('modules/datasource/docker/index', () => {
         'https://my.local.registry/prefix'
       );
 
+      // do not inline, otherwise we get false positive from codeql
       expect(headers).toMatchInlineSnapshot(`
-Object {
-  "authorization": "some-authType some-token",
-}
-`);
+        Object {
+          "authorization": "some-authType some-token",
+        }
+      `);
     });
 
     it('returns "Bearer token" if only token provided', async () => {
@@ -147,11 +140,12 @@ Object {
         'https://my.local.registry/prefix'
       );
 
+      // do not inline, otherwise we get false positive from codeql
       expect(headers).toMatchInlineSnapshot(`
-Object {
-  "authorization": "Bearer some-token",
-}
-`);
+        Object {
+          "authorization": "Bearer some-token",
+        }
+      `);
     });
 
     it('fails', async () => {
@@ -1101,7 +1095,30 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.2.3-alpine',
+          },
+          {
+            version: '1.2.3',
+          },
+          {
+            version: '1-alpine',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '2-alpine',
+          },
+        ],
+        sourceUrl: 'https://github.com/renovatebot/renovate',
+      });
     });
 
     it('supports manifest lists', async () => {
@@ -1137,7 +1154,11 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [],
+        sourceUrl: 'https://github.com/renovatebot/renovate',
+      });
     });
 
     it('ignores empty manifest lists', async () => {
@@ -1158,7 +1179,10 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [],
+      });
     });
 
     it('ignores unsupported manifest', async () => {
@@ -1178,7 +1202,10 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [],
+      });
     });
 
     it('ignores unsupported schema version', async () => {
@@ -1195,7 +1222,10 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [],
+      });
     });
 
     it('supports OCI manifests with media type', async () => {
@@ -1231,7 +1261,15 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '1',
+          },
+        ],
+        sourceUrl: 'https://github.com/renovatebot/renovate',
+      });
     });
 
     it('supports OCI manifests without media type', async () => {
@@ -1266,7 +1304,15 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '1',
+          },
+        ],
+        sourceUrl: 'https://github.com/renovatebot/renovate',
+      });
     });
 
     it('ignores empty OCI manifest indexes', async () => {
@@ -1287,7 +1333,10 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [],
+      });
     });
 
     it('supports redirect', async () => {
@@ -1330,7 +1379,10 @@ Object {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [],
+      });
     });
   });
 });
