@@ -178,7 +178,10 @@ export async function writeExistingFiles(
         const { detectedIndent, lockFileParsed: npmLockParsed } =
           parseLockFile(existingNpmLock);
         if (npmLockParsed) {
-          const packageNames = Object.keys(npmLockParsed?.packages || {}); // lockfileVersion=2
+          const packageNames =
+            'packages' in npmLockParsed
+              ? Object.keys(npmLockParsed.packages)
+              : [];
           const widens = [];
           let lockFileChanged = false;
           for (const upgrade of config.upgrades) {
@@ -191,8 +194,9 @@ export async function writeExistingFiles(
             const { depName } = upgrade;
             for (const packageName of packageNames) {
               if (
-                packageName === `node_modules/${depName}` ||
-                packageName.startsWith(`node_modules/${depName}/`)
+                'packages' in npmLockParsed &&
+                (packageName === `node_modules/${depName}` ||
+                  packageName.startsWith(`node_modules/${depName}/`))
               ) {
                 logger.trace({ packageName }, 'Massaging out package name');
                 lockFileChanged = true;
@@ -206,7 +210,10 @@ export async function writeExistingFiles(
             );
             lockFileChanged = true;
             try {
-              if (npmLockParsed.dependencies) {
+              if (
+                'dependencies' in npmLockParsed &&
+                npmLockParsed.dependencies
+              ) {
                 widens.forEach((depName) => {
                   delete npmLockParsed.dependencies[depName];
                 });
