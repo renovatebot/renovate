@@ -6,13 +6,31 @@ describe('modules/manager/npm/utils', () => {
     it('parses lockfile string into an object', () => {
       const lockFile = loadFixture('lockfile-parsing/package-lock.json');
       const parseLockFileResult = parseLockFile(lockFile);
-      expect(parseLockFileResult).toMatchSnapshot();
+      expect(parseLockFileResult).toStrictEqual({
+        detectedIndent: '  ',
+        lockFileParsed: {
+          lockfileVersion: 2,
+          name: 'lockfile-parsing',
+          packages: {
+            '': {
+              license: 'ISC',
+              name: 'lockfile-parsing',
+              version: '1.0.0',
+            },
+          },
+          requires: true,
+          version: '1.0.0',
+        },
+      });
     });
 
     it('can deal with invalid lockfiles', () => {
       const lockFile = '';
       const parseLockFileResult = parseLockFile(lockFile);
-      expect(parseLockFileResult).toMatchSnapshot();
+      expect(parseLockFileResult).toStrictEqual({
+        detectedIndent: '  ',
+        lockFileParsed: undefined,
+      });
     });
   });
 
