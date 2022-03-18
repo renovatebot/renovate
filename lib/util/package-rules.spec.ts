@@ -495,6 +495,68 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+  it('matches matchSourceUrls', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/presets',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('non-matches matchSourceUrls', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/vuejs/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/vuejs/vue',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('handles matchSourceUrls when missing sourceUrl', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters naked depType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -787,6 +849,27 @@ describe('util/package-rules', () => {
       depName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/Presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('matches matchSourceUrls(case-insensitive)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/Renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
