@@ -76,19 +76,26 @@ import type {
   PlatformConfig,
   PrList,
 } from './types';
-import { UserDetails, getUserDetails, getUserEmail } from './user';
+import { getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
 
-let config: LocalRepoConfig = {} as any;
+let config: LocalRepoConfig;
+let platformConfig: PlatformConfig;
 
-const platformConfig: PlatformConfig = {
-  hostType: PlatformId.Github,
-  endpoint: 'https://api.github.com/',
-};
+export function resetConfigs(): void {
+  config = {} as never;
+  platformConfig = {
+    hostType: PlatformId.Github,
+    endpoint: 'https://api.github.com/',
+  };
+}
 
-const escapeHash = (input: string): string =>
-  input ? input.replace(regEx(/#/g), '%23') : input;
+resetConfigs();
+
+function escapeHash(input: string): string {
+  return input ? input.replace(regEx(/#/g), '%23') : input;
+}
 
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
@@ -127,20 +134,28 @@ export async function initPlatform({
 
   await detectGhe(token);
 
-  let userDetails: UserDetails;
   let renovateUsername: string;
   if (username) {
     renovateUsername = username;
   } else {
-    userDetails = await getUserDetails(platformConfig.endpoint, token);
-    renovateUsername = userDetails.username;
+    platformConfig.userDetails ??= await getUserDetails(
+      platformConfig.endpoint,
+      token
+    );
+    renovateUsername = platformConfig.userDetails.username;
   }
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
-    userDetails = await getUserDetails(platformConfig.endpoint, token);
-    const userEmail = await getUserEmail(platformConfig.endpoint, token);
-    if (userEmail) {
-      discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
+    platformConfig.userDetails ??= await getUserDetails(
+      platformConfig.endpoint,
+      token
+    );
+    platformConfig.userEmail ??= await getUserEmail(
+      platformConfig.endpoint,
+      token
+    );
+    if (platformConfig.userEmail) {
+      discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
@@ -218,8 +233,6 @@ export async function getJsonFile(
   }
   return JSON.parse(raw);
 }
-
-let existingRepos;
 
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
@@ -352,18 +365,16 @@ export async function initRepo({
     config.parentRepo = config.repository;
     config.repository = null;
     // Get list of existing repos
-    existingRepos =
-      existingRepos ||
-      (
-        await githubApi.getJson<{ full_name: string }[]>(
-          'user/repos?per_page=100',
-          {
-            token: forkToken || opts.token,
-            paginate: true,
-            pageLimit: 100,
-          }
-        )
-      ).body.map((r) => r.full_name);
+    platformConfig.existingRepos ??= (
+      await githubApi.getJson<{ full_name: string }[]>(
+        'user/repos?per_page=100',
+        {
+          token: forkToken || opts.token,
+          paginate: true,
+          pageLimit: 100,
+        }
+      )
+    ).body.map((r) => r.full_name);
     try {
       const forkedRepo = await githubApi.postJson<{
         full_name: string;
@@ -424,7 +435,7 @@ export async function initRepo({
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
     }
-    if (existingRepos.includes(config.repository)) {
+    if (platformConfig.existingRepos.includes(config.repository)) {
       logger.debug(
         { repository_fork: config.repository },
         'Found existing fork'
@@ -456,7 +467,7 @@ export async function initRepo({
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
-      existingRepos.push(config.repository);
+      platformConfig.existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
     }

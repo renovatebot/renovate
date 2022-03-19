@@ -1,34 +1,35 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture, mocked } from '../../../../test/util';
+import { loadFixture, logger, mocked } from '../../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import type * as _logger from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
-import type * as _git from '../../../util/git';
+import * as _git from '../../../util/git';
+import * as _hostRules from '../../../util/host-rules';
+import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
-import type { CreatePRConfig, Platform } from '../types';
+import type { CreatePRConfig } from '../types';
+import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
 
+jest.mock('delay');
+
+jest.mock('../../../util/host-rules');
+const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
+
+jest.mock('../../../util/git');
+const git: jest.Mocked<typeof _git> = mocked(_git);
+
 describe('modules/platform/github/index', () => {
-  let github: Platform;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
-  let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
-  beforeEach(async () => {
-    // reset module
-    jest.resetModules();
-    jest.unmock('.');
-    jest.mock('delay');
-    jest.mock('../../../util/host-rules');
-    github = await import('.');
-    hostRules = mocked(await import('../../../util/host-rules'));
-    jest.mock('../../../util/git');
-    git = mocked(await import('../../../util/git'));
-    logger = mocked(await import('../../../logger'));
+  beforeEach(() => {
+    jest.resetAllMocks();
+    github.resetConfigs();
+
+    setBaseUrl(githubApiHost);
+
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
