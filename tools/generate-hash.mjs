@@ -8,20 +8,20 @@ const options = {
 };
 
 /**
- * @param {string} managerName
- * @param {string} fileAddr
+ * @param {string} manager
+ * @param {string} filePath
  * @returns {Promise<string>}
  */
-async function getFileHash(managerName, fileAddr) {
+async function getFileHash(manager, filePath) {
   try {
     const hash = await hasha.fromFile(
-      `./lib/modules/manager/${managerName}/${fileAddr}`,
+      `./lib/modules/manager/${manager}/${filePath}`,
       options
     );
     return hash;
   } catch (err) {
     throw new Error(
-      `ERROR: Unable to generate hash for manager/${managerName}/${fileAddr}`
+      `ERROR: Unable to generate hash for manager/${manager}/${filePath}`
     );
   }
 }
@@ -69,23 +69,24 @@ export async function getHash(manager) {
   try {
     const hashMap = 'export const hashMap = new Map();';
     let hashes = [];
-    //get manager-list
-    const managerList = (
+    //get managers-list
+    const managers = (
       await fs.readdir('./lib/modules/manager', { withFileTypes: true })
     )
       .filter((file) => file.isDirectory())
       .map((file) => file.name);
 
-    for (const manager of managerList) {
+    for (const manager of managers) {
       const hash = getHash(manager);
       hashes.push(hash);
     }
-    //store hashes in hashMap {key->manager, value->hash}
+
+    //append hashes to hashMap {key->manager, value->hash}
     hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set('${managerList[index]}', '${hash}');`
+      (hash, index) => `hashMap.set('${managers[index]}', '${hash}');`
     );
 
-    //write hashMap in dist/
+    //write hashMap to fingerprint.js in dist/
     await fs.writeFile(
       './dist/modules/manager/fingerprint.js',
       [hashMap, hashes.join('\n')].join('\n\n')
