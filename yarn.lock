@@ -3727,7 +3727,7 @@ crypto-random-string@^2.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
 
-css-select@^4.1.3:
+css-select@^4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/css-select/-/css-select-4.2.1.tgz#9e665d6ae4c7f9d65dbe69d0316e3221fb274cdd"
   integrity sha512-/aUslKhzkTNCQUB2qTX84lVmfia9NyjP3WpDGtj/WxhwBzWBYUV3DgUpurHTme8UTPcPlAD1DJ+b0nN/t50zDQ==
@@ -7094,12 +7094,12 @@ node-gyp@^8.4.1:
     tar "^6.1.2"
     which "^2.0.2"
 
-node-html-parser@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-5.2.0.tgz#6f29fd00d79f65334e7e20200964644207925607"
-  integrity sha512-fmiwLfQu+J2A0zjwSEkztSHexAf5qq/WoiL/Hgo1K7JpfEP+OGWY5maG0kGaM+IFVdixF/1QbyXaQ3h4cGfeLw==
+node-html-parser@5.3.2:
+  version "5.3.2"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-5.3.2.tgz#f7702161916011c5cc2b0cb041473c06201d9493"
+  integrity sha512-86XGwFj4chc6tKX9acq+C6asrMjXCttOZECXR8xMGV7vD3kEbHpyF+1Sf3GMoig+XYSazEGYt1Lnle/rQ45Ugw==
   dependencies:
-    css-select "^4.1.3"
+    css-select "^4.2.1"
     he "1.2.0"
 
 node-int64@^0.4.0:
