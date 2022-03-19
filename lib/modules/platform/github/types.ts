@@ -72,8 +72,8 @@ export interface LocalRepoConfig {
   parentRepo: string;
   forkMode?: boolean;
   forkToken?: string;
-  closedPrList: PrMap | null;
-  openPrList: PrMap | null;
+  closedPrList: Pr[] | null;
+  openPrList: Pr[] | null;
   prList: Pr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
@@ -89,7 +89,6 @@ export interface LocalRepoConfig {
 }
 
 export type BranchProtection = any;
-export type PrMap = Pr[];
 
 export interface GhRepo {
   isFork: boolean;

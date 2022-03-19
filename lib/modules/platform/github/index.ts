@@ -71,7 +71,6 @@ import type {
   GhRestPr,
   LocalRepoConfig,
   PlatformConfig,
-  PrMap,
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
 
@@ -488,7 +487,6 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  const g = git;
   await git.initRepo({
     ...config,
     url,
@@ -548,12 +546,12 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-async function getClosedPrs(): Promise<PrMap> {
+async function getClosedPrs(): Promise<Pr[]> {
   const prList = await getPrList();
   return prList.filter((pr) => pr.state === 'closed' || pr.state === 'merged');
 }
 
-async function getOpenPrs(): Promise<PrMap> {
+async function getOpenPrs(): Promise<Pr[]> {
   const prList = await getPrList();
   return prList.filter((pr) => pr.state === 'open');
 }
@@ -564,13 +562,13 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
   const openPrs = await getOpenPrs();
-  const openPr = openPrs[prNo];
+  const openPr = openPrs.find(({ number }) => number === prNo);
   if (openPr) {
     logger.debug('Returning from graphql open PR list');
     return openPr;
   }
   const closedPrs = await getClosedPrs();
-  const closedPr = closedPrs[prNo];
+  const closedPr = closedPrs.find(({ number }) => number === prNo);
   if (closedPr) {
     logger.debug('Returning from PR list');
     return closedPr;
