@@ -48,12 +48,20 @@ export interface GhGraphQlPr extends Pr {
   labels: string[] & { nodes?: { name: string }[] };
 }
 
+export interface UserDetails {
+  username: string;
+  name: string;
+}
+
 export interface PlatformConfig {
   hostType: string;
   endpoint: string;
   isGhe?: boolean;
   gheVersion?: string | null;
   isGHApp?: boolean;
+  existingRepos?: string[];
+  userDetails?: UserDetails;
+  userEmail?: string | null;
 }
 
 export interface LocalRepoConfig {
