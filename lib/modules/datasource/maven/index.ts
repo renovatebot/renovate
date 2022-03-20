@@ -252,14 +252,11 @@ export class MavenDatasource extends Datasource {
     const cacheTimeoutNs = 'datasource-maven:head-requests-timeout';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
 
-    const isCacheValid: boolean = await packageCache.get<true>(
-      cacheTimeoutNs,
-      cacheKey
-    );
+    const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
 
-    let cachedReleaseMap: ReleaseMap =
-      isCacheValid && (await packageCache.get<ReleaseMap>(cacheNs, cacheKey));
-    cachedReleaseMap ??= {};
+    const cachedReleaseMap: ReleaseMap = isCacheValid
+      ? (await packageCache.get<ReleaseMap>(cacheNs, cacheKey)) ?? {}
+      : {};
 
     const freshVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
