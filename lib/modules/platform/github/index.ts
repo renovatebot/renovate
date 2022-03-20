@@ -292,7 +292,7 @@ export async function initRepo({
     }
     if (
       repo.nameWithOwner &&
-      repo.nameWithOwner.toLocaleLowerCase() !== repository.toLocaleLowerCase()
+      repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
     ) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
