@@ -250,58 +250,65 @@ export class MavenDatasource extends Datasource {
 
     const cacheNs = 'datasource-maven:head-requests';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-    const oldReleaseMap: ReleaseMap | undefined =
-      await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
-    const newReleaseMap: ReleaseMap = oldReleaseMap ?? {};
+    const cacheTimeoutKey = 'datasource-maven:head-requests-timeout';
 
-    if (!oldReleaseMap) {
-      const unknownVersions = Object.entries(releaseMap)
-        .filter(([version, release]) => {
-          const isDiscoveredOutside = !!release;
-          const isDiscoveredInsideAndCached = !is.undefined(
-            newReleaseMap[version]
-          );
-          const isDiscovered =
-            isDiscoveredOutside || isDiscoveredInsideAndCached;
-          return !isDiscovered;
-        })
-        .map(([k]) => k);
+    const isCacheValid: boolean = await packageCache.get<true>(
+      cacheNs,
+      cacheTimeoutKey
+    );
 
-      if (unknownVersions.length) {
-        let retryEarlier = false;
-        const queue = unknownVersions.map(
-          (version) => async (): Promise<void> => {
-            const pomUrl = await this.createUrlForDependencyPom(
-              version,
-              dependency,
-              repoUrl
-            );
-            const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
-            const release: Release = { version };
+    let cachedReleaseMap: ReleaseMap =
+      isCacheValid && (await packageCache.get<ReleaseMap>(cacheNs, cacheKey));
+    cachedReleaseMap ??= {};
 
-            const res = await checkHttpResource(this.http, artifactUrl);
-
-            if (res === 'error') {
-              retryEarlier = true;
-            }
-
-            if (is.date(res)) {
-              release.releaseTimestamp = res.toISOString();
-            }
-
-            newReleaseMap[version] =
-              res !== 'not-found' && res !== 'error' ? release : null;
-          }
+    const freshVersions = Object.entries(releaseMap)
+      .filter(([version, release]) => {
+        const isDiscoveredOutside = !!release;
+        const isDiscoveredInsideAndCached = !is.undefined(
+          cachedReleaseMap[version]
         );
+        const isDiscovered = isDiscoveredOutside || isDiscoveredInsideAndCached;
+        return !isDiscovered;
+      })
+      .map(([k]) => k);
 
-        await pAll(queue, { concurrency: 5 });
-        const cacheTTL = retryEarlier ? 60 : 24 * 60;
-        await packageCache.set(cacheNs, cacheKey, newReleaseMap, cacheTTL);
+    if (freshVersions.length) {
+      let retryEarlier = false;
+      const queue = freshVersions.map((version) => async (): Promise<void> => {
+        const pomUrl = await this.createUrlForDependencyPom(
+          version,
+          dependency,
+          repoUrl
+        );
+        const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
+        const release: Release = { version };
+
+        const res = await checkHttpResource(this.http, artifactUrl);
+
+        if (is.date(res)) {
+          release.releaseTimestamp = res.toISOString();
+        }
+
+        if (res === 'error') {
+          retryEarlier = true;
+        }
+
+        cachedReleaseMap[version] =
+          res !== 'not-found' && res !== 'error' ? release : null;
+      });
+
+      await pAll(queue, { concurrency: 5 });
+
+      const timeoutValue = retryEarlier ? 60 : 24 * 60;
+      if (!isCacheValid || retryEarlier) {
+        await packageCache.set(cacheNs, cacheTimeoutKey, true, timeoutValue);
       }
+
+      await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, 24 * 60);
     }
 
     for (const version of Object.keys(releaseMap)) {
-      releaseMap[version] = newReleaseMap[version] ?? null;
+      releaseMap[version] = cachedReleaseMap[version] ?? null;
     }
 
     return releaseMap;
