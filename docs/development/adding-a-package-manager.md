@@ -34,11 +34,11 @@ The function returns an array of detected/extracted dependencies, including:
 The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract an accurate list of dependencies.
 
-As a general approach, we extract _all_ dependencies from each dependency file, even if they contain values we don't support.
+As a general approach, we extract _all_ dependencies from each dependency file, even if they have values we don't support.
 Any dependency file that has values we cannot renovate, should have a `skipReason` message added to the `extractPackageFile` function.
 Make sure the `skipReason` variable string is helpful to someone reading the logs.
 
-Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files.
+Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g. not an actual package file, or has no dependencies) then this function can return `null` to have it ignored and removed from the list of package files.
 
 ### `extractAllPackageFiles(packageFiles)` (async, optional)
 

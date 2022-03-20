@@ -72,7 +72,7 @@ function getFutureVersion(
   const baseRelease: number[] =
     parseVersion(baseVersion || newVersion)?.release ?? [];
   return baseRelease.map((_, index) => {
-    const toPart = toRelease[index] || 0;
+    const toPart: number = toRelease[index] ?? 0;
     if (index < policy) {
       return toPart;
     }
