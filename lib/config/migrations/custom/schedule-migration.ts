@@ -29,7 +29,11 @@ export class ScheduleMigration extends AbstractMigration {
             schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2') // TODO #12071
           ).schedules[0];
           // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
-          if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
+          if (!parsedSchedule || !parsedSchedule.t_a || !parsedSchedule.t_b) {
+            continue;
+          }
+
+          if (parsedSchedule.t_a[0] > parsedSchedule.t_b[0]) {
             const toSplit = schedules[i];
             schedules[i] = toSplit
               .replace(
