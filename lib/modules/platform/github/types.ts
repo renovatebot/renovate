@@ -37,17 +37,6 @@ export interface GhRestPr extends Pr {
   node_id: string;
 }
 
-export interface GhGraphQlPr extends Pr {
-  reviewRequests: any;
-  assignees: any;
-  mergeStateStatus: string;
-  reviews: any;
-  baseRefName: string;
-  headRefName: string;
-  comments: Comment[] & { nodes?: { databaseId: number; body: string }[] };
-  labels: string[] & { nodes?: { name: string }[] };
-}
-
 export interface UserDetails {
   username: string;
   name: string;
