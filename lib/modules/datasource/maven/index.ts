@@ -249,12 +249,12 @@ export class MavenDatasource extends Datasource {
     }
 
     const cacheNs = 'datasource-maven:head-requests';
+    const cacheTimeoutNs = 'datasource-maven:head-requests-timeout';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-    const cacheTimeoutKey = 'datasource-maven:head-requests-timeout';
 
     const isCacheValid: boolean = await packageCache.get<true>(
-      cacheNs,
-      cacheTimeoutKey
+      cacheTimeoutNs,
+      cacheKey
     );
 
     let cachedReleaseMap: ReleaseMap =
@@ -301,7 +301,7 @@ export class MavenDatasource extends Datasource {
 
       const timeoutValue = retryEarlier ? 60 : 24 * 60;
       if (!isCacheValid || retryEarlier) {
-        await packageCache.set(cacheNs, cacheTimeoutKey, true, timeoutValue);
+        await packageCache.set(cacheTimeoutNs, cacheKey, true, timeoutValue);
       }
 
       await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, 24 * 60);
