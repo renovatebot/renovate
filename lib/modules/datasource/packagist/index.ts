@@ -95,37 +95,37 @@ export class PackagistDatasource extends Datasource {
     return meta;
   }
 
-  private async getPackagistFile(
-    regUrl: string,
-    file: RegistryFile
-  ): Promise<PackagistFile> {
-    const { key, sha256 } = file;
-    const fileName = key.replace('%hash%', sha256);
+  static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
-    if (opts.password || opts.headers?.authorization) {
-      return (
-        await this.http.getJson<PackagistFile>(regUrl + '/' + fileName, opts)
-      ).body;
-    }
-    const cacheNamespace = 'datasource-packagist-files';
-    const cacheKey = regUrl + key;
-    // Check the persistent cache for public registries
-    const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
-    // istanbul ignore if
-    if (cachedResult && cachedResult.sha256 === sha256) {
-      return cachedResult.res as Promise<PackagistFile>;
-    }
-    const res = (
-      await this.http.getJson<PackagistFile>(regUrl + '/' + fileName, opts)
-    ).body;
-    const cacheMinutes = 1440; // 1 day
-    await packageCache.set(
-      cacheNamespace,
-      cacheKey,
-      { res, sha256 },
-      cacheMinutes
+    return !!opts.password || !!opts.headers?.authorization;
+  }
+
+  static getPackagistFileUrl(regUrl: string, regFile: RegistryFile): string {
+    const { key, sha256 } = regFile;
+    const fileName = key.replace('%hash%', sha256);
+    const url = `${regUrl}/${fileName}`;
+    return url;
+  }
+
+  @cache({
+    namespace: `datasource-${PackagistDatasource.id}-public-files`,
+    key: (regUrl: string, regFile: RegistryFile) =>
+      PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+    cacheable: (regUrl: string) =>
+      !PackagistDatasource.isPrivatePackage(regUrl),
+    ttlMinutes: 1440,
+  })
+  public async getPackagistFile(
+    regUrl: string,
+    regFile: RegistryFile
+  ): Promise<PackagistFile> {
+    const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
+    const opts = PackagistDatasource.getHostOpts(regUrl);
+    const { body: packagistFile } = await this.http.getJson<PackagistFile>(
+      url,
+      opts
     );
-    return res;
+    return packagistFile;
   }
 
   private static extractDepReleases(versions: RegistryFile): ReleaseResult {
