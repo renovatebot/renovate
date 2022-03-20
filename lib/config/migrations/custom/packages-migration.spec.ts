@@ -26,4 +26,16 @@ describe('config/migrations/custom/packages-migration', () => {
       }
     );
   });
+
+  it('should ignore non array value', () => {
+    expect(PackagesMigration).toMigrate(
+      {
+        packages: { matchPackagePatterns: ['*'] },
+        packageRules: [{ matchPackageNames: [] }],
+      },
+      {
+        packageRules: [{ matchPackageNames: [] }],
+      }
+    );
+  });
 });

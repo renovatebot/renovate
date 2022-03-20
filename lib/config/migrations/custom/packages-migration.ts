@@ -8,10 +8,13 @@ export class PackagesMigration extends AbstractMigration {
   override run(value: unknown): void {
     const packageRules = this.get('packageRules');
 
-    const newPackageRules = Array.isArray(packageRules) ? packageRules : [];
+    let newPackageRules = Array.isArray(packageRules) ? packageRules : [];
     if (is.plainObject(packageRules)) {
       newPackageRules.push(packageRules);
     }
-    this.setHard('packageRules', newPackageRules.concat(value));
+    if (Array.isArray(value)) {
+      newPackageRules = newPackageRules.concat(value);
+    }
+    this.setHard('packageRules', newPackageRules);
   }
 }
