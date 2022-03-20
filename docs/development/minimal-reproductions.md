@@ -1,6 +1,6 @@
 # About minimal reproductions
 
-You may be asked to provide a "minimal reproduction" repository to help the Renovate team debug bug reports or implement a feature.
+You may be asked to provide a "minimal reproduction" repository to help the Renovate team debug bug reports or work on a feature.
 
 This document explains why we need a minimal reproduction, why using large repositories to debug is undesirable, and how you can create a good minimal reproduction.
 
