@@ -192,14 +192,6 @@ export function migrateConfig(
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'packages') {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages
-        );
-        delete migratedConfig.packages;
       } else if (key === 'schedule' && val) {
         // massage to array first
         const schedules = is.string(val) ? [val] : [...(val as string[])];
