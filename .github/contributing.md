@@ -15,7 +15,7 @@ If you've found a **bug** or have a **feature request** then please create an is
 
 ## Code
 
-If you would like to fix a bug or implement a feature, please fork the repository and create a Pull Request.
+If you would like to fix a bug or work on a feature, please fork the repository and create a Pull Request.
 To learn how to setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
 Also skim the [docs/development](../docs/development/) folder, it has a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
 
