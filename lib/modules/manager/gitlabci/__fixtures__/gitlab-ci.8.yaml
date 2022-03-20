@@ -1,0 +1,10 @@
+image:
+  # comment
+  name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim
+
+services:
+  # comment
+  - "$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11"
+  # another comment
+  - name: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0
+    alias: imagealias1

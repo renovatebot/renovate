@@ -155,5 +155,49 @@ describe('modules/manager/gitlabci/extract', () => {
         },
       ]);
     });
+
+    it('extract images from dependency proxy', async () => {
+      const res = await extractAllPackageFiles(config, [
+        'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.8.yaml',
+      ]);
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              currentDigest: undefined,
+              currentValue: '31.65.1-slim',
+              datasource: 'docker',
+              depName: 'renovate/renovate',
+              depType: 'image-name',
+              replaceString: 'renovate/renovate:31.65.1-slim',
+            },
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              currentDigest: undefined,
+              currentValue: '10.4.11',
+              datasource: 'docker',
+              depName: 'mariadb',
+              depType: 'service-image',
+              replaceString: 'mariadb:10.4.11',
+            },
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              currentDigest: undefined,
+              currentValue: '1.0.0',
+              datasource: 'docker',
+              depName: 'other/image1',
+              depType: 'service-image',
+              replaceString: 'other/image1:1.0.0',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.8.yaml',
+        },
+      ]);
+    });
   });
 });
