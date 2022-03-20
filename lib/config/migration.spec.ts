@@ -548,14 +548,14 @@ describe('config/migration', () => {
 
       config = {
         packages: [{ matchPackagePatterns: ['*'] }],
-        packageRules: { matchPackageNames: [] },
+        packageRules: [{ matchPackageNames: [] }],
       } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig.packageRules).toHaveLength(2);
 
       config = {
-        packageRules: { matchPpackageNames: [] },
+        packageRules: [{ matchPpackageNames: [] }],
         packages: [{ matchPackagePatterns: ['*'] }],
       } as never;
       res = configMigration.migrateConfig(config);
