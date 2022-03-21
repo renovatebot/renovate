@@ -28,10 +28,65 @@ require golang.org/x/foo v1.0.0
 require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
 
+replace gopkg.in/russross/blackfriday.v1 ./blackfriday
+
 replace github.com/pkg/errors => ../errors
 
-replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
+replace github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.15.22
 
+replace github.com/davecgh/go-spew v1.0.0 => github.com/davecgh/go-spew v1.0.1
+`;
+
+const gomod1Replaced = `module github.com/renovate-tests/gomod1
+
+require github.com/pkg/errors v0.7.0
+require github.com/aws/aws-sdk-go v1.15.21
+require github.com/davecgh/go-spew v1.0.0
+require golang.org/x/foo v1.0.0
+require github.com/rarkins/foo abcdef1
+require gopkg.in/russross/blackfriday.v1 v1.0.0
+
+replace gopkg.in/russross/blackfriday.v1 ./blackfriday
+
+// renovate-replace replace github.com/pkg/errors => ../errors
+
+replace github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.15.22
+
+replace github.com/davecgh/go-spew v1.0.0 => github.com/davecgh/go-spew v1.0.1
+`;
+
+const gomod2 = `module github.com/renovate-tests/gomod2
+
+require github.com/pkg/errors v0.7.0
+require github.com/aws/aws-sdk-go v1.15.21
+require github.com/davecgh/go-spew v1.0.0
+require golang.org/x/foo v1.0.0
+require github.com/rarkins/foo abcdef1
+require gopkg.in/russross/blackfriday.v1 v1.0.0
+
+replace (
+  gopkg.in/russross/blackfriday.v1 => ./blackfriday
+  github.com/pkg/errors => ../errors
+  github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.15.22
+  github.com/davecgh/go-spew v1.0.0 => github.com/davecgh/go-spew v1.0.1
+)
+`;
+
+const gomod2Replaced = `module github.com/renovate-tests/gomod2
+
+require github.com/pkg/errors v0.7.0
+require github.com/aws/aws-sdk-go v1.15.21
+require github.com/davecgh/go-spew v1.0.0
+require golang.org/x/foo v1.0.0
+require github.com/rarkins/foo abcdef1
+require gopkg.in/russross/blackfriday.v1 v1.0.0
+
+replace (
+  gopkg.in/russross/blackfriday.v1 => ./blackfriday
+  // renovate-replace github.com/pkg/errors => ../errors
+  github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.15.22
+  github.com/davecgh/go-spew v1.0.0 => github.com/davecgh/go-spew v1.0.1
+)
 `;
 
 const adminConfig: RepoGlobalConfig = {
@@ -672,6 +727,18 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('correctly disables inline parent directory replace directives', async () => {
+    expect(gomod.disableLocalParentReplaceDirective(gomod1)).toEqual(
+      gomod1Replaced
+    );
+  });
+
+  it('correctly disables block parent directory replace directives', async () => {
+    expect(gomod.disableLocalParentReplaceDirective(gomod2)).toEqual(
+      gomod2Replaced
+    );
   });
 
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
