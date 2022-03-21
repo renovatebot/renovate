@@ -252,6 +252,8 @@ export class MavenDatasource extends Datasource {
     const cacheTimeoutNs = 'datasource-maven:head-requests-timeout';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
 
+    // Store cache validity as the separate flag.
+    // This allows both cache updating and resetting.
     const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
 
     let cachedReleaseMap: ReleaseMap = {};
@@ -263,19 +265,25 @@ export class MavenDatasource extends Datasource {
       }
     }
 
+    // List versions to check with HEAD request
     const freshVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
-        const isDiscoveredOutside = !!release;
-        const isDiscoveredInsideAndCached = !is.undefined(
-          cachedReleaseMap[version]
-        );
-        const isDiscovered = isDiscoveredOutside || isDiscoveredInsideAndCached;
-        return !isDiscovered;
+        // Release is obtained from previous step
+        const isDiscovered = !!release;
+
+        // Release is checked with HEAD request on previous run (cached)
+        const isVerifiedWithHEAD = !is.undefined(cachedReleaseMap[version]);
+
+        // Select only valid releases not yet verified with HEAD request
+        return isDiscovered && !isVerifiedWithHEAD;
       })
       .map(([k]) => k);
 
+    // Update cached data with freshly discovered versions
     if (freshVersions.length) {
+      // Retry earlier on 50x errors
       let retryEarlier = false;
+
       const queue = freshVersions.map((version) => async (): Promise<void> => {
         const pomUrl = await this.createUrlForDependencyPom(
           version,
@@ -301,18 +309,21 @@ export class MavenDatasource extends Datasource {
 
       await pAll(queue, { concurrency: 5 });
 
-      const timeoutValue = retryEarlier ? 60 : 24 * 60;
+      // Update cache on timeout/error
       if (!isCacheValid || retryEarlier) {
+        // For server errors, cache with shorter TTL
+        const timeoutValue = retryEarlier ? 60 : 24 * 60;
         await packageCache.set(cacheTimeoutNs, cacheKey, true, timeoutValue);
       }
 
+      // Store calculated cache object for at most 24 hours
       await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, 24 * 60);
     }
 
+    // Filter releases with the versions validated via HEAD request
     for (const version of Object.keys(releaseMap)) {
       releaseMap[version] = cachedReleaseMap[version] ?? null;
     }
-
     return releaseMap;
   }
 
