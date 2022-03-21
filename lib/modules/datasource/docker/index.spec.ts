@@ -101,15 +101,12 @@ describe('modules/datasource/docker/index', () => {
     });
   });
   describe('getAuthHeaders', () => {
-    beforeEach(() => {
+    it('returns "authType token" if both provided', async () => {
       httpMock
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    it('returns "authType token" if both provided', async () => {
       hostRules.find.mockReturnValue({
         authType: 'some-authType',
         token: 'some-token',
@@ -130,6 +127,11 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns "Bearer token" if only token provided', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+      hostRules.hosts.mockReturnValue([]);
       hostRules.find.mockReturnValue({
         token: 'some-token',
       });
@@ -149,6 +151,11 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('fails', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+      hostRules.hosts.mockReturnValue([]);
       httpMock.clear(false);
 
       httpMock
@@ -163,6 +170,35 @@ describe('modules/datasource/docker/index', () => {
       );
 
       expect(headers).toBeNull();
+    });
+
+    it('use a HEAD request to the real resource and use the auth header values to get a token', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .head('/v2/real/resource')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry",scope="repository:my/node:whatever"',
+        })
+        .get(
+          '/oauth2/token?service=my.local.registry&scope=repository:my/node:whatever'
+        )
+        .reply(200, { token: 'some-token' });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'my/node/prefix',
+        'head',
+        '/v2/real/resource'
+      );
+
+      // do not inline, otherwise we get false positive from codeql
+      expect(headers).toMatchInlineSnapshot(`
+        Object {
+          "authorization": "Bearer some-token",
+        }
+      `);
     });
   });
 
