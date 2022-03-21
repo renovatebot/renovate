@@ -69,22 +69,17 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (
-    GlobalConfig.get('dryRun') !== 'lookup' &&
-    GlobalConfig.get('dryRun') !== 'extract'
-  ) {
-    if (localDir && !repoConfig.persistRepoData) {
-      try {
-        await deleteLocalFile('.');
-      } catch (err) /* istanbul ignore if */ {
-        logger.warn({ err }, 'localDir deletion error');
-      }
-    }
+  if (localDir && !repoConfig.persistRepoData) {
     try {
-      await fs.remove(privateCacheDir());
+      await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {
-      logger.warn({ err }, 'privateCacheDir deletion error');
+      logger.warn({ err }, 'localDir deletion error');
     }
+  }
+  try {
+    await fs.remove(privateCacheDir());
+  } catch (err) /* istanbul ignore if */ {
+    logger.warn({ err }, 'privateCacheDir deletion error');
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
