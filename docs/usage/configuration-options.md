@@ -1838,7 +1838,6 @@ Only use this option if you run Renovate as a [GitHub App](https://docs.github.c
 It does not apply when you use a Personal Access Token as credential.
 
 You can use `platformCommit` to automatically sign the commits that Renovate creates.
-To avoid errors, set the `gitAuthor` or `gitIgnoredAuthors` or both.
 
 ## postUpdateOptions
 
