@@ -286,7 +286,10 @@ export async function initRepo({
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
+    if (
+      repo.nameWithOwner &&
+      repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
+    ) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
         'Repository has been renamed'
