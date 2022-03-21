@@ -254,9 +254,14 @@ export class MavenDatasource extends Datasource {
 
     const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
 
-    const cachedReleaseMap: ReleaseMap = isCacheValid
-      ? (await packageCache.get<ReleaseMap>(cacheNs, cacheKey)) ?? {}
-      : {};
+    let cachedReleaseMap: ReleaseMap = {};
+    // istanbul ignore if
+    if (isCacheValid) {
+      const cache = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
+      if (cache) {
+        cachedReleaseMap = cache;
+      }
+    }
 
     const freshVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
