@@ -43,7 +43,7 @@ Most issues should have a label relating to either a platform, manager, datasour
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
 If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
-All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can identify any which are missing a status label.
+All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can find any which are missing a status label.
 
 ### Type of issue
 
@@ -63,7 +63,7 @@ For example, use `type:bug` to label a bug type issue, and use `type:feature` fo
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 Use the `type:help` label for issues which should be converted to a discussion post.
 
-Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can identify any which are missing one.
+Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can find any which are missing one.
 
 Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.
 
@@ -198,4 +198,4 @@ Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/P
 
 </details>
 
-Use the `self-hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
+Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own bot.
