@@ -1,0 +1,2096 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/flutter/index getReleases processes real data 1`] = `
+Object {
+  "homepage": "https://flutter.dev",
+  "registryUrl": "https://storage.googleapis.com",
+  "releases": Array [
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-15T16:54:36.795Z",
+      "version": "v0.1.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-02-27T00:26:37.058Z",
+      "version": "v0.1.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-06T08:16:53.944Z",
+      "version": "v0.1.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-07T05:33:37.499Z",
+      "version": "v0.1.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-07T19:43:29.371Z",
+      "version": "v0.2.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-12T17:08:21.387Z",
+      "version": "v0.2.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-16T18:48:13.375Z",
+      "version": "v0.2.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-02T23:23:50.189Z",
+      "version": "v0.2.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-26T20:43:01.049Z",
+      "version": "v0.2.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-30T01:48:38.085Z",
+      "version": "v0.2.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-03-30T13:56:17.652Z",
+      "version": "v0.2.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-02T23:11:51.217Z",
+      "version": "v0.2.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-09T18:34:23.057Z",
+      "version": "v0.2.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-05T15:46:23.078Z",
+      "version": "v0.2.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-09T20:24:31.158Z",
+      "version": "v0.2.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-12T01:48:48.011Z",
+      "version": "v0.2.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-16T20:03:43.109Z",
+      "version": "v0.3.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-24T16:58:25.525Z",
+      "version": "v0.3.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-07T18:35:13.818Z",
+      "version": "v0.3.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-23T13:45:14.270Z",
+      "version": "v0.3.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-24T21:38:15.356Z",
+      "version": "v0.3.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-04-25T02:36:56.617Z",
+      "version": "v0.3.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-04T20:12:10.557Z",
+      "version": "v0.3.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-07T19:54:40.036Z",
+      "version": "v0.4.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-09T04:21:20.388Z",
+      "version": "v0.4.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-09T05:04:04.217Z",
+      "version": "v0.4.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-11T18:23:10.418Z",
+      "version": "v0.4.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-22T22:56:13.374Z",
+      "version": "v0.4.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-05-29T14:37:09.929Z",
+      "version": "v0.5.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-06-19T16:34:52.432Z",
+      "version": "v0.5.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-06-08T00:45:49.120Z",
+      "version": "v0.5.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-06-11T17:12:09.004Z",
+      "version": "v0.5.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-06-11T23:06:33.203Z",
+      "version": "v0.5.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-06-18T19:06:38.885Z",
+      "version": "v0.5.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-07-03T18:05:18.897Z",
+      "version": "v0.5.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-07-16T17:00:12.907Z",
+      "version": "v0.5.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-10T18:54:54.439Z",
+      "version": "v0.5.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-28T18:25:23.275Z",
+      "version": "v0.6.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-21T19:15:54.048Z",
+      "version": "v0.6.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-21T23:35:25.724Z",
+      "version": "v0.6.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-22T22:19:20.039Z",
+      "version": "v0.7.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-27T19:08:49.442Z",
+      "version": "v0.7.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-28T19:42:43.472Z",
+      "version": "v0.7.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-05T02:54:37.048Z",
+      "version": "v0.7.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-30T22:18:00.789Z",
+      "version": "v0.7.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-08-31T00:53:05.441Z",
+      "version": "v0.7.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-06T19:21:48.303Z",
+      "version": "v0.8.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-07T16:06:09.740Z",
+      "version": "v0.8.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-18T19:36:29.169Z",
+      "version": "v0.8.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-14T17:24:49.586Z",
+      "version": "v0.8.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-14T20:21:32.119Z",
+      "version": "v0.8.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-17T21:10:18.168Z",
+      "version": "v0.8.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-18T00:40:12.111Z",
+      "version": "v0.8.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-18T20:41:01.857Z",
+      "version": "v0.8.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-18T21:46:29.068Z",
+      "version": "v0.9.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-18T23:13:24.302Z",
+      "version": "v0.9.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-19T23:58:27.474Z",
+      "version": "v0.9.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-25T20:36:24.192Z",
+      "version": "v0.9.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-10-09T23:37:36.097Z",
+      "version": "v0.9.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-09-28T23:30:33.903Z",
+      "version": "v0.9.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-10-04T02:33:40.645Z",
+      "version": "v0.9.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-10-10T01:30:38.767Z",
+      "version": "v0.10.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-10-20T05:19:03.365Z",
+      "version": "v0.10.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-06T18:44:46.133Z",
+      "version": "v0.10.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-08T20:06:52.048Z",
+      "version": "v0.11.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-10T00:05:02.633Z",
+      "version": "v0.11.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-10T03:57:25.010Z",
+      "version": "v0.11.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-13T01:12:51.313Z",
+      "version": "v0.11.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-13T19:26:13.591Z",
+      "version": "v0.11.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-14T08:21:52.745Z",
+      "version": "v0.11.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-15T00:06:07.567Z",
+      "version": "v0.11.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-19T19:14:35.559Z",
+      "version": "v0.11.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-20T18:47:30.345Z",
+      "version": "v0.11.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-21T07:50:12.774Z",
+      "version": "v0.11.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-27T06:51:22.538Z",
+      "version": "v0.11.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-28T16:57:21.243Z",
+      "version": "v0.11.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-29T03:51:24.955Z",
+      "version": "v0.11.12",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-11-30T05:17:44.100Z",
+      "version": "v0.11.13",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2018-12-04T17:38:52.282Z",
+      "version": "v1.0.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2018-12-12T00:34:29.682Z",
+      "version": "v1.1.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-01-29T22:16:42.061Z",
+      "version": "v1.1.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-01-31T03:59:51.369Z",
+      "version": "v1.2.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-02-26T17:24:44.521Z",
+      "version": "v1.2.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-02-27T23:55:32.285Z",
+      "version": "v1.2.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-02-28T04:56:47.051Z",
+      "version": "v1.3.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-01T01:32:44.709Z",
+      "version": "v1.3.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-01T09:55:35.815Z",
+      "version": "v1.3.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-04T16:19:42.411Z",
+      "version": "v1.3.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-05T16:01:11.312Z",
+      "version": "v1.3.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-07T15:17:53.441Z",
+      "version": "v1.3.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-07T15:20:15.237Z",
+      "version": "v1.3.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-15T20:18:29.639Z",
+      "version": "v1.3.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-10T05:32:40.478Z",
+      "version": "v1.3.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-15T04:03:09.790Z",
+      "version": "v1.3.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-18T16:38:19.665Z",
+      "version": "v1.3.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-19T00:07:35.793Z",
+      "version": "v1.3.12",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-19T03:42:42.929Z",
+      "version": "v1.3.13",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-26T01:16:58.897Z",
+      "version": "v1.3.14",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-26T22:02:37.386Z",
+      "version": "v1.4.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-27T01:13:10.675Z",
+      "version": "v1.4.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-27T16:39:20.541Z",
+      "version": "v1.4.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-27T21:50:50.687Z",
+      "version": "v1.4.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-28T01:14:32.831Z",
+      "version": "v1.4.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-28T18:13:28.784Z",
+      "version": "v1.4.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-29T20:29:43.258Z",
+      "version": "v1.4.6-hotfix.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-29T00:01:25.778Z",
+      "version": "v1.4.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-03-29T21:06:01.732Z",
+      "version": "v1.4.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-03T01:33:45.902Z",
+      "version": "v1.4.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-12T21:25:21.538Z",
+      "version": "v1.4.9-hotfix.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-04T18:49:39.997Z",
+      "version": "v1.4.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-04T21:10:15.510Z",
+      "version": "v1.4.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-08T18:01:12.285Z",
+      "version": "v1.4.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-09T03:06:18.387Z",
+      "version": "v1.4.12",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-10T01:42:02.324Z",
+      "version": "v1.4.13",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-10T02:55:32.782Z",
+      "version": "v1.4.14",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-10T22:27:03.387Z",
+      "version": "v1.4.15",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-11T17:02:15.961Z",
+      "version": "v1.4.16",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-11T21:53:22.414Z",
+      "version": "v1.4.17",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-12T00:32:34.053Z",
+      "version": "v1.4.18",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-16T21:01:51.513Z",
+      "version": "v1.5.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-17T06:13:23.176Z",
+      "version": "v1.5.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-17T21:58:20.871Z",
+      "version": "v1.5.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-19T23:20:49.502Z",
+      "version": "v1.5.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-30T23:04:50.739Z",
+      "version": "v1.5.4-hotfix.1",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-05-07T18:44:16.075Z",
+      "version": "v1.5.4-hotfix.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-27T00:01:42.883Z",
+      "version": "v1.5.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-23T23:47:50.170Z",
+      "version": "v1.5.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-24T18:40:46.612Z",
+      "version": "v1.5.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-24T23:49:23.261Z",
+      "version": "v1.5.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-04-26T00:03:05.012Z",
+      "version": "v1.5.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-17T10:07:23.209Z",
+      "version": "v1.6.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-22T22:31:26.087Z",
+      "version": "v1.6.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-23T18:19:28.406Z",
+      "version": "v1.6.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-30T23:18:37.088Z",
+      "version": "v1.6.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-28T20:19:54.738Z",
+      "version": "v1.6.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-28T23:22:21.227Z",
+      "version": "v1.6.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-29T20:55:10.733Z",
+      "version": "v1.6.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-05-31T18:11:35.815Z",
+      "version": "v1.6.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-03T20:30:56.698Z",
+      "version": "v1.7.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-04T19:33:57.340Z",
+      "version": "v1.7.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-06T16:56:37.925Z",
+      "version": "v1.7.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-07T22:20:18.312Z",
+      "version": "v1.7.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-14T19:52:05.259Z",
+      "version": "v1.7.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-21T23:10:52.072Z",
+      "version": "v1.7.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-22T01:06:19.065Z",
+      "version": "v1.7.7",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-07-24T16:14:50.488Z",
+      "version": "v1.7.8+hotfix.4",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-07-09T21:26:14.141Z",
+      "version": "v1.7.8+hotfix.3",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-07-08T17:22:05.600Z",
+      "version": "v1.7.8+hotfix.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-22T06:41:22.424Z",
+      "version": "v1.7.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-25T02:41:33.204Z",
+      "version": "v1.7.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-26T20:48:21.874Z",
+      "version": "v1.7.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-06-28T16:42:26.390Z",
+      "version": "v1.7.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-07-11T21:06:56.137Z",
+      "version": "v1.8.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-07-19T19:13:55.016Z",
+      "version": "v1.8.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-08T21:41:47.801Z",
+      "version": "v1.8.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-07T17:21:09.951Z",
+      "version": "v1.8.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-15T22:34:12.938Z",
+      "version": "v1.9.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-10-23T23:26:25.450Z",
+      "version": "v1.9.1+hotfix.6",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-10-17T17:17:25.252Z",
+      "version": "v1.9.1+hotfix.5",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-10-01T16:21:16.408Z",
+      "version": "v1.9.1+hotfix.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-26T01:42:23.874Z",
+      "version": "v1.9.1+hotfix.3",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-09-10T02:24:14.047Z",
+      "version": "v1.9.1+hotfix.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-04T01:33:58.909Z",
+      "version": "v1.9.1+hotfix.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-21T18:22:56.132Z",
+      "version": "v1.9.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-21T23:40:40.400Z",
+      "version": "v1.9.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-22T17:08:36.115Z",
+      "version": "v1.9.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-23T22:04:15.860Z",
+      "version": "v1.9.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-24T04:12:52.664Z",
+      "version": "v1.9.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-29T02:39:04.177Z",
+      "version": "v1.9.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-08-29T17:43:42.823Z",
+      "version": "v1.9.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-06T20:01:21.350Z",
+      "version": "v1.10.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-09T23:50:46.127Z",
+      "version": "v1.10.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-14T00:11:41.581Z",
+      "version": "v1.10.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-17T21:14:09.710Z",
+      "version": "v1.10.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-19T04:18:59.300Z",
+      "version": "v1.10.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-19T23:20:01.315Z",
+      "version": "v1.10.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-09-25T23:00:00.696Z",
+      "version": "v1.10.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-10T20:06:18.048Z",
+      "version": "v1.10.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-04T00:24:49.464Z",
+      "version": "v1.10.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-04T06:20:52.805Z",
+      "version": "v1.10.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-04T07:50:50.026Z",
+      "version": "v1.10.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-04T17:48:53.142Z",
+      "version": "v1.10.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-04T22:58:22.726Z",
+      "version": "v1.10.12",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-08T00:50:59.247Z",
+      "version": "v1.10.13",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-10-08T22:19:53.416Z",
+      "version": "v1.10.14",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-07T02:17:46.309Z",
+      "version": "v1.10.15",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-11T19:17:17.839Z",
+      "version": "v1.10.16",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-22T06:11:06.634Z",
+      "version": "v1.11.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-14T21:45:34.176Z",
+      "version": "v1.12.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-15T04:35:55.477Z",
+      "version": "v1.12.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-15T21:44:47.045Z",
+      "version": "v1.12.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-18T17:50:37.937Z",
+      "version": "v1.12.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-18T22:48:29.860Z",
+      "version": "v1.12.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-21T03:15:04.156Z",
+      "version": "v1.12.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-21T18:03:04.261Z",
+      "version": "v1.12.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-21T21:11:45.062Z",
+      "version": "v1.12.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-22T23:36:37.236Z",
+      "version": "v1.12.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-23T07:00:43.053Z",
+      "version": "v1.12.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-23T21:37:20.592Z",
+      "version": "v1.12.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-25T21:15:16.767Z",
+      "version": "v1.12.12",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-04-17T21:40:00.498Z",
+      "version": "v1.12.13+hotfix.9",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-02-11T22:00:18.927Z",
+      "version": "v1.12.13+hotfix.8",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-01-27T16:03:26.295Z",
+      "version": "v1.12.13+hotfix.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-11T16:13:33.789Z",
+      "version": "v1.12.13+hotfix.6",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2019-12-11T15:48:44.133Z",
+      "version": "v1.12.13+hotfix.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-10T00:24:54.364Z",
+      "version": "v1.12.13+hotfix.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-06T05:46:35.069Z",
+      "version": "v1.12.13+hotfix.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-04T18:25:08.365Z",
+      "version": "v1.12.13+hotfix.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-03T19:11:21.659Z",
+      "version": "v1.12.13+hotfix.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-26T01:00:40.925Z",
+      "version": "v1.12.13",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-26T22:23:08.510Z",
+      "version": "v1.12.14",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-11-27T18:51:54.821Z",
+      "version": "v1.12.15",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-02T19:14:12.085Z",
+      "version": "v1.12.16",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-05T19:25:47.249Z",
+      "version": "v1.13.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-12T21:44:09.530Z",
+      "version": "v1.13.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-13T02:19:56.063Z",
+      "version": "v1.13.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-19T21:45:48.483Z",
+      "version": "v1.13.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-20T20:00:43.417Z",
+      "version": "v1.13.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2019-12-21T02:24:22.017Z",
+      "version": "v1.13.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-15T17:38:56.683Z",
+      "version": "v1.13.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-07T23:11:25.187Z",
+      "version": "v1.13.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-10T22:26:07.379Z",
+      "version": "v1.13.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-14T21:30:53.036Z",
+      "version": "v1.13.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-15T23:25:38.749Z",
+      "version": "v1.14.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-16T18:38:09.565Z",
+      "version": "v1.14.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-21T20:17:02.859Z",
+      "version": "v1.14.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-22T01:28:39.478Z",
+      "version": "v1.14.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-25T01:00:32.350Z",
+      "version": "v1.14.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-01-27T18:40:49.492Z",
+      "version": "v1.14.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-02-05T19:47:13.642Z",
+      "version": "v1.14.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-02-06T14:47:20.237Z",
+      "version": "v1.15.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-02-06T23:04:49.071Z",
+      "version": "v1.15.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-02-07T23:06:56.001Z",
+      "version": "v1.15.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-02-11T18:08:56.423Z",
+      "version": "v1.15.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-04T21:38:53.752Z",
+      "version": "v1.15.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-04T23:34:47.423Z",
+      "version": "v1.15.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T01:25:11.376Z",
+      "version": "v1.15.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T02:23:36.154Z",
+      "version": "v1.15.7",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T03:14:51.335Z",
+      "version": "v1.15.8",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T05:37:28.243Z",
+      "version": "v1.15.9",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T18:46:54.555Z",
+      "version": "v1.15.10",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T21:13:06.385Z",
+      "version": "v1.15.11",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-05T23:38:34.152Z",
+      "version": "v1.15.12",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-06T01:27:25.586Z",
+      "version": "v1.15.13",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-06T02:23:47.980Z",
+      "version": "v1.15.14",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-06T03:36:11.798Z",
+      "version": "v1.15.15",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-06T04:08:58.408Z",
+      "version": "v1.15.16",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-17T17:25:39.733Z",
+      "version": "v1.15.17",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-06T23:41:43.468Z",
+      "version": "v1.15.18",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-10T17:35:20.848Z",
+      "version": "v1.15.19",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-11T16:44:47.227Z",
+      "version": "v1.15.20",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-13T20:57:15.085Z",
+      "version": "v1.15.21",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-16T19:36:37.526Z",
+      "version": "v1.15.22",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-18T22:18:46.105Z",
+      "version": "v1.16.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-19T18:16:28.667Z",
+      "version": "v1.16.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-24T14:59:26.515Z",
+      "version": "v1.16.2",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-27T18:34:01.712Z",
+      "version": "v1.16.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-22T17:16:41.221Z",
+      "version": "1.17.0-3.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-29T00:00:51.503Z",
+      "version": "1.17.0-3.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-02T20:36:26.070Z",
+      "version": "1.17.0-3.4.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-03-31T19:32:26.714Z",
+      "version": "1.17.0-dev.0.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-01T22:17:03.293Z",
+      "version": "1.17.0-dev.1.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-02T17:23:44.462Z",
+      "version": "1.17.0-dev.2.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-02T18:55:26.271Z",
+      "version": "1.17.0-dev.3.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-06T23:15:19.371Z",
+      "version": "1.17.0-dev.3.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-03T00:00:48.379Z",
+      "version": "1.17.0-dev.4.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-04T00:59:29.604Z",
+      "version": "1.17.0-dev.5.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-05-06T14:34:15.140Z",
+      "version": "1.17.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-05-13T18:12:10.369Z",
+      "version": "1.17.1",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-05-28T21:45:26.846Z",
+      "version": "1.17.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-06-04T17:15:43.744Z",
+      "version": "1.17.3",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-06-18T16:04:42.724Z",
+      "version": "1.17.4",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-07-01T23:24:33.419Z",
+      "version": "1.17.5",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-21T22:15:53.662Z",
+      "version": "1.18.0-6.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-24T13:01:43.529Z",
+      "version": "1.18.0-7.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-24T16:42:21.099Z",
+      "version": "1.18.0-8.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-05T23:13:38.294Z",
+      "version": "1.18.0-9.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-06T01:46:06.990Z",
+      "version": "1.18.0-10.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-06T18:45:38.119Z",
+      "version": "1.18.0-11.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-14T17:55:40.355Z",
+      "version": "1.18.0-11.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-06T22:11:06.703Z",
+      "version": "1.18.0-12.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-07T17:15:45.535Z",
+      "version": "1.18.0-13.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-04T23:15:42.693Z",
+      "version": "1.18.0-dev.0.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-06T19:06:05.220Z",
+      "version": "1.18.0-dev.1.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-06T23:33:17.301Z",
+      "version": "1.18.0-dev.2.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-07T04:25:05.542Z",
+      "version": "1.18.0-dev.3.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-07T16:38:36.607Z",
+      "version": "1.18.0-dev.4.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-04-17T21:38:14.667Z",
+      "version": "1.18.0-dev.5.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-08T19:40:11.308Z",
+      "version": "1.19.0-0.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-05-12T22:42:16.142Z",
+      "version": "1.19.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-06-01T17:41:58.968Z",
+      "version": "1.19.0-2.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-06-02T20:25:12.215Z",
+      "version": "1.19.0-3.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-06-05T16:39:36.057Z",
+      "version": "1.19.0-4.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-06-10T22:07:46.350Z",
+      "version": "1.19.0-4.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-01T23:27:53.160Z",
+      "version": "1.19.0-4.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-01T23:46:59.532Z",
+      "version": "1.19.0-4.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-06-09T23:56:14.424Z",
+      "version": "1.19.0-5.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-06-11T15:33:43.923Z",
+      "version": "1.20.0-0.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-01T23:26:51.051Z",
+      "version": "1.20.0-2.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-05T04:53:44.915Z",
+      "version": "1.20.0-3.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-09T19:21:38.263Z",
+      "version": "1.20.0-7.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-11T04:18:51.678Z",
+      "version": "1.20.0-7.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-21T16:18:22.967Z",
+      "version": "1.20.0-7.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-29T03:34:51.537Z",
+      "version": "1.20.0-7.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-03T21:49:15.216Z",
+      "version": "1.20.0-7.4.pre",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-08-05T14:29:36.789Z",
+      "version": "1.20.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-08-06T17:51:18.839Z",
+      "version": "1.20.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-14T21:07:28.246Z",
+      "version": "1.20.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-09-02T18:06:30.513Z",
+      "version": "1.20.3",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-09-15T17:49:01.042Z",
+      "version": "1.20.4",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-07-17T03:24:03.608Z",
+      "version": "1.21.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-07T16:47:56.936Z",
+      "version": "1.21.0-7.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-13T17:31:36.085Z",
+      "version": "1.21.0-9.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-19T18:43:17.164Z",
+      "version": "1.21.0-9.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-28T18:39:17.092Z",
+      "version": "1.21.0-9.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-08-21T22:07:11.688Z",
+      "version": "1.22.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-09-01T19:39:00.885Z",
+      "version": "1.22.0-9.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-09-14T21:53:13.773Z",
+      "version": "1.22.0-12.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-09-16T17:16:40.811Z",
+      "version": "1.22.0-12.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-09-28T16:48:05.583Z",
+      "version": "1.22.0-12.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-09-29T20:24:32.881Z",
+      "version": "1.22.0-12.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-08T21:41:58.867Z",
+      "version": "1.22.0-12.4.pre",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-10-01T14:34:00.881Z",
+      "version": "1.22.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-10-08T22:00:09.613Z",
+      "version": "1.22.1",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-10-16T18:22:30.509Z",
+      "version": "1.22.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-10-30T16:35:53.176Z",
+      "version": "1.22.3",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-11-13T20:11:42.086Z",
+      "version": "1.22.4",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2020-12-10T22:57:36.709Z",
+      "version": "1.22.5",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-01-25T19:47:03.570Z",
+      "version": "1.22.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-09-22T21:17:39.925Z",
+      "version": "1.23.0-4.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-01T23:27:31.491Z",
+      "version": "1.23.0-7.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-12T18:10:16.613Z",
+      "version": "1.23.0-13.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-14T00:38:49.787Z",
+      "version": "1.23.0-18.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-15T23:29:05.996Z",
+      "version": "1.23.0-18.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-20T02:45:48.918Z",
+      "version": "1.24.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-22T21:19:29.265Z",
+      "version": "1.24.0-3.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-10-30T19:32:26.946Z",
+      "version": "1.24.0-6.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-11-05T00:26:10.692Z",
+      "version": "1.24.0-7.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-11-16T20:57:04.768Z",
+      "version": "1.24.0-10.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-11-19T15:26:06.042Z",
+      "version": "1.24.0-10.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-12-02T17:01:50.738Z",
+      "version": "1.25.0-4.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-12-10T19:30:31.030Z",
+      "version": "1.25.0-8.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-12-16T21:55:19.340Z",
+      "version": "1.25.0-8.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-01-06T00:07:32.178Z",
+      "version": "1.25.0-8.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-01-15T19:54:29.877Z",
+      "version": "1.25.0-8.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2020-12-16T22:07:55.041Z",
+      "version": "1.26.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-01-13T17:25:01.089Z",
+      "version": "1.26.0-8.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-01-21T18:36:56.763Z",
+      "version": "1.26.0-12.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-01-29T18:20:51.623Z",
+      "version": "1.26.0-17.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-04T19:52:38.978Z",
+      "version": "1.26.0-17.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-05T06:36:19.027Z",
+      "version": "1.26.0-17.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-10T21:37:57.044Z",
+      "version": "1.26.0-17.4.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-11T17:51:48.205Z",
+      "version": "1.26.0-17.5.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-16T19:18:21.576Z",
+      "version": "1.26.0-17.6.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-24T18:23:49.549Z",
+      "version": "1.26.0-17.7.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-25T17:57:01.215Z",
+      "version": "1.26.0-17.8.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-10T23:56:37.818Z",
+      "version": "1.27.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-17T23:07:43.415Z",
+      "version": "1.27.0-4.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-02-24T23:10:48.874Z",
+      "version": "1.27.0-8.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-03-03T18:57:32.831Z",
+      "version": "2.0.0",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-03-04T21:11:40.554Z",
+      "version": "2.0.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-03-15T17:14:38.354Z",
+      "version": "2.0.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-03-19T20:20:00.679Z",
+      "version": "2.0.3",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-04-02T20:38:34.337Z",
+      "version": "2.0.4",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-04-16T18:02:50.882Z",
+      "version": "2.0.5",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-04-30T18:55:55.681Z",
+      "version": "2.0.6",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-03-03T19:18:35.641Z",
+      "version": "2.1.0-10.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-03-13T01:00:51.363Z",
+      "version": "2.1.0-12.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-03-18T21:12:39.692Z",
+      "version": "2.1.0-12.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-04-15T22:30:23.747Z",
+      "version": "2.2.0-10.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-04-29T19:24:48.246Z",
+      "version": "2.2.0-10.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-05-10T20:26:30.458Z",
+      "version": "2.2.0-10.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-05-19T21:19:41.989Z",
+      "version": "2.2.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-05-27T23:12:48.651Z",
+      "version": "2.2.1",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-06-11T18:59:42.020Z",
+      "version": "2.2.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-07-01T22:45:40.189Z",
+      "version": "2.2.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-04-27T16:47:41.489Z",
+      "version": "2.3.0-0.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-05-10T23:46:36.836Z",
+      "version": "2.3.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-05-18T23:20:33.552Z",
+      "version": "2.3.0-12.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-05-28T00:10:53.758Z",
+      "version": "2.3.0-16.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-06-17T00:37:48.018Z",
+      "version": "2.3.0-24.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-06-25T23:07:46.452Z",
+      "version": "2.3.0-24.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-07-02T21:52:31.207Z",
+      "version": "2.4.0-0.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-07-13T23:36:55.783Z",
+      "version": "2.4.0-4.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-07-22T19:18:29.069Z",
+      "version": "2.4.0-4.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-07-22T22:44:29.627Z",
+      "version": "2.4.0-4.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-07-27T21:03:05.871Z",
+      "version": "2.5.0-1.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-08-05T18:54:18.003Z",
+      "version": "2.5.0-5.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-08-12T00:33:41.428Z",
+      "version": "2.5.0-5.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-08-19T18:36:51.976Z",
+      "version": "2.5.0-5.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-09-02T17:36:07.377Z",
+      "version": "2.5.0-5.3.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-08-12T23:48:47.162Z",
+      "version": "2.5.0-6.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-09-10T22:05:24.891Z",
+      "version": "2.5.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-09-17T21:54:22.188Z",
+      "version": "2.5.1",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-09-30T23:48:47.983Z",
+      "version": "2.5.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-10-15T20:49:17.899Z",
+      "version": "2.5.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-08-26T00:01:48.631Z",
+      "version": "2.6.0-0.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-09-13T19:01:48.167Z",
+      "version": "2.6.0-5.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-09-16T01:31:55.213Z",
+      "version": "2.6.0-5.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-09-25T04:23:04.133Z",
+      "version": "2.6.0-11.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-10-20T15:31:44.689Z",
+      "version": "2.7.0-3.0.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-10-28T01:23:19.625Z",
+      "version": "2.7.0-3.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-11-12T22:37:32.489Z",
+      "version": "2.8.0-3.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-11-18T19:56:24.033Z",
+      "version": "2.8.0-3.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-12-01T23:27:03.890Z",
+      "version": "2.8.0-3.3.pre",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-12-09T01:20:18.536Z",
+      "version": "2.8.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2021-12-16T19:49:49.658Z",
+      "version": "2.8.1",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2021-12-15T00:49:29.119Z",
+      "version": "2.9.0-0.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2022-01-12T20:49:45.416Z",
+      "version": "2.10.0-0.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2022-01-20T21:48:07.280Z",
+      "version": "2.10.0-0.2.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2022-01-27T01:12:24.134Z",
+      "version": "2.10.0-0.3.pre",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2022-02-03T16:29:13.224Z",
+      "version": "2.10.0",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2022-02-10T01:18:38.655Z",
+      "version": "2.10.1",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2022-02-19T04:37:38.591Z",
+      "version": "2.10.2",
+    },
+    Object {
+      "isStable": true,
+      "releaseTimestamp": "2022-03-03T02:51:02.356Z",
+      "version": "2.10.3",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2022-02-16T18:34:51.633Z",
+      "version": "2.11.0-0.1.pre",
+    },
+    Object {
+      "isStable": false,
+      "releaseTimestamp": "2022-03-17T23:45:13.673Z",
+      "version": "2.12.0-4.1.pre",
+    },
+  ],
+  "sourceUrl": "https://github.com/flutter/flutter",
+}
+`;
