@@ -5,7 +5,7 @@ import type { LockFile, ParseLockFileResult } from './types';
 export function parseLockFile(lockFile: string): ParseLockFileResult {
   const detectedIndent = detectIndent(lockFile).indent || '  ';
 
-  let lockFileParsed: LockFile;
+  let lockFileParsed: any;
   try {
     lockFileParsed = JSON.parse(lockFile);
   } catch (err) {
