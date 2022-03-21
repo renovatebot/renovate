@@ -463,6 +463,30 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(REPOSITORY_RENAMED);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should not be case sensitive', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          data: {
+            repository: {
+              nameWithOwner: 'Some/repo',
+              hasIssuesEnabled: true,
+              defaultBranchRef: {
+                name: 'master',
+                target: {
+                  oid: '1234',
+                },
+              },
+            },
+          },
+        });
+      const result = await github.initRepo({
+        repository: 'some/Repo',
+      } as any);
+      expect(result.defaultBranch).toBe('master');
+      expect(result.isFork).toBeFalse();
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should detect repoForceRebase', async () => {
@@ -2440,7 +2464,7 @@ describe('modules/platform/github/index', () => {
     });
     it('returns empty if disabled', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: { repository: {} }} );
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: {repository: {}}});
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
