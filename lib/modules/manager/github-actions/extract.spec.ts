@@ -31,5 +31,32 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ]);
     });
+    it('extracts action tag line with digest pinning and a comment from a yaml file', () => {
+      const res = extractPackageFile(Fixtures.get('workflow_4.yml'));
+      expect(res.deps).toMatchSnapshot([
+        {
+          currentValue: 'v2.3.5',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
+          versioning: 'docker',
+        },
+      ]);
+    });
+    it('extracts action line with a comment & double quotes from a yaml file', () => {
+      const res = extractPackageFile(Fixtures.get('workflow_6.yml'));
+      expect(res.deps).toMatchSnapshot([
+        {
+          currentValue: 'v1.1.2',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString: '"actions/checkout@v1.1.2"',
+          versioning: 'docker',
+        },
+      ]);
+    });
   });
 });
