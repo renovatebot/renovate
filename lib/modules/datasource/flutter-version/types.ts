@@ -6,7 +6,7 @@ export interface FlutterCurrentRelease {
 
 export interface FlutterRelease {
   hash: string;
-  channel: string;
+  channel: 'stable' | 'beta' | 'dev';
   version: string;
   dart_sdk_version: string;
   dart_sdk_arch: string;
