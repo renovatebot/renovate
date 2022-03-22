@@ -1,32 +1,34 @@
 import { PuppetDatasource } from '../../datasource/puppet';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
+import { logger } from '../../../logger';
+import { simpleModuleLineRegexFactory } from './constants';
 
-export async function extractAllPackageFiles(
-  _config: ExtractConfig,
-  packageFiles: string[]
-): Promise<PackageFile[]> {
-  const dep: PackageDependency = {
-    depName: 'test',
-    currentRawValue: '1.0.0',
-    currentVersion: '1.0.0',
-    datasource: PuppetDatasource.id,
-    packageName: 'test.package',
-    currentValue: '1.0.0',
-    extractVersion: '1.0.0',
-    registryUrls: ['https://forgeapi.puppet.com'],
-    fileReplacePosition: 13,
-  };
+export function extractPackageFile(
+  content: string,
+  fileName: string
+): PackageFile | null {
+  logger.debug('extract puppet dependencies');
 
   const deps: PackageDependency[] = [];
-  deps.push(dep);
+  const simpleModuleLineRegex = simpleModuleLineRegexFactory();
 
-  const packageFile: PackageFile = {
+  let line: RegExpExecArray;
+  while ((line = simpleModuleLineRegex.exec(content)) !== null) {
+    const module = line[1];
+
+    const version = line[2];
+
+    const dep: PackageDependency = {
+      datasource: PuppetDatasource.id,
+      packageName: module,
+      currentValue: version,
+      registryUrls: ['https://forgeapi.puppet.com'],
+    };
+
+    deps.push(dep);
+  }
+
+  return {
     deps,
-    packageFile: 'Puppetfile',
   };
-
-  const f: PackageFile[] = [];
-  f.push(packageFile);
-
-  return f;
 }

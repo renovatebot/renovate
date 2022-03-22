@@ -1,7 +1,7 @@
 import { ProgrammingLanguage } from '../../../constants';
 import { PuppetDatasource } from '../../datasource/puppet';
 
-export { extractAllPackageFiles } from './extract';
+export { extractPackageFile } from './extract';
 
 export const language = ProgrammingLanguage.Ruby;
 
