@@ -1,5 +1,6 @@
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { PuppetModule } from './types';
 
 export class PuppetDatasource extends Datasource {
   static id = 'puppet';
@@ -19,7 +20,26 @@ export class PuppetDatasource extends Datasource {
       return null;
     }
 
-    const module = JSON.parse(moduleResponse.body);
-    
+    const module: PuppetModule = JSON.parse(moduleResponse.body);
+
+    const releases: Release[] = module.releases.map(release => ({
+      version: release.version,
+      downloadUrl: release.file_uri,
+      releaseTimestamp: release.created_at,
+      registryUrl: release.uri,
+    }));
+
+    const releaseResult: ReleaseResult = {
+      releases,
+      deprecationMessage: module.deprecated_for,
+      homepage: module.homepage_url,
+      tags: { // is this the correct use of tags?
+        endorsement: module.endorsement,
+        moduleGroup: module.module_group,
+        premium: `${module.premium}`,
+      }
+    };
+
+    return releaseResult;
   }
 }
