@@ -834,7 +834,7 @@ Also we support the `off` keyword which will stop any fetching immediately.
 
 <!-- prettier-ignore -->
 !!! warning
-    Advanced functionality only. 
+    Advanced functionality only.
     Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
