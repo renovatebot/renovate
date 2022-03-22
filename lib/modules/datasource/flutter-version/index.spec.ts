@@ -9,7 +9,7 @@ const urlPath = '/flutter_infra_release/releases/releases_linux.json';
 const datasource = FlutterDatasource.id;
 const depName = 'flutter';
 
-describe('modules/datasource/flutter/index', () => {
+describe('modules/datasource/flutter-version/index', () => {
   describe('getReleases', () => {
     it('throws for 500', async () => {
       httpMock.scope(baseUrl).get(urlPath).reply(500);
@@ -48,7 +48,7 @@ describe('modules/datasource/flutter/index', () => {
         depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(417);
+      expect(res.releases).toHaveLength(31);
     });
   });
 });

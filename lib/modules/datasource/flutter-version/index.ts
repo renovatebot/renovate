@@ -1,6 +1,6 @@
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { FlutterRelease } from './types';
+import type { FlutterResponse } from './types';
 
 export class FlutterDatasource extends Datasource {
   static readonly id = 'flutter-version';
@@ -30,17 +30,25 @@ export class FlutterDatasource extends Datasource {
     };
     try {
       const resp = (
-        await this.http.getJson<FlutterRelease>(
+        await this.http.getJson<FlutterResponse>(
           `${registryUrl}/flutter_infra_release/releases/releases_linux.json`
         )
       ).body;
-      result.releases.push(
-        ...resp.releases.map(({ version, release_date, channel }) => ({
+      const stableRegex = /^\d+\.\d+\.\d+$/;
+      result.releases = resp.releases
+        // The API response contains a stable version being released as a non-stable
+        // release. And so we filter out these releases here.
+        .filter(({ version, channel }) => {
+          if (version.match(stableRegex)) {
+            return channel === 'stable';
+          }
+          return true;
+        })
+        .map(({ version, release_date, channel }) => ({
           version,
           releaseTimestamp: release_date,
           isStable: channel === 'stable',
-        }))
-      );
+        }));
     } catch (err) {
       this.handleGenericErrors(err);
     }
