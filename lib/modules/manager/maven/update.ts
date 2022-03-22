@@ -82,9 +82,17 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newPomVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+    let releaseType = bumpVersion as ReleaseType;
+    if (semver.prerelease(currentValue)) {
+      releaseType = 'pre'.concat(bumpVersion) as ReleaseType;
+    }
+
+    let newPomVersion = semver.inc(currentValue, releaseType, 'SNAPSHOT');
     if (!newPomVersion) {
       throw new Error('semver inc failed');
+    }
+    if (semver.prerelease(currentValue)) {
+      newPomVersion = newPomVersion.replace(/-SNAPSHOT.*/, '-SNAPSHOT');
     }
 
     logger.debug({ newPomVersion });
