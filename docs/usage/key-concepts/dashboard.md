@@ -8,7 +8,7 @@ description: Learn all about Renovate's Dependency Dashboard
 Renovate has a Dependency Dashboard that shows an overview of the state of your repositories' dependencies.
 
 When the Dependency Dashboard is enabled, Renovate will create a new issue in the repository.
-This issue contains a "dashboard" where you can get an overview of the status of all updates.
+This issue has a "dashboard" where you can get an overview of the status of all updates.
 
 Having the Dependency Dashboard also enables the concept of an "approval" workflow for new upgrades, either for selected dependencies (recommended) or even for all.
 
@@ -92,7 +92,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 
 #### Require approval for major updates
 
-Major updates often contain breaking changes which require manual changes in your code before they can be merged.
+Major updates often have breaking changes which require manual changes in your code before they can be merged.
 So maybe you only want to get major updates when you have sufficient time to check them carefully.
 
 Dependency Dashboard Approval is far superior to disabling major updates because at least you can fully see what's pending on the dashboard, instead of updates being totally invisible.
