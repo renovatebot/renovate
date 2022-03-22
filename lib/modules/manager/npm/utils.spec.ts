@@ -53,5 +53,12 @@ describe('modules/manager/npm/utils', () => {
       const lockFileComposed = composeLockFile(lockFile, '  ');
       expect(lockFileComposed).toMatchSnapshot();
     });
+
+    it('adds trailing newline to match npms behaviour and avoid diffs', () => {
+      const lockFile = loadFixture('lockfile-parsing/package-lock.json');
+      const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
+      const lockFileComposed = composeLockFile(lockFileParsed, detectedIndent);
+      expect(lockFileComposed).toBe(lockFile);
+    });
   });
 });

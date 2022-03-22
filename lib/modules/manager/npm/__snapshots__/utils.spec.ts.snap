@@ -13,5 +13,6 @@ exports[`modules/manager/npm/utils composeLockFile composes lockfile string out 
   },
   \\"requires\\": true,
   \\"version\\": \\"1.0.0\\"
-}"
+}
+"
 `;
