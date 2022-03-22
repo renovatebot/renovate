@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (:?(?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[\w.]+)?\s*['"]?\s*(:?#\s*(?:renovate:\s+)?tag=(?<tag>[v?\d+.]+))?)(:?.*)?)$/
+  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>\S+)['"]?(?:\s+#\s+(?:renovate:\s+)?tag=(?<tag>\S+))?)/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -46,7 +46,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         datasource: GithubTagsDatasource.id,
         versioning: dockerVersioning.id,
         depType: 'action',
-        replaceString: replaceString.trim(),
+        replaceString,
         autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
       };
       if (shaRe.test(currentValue)) {
