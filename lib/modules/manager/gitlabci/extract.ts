@@ -11,10 +11,13 @@ import { replaceReferenceTags } from './utils';
 const commentsRe = regEx(/^\s*#/);
 const aliasesRe = regEx(`^\\s*-?\\s*alias:`);
 const whitespaceRe = regEx(`^(?<whitespace>\\s*)`);
-const depName = `['"]?(?:\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)?(?<depName>[^\\s'"]+)['"]?`;
-const imageRe = regEx(`^(?<whitespace>\\s*)image:(?:\\s+${depName})?\\s*$`);
-const nameRe = regEx(`^\\s*name:\\s+${depName}\\s*$`);
-const serviceRe = regEx(`^\\s*-?\\s*(?:name:\\s+)?${depName}\\s*$`);
+const imageRe = regEx(
+  `^(?<whitespace>\\s*)image:(?:\\s+['"]?(?<image>[^\\s'"]+)['"]?)?\\s*$`
+);
+const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
+const serviceRe = regEx(
+  `^\\s*-?\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+[^:]$)['"]?\\s*$`
+);
 function skipCommentAndAliasLines(
   lines: string[],
   lineNumber: number
@@ -37,7 +40,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const line = lines[lineNumber];
       const imageMatch = imageRe.exec(line);
       if (imageMatch) {
-        switch (imageMatch.groups.depName) {
+        switch (imageMatch.groups.image) {
           case undefined:
           case '': {
             let blockLine;
@@ -60,7 +63,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
           default: {
             logger.trace(`Matched image on line ${lineNumber}`);
-            const dep = getDep(imageMatch.groups.depName);
+            const dep = getDep(imageMatch.groups.image);
             dep.depType = 'image';
             deps.push(dep);
           }
