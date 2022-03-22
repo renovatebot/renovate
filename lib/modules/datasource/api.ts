@@ -9,7 +9,7 @@ import { CondaDatasource } from './conda';
 import { CrateDatasource } from './crate';
 import { DartDatasource } from './dart';
 import { DockerDatasource } from './docker';
-import { FlutterDatasource } from './flutter';
+import { FlutterDatasource } from './flutter-version';
 import { GalaxyDatasource } from './galaxy';
 import { GalaxyCollectionDatasource } from './galaxy-collection';
 import { GitRefsDatasource } from './git-refs';

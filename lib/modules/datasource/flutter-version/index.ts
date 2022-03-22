@@ -3,7 +3,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { FlutterRelease } from './types';
 
 export class FlutterDatasource extends Datasource {
-  static readonly id = 'flutter';
+  static readonly id = 'flutter-version';
 
   constructor() {
     super(FlutterDatasource.id);
