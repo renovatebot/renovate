@@ -3,11 +3,12 @@ import dataFiles from '../../../data-files.generated';
 export type UbuntuDistroInfo = Record<string, string>;
 
 // Data file generated with:
-// ubuntu-distro-json-generate.mjs
+// distro-json-generate.mjs
 const ubuntuJsonKey = 'data/ubuntu-distro-info.json';
 
 const ubuntuDistroInfo: UbuntuDistroInfo = JSON.parse(
-  dataFiles?.get(ubuntuJsonKey) ?? ''
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  dataFiles.get(ubuntuJsonKey)!
 );
 
 const codenameToVersion = new Map<string, string>();
