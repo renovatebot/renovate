@@ -8,9 +8,18 @@ export class PuppetDatasource extends Datasource {
     super(PuppetDatasource.id);
   }
 
-  getReleases(
-    getReleasesConfig: GetReleasesConfig
-  ): Promise<ReleaseResult | null> {
-    return null;
+  async getReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // https://forgeapi.puppet.com
+    const moduleResponse = await this.http.get(`${registryUrl}/v3/modules/${packageName}`);
+
+    if(moduleResponse.statusCode !== 200) {
+      return null;
+    }
+
+    const module = JSON.parse(moduleResponse.body);
+    
   }
 }
