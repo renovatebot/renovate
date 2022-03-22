@@ -16,5 +16,5 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
 }
 
 export function composeLockFile(lockFile: LockFile, indent: string): string {
-  return JSON.stringify(lockFile, null, indent);
+  return JSON.stringify(lockFile, null, indent) + '\n';
 }
