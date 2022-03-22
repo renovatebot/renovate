@@ -18,6 +18,20 @@ const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
 const serviceRe = regEx(
   `^\\s*-?\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+[^:]$)['"]?\\s*$`
 );
+const depProxyRe = regEx(
+  `(?:\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)?(?<depName>.+)`
+);
+
+/**
+ * Get image dependencies respecting Gitlab Dependency Proxy
+ * @param imageName as used in .gitlab-ci.yml file
+ * @return package dependency for the image
+ */
+function getGitlabDep(imageName: string): PackageDependency {
+  const match = depProxyRe.exec(imageName);
+  return getDep(match.groups.depName);
+}
+
 function skipCommentAndAliasLines(
   lines: string[],
   lineNumber: number
@@ -50,7 +64,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               const imageNameMatch = nameRe.exec(blockLine);
               if (imageNameMatch) {
                 logger.trace(`Matched image name on line ${lineNumber}`);
-                const dep = getDep(imageNameMatch.groups.depName);
+                const dep = getGitlabDep(imageNameMatch.groups.depName);
                 dep.depType = 'image-name';
                 deps.push(dep);
                 break;
@@ -63,7 +77,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
           default: {
             logger.trace(`Matched image on line ${lineNumber}`);
-            const dep = getDep(imageMatch.groups.image);
+            const dep = getGitlabDep(imageMatch.groups.image);
             dep.depType = 'image';
             deps.push(dep);
           }
@@ -85,7 +99,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             logger.trace('serviceImageMatch');
             foundImage = true;
             lineNumber = serviceImageLine.lineNumber;
-            const dep = getDep(serviceImageMatch.groups.depName);
+            const dep = getGitlabDep(serviceImageMatch.groups.depName);
             dep.depType = 'service-image';
             deps.push(dep);
           }
