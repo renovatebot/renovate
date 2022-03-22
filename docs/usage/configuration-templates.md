@@ -41,7 +41,7 @@ Do not touch this unless you know what you're doing.
 You're probably fine leaving this setting alone, though you can change it.
 e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update' then you could configure `"commitMessageAction": "Upgrade"`.
 
-`commitMessageTopic` is usually two to three words that identify _what_ is being updated.
+`commitMessageTopic` is usually two to three words that show _what_ is being updated.
 e.g. it might be `dependency react` or `Docker image ubuntu`.
 You may want to edit this.
 If you think your new `commitMessageTopic` is helpful for others, please [open a PR](https://github.com/renovatebot/renovate/pulls).

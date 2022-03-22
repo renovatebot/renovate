@@ -29,6 +29,8 @@ describe('modules/versioning/maven/index', () => {
     ${'x1.0.0'}          | ${true}
     ${'2.1.1.RELEASE'}   | ${true}
     ${'Greenwich.SR1'}   | ${true}
+    ${'v1.0.0_2'}        | ${true}
+    ${'1.1.1-20_62b10c'} | ${true}
     ${'.1'}              | ${false}
     ${'1.'}              | ${false}
     ${'-1'}              | ${false}
