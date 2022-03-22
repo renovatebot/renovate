@@ -49,19 +49,15 @@ export function extractPackageFile(
     });
 
     const git = map.get('git');
-    const branch = map.get('branch');
     const commit = map.get('commit');
-    const tag = map.get('tag');
 
     // TODO: find out how to create proper git/github/gitlab PackageDependency
 
     const dep: PackageDependency = {
       depName: packageName,
-      packageName: packageName,
+      packageName: git,
       datasource: GitRefsDatasource.id,
       currentDigest: commit,
-      currentValue: tag || branch || commit,
-      registryUrls: [git],
       versioning: commit ? gitVersioning.id : undefined,
     };
 
