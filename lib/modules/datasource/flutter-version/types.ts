@@ -1,10 +1,10 @@
-interface FlutterCurrentRelease {
+export interface FlutterCurrentRelease {
   beta: string;
   dev: string;
   stable: string;
 }
 
-interface FlutterRelease {
+export interface FlutterRelease {
   hash: string;
   channel: string;
   version: string;

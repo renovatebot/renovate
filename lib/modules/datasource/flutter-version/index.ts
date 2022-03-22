@@ -2,11 +2,11 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { FlutterResponse } from './types';
 
-export class FlutterDatasource extends Datasource {
+export class FlutterVersionDatasource extends Datasource {
   static readonly id = 'flutter-version';
 
   constructor() {
-    super(FlutterDatasource.id);
+    super(FlutterVersionDatasource.id);
   }
 
   override readonly customRegistrySupport = false;

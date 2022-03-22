@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/datasource/flutter/index getReleases processes real data 1`] = `
+exports[`modules/datasource/flutter-version/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://flutter.dev",
   "registryUrl": "https://storage.googleapis.com",

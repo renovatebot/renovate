@@ -2,11 +2,11 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { FlutterDatasource } from '.';
+import { FlutterVersionDatasource } from '.';
 
 const baseUrl = 'https://storage.googleapis.com';
 const urlPath = '/flutter_infra_release/releases/releases_linux.json';
-const datasource = FlutterDatasource.id;
+const datasource = FlutterVersionDatasource.id;
 const depName = 'flutter';
 
 describe('modules/datasource/flutter-version/index', () => {
