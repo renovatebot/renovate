@@ -1,6 +1,6 @@
+import { logger } from '../../../logger';
 import { PuppetDatasource } from '../../datasource/puppet';
 import type { PackageDependency, PackageFile } from '../types';
-import { logger } from '../../../logger';
 import { simpleModuleLineRegexFactory } from './constants';
 
 export function extractPackageFile(
@@ -19,6 +19,7 @@ export function extractPackageFile(
     const version = line[2];
 
     const dep: PackageDependency = {
+      depName: module,
       datasource: PuppetDatasource.id,
       packageName: module,
       currentValue: version,
