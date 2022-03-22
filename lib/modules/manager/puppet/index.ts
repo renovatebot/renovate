@@ -7,7 +7,6 @@ export const language = ProgrammingLanguage.Ruby;
 
 export const defaultConfig = {
   fileMatch: ['^Puppetfile$'],
-  versioning: '1.0.0',
 };
 
 export const supportedDatasources = [PuppetDatasource.id];
