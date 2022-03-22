@@ -237,6 +237,37 @@ export class MavenDatasource extends Datasource {
     return `${version}/${dependency.name}-${version}.pom`;
   }
 
+  /**
+   *
+   * Double-check releases using HEAD request and
+   * attach timestamps obtained from `Last-Modified` header.
+   *
+   * Example input:
+   *
+   * {
+   *   '1.0.0': {
+   *     version: '1.0.0',
+   *     releaseTimestamp: '2020-01-01T01:00:00.000Z',
+   *   },
+   *   '1.0.1': null,
+   * }
+   *
+   * Example output:
+   *
+   * {
+   *   '1.0.0': {
+   *     version: '1.0.0',
+   *     releaseTimestamp: '2020-01-01T01:00:00.000Z',
+   *   },
+   *   '1.0.1': {
+   *     version: '1.0.1',
+   *     releaseTimestamp: '2021-01-01T01:00:00.000Z',
+   *   }
+   * }
+   *
+   * It should validate `1.0.0` with HEAD request, but leave `1.0.1` intact.
+   *
+   */
   async addReleasesUsingHeadRequests(
     inputReleaseMap: ReleaseMap,
     dependency: MavenDependency,
@@ -254,6 +285,9 @@ export class MavenDatasource extends Datasource {
 
     // Store cache validity as the separate flag.
     // This allows both cache updating and resetting.
+    //
+    // Even if new version is being released each 10 minutes,
+    // we still want to reset the whole cache after 24 hours.
     const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
 
     let cachedReleaseMap: ReleaseMap = {};
@@ -268,22 +302,20 @@ export class MavenDatasource extends Datasource {
     // List versions to check with HEAD request
     const freshVersions = Object.entries(releaseMap)
       .filter(([version, release]) => {
-        // Release is obtained from previous step
-        const isDiscovered = !!release;
+        // Release is present in maven-metadata.xml,
+        // but haven't been validated yet
+        const isValidatedAtPreviousSteps = release !== null;
 
-        // Release is checked with HEAD request on previous run (cached)
-        const isVerifiedWithHEAD = !is.undefined(cachedReleaseMap[version]);
+        // Release was validated and cached with HEAD request during previous run
+        const isValidatedHere = !is.undefined(cachedReleaseMap[version]);
 
         // Select only valid releases not yet verified with HEAD request
-        return isDiscovered && !isVerifiedWithHEAD;
+        return !isValidatedAtPreviousSteps && !isValidatedHere;
       })
       .map(([k]) => k);
 
     // Update cached data with freshly discovered versions
     if (freshVersions.length) {
-      // Retry earlier on 50x errors
-      let retryEarlier = false;
-
       const queue = freshVersions.map((version) => async (): Promise<void> => {
         const pomUrl = await this.createUrlForDependencyPom(
           version,
@@ -299,24 +331,18 @@ export class MavenDatasource extends Datasource {
           release.releaseTimestamp = res.toISOString();
         }
 
-        if (res === 'error') {
-          retryEarlier = true;
-        }
-
         cachedReleaseMap[version] =
           res !== 'not-found' && res !== 'error' ? release : null;
       });
 
       await pAll(queue, { concurrency: 5 });
 
-      // Update cache on timeout/error
-      if (!isCacheValid || retryEarlier) {
-        // For server errors, cache with shorter TTL
-        const timeoutValue = retryEarlier ? 60 : 24 * 60;
-        await packageCache.set(cacheTimeoutNs, cacheKey, true, timeoutValue);
+      if (!isCacheValid) {
+        // Store new TTL flag for 24 hours if the previous one is invalidated
+        await packageCache.set(cacheTimeoutNs, cacheKey, 'long', 24 * 60);
       }
 
-      // Store calculated cache object for at most 24 hours
+      // Store updated cache object
       await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, 24 * 60);
     }
 
