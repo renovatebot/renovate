@@ -1,8 +1,8 @@
 import { load } from 'js-yaml';
-import { logger } from '../../logger';
+import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import { VelaPipelineConfiguration } from './types';
+import type { VelaPipelineConfiguration } from './types';
 
 export function extractPackageFile(file: string): PackageFile | null {
   let doc: VelaPipelineConfiguration;
