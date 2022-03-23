@@ -95,12 +95,15 @@ export class PackagistDatasource extends Datasource {
     return meta;
   }
 
-  static isPrivatePackage(regUrl: string): boolean {
+  private static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
     return !!opts.password || !!opts.headers?.authorization;
   }
 
-  static getPackagistFileUrl(regUrl: string, regFile: RegistryFile): string {
+  private static getPackagistFileUrl(
+    regUrl: string,
+    regFile: RegistryFile
+  ): string {
     const { key, sha256 } = regFile;
     const fileName = key.replace('%hash%', sha256);
     const url = `${regUrl}/${fileName}`;
@@ -115,7 +118,7 @@ export class PackagistDatasource extends Datasource {
       !PackagistDatasource.isPrivatePackage(regUrl),
     ttlMinutes: 1440,
   })
-  public async getPackagistFile(
+  async getPackagistFile(
     regUrl: string,
     regFile: RegistryFile
   ): Promise<PackagistFile> {
