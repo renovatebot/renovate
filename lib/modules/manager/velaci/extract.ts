@@ -24,6 +24,14 @@ export function extractPackageFile(file: string): PackageFile | null {
       deps.push(dep);
     });
 
+    // iterate over services
+    doc.services?.forEach((service) => {
+      const dep: PackageDependency = getDep(service.image);
+
+      dep.depType = 'docker';
+      deps.push(dep);
+    });
+
     // iterate over stages
     for (const stage in doc.stages) {
       logger.debug(doc.stages[stage]);

@@ -1,12 +1,5 @@
 version: "1"
 
-services:
-  - name: mysql
-    image: mysql:5.7.24
-
-  - name: redis
-    image: redis:alpine
-
 stages:
   go:
     steps:
@@ -26,18 +19,3 @@ stages:
           - npm install
           - npm test
 
-secrets:
-  # Implicit secret definition.
-  - name: vault_token
-
-  - origin:
-      name: private vault
-      image: target/secret-vault:v0.1.0
-      secrets: [ vault_token ]
-      parameters:
-        addr: vault.example.com
-        auth_method: token
-        username: octocat
-        items:
-          - source: secret/docker
-            path: docker
