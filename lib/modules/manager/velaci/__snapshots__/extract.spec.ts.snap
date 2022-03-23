@@ -1,29 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/velaci/extract extractPackageFile() extracts multiple stages pipeline image lines 1`] = `
+exports[`modules/manager/velaci/extract extractPackageFile() extracts multiple secrets pipeline image lines 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "currentDigest": undefined,
-    "currentValue": "1.13",
-    "datasource": "docker",
-    "depName": "golang",
-    "depType": "docker",
-    "replaceString": "golang:1.13",
-  },
-  Object {
-    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
     "depType": "docker",
-    "lookupName": "amd64/node",
+    "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
-  },
-  Object {
-    "depType": "docker",
-    "skipReason": "invalid-value",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -37,7 +24,40 @@ Array [
 ]
 `;
 
-exports[`manager/velaci/extract extractPackageFile() extracts multiple step pipeline image lines 1`] = `
+exports[`modules/manager/velaci/extract extractPackageFile() extracts multiple services pipeline image lines 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
+    "currentValue": "10.0.0",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "packageName": "amd64/node",
+    "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "5.7.24",
+    "datasource": "docker",
+    "depName": "mysql",
+    "depType": "docker",
+    "replaceString": "mysql:5.7.24",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "alpine",
+    "datasource": "docker",
+    "depName": "redis",
+    "depType": "docker",
+    "replaceString": "redis:alpine",
+  },
+]
+`;
+
+exports[`modules/manager/velaci/extract extractPackageFile() extracts multiple stages pipeline image lines 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -49,27 +69,38 @@ Array [
     "replaceString": "golang:1.13",
   },
   Object {
-    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
     "depType": "docker",
-    "lookupName": "amd64/node",
+    "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
   },
-  Object {
-    "depType": "docker",
-    "skipReason": "invalid-value",
-  },
+]
+`;
+
+exports[`modules/manager/velaci/extract extractPackageFile() extracts multiple step pipeline image lines 1`] = `
+Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
-    "currentValue": "v0.1.0",
+    "currentValue": "1.13",
     "datasource": "docker",
-    "depName": "target/secret-vault",
+    "depName": "golang",
     "depType": "docker",
-    "replaceString": "target/secret-vault:v0.1.0",
+    "replaceString": "golang:1.13",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
+    "currentValue": "10.0.0",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "packageName": "amd64/node",
+    "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
   },
 ]
 `;
