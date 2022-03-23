@@ -689,7 +689,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
       'head',
-      '/v2/tags/list/'
+      '/v2/tags/list'
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
