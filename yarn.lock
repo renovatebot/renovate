@@ -1562,6 +1562,11 @@
   resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-1.11.0.tgz#fff074121e72bbbf6f1e5da05b916196039479df"
   integrity sha512-YwVzEaGDM5LvRN7fn+8hYLTgcXsyksAr3V1x76/V3mWyaqKUAo4llcCd8lYoBCo4bxVgFq2pzPDQpeunZejLQg==
 
+"@mattiasbuelens/web-streams-adapter@~0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@mattiasbuelens/web-streams-adapter/-/web-streams-adapter-0.1.0.tgz#607b5a25682f4ae2741da7ba6df39302505336b3"
+  integrity sha512-oV4PyZfwJNtmFWhvlJLqYIX1Nn22ML8FZpS16ZUKv0hg7414xV1fjsGqxQzLT2dyK92TKxsJSwMOd7VNHAtPmA==
+
 "@node-redis/bloom@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@node-redis/bloom/-/bloom-1.0.1.tgz#144474a0b7dc4a4b91badea2cfa9538ce0a1854e"
@@ -1878,6 +1883,14 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
+"@openpgp/web-stream-tools@0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.10.tgz#4496390da9715c9bfc581ad144f9fb8a36a37775"
+  integrity sha512-1ONZADML0fb0RJR5UiGYPnRf9VaYBYUBc1gF9jyq57sHkr58cp5/BQHS+ivrqbRw21Sb70FKTssmJbRe71V+kw==
+  dependencies:
+    "@mattiasbuelens/web-streams-adapter" "~0.1.0"
+    web-streams-polyfill "~3.0.3"
+
 "@pnpm/constants@5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@pnpm/constants/-/constants-5.0.0.tgz#52f4d14d1ec3accd397b9e49eef377d0d39020e6"
@@ -1932,7 +1945,6 @@
 
 "@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.4":
   version "0.0.4"
-  uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
 "@renovatebot/pep440@2.1.1":
@@ -9423,6 +9435,11 @@ wcwidth@^1.0.0:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
+
+web-streams-polyfill@~3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.0.3.tgz#f49e487eedeca47a207c1aee41ee5578f884b42f"
+  integrity sha512-d2H/t0eqRNM4w2WvmTdoeIvzAUSpK7JmATB8Nr2lb7nQ9BTIJVjbQ/TRFVEh2gUH1HwclPdoPtfMoFfetXaZnA==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
