@@ -20,11 +20,6 @@ const ubuntuDistroInfo = shell.exec(
   { silent: true }
 );
 
-const debianDistroInfo = shell.exec(
-  `debian-distro-info --all -f | sed -r 's/Ubuntu|"|LTS |Debian //g; s/([0-9]+.[0-9]+) /\\1 /; s/.*/\\L&/; s/( [a-z]*) [a-z]*/\\1/g; s/^[ \\t]*//'`,
-  { silent: true }
-);
-
 /**
  * @param {string} str
  * @returns {{}}
@@ -76,5 +71,3 @@ async function updateJsonFile(file, newData) {
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 updateJsonFile(`../data/ubuntu-distro-info.json`, ubuntuDistroInfo.toString());
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-updateJsonFile(`../data/debian-distro-info.json`, debianDistroInfo.toString());
