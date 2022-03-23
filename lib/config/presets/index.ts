@@ -22,6 +22,7 @@ import type { ParsedPreset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
+  PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
   PRESET_PROHIBITED_SUBPRESET,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
@@ -293,6 +294,10 @@ export async function resolveConfigPresets(
             error.validationError = `Preset is invalid (${preset})`;
           } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
             error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
+          } else if (err.message === PRESET_INVALID_JSON) {
+            error.validationError = `Preset is invalid JSON (${preset})`;
+          } else {
+            error.validationError = `Preset caused unexpected error (${preset})`;
           }
           // istanbul ignore if
           if (existingPresets.length) {

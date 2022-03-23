@@ -460,6 +460,26 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processPredefinedRegistryUrl,
   },
   {
+    // mavenCentral { content {
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: ['mavenCentral', 'jcenter', 'google', 'gradlePluginPortal'],
+        tokenMapKey: 'registryName',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['content'],
+      },
+      {
+        matchType: TokenType.LeftBrace,
+        lookahead: true,
+      },
+    ],
+    handler: processPredefinedRegistryUrl,
+  },
+  {
     // maven("https://repository.mycompany.com/m2/repository")
     matchers: [
       {
