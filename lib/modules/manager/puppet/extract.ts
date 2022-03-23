@@ -9,10 +9,9 @@ import {
 } from './constants';
 
 export function extractPackageFile(
-  content: string,
-  fileName: string
+  content: string
 ): PackageFile | null {
-  logger.debug('extract puppet dependencies');
+  logger.trace('puppet.extractPackageFile()');
 
   const deps: PackageDependency[] = [];
   const simpleModuleLineRegex = simpleModuleLineRegexFactory();
@@ -64,7 +63,9 @@ export function extractPackageFile(
     deps.push(dep);
   }
 
-  return {
-    deps,
-  };
+  if (deps.length) {
+    return {deps};
+  }
+
+  return null;
 }
