@@ -22,12 +22,12 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this directly in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
-When you install Renovate from npm it naturally does not come bundled with any third party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
-Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third party tools are pre-installed in the same environment alongside Renovate before you run it.
+When you install Renovate from npm it naturally does not come bundled with any third-party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
+Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
-Renovate requires Node.js >=14.15.0 as well as Git >=2.33.0.
+Renovate requires Node.js `>=14.15.0` and Git `>=2.33.0`.
 
 #### Docker image
 
@@ -38,10 +38,10 @@ The `slim` image contains only Node.js so works if either:
 - You do not require any additional package managers, or
 - You map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when necessary
 
-The "full" image (which `latest` defaults to) contains every package manager which Renovate supports already preinstalled.
+The "full" image (which `latest` defaults to) has every package manager which Renovate supports already preinstalled.
 This approach works best for many, but does have the following downsides:
 
-- It only contains _one_ version of each language/manager - usually the latest
+- It only has _one_ version of each language/manager - usually the latest
 - It's several gigabytes in size
 
 The `renovate/renovate` Docker images are compatible with all of Renovate's supported platforms.
@@ -78,6 +78,26 @@ It is integrated with WhiteSource's vulnerability detection capabilities and add
 
 WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
 
+#### Forking Renovate app
+
+"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
+Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
+
+[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+
+##### Benefits
+
+Forking Renovate needs only `read` level access to the code of any repository it runs on.
+
+##### Drawbacks
+
+If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
+
+- Automerge is not supported
+- The `baseBranches` config option is not supported
+- The app dashboard (`app.renovatebot.com`) is currently not supported
+
 ### Hosting Renovate
 
 Once you have decided on a Renovate distribution, you need to decide where and how to run it.
@@ -92,7 +112,9 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 
 ### Global config
 
-Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js` or `config.json`), environment variables, or CLI parameters.
+Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file, environment variables, or CLI parameters.
+By default Renovate checks if a file named `config.js` is present.
+Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (e.g. `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -106,7 +128,24 @@ If you are configuring using environment variables, there are two possibilities:
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
-Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+<!-- prettier-ignore -->
+!!! note
+    It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+
+#### Using `config.js`
+
+If you use a `config.js`, it will be expected to export a configuration via `module.exports`.
+The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
+
+```javascript
+module.exports = {
+  token: 'abcdefg',
+};
+```
+
+`config.js` may also export a `Promise` of such an object, or a function that will return either a plain JavaScript object or a `Promise` of such an object.
+This allows one to include the results of asynchronous operations in the exported value.
+An example of a `config.js` that exports an async function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
 
 ### Authentication
 
@@ -116,7 +155,7 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### GitHub (Enterprise Server)
 
-First, [create a Personal Access Token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
+First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
@@ -135,6 +174,7 @@ When creating the GitHub App give it the following permissions:
 - Commit statuses: Read & write
 - Dependabot alerts: Read-only
 - Workflows: Read & write
+- Members: Read
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
@@ -147,19 +187,21 @@ The slug name of your app with `[bot]` appended
 **`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
 
 The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-It needs to contain the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
+It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
 **`token:"x-access-token:${github-app-installation}"`**
 
 The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
-**Note** The installation tokens expire after 1 hour and need to be regenerated regularly.
-Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+<!-- prettier-ignore -->
+!!! note
+    The installation tokens expire after 1 hour and need to be regenerated regularly.
+    Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
 List of repositories to run on.
-Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
@@ -171,7 +213,16 @@ Don't forget to configure `platform=gitlab` somewhere in config.
 
 #### Bitbucket Cloud
 
-First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
+First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
+Give the bot App password the following permission scopes:
+
+- [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
+- [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
+- [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
+- [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
+
+The bot also needs to be able to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
+
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also be sure to configure the `username` for your bot account too.
 Don't forget to configure `platform=bitbucket` somewhere in config.
@@ -185,9 +236,9 @@ Don't forget to configure `platform=bitbucket-server` somewhere in config.
 
 If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
-### Azure DevOps
+#### Azure DevOps
 
-First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
+First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=azure` somewhere in config.
 
@@ -204,7 +255,10 @@ This account can actually be _any_ account on GitHub, and needs only read-only a
 It's used when fetching release notes for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token as you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+<!-- prettier-ignore -->
+!!! note
+    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token.
+    Otherwise you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 

@@ -6,13 +6,14 @@ import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
-import { ExecOptions, exec } from '.';
+import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
+import { exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
+jest.mock('../../modules/datasource');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -712,7 +713,7 @@ describe('util/exec/index', () => {
       actualCmd.push(execCmd);
       actualOpts.push(execOpts);
       callback(null, { stdout: '', stderr: '' });
-      return undefined;
+      return undefined as never;
     });
     GlobalConfig.set({ cacheDir, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
@@ -728,7 +729,7 @@ describe('util/exec/index', () => {
     cpExec.mockImplementation((execCmd, execOpts, callback) => {
       actualCmd.push(execCmd);
       callback(null, { stdout: '', stderr: '' });
-      return undefined;
+      return undefined as never;
     });
 
     GlobalConfig.set({ binarySource: 'global' });
@@ -747,8 +748,31 @@ describe('util/exec/index', () => {
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    // FIXME: explicit assert condition
-    expect(actualCmd).toMatchSnapshot();
+    expect(actualCmd).toEqual([
+      `echo hello`,
+      `echo hello`,
+      `docker pull renovate/image`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `echo hello`,
+      `echo hello`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+    ]);
+  });
+  it('Supports binarySource=install', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    GlobalConfig.set({ binarySource: 'install' });
+    process.env.BUILDPACK = 'true';
+    const promise = exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
+    await expect(promise).rejects.toThrow('No tool releases found.');
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {

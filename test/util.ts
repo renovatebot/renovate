@@ -3,9 +3,9 @@ import { readFileSync } from 'fs';
 import { expect } from '@jest/globals';
 import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
-import type { RenovateConfig as _RenovateConfig } from '../lib/config/types';
+import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { platform as _platform } from '../lib/platform';
+import { platform as _platform } from '../lib/modules/platform';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
@@ -16,7 +16,17 @@ import * as _hostRules from '../lib/util/host-rules';
  * @param module module which is mocked by `jest.mock`
  */
 export function mocked<T>(module: T): jest.Mocked<T> {
-  return module as never;
+  return module as jest.Mocked<T>;
+}
+
+/**
+ * Simple wrapper for getting mocked version of a function
+ * @param func function which is mocked by `jest.mock`
+ */
+export function mockedFunction<T extends (...args: any[]) => any>(
+  func: T
+): jest.MockedFunction<T> {
+  return func as jest.MockedFunction<T>;
 }
 
 /**
@@ -34,8 +44,7 @@ export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
 export const logger = mocked(_logger);
 
-// Required because of isolatedModules
-export type RenovateConfig = _RenovateConfig;
+export type { RenovateConfig };
 
 export const defaultConfig = getConfig();
 

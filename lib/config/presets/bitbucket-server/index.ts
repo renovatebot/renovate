@@ -17,11 +17,16 @@ const http = new BitbucketServerHttp();
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
-  endpoint: string
+  endpoint: string,
+  branchOrTag?: string
 ): Promise<Preset> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
-  const url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
+  let url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
+  if (branchOrTag) {
+    url += '&at=' + encodeURIComponent(branchOrTag);
+  }
+
   let res: { body: FileData };
   try {
     res = await http.getJson(url);
@@ -50,13 +55,13 @@ export async function fetchJSONFile(
 }
 
 export function getPresetFromEndpoint(
-  pkgName: string,
+  repo: string,
   filePreset: string,
   presetPath: string,
   endpoint: string
 ): Promise<Preset> {
   return fetchPreset({
-    pkgName,
+    repo,
     filePreset,
     presetPath,
     endpoint,

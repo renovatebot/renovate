@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>ExamplePomFile</artifactId>
+
+  <properties>
+    <scala.version.major>2.13</scala.version.major>
+    <scala.version.minor>7</scala.version.minor>
+    <scala.version>${scala.version.major}.${scala.version.minor}</scala.version>
+
+    <maven-scalac-scapegoat.version>1.4.11</maven-scalac-scapegoat.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.sksamuel.scapegoat</groupId>
+      <artifactId>scalac-scapegoat-plugin_${scala.version}</artifactId>
+      <version>${maven-scalac-scapegoat.version}</version>
+    </dependency>
+  </dependencies>
+</project>

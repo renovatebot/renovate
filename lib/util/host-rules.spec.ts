@@ -1,5 +1,5 @@
 import { PlatformId } from '../constants';
-import * as datasourceNuget from '../datasource/nuget';
+import { NugetDatasource } from '../modules/datasource/nuget';
 import { add, clear, find, findAll, getAll, hosts } from './host-rules';
 
 describe('util/host-rules', () => {
@@ -40,8 +40,10 @@ describe('util/host-rules', () => {
         username: 'user1',
         password: 'pass1',
       } as any);
-      // FIXME: explicit assert condition
-      expect(find({ url: 'https://some.endpoint/v3/' })).toMatchSnapshot();
+      expect(find({ url: 'https://some.endpoint/v3/' })).toEqual({
+        password: 'pass1',
+        username: 'user1',
+      });
     });
   });
   describe('find()', () => {
@@ -53,22 +55,21 @@ describe('util/host-rules', () => {
     });
     it('needs exact host matches', () => {
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         hostName: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
       } as any);
-      // FIXME: explicit assert condition
-      expect(find({ hostType: datasourceNuget.id })).toMatchSnapshot();
+      expect(find({ hostType: NugetDatasource.id })).toEqual({});
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://nuget.org' })
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.org' })
       ).not.toEqual({});
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://not.nuget.org' })
+        find({ hostType: NugetDatasource.id, url: 'https://not.nuget.org' })
       ).not.toEqual({});
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://not-nuget.org' })
+        find({ hostType: NugetDatasource.id, url: 'https://not-nuget.org' })
       ).toEqual({});
     });
     it('matches on empty rules', () => {
@@ -76,18 +77,17 @@ describe('util/host-rules', () => {
         enabled: true,
       });
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
+        find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
       ).toEqual({ enabled: true });
     });
     it('matches on hostType', () => {
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         token: 'abc',
       });
-      // FIXME: explicit assert condition
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
-      ).toMatchSnapshot();
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
+      ).toEqual({ token: 'abc' });
     });
     it('matches on domainName', () => {
       add({
@@ -95,14 +95,14 @@ describe('util/host-rules', () => {
         token: 'def',
       } as any);
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
+        find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
           .token
       ).toBe('def');
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://github.com' }).token
+        find({ hostType: NugetDatasource.id, url: 'https://github.com' }).token
       ).toBe('def');
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://apigithub.com' })
+        find({ hostType: NugetDatasource.id, url: 'https://apigithub.com' })
           .token
       ).toBeUndefined();
     });
@@ -114,17 +114,17 @@ describe('util/host-rules', () => {
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
-      // Initialized generic host rule for github platform
-      add({
-        hostType: PlatformId.Github,
-        matchHost: 'https://api.github.com',
-        token: 'abc',
-      });
       // specific host rule for using other token in different org
       add({
         hostType: PlatformId.Github,
         matchHost: 'https://api.github.com/repos/org-b/',
         token: 'def',
+      });
+      // Initialized generic host rule for github platform
+      add({
+        hostType: PlatformId.Github,
+        matchHost: 'https://api.github.com',
+        token: 'abc',
       });
       expect(
         find({
@@ -177,10 +177,9 @@ describe('util/host-rules', () => {
         hostName: 'nuget.local',
         token: 'abc',
       } as any);
-      // FIXME: explicit assert condition
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
-      ).toMatchSnapshot();
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
+      ).toEqual({ token: 'abc' });
     });
     it('matches on matchHost with protocol', () => {
       add({
@@ -191,7 +190,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://domain.com' }).token).toBe('def');
       expect(
         find({
-          hostType: datasourceNuget.id,
+          hostType: NugetDatasource.id,
           url: 'https://domain.com/renovatebot',
         }).token
       ).toBe('def');
@@ -216,59 +215,77 @@ describe('util/host-rules', () => {
     });
     it('matches on hostType and endpoint', () => {
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         matchHost: 'https://nuget.local/api',
         token: 'abc',
       } as any);
       expect(
-        find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
           .token
       ).toBe('abc');
     });
     it('matches on endpoint subresource', () => {
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         matchHost: 'https://nuget.local/api',
         token: 'abc',
       } as any);
-      // FIXME: explicit assert condition
       expect(
         find({
-          hostType: datasourceNuget.id,
+          hostType: NugetDatasource.id,
           url: 'https://nuget.local/api/sub-resource',
         })
-      ).toMatchSnapshot();
+      ).toEqual({ token: 'abc' });
+    });
+    it('matches shortest matchHost first', () => {
+      add({
+        matchHost: 'https://nuget.local/api',
+        token: 'longest',
+      } as any);
+      add({
+        matchHost: 'https://nuget.local/',
+        token: 'shortest',
+      } as any);
+      expect(
+        find({
+          url: 'https://nuget.local/api/sub-resource',
+        })
+      ).toEqual({ token: 'longest' });
     });
     it('returns hosts', () => {
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         token: 'aaaaaa',
       });
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         matchHost: 'https://nuget.local/api',
         token: 'abc',
       } as any);
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         hostName: 'my.local.registry',
         token: 'def',
       } as any);
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         matchHost: 'another.local.registry',
         token: 'xyz',
       });
       add({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
         matchHost: 'https://yet.another.local.registry',
         token: '123',
       });
       const res = hosts({
-        hostType: datasourceNuget.id,
+        hostType: NugetDatasource.id,
       });
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(4);
+      expect(res).toEqual([
+        'nuget.local',
+        'my.local.registry',
+        'another.local.registry',
+        'yet.another.local.registry',
+      ]);
     });
   });
   describe('findAll()', () => {
@@ -283,8 +300,15 @@ describe('util/host-rules', () => {
         password: 'p4$$w0rd',
       };
       add(hostRule);
-      expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
-      expect(findAll({ hostType: 'nuget' })[0]).toMatchSnapshot();
+      expect(findAll({ hostType: 'nuget' })).toEqual([
+        {
+          hostType: 'nuget',
+          password: 'p4$$w0rd',
+          resolvedHost: 'nuget.org',
+          username: 'root',
+          matchHost: 'nuget.org',
+        },
+      ]);
     });
   });
   describe('getAll()', () => {

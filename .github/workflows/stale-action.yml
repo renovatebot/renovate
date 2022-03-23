@@ -9,7 +9,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@cdf15f641adb27a71842045a94023bef6945e3aa # renovate: tag=v4.0.0
+      - uses: actions/stale@7fb802b3079a276cf3c7e6ba9aa003c665b3f838 # renovate: tag=v4.1.0
         with:
           # Rate limit per run, (defaults to 30, but we've increased it to 40 for now).
           operations-per-run: 40

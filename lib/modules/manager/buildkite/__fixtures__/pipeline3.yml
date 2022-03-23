@@ -1,0 +1,16 @@
+steps:
+  # Prebuild the app image, upload it to a registry for later steps
+  - name: "Docker Build"
+    plugins:
+      namespace/docker-compose#v1.3.2.5:
+        build: app
+        image-repository: index.docker.io/org/repo
+
+  - wait
+
+  - name: "wrong"
+    command: test.sh
+    parallelism: 25
+    plugins:
+      github.com/buildkite/plugin-docker-compose#v1.3.2:
+        run: app

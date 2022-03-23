@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/presets/bitbucket-server/index fetchJSONFile() handles branches/tags 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc",
+      "host": "git.company.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://git.company.org/rest/api/1.0/projects/some/repos/repo/browse/some-filename.json?limit=20000&at=feature%2Fbranch",
+  },
+]
+`;
+
 exports[`config/presets/bitbucket-server/index fetchJSONFile() returns JSON 1`] = `
 Array [
   Object {

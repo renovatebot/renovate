@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "master",
+    "datasource": "github-tags",
+    "depName": "actions/bin",
+    "depType": "action",
+    "replaceString": "actions/bin/shellcheck@master",
+    "skipReason": "invalid-version",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentDigest": "c308fdd69d26ed66f4506ebd74b180abe5362145",
+    "currentValue": "v1.1.0",
+    "datasource": "github-tags",
+    "depName": "docker/setup-qemu-action",
+    "depType": "action",
+    "replaceString": "docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "1.0.0",
+    "datasource": "github-tags",
+    "depName": "actions/checkout",
+    "depType": "action",
+    "replaceString": "actions/checkout@1.0.0",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentDigest": "c308fdd69d26ed66f4506ebd74b180abe5362145",
+    "currentValue": undefined,
+    "datasource": "github-tags",
+    "depName": "docker/setup-qemu-action",
+    "depType": "action",
+    "replaceString": "docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "v2",
+    "datasource": "github-tags",
+    "depName": "docker/build-push-action",
+    "depType": "action",
+    "replaceString": "docker/build-push-action@v2",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentDigest": "ec3a7ce113134d7a93b817d10a8272cb61118579",
+    "currentValue": "v2.4.0",
+    "datasource": "github-tags",
+    "depName": "actions/checkout",
+    "depType": "action",
+    "replaceString": "actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentDigest": "16499b5e05bf2e26879000db0c1d13f7e13fa3af",
+    "currentValue": "v1.0.7",
+    "datasource": "github-tags",
+    "depName": "actions-rs/toolchain",
+    "depType": "action",
+    "replaceString": "actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "v1.0.3",
+    "datasource": "github-tags",
+    "depName": "actions-rs/cargo",
+    "depType": "action",
+    "replaceString": "actions-rs/cargo@v1.0.3",
+    "versioning": "docker",
+  },
+]
+`;
+
+exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "master",
+    "datasource": "github-tags",
+    "depName": "actions/bin",
+    "depType": "action",
+    "replaceString": "actions/bin/shellcheck@master",
+    "skipReason": "invalid-version",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "replicated/dockerfilelint",
+    "depType": "docker",
+    "replaceString": "replicated/dockerfilelint",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "master",
+    "datasource": "github-tags",
+    "depName": "actions/docker",
+    "depType": "action",
+    "replaceString": "actions/docker/cli@master",
+    "skipReason": "invalid-version",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
+    "currentValue": "6",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
+    "versioning": "docker",
+  },
+]
+`;
+
+exports[`modules/manager/github-actions/extract extractPackageFile() extracts tag line with double quotes 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "v0.13.1",
+    "datasource": "github-tags",
+    "depName": "pascalgn/automerge-action",
+    "depType": "action",
+    "replaceString": "\\"pascalgn/automerge-action@v0.13.1\\"",
+    "versioning": "docker",
+  },
+]
+`;

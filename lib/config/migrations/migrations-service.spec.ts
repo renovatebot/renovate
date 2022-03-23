@@ -9,7 +9,10 @@ describe('config/migrations/migrations-service', () => {
       };
 
       const migratedConfig = MigrationsService.run(originalConfig);
-      expect(migratedConfig).not.toHaveProperty(property);
+      expect(
+        MigrationsService.isMigrated(originalConfig, migratedConfig)
+      ).toBeTrue();
+      expect(migratedConfig).toEqual({});
     }
   });
 
@@ -23,8 +26,12 @@ describe('config/migrations/migrations-service', () => {
       };
 
       const migratedConfig = MigrationsService.run(originalConfig);
-      expect(migratedConfig).not.toHaveProperty(oldPropertyName);
-      expect(migratedConfig[newPropertyName]).toBe('test');
+      expect(
+        MigrationsService.isMigrated(originalConfig, migratedConfig)
+      ).toBeTrue();
+      expect(migratedConfig).toEqual({
+        [newPropertyName]: 'test',
+      });
     }
   });
 
@@ -40,6 +47,9 @@ describe('config/migrations/migrations-service', () => {
       MigrationsService.renamedProperties.get(property)
     );
 
+    expect(
+      MigrationsService.isMigrated(originalConfig, migratedConfig)
+    ).toBeTrue();
     expect(mappedProperties).toEqual(Object.keys(migratedConfig));
   });
 });

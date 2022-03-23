@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
 import { getOptions } from '../../../../config/options';
-import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
+import type { ParseConfigOptions } from './types';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -21,7 +22,7 @@ function normalizePrefixes(
   return result;
 }
 
-export function getEnvName(option: Partial<RenovateOptions>): string {
+export function getEnvName(option: ParseConfigOptions): string {
   if (option.env === false) {
     return '';
   }
@@ -82,27 +83,28 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   options.forEach((option) => {
     if (option.env !== false) {
       const envName = getEnvName(option);
-      if (env[envName]) {
+      const envVal = env[envName];
+      if (envVal) {
         if (option.type === 'array' && option.subType === 'object') {
           try {
-            const parsed = JSON.parse(env[envName]);
+            const parsed = JSON.parse(envVal);
             if (is.array(parsed)) {
               config[option.name] = parsed;
             } else {
               logger.debug(
-                { val: env[envName], envName },
+                { val: envVal, envName },
                 'Could not parse object array'
               );
             }
           } catch (err) {
             logger.debug(
-              { val: env[envName], envName },
+              { val: envVal, envName },
               'Could not parse environment variable'
             );
           }
         } else {
           const coerce = coersions[option.type];
-          config[option.name] = coerce(env[envName]);
+          config[option.name] = coerce(envVal);
         }
       }
     }

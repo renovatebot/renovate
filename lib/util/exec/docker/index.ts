@@ -1,18 +1,13 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import * as versioning from '../../../versioning';
-import { regEx } from '../../regex';
+import { getPkgReleases } from '../../../modules/datasource';
+import * as versioning from '../../../modules/versioning';
+import { newlineRegex, regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';
-import {
-  DockerOptions,
-  Opt,
-  VolumeOption,
-  VolumesPair,
-  rawExec,
-} from '../common';
+import { rawExec } from '../common';
+import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
 const prefetchedImages = new Set<string>();
 
@@ -59,13 +54,17 @@ function uniq<T = unknown>(
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
-  const filtered: VolumesPair[] = expanded.filter((vol) => vol !== null);
+  const filtered: VolumesPair[] = expanded.filter(
+    (vol): vol is VolumesPair => vol !== null
+  );
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => `-v "${from}":"${to}"`);
 }
 
 function prepareCommands(commands: Opt<string>[]): string[] {
-  return commands.filter((command) => command && typeof command === 'string');
+  return commands.filter<string>((command): command is string =>
+    is.string(command)
+  );
 }
 
 export async function getDockerTag(
@@ -102,9 +101,8 @@ export async function getDockerTag(
       logger.debug('Filtering out unstable versions');
       versions = versions.filter((version) => ver.isStable(version));
     }
-    versions = versions.sort(ver.sortVersions.bind(ver));
-    if (versions.length) {
-      const version = versions.pop();
+    const version = versions.sort(ver.sortVersions.bind(ver)).pop();
+    if (version) {
       logger.debug(
         { depName, scheme, constraint, version },
         `Found compatible image version`
@@ -122,12 +120,12 @@ export async function getDockerTag(
   return 'latest';
 }
 
-function getContainerName(image: string, prefix?: string): string {
-  return `${prefix || 'renovate_'}${image}`.replace(regEx(/\//g), '_');
+function getContainerName(image: string, prefix?: string | undefined): string {
+  return `${prefix ?? 'renovate_'}${image}`.replace(regEx(/\//g), '_');
 }
 
-function getContainerLabel(prefix: string): string {
-  return `${prefix || 'renovate_'}child`;
+function getContainerLabel(prefix: string | undefined): string {
+  return `${prefix ?? 'renovate_'}child`;
 }
 
 export async function removeDockerContainer(
@@ -175,7 +173,7 @@ export async function removeDanglingContainers(): Promise<void> {
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
-        .split('\n')
+        .split(newlineRegex)
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
@@ -204,7 +202,7 @@ export async function generateDockerCommand(
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
   let image = options.image;
-  const volumes = options.volumes || [];
+  const volumes = options.volumes ?? [];
   const {
     localDir,
     cacheDir,
@@ -226,7 +224,7 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter((x) => typeof x === 'string')
+        .filter(is.string)
         .map((e) => `-e ${e}`)
     );
   }
@@ -237,11 +235,11 @@ export async function generateDockerCommand(
 
   image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
 
-  let tag: string;
+  let tag: string | null = null;
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {
-    const tagVersioning = tagScheme || 'semver';
+    const tagVersioning = tagScheme ?? 'semver';
     tag = await getDockerTag(image, tagConstraint, tagVersioning);
     logger.debug(
       { image, tagConstraint, tagVersioning, tag },

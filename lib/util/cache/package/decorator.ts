@@ -34,6 +34,7 @@ function decorate<T>(fn: Handler<T>): Decorator<T> {
   const result: Decorator<T> = (
     target,
     key,
+    /* TODO: Can descriptor be undefined ? */
     descriptor = Object.getOwnPropertyDescriptor(target, key) ?? {
       enumerable: true,
       configurable: true,

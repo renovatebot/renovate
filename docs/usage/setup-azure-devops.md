@@ -25,6 +25,7 @@ schedules:
     displayName: 'Every day at 3am'
     branches:
       include: [main]
+    always: true
 
 trigger: none
 

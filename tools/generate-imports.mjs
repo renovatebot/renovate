@@ -73,7 +73,7 @@ async function generateData() {
   /** @type {string[]} */
   const contentMapAssignments = [];
   for (const file of files) {
-    const key = file.replace(/\\/g, '/'); // TODO #12071
+    const key = file.replace(/\\/g, '/');
 
     const rawFileContent = await fs.readFile(file, 'utf8');
     const value = JSON.stringify(rawFileContent);

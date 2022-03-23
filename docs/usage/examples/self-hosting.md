@@ -15,7 +15,7 @@ If you want to use these package managers to update your lockfiles, you must ens
 npm install -g yarn pnpm
 ```
 
-The same goes for any other third party binary tool like `gradle` or `poetry` - you need to make sure they are installed and the appropriate version before running Renovate.
+The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the correct version before running Renovate.
 
 ### Docker
 
@@ -25,13 +25,15 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:25.69.4
-docker run --rm renovate/renovate:25.69
-docker run --rm renovate/renovate:25
+docker run --rm renovate/renovate:31.14.0
+docker run --rm renovate/renovate:31.14
+docker run --rm renovate/renovate:31
 ```
 
-Do not use the example tags listed above, as they will be out-of-date.
-Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
+<!-- prettier-ignore -->
+!!! warning
+    Do not use the example tags listed above, as they will be out-of-date.
+    Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
 If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
@@ -47,7 +49,7 @@ The following is an example manifest of running Renovate against a GitHub Enterp
 First the Kubernetes manifest:
 
 ```yaml
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: renovate
@@ -62,7 +64,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:25.69.4
+              image: renovate/renovate:31.14.0
               args:
                 - user/repo
               # Environment Variables
@@ -97,7 +99,7 @@ A `config.js` file can be added to the manifest using a `ConfigMap` as shown in 
 
 ```yaml
 ---
- apiVersion: v1
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: renovate-config
@@ -109,7 +111,7 @@ data:
     }
 
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: renovate-bot
@@ -121,7 +123,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:25.69.4
+            - image: renovate/renovate:31.14.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -166,7 +168,7 @@ The following example runs Renovate hourly, and looks for the self-hosted config
 ```yml
 version: '2.1'
 orbs:
-  renovate: daniel-shuy/renovate@2.1.1
+  renovate: daniel-shuy/renovate@2.2.0
 workflows:
   renovate:
     jobs:
@@ -189,7 +191,7 @@ How to validate your config as part of your workflow:
 ```yml
 version: '2.1'
 orbs:
-  renovate: daniel-shuy/renovate@2.1
+  renovate: daniel-shuy/renovate@2.2.0
 workflows:
   lint:
     jobs:
@@ -210,15 +212,15 @@ By default, Renovate stores all files in the `renovate/` subdirectory of the ope
 
 Repository data is copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 
-Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, is stored in `/tmp/renovate/cache`.
+Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, are stored in `/tmp/renovate/cache`.
 
-To use another directory as the base directory, instead of `tmp/renovate`:
+To use another directory as the base directory, instead of the default `tmp/renovate` you can:
 
-- Configure a value for `baseDir` in `config.js`
+- Set a value for `baseDir` in `config.js`
 - Use an environment variable `RENOVATE_BASE_DIR`
 - Use the CLI to pass a base directory: `--base-dir=`
 
-If you want to override the cache location then configure a value for `cacheDir` instead.
+If you want to override the cache location then set a value for `cacheDir` instead.
 
 ## Usage
 
@@ -250,7 +252,7 @@ If running against GitHub Enterprise, change the above `gitlab` values to the eq
 You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
 
 Most people will run Renovate via cron, e.g. once per hour.
-Here is an example bash script that you can point `cron` to:
+Here is an example Bash script that you can point `cron` to:
 
 ```sh
 #!/bin/bash
@@ -264,18 +266,20 @@ export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 renovate
 ```
 
-Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
-You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
+<!-- prettier-ignore -->
+!!! note
+    The GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
+    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
 ## Kubernetes for GitLab, using Git over SSH
 
-This section describes how to use Git binary with SSH for Gitlab, to avoid API shortcomings.
+This section describes how to use Git binary with SSH for GitLab, to avoid API shortcomings.
 
-You need to first create a SSH key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
+You need to first create a SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/)).
 
-Then, you need to create the secret to add the SSH key, and the following config to your container
+Then, you need to create the secret to add the SSH key, and the following config to your container:
 
 ```
 host gitlab.com
@@ -285,13 +289,13 @@ host gitlab.com
   User git
 ```
 
-To easily create the secret, you can do the following (see [docs](https://kubernetes.io/docs/concepts/configuration/secret/#use-case-pod-with-ssh-keys))
+To easily create the secret, you can do the following (see [docs](https://kubernetes.io/docs/concepts/configuration/secret/#use-case-pod-with-ssh-keys)).
 
 ```sh
 kubectl create secret generic ssh-key-secret --from-file=config=/path/to/config --from-file=id_rsa=/path/to/.ssh/id_rsa --from-file=id_rsa.pub=/path/to/.ssh/id_rsa.pub
 ```
 
-It creates something like this
+It creates something like this:
 
 ```yml
 apiVersion: v1
@@ -359,7 +363,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:25.69.4
+              image: renovate/renovate:31.14.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

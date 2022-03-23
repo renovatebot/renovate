@@ -11,8 +11,10 @@ coverage
 **/*.d.ts
 /config.js
 .clinic/
+.cache/
 
 # generated code
 **/*.generated.ts
 /tools/dist
 /patches
+tmp/

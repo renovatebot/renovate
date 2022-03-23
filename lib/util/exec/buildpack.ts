@@ -1,17 +1,34 @@
 import { quote } from 'shlex';
-import { getPkgReleases } from '../../datasource';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import * as allVersioning from '../../versioning';
-import { id as composerVersioningId } from '../../versioning/composer';
-import { id as npmVersioningId } from '../../versioning/npm';
-import { id as semverVersioningId } from '../../versioning/semver';
+import { getPkgReleases } from '../../modules/datasource';
+import * as allVersioning from '../../modules/versioning';
+import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as npmVersioningId } from '../../modules/versioning/npm';
+import { id as pep440VersioningId } from '../../modules/versioning/pep440';
+import { id as semverVersioningId } from '../../modules/versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bundler: {
+    datasource: 'rubygems',
+    depName: 'bundler',
+    versioning: 'ruby',
+  },
   composer: {
     datasource: 'github-releases',
     depName: 'composer/composer',
     versioning: composerVersioningId,
+  },
+  flux: {
+    datasource: 'github-releases',
+    depName: 'fluxcd/flux2',
+    versioning: semverVersioningId,
+  },
+  helm: {
+    datasource: 'github-releases',
+    depName: 'helm/helm',
+    versioning: semverVersioningId,
   },
   jb: {
     datasource: 'github-releases',
@@ -21,9 +38,44 @@ const allToolConfig: Record<string, ToolConfig> = {
   npm: {
     datasource: 'npm',
     depName: 'npm',
+    hash: true,
     versioning: npmVersioningId,
   },
+  pnpm: {
+    datasource: 'npm',
+    depName: 'pnpm',
+    versioning: npmVersioningId,
+  },
+  poetry: {
+    datasource: 'pypi',
+    depName: 'poetry',
+    versioning: pep440VersioningId,
+  },
 };
+
+export function supportsDynamicInstall(toolName: string): boolean {
+  return !!allToolConfig[toolName];
+}
+
+export function isBuildpack(): boolean {
+  return !!process.env.BUILDPACK;
+}
+
+export function isDynamicInstall(toolConstraints?: ToolConstraint[]): boolean {
+  const { binarySource } = GlobalConfig.get();
+  if (binarySource !== 'install') {
+    return false;
+  }
+  if (!isBuildpack()) {
+    logger.warn(
+      'binarySource=install is only compatible with images derived from containerbase/buildpack'
+    );
+    return false;
+  }
+  return !!toolConstraints?.every((toolConstraint) =>
+    supportsDynamicInstall(toolConstraint.toolName)
+  );
+}
 
 export async function resolveConstraint(
   toolConstraint: ToolConstraint
@@ -48,29 +100,29 @@ export async function resolveConstraint(
   }
 
   const pkgReleases = await getPkgReleases(toolConfig);
-  if (!pkgReleases?.releases?.length) {
-    throw new Error('No tool releases found.');
-  }
+  const releases = pkgReleases?.releases ?? [];
+  const versions = releases.map((r) => r.version);
+  const resolvedVersion = versions
+    .filter((v) =>
+      constraint ? versioning.matches(v, constraint) : versioning.isStable(v)
+    )
+    .pop();
 
-  const allVersions = pkgReleases.releases.map((r) => r.version);
-  const matchingVersions = allVersions.filter(
-    (v) => !constraint || versioning.matches(v, constraint)
-  );
-
-  if (matchingVersions.length) {
-    const resolvedVersion = matchingVersions.pop();
+  if (resolvedVersion) {
     logger.debug({ toolName, constraint, resolvedVersion }, 'Resolved version');
     return resolvedVersion;
   }
-  const latestVersion = allVersions.filter((v) => versioning.isStable(v)).pop();
+
+  const latestVersion = versions.filter((v) => versioning.isStable(v)).pop();
+  if (!latestVersion) {
+    throw new Error('No tool releases found.');
+  }
   logger.warn(
     { toolName, constraint, latestVersion },
     'No matching tool versions found for constraint - using latest version'
   );
   return latestVersion;
 }
-
-const hashedTools = ['npm'];
 
 export async function generateInstallCommands(
   toolConstraints: ToolConstraint[]
@@ -82,8 +134,8 @@ export async function generateInstallCommands(
       const { toolName } = toolConstraint;
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
-      if (hashedTools.includes(toolName)) {
-        installCommands.push(`hash -d ${toolName}`);
+      if (allToolConfig[toolName].hash) {
+        installCommands.push(`hash -d ${toolName} 2>/dev/null || true`);
       }
     }
   }
