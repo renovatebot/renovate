@@ -24,7 +24,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 By default, Renovate preserves the precision level specified in the Docker images.
 For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
 This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to implement one day.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to work on one day.
 
 ## Version compatibility
 
@@ -229,7 +229,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:32.3.0
+FROM renovate/renovate:32.6.7
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
