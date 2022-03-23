@@ -268,7 +268,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'io.gitlab.arturbosch.detekt',
             depType: 'plugin',
             currentValue: '1.17.0',
-            commitMessageTopic: 'plugin detekt',
+            commitMessageTopic: 'Gradle plugin detekt',
             packageName:
               'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
             managerData: {
@@ -284,7 +284,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.danilopianini.publish-on-central',
             depType: 'plugin',
             currentValue: '0.5.0',
-            commitMessageTopic: 'plugin publish-on-central',
+            commitMessageTopic: 'Gradle plugin publish-on-central',
             packageName:
               'org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin',
             managerData: {
@@ -299,7 +299,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'org.ajoberstar.grgit',
             depType: 'plugin',
-            commitMessageTopic: 'plugin grgit',
+            commitMessageTopic: 'Gradle plugin grgit',
             packageName:
               'org.ajoberstar.grgit:org.ajoberstar.grgit.gradle.plugin',
             managerData: {
@@ -391,7 +391,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.jetbrains.kotlin.jvm',
             depType: 'plugin',
             currentValue: '1.5.21',
-            commitMessageTopic: 'plugin kotlinJvm',
+            commitMessageTopic: 'Gradle plugin kotlinJvm',
             packageName:
               'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
             managerData: {
@@ -407,7 +407,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.jetbrains.kotlin.plugin.serialization',
             depType: 'plugin',
             currentValue: '1.5.21',
-            commitMessageTopic: 'plugin kotlinSerialization',
+            commitMessageTopic: 'Gradle plugin kotlinSerialization',
             packageName:
               'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
             managerData: {
@@ -423,7 +423,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.danilopianini.multi-jvm-test-plugin',
             depType: 'plugin',
             currentValue: '0.3.0',
-            commitMessageTopic: 'plugin multiJvm',
+            commitMessageTopic: 'Gradle plugin multiJvm',
             packageName:
               'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
             managerData: {
