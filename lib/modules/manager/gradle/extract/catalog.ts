@@ -255,7 +255,7 @@ export function parseCatalog(
       packageName: `${depName}:${depName}.gradle.plugin`,
       registryUrls: ['https://plugins.gradle.org/m2/'],
       currentValue,
-      commitMessageTopic: `plugin ${pluginName}`,
+      commitMessageTopic: `Gradle plugin ${pluginName}`,
       managerData: { fileReplacePosition },
     };
 
