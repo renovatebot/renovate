@@ -16,7 +16,7 @@ const imageRe = regEx(
 );
 const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
 const serviceRe = regEx(
-  `^\\s*-?\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+[^:]$)['"]?\\s*$`
+  `^\\s*-?\\s*(?:name:\\s+)?['"]?(?<depName>[\\{\\}\\$\\w.\\d\\/\\@]+:[\\{\\}\\$\\w.\\d\\:\\@-]+)['"]?\\s*$`
 );
 function skipCommentAndAliasLines(
   lines: string[],

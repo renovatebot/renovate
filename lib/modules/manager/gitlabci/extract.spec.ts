@@ -57,7 +57,7 @@ describe('modules/manager/gitlabci/extract', () => {
       ]);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].deps).toHaveLength(4);
+      expect(res[0].deps).toHaveLength(10);
     });
 
     it('extracts multiple image lines', async () => {
