@@ -8,7 +8,7 @@ export function getHttpUrl(url: string, token?: string): string {
 
   parsedUrl.token = token;
 
-  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol) // TODO #12071
+  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
     ? parsedUrl.protocol
     : 'https';
   return parsedUrl.toString(protocol);

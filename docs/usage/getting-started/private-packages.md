@@ -23,20 +23,23 @@ There are four times in Renovate's behavior when it may need credentials:
 - Looking up release notes
 - Passing to package managers when updating lock files or checksums
 
-Note: if you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
+<!-- prettier-ignore -->
+!!! note
+    If you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
 
 ## Private Config Presets
 
 Renovate supports config presets, including those which are private.
 
 Although npm presets were the first type supported, they are now deprecated and it is recommend that all users migrate to git-hosted "local" presets instead.
-However if you do still use them, private modules should work if you configure the `npmrc` file including token credentials in your bot global config.
+However if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your bot global config.
+It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
 The recommended way of using local presets is to configure then using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
 
 It's not recommended that you use a private repository to host your config while then extending it from a public repository.
-If your preset doesn't contain secrets then you should make it public, while if it does contain secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
+If your preset doesn't have secrets then you should make it public, while if it does have secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
 
 In summary, the recommended approach to private presets is:
 
@@ -46,7 +49,7 @@ In summary, the recommended approach to private presets is:
 
 ## Dependency Version Lookups
 
-Whenever Renovate detects that a project uses a particular dependency, it attempts to look up that dependency to see if any new versions exist.
+Whenever Renovate detects that a project uses a particular dependency, it tries to look up that dependency to see if any new versions exist.
 If such a package is private, then Renovate must be configured with the relevant credentials.
 Renovate does not use any package managers for this step and performs all HTTP(S) lookups itself, including insertion of authentication headers.
 
@@ -123,7 +126,8 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is written out to local [GIT*CONFIG*](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
+<!-- prettier-ignore -->
+If a `github.com` token is found in `hostRules`, then it is written out to local [GIT_CONFIG_](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
 The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
 
 ### helm
@@ -187,7 +191,9 @@ module.exports = {
 };
 ```
 
-**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
+<!-- prettier-ignore -->
+!!! tip
+    Remember to put a trailing slash at the end of your `matchHost` URL.
 
 #### Add npmrc string to Renovate config
 
@@ -244,8 +250,8 @@ If instead you use an alternative registry or need an `.npmrc` file for some oth
 Renovate will then use the following logic:
 
 1. If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
-1. If an `npmrc` string is present and contains `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
-1. If an `npmrc` string is present but doesn't contain `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+1. If an `npmrc` string is present and has a `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+1. If an `npmrc` string is present but doesn't have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
 
 #### Encrypted entire .npmrc file into config
 
@@ -320,7 +326,35 @@ For those found, a command similar to the following is run: `dotnet nuget add so
 
 ### poetry
 
-For every poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`.
+For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'pypi.example.com',
+      hostType: 'pypi',
+      username: process.env.PYPI_USERNAME,
+      password: process.env.PYPI_PASSWORD,
+    },
+  ],
+};
+```
+
+If you're self-hosting Renovate via the [GitLab Runner](../getting-started/running.md#gitlab-runner) and want to access packages from private GitLab registries, you can use the GitLab CI job token for authentication:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'gitlab.example.com',
+      hostType: 'pypi',
+      username: 'gitlab-ci-token',
+      password: process.env.CI_JOB_TOKEN,
+    },
+  ],
+};
+```
 
 ## WhiteSource Renovate Hosted App Encryption
 
@@ -388,7 +422,9 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
-Note: Encrypted values can't be used in the "Admin/Bot config".
+<!-- prettier-ignore -->
+!!! note
+    Encrypted values can't be used in the "Admin/Bot config".
 
 ### hostRules configuration using environment variables
 

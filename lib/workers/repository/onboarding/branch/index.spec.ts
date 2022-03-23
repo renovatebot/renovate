@@ -12,9 +12,10 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
-import { Pr } from '../../../../platform';
+import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import * as _cache from '../../../../util/cache/repository';
+import type { FileAddition } from '../../../../util/git/types';
 import * as _config from './config';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
@@ -22,7 +23,7 @@ import { checkOnboardingBranch } from '.';
 const rebase: any = _rebase;
 const configModule: any = _config;
 
-jest.mock('../../../../workers/repository/onboarding/branch/rebase');
+jest.mock('../../../repository/onboarding/branch/rebase');
 jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
@@ -71,8 +72,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
-      const contents =
-        git.commitFiles.mock.calls[0][0].files[0].contents?.toString();
+      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+      const contents = file.contents.toString();
       expect(contents).toBeJsonString();
       expect(JSON.parse(contents)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
@@ -100,8 +101,8 @@ describe('workers/repository/onboarding/branch/index', () => {
         },
         configFileNames[0]
       );
-      const contents =
-        git.commitFiles.mock.calls[0][0].files[0].contents?.toString();
+      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+      const contents = file.contents.toString();
       expect(contents).toBeJsonString();
       expect(JSON.parse(contents)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',

@@ -20,7 +20,7 @@ export const presets: Record<string, Preset> = {
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
   },
   mapbox: {
-    description: 'All mapbox-related packages',
+    description: 'All Mapbox-related packages',
     matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   emberTemplateLint: {
@@ -33,7 +33,7 @@ export const presets: Record<string, Preset> = {
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
-    description: 'All stylelint packages',
+    description: 'All Stylelint packages',
     matchPackagePrefixes: ['stylelint'],
   },
   tslint: {

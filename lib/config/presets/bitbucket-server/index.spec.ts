@@ -36,6 +36,26 @@ describe('config/presets/bitbucket-server/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('handles branches/tags', async () => {
+      httpMock
+        .scope(bitbucketApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .query({ limit: 20000, at: 'feature/branch' })
+        .reply(200, {
+          isLastPage: true,
+          lines: [{ text: '{"from":"api"' }, { text: '}' }],
+        });
+
+      const res = await bitbucketServer.fetchJSONFile(
+        'some/repo',
+        'some-filename.json',
+        bitbucketApiHost,
+        'feature/branch'
+      );
+      expect(res).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws 404', async () => {
       httpMock
         .scope(bitbucketApiHost)

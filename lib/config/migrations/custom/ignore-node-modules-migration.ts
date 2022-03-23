@@ -1,16 +1,10 @@
-import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class IgnoreNodeModulesMigration extends AbstractMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
-    super('ignoreNodeModules', originalConfig, migratedConfig);
-  }
+  override readonly deprecated = true;
+  override readonly propertyName = 'ignoreNodeModules';
 
-  override run(): void {
-    this.delete(this.propertyName);
-
-    this.migratedConfig.ignorePaths = this.originalConfig.ignoreNodeModules
-      ? ['node_modules/']
-      : [];
+  override run(value: unknown): void {
+    this.setSafely('ignorePaths', value ? ['node_modules/'] : []);
   }
 }

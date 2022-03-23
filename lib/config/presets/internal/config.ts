@@ -9,7 +9,7 @@ export const presets: Record<string, Preset> = {
       ':ignoreModulesAndTests',
       ':autodetectPinVersions',
       ':prHourlyLimit2',
-      ':prConcurrentLimit20',
+      ':prConcurrentLimit10',
       'group:monorepos',
       'group:recommended',
       'workarounds:all',

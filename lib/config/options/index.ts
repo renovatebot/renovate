@@ -1,9 +1,9 @@
 import { PlatformId } from '../../constants';
-import { getManagers } from '../../manager';
-import { getPlatformList } from '../../platform';
-import { getVersioningList } from '../../versioning';
-import * as dockerVersioning from '../../versioning/docker';
-import * as pep440Versioning from '../../versioning/pep440';
+import { getManagers } from '../../modules/manager';
+import { getPlatformList } from '../../modules/platform';
+import { getVersioningList } from '../../modules/versioning';
+import * as dockerVersioning from '../../modules/versioning/docker';
+import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -182,6 +182,14 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'globalExtends',
+    description:
+      'Configuration presets to use/extend for a self-hosted config.',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'description',
     description: 'Plain text description for a config or preset.',
     type: 'array',
@@ -199,15 +207,6 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     cli: false,
     env: false,
-  },
-  {
-    name: 'deepExtract',
-    description: `Enable extraction of dependencies using package managers.`,
-    type: 'boolean',
-    default: false,
-    cli: false,
-    env: false,
-    supportedManagers: ['gradle'],
   },
   {
     name: 'repositoryCache',
@@ -262,10 +261,10 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
+      'Controls whether third-party tools like npm or Gradle are called directly, via Docker sidecar containers, or dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker'],
+    allowedValues: ['global', 'docker', 'install'],
     default: 'global',
   },
   {
@@ -695,6 +694,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'useBaseBranchConfig',
+    description:
+      'Whether to read configuration from baseBranches instead of only the default branch',
+    type: 'string',
+    allowedValues: ['merge', 'none'],
+    default: 'none',
+  },
+  {
     name: 'gitAuthor',
     description: 'Author to use for Git commits. Must conform to RFC5322.',
     type: 'string',
@@ -710,7 +717,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+      'Additional Git authors which are ignored by Renovate. Must conform to RFC5322.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -765,6 +772,17 @@ const options: RenovateOptions[] = [
       format: 'uri',
     },
     supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+  },
+  {
+    name: 'defaultRegistryUrls',
+    description:
+      'List of registry URLs to use as the default for a datasource.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    stage: 'branch',
+    cli: false,
+    env: false,
   },
   {
     name: 'registryUrls',
@@ -852,7 +870,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchBaseBranches',
     description:
-      'List of branches to match (e.g. ["master"]). Valid only within `packageRules` object.',
+      'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release\\/.*/"]`). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1150,6 +1168,7 @@ const options: RenovateOptions[] = [
       'replace',
       'widen',
       'update-lockfile',
+      'in-range-only',
     ],
     cli: false,
     env: false,
@@ -1166,7 +1185,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
-    supportedManagers: ['helmv3', 'npm', 'sbt'],
+    supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
   {
@@ -1223,7 +1242,7 @@ const options: RenovateOptions[] = [
     default: {
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
-      commitMessageTopic: '{{{depName}}} commit hash',
+      commitMessageTopic: '{{{depName}}} digest',
     },
     cli: false,
     mergeable: true,
@@ -1306,6 +1325,13 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
+    name: 'stopUpdatingLabel',
+    description: 'Label to use to request the bot to stop updating a PR.',
+    type: 'string',
+    default: 'stop-updating',
+    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
+  },
+  {
     name: 'stabilityDays',
     description:
       'Number of days required before a new release is considered to be stabilized.',
@@ -1378,7 +1404,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
   // Automatic merging
   {
@@ -1595,7 +1621,7 @@ const options: RenovateOptions[] = [
   {
     name: 'groupSlug',
     description:
-      'Slug to use for group (e.g. in branch name). Will be calculated from groupName if null.',
+      'Slug to use for group (e.g. in branch name). Will be calculated from `groupName` if `null`.',
     type: 'string',
     default: null,
     cli: false,
@@ -1737,6 +1763,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'gomodUpdateImportPaths',
       'gomodTidy',
+      'gomodTidy1.17',
       'npmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
@@ -1957,6 +1984,7 @@ const options: RenovateOptions[] = [
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
     },
@@ -1966,7 +1994,7 @@ const options: RenovateOptions[] = [
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
-    default: ['Package', 'Type', 'Update', 'Change'],
+    default: ['Package', 'Type', 'Update', 'Change', 'Pending'],
   },
   {
     name: 'prBodyNotes',
@@ -2056,9 +2084,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'lookupNameTemplate',
+    name: 'packageNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
+      'Optional packageName for extracted dependencies, else defaults to depName value. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -2129,7 +2157,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Allow to disable release notes fetching.',
+    description: 'Whether or not to fetch release notes.',
     type: 'boolean',
     default: true,
     cli: false,
@@ -2152,7 +2180,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitNoVerify',
     description:
-      'Which git commands will be run with the `--no-verify` option.',
+      'Which Git commands will be run with the `--no-verify` option.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -2171,7 +2199,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitUrl',
     description:
-      'Overrides the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
+      'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
@@ -2190,6 +2218,29 @@ const options: RenovateOptions[] = [
     description: `Enable or disable usage of platform-native auto-merge capabilities when available.`,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'userStrings',
+    description:
+      'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
+    type: 'object',
+    freeChoice: true,
+    default: {
+      ignoreTopic: 'Renovate Ignore Notification',
+      ignoreMajor:
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{newMajor}}}.x releases. However, if you upgrade to {{{newMajor}}}.x manually then Renovate will reenable minor and patch updates automatically.',
+      ignoreDigest:
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.',
+      ignoreOther:
+        'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
+    },
+  },
+  {
+    name: 'platformCommit',
+    description: `Use platform API to perform commits instead of using Git directly.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['github'],
   },
 ];
 

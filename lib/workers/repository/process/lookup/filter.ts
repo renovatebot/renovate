@@ -1,12 +1,12 @@
-import * as semver from 'semver';
+import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
+import type { Release } from '../../../../modules/datasource/types';
+import type { VersioningApi } from '../../../../modules/versioning';
+import * as npmVersioning from '../../../../modules/versioning/npm';
+import * as pep440 from '../../../../modules/versioning/pep440';
+import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { configRegexPredicate } from '../../../../util/regex';
-import type { VersioningApi } from '../../../../versioning';
-import * as npmVersioning from '../../../../versioning/npm';
-import * as pep440 from '../../../../versioning/pep440';
-import * as poetryVersioning from '../../../../versioning/poetry';
 import type { FilterConfig } from './types';
 
 export function filterVersions(

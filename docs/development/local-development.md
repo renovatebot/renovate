@@ -38,7 +38,7 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 #### Windows
 
 Follow these steps to set up your development environment on Windows 10.
-If you already installed a component, skip the corresponding step.
+If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
@@ -120,16 +120,18 @@ You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
+Refactor PRs should ideally not change or remove tests (adding tests is OK).
+
 ### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
-You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
+You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
-The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
+The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.

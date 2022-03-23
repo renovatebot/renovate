@@ -8,6 +8,10 @@ description: Node.js versions support in Renovate
 Renovate can upgrade the [Node.js](https://nodejs.org/en/) runtime used by your project.
 This way you're using the latest bug fixes, performance improvements, security mitigations, etc.
 
+## LTS codenames
+
+Renovate understands [codenames for Node.js LTS releases](https://github.com/nodejs/Release/blob/main/CODENAMES.md) and will offer upgrades for them (e.g. from `fermium` to `gallium`) as long as the `node` versioning scheme is being used.
+
 ## File Support
 
 Renovate can manage the Node.js version in the following files:
@@ -15,6 +19,7 @@ Renovate can manage the Node.js version in the following files:
 - The [`engines`](https://docs.npmjs.com/files/package.json#engines) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`volta`](https://docs.volta.sh/guide/understanding#managing-your-project) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`.nvmrc`](https://github.com/creationix/nvm#nvmrc) file for the [Node Version Manager](https://github.com/creationix/nvm)
+- The [`.node-version`](https://github.com/nodenv/nodenv#choosing-the-node-version) file for the [nodenv](https://github.com/nodenv/nodenv) environment manager
 - The [`node_js`](https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Specifying-Node.js-versions) field in [`.travis.yml`](https://docs.travis-ci.com/user/customizing-the-build/)
 
 ## Configuring which version of npm Renovate uses
@@ -33,3 +38,5 @@ For example, if you want to use at least npm `8.1.0` and also allow newer versio
   }
 }
 ```
+
+Alternatively, the npm version can also be configured via the [`constraints` option](https://docs.renovatebot.com/configuration-options/#constraints).

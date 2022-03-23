@@ -4,7 +4,7 @@ If you've been referred to this document, it's because someone you're interactin
 
 ## Be positive and polite
 
-This project is open source, and contains the work of a lot of contributors who are proud of it.
+This project is open source, and has the work of a lot of contributors who are proud of it.
 Please avoid unnecessary criticism, especially if you are new to the project or have not contributed anything.
 You are welcome to make it better, and do not need to criticize the works of others first.
 
@@ -35,7 +35,7 @@ In other words, if someone's taking the time to help you, "don't be lazy".
 
 If someone's helped you get some functionality working, or successfully troubleshoot a problem, please try to do this:
 
-- Confirm which advice fixed your problem, if it's unclear
+- Let us know which advice fixed your problem, if it's unclear
 - If you're feeling polite, thank the person who helped you
 - If you're feeling helpful, submit a Pull Request to improve the relevant documentation
 

@@ -1,6 +1,7 @@
 import { defaultConfig, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
-import * as datasourceNpm from '../../../datasource/npm';
+import { NpmDatasource } from '../../../modules/datasource/npm';
+import type { LookupUpdate } from '../../../modules/manager/types';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
@@ -38,8 +39,18 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        isLockFileMaintenance: true,
+        upgrades: [
+          {
+            branchName: 'some-branch',
+            prTitle: 'some-title',
+            isLockFileMaintenance: true,
+          },
+        ],
+      });
     });
     it('handles lockFileUpdate', () => {
       const branch = [
@@ -55,8 +66,29 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        isLockfileUpdate: true,
+        currentValue: '^1.0.0',
+        currentVersion: '1.0.0',
+        lockedVersion: '1.0.0',
+        newValue: '^1.0.0',
+        newVersion: '1.0.1',
+        reuseLockFiles: true,
+        upgrades: [
+          {
+            branchName: 'some-branch',
+            prTitle: 'some-title',
+            isLockfileUpdate: true,
+            currentValue: '^1.0.0',
+            currentVersion: '1.0.0',
+            lockedVersion: '1.0.0',
+            newValue: '^1.0.0',
+            newVersion: '1.0.1',
+          },
+        ],
+      });
     });
     it('does not group same upgrades', () => {
       const branch = [
@@ -193,6 +225,86 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
+    it('groups multiple upgrades different version but same value', () => {
+      const branch = [
+        {
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0',
+          newVersion: '6.0.3',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+        },
+        {
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0',
+          newVersion: '6.0.1',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeUndefined();
+      expect(res.recreateClosed).toBeUndefined();
+      expect(res.groupName).toBeDefined();
+      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
+    });
+    it('groups multiple upgrades different value but same version', () => {
+      const branch = [
+        {
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0.1',
+          newVersion: '6.0.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+        },
+        {
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '^6.0.0',
+          newVersion: '6.0.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeUndefined();
+      expect(res.recreateClosed).toBeUndefined();
+      expect(res.groupName).toBeDefined();
+      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
+    });
     it('groups multiple digest updates', () => {
       const branch = [
         {
@@ -229,6 +341,20 @@ describe('workers/repository/updates/generate', () => {
       expect(res.singleVersion).toBeUndefined();
       expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
+    });
+    it('pins digest to table', () => {
+      const branch = [
+        partial<LookupUpdate & BranchUpgradeConfig>({
+          ...defaultConfig,
+          depName: 'foo-image',
+          newDigest: 'abcdefg987612345',
+          currentDigest: '',
+          updateType: 'pin',
+        }),
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].displayFrom).toBe('');
+      expect(res.upgrades[0].displayTo).toBe('abcdefg');
     });
     it('fixes different messages', () => {
       const branch = [
@@ -385,14 +511,13 @@ describe('workers/repository/updates/generate', () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res.prTitle).toMatchSnapshot();
+      expect(res.prTitle).toBe('upgrade some-dep');
     });
     it('handles @types specially', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: '@types/some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -405,7 +530,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -415,7 +540,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -427,8 +552,25 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
-      // FIXME: explicit assert condition
-      expect(generateBranchConfig(branch)).toMatchSnapshot();
+      expect(generateBranchConfig(branch)).toMatchSnapshot({
+        upgrades: [
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '0.6.0',
+          },
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '1.0.0',
+          },
+          {
+            depName: '@types/some-dep',
+            branchName: 'some-branch',
+            newValue: '0.5.8',
+          },
+        ],
+      });
     });
     it('handles @types specially (reversed)', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -443,7 +585,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: datasourceNpm.id,
+          datasource: NpmDatasource.id,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -462,8 +604,28 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
       ];
-      // FIXME: explicit assert condition
-      expect(generateBranchConfig(branch)).toMatchSnapshot();
+      expect(generateBranchConfig(branch)).toMatchSnapshot({
+        upgrades: [
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '0.6.0',
+            labels: ['a', 'c'],
+          },
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '1.0.0',
+            labels: ['a', 'b'],
+          },
+          {
+            depName: '@types/some-dep',
+            branchName: 'some-branch',
+            newValue: '0.5.7',
+            labels: ['a'],
+          },
+        ],
+      });
     });
     it('handles upgrades', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -511,8 +673,21 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res.prTitle).toMatchSnapshot();
+      expect(res.prTitle).toMatchSnapshot('some-title (patch)');
+    });
+    it('combines prBodyColumns', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          branchName: 'some-branch',
+          prBodyColumns: ['column-a', 'column-b'],
+        },
+        {
+          branchName: 'some-branch',
+          prBodyColumns: ['column-c', 'column-b', 'column-a'],
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prBodyColumns).toEqual(['column-a', 'column-b', 'column-c']);
     });
     it('sorts upgrades, without position first', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -590,6 +765,36 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeUndefined();
       expect(res.upgrades).toHaveLength(1);
+    });
+    it('displays pending versions', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'No pending version',
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'One pending version',
+          pendingVersions: ['1.1.0'],
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'Two pending versions',
+          pendingVersions: ['1.1.0', '1.1.1'],
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades.map((u) => u.displayPending)).toStrictEqual([
+        '',
+        '`1.1.0`',
+        '`1.1.1` (+1)',
+      ]);
     });
   });
 });

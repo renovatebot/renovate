@@ -1,5 +1,5 @@
-import * as fs from 'fs-extra';
-import { join } from 'upath';
+import fs from 'fs-extra';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type {
   RenovateConfig,
@@ -9,14 +9,14 @@ import { logger } from '../../../logger';
 import type { Cache } from './types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
-export const CACHE_REVISION = 9;
+export const CACHE_REVISION = 10;
 
 let repositoryCache: RepositoryCacheConfig | undefined = 'disabled';
 let cacheFileName: string | null = null;
 let cache: Cache | null = Object.create({});
 
 export function getCacheFileName(config: RenovateConfig): string {
-  return join(
+  return upath.join(
     GlobalConfig.get('cacheDir'),
     '/renovate/repository/',
     config.platform,

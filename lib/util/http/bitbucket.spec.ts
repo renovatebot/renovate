@@ -43,11 +43,4 @@ describe('util/http/bitbucket', () => {
 
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
-  it('returns cached', async () => {
-    httpMock.scope(baseUrl).get('/projects/foo').reply(200, {});
-    const { body } = await api.getJson('projects/foo');
-    // FIXME: explicit assert condition
-    expect(body).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
 });

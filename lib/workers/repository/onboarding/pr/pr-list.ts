@@ -18,7 +18,7 @@ export function getPrList(
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {
-    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/); // TODO #12071
+    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
     prDesc += `<details>\n<summary>${branch.prTitle.replace(
       prTitleRe,
       '@&#8203;$1'

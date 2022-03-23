@@ -1,8 +1,11 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
-import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
+import {
+  hasValidSchedule,
+  hasValidTimezone,
+} from '../workers/repository/update/branch/schedule';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
@@ -37,7 +40,8 @@ const ignoredNodes = [
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
 ];
-
+const tzRe = regEx(/^:timezone\((.+)\)$/);
+const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 function isManagerPath(parentPath: string): boolean {
   return (
     regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
@@ -243,8 +247,8 @@ export async function validateConfig(
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
-                const subValidation = await module.exports.validateConfig(
-                  subval,
+                const subValidation = await validateConfig(
+                  subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -253,7 +257,6 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = regEx(/^:timezone\((.+)\)$/); // TODO #12071
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -382,7 +385,7 @@ export async function validateConfig(
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
-                'lookupNameTemplate',
+                'packageNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
@@ -488,7 +491,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule  // TODO #12071
+              !rulesRe.test(parentPath) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
@@ -539,7 +542,7 @@ export async function validateConfig(
                 .filter((option) => option.freeChoice)
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
-                const subValidation = await module.exports.validateConfig(
+                const subValidation = await validateConfig(
                   val,
                   isPreset,
                   currentPath

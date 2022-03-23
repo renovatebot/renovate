@@ -21,8 +21,20 @@ describe('logger/err-serializer', () => {
         },
       },
     });
-    // FIXME: explicit assert condition
-    expect(errSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toEqual({
+      a: 1,
+      b: 2,
+      message: 'some message',
+      response: {
+        body: 'some response body',
+        url: 'some/path',
+      },
+      options: {
+        headers: {
+          authorization: 'Bearer testtoken',
+        },
+      },
+    });
   });
   it('handles missing fields', () => {
     const err = partial<Error & Record<string, unknown>>({
@@ -30,8 +42,11 @@ describe('logger/err-serializer', () => {
       stack: 'foo',
       body: 'some body',
     });
-    // FIXME: explicit assert condition
-    expect(errSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toEqual({
+      a: 1,
+      stack: 'foo',
+      body: 'some body',
+    });
   });
 
   describe('got', () => {

@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
+import { configRegexPredicate, isConfigRegex } from '../../util/regex';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -30,7 +31,19 @@ export async function autodiscoverRepositories(
     return config;
   }
   if (config.autodiscoverFilter) {
-    discovered = discovered.filter(minimatch.filter(config.autodiscoverFilter));
+    if (isConfigRegex(config.autodiscoverFilter)) {
+      const autodiscoveryPred = configRegexPredicate(config.autodiscoverFilter);
+      if (!autodiscoveryPred) {
+        throw new Error(
+          `Failed to parse regex pattern "${config.autodiscoverFilter}"`
+        );
+      }
+      discovered = discovered.filter(autodiscoveryPred);
+    } else {
+      discovered = discovered.filter(
+        minimatch.filter(config.autodiscoverFilter)
+      );
+    }
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.debug('None of the discovered repositories matched the filter');

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { NormalizedOptions } from 'got';
+import type { Options } from 'got';
 import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -14,10 +14,14 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
     return options;
   }
 
+  options.headers ??= {};
   if (options.token) {
     if (options.hostType === PlatformId.Gitea) {
       options.headers.authorization = `token ${options.token}`;
-    } else if (GITHUB_API_USING_HOST_TYPES.includes(options.hostType)) {
+    } else if (
+      options.hostType &&
+      GITHUB_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
       options.headers.authorization = `token ${options.token}`;
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
@@ -29,7 +33,10 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
           );
         }
       }
-    } else if (GITLAB_API_USING_HOST_TYPES.includes(options.hostType)) {
+    } else if (
+      options.hostType &&
+      GITLAB_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
       // GitLab versions earlier than 12.2 only support authentication with
       // a personal access token, which is 20 characters long.
       if (options.token.length === 20) {
@@ -51,7 +58,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
   } else if (options.password !== undefined) {
     // Otherwise got will add username and password to url and header
     const auth = Buffer.from(
-      `${options.username || ''}:${options.password}`
+      `${options.username ?? ''}:${options.password}`
     ).toString('base64');
     options.headers.authorization = `Basic ${auth}`;
     delete options.username;
@@ -61,20 +68,20 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
 }
 
 // isAmazon return true if request options contains Amazon related headers
-function isAmazon(options: NormalizedOptions): boolean {
-  return options.search?.includes('X-Amz-Algorithm');
+function isAmazon(options: Options): boolean {
+  return !!options.search?.includes('X-Amz-Algorithm');
 }
 
 // isAzureBlob return true if request options contains Azure container registry related data
-function isAzureBlob(options: NormalizedOptions): boolean {
-  return (
+function isAzureBlob(options: Options): boolean {
+  return !!(
     options.hostname?.endsWith('.blob.core.windows.net') && // lgtm [js/incomplete-url-substring-sanitization]
     options.href?.includes('/docker/registry')
   );
 }
 
 // removeAuthorization from the redirect options
-export function removeAuthorization(options: NormalizedOptions): void {
+export function removeAuthorization(options: Options): void {
   if (!options.password && !options.headers?.authorization) {
     return;
   }
@@ -83,7 +90,7 @@ export function removeAuthorization(options: NormalizedOptions): void {
   if (isAmazon(options) || isAzureBlob(options)) {
     // if there is no port in the redirect URL string, then delete it from the redirect options.
     // This can be evaluated for removal after upgrading to Got v10
-    const portInUrl = options.href.split('/')[2].split(':')[1];
+    const portInUrl = options.href?.split?.('/')?.[2]?.split(':')?.[1];
     // istanbul ignore next
     if (!portInUrl) {
       delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
@@ -91,7 +98,9 @@ export function removeAuthorization(options: NormalizedOptions): void {
 
     // registry is hosted on Amazon or Azure blob, redirect url includes
     // authentication which is not required and should be removed
-    delete options.headers.authorization;
+    if (options?.headers?.authorization) {
+      delete options.headers.authorization;
+    }
     delete options.username;
     delete options.password;
   }

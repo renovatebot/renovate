@@ -30,7 +30,7 @@ Be careful, and consider creating a new "config help" post at the [discussions t
 ## Commit Message
 
 Renovate will use one commit per branch, this makes it easy for you to merge.
-As such, the `commitMessage` reflects the contents of the branch and is usually the same as the PR title.
+Therefore, the `commitMessage` reflects the contents of the branch and is usually the same as the PR title.
 
 `commitMessage` has a default value of `{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}`, with the intention that you only edit some of those subcomponents.
 
@@ -41,7 +41,7 @@ Do not touch this unless you know what you're doing.
 You're probably fine leaving this setting alone, though you can change it.
 e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update' then you could configure `"commitMessageAction": "Upgrade"`.
 
-`commitMessageTopic` is usually two to three words that identify _what_ is being updated.
+`commitMessageTopic` is usually two to three words that show _what_ is being updated.
 e.g. it might be `dependency react` or `Docker image ubuntu`.
 You may want to edit this.
 If you think your new `commitMessageTopic` is helpful for others, please [open a PR](https://github.com/renovatebot/renovate/pulls).

@@ -1,3 +1,7 @@
+---
+title: Versioning
+---
+
 # Versioning
 
 Once Managers have extracted dependencies, and Datasources have located available versions, then Renovate will use a "Versioning" scheme to perform sorting and filtering of results.
@@ -53,5 +57,5 @@ The configuration below overrides Renovate's default `docker` versioning for the
 
 ## Supported Versioning
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
