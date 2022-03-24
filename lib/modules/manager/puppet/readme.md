@@ -1,5 +1,13 @@
 simply keeps Puppetfiles updated
 
+# How It Works
+
+1. Renovate searches in each repository for any `Puppetfile` files
+1. Existing dependencies are extracted from the relevant sections of the file
+1. Renovate resolves the dependency on the provided forges (or uses `https://forgeapi.puppetlabs.com` as default)
+1. A PR is created with `Puppetfile` updated in the same commit
+1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
+
 # supported Puppetfile formats
 
 the manager extracts the deps from one Puppetfile
@@ -13,7 +21,7 @@ the Puppetfile supports at the moment different ways to configure forges
    mod 'puppetlabs/apache', '7.0.0'
    ```
 
-1. one forge defined: `forge "https://forgeapi.puppetlabs.com"`
+2. one forge defined: `forge "https://forgeapi.puppetlabs.com"`
 
    ```ruby
    forge "https://forgeapi.puppetlabs.com"
@@ -23,7 +31,7 @@ the Puppetfile supports at the moment different ways to configure forges
    mod 'puppetlabs/concat', '7.1.1'
    ```
 
-1. multiple forges defined
+3. multiple forges defined
 
    ```ruby
    forge "https://forgeapi.puppetlabs.com"
@@ -36,6 +44,15 @@ the Puppetfile supports at the moment different ways to configure forges
    forge "https://forgeapi.example.com"
 
    mod 'example/infra', '3.3.0'
+   ```
+
+4. github based version
+
+   ```ruby
+   # tag based
+   mod 'example/standalone_jar',
+      :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
+      :tag => '0.9.0'
    ```
 
 # general overview
@@ -54,11 +71,6 @@ usually you can add the versions to a forge and use the already provided
 way of updating
 
 ```ruby
-# tag based
-mod 'example/standalone_jar',
-    :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
-    :tag => '0.9.0'
-
 # branch based
 mod 'example/samba',
     :git    => 'https://github.com/example/puppet-samba',
