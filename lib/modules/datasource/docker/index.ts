@@ -55,10 +55,9 @@ export async function getAuthHeaders(
   registryHost: string,
   dockerRepository: string,
   apiCheckMode: 'head' | 'get' = 'get',
-  apiCheckPath = '/v2/'
+  apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckUrl = `${registryHost}${apiCheckPath}`;
     const apiCheckResponse = await http[apiCheckMode](apiCheckUrl, {
       throwHttpErrors: false,
       noAuth: true,
@@ -689,7 +688,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
       'head',
-      '/v2/tags/list'
+      url
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
