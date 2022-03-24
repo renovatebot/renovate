@@ -564,7 +564,7 @@ Example url: `redis://localhost`.
 
 ## repositories
 
-If define a `repositories` array in your global config then its elements can each be an object:
+If you define a `repositories` array in your global config then its elements can each be an object:
 
 ```js
 {
