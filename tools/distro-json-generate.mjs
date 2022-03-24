@@ -53,7 +53,7 @@ async function updateJsonFile(file, newData) {
     shell.exit(1);
   }
 
-  const parsedData = JSON.stringify(objectify(newData));
+  const parsedData = JSON.stringify(objectify(newData), undefined, 2);
 
   if (oldData === parsedData) {
     shell.echo(`${file} is up to date.`);
