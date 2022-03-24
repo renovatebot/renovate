@@ -3083,9 +3083,12 @@ exports[`modules/platform/github/index getBranchPr(branchName) should return the
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
-  "hasAssignees": false,
-  "hasReviewers": false,
-  "labels": undefined,
+  "hasAssignees": true,
+  "hasReviewers": true,
+  "labels": Array [
+    "foo",
+    "bar",
+  ],
   "number": 91,
   "sha": undefined,
   "sourceBranch": "somebranch",

@@ -568,6 +568,9 @@ describe('modules/platform/github/index', () => {
           number: 91,
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: PrState.Open,
+          assignee: { login: 'foo' },
+          requested_reviewers: [{ login: 'bar' }],
+          labels: [{ name: 'foo' }, { name: 'bar' }],
         },
       ]);
 
