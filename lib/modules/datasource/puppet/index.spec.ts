@@ -32,7 +32,6 @@ describe('modules/datasource/puppet/index', () => {
       expect(release.registryUrl).toBe('https://forgeapi.puppet.com');
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -48,7 +47,6 @@ describe('modules/datasource/puppet/index', () => {
       registryUrls: ['https://forgeapi.puppet.com'],
     });
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   // https://forgeapi.puppet.com/#operation/getModule
@@ -63,7 +61,6 @@ describe('modules/datasource/puppet/index', () => {
       registryUrls: ['https://forgeapi.puppet.com'],
     });
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should fetch package info from custom registry', async () => {
@@ -78,6 +75,5 @@ describe('modules/datasource/puppet/index', () => {
       registryUrls,
     });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });
