@@ -29,10 +29,10 @@ export class PuppetDatasource extends Datasource {
       version: release.version,
       downloadUrl: release.file_uri,
       releaseTimestamp: release.created_at,
-      registryUrl: release.uri,
+      registryUrl,
     }));
 
-    const releaseResult: ReleaseResult = {
+    return {
       releases,
       deprecationMessage: module.deprecated_for,
       homepage: module.homepage_url,
@@ -43,7 +43,5 @@ export class PuppetDatasource extends Datasource {
         premium: `${module.premium}`,
       },
     };
-
-    return releaseResult;
   }
 }

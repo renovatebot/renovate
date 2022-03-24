@@ -21,16 +21,18 @@ describe('modules/datasource/puppet/index', () => {
         packageName: 'puppetlabs/apache',
         registryUrls: ['https://forgeapi.puppet.com'],
       });
-      const release = res.releases[0];
+      const release = res.releases[res.releases.length - 1];
 
       expect(res.releases).toHaveLength(4);
       expect(release.version).toEqual('7.0.0');
       expect(release.downloadUrl).toEqual(
         '/v3/files/puppetlabs-apache-7.0.0.tar.gz'
       );
-      expect(release.releaseTimestamp).toEqual('2021-10-11 07:47:24 -0700');
+      expect(release.releaseTimestamp).toEqual('2021-10-11T14:47:24.000Z');
       expect(release.registryUrl).toEqual('https://forgeapi.puppet.com');
       expect(res).toMatchSnapshot();
+      expect(res.sourceUrl).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

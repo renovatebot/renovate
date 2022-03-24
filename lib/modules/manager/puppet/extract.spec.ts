@@ -6,10 +6,12 @@ describe('modules/manager/puppet/extract', () => {
     it('returns null for empty Puppetfile', () => {
       expect(extractPackageFile('')).toBeNull();
     });
+
     it('extracts multiple modules from Puppetfile', () => {
       const res = extractPackageFile(Fixtures.get('Puppetfile'));
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
+
   });
 });
