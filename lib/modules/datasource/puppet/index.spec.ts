@@ -24,12 +24,12 @@ describe('modules/datasource/puppet/index', () => {
       const release = res.releases[res.releases.length - 1];
 
       expect(res.releases).toHaveLength(4);
-      expect(release.version).toEqual('7.0.0');
-      expect(release.downloadUrl).toEqual(
+      expect(release.version).toBe('7.0.0');
+      expect(release.downloadUrl).toBe(
         '/v3/files/puppetlabs-apache-7.0.0.tar.gz'
       );
-      expect(release.releaseTimestamp).toEqual('2021-10-11T14:47:24.000Z');
-      expect(release.registryUrl).toEqual('https://forgeapi.puppet.com');
+      expect(release.releaseTimestamp).toBe('2021-10-11T14:47:24.000Z');
+      expect(release.registryUrl).toBe('https://forgeapi.puppet.com');
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
