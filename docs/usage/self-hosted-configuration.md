@@ -564,6 +564,14 @@ Example url: `redis://localhost`.
 
 ## repositories
 
+If you use a `config.js` file, then the `repositories` array can be an object:
+
+```js
+{
+  repositories: [ { repository: 'g/r', bumpVersion: true } ],
+}
+```
+
 ## repositoryCache
 
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
