@@ -21,7 +21,7 @@
     "eslint-fix": "eslint --fix . --report-unused-disable-directives",
     "generate": "run-s generate:*",
     "generate:imports": "node tools/generate-imports.mjs",
-    "generate:ubuntu-distro-info": "node tools/distro-json-generate.mjs",
+    "ubuntu-distro-info": "node tools/distro-json-generate.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "cross-env LOG_LEVEL=fatal node --expose-gc --no-compilation-cache node_modules/jest/bin/jest.js --logHeapUsage",
     "jest-debug": "cross-env NODE_OPTIONS=--inspect-brk yarn jest --testTimeout=100000000",
