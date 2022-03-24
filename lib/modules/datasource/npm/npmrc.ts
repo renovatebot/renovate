@@ -10,7 +10,7 @@ import { regEx } from '../../../util/regex';
 import { fromBase64 } from '../../../util/string';
 import { ensureTrailingSlash, validateUrl } from '../../../util/url';
 import { defaultRegistryUrls } from './common';
-import type { NpmrcRules, PackageResolution } from './types';
+import type { NpmrcRules } from './types';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
@@ -179,11 +179,12 @@ export function resolveRegistryUrl(packageName: string): string {
   return registryUrl;
 }
 
-export function resolvePackage(packageName: string): PackageResolution {
-  const registryUrl = resolveRegistryUrl(packageName);
-  const packageUrl = url.resolve(
+export function resolvePackageUrl(
+  registryUrl: string,
+  packageName: string
+): string {
+  return url.resolve(
     ensureTrailingSlash(registryUrl),
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
   );
-  return { packageUrl, registryUrl };
 }

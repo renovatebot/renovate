@@ -171,6 +171,36 @@ describe('modules/manager/maven/index', () => {
       expect(updatedDep.currentValue).toEqual(newValue);
     });
 
+    it('should apply props recursively', () => {
+      const [{ deps }] = resolveParents([
+        extractPackage(loadFixture('recursive_props.pom.xml')),
+      ]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7',
+          currentValue: '1.4.11',
+        },
+      ]);
+    });
+
+    it('should detect props infinitely recursing props', () => {
+      const [{ deps }] = resolveParents([
+        extractPackage(loadFixture('infinite_recursive_props.pom.xml')),
+      ]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core',
+          currentValue: '${foo}',
+          skipReason: 'recursive-placeholder',
+        },
+        {
+          depName: 'org.apache.lucene:lucene-core-${var1}',
+          currentValue: '1.2',
+          skipReason: 'recursive-placeholder',
+        },
+      ]);
+    });
+
     it('should include registryUrls from parent pom files', async () => {
       fs.readLocalFile
         .mockResolvedValueOnce(pomParent)
