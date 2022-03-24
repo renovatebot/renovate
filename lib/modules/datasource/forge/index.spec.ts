@@ -30,7 +30,6 @@ describe('modules/datasource/forge/index', () => {
       );
       expect(release.releaseTimestamp).toBe('2021-10-11T14:47:24.000Z');
       expect(release.registryUrl).toBe('https://forgeapi.puppet.com');
-      expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
     });
   });
@@ -74,6 +73,17 @@ describe('modules/datasource/forge/index', () => {
       depName: 'foobar',
       registryUrls,
     });
-    expect(res).toMatchSnapshot();
+
+    expect(res.releases).toHaveLength(4);
+
+    const release = res.releases[res.releases.length - 1];
+
+    expect(release.version).toBe('7.0.0');
+    expect(release.downloadUrl).toBe(
+      '/v3/files/puppetlabs-apache-7.0.0.tar.gz'
+    );
+    expect(release.releaseTimestamp).toBe('2021-10-11T14:47:24.000Z');
+    expect(release.registryUrl).toBe('https://puppet.mycustomregistry.com');
+    expect(res.sourceUrl).toBeDefined();
   });
 });
