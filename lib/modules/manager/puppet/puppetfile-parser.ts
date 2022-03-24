@@ -1,16 +1,6 @@
-import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import { PUPPET_FORGE as defaultRegistryUrl } from '../../datasource/puppet-forge/common';
-
-export interface PuppetfileModule {
-  name?: string;
-  version?: string;
-  tags?: Map<string, string>;
-  skipReasons?: SkipReason[];
-}
-
-export type PuppetForgeUrl = string;
-export type Puppetfile = Map<PuppetForgeUrl, PuppetfileModule[]>;
+import type { PuppetForgeUrl, Puppetfile, PuppetfileModule } from './types';
 
 const lineTerminationRegex = regEx(`\r?\n`);
 const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
@@ -46,7 +36,8 @@ export function parsePuppetfile(content: string): Puppetfile {
       const value = moduleValue[2];
 
       if (key) {
-        currentPuppetfileModule.tags = currentPuppetfileModule.tags || new Map();
+        currentPuppetfileModule.tags =
+          currentPuppetfileModule.tags || new Map();
         currentPuppetfileModule.tags.set(key, value);
       } else {
         // "positional" module values
@@ -60,7 +51,8 @@ export function parsePuppetfile(content: string): Puppetfile {
           currentPuppetfileModule.version = value;
         } else {
           // 3+ value without a key is not supported
-          currentPuppetfileModule.skipReasons = currentPuppetfileModule.skipReasons || [];
+          currentPuppetfileModule.skipReasons =
+            currentPuppetfileModule.skipReasons || [];
           currentPuppetfileModule.skipReasons.push('invalid-config');
         }
       }

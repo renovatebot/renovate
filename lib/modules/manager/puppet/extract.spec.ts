@@ -1,6 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
+import { PUPPET_FORGE } from '../../datasource/puppet-forge/common';
 import { extractPackageFile } from './extract';
 
 describe('modules/manager/puppet/extract', () => {
@@ -17,19 +18,19 @@ describe('modules/manager/puppet/extract', () => {
       expect(dep0.depName).toBe('puppetlabs/stdlib');
       expect(dep0.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep0.currentValue).toBe('8.0.0');
-      expect(dep0.registryUrls).toBeUndefined();
+      expect(dep0.registryUrls).toStrictEqual([PUPPET_FORGE]);
 
       const dep1 = res.deps[1];
       expect(dep1.depName).toBe('puppetlabs/apache');
       expect(dep1.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep1.currentValue).toBe('6.5.1');
-      expect(dep1.registryUrls).toBeUndefined();
+      expect(dep1.registryUrls).toStrictEqual([PUPPET_FORGE]);
 
       const dep2 = res.deps[2];
       expect(dep2.depName).toBe('puppetlabs/puppetdb');
       expect(dep2.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep2.currentValue).toBe('7.9.0');
-      expect(dep2.registryUrls).toBeUndefined();
+      expect(dep2.registryUrls).toStrictEqual([PUPPET_FORGE]);
     });
 
     it('extracts multiple modules from Puppetfile with multiple forges/registries', () => {

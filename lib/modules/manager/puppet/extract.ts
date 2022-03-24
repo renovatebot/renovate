@@ -3,26 +3,19 @@ import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 import type { PackageDependency, PackageFile } from '../types';
-import {
-  RE_REPOSITORY_GITHUB_SSH_FORMAT,
-  forgeRegexFactory,
-  gitModuleRegexFactory,
-  simpleModuleLineRegexFactory,
-} from './constants';
-import type { ForgeContent } from './types';
+import { RE_REPOSITORY_GITHUB_SSH_FORMAT } from './constants';
+import { parsePuppetfile } from './puppetfile-parser';
+import type { PuppetfileModule } from './types';
 
 function getForgeDependency(
-  line: RegExpExecArray,
-  forgeUrl: string
+  module: PuppetfileModule,
+  forgeUrl?: string,
 ): PackageDependency {
-  const module = line[1];
-  const version = line[2];
-
   const dep: PackageDependency = {
-    depName: module,
+    depName: module.name,
     datasource: PuppetForgeDatasource.id,
-    packageName: module,
-    currentValue: version,
+    packageName: module.name,
+    currentValue: module.version,
   };
 
   if (forgeUrl) {
@@ -32,22 +25,11 @@ function getForgeDependency(
   return dep;
 }
 
-function getGitDependency(line: RegExpExecArray): PackageDependency {
-  const map = new Map();
+function getGitDependency(module: PuppetfileModule): PackageDependency {
+  const moduleName = module.name;
 
-  const moduleName = line.groups.moduleName;
-
-  [1, 2, 3].forEach((i) => {
-    const key = line.groups[`key${i}`];
-    const value = line.groups[`value${i}`];
-
-    if (key && value) {
-      map.set(key, value);
-    }
-  });
-
-  const git = map.get('git');
-  const tag = map.get('tag');
+  const git = module.tags?.get('git');
+  const tag = module.tags?.get('tag');
 
   if (git && tag) {
     const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(git);
@@ -87,40 +69,23 @@ function getGitDependency(line: RegExpExecArray): PackageDependency {
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('puppet.extractPackageFile()');
 
+  const puppetFile = parsePuppetfile(content);
   const deps: PackageDependency[] = [];
 
-  const forgeContents: ForgeContent[] = [];
+  for (const [forgeUrl, modules] of puppetFile.entries()) {
+    for (const module of modules) {
+      let packageDependency: PackageDependency;
+      if(module.name && module.version) {
+        packageDependency = getForgeDependency(module, forgeUrl);
+      } else {
+        packageDependency = getGitDependency(module);
+      }
 
-  const forgeRegex = forgeRegexFactory();
-  let forge: RegExpExecArray;
+      if(!packageDependency.skipReason && module.skipReasons) {
+        packageDependency.skipReason = module.skipReasons[0]; // ! TODO: fix only one skipreason in parser!
+      }
 
-  if (!forgeRegexFactory().test(content)) {
-    forgeContents.push({
-      moduleContent: content,
-    });
-  }
-
-  while ((forge = forgeRegex.exec(content)) !== null) {
-    const forgeUrl = forge[1];
-    const moduleContent = forge[2];
-
-    forgeContents.push({
-      forgeUrl,
-      moduleContent,
-    });
-  }
-
-  for (const { forgeUrl, moduleContent } of forgeContents) {
-    const simpleModuleLineRegex = simpleModuleLineRegexFactory();
-
-    let line: RegExpExecArray;
-    while ((line = simpleModuleLineRegex.exec(moduleContent)) !== null) {
-      deps.push(getForgeDependency(line, forgeUrl));
-    }
-
-    const gitModuleRegex = gitModuleRegexFactory();
-    while ((line = gitModuleRegex.exec(content)) !== null) {
-      deps.push(getGitDependency(line));
+      deps.push(packageDependency);
     }
   }
 
