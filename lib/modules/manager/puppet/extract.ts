@@ -18,7 +18,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const forgeRegex = forgeRegexFactory();
   let forge: RegExpExecArray;
 
-  if(!forgeRegexFactory().test(content)) {
+  if (!forgeRegexFactory().test(content)) {
     forgeContents.push({
       forgeUrl: 'https://forgeapi.puppet.com', // TODO: default Registry
       moduleContent: content,
@@ -35,8 +35,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     });
   }
 
-  for (const {forgeUrl, moduleContent} of forgeContents) {
-
+  for (const { forgeUrl, moduleContent } of forgeContents) {
     const simpleModuleLineRegex = simpleModuleLineRegexFactory();
 
     let line: RegExpExecArray;
