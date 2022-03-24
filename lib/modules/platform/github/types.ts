@@ -35,6 +35,10 @@ export interface GhRestPr extends Pr {
   closed_at: string;
   user?: { login?: string };
   node_id: string;
+  assignee?: { login?: string };
+  assignees?: { login?: string }[];
+  requested_reviewers?: { login?: string }[];
+  labels?: { name: string }[];
 }
 
 export interface UserDetails {
