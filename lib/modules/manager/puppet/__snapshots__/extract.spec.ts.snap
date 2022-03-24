@@ -1,5 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/puppet/extract extractPackageFile() extracts multiple git tag modules from Puppetfile 1`] = `
+Array [
+  Object {
+    "currentValue": "0.9.0",
+    "datasource": "github-tags",
+    "depName": "apache",
+    "gitRef": true,
+    "githubRepo": "puppetlabs/puppetlabs-apache",
+    "packageName": "puppetlabs/puppetlabs-apache",
+    "sourceUrl": "https://github.com/puppetlabs/puppetlabs-apache",
+  },
+  Object {
+    "currentValue": "5.0.0",
+    "datasource": "github-tags",
+    "depName": "stdlib",
+    "gitRef": true,
+    "githubRepo": "puppetlabs/puppetlabs-stdlib",
+    "packageName": "puppetlabs/puppetlabs-stdlib",
+    "sourceUrl": "git@github.com:puppetlabs/puppetlabs-stdlib.git",
+  },
+]
+`;
+
 exports[`modules/manager/puppet/extract extractPackageFile() extracts multiple modules from Puppetfile with multiple forges/registries 1`] = `
 Array [
   Object {
