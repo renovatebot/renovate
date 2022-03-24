@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { PuppetDatasource } from '../../datasource/puppet';
 import { extractPackageFile } from './extract';
 
 describe('modules/manager/puppet/extract', () => {
@@ -11,7 +12,24 @@ describe('modules/manager/puppet/extract', () => {
     it('extracts multiple modules from Puppetfile without a forge', () => {
       const res = extractPackageFile(Fixtures.get('Puppetfile_no_forge'));
       expect(res.deps).toHaveLength(3);
-      expect(res.deps).toMatchSnapshot();
+
+      const dep0 = res.deps[0];
+      expect(dep0.depName).toBe('puppetlabs/stdlib');
+      expect(dep0.datasource).toBe(PuppetDatasource.id);
+      expect(dep0.currentValue).toBe('8.0.0');
+      expect(dep0.registryUrls).toInclude('https://forgeapi.puppet.com');
+
+      const dep1 = res.deps[1];
+      expect(dep1.depName).toBe('puppetlabs/apache');
+      expect(dep1.datasource).toBe(PuppetDatasource.id);
+      expect(dep1.currentValue).toBe('6.5.1');
+      expect(dep1.registryUrls).toInclude('https://forgeapi.puppet.com');
+
+      const dep2 = res.deps[2];
+      expect(dep2.depName).toBe('puppetlabs/puppetdb');
+      expect(dep2.datasource).toBe(PuppetDatasource.id);
+      expect(dep2.currentValue).toBe('7.9.0');
+      expect(dep2.registryUrls).toInclude('https://forgeapi.puppet.com');
     });
 
     it('extracts multiple modules from Puppetfile with multiple forges/registries', () => {
@@ -30,38 +48,74 @@ describe('modules/manager/puppet/extract', () => {
       expect(forgeApiDeps).toHaveLength(3);
       expect(mockDeps).toHaveLength(3);
 
-      expect(res.deps).toMatchSnapshot();
+      const dep0 = res.deps[0];
+      expect(dep0.depName).toBe('puppetlabs/stdlib');
+      expect(dep0.datasource).toBe(PuppetDatasource.id);
+      expect(dep0.currentValue).toBe('8.0.0');
+      expect(dep0.registryUrls).toInclude('https://forgeapi.puppetlabs.com');
+
+      const dep1 = res.deps[1];
+      expect(dep1.depName).toBe('puppetlabs/apache');
+      expect(dep1.datasource).toBe(PuppetDatasource.id);
+      expect(dep1.currentValue).toBe('6.5.1');
+      expect(dep1.registryUrls).toInclude('https://forgeapi.puppetlabs.com');
+
+      const dep2 = res.deps[2];
+      expect(dep2.depName).toBe('puppetlabs/puppetdb');
+      expect(dep2.datasource).toBe(PuppetDatasource.id);
+      expect(dep2.currentValue).toBe('7.9.0');
+      expect(dep2.registryUrls).toInclude('https://forgeapi.puppetlabs.com');
+
+      const dep3 = res.deps[3];
+      expect(dep3.depName).toBe('mock/mockstdlib');
+      expect(dep3.datasource).toBe(PuppetDatasource.id);
+      expect(dep3.currentValue).toBe('10.0.0');
+      expect(dep3.registryUrls).toInclude(
+        'https://some-other-puppet-forge.com'
+      );
+
+      const dep4 = res.deps[4];
+      expect(dep4.depName).toBe('mock/mockapache');
+      expect(dep4.datasource).toBe(PuppetDatasource.id);
+      expect(dep4.currentValue).toBe('2.5.1');
+      expect(dep4.registryUrls).toInclude(
+        'https://some-other-puppet-forge.com'
+      );
+
+      const dep5 = res.deps[5];
+      expect(dep5.depName).toBe('mock/mockpuppetdb');
+      expect(dep5.datasource).toBe(PuppetDatasource.id);
+      expect(dep5.currentValue).toBe('1.9.0');
+      expect(dep5.registryUrls).toInclude(
+        'https://some-other-puppet-forge.com'
+      );
     });
 
     it('extracts multiple git tag modules from Puppetfile', () => {
       const res = extractPackageFile(Fixtures.get('Puppetfile_git_tag'));
       expect(res.deps).toHaveLength(2);
 
-      const dep1 = res.deps[0];
-      expect(dep1.depName).toBe('apache');
-      expect(dep1.packageName).toBe('puppetlabs/puppetlabs-apache');
-      expect(dep1.githubRepo).toBe('puppetlabs/puppetlabs-apache');
-      expect(dep1.sourceUrl).toBe(
+      const dep0 = res.deps[0];
+      expect(dep0.depName).toBe('apache');
+      expect(dep0.packageName).toBe('puppetlabs/puppetlabs-apache');
+      expect(dep0.githubRepo).toBe('puppetlabs/puppetlabs-apache');
+      expect(dep0.sourceUrl).toBe(
         'https://github.com/puppetlabs/puppetlabs-apache'
       );
-      expect(dep1.gitRef).toBe(true);
-      expect(dep1.currentValue).toBe('0.9.0');
-      expect(dep1.datasource).toBe(GithubTagsDatasource.id);
+      expect(dep0.gitRef).toBe(true);
+      expect(dep0.currentValue).toBe('0.9.0');
+      expect(dep0.datasource).toBe(GithubTagsDatasource.id);
 
-      const dep2 = res.deps[1];
-      expect(dep2.depName).toBe('stdlib');
-      expect(dep2.packageName).toBe('puppetlabs/puppetlabs-stdlib');
-      expect(dep2.githubRepo).toBe('puppetlabs/puppetlabs-stdlib');
-      expect(dep2.sourceUrl).toBe(
+      const dep1 = res.deps[1];
+      expect(dep1.depName).toBe('stdlib');
+      expect(dep1.packageName).toBe('puppetlabs/puppetlabs-stdlib');
+      expect(dep1.githubRepo).toBe('puppetlabs/puppetlabs-stdlib');
+      expect(dep1.sourceUrl).toBe(
         'git@github.com:puppetlabs/puppetlabs-stdlib.git'
       );
-      expect(dep2.gitRef).toBe(true);
-      expect(dep2.currentValue).toBe('5.0.0');
-      expect(dep2.datasource).toBe(GithubTagsDatasource.id);
-
-      // commit -> dep.currentDigest = depRefPart;
-
-      expect(res.deps).toMatchSnapshot();
+      expect(dep1.gitRef).toBe(true);
+      expect(dep1.currentValue).toBe('5.0.0');
+      expect(dep1.datasource).toBe(GithubTagsDatasource.id);
     });
   });
 });
