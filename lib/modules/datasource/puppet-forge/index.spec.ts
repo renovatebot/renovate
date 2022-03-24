@@ -1,13 +1,13 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
-import { ForgeDatasource } from './index';
+import { PuppetForgeDatasource } from './index';
 
 const puppetforgeReleases = loadFixture('puppetforge-response.json');
 
-const datasource = ForgeDatasource.id;
+const datasource = PuppetForgeDatasource.id;
 
-describe('modules/datasource/forge/index', () => {
+describe('modules/datasource/puppet-forge/index', () => {
   describe('getReleases', () => {
     it('should use default forge if no other provided', async () => {
       httpMock

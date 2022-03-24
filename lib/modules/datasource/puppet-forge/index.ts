@@ -4,11 +4,11 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { PUPPET_FORGE } from './common';
 import type { PuppetModule } from './types';
 
-export class ForgeDatasource extends Datasource {
-  static id = 'forge';
+export class PuppetForgeDatasource extends Datasource {
+  static id = 'puppet-forge';
 
   constructor() {
-    super(ForgeDatasource.id);
+    super(PuppetForgeDatasource.id);
   }
 
   override readonly defaultRegistryUrls = [PUPPET_FORGE];

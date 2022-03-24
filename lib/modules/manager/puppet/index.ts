@@ -1,6 +1,6 @@
 import { ProgrammingLanguage } from '../../../constants';
-import { ForgeDatasource } from '../../datasource/forge';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 
 export { extractPackageFile } from './extract';
 
@@ -11,6 +11,6 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  ForgeDatasource.id,
+  PuppetForgeDatasource.id,
   GithubTagsDatasource.id,
 ];

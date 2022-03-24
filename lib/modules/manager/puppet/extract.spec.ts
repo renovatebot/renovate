@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { ForgeDatasource } from '../../datasource/forge';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 import { extractPackageFile } from './extract';
 
 describe('modules/manager/puppet/extract', () => {
@@ -15,19 +15,19 @@ describe('modules/manager/puppet/extract', () => {
 
       const dep0 = res.deps[0];
       expect(dep0.depName).toBe('puppetlabs/stdlib');
-      expect(dep0.datasource).toBe(ForgeDatasource.id);
+      expect(dep0.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep0.currentValue).toBe('8.0.0');
       expect(dep0.registryUrls).toBeUndefined();
 
       const dep1 = res.deps[1];
       expect(dep1.depName).toBe('puppetlabs/apache');
-      expect(dep1.datasource).toBe(ForgeDatasource.id);
+      expect(dep1.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep1.currentValue).toBe('6.5.1');
       expect(dep1.registryUrls).toBeUndefined();
 
       const dep2 = res.deps[2];
       expect(dep2.depName).toBe('puppetlabs/puppetdb');
-      expect(dep2.datasource).toBe(ForgeDatasource.id);
+      expect(dep2.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep2.currentValue).toBe('7.9.0');
       expect(dep2.registryUrls).toBeUndefined();
     });
@@ -50,25 +50,25 @@ describe('modules/manager/puppet/extract', () => {
 
       const dep0 = res.deps[0];
       expect(dep0.depName).toBe('puppetlabs/stdlib');
-      expect(dep0.datasource).toBe(ForgeDatasource.id);
+      expect(dep0.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep0.currentValue).toBe('8.0.0');
       expect(dep0.registryUrls).toInclude('https://forgeapi.puppetlabs.com');
 
       const dep1 = res.deps[1];
       expect(dep1.depName).toBe('puppetlabs/apache');
-      expect(dep1.datasource).toBe(ForgeDatasource.id);
+      expect(dep1.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep1.currentValue).toBe('6.5.1');
       expect(dep1.registryUrls).toInclude('https://forgeapi.puppetlabs.com');
 
       const dep2 = res.deps[2];
       expect(dep2.depName).toBe('puppetlabs/puppetdb');
-      expect(dep2.datasource).toBe(ForgeDatasource.id);
+      expect(dep2.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep2.currentValue).toBe('7.9.0');
       expect(dep2.registryUrls).toInclude('https://forgeapi.puppetlabs.com');
 
       const dep3 = res.deps[3];
       expect(dep3.depName).toBe('mock/mockstdlib');
-      expect(dep3.datasource).toBe(ForgeDatasource.id);
+      expect(dep3.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep3.currentValue).toBe('10.0.0');
       expect(dep3.registryUrls).toInclude(
         'https://some-other-puppet-forge.com'
@@ -76,7 +76,7 @@ describe('modules/manager/puppet/extract', () => {
 
       const dep4 = res.deps[4];
       expect(dep4.depName).toBe('mock/mockapache');
-      expect(dep4.datasource).toBe(ForgeDatasource.id);
+      expect(dep4.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep4.currentValue).toBe('2.5.1');
       expect(dep4.registryUrls).toInclude(
         'https://some-other-puppet-forge.com'
@@ -84,7 +84,7 @@ describe('modules/manager/puppet/extract', () => {
 
       const dep5 = res.deps[5];
       expect(dep5.depName).toBe('mock/mockpuppetdb');
-      expect(dep5.datasource).toBe(ForgeDatasource.id);
+      expect(dep5.datasource).toBe(PuppetForgeDatasource.id);
       expect(dep5.currentValue).toBe('1.9.0');
       expect(dep5.registryUrls).toInclude(
         'https://some-other-puppet-forge.com'
