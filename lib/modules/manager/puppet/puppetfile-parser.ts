@@ -1,6 +1,6 @@
 import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
-import { defaultRegistry } from '.';
+import { PUPPET_FORGE as defaultRegistryUrl } from '../../datasource/puppet-forge/common';
 
 export interface PuppetfileModule {
   name?: string;
@@ -18,7 +18,7 @@ const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
 export function parsePuppetfile(content: string): Puppetfile {
   const puppetfile: Puppetfile = new Map<PuppetForgeUrl, PuppetfileModule[]>();
 
-  let currentForge = defaultRegistry;
+  let currentForge = defaultRegistryUrl;
   let currentPuppetfileModule: PuppetfileModule = {};
 
   for (const line of content.split(lineTerminationRegex)) {

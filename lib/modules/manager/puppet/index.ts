@@ -5,7 +5,6 @@ import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 export { extractPackageFile } from './extract';
 
 export const language = ProgrammingLanguage.Ruby;
-export const defaultRegistry = 'https://forgeapi.puppetlabs.com';
 
 export const defaultConfig = {
   fileMatch: ['^Puppetfile$'],
