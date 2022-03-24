@@ -9,11 +9,7 @@ import {
   gitModuleRegexFactory,
   simpleModuleLineRegexFactory,
 } from './constants';
-
-interface ForgeContent {
-  forgeUrl: string;
-  moduleContent: string;
-}
+import type { ForgeContent } from './types';
 
 function getForgeDependency(
   line: RegExpExecArray,
