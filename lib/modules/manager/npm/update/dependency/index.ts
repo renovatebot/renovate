@@ -5,8 +5,6 @@ import { regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
-const patchReg = regEx('(patch:.*@(npm:)?).*#.*');
-
 function replaceAsString(
   parsedContents: PackageJson,
   fileContent: string,
