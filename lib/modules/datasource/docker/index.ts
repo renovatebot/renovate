@@ -721,7 +721,6 @@ export class DockerDatasource extends Datasource {
     namespace: 'datasource-docker-tags',
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
-    ttlMinutes: 30,
   })
   public async getTags(
     registryHost: string,
@@ -797,7 +796,6 @@ export class DockerDatasource extends Datasource {
       );
       return `${registryHost}:${dockerRepository}:${newTag}`;
     },
-    ttlMinutes: 30,
   })
   override async getDigest(
     { registryUrl, packageName }: GetReleasesConfig,
