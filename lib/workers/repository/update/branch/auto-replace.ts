@@ -120,7 +120,7 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
-  if (!reuseExistingBranch) {
+  if (reuseExistingBranch) {
     if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
       logger.debug(
         { packageFile, depName },
@@ -138,7 +138,7 @@ export async function doAutoReplace(
     logger.debug({ packageFile, depName }, 'Branch dep is already updated');
     return existingContent;
   }
-  const replaceString = upgrade.replaceString || currentValue || newDigest;
+  const replaceString = upgrade.replaceString || currentValue;
 
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
