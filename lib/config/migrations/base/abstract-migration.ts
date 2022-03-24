@@ -44,7 +44,7 @@ export abstract class AbstractMigration implements Migration {
     this.setHard(this.propertyName, value);
   }
 
-  protected delete(property: string): void {
+  protected delete(property = this.propertyName): void {
     delete this.migratedConfig[property];
   }
 }

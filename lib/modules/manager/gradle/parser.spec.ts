@@ -93,6 +93,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'mavenCentral()'}                             | ${MAVEN_REPO}
       ${'jcenter()'}                                  | ${JCENTER_REPO}
       ${'google()'}                                   | ${GOOGLE_REPO}
+      ${'google { content { includeGroup "foo" } }'}  | ${GOOGLE_REPO}
       ${'gradlePluginPortal()'}                       | ${GRADLE_PLUGIN_PORTAL_REPO}
       ${'maven("https://foo.bar/baz/qux")'}           | ${'https://foo.bar/baz/qux'}
       ${'maven { url = uri("https://foo.bar/baz") }'} | ${'https://foo.bar/baz'}

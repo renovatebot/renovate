@@ -4,6 +4,7 @@ import * as _local from './local';
 import * as _npm from './npm';
 import {
   PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
@@ -115,6 +116,22 @@ describe('config/presets/index', () => {
       expect(e.validationMessage).toBeUndefined();
     });
 
+    it('throws if invalid preset json', async () => {
+      config.foo = 1;
+      config.extends = ['org/repo'];
+      let e: Error;
+      local.getPreset.mockRejectedValueOnce(new Error(PRESET_INVALID_JSON));
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toBe('Preset is invalid JSON (org/repo)');
+      expect(e.validationMessage).toBeUndefined();
+    });
+
     it('throws noconfig', async () => {
       config.foo = 1;
       config.extends = ['noconfig:base'];
@@ -143,7 +160,9 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
+      expect(e.validationError).toBe(
+        'Preset caused unexpected error (throw:base)'
+      );
       expect(e.validationMessage).toBeUndefined();
     });
 

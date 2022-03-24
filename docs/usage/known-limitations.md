@@ -8,7 +8,7 @@ Renovate, like any computer program has limitations.
 Sometimes these are functionality limitations - perhaps something is impossible or too complex to do, or we simply haven't implemented it yet.
 At other times it may be a "performance" limitation, because jobs neither start nor complete instantly, even if the user may start with that expectation.
 
-This document attempts to list out the most commonly seen limitations and describe whether they're permanent and if there's any plans to improving the situation.
+This document tries to list out the most commonly seen limitations and describe whether they're permanent and if there's any plans to improving the situation.
 
 ## Time/schedule based limitations
 

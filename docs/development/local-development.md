@@ -38,7 +38,7 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 #### Windows
 
 Follow these steps to set up your development environment on Windows 10.
-If you already installed a component, skip the corresponding step.
+If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
@@ -131,7 +131,7 @@ e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in
 
 ### Coverage
 
-The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
+The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
