@@ -46,7 +46,6 @@ export class ForgeDatasource extends Datasource {
       deprecationMessage: module.deprecated_for,
       homepage: module.homepage_url,
       tags: {
-        // is this the correct use of tags?
         endorsement: module.endorsement,
         moduleGroup: module.module_group,
         premium: `${module.premium}`,
