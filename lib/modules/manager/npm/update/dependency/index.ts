@@ -5,8 +5,6 @@ import { regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
-const patchReg = regEx('(patch:.*@(npm:)?).*#.*');
-
 function replaceAsString(
   parsedContents: PackageJson,
   fileContent: string,
@@ -30,9 +28,9 @@ function replaceAsString(
   const searchString = `"${oldValue}"`;
   let newString = `"${newValue}"`;
 
-  if (patchReg.test(oldValue)) {
-    const replaceRegex = regEx(`(patch:${depName}@(npm:)?).*#`);
-    const match = patchReg.exec(oldValue);
+  const replaceRegex = regEx(`(patch:${depName}@(npm:)?).*#`);
+  const match = patchReg.exec(oldValue);
+  if (match) {
     const patch = oldValue.replace(replaceRegex, `${match[1]}${newValue}#`);
     parsedContents[depType][depName] = patch;
     newString = `"${patch}"`;
