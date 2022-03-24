@@ -568,7 +568,10 @@ If define a `repositories` array in then your global config then its elements ca
 
 ```js
 {
-  repositories: [ { repository: 'g/r', bumpVersion: true } ],
+  repositories: [
+    { repository: 'g/r1', bumpVersion: true },
+    'g/r2'
+  ],
 }
 ```
 
