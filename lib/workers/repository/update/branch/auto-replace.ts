@@ -139,7 +139,6 @@ export async function doAutoReplace(
     return existingContent;
   }
   const replaceString = upgrade.replaceString || currentValue;
-
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
