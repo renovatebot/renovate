@@ -1,4 +1,3 @@
-import path from 'path';
 import Graph from 'graph-data-structure';
 import minimatch from 'minimatch';
 import upath from 'upath';
@@ -77,7 +76,7 @@ function reframeRelativePathToRootOfRepo(
     dependentProjectRelativePath
   );
   const absoluteProjectReferencePath = upath.resolve(
-    path.dirname(absoluteDependentProjectPath),
+    upath.dirname(absoluteDependentProjectPath),
     projectReference
   );
   const relativeProjectReferencePath = upath.relative(
