@@ -823,7 +823,8 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 ## golang
 
-Configuration added here applies for all Go-related updates, but currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
+Configuration added here applies for all Go-related updates.
+The only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
 For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
