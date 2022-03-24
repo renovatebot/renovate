@@ -41,7 +41,9 @@ describe('modules/manager/puppet/extract', () => {
       expect(dep1.depName).toBe('apache');
       expect(dep1.packageName).toBe('puppetlabs/puppetlabs-apache');
       expect(dep1.githubRepo).toBe('puppetlabs/puppetlabs-apache');
-      expect(dep1.sourceUrl).toBe('https://github.com/puppetlabs/puppetlabs-apache');
+      expect(dep1.sourceUrl).toBe(
+        'https://github.com/puppetlabs/puppetlabs-apache'
+      );
       expect(dep1.gitRef).toBe(true);
       expect(dep1.currentValue).toBe('0.9.0');
       expect(dep1.datasource).toBe(GithubTagsDatasource.id);
@@ -50,7 +52,9 @@ describe('modules/manager/puppet/extract', () => {
       expect(dep2.depName).toBe('stdlib');
       expect(dep2.packageName).toBe('puppetlabs/puppetlabs-stdlib');
       expect(dep2.githubRepo).toBe('puppetlabs/puppetlabs-stdlib');
-      expect(dep2.sourceUrl).toBe('git@github.com:puppetlabs/puppetlabs-stdlib.git');
+      expect(dep2.sourceUrl).toBe(
+        'git@github.com:puppetlabs/puppetlabs-stdlib.git'
+      );
       expect(dep2.gitRef).toBe(true);
       expect(dep2.currentValue).toBe('5.0.0');
       expect(dep2.datasource).toBe(GithubTagsDatasource.id);
@@ -59,6 +63,5 @@ describe('modules/manager/puppet/extract', () => {
 
       expect(res.deps).toMatchSnapshot();
     });
-
   });
 });

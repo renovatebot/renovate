@@ -10,4 +10,7 @@ export const defaultConfig = {
   fileMatch: ['^Puppetfile$'],
 };
 
-export const supportedDatasources = [PuppetDatasource.id, GithubTagsDatasource.id];
+export const supportedDatasources = [
+  PuppetDatasource.id,
+  GithubTagsDatasource.id,
+];
