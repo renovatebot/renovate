@@ -297,7 +297,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(200)
         .head('/library/some-dep/manifests/latest')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
-      hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
+      hostRules.find.mockReturnValue({ insecureRegistry: true });
       const res = await getDigest({
         datasource: 'docker',
         depName: 'some-dep',
