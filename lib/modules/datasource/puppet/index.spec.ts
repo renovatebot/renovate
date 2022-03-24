@@ -35,4 +35,49 @@ describe('modules/datasource/puppet/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
+  // https://forgeapi.puppet.com/#operation/getModule
+  it('should return null if lookup fails 400', async () => {
+    httpMock
+      .scope('https://forgeapi.puppet.com')
+      .get('/v3/modules/foobar')
+      .reply(400);
+    const res = await getPkgReleases({
+      datasource,
+      depName: 'foobar',
+      registryUrls: ['https://forgeapi.puppet.com'],
+    });
+    expect(res).toBeNull();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  // https://forgeapi.puppet.com/#operation/getModule
+  it('should return null if lookup fails', async () => {
+    httpMock
+      .scope('https://forgeapi.puppet.com')
+      .get('/v3/modules/foobar')
+      .reply(404);
+    const res = await getPkgReleases({
+      datasource,
+      depName: 'foobar',
+      registryUrls: ['https://forgeapi.puppet.com'],
+    });
+    expect(res).toBeNull();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('should fetch package info from custom registry', async () => {
+    httpMock
+      .scope('https://puppet.mycustomregistry.com', {})
+      .get('/v3/modules/foobar')
+      .reply(200, puppetforgeReleases);
+    const registryUrls = ['https://puppet.mycustomregistry.com'];
+    const res = await getPkgReleases({
+      datasource,
+      depName: 'foobar',
+      registryUrls,
+    });
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
 });

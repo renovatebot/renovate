@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { PuppetModule } from './types';
@@ -15,11 +16,15 @@ export class PuppetDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
-    const moduleResponse = await this.http.get(
-      `${registryUrl}/v3/modules/${moduleSlug}`
-    );
+    const url = `${registryUrl}/v3/modules/${moduleSlug}`;
 
-    if (moduleResponse.statusCode !== 200) {
+    let moduleResponse;
+    try {
+      moduleResponse = await this.http.get(url);
+    } catch (e) {
+      logger.warn(
+        `ignore dependency ${packageName} because of faulty response for ${url}: ${e}`
+      );
       return null;
     }
 

@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/puppet/extract extractPackageFile() extracts multiple modules from Puppetfile 1`] = `
+Array [
+  Object {
+    "currentValue": "8.0.0",
+    "datasource": "puppet",
+    "depName": "puppetlabs/stdlib",
+    "packageName": "puppetlabs/stdlib",
+    "registryUrls": Array [
+      "https://forgeapi.puppet.com",
+    ],
+  },
+  Object {
+    "currentValue": "6.5.1",
+    "datasource": "puppet",
+    "depName": "puppetlabs/apache",
+    "packageName": "puppetlabs/apache",
+    "registryUrls": Array [
+      "https://forgeapi.puppet.com",
+    ],
+  },
+  Object {
+    "currentValue": "7.9.0",
+    "datasource": "puppet",
+    "depName": "puppetlabs/puppetdb",
+    "packageName": "puppetlabs/puppetdb",
+    "registryUrls": Array [
+      "https://forgeapi.puppet.com",
+    ],
+  },
+]
+`;

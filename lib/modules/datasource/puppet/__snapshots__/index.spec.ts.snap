@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/puppet/index getReleases parses real data 1`] = `
+Object {
+  "deprecationMessage": null,
+  "registryUrl": "https://forgeapi.puppet.com",
+  "releases": Array [
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-6.4.0.tar.gz",
+      "registryUrl": "https://forgeapi.puppet.com",
+      "releaseTimestamp": "2021-08-02T13:49:41.000Z",
+      "version": "6.4.0",
+    },
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-6.5.0.tar.gz",
+      "registryUrl": "https://forgeapi.puppet.com",
+      "releaseTimestamp": "2021-08-24T15:20:22.000Z",
+      "version": "6.5.0",
+    },
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-6.5.1.tar.gz",
+      "registryUrl": "https://forgeapi.puppet.com",
+      "releaseTimestamp": "2021-08-25T11:16:27.000Z",
+      "version": "6.5.1",
+    },
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-7.0.0.tar.gz",
+      "registryUrl": "https://forgeapi.puppet.com",
+      "releaseTimestamp": "2021-10-11T14:47:24.000Z",
+      "version": "7.0.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/puppetlabs/puppetlabs-apache",
+  "tags": Object {
+    "endorsement": "supported",
+    "moduleGroup": "base",
+    "premium": "false",
+  },
+}
+`;
+
+exports[`modules/datasource/puppet/index getReleases parses real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "forgeapi.puppet.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://forgeapi.puppet.com/v3/modules/puppetlabs-apache",
+  },
+]
+`;
+
+exports[`modules/datasource/puppet/index should fetch package info from custom registry 1`] = `
+Object {
+  "deprecationMessage": null,
+  "registryUrl": "https://puppet.mycustomregistry.com",
+  "releases": Array [
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-6.4.0.tar.gz",
+      "registryUrl": "https://puppet.mycustomregistry.com",
+      "releaseTimestamp": "2021-08-02T13:49:41.000Z",
+      "version": "6.4.0",
+    },
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-6.5.0.tar.gz",
+      "registryUrl": "https://puppet.mycustomregistry.com",
+      "releaseTimestamp": "2021-08-24T15:20:22.000Z",
+      "version": "6.5.0",
+    },
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-6.5.1.tar.gz",
+      "registryUrl": "https://puppet.mycustomregistry.com",
+      "releaseTimestamp": "2021-08-25T11:16:27.000Z",
+      "version": "6.5.1",
+    },
+    Object {
+      "downloadUrl": "/v3/files/puppetlabs-apache-7.0.0.tar.gz",
+      "registryUrl": "https://puppet.mycustomregistry.com",
+      "releaseTimestamp": "2021-10-11T14:47:24.000Z",
+      "version": "7.0.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/puppetlabs/puppetlabs-apache",
+  "tags": Object {
+    "endorsement": "supported",
+    "moduleGroup": "base",
+    "premium": "false",
+  },
+}
+`;
+
+exports[`modules/datasource/puppet/index should fetch package info from custom registry 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "puppet.mycustomregistry.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://puppet.mycustomregistry.com/v3/modules/foobar",
+  },
+]
+`;
+
+exports[`modules/datasource/puppet/index should return null if lookup fails 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "forgeapi.puppet.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://forgeapi.puppet.com/v3/modules/foobar",
+  },
+]
+`;
+
+exports[`modules/datasource/puppet/index should return null if lookup fails 400 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "forgeapi.puppet.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://forgeapi.puppet.com/v3/modules/foobar",
+  },
+]
+`;
+
+exports[`modules/datasource/puppet/index should return null if lookup fails 401 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "forgeapi.puppet.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://forgeapi.puppet.com/v3/modules/foobar",
+  },
+]
+`;
