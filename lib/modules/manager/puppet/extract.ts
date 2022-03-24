@@ -9,7 +9,7 @@ import type { PuppetfileModule } from './types';
 
 function getForgeDependency(
   module: PuppetfileModule,
-  forgeUrl?: string,
+  forgeUrl?: string
 ): PackageDependency {
   const dep: PackageDependency = {
     depName: module.name,
@@ -66,6 +66,10 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
   }
 }
 
+function isGitModule(module: PuppetfileModule): boolean {
+  return module.tags?.has('git');
+}
+
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('puppet.extractPackageFile()');
 
@@ -75,14 +79,16 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const [forgeUrl, modules] of puppetFile.entries()) {
     for (const module of modules) {
       let packageDependency: PackageDependency;
-      if(module.name && module.version) {
-        packageDependency = getForgeDependency(module, forgeUrl);
-      } else {
+
+      if(isGitModule(module)) {
         packageDependency = getGitDependency(module);
+      } else {
+        packageDependency = getForgeDependency(module, forgeUrl);
       }
 
-      if(!packageDependency.skipReason && module.skipReasons) {
-        packageDependency.skipReason = module.skipReasons[0]; // ! TODO: fix only one skipreason in parser!
+      if(module.skipReason) {
+        // the PuppetfileModule skip reason is dominant over the packageDependency skip reason
+        packageDependency.skipReason = module.skipReason;
       }
 
       deps.push(packageDependency);

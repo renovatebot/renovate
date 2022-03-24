@@ -47,9 +47,8 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       expect(defaultRegistryModules).toHaveLength(1);
       expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
       expect(defaultRegistryModules[0].version).toBe('8.0.0');
-      expect(defaultRegistryModules[0].skipReasons).toBeDefined();
-      expect(defaultRegistryModules[0].skipReasons).toHaveLength(1);
-      expect(defaultRegistryModules[0].skipReasons[0]).toBe('invalid-config');
+      expect(defaultRegistryModules[0].skipReason).toBeDefined();
+      expect(defaultRegistryModules[0].skipReason).toBe('invalid-config');
 
     });
 

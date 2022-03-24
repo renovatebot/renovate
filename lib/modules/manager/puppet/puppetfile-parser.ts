@@ -50,9 +50,7 @@ export function parsePuppetfile(content: string): Puppetfile {
           currentPuppetfileModule.version = value;
         } else {
           // 3+ value without a key is not supported
-          currentPuppetfileModule.skipReasons =
-            currentPuppetfileModule.skipReasons || [];
-          currentPuppetfileModule.skipReasons.push('invalid-config');
+          currentPuppetfileModule.skipReason = 'invalid-config';
         }
       }
     }

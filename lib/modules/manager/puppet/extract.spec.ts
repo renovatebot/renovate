@@ -117,5 +117,39 @@ describe('modules/manager/puppet/extract', () => {
       expect(dep1.currentValue).toBe('5.0.0');
       expect(dep1.datasource).toBe(GithubTagsDatasource.id);
     });
+
+    it('Git module without a tag should result in a skip reason', () => {
+      const res = extractPackageFile(Fixtures.get('Puppetfile_git_without_tag'));
+      expect(res.deps).toHaveLength(1);
+
+      const dep0 = res.deps[0];
+      expect(dep0.depName).toBe('stdlib');
+      expect(dep0.packageName).toBeUndefined();
+      expect(dep0.githubRepo).toBeUndefined();
+      expect(dep0.sourceUrl).toBe(
+        'git@github.com:puppetlabs/puppetlabs-stdlib.git'
+      );
+      expect(dep0.gitRef).toBe(true);
+      expect(dep0.currentValue).toBeUndefined();
+      expect(dep0.datasource).toBeUndefined();
+      expect(dep0.skipReason).toBe('invalid-version');
+    });
+
+    it('Skip reason should be overwritten by parser', () => {
+      const res = extractPackageFile(Fixtures.get('Puppetfile_git_without_tag_and_three_params'));
+      expect(res.deps).toHaveLength(1);
+
+      const dep0 = res.deps[0];
+      expect(dep0.depName).toBe('stdlib');
+      expect(dep0.packageName).toBeUndefined();
+      expect(dep0.githubRepo).toBeUndefined();
+      expect(dep0.sourceUrl).toBe(
+        'git@github.com:puppetlabs/puppetlabs-stdlib.git'
+      );
+      expect(dep0.gitRef).toBe(true);
+      expect(dep0.currentValue).toBeUndefined();
+      expect(dep0.datasource).toBeUndefined();
+      expect(dep0.skipReason).toBe('invalid-config');
+    });
   });
 });
