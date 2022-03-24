@@ -13,10 +13,13 @@ If you need commercial level support then use INSERT OUR COMMERCIAL OFFERING HER
 
 Renovate does **not** have ISO 27001 or SOC2 certification.
 
-### How to report a security problem
+### Security / Disclosure
 
-If you discover any important bug with Renovate that may pose a security problem, please disclose it confidentially to [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com) first, so that it can be assessed and hopefully fixed prior to being exploited.
-Please do not raise GitHub issues for security-related doubts or problems.
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com).
+This way we can evaluate the bug and hopefully fix it before it gets abused.
+Please give us enough time to investigate the bug before you report it anywhere else.
+
+Please do not create GitHub issues for security-related doubts or problems.
 
 ## Permissions
 
