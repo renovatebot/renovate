@@ -238,7 +238,7 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
-But Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
+Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
