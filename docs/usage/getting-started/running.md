@@ -38,10 +38,10 @@ The `slim` image contains only Node.js so works if either:
 - You do not require any additional package managers, or
 - You map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when necessary
 
-The "full" image (which `latest` defaults to) contains every package manager which Renovate supports already preinstalled.
+The "full" image (which `latest` defaults to) has every package manager which Renovate supports already preinstalled.
 This approach works best for many, but does have the following downsides:
 
-- It only contains _one_ version of each language/manager - usually the latest
+- It only has _one_ version of each language/manager - usually the latest
 - It's several gigabytes in size
 
 The `renovate/renovate` Docker images are compatible with all of Renovate's supported platforms.
@@ -191,7 +191,7 @@ The slug name of your app with `[bot]` appended
 **`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
 
 The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-It needs to contain the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
+It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
 **`token:"x-access-token:${github-app-installation}"`**

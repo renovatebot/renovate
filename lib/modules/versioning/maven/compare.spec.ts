@@ -91,6 +91,7 @@ describe('modules/versioning/maven/compare', () => {
         ${'5.0.7'}              | ${'5.0.7.RELEASE'}
         ${'Hoxton.RELEASE'}     | ${'hoxton'}
         ${'Hoxton.SR1'}         | ${'hoxton.sr-1'}
+        ${'1_5ea'}              | ${'1.0_5ea'}
       `('$x == $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(0);
         expect(compare(y, x)).toBe(0);
@@ -184,6 +185,8 @@ describe('modules/versioning/maven/compare', () => {
         ${'1-0.alpha'}                                  | ${'1'}
         ${'1-0.beta'}                                   | ${'1'}
         ${'1-0.alpha'}                                  | ${'1-0.beta'}
+        ${'1_5ea'}                                      | ${'1_c3b'}
+        ${'1_c3b'}                                      | ${'2'}
       `('$x < $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(-1);
         expect(compare(y, x)).toBe(1);
