@@ -1,6 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/puppet/extract extractPackageFile() extracts multiple modules from Puppetfile 1`] = `
+exports[`modules/manager/puppet/extract extractPackageFile() extracts multiple modules from Puppetfile with multiple forges/registries 1`] = `
+Array [
+  Object {
+    "currentValue": "8.0.0",
+    "datasource": "puppet",
+    "depName": "puppetlabs/stdlib",
+    "packageName": "puppetlabs/stdlib",
+    "registryUrls": Array [
+      "https://forgeapi.puppetlabs.com",
+    ],
+  },
+  Object {
+    "currentValue": "6.5.1",
+    "datasource": "puppet",
+    "depName": "puppetlabs/apache",
+    "packageName": "puppetlabs/apache",
+    "registryUrls": Array [
+      "https://forgeapi.puppetlabs.com",
+    ],
+  },
+  Object {
+    "currentValue": "7.9.0",
+    "datasource": "puppet",
+    "depName": "puppetlabs/puppetdb",
+    "packageName": "puppetlabs/puppetdb",
+    "registryUrls": Array [
+      "https://forgeapi.puppetlabs.com",
+    ],
+  },
+  Object {
+    "currentValue": "10.0.0",
+    "datasource": "puppet",
+    "depName": "mock/mockstdlib",
+    "packageName": "mock/mockstdlib",
+    "registryUrls": Array [
+      "https://some-other-puppet-forge.com",
+    ],
+  },
+  Object {
+    "currentValue": "2.5.1",
+    "datasource": "puppet",
+    "depName": "mock/mockapache",
+    "packageName": "mock/mockapache",
+    "registryUrls": Array [
+      "https://some-other-puppet-forge.com",
+    ],
+  },
+  Object {
+    "currentValue": "1.9.0",
+    "datasource": "puppet",
+    "depName": "mock/mockpuppetdb",
+    "packageName": "mock/mockpuppetdb",
+    "registryUrls": Array [
+      "https://some-other-puppet-forge.com",
+    ],
+  },
+]
+`;
+
+exports[`modules/manager/puppet/extract extractPackageFile() extracts multiple modules from Puppetfile without a forge 1`] = `
 Array [
   Object {
     "currentValue": "8.0.0",
