@@ -34,10 +34,8 @@ function replaceAsString(
     const replaceRegex = regEx(`(patch:${depName}@(npm:)?).*#`);
     const match = patchReg.exec(oldValue);
     const patch = oldValue.replace(replaceRegex, `${match[1]}${newValue}#`);
-    if (patch) {
-      parsedContents[depType][depName] = patch;
-      newString = `"${patch}"`;
-    }
+    parsedContents[depType][depName] = patch;
+    newString = `"${patch}"`;
   }
 
   // Skip ahead to depType section
