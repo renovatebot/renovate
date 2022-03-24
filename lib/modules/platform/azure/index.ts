@@ -14,6 +14,7 @@ import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
+  REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
@@ -172,6 +173,11 @@ export async function initRepo({
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
+  // istanbul ignore if
+  if (!repo) {
+    logger.error({ repos, repo }, 'Could not find repo in repo list');
+    throw new Error(REPOSITORY_NOT_FOUND);
+  }
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   if (repo.isDisabled) {
     logger.debug('Repository is disabled- throwing error to abort renovation');
