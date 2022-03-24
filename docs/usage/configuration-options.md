@@ -2541,7 +2541,7 @@ If you are using a semantic prefix for your commits, then you will want to enabl
 Although it's configurable to a package-level, it makes most sense to configure it at a repository level.
 If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
-But please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
+Renovate autodetects if your repository is already using semantic commits or not and follows suit, so you only need to configure this if you wish to _override_ Renovate's autodetected setting.
 
 ## separateMajorMinor
 
