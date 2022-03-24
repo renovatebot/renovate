@@ -549,32 +549,16 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-async function getClosedPrs(): Promise<Pr[]> {
-  const prList = await getPrList();
-  return prList.filter((pr) => pr.state === 'closed' || pr.state === 'merged');
-}
-
-async function getOpenPrs(): Promise<Pr[]> {
-  const prList = await getPrList();
-  return prList.filter((pr) => pr.state === 'open');
-}
-
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   if (!prNo) {
     return null;
   }
-  const openPrs = await getOpenPrs();
-  const openPr = openPrs.find(({ number }) => number === prNo);
-  if (openPr) {
-    logger.debug('Returning from graphql open PR list');
-    return openPr;
-  }
-  const closedPrs = await getClosedPrs();
-  const closedPr = closedPrs.find(({ number }) => number === prNo);
-  if (closedPr) {
+  const prList = await getPrList();
+  const cachedPr = prList.find(({ number }) => number === prNo);
+  if (cachedPr) {
     logger.debug('Returning from PR list');
-    return closedPr;
+    return cachedPr;
   }
   logger.debug(
     { prNo },
@@ -588,13 +572,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (!pr) {
     return null;
   }
-  // Harmonise PR values
-  pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === PrState.Open) {
-    pr.sourceBranch = pr.head ? pr.head.ref : undefined;
-    pr.sha = pr.head ? pr.head.sha : undefined;
-  }
-  return pr;
+  return coerceGhRestPr(pr);
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -607,13 +585,31 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
+function coerceGhRestPr(pr: GhRestPr): Pr {
+  return {
+    number: pr.number,
+    sourceBranch: pr.head?.ref,
+    sha: pr.head?.sha,
+    title: pr.title,
+    state:
+      pr.state === PrState.Closed && pr.merged_at?.length
+        ? /* istanbul ignore next */ PrState.Merged
+        : pr.state,
+    createdAt: pr.created_at,
+    closedAt: pr.closed_at,
+    sourceRepo: pr.head?.repo?.full_name,
+    hasAssignees: !!(pr.assignee || is.nonEmptyArray(pr.assignees)),
+    hasReviewers: !!pr.requested_reviewers,
+    labels: pr.labels?.map(({ name }) => name),
+  };
+}
+
 export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let prList: GhRestPr[];
     try {
-      prList = (
+      const ghRestPrs = (
         await githubApi.getJson<GhRestPr[]>(
           `repos/${
             config.parentRepo || config.repository
@@ -621,35 +617,21 @@ export async function getPrList(): Promise<Pr[]> {
           { paginate: true }
         )
       ).body;
+      config.prList = ghRestPrs
+        .filter(
+          (pr) =>
+            config.forkMode ||
+            config.ignorePrAuthor ||
+            (pr?.user?.login && config?.renovateUsername
+              ? pr.user.login === config.renovateUsername
+              : true)
+        )
+        .map(coerceGhRestPr);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PlatformId.Github);
     }
-    config.prList = prList
-      .filter(
-        (pr) =>
-          config.forkMode ||
-          config.ignorePrAuthor ||
-          (pr?.user?.login && config?.renovateUsername
-            ? pr.user.login === config.renovateUsername
-            : true)
-      )
-      .map((pr) => ({
-        number: pr.number,
-        sourceBranch: pr.head.ref,
-        sha: pr.head.sha,
-        title: pr.title,
-        state:
-          pr.state === PrState.Closed && pr.merged_at?.length
-            ? /* istanbul ignore next */ PrState.Merged
-            : pr.state,
-        createdAt: pr.created_at,
-        closedAt: pr.closed_at,
-        sourceRepo: pr.head?.repo?.full_name,
-        hasAssignees: !!(pr.assignee || is.nonEmptyArray(pr.assignees)),
-        hasReviewers: !!pr.requested_reviewers,
-        labels: pr.labels?.map(({ name }) => name),
-      }));
+
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
@@ -1416,25 +1398,23 @@ export async function createPr({
     options.body.maintainer_can_modify = true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
-  const pr = (
+  const ghRestPr = (
     await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
+  const { node_id: prNodeId } = ghRestPr;
+  const pr = coerceGhRestPr(ghRestPr);
   logger.debug(
     { branch: sourceBranch, pr: pr.number, draft: draftPR },
     'PR created'
   );
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
-  }
   pr.displayNumber = `Pull Request #${pr.number}`;
   pr.sourceBranch = sourceBranch;
-  pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
-  await tryPrAutomerge(pr.number, pr.node_id, platformOptions);
+  await tryPrAutomerge(pr.number, prNodeId, platformOptions);
+  config.prList?.push(pr);
   return pr;
 }
 

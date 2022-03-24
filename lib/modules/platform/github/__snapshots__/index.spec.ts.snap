@@ -143,15 +143,18 @@ Array [
 
 exports[`modules/platform/github/index createPr() should create a draftPR if set in the settings 1`] = `
 Object {
+  "closedAt": undefined,
+  "createdAt": undefined,
   "displayNumber": "Pull Request #123",
-  "head": Object {
-    "repo": Object {
-      "full_name": "some/repo",
-    },
-  },
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 123,
+  "sha": undefined,
   "sourceBranch": "some-branch",
   "sourceRepo": "some/repo",
+  "state": undefined,
+  "title": undefined,
 }
 `;
 
@@ -227,15 +230,18 @@ Array [
 
 exports[`modules/platform/github/index createPr() should create and return a PR object 1`] = `
 Object {
+  "closedAt": undefined,
+  "createdAt": undefined,
   "displayNumber": "Pull Request #123",
-  "head": Object {
-    "repo": Object {
-      "full_name": "some/repo",
-    },
-  },
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 123,
+  "sha": undefined,
   "sourceBranch": "some-branch",
   "sourceRepo": "some/repo",
+  "state": undefined,
+  "title": undefined,
 }
 `;
 
@@ -328,15 +334,18 @@ Array [
 
 exports[`modules/platform/github/index createPr() should use defaultBranch 1`] = `
 Object {
+  "closedAt": undefined,
+  "createdAt": undefined,
   "displayNumber": "Pull Request #123",
-  "head": Object {
-    "repo": Object {
-      "full_name": "some/repo",
-    },
-  },
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 123,
+  "sha": undefined,
   "sourceBranch": "some-branch",
   "sourceRepo": "some/repo",
+  "state": undefined,
+  "title": undefined,
 }
 `;
 
@@ -3074,6 +3083,9 @@ exports[`modules/platform/github/index getBranchPr(branchName) should return the
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 91,
   "sha": undefined,
   "sourceBranch": "somebranch",
@@ -4281,6 +4293,9 @@ exports[`modules/platform/github/index getPr(prNo) should return PR from graphql
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 2500,
   "sha": undefined,
   "sourceBranch": "renovate/jest-monorepo",
@@ -4353,13 +4368,17 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
 Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "displayNumber": "Pull Request #1",
-  "merged_at": "sometime",
+  "closedAt": undefined,
+  "createdAt": undefined,
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 1,
-  "state": "closed",
+  "sha": undefined,
+  "sourceBranch": undefined,
+  "sourceRepo": undefined,
+  "state": "merged",
+  "title": undefined,
 }
 `;
 
@@ -4437,16 +4456,17 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
 Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "commits": 1,
-  "displayNumber": "Pull Request #1",
-  "mergeable_state": "dirty",
+  "closedAt": undefined,
+  "createdAt": undefined,
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 1,
   "sha": undefined,
   "sourceBranch": undefined,
+  "sourceRepo": undefined,
   "state": "open",
+  "title": undefined,
 }
 `;
 
@@ -4524,15 +4544,17 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
 Object {
-  "base": Object {
-    "sha": "5678",
-  },
-  "commits": 1,
-  "displayNumber": "Pull Request #1",
+  "closedAt": undefined,
+  "createdAt": undefined,
+  "hasAssignees": false,
+  "hasReviewers": false,
+  "labels": undefined,
   "number": 1,
   "sha": undefined,
   "sourceBranch": undefined,
+  "sourceRepo": undefined,
   "state": "open",
+  "title": undefined,
 }
 `;
 
