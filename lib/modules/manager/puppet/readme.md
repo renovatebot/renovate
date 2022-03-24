@@ -55,10 +55,6 @@ the Puppetfile supports at the moment different ways to configure forges
       :tag => '0.9.0'
    ```
 
-# general overview
-
-![puppet overview](__docs__/puppet_overview.dio.png)
-
 # possible improvements
 
 ## monorepo
