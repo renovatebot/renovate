@@ -173,7 +173,6 @@ export async function initRepo({
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
-  // istanbul ignore if
   if (!repo) {
     logger.error({ repos, repo }, 'Could not find repo in repo list');
     throw new Error(REPOSITORY_NOT_FOUND);
