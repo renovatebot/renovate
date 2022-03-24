@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { ForgeDatasource } from '../../datasource/forge';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { PuppetDatasource } from '../../datasource/puppet';
 import type { PackageDependency, PackageFile } from '../types';
 import {
   RE_REPOSITORY_GITHUB_SSH_FORMAT,
@@ -20,7 +20,7 @@ function getForgeDependency(
 
   return {
     depName: module,
-    datasource: PuppetDatasource.id,
+    datasource: ForgeDatasource.id,
     packageName: module,
     currentValue: version,
     registryUrls: [forgeUrl],

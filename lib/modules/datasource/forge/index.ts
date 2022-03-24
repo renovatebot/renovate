@@ -3,11 +3,11 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { PuppetModule } from './types';
 
-export class PuppetDatasource extends Datasource {
-  static id = 'puppet';
+export class ForgeDatasource extends Datasource {
+  static id = 'forge';
 
   constructor() {
-    super(PuppetDatasource.id);
+    super(ForgeDatasource.id);
   }
 
   async getReleases({
