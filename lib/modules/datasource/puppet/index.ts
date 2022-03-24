@@ -21,9 +21,10 @@ export class PuppetDatasource extends Datasource {
     let moduleResponse;
     try {
       moduleResponse = await this.http.get(url);
-    } catch (e) {
+    } catch (err) {
       logger.warn(
-        `ignore dependency ${packageName} because of faulty response for ${url}: ${e}`
+        { err },
+        `ignore dependency ${packageName} because of faulty response for ${url}`
       );
       return null;
     }
