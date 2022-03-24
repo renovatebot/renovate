@@ -7,5 +7,5 @@ export interface PuppetfileModule {
   skipReasons?: SkipReason[];
 }
 
-export type PuppetForgeUrl = string;
+export type PuppetForgeUrl = string | undefined;
 export type Puppetfile = Map<PuppetForgeUrl, PuppetfileModule[]>;

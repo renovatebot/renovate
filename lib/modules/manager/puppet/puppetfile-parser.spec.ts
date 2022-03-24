@@ -1,5 +1,4 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { PUPPET_FORGE as defaultRegistryUrl } from '../../datasource/puppet-forge/common';
 import { parsePuppetfile } from './puppetfile-parser';
 
 const puppetLabsRegistryUrl = 'https://forgeapi.puppetlabs.com';
@@ -8,7 +7,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
   describe('parsePuppetfile()', () => {
     it('Puppetfile_git_tag', () => {
       const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_git_tag'));
-      const defaultRegistryModules = puppetfile.get(defaultRegistryUrl);
+      const defaultRegistryModules = puppetfile.get(undefined);
 
       expect(defaultRegistryModules).toHaveLength(2);
       expect(defaultRegistryModules[0].name).toBe('apache');
@@ -24,7 +23,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
     it('Puppetfile_git_tag_single_line', () => {
       const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_git_tag_single_line'));
-      const defaultRegistryModules = puppetfile.get(defaultRegistryUrl);
+      const defaultRegistryModules = puppetfile.get(undefined);
 
       expect(defaultRegistryModules).toHaveLength(2);
       expect(defaultRegistryModules[0].name).toBe('apache');
@@ -43,7 +42,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_invalid_module'));
       expect(puppetfile.size).toBe(1);
 
-      const defaultRegistryModules = puppetfile.get(defaultRegistryUrl);
+      const defaultRegistryModules = puppetfile.get(undefined);
 
       expect(defaultRegistryModules).toHaveLength(1);
       expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
@@ -84,7 +83,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_no_forge'));
       expect(puppetfile.size).toBe(1);
 
-      const defaultRegistryModules = puppetfile.get(defaultRegistryUrl);
+      const defaultRegistryModules = puppetfile.get(undefined);
 
       expect(defaultRegistryModules).toHaveLength(3);
       expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
