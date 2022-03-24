@@ -839,7 +839,7 @@ Also we support the `off` keyword which will stop any fetching immediately.
     Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
-But you may choose to _add_ settings to any group by defining your own `group` configuration object.
+But you may _add_ settings to any group by defining your own `group` configuration object.
 
 ## groupName
 
