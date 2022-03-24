@@ -17,19 +17,19 @@ describe('modules/manager/puppet/extract', () => {
       expect(dep0.depName).toBe('puppetlabs/stdlib');
       expect(dep0.datasource).toBe(ForgeDatasource.id);
       expect(dep0.currentValue).toBe('8.0.0');
-      expect(dep0.registryUrls).toInclude('https://forgeapi.puppet.com');
+      expect(dep0.registryUrls).toBeUndefined();
 
       const dep1 = res.deps[1];
       expect(dep1.depName).toBe('puppetlabs/apache');
       expect(dep1.datasource).toBe(ForgeDatasource.id);
       expect(dep1.currentValue).toBe('6.5.1');
-      expect(dep1.registryUrls).toInclude('https://forgeapi.puppet.com');
+      expect(dep1.registryUrls).toBeUndefined();
 
       const dep2 = res.deps[2];
       expect(dep2.depName).toBe('puppetlabs/puppetdb');
       expect(dep2.datasource).toBe(ForgeDatasource.id);
       expect(dep2.currentValue).toBe('7.9.0');
-      expect(dep2.registryUrls).toInclude('https://forgeapi.puppet.com');
+      expect(dep2.registryUrls).toBeUndefined();
     });
 
     it('extracts multiple modules from Puppetfile with multiple forges/registries', () => {

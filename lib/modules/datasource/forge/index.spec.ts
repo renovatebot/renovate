@@ -9,6 +9,21 @@ const datasource = ForgeDatasource.id;
 
 describe('modules/datasource/forge/index', () => {
   describe('getReleases', () => {
+    it('should use default forge if no other provided', async () => {
+      httpMock
+        .scope('https://forgeapi.puppet.com')
+        .get('/v3/modules/puppetlabs-apache')
+        .reply(200, puppetforgeReleases);
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'puppetlabs/apache',
+        packageName: 'puppetlabs/apache',
+      });
+      expect(res).toBeDefined();
+      expect(res.registryUrl).toBe('https://forgeapi.puppet.com');
+    });
+
     it('parses real data', async () => {
       httpMock
         .scope('https://forgeapi.puppet.com')

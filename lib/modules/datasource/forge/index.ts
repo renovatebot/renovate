@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { PUPPET_FORGE } from './common';
 import type { PuppetModule } from './types';
 
 export class ForgeDatasource extends Datasource {
@@ -9,6 +10,8 @@ export class ForgeDatasource extends Datasource {
   constructor() {
     super(ForgeDatasource.id);
   }
+
+  override readonly defaultRegistryUrls = [PUPPET_FORGE];
 
   async getReleases({
     packageName,

@@ -18,13 +18,18 @@ function getForgeDependency(
   const module = line[1];
   const version = line[2];
 
-  return {
+  const dep: PackageDependency = {
     depName: module,
     datasource: ForgeDatasource.id,
     packageName: module,
     currentValue: version,
-    registryUrls: [forgeUrl],
   };
+
+  if (forgeUrl) {
+    dep.registryUrls = [forgeUrl];
+  }
+
+  return dep;
 }
 
 function getGitDependency(line: RegExpExecArray): PackageDependency {
@@ -91,7 +96,6 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   if (!forgeRegexFactory().test(content)) {
     forgeContents.push({
-      forgeUrl: 'https://forgeapi.puppet.com',
       moduleContent: content,
     });
   }

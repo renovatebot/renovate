@@ -1,4 +1,4 @@
 export interface ForgeContent {
-  forgeUrl: string;
+  forgeUrl?: string;
   moduleContent: string;
 }
