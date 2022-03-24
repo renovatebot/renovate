@@ -1,4 +1,4 @@
-import type { SkipReason } from "../../../types/skip-reason";
+import type { SkipReason } from '../../../types/skip-reason';
 
 export interface PuppetfileModule {
   name?: string;

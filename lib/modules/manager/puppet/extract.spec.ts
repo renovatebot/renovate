@@ -119,7 +119,9 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('Git module without a tag should result in a skip reason', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile_git_without_tag'));
+      const res = extractPackageFile(
+        Fixtures.get('Puppetfile_git_without_tag')
+      );
       expect(res.deps).toHaveLength(1);
 
       const dep0 = res.deps[0];
@@ -136,7 +138,9 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('Skip reason should be overwritten by parser', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile_git_without_tag_and_three_params'));
+      const res = extractPackageFile(
+        Fixtures.get('Puppetfile_git_without_tag_and_three_params')
+      );
       expect(res.deps).toHaveLength(1);
 
       const dep0 = res.deps[0];

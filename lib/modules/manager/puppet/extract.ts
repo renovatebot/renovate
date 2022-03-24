@@ -80,13 +80,13 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (const module of modules) {
       let packageDependency: PackageDependency;
 
-      if(isGitModule(module)) {
+      if (isGitModule(module)) {
         packageDependency = getGitDependency(module);
       } else {
         packageDependency = getForgeDependency(module, forgeUrl);
       }
 
-      if(module.skipReason) {
+      if (module.skipReason) {
         // the PuppetfileModule skip reason is dominant over the packageDependency skip reason
         packageDependency.skipReason = module.skipReason;
       }

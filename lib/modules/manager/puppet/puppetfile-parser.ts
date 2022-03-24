@@ -43,8 +43,6 @@ export function parsePuppetfile(content: string): Puppetfile {
         if (currentPuppetfileModule.name === undefined) {
           // moduleName
           currentPuppetfileModule.name = value;
-
-          // eslint-disable-next-line no-negated-condition
         } else if (currentPuppetfileModule.version === undefined) {
           // second value without a key is the version
           currentPuppetfileModule.version = value;
