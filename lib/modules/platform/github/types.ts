@@ -20,7 +20,7 @@ export interface Comment {
   body: string;
 }
 
-export interface GhRestPr extends Pr {
+export interface GhRestPr {
   head: {
     ref: string;
     sha: string;
