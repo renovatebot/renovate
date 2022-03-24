@@ -15,6 +15,74 @@ interface ForgeContent {
   moduleContent: string;
 }
 
+function getForgeDependency(
+  line: RegExpExecArray,
+  forgeUrl: string
+): PackageDependency {
+  const module = line[1];
+  const version = line[2];
+
+  return {
+    depName: module,
+    datasource: PuppetDatasource.id,
+    packageName: module,
+    currentValue: version,
+    registryUrls: [forgeUrl],
+  };
+}
+
+function getGitDependency(line: RegExpExecArray): PackageDependency {
+  const map = new Map();
+
+  const moduleName = line.groups.moduleName;
+
+  [1, 2, 3].forEach((i) => {
+    const key = line.groups[`key${i}`];
+    const value = line.groups[`value${i}`];
+
+    if (key && value) {
+      map.set(key, value);
+    }
+  });
+
+  const git = map.get('git');
+  const tag = map.get('tag');
+
+  if (git && tag) {
+    const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(git);
+
+    let githubOwnerRepo;
+    if (matchUrlSshFormat) {
+      const githubOwner = matchUrlSshFormat[1];
+      const githubRepo = matchUrlSshFormat[2];
+      githubOwnerRepo = `${githubOwner}/${githubRepo}`;
+    } else {
+      githubOwnerRepo = git
+        .replace(regEx(/^github:/), '')
+        .replace(regEx(/^git\+/), '')
+        .replace(regEx(/^https:\/\/github\.com\//), '')
+        .replace(regEx(/\.git$/), '');
+    }
+
+    return {
+      depName: moduleName,
+      packageName: githubOwnerRepo,
+      githubRepo: githubOwnerRepo,
+      sourceUrl: git,
+      gitRef: true,
+      currentValue: tag,
+      datasource: GithubTagsDatasource.id,
+    };
+  } else {
+    return {
+      depName: moduleName,
+      gitRef: true,
+      sourceUrl: git,
+      skipReason: 'invalid-version',
+    };
+  }
+}
+
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('puppet.extractPackageFile()');
 
@@ -27,7 +95,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   if (!forgeRegexFactory().test(content)) {
     forgeContents.push({
-      forgeUrl: 'https://forgeapi.puppet.com', // TODO: default Registry
+      forgeUrl: 'https://forgeapi.puppet.com',
       moduleContent: content,
     });
   }
@@ -47,75 +115,12 @@ export function extractPackageFile(content: string): PackageFile | null {
 
     let line: RegExpExecArray;
     while ((line = simpleModuleLineRegex.exec(moduleContent)) !== null) {
-      const module = line[1];
-      const version = line[2];
-
-      const dep: PackageDependency = {
-        depName: module,
-        datasource: PuppetDatasource.id,
-        packageName: module,
-        currentValue: version,
-        registryUrls: [forgeUrl],
-      };
-
-      deps.push(dep);
+      deps.push(getForgeDependency(line, forgeUrl));
     }
 
     const gitModuleRegex = gitModuleRegexFactory();
     while ((line = gitModuleRegex.exec(content)) !== null) {
-      const map = new Map();
-
-      const moduleName = line.groups.moduleName;
-
-      [1, 2, 3].forEach((i) => {
-        const key = line.groups[`key${i}`];
-        const value = line.groups[`value${i}`];
-
-        if (key && value) {
-          map.set(key, value);
-        }
-      });
-
-      const git = map.get('git');
-      const tag = map.get('tag');
-
-      if (git && tag) {
-        const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(git);
-
-        let githubOwnerRepo;
-        if (matchUrlSshFormat) {
-          const githubOwner = matchUrlSshFormat[1];
-          const githubRepo = matchUrlSshFormat[2];
-          githubOwnerRepo = `${githubOwner}/${githubRepo}`;
-        } else {
-          githubOwnerRepo = git
-            .replace(regEx(/^github:/), '')
-            .replace(regEx(/^git\+/), '')
-            .replace(regEx(/^https:\/\/github\.com\//), '')
-            .replace(regEx(/\.git$/), '');
-        }
-
-        const dep: PackageDependency = {
-          depName: moduleName,
-          packageName: githubOwnerRepo,
-          githubRepo: githubOwnerRepo,
-          sourceUrl: git,
-          gitRef: true,
-          currentValue: tag,
-          datasource: GithubTagsDatasource.id,
-        };
-
-        deps.push(dep);
-      } else {
-        const dep: PackageDependency = {
-          depName: moduleName,
-          gitRef: true,
-          sourceUrl: git,
-          skipReason: 'invalid-version',
-        };
-
-        deps.push(dep);
-      }
+      deps.push(getGitDependency(line));
     }
   }
 
