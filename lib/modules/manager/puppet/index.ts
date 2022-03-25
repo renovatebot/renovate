@@ -8,7 +8,7 @@ export { extractPackageFile } from './extract';
 export const language = ProgrammingLanguage.Ruby;
 
 export const defaultConfig = {
-  fileMatch: ['^Puppetfile$'],
+  fileMatch: ['(^|\\/)Puppetfile$'],
 };
 
 export const supportedDatasources = [

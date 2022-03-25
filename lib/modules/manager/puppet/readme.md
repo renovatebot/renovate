@@ -55,13 +55,18 @@ the Puppetfile supports at the moment different ways to configure forges
       :tag => '0.9.0'
    ```
 
+5. git based version
+
+   ```ruby
+   # tag based
+   mod 'stdlib',
+    :git => 'git@gitlab.com:example/project_stdlib.git',
+    :tag => '5.0.0'
+   ```
+
 # possible improvements
 
-## monorepo
-
-at the moment we support only one Puppetfile per repository
-
-## git-support
+## further git-support
 
 usually you can add the versions to a forge and use the already provided
 way of updating
@@ -71,4 +76,11 @@ way of updating
 mod 'example/samba',
     :git    => 'https://github.com/example/puppet-samba',
     :branch => 'stable_version'
+```
+
+```ruby
+# ref based
+mod 'example/samba',
+    :git => 'https://github.com/example/puppet-samba',
+    :ref => 'stable_version'
 ```
