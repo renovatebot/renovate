@@ -14,12 +14,13 @@ export function parsePuppetfile(content: string): Puppetfile {
     // remove comments
     const line = rawLine.replace(regEx(/#.*$/), '');
 
-    if (forgeRegex.test(line)) {
+    const forgeResult = forgeRegex.exec(line);
+    if (forgeResult) {
       addPuppetfileModule(puppetfile, currentForge, currentPuppetfileModule);
 
       currentPuppetfileModule = {};
 
-      currentForge = forgeRegex.exec(line)[1];
+      currentForge = forgeResult[1];
       continue;
     }
 
@@ -31,7 +32,7 @@ export function parsePuppetfile(content: string): Puppetfile {
     }
 
     const moduleValueRegex = regEx(/(?:\s*:(\w+)\s+=>\s+)?['"]([^'"]+)['"]/g);
-    let moduleValue: RegExpExecArray;
+    let moduleValue: RegExpExecArray | null;
 
     while ((moduleValue = moduleValueRegex.exec(line)) !== null) {
       const key = moduleValue[1];
@@ -42,17 +43,7 @@ export function parsePuppetfile(content: string): Puppetfile {
           currentPuppetfileModule.tags || new Map();
         currentPuppetfileModule.tags.set(key, value);
       } else {
-        // "positional" module values
-        if (currentPuppetfileModule.name === undefined) {
-          // moduleName
-          currentPuppetfileModule.name = value;
-        } else if (currentPuppetfileModule.version === undefined) {
-          // second value without a key is the version
-          currentPuppetfileModule.version = value;
-        } else {
-          // 3+ value without a key is not supported
-          currentPuppetfileModule.skipReason = 'invalid-config';
-        }
+        fillPuppetfileModule(currentPuppetfileModule, value);
       }
     }
   }
@@ -62,9 +53,23 @@ export function parsePuppetfile(content: string): Puppetfile {
   return puppetfile;
 }
 
+function fillPuppetfileModule(currentPuppetfileModule, value): void {
+  // "positional" module values
+  if (currentPuppetfileModule.name === undefined) {
+    // moduleName
+    currentPuppetfileModule.name = value;
+  } else if (currentPuppetfileModule.version === undefined) {
+    // second value without a key is the version
+    currentPuppetfileModule.version = value;
+  } else {
+    // 3+ value without a key is not supported
+    currentPuppetfileModule.skipReason = 'invalid-config';
+  }
+}
+
 function addPuppetfileModule(
   puppetfile: Puppetfile,
-  currentForge: string,
+  currentForge: string | undefined,
   module: PuppetfileModule
 ): void {
   if (Object.keys(module).length === 0) {
@@ -75,5 +80,5 @@ function addPuppetfileModule(
     puppetfile.set(currentForge, []);
   }
 
-  puppetfile.get(currentForge).push(module);
+  puppetfile.get(currentForge)?.push(module);
 }
