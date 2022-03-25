@@ -9,20 +9,22 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_git_tag'));
       const defaultRegistryModules = puppetfile.get(undefined);
 
-      expect(defaultRegistryModules).toHaveLength(2);
-      expect(defaultRegistryModules[0].name).toBe('apache');
-      expect(defaultRegistryModules[0].version).toBeUndefined();
-      expect(defaultRegistryModules[0].tags.get('git')).toBe(
-        'https://github.com/puppetlabs/puppetlabs-apache'
-      );
-      expect(defaultRegistryModules[0].tags.get('tag')).toBe('0.9.0');
-
-      expect(defaultRegistryModules[1].name).toBe('stdlib');
-      expect(defaultRegistryModules[1].version).toBeUndefined();
-      expect(defaultRegistryModules[1].tags.get('git')).toBe(
-        'git@github.com:puppetlabs/puppetlabs-stdlib.git'
-      );
-      expect(defaultRegistryModules[1].tags.get('tag')).toBe('5.0.0');
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'apache',
+          tags: new Map([
+            ['git', 'https://github.com/puppetlabs/puppetlabs-apache'],
+            ['tag', '0.9.0'],
+          ]),
+        },
+        {
+          name: 'stdlib',
+          tags: new Map([
+            ['git', 'git@github.com:puppetlabs/puppetlabs-stdlib.git'],
+            ['tag', '5.0.0'],
+          ]),
+        },
+      ]);
     });
 
     it('Puppetfile_git_tag_single_line', () => {
@@ -31,20 +33,22 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       );
       const defaultRegistryModules = puppetfile.get(undefined);
 
-      expect(defaultRegistryModules).toHaveLength(2);
-      expect(defaultRegistryModules[0].name).toBe('apache');
-      expect(defaultRegistryModules[0].version).toBeUndefined();
-      expect(defaultRegistryModules[0].tags.get('git')).toBe(
-        'https://github.com/puppetlabs/puppetlabs-apache'
-      );
-      expect(defaultRegistryModules[0].tags.get('tag')).toBe('0.9.0');
-
-      expect(defaultRegistryModules[1].name).toBe('stdlib');
-      expect(defaultRegistryModules[1].version).toBeUndefined();
-      expect(defaultRegistryModules[1].tags.get('git')).toBe(
-        'git@github.com:puppetlabs/puppetlabs-stdlib.git'
-      );
-      expect(defaultRegistryModules[1].tags.get('tag')).toBe('5.0.0');
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'apache',
+          tags: new Map([
+            ['git', 'https://github.com/puppetlabs/puppetlabs-apache'],
+            ['tag', '0.9.0'],
+          ]),
+        },
+        {
+          name: 'stdlib',
+          tags: new Map([
+            ['git', 'git@github.com:puppetlabs/puppetlabs-stdlib.git'],
+            ['tag', '5.0.0'],
+          ]),
+        },
+      ]);
     });
 
     it('Puppetfile_invalid_module', () => {
@@ -55,11 +59,13 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
       const defaultRegistryModules = puppetfile.get(undefined);
 
-      expect(defaultRegistryModules).toHaveLength(1);
-      expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
-      expect(defaultRegistryModules[0].version).toBe('8.0.0');
-      expect(defaultRegistryModules[0].skipReason).toBeDefined();
-      expect(defaultRegistryModules[0].skipReason).toBe('invalid-config');
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'puppetlabs/stdlib',
+          version: '8.0.0',
+          skipReason: 'invalid-config',
+        },
+      ]);
     });
 
     it('Puppetfile_multiple_forges', () => {
@@ -70,25 +76,39 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
       const defaultRegistryModules = puppetfile.get(puppetLabsRegistryUrl);
 
-      expect(defaultRegistryModules).toHaveLength(3);
-      expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
-      expect(defaultRegistryModules[0].version).toBe('8.0.0');
-      expect(defaultRegistryModules[1].name).toBe('puppetlabs/apache');
-      expect(defaultRegistryModules[1].version).toBe('6.5.1');
-      expect(defaultRegistryModules[2].name).toBe('puppetlabs/puppetdb');
-      expect(defaultRegistryModules[2].version).toBe('7.9.0');
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'puppetlabs/stdlib',
+          version: '8.0.0',
+        },
+        {
+          name: 'puppetlabs/apache',
+          version: '6.5.1',
+        },
+        {
+          name: 'puppetlabs/puppetdb',
+          version: '7.9.0',
+        },
+      ]);
 
       const someOtherPuppetForgeModules = puppetfile.get(
         'https://some-other-puppet-forge.com'
       );
 
-      expect(someOtherPuppetForgeModules).toHaveLength(3);
-      expect(someOtherPuppetForgeModules[0].name).toBe('mock/mockstdlib');
-      expect(someOtherPuppetForgeModules[0].version).toBe('10.0.0');
-      expect(someOtherPuppetForgeModules[1].name).toBe('mock/mockapache');
-      expect(someOtherPuppetForgeModules[1].version).toBe('2.5.1');
-      expect(someOtherPuppetForgeModules[2].name).toBe('mock/mockpuppetdb');
-      expect(someOtherPuppetForgeModules[2].version).toBe('1.9.0');
+      expect(someOtherPuppetForgeModules).toEqual([
+        {
+          name: 'mock/mockstdlib',
+          version: '10.0.0',
+        },
+        {
+          name: 'mock/mockapache',
+          version: '2.5.1',
+        },
+        {
+          name: 'mock/mockpuppetdb',
+          version: '1.9.0',
+        },
+      ]);
     });
 
     it('Puppetfile_no_forge', () => {
@@ -97,13 +117,20 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
       const defaultRegistryModules = puppetfile.get(undefined);
 
-      expect(defaultRegistryModules).toHaveLength(3);
-      expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
-      expect(defaultRegistryModules[0].version).toBe('8.0.0');
-      expect(defaultRegistryModules[1].name).toBe('puppetlabs/apache');
-      expect(defaultRegistryModules[1].version).toBe('6.5.1');
-      expect(defaultRegistryModules[2].name).toBe('puppetlabs/puppetdb');
-      expect(defaultRegistryModules[2].version).toBe('7.9.0');
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'puppetlabs/stdlib',
+          version: '8.0.0',
+        },
+        {
+          name: 'puppetlabs/apache',
+          version: '6.5.1',
+        },
+        {
+          name: 'puppetlabs/puppetdb',
+          version: '7.9.0',
+        },
+      ]);
     });
 
     it('Puppetfile_single_forge', () => {
@@ -114,13 +141,20 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
       const defaultRegistryModules = puppetfile.get(puppetLabsRegistryUrl);
 
-      expect(defaultRegistryModules).toHaveLength(3);
-      expect(defaultRegistryModules[0].name).toBe('puppetlabs/stdlib');
-      expect(defaultRegistryModules[0].version).toBe('8.0.0');
-      expect(defaultRegistryModules[1].name).toBe('puppetlabs/apache');
-      expect(defaultRegistryModules[1].version).toBe('6.5.1');
-      expect(defaultRegistryModules[2].name).toBe('puppetlabs/puppetdb');
-      expect(defaultRegistryModules[2].version).toBe('7.9.0');
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'puppetlabs/stdlib',
+          version: '8.0.0',
+        },
+        {
+          name: 'puppetlabs/apache',
+          version: '6.5.1',
+        },
+        {
+          name: 'puppetlabs/puppetdb',
+          version: '7.9.0',
+        },
+      ]);
     });
 
     it('Puppetfile_with_comments', () => {
@@ -131,45 +165,32 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
       const defaultRegistryModules = puppetfile.get(undefined);
 
-      expect(defaultRegistryModules).toHaveLength(5);
-
-      const dep0 = defaultRegistryModules[0];
-      const dep1 = defaultRegistryModules[1];
-      const dep2 = defaultRegistryModules[2];
-      const dep3 = defaultRegistryModules[3];
-      const dep4 = defaultRegistryModules[4];
-
-      expect(dep0.name).toBe('puppetlabs/stdlib');
-      expect(dep0.version).toBe('8.0.0');
-      expect(dep0.tags).toBeUndefined();
-      expect(dep0.skipReason).toBeUndefined();
-
-      expect(dep1.name).toBe('puppetlabs/apache');
-      expect(dep1.version).toBe('6.5.1');
-      expect(dep1.tags).toBeUndefined();
-      expect(dep1.skipReason).toBeUndefined();
-
-      expect(dep2.name).toBe('apache');
-      expect(dep2.version).toBeUndefined();
-      expect(dep2.tags.size).toBe(1);
-      expect(dep2.tags.get('git')).toBe(
-        'https://github.com/puppetlabs/puppetlabs-apache'
-      );
-      expect(dep2.skipReason).toBeUndefined();
-
-      expect(dep3.name).toBe('stdlib');
-      expect(dep3.version).toBeUndefined();
-      expect(dep3.tags.size).toBe(1);
-      expect(dep3.tags.get('tag')).toBe('5.0.0');
-      expect(dep3.skipReason).toBeUndefined();
-
-      expect(dep4.name).toBe('stdlib2');
-      expect(dep4.version).toBeUndefined();
-      expect(dep4.tags.size).toBe(1);
-      expect(dep4.tags.get('git')).toBe(
-        'git@github.com:puppetlabs/puppetlabs-stdlib2.git'
-      );
-      expect(dep4.skipReason).toBeUndefined();
+      expect(defaultRegistryModules).toEqual([
+        {
+          name: 'puppetlabs/stdlib',
+          version: '8.0.0',
+        },
+        {
+          name: 'puppetlabs/apache',
+          version: '6.5.1',
+        },
+        {
+          name: 'apache',
+          tags: new Map([
+            ['git', 'https://github.com/puppetlabs/puppetlabs-apache'],
+          ]),
+        },
+        {
+          name: 'stdlib',
+          tags: new Map([['tag', '5.0.0']]),
+        },
+        {
+          name: 'stdlib2',
+          tags: new Map([
+            ['git', 'git@github.com:puppetlabs/puppetlabs-stdlib2.git'],
+          ]),
+        },
+      ]);
     });
   });
 });
