@@ -5,7 +5,10 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
+import {
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_NOT_FOUND,
+} from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
@@ -183,6 +186,14 @@ describe('modules/platform/azure/index', () => {
           repository: 'some/repo3',
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
+    });
+
+    it(`throws if repo is not in repos list`, async () => {
+      await expect(
+        initRepo({
+          repository: 'some/missing',
+        })
+      ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
   });
 
