@@ -48,23 +48,34 @@ export class PuppetForgeDatasource extends Datasource {
       registryUrl,
     }));
 
-    const result: ReleaseResult = {
-      releases,
-      homepage: module.homepage_url,
-      tags: {
-        moduleGroup: module.module_group,
-        premium: `${module.premium}`,
-      },
-    };
-
-    if (module.deprecated_for) {
-      result.deprecationMessage = module.deprecated_for;
+    if (!releases.length) {
+      return null;
     }
 
-    if (result.tags && module.endorsement) {
-      result.tags.endorsement = module.endorsement;
-    }
-
-    return result;
+    return createReleaseResult(releases, module);
   }
+}
+
+function createReleaseResult(
+  releases: Release[],
+  module: PuppetModule
+): ReleaseResult {
+  const result: ReleaseResult = {
+    releases,
+    homepage: module.homepage_url,
+    tags: {
+      moduleGroup: module.module_group,
+      premium: `${module.premium}`,
+    },
+  };
+
+  if (module.deprecated_for) {
+    result.deprecationMessage = module.deprecated_for;
+  }
+
+  if (result.tags && module.endorsement) {
+    result.tags.endorsement = module.endorsement;
+  }
+
+  return result;
 }

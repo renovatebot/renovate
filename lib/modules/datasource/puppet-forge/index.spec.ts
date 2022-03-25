@@ -8,6 +8,7 @@ const puppetforgeReleases = loadFixture('puppetforge-response.json');
 const puppetforgeReleasesNulls = loadFixture(
   'puppetforge-response-with-nulls.json'
 );
+const puppetforgeNoReleases = loadFixture('puppetforge-no-releases.json');
 
 const datasource = PuppetForgeDatasource.id;
 
@@ -191,5 +192,20 @@ describe('modules/datasource/puppet-forge/index', () => {
         premium: 'false',
       },
     });
+  });
+
+  it('no releases available -> return null', async () => {
+    httpMock
+      .scope('https://forgeapi.puppet.com', {})
+      .get('/v3/modules/foobar')
+      .query({ exclude_fields: 'current_release' })
+      .reply(200, puppetforgeNoReleases);
+
+    const res = await getPkgReleases({
+      datasource,
+      depName: 'foobar',
+    });
+
+    expect(res).toBeNull();
   });
 });
