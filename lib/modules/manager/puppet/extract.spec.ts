@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/puppet/extract', () => {
   describe('extractPackageFile()', () => {
