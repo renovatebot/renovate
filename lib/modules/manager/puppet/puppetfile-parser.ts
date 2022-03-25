@@ -1,7 +1,6 @@
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type { PuppetForgeUrl, Puppetfile, PuppetfileModule } from './types';
 
-const lineTerminationRegex = regEx(`\r?\n`);
 const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
 
 export function parsePuppetfile(content: string): Puppetfile {
@@ -10,7 +9,7 @@ export function parsePuppetfile(content: string): Puppetfile {
   let currentForge = undefined;
   let currentPuppetfileModule: PuppetfileModule = {};
 
-  for (const rawLine of content.split(lineTerminationRegex)) {
+  for (const rawLine of content.split(newlineRegex)) {
     // remove comments
     const line = rawLine.replace(regEx(/#.*$/), '');
 
