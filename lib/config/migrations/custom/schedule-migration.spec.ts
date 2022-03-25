@@ -47,4 +47,16 @@ describe('config/migrations/custom/schedule-migration', () => {
       false
     );
   });
+
+  it('does not migrate invalid range', () => {
+    expect(ScheduleMigration).toMigrate(
+      {
+        schedule: 'after and before 5:00',
+      } as any,
+      {
+        schedule: 'after and before 5:00',
+      } as any,
+      false
+    );
+  });
 });
