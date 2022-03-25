@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
-import { PuppetForgeDatasource } from './index';
+import { PuppetForgeDatasource } from '.';
 
 const puppetforgeReleases = loadFixture('puppetforge-response.json');
 const puppetforgeReleasesNulls = loadFixture(
@@ -41,16 +41,42 @@ describe('modules/datasource/puppet-forge/index', () => {
         packageName: 'puppetlabs/apache',
         registryUrls: ['https://forgeapi.puppet.com'],
       });
-      const release = res.releases[res.releases.length - 1];
 
-      expect(res.releases).toHaveLength(4);
-      expect(release.version).toBe('7.0.0');
-      expect(release.downloadUrl).toBe(
-        '/v3/files/puppetlabs-apache-7.0.0.tar.gz'
-      );
-      expect(release.releaseTimestamp).toBe('2021-10-11T14:47:24.000Z');
-      expect(release.registryUrl).toBe('https://forgeapi.puppet.com');
-      expect(res.sourceUrl).toBeDefined();
+      expect(res).toEqual({
+        registryUrl: 'https://forgeapi.puppet.com',
+        releases: [
+          {
+            downloadUrl: '/v3/files/puppetlabs-apache-6.4.0.tar.gz',
+            registryUrl: 'https://forgeapi.puppet.com',
+            releaseTimestamp: '2021-08-02T13:49:41.000Z',
+            version: '6.4.0',
+          },
+          {
+            downloadUrl: '/v3/files/puppetlabs-apache-6.5.0.tar.gz',
+            registryUrl: 'https://forgeapi.puppet.com',
+            releaseTimestamp: '2021-08-24T15:20:22.000Z',
+            version: '6.5.0',
+          },
+          {
+            downloadUrl: '/v3/files/puppetlabs-apache-6.5.1.tar.gz',
+            registryUrl: 'https://forgeapi.puppet.com',
+            releaseTimestamp: '2021-08-25T11:16:27.000Z',
+            version: '6.5.1',
+          },
+          {
+            downloadUrl: '/v3/files/puppetlabs-apache-7.0.0.tar.gz',
+            registryUrl: 'https://forgeapi.puppet.com',
+            releaseTimestamp: '2021-10-11T14:47:24.000Z',
+            version: '7.0.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
+        tags: {
+          endorsement: 'supported',
+          moduleGroup: 'base',
+          premium: 'false',
+        },
+      });
     });
   });
 
@@ -97,17 +123,41 @@ describe('modules/datasource/puppet-forge/index', () => {
       registryUrls,
     });
 
-    expect(res.releases).toHaveLength(4);
-
-    const release = res.releases[res.releases.length - 1];
-
-    expect(release.version).toBe('7.0.0');
-    expect(release.downloadUrl).toBe(
-      '/v3/files/puppetlabs-apache-7.0.0.tar.gz'
-    );
-    expect(release.releaseTimestamp).toBe('2021-10-11T14:47:24.000Z');
-    expect(release.registryUrl).toBe('https://puppet.mycustomregistry.com');
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toEqual({
+      registryUrl: 'https://puppet.mycustomregistry.com',
+      releases: [
+        {
+          downloadUrl: '/v3/files/puppetlabs-apache-6.4.0.tar.gz',
+          registryUrl: 'https://puppet.mycustomregistry.com',
+          releaseTimestamp: '2021-08-02T13:49:41.000Z',
+          version: '6.4.0',
+        },
+        {
+          downloadUrl: '/v3/files/puppetlabs-apache-6.5.0.tar.gz',
+          registryUrl: 'https://puppet.mycustomregistry.com',
+          releaseTimestamp: '2021-08-24T15:20:22.000Z',
+          version: '6.5.0',
+        },
+        {
+          downloadUrl: '/v3/files/puppetlabs-apache-6.5.1.tar.gz',
+          registryUrl: 'https://puppet.mycustomregistry.com',
+          releaseTimestamp: '2021-08-25T11:16:27.000Z',
+          version: '6.5.1',
+        },
+        {
+          downloadUrl: '/v3/files/puppetlabs-apache-7.0.0.tar.gz',
+          registryUrl: 'https://puppet.mycustomregistry.com',
+          releaseTimestamp: '2021-10-11T14:47:24.000Z',
+          version: '7.0.0',
+        },
+      ],
+      sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
+      tags: {
+        endorsement: 'supported',
+        moduleGroup: 'base',
+        premium: 'false',
+      },
+    });
   });
 
   it('load all possible null values', async () => {
@@ -122,14 +172,21 @@ describe('modules/datasource/puppet-forge/index', () => {
       depName: 'foobar',
     });
 
-    expect(res.releases).toHaveLength(1);
-    expect(res.deprecationMessage).toBeUndefined();
-    expect(res.sourceUrl).toBe(
-      'https://github.com/puppetlabs/puppetlabs-apache'
-    );
-    expect(res.tags).toBeDefined();
-    expect(res.tags.endorsement).toBeUndefined();
-    expect(res.tags.moduleGroup).toBe('base');
-    expect(res.tags.premium).toBe('false');
+    expect(res).toEqual({
+      registryUrl: 'https://forgeapi.puppet.com',
+      releases: [
+        {
+          downloadUrl: '/v3/files/puppetlabs-apache-7.0.0.tar.gz',
+          registryUrl: 'https://forgeapi.puppet.com',
+          releaseTimestamp: '2021-10-11T14:47:24.000Z',
+          version: '7.0.0',
+        },
+      ],
+      sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
+      tags: {
+        moduleGroup: 'base',
+        premium: 'false',
+      },
+    });
   });
 });
