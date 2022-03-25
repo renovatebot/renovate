@@ -259,6 +259,7 @@
     "lib/modules/manager/poetry/artifacts.ts",
     "lib/modules/manager/poetry/extract.ts",
     "lib/modules/manager/poetry/index.ts",
+    "lib/modules/manager/poetry/locked-version.ts",
     "lib/modules/manager/pre-commit/extract.ts",
     "lib/modules/manager/pre-commit/index.ts",
     "lib/modules/manager/pub/extract.ts",

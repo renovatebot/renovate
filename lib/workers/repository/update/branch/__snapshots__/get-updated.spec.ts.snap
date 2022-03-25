@@ -218,14 +218,14 @@ Object {
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
-      "path": "poetry.lock",
+      "path": "terraform.lock",
       "type": "addition",
     },
   ],
   "updatedPackageFiles": Array [
     Object {
       "contents": "existing content",
-      "path": "pyproject.toml",
+      "path": "abc.tf",
       "type": "addition",
     },
   ],

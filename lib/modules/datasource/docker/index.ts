@@ -8,7 +8,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
+import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import { Http, HttpError } from '../../../util/http';
 import type {
@@ -32,7 +32,14 @@ import {
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
-import { Image, ImageList, MediaType, RegistryRepository } from './types';
+import {
+  Image,
+  ImageList,
+  MediaType,
+  OciImage,
+  OciImageList,
+  RegistryRepository,
+} from './types';
 
 export const DOCKER_HUB = 'https://index.docker.io';
 
@@ -368,8 +375,12 @@ export class DockerDatasource extends Datasource {
         logger.debug('No docker auth found - returning');
         return null;
       }
-      headers.accept =
-        'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
+      headers.accept = [
+        MediaType.manifestListV2,
+        MediaType.manifestV2,
+        MediaType.ociManifestV1,
+        MediaType.ociManifestIndexV1,
+      ].join(', ');
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
         headers,
@@ -444,7 +455,11 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
+    const manifest = JSON.parse(manifestResponse.body) as
+      | ImageList
+      | Image
+      | OciImageList
+      | OciImage;
     if (manifest.schemaVersion !== 2) {
       logger.debug(
         { registry, dockerRepository, tag },
@@ -453,23 +468,62 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    if (
-      manifest.mediaType === MediaType.manifestListV2 &&
-      manifest.manifests.length
-    ) {
-      logger.trace(
-        { registry, dockerRepository, tag },
-        'Found manifest list, using first image'
-      );
-      return this.getConfigDigest(
-        registry,
-        dockerRepository,
-        manifest.manifests[0].digest
-      );
+    if (manifest.mediaType === MediaType.manifestListV2) {
+      if (manifest.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest list, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest list with no manifests - returning'
+        );
+        return null;
+      }
     }
 
     if (
       manifest.mediaType === MediaType.manifestV2 &&
+      is.string(manifest.config?.digest)
+    ) {
+      return manifest.config?.digest;
+    }
+
+    // OCI image lists are not required to specify a mediaType
+    if (
+      manifest.mediaType === MediaType.ociManifestIndexV1 ||
+      (!manifest.mediaType && hasKey('manifests', manifest))
+    ) {
+      const imageList = manifest as OciImageList;
+      if (imageList.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest index, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest index with no manifests - returning'
+        );
+        return null;
+      }
+    }
+
+    // OCI manifests are not required to specify a mediaType
+    if (
+      (manifest.mediaType === MediaType.ociManifestV1 ||
+        (!manifest.mediaType && hasKey('config', manifest))) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
@@ -485,22 +539,18 @@ export class DockerDatasource extends Datasource {
    * This function will:
    *  - Return the labels for the requested image
    */
-  private async getLabels(
+  @cache({
+    namespace: 'datasource-docker-labels',
+    key: (registryHost: string, dockerRepository: string, tag: string) =>
+      `${registryHost}:${dockerRepository}:${tag}`,
+    ttlMinutes: 60,
+  })
+  public async getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string
   ): Promise<Record<string, string>> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
-    const cacheNamespace = 'datasource-docker-labels';
-    const cacheKey = `${registryHost}:${dockerRepository}:${tag}`;
-    const cachedResult = await packageCache.get<Record<string, string>>(
-      cacheNamespace,
-      cacheKey
-    );
-    // istanbul ignore if
-    if (cachedResult !== undefined) {
-      return cachedResult;
-    }
     try {
       let labels: Record<string, string> = {};
       const configDigest = await this.getConfigDigest(
@@ -537,8 +587,6 @@ export class DockerDatasource extends Datasource {
           'found labels in manifest'
         );
       }
-      const cacheMinutes = 60;
-      await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
       return labels;
     } catch (err) /* istanbul ignore next: should be tested in future */ {
       if (err instanceof ExternalHostError) {
@@ -669,22 +717,16 @@ export class DockerDatasource extends Datasource {
     return tags;
   }
 
-  private async getTags(
+  @cache({
+    namespace: 'datasource-docker-tags',
+    key: (registryHost: string, dockerRepository: string) =>
+      `${registryHost}:${dockerRepository}`,
+  })
+  public async getTags(
     registryHost: string,
     dockerRepository: string
   ): Promise<string[] | null> {
     try {
-      const cacheNamespace = 'datasource-docker-tags';
-      const cacheKey = `${registryHost}:${dockerRepository}`;
-      const cachedResult = await packageCache.get<string[]>(
-        cacheNamespace,
-        cacheKey
-      );
-      // istanbul ignore if
-      if (cachedResult !== undefined) {
-        return cachedResult;
-      }
-
       const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
         registryHost
       );
@@ -694,8 +736,6 @@ export class DockerDatasource extends Datasource {
       } else {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
-      const cacheMinutes = 30;
-      await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
       return tags;
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {
@@ -743,6 +783,20 @@ export class DockerDatasource extends Datasource {
    *  - Look up a sha256 digest for a tag on its registry
    *  - Return the digest as a string
    */
+  @cache({
+    namespace: 'datasource-docker-digest',
+    key: (
+      { registryUrl, packageName }: GetReleasesConfig,
+      newValue?: string
+    ) => {
+      const newTag = newValue || 'latest';
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl
+      );
+      return `${registryHost}:${dockerRepository}:${newTag}`;
+    },
+  })
   override async getDigest(
     { registryUrl, packageName }: GetReleasesConfig,
     newValue?: string
@@ -755,18 +809,8 @@ export class DockerDatasource extends Datasource {
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue || 'latest';
-    const cacheNamespace = 'datasource-docker-digest';
-    const cacheKey = `${registryHost}:${dockerRepository}:${newTag}`;
     let digest: string = null;
     try {
-      const cachedResult = await packageCache.get<string>(
-        cacheNamespace,
-        cacheKey
-      );
-      // istanbul ignore if
-      if (cachedResult !== undefined) {
-        return cachedResult;
-      }
       let manifestResponse = await this.getManifestResponse(
         registryHost,
         dockerRepository,
@@ -805,8 +849,6 @@ export class DockerDatasource extends Datasource {
         'Unknown Error looking up docker image digest'
       );
     }
-    const cacheMinutes = 30;
-    await packageCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   }
 
