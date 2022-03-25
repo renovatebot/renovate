@@ -67,7 +67,10 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
 }
 
 function isGitModule(module: PuppetfileModule): boolean {
-  return module.tags?.has('git');
+  if (module.tags) {
+    return module.tags.has('git');
+  }
+  return false;
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
