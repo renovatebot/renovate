@@ -3,16 +3,16 @@ export interface PuppetModule {
   slug: string;
   name: string;
   deprecated_at: string | null;
-  owner: PuppetModuleOwner | null;
+  owner: PuppetModuleOwner;
   downloads: number;
   created_at: string;
   updated_at: string;
   deprecated_for: string | null;
   superseded_by: PuppetSupercededBy | null;
   endorsement: PuppetEndorsement | null;
-  module_group: PuppetModuleGroup | null;
+  module_group: PuppetModuleGroup;
   premium: boolean;
-  current_release: PuppetRelease | null;
+  current_release: PuppetRelease;
   releases: PuppetReleaseAbbreviated[];
   feedback_score: IntRange<101>;
   homepage_url: string;
@@ -42,7 +42,7 @@ export interface PuppetRelease {
   changelog: string;
   license: string;
   reference: string;
-  pe_compatibility: string[] | null;
+  pe_compatibility: string[] | null | undefined;
   tasks: PuppetBoltTask[];
   plans: PuppetBoltPlan[];
   created_at: string;

@@ -13,6 +13,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       httpMock
         .scope('https://forgeapi.puppet.com')
         .get('/v3/modules/puppetlabs-apache')
+        .query({ exclude_fields: 'current_release' })
         .reply(200, puppetforgeReleases);
 
       const res = await getPkgReleases({
@@ -28,6 +29,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       httpMock
         .scope('https://forgeapi.puppet.com')
         .get('/v3/modules/puppetlabs-apache')
+        .query({ exclude_fields: 'current_release' })
         .reply(200, puppetforgeReleases);
 
       const res = await getPkgReleases({
@@ -54,6 +56,7 @@ describe('modules/datasource/puppet-forge/index', () => {
     httpMock
       .scope('https://forgeapi.puppet.com')
       .get('/v3/modules/foobar')
+      .query({ exclude_fields: 'current_release' })
       .reply(400);
     const res = await getPkgReleases({
       datasource,
@@ -68,6 +71,7 @@ describe('modules/datasource/puppet-forge/index', () => {
     httpMock
       .scope('https://forgeapi.puppet.com')
       .get('/v3/modules/foobar')
+      .query({ exclude_fields: 'current_release' })
       .reply(404);
     const res = await getPkgReleases({
       datasource,
@@ -81,6 +85,7 @@ describe('modules/datasource/puppet-forge/index', () => {
     httpMock
       .scope('https://puppet.mycustomregistry.com', {})
       .get('/v3/modules/foobar')
+      .query({ exclude_fields: 'current_release' })
       .reply(200, puppetforgeReleases);
     const registryUrls = ['https://puppet.mycustomregistry.com'];
     const res = await getPkgReleases({

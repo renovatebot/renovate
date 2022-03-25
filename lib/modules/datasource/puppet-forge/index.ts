@@ -19,7 +19,7 @@ export class PuppetForgeDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
-    const url = `${registryUrl}/v3/modules/${moduleSlug}`;
+    const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
     let moduleResponse;
     try {
