@@ -122,5 +122,50 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       expect(defaultRegistryModules[2].name).toBe('puppetlabs/puppetdb');
       expect(defaultRegistryModules[2].version).toBe('7.9.0');
     });
+
+    it('Puppetfile_with_comments', () => {
+      const puppetfile = parsePuppetfile(
+        Fixtures.get('Puppetfile_with_comments')
+      );
+      expect(puppetfile.size).toBe(1);
+
+      const defaultRegistryModules = puppetfile.get(undefined);
+
+      expect(defaultRegistryModules).toHaveLength(5);
+
+      const dep0 = defaultRegistryModules[0];
+      const dep1 = defaultRegistryModules[1];
+      const dep2 = defaultRegistryModules[2];
+      const dep3 = defaultRegistryModules[3];
+      const dep4 = defaultRegistryModules[4];
+
+      expect(dep0.name).toBe('puppetlabs/stdlib');
+      expect(dep0.version).toBe('8.0.0');
+      expect(dep0.tags).toBeUndefined();
+      expect(dep0.skipReason).toBeUndefined();
+
+      expect(dep1.name).toBe('puppetlabs/apache');
+      expect(dep1.version).toBe('6.5.1');
+      expect(dep1.tags).toBeUndefined();
+      expect(dep1.skipReason).toBeUndefined();
+
+      expect(dep2.name).toBe('apache');
+      expect(dep2.version).toBeUndefined();
+      expect(dep2.tags.size).toBe(1);
+      expect(dep2.tags.get('git')).toBe('https://github.com/puppetlabs/puppetlabs-apache');
+      expect(dep2.skipReason).toBeUndefined();
+
+      expect(dep3.name).toBe('stdlib');
+      expect(dep3.version).toBeUndefined();
+      expect(dep3.tags.size).toBe(1);
+      expect(dep3.tags.get('tag')).toBe('5.0.0');
+      expect(dep3.skipReason).toBeUndefined();
+
+      expect(dep4.name).toBe('stdlib2');
+      expect(dep4.version).toBeUndefined();
+      expect(dep4.tags.size).toBe(1);
+      expect(dep4.tags.get('git')).toBe('git@github.com:puppetlabs/puppetlabs-stdlib2.git');
+      expect(dep4.skipReason).toBeUndefined();
+    });
   });
 });

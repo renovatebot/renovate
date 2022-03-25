@@ -10,7 +10,10 @@ export function parsePuppetfile(content: string): Puppetfile {
   let currentForge = undefined;
   let currentPuppetfileModule: PuppetfileModule = {};
 
-  for (const line of content.split(lineTerminationRegex)) {
+  for (const rawLine of content.split(lineTerminationRegex)) {
+    // remove comments
+    const line = rawLine.replace(regEx(/#.*$/), '');
+
     if (forgeRegex.test(line)) {
       addPuppetfileModule(puppetfile, currentForge, currentPuppetfileModule);
 
