@@ -41,15 +41,23 @@ export class PuppetForgeDatasource extends Datasource {
       registryUrl,
     }));
 
-    return {
+    const result: ReleaseResult = {
       releases,
-      deprecationMessage: module.deprecated_for,
       homepage: module.homepage_url,
       tags: {
-        endorsement: module.endorsement,
         moduleGroup: module.module_group,
         premium: `${module.premium}`,
       },
     };
+
+    if (module.deprecated_for) {
+      result.deprecationMessage = module.deprecated_for;
+    }
+
+    if (result.tags && module.endorsement) {
+      result.tags.endorsement = module.endorsement;
+    }
+
+    return result;
   }
 }

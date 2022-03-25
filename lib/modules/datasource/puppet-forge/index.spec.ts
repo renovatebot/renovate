@@ -4,6 +4,9 @@ import { loadFixture } from '../../../../test/util';
 import { PuppetForgeDatasource } from './index';
 
 const puppetforgeReleases = loadFixture('puppetforge-response.json');
+const puppetforgeReleasesNulls = loadFixture(
+  'puppetforge-response-with-nulls.json'
+);
 
 const datasource = PuppetForgeDatasource.id;
 
@@ -105,5 +108,28 @@ describe('modules/datasource/puppet-forge/index', () => {
     expect(release.releaseTimestamp).toBe('2021-10-11T14:47:24.000Z');
     expect(release.registryUrl).toBe('https://puppet.mycustomregistry.com');
     expect(res.sourceUrl).toBeDefined();
+  });
+
+  it('load all possible null values', async () => {
+    httpMock
+      .scope('https://forgeapi.puppet.com', {})
+      .get('/v3/modules/foobar')
+      .query({ exclude_fields: 'current_release' })
+      .reply(200, puppetforgeReleasesNulls);
+
+    const res = await getPkgReleases({
+      datasource,
+      depName: 'foobar',
+    });
+
+    expect(res.releases).toHaveLength(1);
+    expect(res.deprecationMessage).toBeUndefined();
+    expect(res.sourceUrl).toBe(
+      'https://github.com/puppetlabs/puppetlabs-apache'
+    );
+    expect(res.tags).toBeDefined();
+    expect(res.tags.endorsement).toBeUndefined();
+    expect(res.tags.moduleGroup).toBe('base');
+    expect(res.tags.premium).toBe('false');
   });
 });
