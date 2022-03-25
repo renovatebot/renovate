@@ -1,3 +1,4 @@
+import { EOL } from 'os';
 import { Fixtures } from '../../../../test/fixtures';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -113,7 +114,10 @@ describe('modules/manager/puppet/extract', () => {
 
     it('Git module without a tag should result in a skip reason', () => {
       const res = extractPackageFile(
-        Fixtures.get('Puppetfile_github_without_tag')
+        [
+          "mod 'stdlib',",
+          "  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',",
+        ].join(EOL)
       );
 
       expect(res.deps).toEqual([
@@ -128,7 +132,10 @@ describe('modules/manager/puppet/extract', () => {
 
     it('Skip reason should be overwritten by parser', () => {
       const res = extractPackageFile(
-        Fixtures.get('Puppetfile_github_without_tag_and_three_params')
+        [
+          "mod 'stdlib', '0.1.0', 'i create a skip reason'",
+          "  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',",
+        ].join(EOL)
       );
 
       expect(res.deps).toEqual([

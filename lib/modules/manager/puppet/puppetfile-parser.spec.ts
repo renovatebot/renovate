@@ -1,3 +1,4 @@
+import { EOL } from 'os';
 import { Fixtures } from '../../../../test/fixtures';
 import { parsePuppetfile } from './puppetfile-parser';
 
@@ -29,7 +30,10 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
     it('Puppetfile_github_tag_single_line', () => {
       const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile_github_tag_single_line')
+        [
+          "mod 'apache', :git => 'https://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'",
+          "mod 'stdlib', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git', :tag => '5.0.0'",
+        ].join(EOL)
       );
       const defaultRegistryModules = puppetfile.get(undefined);
 

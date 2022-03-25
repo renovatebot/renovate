@@ -1,2 +1,0 @@
-mod 'stdlib', '0.1.0', 'i create a skip reason'
-  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
