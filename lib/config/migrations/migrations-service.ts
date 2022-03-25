@@ -7,7 +7,9 @@ import { AutomergeMigration } from './custom/automerge-migration';
 import { AutomergeMinorMigration } from './custom/automerge-minor-migration';
 import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
+import { BaseBranchMigration } from './custom/base-branch-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
+import { BranchNameMigration } from './custom/branch-name-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
@@ -16,6 +18,7 @@ import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
+import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
@@ -66,7 +69,9 @@ export class MigrationsService {
     AutomergeMinorMigration,
     AutomergePatchMigration,
     AutomergeTypeMigration,
+    BaseBranchMigration,
     BinarySourceMigration,
+    BranchNameMigration,
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
@@ -75,6 +80,7 @@ export class MigrationsService {
     IgnoreNodeModulesMigration,
     PackageNameMigration,
     PackagePatternMigration,
+    PackagesMigration,
     PathRulesMigration,
     PinVersionsMigration,
     RaiseDeprecationWarningsMigration,

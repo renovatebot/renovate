@@ -35,7 +35,7 @@ If you want to print pretty JSON with Handlebars you can use the built-in functi
 
 `{{{stringToPrettyJSON myvar}}}`
 
-In the example above `myvar` is a variable/field, that contains valid JSON.
+In the example above `myvar` is a variable/field, that has valid JSON.
 
 ### encodeURIComponent
 

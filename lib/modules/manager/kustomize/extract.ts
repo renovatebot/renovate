@@ -133,6 +133,8 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
+  pkg.kind ??= 'Kustomization';
+
   if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
