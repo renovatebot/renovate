@@ -53,7 +53,10 @@ export function parsePuppetfile(content: string): Puppetfile {
   return puppetfile;
 }
 
-function fillPuppetfileModule(currentPuppetfileModule, value): void {
+function fillPuppetfileModule(
+  currentPuppetfileModule: PuppetfileModule,
+  value: string
+): void {
   // "positional" module values
   if (currentPuppetfileModule.name === undefined) {
     // moduleName
