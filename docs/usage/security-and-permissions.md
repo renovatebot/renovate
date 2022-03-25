@@ -7,7 +7,6 @@ This page talks about our security stance, and explains what permissions are nee
 Renovate is open source software, and comes with no guarantees or warranties of any kind.
 That said, we will try to fix security problems in a reasonable timeframe if possible.
 
-If you need commercial level support then use INSERT OUR COMMERCIAL OFFERING HERE.
 
 ### No certifications
 
