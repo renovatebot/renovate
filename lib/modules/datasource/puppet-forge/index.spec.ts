@@ -1,7 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { PuppetForgeDatasource } from '.';
 
 const puppetforgeReleases = loadFixture('puppetforge-response.json');
@@ -90,13 +89,12 @@ describe('modules/datasource/puppet-forge/index', () => {
       .query({ exclude_fields: 'current_release' })
       .reply(400);
 
-    await expect(
-      getPkgReleases({
-        datasource,
-        depName: 'foobar',
-        registryUrls: ['https://forgeapi.puppet.com'],
-      })
-    ).rejects.toThrow(ExternalHostError);
+    const res = await getPkgReleases({
+      datasource,
+      depName: 'foobar',
+      registryUrls: ['https://forgeapi.puppet.com'],
+    });
+    expect(res).toBeNull();
   });
 
   // https://forgeapi.puppet.com/#operation/getModule
