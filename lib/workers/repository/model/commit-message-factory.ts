@@ -29,8 +29,8 @@ export class CommitMessageFactory {
   private createSemanticCommitMessage(): SemanticCommitMessage {
     const message = new SemanticCommitMessage();
 
-    message.setType(this.config.semanticCommitType);
-    message.setScope(this.config.semanticCommitScope);
+    message.setType(this.config.semanticCommitType ?? '');
+    message.setScope(this.config.semanticCommitScope ?? '');
 
     return message;
   }

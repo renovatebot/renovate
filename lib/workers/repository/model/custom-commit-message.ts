@@ -22,6 +22,6 @@ export class CustomCommitMessage extends CommitMessage {
   }
 
   protected get prefix(): string {
-    return this._prefix;
+    return this._prefix ?? '';
   }
 }

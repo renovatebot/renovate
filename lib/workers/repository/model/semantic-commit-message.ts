@@ -25,7 +25,7 @@ export class SemanticCommitMessage extends CommitMessage {
   }
 
   static fromString(value: string): SemanticCommitMessage {
-    const { groups } = value.match(SemanticCommitMessage.REGEXP);
+    const { groups = {} } = value.match(SemanticCommitMessage.REGEXP) ?? {};
 
     const message = new SemanticCommitMessage();
     message.setType(groups.type);
@@ -54,10 +54,14 @@ export class SemanticCommitMessage extends CommitMessage {
   }
 
   protected get prefix(): string {
-    if (!this.scope && !this.type) {
-      return '';
+    if (this.type && !this.scope) {
+      return this.type;
     }
 
-    return this.scope ? `${this.type}(${this.scope})` : this.type;
+    if (this.scope) {
+      return `${this.type}(${this.scope})`;
+    }
+
+    return '';
   }
 }
