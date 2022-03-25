@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 import { extractPackageFile } from './extract';
@@ -86,7 +87,7 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('extracts multiple git tag modules from Puppetfile', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile_git_tag'));
+      const res = extractPackageFile(Fixtures.get('Puppetfile_github_tag'));
 
       expect(res.deps).toEqual([
         {
@@ -112,7 +113,7 @@ describe('modules/manager/puppet/extract', () => {
 
     it('Git module without a tag should result in a skip reason', () => {
       const res = extractPackageFile(
-        Fixtures.get('Puppetfile_git_without_tag')
+        Fixtures.get('Puppetfile_github_without_tag')
       );
 
       expect(res.deps).toEqual([
@@ -127,7 +128,7 @@ describe('modules/manager/puppet/extract', () => {
 
     it('Skip reason should be overwritten by parser', () => {
       const res = extractPackageFile(
-        Fixtures.get('Puppetfile_git_without_tag_and_three_params')
+        Fixtures.get('Puppetfile_github_without_tag_and_three_params')
       );
 
       expect(res.deps).toEqual([
@@ -136,6 +137,59 @@ describe('modules/manager/puppet/extract', () => {
           gitRef: true,
           skipReason: 'invalid-config',
           sourceUrl: 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
+        },
+      ]);
+    });
+
+    it('GitTagsDatasource', () => {
+      const res = extractPackageFile(Fixtures.get('Puppetfile_git_tag'));
+
+      expect(res.deps).toEqual([
+        {
+          datasource: GitTagsDatasource.id,
+          depName: 'apache',
+          packageName: 'https://gitlab.com/example/project.git',
+          repo: 'https://gitlab.com/example/project.git',
+          sourceUrl: 'https://gitlab.com/example/project.git',
+          githubRepo: undefined,
+          gitRef: true,
+          currentValue: '0.9.0',
+        },
+        {
+          datasource: GitTagsDatasource.id,
+          depName: 'stdlib',
+          packageName: 'git@gitlab.com:example/project_stdlib.git',
+          repo: 'git@gitlab.com:example/project_stdlib.git',
+          githubRepo: undefined,
+          sourceUrl: 'git@gitlab.com:example/project_stdlib.git',
+          gitRef: true,
+          currentValue: '5.0.0',
+        },
+        {
+          datasource: GitTagsDatasource.id,
+          depName: 'multiple_dirs_ssh',
+          packageName: 'git@gitlab.com:dir1/dir2/project.git',
+          repo: 'git@gitlab.com:dir1/dir2/project.git',
+          githubRepo: undefined,
+          sourceUrl: 'git@gitlab.com:dir1/dir2/project.git',
+          gitRef: true,
+          currentValue: '1.0.0',
+        },
+        {
+          datasource: GitTagsDatasource.id,
+          depName: 'multiple_dirs_https',
+          packageName: 'https://gitlab.com/dir1/dir2/project.git',
+          repo: 'https://gitlab.com/dir1/dir2/project.git',
+          githubRepo: undefined,
+          sourceUrl: 'https://gitlab.com/dir1/dir2/project.git',
+          gitRef: true,
+          currentValue: '1.9.0',
+        },
+        {
+          depName: 'invalid_url',
+          sourceUrl: 'hello world',
+          gitRef: true,
+          skipReason: 'invalid-url',
         },
       ]);
     });

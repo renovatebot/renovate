@@ -5,8 +5,8 @@ const puppetLabsRegistryUrl = 'https://forgeapi.puppetlabs.com';
 
 describe('modules/manager/puppet/puppetfile-parser', () => {
   describe('parsePuppetfile()', () => {
-    it('Puppetfile_git_tag', () => {
-      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_git_tag'));
+    it('Puppetfile_github_tag', () => {
+      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_github_tag'));
       const defaultRegistryModules = puppetfile.get(undefined);
 
       expect(defaultRegistryModules).toEqual([
@@ -27,9 +27,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       ]);
     });
 
-    it('Puppetfile_git_tag_single_line', () => {
+    it('Puppetfile_github_tag_single_line', () => {
       const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile_git_tag_single_line')
+        Fixtures.get('Puppetfile_github_tag_single_line')
       );
       const defaultRegistryModules = puppetfile.get(undefined);
 
