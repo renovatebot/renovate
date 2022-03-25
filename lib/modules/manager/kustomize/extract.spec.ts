@@ -34,6 +34,22 @@ describe('modules/manager/kustomize/extract', () => {
     const file = parseKustomize('');
     expect(file).toBeNull();
   });
+  it('should return null when header has invalid resource kind', () => {
+    const file = parseKustomize(`
+      kind: NoKustomization
+      bases:
+      - github.com/fluxcd/flux/deploy?ref=1.19.0
+    `);
+    expect(file).toBeNull();
+  });
+  it('should fall back to default resource kind when header is missing', () => {
+    const file = parseKustomize(`
+      bases:
+      - github.com/fluxcd/flux/deploy?ref=1.19.0
+    `);
+    expect(file).not.toBeNull();
+    expect(file.kind).toBe('Kustomization');
+  });
   describe('extractBase', () => {
     it('should return null for a local base', () => {
       const res = extractResource('./service-1');

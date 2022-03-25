@@ -1,9 +1,12 @@
 # Contributing
 
-## Security
+## Security / Disclosure
 
-If you think you've found a **security issue**, please do not mention it in this repository.
-Instead, email renovate-disclosure@whitesourcesoftware.com with as much details as possible so that it can be handled confidentially.
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com).
+This way we can evaluate the bug and hopefully fix it before it gets abused.
+Please give us enough time to investigate the bug before you report it anywhere else.
+
+Please do not create GitHub issues for security-related doubts or problems.
 
 ## Support
 
@@ -15,7 +18,7 @@ If you've found a **bug** or have a **feature request** then please create an is
 
 ## Code
 
-If you would like to fix a bug or implement a feature, please fork the repository and create a Pull Request.
+If you would like to fix a bug or work on a feature, please fork the repository and create a Pull Request.
 To learn how to setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
 Also skim the [docs/development](../docs/development/) folder, it has a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
 

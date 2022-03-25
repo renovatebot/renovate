@@ -176,7 +176,8 @@ exports[`modules/manager/npm/post-update/npm performs lock file updates retainin
       \\"integrity\\": \\"sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==\\"
     }
   }
-}"
+}
+"
 `;
 
 exports[`modules/manager/npm/post-update/npm performs lock file updates retaining the package.json counterparts 2`] = `
