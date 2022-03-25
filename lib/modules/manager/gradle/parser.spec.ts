@@ -85,19 +85,20 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('registryUrls', () => {
     test.each`
-      input                                           | url
-      ${'url ""'}                                     | ${null}
-      ${'url "#!@"'}                                  | ${null}
-      ${'url "https://example.com"'}                  | ${'https://example.com'}
-      ${'url("https://example.com")'}                 | ${'https://example.com'}
-      ${'mavenCentral()'}                             | ${MAVEN_REPO}
-      ${'jcenter()'}                                  | ${JCENTER_REPO}
-      ${'google()'}                                   | ${GOOGLE_REPO}
-      ${'google { content { includeGroup "foo" } }'}  | ${GOOGLE_REPO}
-      ${'gradlePluginPortal()'}                       | ${GRADLE_PLUGIN_PORTAL_REPO}
-      ${'maven("https://foo.bar/baz/qux")'}           | ${'https://foo.bar/baz/qux'}
-      ${'maven { url = uri("https://foo.bar/baz") }'} | ${'https://foo.bar/baz'}
-      ${"maven { url 'https://foo.bar/baz' }"}        | ${'https://foo.bar/baz'}
+      input                                          | url
+      ${'url ""'}                                    | ${null}
+      ${'url "#!@"'}                                 | ${null}
+      ${'url "https://example.com"'}                 | ${'https://example.com'}
+      ${'url("https://example.com")'}                | ${'https://example.com'}
+      ${'mavenCentral()'}                            | ${MAVEN_REPO}
+      ${'jcenter()'}                                 | ${JCENTER_REPO}
+      ${'google()'}                                  | ${GOOGLE_REPO}
+      ${'google { content { includeGroup "foo" } }'} | ${GOOGLE_REPO}
+      ${'gradlePluginPortal()'}                      | ${GRADLE_PLUGIN_PORTAL_REPO}
+      ${'maven("https://foo.bar/baz/qux")'}          | ${'https://foo.bar/baz/qux'}
+      ${'maven { url = uri("https://foo.bar/baz")'}  | ${'https://foo.bar/baz'}
+      ${"maven { url 'https://foo.bar/baz'"}         | ${'https://foo.bar/baz'}
+      ${"maven { url = 'https://foo.bar/baz'"}       | ${'https://foo.bar/baz'}
     `('$input', ({ input, url }) => {
       const expected = [url].filter(Boolean);
       const { urls } = parseGradle(input);

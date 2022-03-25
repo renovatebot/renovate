@@ -15,7 +15,7 @@ Renovate supports upgrading dependencies in Bundler's Gemfiles and their accompa
 1. A PR is created which updates the `Gemfile` and `Gemfile.lock` in a single commit
 1. If the source repository has a "changelog" file or uses GitHub releases, then Release Notes for each version are embedded in the generated PR
 
-## Caveats
+## Warnings
 
 Renovate doesn't update dependencies without a version constraint.
 Example: `gem 'some-gem', '~> 1.2.3'` will update `some-gem` if a new version matching the constraint is available, but `gem 'some-gem'` won't.
