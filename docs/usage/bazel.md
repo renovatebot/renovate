@@ -16,7 +16,7 @@ Renovate supports upgrading dependencies in Bazel `WORKSPACE` files.
 
 ## git_repository
 
-Renovate will update any `git_repository` declaration that contains the following:
+Renovate will update any `git_repository` declaration that has the following:
 
 1. name
 2. remote matching `https://github.com/<owner>/<repo>.git`
@@ -36,7 +36,7 @@ Renovate uses the list of **tags** on the remote repository (GitHub) to detect a
 
 ## http_archive and http_file
 
-Renovate will update any `http_archive` or `http_file` declaration that contains the following:
+Renovate will update any `http_archive` or `http_file` declaration that has the following:
 
 1. name
 2. url matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`

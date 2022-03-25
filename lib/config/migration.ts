@@ -61,11 +61,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'packageRules' && is.plainObject(val)) {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        migratedConfig.packageRules.push(val);
       } else if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
@@ -133,15 +128,6 @@ export function migrateConfig(
           migratedConfig.npmrc = '';
         }
       } else if (
-        key === 'branchName' &&
-        is.string(val) &&
-        val?.includes('{{managerBranchPrefix}}')
-      ) {
-        migratedConfig.branchName = val.replace(
-          '{{managerBranchPrefix}}',
-          '{{additionalBranchPrefix}}'
-        );
-      } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
         val.includes('{{')
@@ -198,63 +184,9 @@ export function migrateConfig(
           }
         }
         delete migratedConfig.unpublishSafe;
-      } else if (key === 'automergeMinor') {
-        migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = !!val;
-        delete migratedConfig[key];
-      } else if (key === 'automergeMajor') {
-        migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = !!val;
-        delete migratedConfig[key];
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'automergePatch') {
-        migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = !!val;
-        delete migratedConfig[key];
-      } else if (
-        key === 'automerge' &&
-        is.string(val) &&
-        ['none', 'patch', 'minor', 'any'].includes(val)
-      ) {
-        delete migratedConfig.automerge;
-        if (val === 'none') {
-          migratedConfig.automerge = false;
-        } else if (val === 'patch') {
-          migratedConfig.patch = migratedConfig.patch || {};
-          migratedConfig.patch.automerge = true;
-          migratedConfig.minor = migratedConfig.minor || {};
-          migratedConfig.minor.automerge = false;
-          migratedConfig.major = migratedConfig.major || {};
-          migratedConfig.major.automerge = false;
-        } else if (val === 'minor') {
-          migratedConfig.minor = migratedConfig.minor || {};
-          migratedConfig.minor.automerge = true;
-          migratedConfig.major = migratedConfig.major || {};
-          migratedConfig.major.automerge = false;
-        } /* istanbul ignore else: we can never go to else */ else if (
-          val === 'any'
-        ) {
-          migratedConfig.automerge = true;
-        }
-      } else if (key === 'packages') {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages
-        );
-        delete migratedConfig.packages;
-      } else if (key === 'packageName') {
-        migratedConfig.packageNames = [val];
-        delete migratedConfig.packageName;
-      } else if (key === 'packagePattern') {
-        migratedConfig.packagePatterns = [val];
-        delete migratedConfig.packagePattern;
-      } else if (key === 'baseBranch') {
-        migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
-        delete migratedConfig.baseBranch;
       } else if (key === 'schedule' && val) {
         // massage to array first
         const schedules = is.string(val) ? [val] : [...(val as string[])];

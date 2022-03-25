@@ -18,7 +18,6 @@ export interface DigestConfig {
 }
 
 export interface GetReleasesConfig {
-  npmrc?: string;
   packageName: string;
   registryUrl?: string;
 }

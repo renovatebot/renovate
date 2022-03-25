@@ -109,7 +109,17 @@ async function isDirectory(dir: string): Promise<boolean> {
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/62352647/3005034
   try {
-    const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    // istanbul ignore if
+    if (!res) {
+      logger.debug('Could not determine default branch using git rev-parse');
+      const headPrefix = 'HEAD branch: ';
+      res = (await git.raw(['remote', 'show', 'origin']))
+        .split('\n')
+        .map((line) => line.trim())
+        .find((line) => line.startsWith(headPrefix))
+        .replace(headPrefix, '');
+    }
     return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
