@@ -133,7 +133,7 @@ query($owner: String!, $name: String!) {
     vulnerabilityAlerts(last: 100) {
       edges {
         node {
-          dismissReason
+          state
           vulnerableManifestFilename
           vulnerableManifestPath
           vulnerableRequirements

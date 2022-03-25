@@ -6605,7 +6605,6 @@ Array [
             },
             "edges": Object {
               "node": Object {
-                "dismissReason": null,
                 "securityAdvisory": Object {
                   "description": null,
                   "identifiers": Object {
@@ -6627,6 +6626,7 @@ Array [
                   },
                   "vulnerableVersionRange": null,
                 },
+                "state": null,
                 "vulnerableManifestFilename": null,
                 "vulnerableManifestPath": null,
                 "vulnerableRequirements": null,
@@ -6641,7 +6641,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "676",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6672,7 +6672,6 @@ Array [
             },
             "edges": Object {
               "node": Object {
-                "dismissReason": null,
                 "securityAdvisory": Object {
                   "description": null,
                   "identifiers": Object {
@@ -6694,6 +6693,7 @@ Array [
                   },
                   "vulnerableVersionRange": null,
                 },
+                "state": null,
                 "vulnerableManifestFilename": null,
                 "vulnerableManifestPath": null,
                 "vulnerableRequirements": null,
@@ -6708,7 +6708,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "676",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6739,7 +6739,6 @@ Array [
             },
             "edges": Object {
               "node": Object {
-                "dismissReason": null,
                 "securityAdvisory": Object {
                   "description": null,
                   "identifiers": Object {
@@ -6761,6 +6760,7 @@ Array [
                   },
                   "vulnerableVersionRange": null,
                 },
+                "state": null,
                 "vulnerableManifestFilename": null,
                 "vulnerableManifestPath": null,
                 "vulnerableRequirements": null,
@@ -6775,7 +6775,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "676",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6806,7 +6806,6 @@ Array [
             },
             "edges": Object {
               "node": Object {
-                "dismissReason": null,
                 "securityAdvisory": Object {
                   "description": null,
                   "identifiers": Object {
@@ -6828,6 +6827,7 @@ Array [
                   },
                   "vulnerableVersionRange": null,
                 },
+                "state": null,
                 "vulnerableManifestFilename": null,
                 "vulnerableManifestPath": null,
                 "vulnerableRequirements": null,
@@ -6842,7 +6842,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "684",
+      "content-length": "676",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
