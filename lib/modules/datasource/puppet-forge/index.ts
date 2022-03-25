@@ -1,4 +1,6 @@
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { HttpError } from '../../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { PUPPET_FORGE } from './common';
@@ -29,7 +31,12 @@ export class PuppetForgeDatasource extends Datasource {
         { err },
         `ignore dependency ${packageName} because of faulty response for ${url}`
       );
-      return null;
+      if (err instanceof HttpError) {
+        if (err.response?.statusCode !== 404) {
+          throw new ExternalHostError(err);
+        }
+      }
+      this.handleGenericErrors(err);
     }
 
     const module: PuppetModule = JSON.parse(moduleResponse.body);
