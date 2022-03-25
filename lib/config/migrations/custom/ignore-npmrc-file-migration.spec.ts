@@ -23,4 +23,16 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
       }
     );
   });
+
+  it('should change npmrc field if it not represents string value', () => {
+    expect(IgnoreNpmrcFileMigration).toMigrate(
+      {
+        ignoreNpmrcFile: true,
+        npmrc: true,
+      } as any,
+      {
+        npmrc: '',
+      }
+    );
+  });
 });
