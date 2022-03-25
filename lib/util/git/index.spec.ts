@@ -376,6 +376,28 @@ describe('util/git/index', () => {
       });
       expect(commit).not.toBeNull();
     });
+    it('uses right commit SHA', async () => {
+      const files: FileChange[] = [
+        {
+          type: 'addition',
+          path: 'some-existing-file',
+          contents: 'updated content',
+        },
+        {
+          type: 'addition',
+          path: 'some-other-existing-file',
+          contents: 'other updated content',
+        },
+      ];
+      const commitConfig = {
+        branchName: 'renovate/something',
+        files,
+        message: 'Update something',
+      };
+      const commitSha = await git.commitFiles(commitConfig);
+      const remoteSha = await git.fetchCommit(commitConfig);
+      expect(commitSha).toEqual(remoteSha);
+    });
     it('updates git submodules', async () => {
       const files: FileChange[] = [
         {
