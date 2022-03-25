@@ -1,1 +1,0 @@
-mod 'puppetlabs/stdlib', '8.0.0', 'i should trigger a skip reason'

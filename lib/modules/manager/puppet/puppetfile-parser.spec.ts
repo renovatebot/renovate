@@ -51,10 +51,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       ]);
     });
 
-    it('Puppetfile_invalid_module', () => {
-      const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile_invalid_module')
-      );
+    it('Puppetfile with an invalid module creates PuppetfileModule with skipReason "invalid-config"', () => {
+      const puppetFileContent = `mod 'puppetlabs/stdlib', '8.0.0', 'i should trigger a skip reason'`;
+      const puppetfile = parsePuppetfile(puppetFileContent);
       expect(puppetfile.size).toBe(1);
 
       const defaultRegistryModules = puppetfile.get(undefined);
