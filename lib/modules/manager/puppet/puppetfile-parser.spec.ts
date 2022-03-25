@@ -152,7 +152,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       expect(dep2.name).toBe('apache');
       expect(dep2.version).toBeUndefined();
       expect(dep2.tags.size).toBe(1);
-      expect(dep2.tags.get('git')).toBe('https://github.com/puppetlabs/puppetlabs-apache');
+      expect(dep2.tags.get('git')).toBe(
+        'https://github.com/puppetlabs/puppetlabs-apache'
+      );
       expect(dep2.skipReason).toBeUndefined();
 
       expect(dep3.name).toBe('stdlib');
@@ -164,7 +166,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       expect(dep4.name).toBe('stdlib2');
       expect(dep4.version).toBeUndefined();
       expect(dep4.tags.size).toBe(1);
-      expect(dep4.tags.get('git')).toBe('git@github.com:puppetlabs/puppetlabs-stdlib2.git');
+      expect(dep4.tags.get('git')).toBe(
+        'git@github.com:puppetlabs/puppetlabs-stdlib2.git'
+      );
       expect(dep4.skipReason).toBeUndefined();
     });
   });
