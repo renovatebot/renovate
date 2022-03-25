@@ -79,4 +79,16 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       }
     );
   });
+
+  it('prevent duplicates', () => {
+    expect(UnpublishSafeMigration).toMigrate(
+      {
+        extends: ['npm:unpublishSafe'],
+        unpublishSafe: true,
+      },
+      {
+        extends: ['npm:unpublishSafe'],
+      }
+    );
+  });
 });
