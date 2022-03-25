@@ -18,9 +18,8 @@ export function extractPackageFile(file: string): PackageFile | null {
   try {
     // iterate over steps
     doc.steps?.forEach((step) => {
-      const dep: PackageDependency = getDep(step.image as string);
+      const dep: PackageDependency = getDep(step.image);
 
-      dep.depType = 'docker';
       deps.push(dep);
     });
 
@@ -28,7 +27,6 @@ export function extractPackageFile(file: string): PackageFile | null {
     doc.services?.forEach((service) => {
       const dep: PackageDependency = getDep(service.image);
 
-      dep.depType = 'docker';
       deps.push(dep);
     });
 
@@ -36,9 +34,8 @@ export function extractPackageFile(file: string): PackageFile | null {
     for (const stage in doc.stages) {
       logger.debug(doc.stages[stage]);
       doc.stages[stage].steps.forEach((step) => {
-        const dep: PackageDependency = getDep(step.image as string);
+        const dep: PackageDependency = getDep(step.image);
 
-        dep.depType = 'docker';
         deps.push(dep);
       });
     }
@@ -48,7 +45,6 @@ export function extractPackageFile(file: string): PackageFile | null {
       if (secret.origin) {
         const dep: PackageDependency = getDep(secret.origin.image);
 
-        dep.depType = 'docker';
         deps.push(dep);
       }
     });

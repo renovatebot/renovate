@@ -8,7 +8,6 @@ Array [
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "depType": "docker",
     "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
   },
@@ -18,7 +17,6 @@ Array [
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "target/secret-vault",
-    "depType": "docker",
     "replaceString": "target/secret-vault:v0.1.0",
   },
 ]
@@ -32,7 +30,6 @@ Array [
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "depType": "docker",
     "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
   },
@@ -42,7 +39,6 @@ Array [
     "currentValue": "5.7.24",
     "datasource": "docker",
     "depName": "mysql",
-    "depType": "docker",
     "replaceString": "mysql:5.7.24",
   },
   Object {
@@ -51,7 +47,6 @@ Array [
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "redis",
-    "depType": "docker",
     "replaceString": "redis:alpine",
   },
 ]
@@ -65,7 +60,6 @@ Array [
     "currentValue": "1.13",
     "datasource": "docker",
     "depName": "golang",
-    "depType": "docker",
     "replaceString": "golang:1.13",
   },
   Object {
@@ -74,7 +68,6 @@ Array [
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "depType": "docker",
     "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
   },
@@ -89,7 +82,6 @@ Array [
     "currentValue": "1.13",
     "datasource": "docker",
     "depName": "golang",
-    "depType": "docker",
     "replaceString": "golang:1.13",
   },
   Object {
@@ -98,7 +90,6 @@ Array [
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "depType": "docker",
     "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
   },
