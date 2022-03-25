@@ -30,4 +30,8 @@ export enum TerraformResourceTypes {
    * https://www.terraform.io/docs/providers/helm/r/release.html
    */
   helm_release = 'helm_release',
+  /**
+   * https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace
+   */
+  tfe_workspace = 'tfe_workspace',
 }

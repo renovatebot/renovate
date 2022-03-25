@@ -9,6 +9,7 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
@@ -102,7 +103,7 @@ export async function generateLockFile(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing yarn.lock for lock file maintenance'
+          'Error removing package-lock.json for lock file maintenance'
         );
       }
     }
@@ -123,6 +124,26 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readFile(upath.join(cwd, filename), 'utf8');
+
+    // Massage lockfile counterparts of package.json that were modified
+    // because npm install was called with an explicit version for rangeStrategy=update-lockfile
+    if (lockUpdates.length) {
+      const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
+      if (lockFileParsed?.lockfileVersion === 2) {
+        lockUpdates.forEach((lockUpdate) => {
+          if (
+            lockFileParsed.packages?.['']?.[lockUpdate.depType]?.[
+              lockUpdate.depName
+            ]
+          ) {
+            lockFileParsed.packages[''][lockUpdate.depType][
+              lockUpdate.depName
+            ] = lockUpdate.newValue;
+          }
+        });
+        lockFile = composeLockFile(lockFileParsed, detectedIndent);
+      }
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
