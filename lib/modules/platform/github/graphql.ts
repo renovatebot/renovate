@@ -134,6 +134,7 @@ query($owner: String!, $name: String!) {
       edges {
         node {
           state
+          dismissReason
           vulnerableManifestFilename
           vulnerableManifestPath
           vulnerableRequirements
