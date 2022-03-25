@@ -6,7 +6,7 @@ const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
 export function parsePuppetfile(content: string): Puppetfile {
   const puppetfile: Puppetfile = new Map<PuppetForgeUrl, PuppetfileModule[]>();
 
-  let currentForge = undefined;
+  let currentForge: string | undefined = undefined;
   let currentPuppetfileModule: PuppetfileModule = {};
 
   for (const rawLine of content.split(newlineRegex)) {
