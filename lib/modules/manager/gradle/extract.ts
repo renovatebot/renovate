@@ -118,5 +118,6 @@ export async function extractAllPackageFiles(
     }
   });
 
-  return Object.values(packageFilesByName);
+  const result = Object.values(packageFilesByName);
+  return result;
 }

@@ -1,4 +1,3 @@
-import detectIndent from 'detect-indent';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -10,6 +9,7 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
@@ -128,14 +128,7 @@ export async function generateLockFile(
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
     if (lockUpdates.length) {
-      let detectedIndent: string;
-      let lockFileParsed: any;
-      try {
-        detectedIndent = detectIndent(lockFile).indent || '  ';
-        lockFileParsed = JSON.parse(lockFile);
-      } catch (err) {
-        logger.warn({ err }, 'Error parsing npm lock file');
-      }
+      const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
       if (lockFileParsed?.lockfileVersion === 2) {
         lockUpdates.forEach((lockUpdate) => {
           if (
@@ -148,7 +141,7 @@ export async function generateLockFile(
             ] = lockUpdate.newValue;
           }
         });
-        lockFile = JSON.stringify(lockFileParsed, null, detectedIndent);
+        lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
     }
   } catch (err) /* istanbul ignore next */ {
