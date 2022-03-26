@@ -2,7 +2,7 @@ Conan versioning supports [Semantic Versioning 2.0](https://semver.org) but some
 
 Conan implements [python-node-semver](https://github.com/podhmo/python-node-semver).
 
-More information can be found in the [Conan docs](https://docs.conan.io/en/latest/versioning/version_ranges.html#version-ranges)
+Read the [Conan docs about version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html#version-ranges) for more information.
 
 | syntax                                           | description                                                                                                |
 | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
