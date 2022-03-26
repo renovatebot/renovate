@@ -1,6 +1,7 @@
 import { ProgrammingLanguage } from '../../constants';
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import './fingerprint';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
