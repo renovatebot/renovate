@@ -13,7 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
-      'workarounds:ignoreDotNet7',
+      'workarounds:ignoreDotnet7Preview',
     ],
   },
   mavenCommonsAncientVersion: {
@@ -89,7 +89,7 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  ignoreDotNet7: {
+  ignoreDotnet7Preview: {
     description: 'Ignore dotnet 7 preview releases',
     packageRules: [
       {
