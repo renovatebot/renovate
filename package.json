@@ -7,7 +7,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean generate:* compile:* generate-hash",
+    "build": "run-s clean generate:* compile:*",
     "build:docs": "run-s \"release:prepare {@}\" --",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
@@ -22,7 +22,7 @@
     "generate": "run-s generate:*",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
-    "generate-hash": "node tools/generate-hash.mjs",
+    "generate:hash": "node tools/generate-hash.mjs",
     "jest": "cross-env LOG_LEVEL=fatal node --expose-gc --no-compilation-cache node_modules/jest/bin/jest.js --logHeapUsage",
     "jest-debug": "cross-env NODE_OPTIONS=--inspect-brk yarn jest --testTimeout=100000000",
     "jest-silent": "cross-env yarn jest --reporters jest-silent-reporter",

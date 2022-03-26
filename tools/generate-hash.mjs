@@ -67,7 +67,7 @@ export async function getHash(manager) {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
-    const hashMap = `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nconst hashMap = new Map()`;
+    const hashMap = `// istanbul ignore file\nexport const hashMap = new Map<string, string>();`;
     let hashes = [];
     //get managers-list
     const managers = (
@@ -88,12 +88,8 @@ export async function getHash(manager) {
 
     //write hashMap to fingerprint.js in dist/
     await fs.writeFile(
-      './dist/modules/manager/fingerprint.js',
-      [
-        hashMap,
-        hashes.join('\n'),
-        `exports.default = hashMap;\n//# sourceMappingURL=fingerprint.js.map`,
-      ].join('\n\n')
+      './lib/modules/manager/fingerprint.ts',
+      [hashMap, hashes.join('\n')].join('\n\n')
     );
   } catch (err) {
     shell.echo('ERROR:', err.message);
