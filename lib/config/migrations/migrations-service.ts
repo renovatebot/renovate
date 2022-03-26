@@ -16,6 +16,7 @@ import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackagesMigration } from './custom/packages-migration';
@@ -79,6 +80,7 @@ export class MigrationsService {
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
+    IgnoreNpmrcFileMigration,
     PackageNameMigration,
     PackagePatternMigration,
     PackagesMigration,
