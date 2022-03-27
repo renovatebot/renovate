@@ -1758,7 +1758,7 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchSourceUrls
 
-Here's an example of where you use this to match exact package urls and prevent accidental grouping:
+Here's an example of where you use this to match exact package urls:
 
 ```json
 {
