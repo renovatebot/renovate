@@ -1,4 +1,4 @@
-export * from './commit-message-json';
+export type { CommitMessageJSON } from './commit-message-json';
 export * from './host-rules';
 export * from './skip-reason';
 export * from './versioning';
