@@ -2511,7 +2511,6 @@ describe('modules/platform/github/index', () => {
 
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns empty if disabled', async () => {
       // prettier-ignore
