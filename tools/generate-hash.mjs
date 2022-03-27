@@ -67,7 +67,7 @@ export async function getHash(manager) {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
-    const hashMap = `// istanbul ignore file\nexport const hashMap = new Map<string, string>();`;
+    const hashMap = `export const hashMap = new Map<string, string>();`;
     let hashes = [];
     //get managers-list
     const managers = (
