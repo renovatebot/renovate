@@ -1764,7 +1764,8 @@ Here's an example of where you use this to match exact package urls:
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/facebook/react-native"]
+      "matchSourceUrls": ["https://github.com/facebook/react"],
+      "groupName": "React"
     }
   ]
 }

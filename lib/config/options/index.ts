@@ -1024,8 +1024,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchSourceUrls',
-    description:
-      'A list of source URLs to match against, useful in preventing accidental grouping of packages with similar url prefixes.',
+    description: 'A list of source URLs to exact match against.',
     type: 'array',
     subType: 'string',
     allowString: true,

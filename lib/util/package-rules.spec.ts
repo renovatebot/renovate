@@ -522,7 +522,7 @@ describe('util/package-rules', () => {
         {
           matchSourceUrls: [
             'https://github.com/foo/bar',
-            'https://github.com/vuejs/',
+            'https://github.com/facebook/react',
           ],
           x: 1,
         },
@@ -532,7 +532,7 @@ describe('util/package-rules', () => {
       depType: 'dependencies',
       depName: 'a',
       updateType: 'patch' as UpdateType,
-      sourceUrl: 'https://github.com/vuejs/vue',
+      sourceUrl: 'https://github.com/facebook/react-native',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
