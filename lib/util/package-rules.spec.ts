@@ -859,7 +859,7 @@ describe('util/package-rules', () => {
         {
           matchSourceUrls: [
             'https://github.com/foo/bar',
-            'https://github.com/Renovatebot/',
+            'https://github.com/Renovatebot/renovate',
           ],
           x: 1,
         },
@@ -869,7 +869,7 @@ describe('util/package-rules', () => {
       depType: 'dependencies',
       depName: 'a',
       updateType: 'patch' as UpdateType,
-      sourceUrl: 'https://github.com/renovatebot',
+      sourceUrl: 'https://github.com/renovatebot/Renovate',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
