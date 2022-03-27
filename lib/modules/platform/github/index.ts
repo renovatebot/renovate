@@ -1689,7 +1689,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 
   const gheSupportsStateFilter = semver.satisfies(
     platformConfig.gheVersion,
-    '~3.0.25 || ~3.1.17 || ~3.2.9 || ~3.3.4'
+    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
   );
   const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
   const query = vulnerabilityAlertsQuery(filterByState);
