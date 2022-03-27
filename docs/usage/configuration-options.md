@@ -1753,6 +1753,20 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+### matchSourceUrls
+
+Here's an example of where you use this to match exact package urls and prevent accidental grouping:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/facebook/react-native"]
+    }
+  ]
+}
+```
+
 ### matchUpdateTypes
 
 Use this field to match rules against types of updates.
