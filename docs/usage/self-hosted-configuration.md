@@ -292,6 +292,17 @@ Like this:
 
 ## dryRun
 
+Use `dryRun` to preview the behavior of Renovate in logs, without making any changes to the repository files.
+
+You can choose from the following behaviors for the `dryRun` config option:
+
+- `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
+- `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
+- `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
+- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
+
+Information provided mainly in debug log level.
+
 ## endpoint
 
 ## executionTimeout
@@ -563,6 +574,17 @@ The global cache is used to store lookup results (e.g. dependency versions and r
 Example url: `redis://localhost`.
 
 ## repositories
+
+Elements in the `repositories` array can be an object if you wish to define additional settings:
+
+```js
+{
+  repositories: [
+    { repository: 'g/r1', bumpVersion: true },
+    'g/r2'
+  ],
+}
+```
 
 ## repositoryCache
 

@@ -122,11 +122,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'ignoreNpmrcFile') {
-        delete migratedConfig.ignoreNpmrcFile;
-        if (!is.string(migratedConfig.npmrc)) {
-          migratedConfig.npmrc = '';
-        }
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
