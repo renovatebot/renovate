@@ -151,6 +151,12 @@ describe('workers/global/config/parse/index', () => {
       expect(parsed).toContainEntries([['dryRun', 'full']]);
     });
 
+    it('cli dryRun replaced to full', async () => {
+      defaultArgv = defaultArgv.concat(['--dry-run']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed).toContainEntries([['dryRun', 'full']]);
+    });
+
     it('env dryRun = false replaced to null', async () => {
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
