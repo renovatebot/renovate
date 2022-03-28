@@ -3534,21 +3534,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -3570,7 +3558,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3842,21 +3830,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -3878,7 +3854,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4128,21 +4104,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -4164,7 +4128,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5335,21 +5299,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -5371,7 +5323,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5452,7 +5404,6 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return PR from graphql result 1`] = `
 Object {
-  "cannotMergeReason": "pr.mergeStateStatus = DIRTY",
   "displayNumber": "Pull Request #2500",
   "hasAssignees": false,
   "hasReviewers": false,
@@ -5552,21 +5503,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -5588,7 +5527,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5699,21 +5638,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -5735,7 +5662,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5928,21 +5855,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -5964,7 +5879,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6156,21 +6071,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -6192,7 +6095,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6370,21 +6273,9 @@ Array [
                   "name": null,
                 },
               },
-              "mergeStateStatus": null,
               "number": null,
               "reviewRequests": Object {
                 "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                  "states": Array [
-                    "CHANGES_REQUESTED",
-                  ],
-                },
-                "nodes": Object {
-                  "state": null,
-                },
               },
               "title": null,
             },
@@ -6406,7 +6297,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "915",
+      "content-length": "771",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

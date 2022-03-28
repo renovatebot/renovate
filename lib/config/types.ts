@@ -11,6 +11,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type DryRunConfig = 'extract' | 'lookup' | 'full';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
@@ -104,7 +105,7 @@ export interface RepoGlobalConfig {
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
-  dryRun?: boolean;
+  dryRun?: DryRunConfig;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
@@ -274,6 +275,7 @@ export interface PackageRule
   excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
+  matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
