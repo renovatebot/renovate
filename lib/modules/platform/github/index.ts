@@ -587,6 +587,7 @@ function matchesState(state: string, desiredState: string): boolean {
 
 function coerceGhRestPr(pr: GhRestPr): Pr {
   return {
+    displayNumber: `Pull Request #${pr.number}`,
     number: pr.number,
     sourceBranch: pr.head?.ref,
     sha: pr.head?.sha,

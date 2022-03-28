@@ -3083,6 +3083,7 @@ exports[`modules/platform/github/index getBranchPr(branchName) should return the
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "displayNumber": "Pull Request #91",
   "hasAssignees": true,
   "hasReviewers": true,
   "labels": Array [
@@ -4296,6 +4297,7 @@ exports[`modules/platform/github/index getPr(prNo) should return PR from graphql
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "displayNumber": "Pull Request #2500",
   "hasAssignees": false,
   "hasReviewers": false,
   "labels": undefined,
@@ -4373,6 +4375,7 @@ exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "hasAssignees": false,
   "hasReviewers": false,
   "labels": undefined,
@@ -4461,6 +4464,7 @@ exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "hasAssignees": false,
   "hasReviewers": false,
   "labels": undefined,
@@ -4549,6 +4553,7 @@ exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "hasAssignees": false,
   "hasReviewers": false,
   "labels": undefined,
