@@ -27,6 +27,7 @@ import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
+import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
@@ -90,6 +91,7 @@ export class MigrationsService {
     RebaseStalePrsMigration,
     RenovateForkMigration,
     RequiredStatusChecksMigration,
+    ScheduleMigration,
     SemanticCommitsMigration,
     SuppressNotificationsMigration,
     TrustLevelMigration,
