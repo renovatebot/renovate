@@ -112,6 +112,36 @@ describe('modules/manager/puppet/extract', () => {
       ]);
     });
 
+    it('Use GithubTagsDatasource only if host is exactly github.com', () => {
+      const res = extractPackageFile(`mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`);
+
+      expect(res.deps).toEqual([
+        {
+          datasource: GitTagsDatasource.id,
+          depName: 'apache',
+          packageName: 'https://github.com.example.com/puppetlabs/puppetlabs-apache',
+          sourceUrl: 'https://github.com.example.com/puppetlabs/puppetlabs-apache',
+          repo: 'https://github.com.example.com/puppetlabs/puppetlabs-apache',
+          currentValue: '0.9.0',
+          gitRef: true,
+        }
+      ]);
+    });
+
+    it('Github url without https is skipped', () => {
+      const res = extractPackageFile(`mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`);
+
+      expect(res.deps).toEqual([
+        {
+          datasource: GithubTagsDatasource.id,
+          depName: 'apache',
+          sourceUrl: 'http://github.com/puppetlabs/puppetlabs-apache',
+          skipReason: 'invalid-url',
+          gitRef: true,
+        }
+      ]);
+    });
+
     it('Git module without a tag should result in a skip reason', () => {
       const res = extractPackageFile(
         [

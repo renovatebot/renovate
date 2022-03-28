@@ -32,29 +32,7 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
   const git = module.tags?.get('git');
   const tag = module.tags?.get('tag');
 
-  if (git && tag) {
-    const githubUrl = isGithubUrl(git);
-    const gitOwnerRepo = getGitOwnerRepo(git, githubUrl);
-
-    if (typeof gitOwnerRepo !== 'string') {
-      // failed to parse git url
-      return {
-        depName: moduleName,
-        ...gitOwnerRepo,
-      };
-    }
-
-    return {
-      depName: moduleName,
-      packageName: githubUrl ? gitOwnerRepo : git,
-      repo: githubUrl ? undefined : git,
-      githubRepo: githubUrl ? gitOwnerRepo : undefined,
-      sourceUrl: git,
-      gitRef: true,
-      currentValue: tag,
-      datasource: githubUrl ? GithubTagsDatasource.id : GitTagsDatasource.id,
-    };
-  } else {
+  if (!git || !tag) {
     return {
       depName: moduleName,
       gitRef: true,
@@ -62,6 +40,39 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
       skipReason: 'invalid-version',
     };
   }
+
+  const githubUrl = isGithubUrl(git);
+  const parsedUrl = tryParseUrl(git);
+  if (parsedUrl && parsedUrl.host === 'github.com' && parsedUrl.protocol !== 'https:') {
+    logger.warn(`Access to github is only allowed for https, your url was: ${git}`);
+    return {
+      datasource: GithubTagsDatasource.id,
+      depName: moduleName,
+      gitRef: true,
+      sourceUrl: git,
+      skipReason: 'invalid-url',
+    }
+  }
+  const gitOwnerRepo = getGitOwnerRepo(git, githubUrl);
+
+  if (typeof gitOwnerRepo !== 'string') {
+    // failed to parse git url
+    return {
+      depName: moduleName,
+      ...gitOwnerRepo,
+    };
+  }
+
+  return {
+    depName: moduleName,
+    packageName: githubUrl ? gitOwnerRepo : git,
+    repo: githubUrl ? undefined : git,
+    githubRepo: githubUrl ? gitOwnerRepo : undefined,
+    sourceUrl: git,
+    gitRef: true,
+    currentValue: tag,
+    datasource: githubUrl ? GithubTagsDatasource.id : GitTagsDatasource.id,
+  };
 }
 
 function getGitOwnerRepo(
@@ -97,9 +108,18 @@ function getGitOwnerRepo(
 }
 
 function isGithubUrl(git: string): boolean {
+  const parsedUrl = tryParseUrl(git);
   return (
-    git.startsWith('https://github.com') || git.startsWith('git@github.com')
+    parsedUrl && parsedUrl.host === 'github.com' && parsedUrl.protocol === 'https:' || git.startsWith('git@github.com')
   );
+}
+
+function tryParseUrl(url: string): URL | undefined {
+  try {
+    return new URL(url);
+  } catch (err) {
+    return undefined;
+  }
 }
 
 function isGitModule(module: PuppetfileModule): boolean {
