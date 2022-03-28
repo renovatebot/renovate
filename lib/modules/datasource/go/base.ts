@@ -125,7 +125,7 @@ export class BaseGoDatasource {
 
         // split the go module from the URL: host/go/module -> go/module
         const split = goModule.split('/');
-        const packageName = split[1] + '/' + split[2];
+        const packageName = split.slice(1).join('/');
 
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
