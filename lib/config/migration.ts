@@ -1,4 +1,3 @@
-import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
@@ -122,11 +121,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'ignoreNpmrcFile') {
-        delete migratedConfig.ignoreNpmrcFile;
-        if (!is.string(migratedConfig.npmrc)) {
-          migratedConfig.npmrc = '';
-        }
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
@@ -187,71 +181,6 @@ export function migrateConfig(
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'schedule' && val) {
-        // massage to array first
-        const schedules = is.string(val) ? [val] : [...(val as string[])];
-        // split 'and'
-        const schedulesLength = schedules.length;
-        const afterBeforeRe = regEx(
-          /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-        );
-        for (let i = 0; i < schedulesLength; i += 1) {
-          if (
-            schedules[i].includes(' and ') &&
-            schedules[i].includes('before ') &&
-            schedules[i].includes('after ')
-          ) {
-            const parsedSchedule = later.parse.text(
-              // We need to massage short hours first before we can parse it
-              fixShortHours(schedules[i])
-            ).schedules[0];
-            // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
-            if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
-              const toSplit = schedules[i];
-              schedules[i] = toSplit
-                .replace(afterBeforeRe, '$1$2 $3 $7')
-                .trim();
-              schedules.push(
-                toSplit.replace(afterBeforeRe, '$1$4 $5 $7').trim()
-              );
-            }
-          }
-        }
-        for (let i = 0; i < schedules.length; i += 1) {
-          if (schedules[i].includes('on the last day of the month')) {
-            schedules[i] = schedules[i].replace(
-              'on the last day of the month',
-              'on the first day of the month'
-            );
-          }
-          if (schedules[i].includes('on every weekday')) {
-            schedules[i] = schedules[i].replace(
-              'on every weekday',
-              'every weekday'
-            );
-          }
-          if (schedules[i].endsWith(' every day')) {
-            schedules[i] = schedules[i].replace(' every day', '');
-          }
-          if (
-            regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
-              schedules[i]
-            )
-          ) {
-            schedules[i] = schedules[i].replace(
-              regEx(/every ([a-z]*day)$/),
-              'on $1'
-            );
-          }
-          if (schedules[i].endsWith('days')) {
-            schedules[i] = schedules[i].replace('days', 'day');
-          }
-        }
-        if (is.string(val) && schedules.length === 1) {
-          [migratedConfig.schedule] = schedules as any; // TODO: fixme
-        } else {
-          migratedConfig.schedule = schedules;
-        }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',

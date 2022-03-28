@@ -32,7 +32,7 @@ describe('workers/repository/error-config', () => {
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
@@ -57,7 +57,7 @@ describe('workers/repository/error-config', () => {
         number: 1,
         state: PrState.Open,
       });
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });

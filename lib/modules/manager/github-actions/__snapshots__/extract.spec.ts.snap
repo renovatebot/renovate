@@ -90,6 +90,52 @@ Array [
 ]
 `;
 
+exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines with double quotes and comments 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "v0.13.1",
+    "datasource": "github-tags",
+    "depName": "pascalgn/automerge-action",
+    "depType": "action",
+    "replaceString": "\\"pascalgn/automerge-action@v0.13.1\\"",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentDigest": "1e204e9a9253d643386038d443f96446fa156a97",
+    "currentValue": "v2.3.5",
+    "datasource": "github-tags",
+    "depName": "actions/checkout",
+    "depType": "action",
+    "replaceString": "actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "v1",
+    "datasource": "github-tags",
+    "depName": "actions/checkout",
+    "depType": "action",
+    "replaceString": "actions/checkout@v1",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "commitMessageTopic": "{{{depName}}} action",
+    "currentValue": "v1.1.2",
+    "datasource": "github-tags",
+    "depName": "actions/checkout",
+    "depType": "action",
+    "replaceString": "\\"actions/checkout@v1.1.2\\"",
+    "versioning": "docker",
+  },
+]
+`;
+
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
 Array [
   Object {
@@ -132,21 +178,6 @@ Array [
     "depName": "node",
     "depType": "docker",
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
-    "versioning": "docker",
-  },
-]
-`;
-
-exports[`modules/manager/github-actions/extract extractPackageFile() extracts tag line with double quotes 1`] = `
-Array [
-  Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v0.13.1",
-    "datasource": "github-tags",
-    "depName": "pascalgn/automerge-action",
-    "depType": "action",
-    "replaceString": "\\"pascalgn/automerge-action@v0.13.1\\"",
     "versioning": "docker",
   },
 ]
