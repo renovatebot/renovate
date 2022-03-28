@@ -832,7 +832,10 @@ Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
 
-Caution: Advanced functionality only. Do not use unless you know what you're doing.
+<!-- prettier-ignore -->
+!!! warning
+    Advanced functionality only.
+    Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
 However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
@@ -1753,6 +1756,21 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+### matchSourceUrls
+
+Here's an example of where you use this to match exact package urls:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/facebook/react"],
+      "groupName": "React"
+    }
+  ]
+}
+```
+
 ### matchUpdateTypes
 
 Use this field to match rules against types of updates.
@@ -1834,11 +1852,11 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## platformCommit
 
-Supports only GitHub App mode and not when using Personal Access Tokens.
+Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
+It does not apply when you use a Personal Access Token as credential.
 
-To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
-
-The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
+When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
+This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
 ## postUpdateOptions
 
