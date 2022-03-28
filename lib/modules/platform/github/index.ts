@@ -628,15 +628,6 @@ async function getOpenPrs(): Promise<PrList> {
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
-        // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
-        const hasNegativeReview = pr.reviews?.nodes?.length > 0;
-        // istanbul ignore if
-        if (hasNegativeReview) {
-          pr.cannotMergeReason = `PR has a negative review`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
-          pr.cannotMergeReason = `pr.mergeStateStatus = ${pr.mergeStateStatus}`;
-        }
         if (pr.labels) {
           pr.labels = pr.labels.nodes.map((label) => label.name);
         }

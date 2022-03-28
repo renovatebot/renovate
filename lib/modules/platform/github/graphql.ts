@@ -73,7 +73,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         headRefName
         baseRefName
         title
-        mergeStateStatus
         labels(last: 100) {
           nodes {
             name
@@ -86,11 +85,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
           totalCount
         }
         body
-        reviews(first: 1, states: [CHANGES_REQUESTED]){
-          nodes{
-            state
-          }
-        }
       }
     }
   }
