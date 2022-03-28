@@ -41,9 +41,10 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
     };
   }
 
-  const githubUrl = isGithubUrl(git);
   const parsedUrl = tryParseUrl(git);
-  if (parsedUrl && parsedUrl.host === 'github.com' && parsedUrl.protocol !== 'https:') {
+  const githubUrl = isGithubUrl(git, parsedUrl);
+
+  if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
     logger.warn(`Access to github is only allowed for https, your url was: ${git}`);
     return {
       datasource: GithubTagsDatasource.id,
@@ -107,10 +108,9 @@ function getGitOwnerRepo(
   }
 }
 
-function isGithubUrl(git: string): boolean {
-  const parsedUrl = tryParseUrl(git);
+function isGithubUrl(git: string, parsedUrl: URL | undefined): boolean {
   return (
-    parsedUrl && parsedUrl.host === 'github.com' && parsedUrl.protocol === 'https:' || git.startsWith('git@github.com')
+    parsedUrl && parsedUrl.host === 'github.com' || git.startsWith('git@github.com')
   );
 }
 
