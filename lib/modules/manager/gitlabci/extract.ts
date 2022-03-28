@@ -3,10 +3,9 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline } from './types';
-import { replaceReferenceTags } from './utils';
+import { getGitlabDep, replaceReferenceTags } from './utils';
 
 const commentsRe = regEx(/^\s*#/);
 const aliasesRe = regEx(`^\\s*-?\\s*alias:`);
@@ -18,19 +17,6 @@ const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
 const serviceRe = regEx(
   `^\\s*-?\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+[^:]$)['"]?\\s*$`
 );
-const depProxyRe = regEx(
-  `(?:\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)?(?<depName>.+)`
-);
-
-/**
- * Get image dependencies respecting Gitlab Dependency Proxy
- * @param imageName as used in .gitlab-ci.yml file
- * @return package dependency for the image
- */
-function getGitlabDep(imageName: string): PackageDependency {
-  const match = depProxyRe.exec(imageName);
-  return getDep(match.groups.depName);
-}
 
 function skipCommentAndAliasLines(
   lines: string[],
