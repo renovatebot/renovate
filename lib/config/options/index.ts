@@ -152,8 +152,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extends',
-    description:
-      'Configuration presets to use/extend. Note: does not work if configured in config.js.',
+    description: 'Configuration presets to use/extend.',
     stage: 'package',
     type: 'array',
     subType: 'string',
@@ -246,9 +245,10 @@ const options: RenovateOptions[] = [
     name: 'dryRun',
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.',
-    type: 'boolean',
+    type: 'string',
     globalOnly: true,
-    default: false,
+    allowedValues: ['extract', 'lookup', 'full'],
+    default: null,
   },
   {
     name: 'printConfig',
@@ -1014,6 +1014,18 @@ const options: RenovateOptions[] = [
     name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchSourceUrls',
+    description: 'A list of source URLs to exact match against.',
     type: 'array',
     subType: 'string',
     allowString: true,
