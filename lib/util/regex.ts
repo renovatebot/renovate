@@ -89,5 +89,3 @@ export function configRegexPredicate(
   }
   return null;
 }
-
-export const stableVersionRegex = /^\d+\.\d+\.\d+$/;
