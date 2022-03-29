@@ -764,6 +764,7 @@ describe('config/migration', () => {
       migratedConfig: { automerge: true, platformAutomerge: true },
     });
   });
+
   it('it migrates dryRun', () => {
     let config: TestRenovateConfig;
     let res: MigratedConfig;
