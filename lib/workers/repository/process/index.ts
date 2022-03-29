@@ -1,5 +1,4 @@
 import { mergeChildConfig } from '../../../config';
-import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -104,11 +103,6 @@ export async function extractDependencies(
     logger.debug('No baseBranches');
     const packageFiles = await extract(config);
     addSplit('extract');
-    if (GlobalConfig.get('dryRun') === 'extract') {
-      res.packageFiles = packageFiles;
-      logger.info({ packageFiles }, 'Extracted dependencies');
-      return res;
-    }
     res = await lookup(config, packageFiles);
   }
   addSplit('lookup');

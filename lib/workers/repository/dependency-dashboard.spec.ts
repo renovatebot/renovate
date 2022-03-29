@@ -32,7 +32,7 @@ async function dryRun(
   ensureIssueCalls = 0
 ) {
   jest.clearAllMocks();
-  GlobalConfig.set({ dryRun: 'full' });
+  GlobalConfig.set({ dryRun: true });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls

@@ -22,27 +22,6 @@ export async function parseConfigs(
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = envParser.getConfig(env);
 
-  if (cliConfig?.dryRun === 'true') {
-    logger.warn('cli config dryRun property has been changed to full');
-    cliConfig.dryRun = 'full';
-  }
-  if (envConfig?.dryRun === 'true') {
-    logger.warn('env config dryRun property has been changed to full');
-    envConfig.dryRun = 'full';
-  }
-  if (cliConfig?.dryRun === 'false' || cliConfig?.dryRun === 'null') {
-    logger.warn(
-      'cli config dryRun property has been changed to null, running with normal mode.'
-    );
-    cliConfig.dryRun = null;
-  }
-  if (envConfig?.dryRun === 'false' || envConfig?.dryRun === 'null') {
-    logger.warn(
-      'env config dryRun property has been changed to null, running with normal mode.'
-    );
-    envConfig.dryRun = null;
-  }
-
   let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
