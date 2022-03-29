@@ -38,7 +38,7 @@ const presetSources: Record<string, PresetApi> = {
 };
 
 const nonScopedPresetWithSubdirRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/
+  /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-. /]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/
 );
 const gitPresetRegex = regEx(
   /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/
@@ -195,6 +195,7 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
+  logger.debug(parsePreset(preset));
   let presetConfig = await presetSources[presetSource].getPreset({
     repo,
     presetPath,
@@ -202,6 +203,7 @@ export async function getPreset(
     baseConfig,
     tag,
   });
+  logger.debug(presetConfig);
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
