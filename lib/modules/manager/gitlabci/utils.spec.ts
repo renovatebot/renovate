@@ -2,17 +2,12 @@ import { getGitlabDep } from './utils';
 
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {
-    it.each([
-      ['no variable', 'mariadb:10.4.11'],
-      [
-        'variable',
-        '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11',
-      ],
-      [
-        'variable with brackets',
-        '${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/mariadb:10.4.11',
-      ],
-    ])('offical image - %s', (_case, imageName) => {
+    it.each`
+      name                        | imageName
+      ${'no variable'}            | ${'mariadb:10.4.11'}
+      ${'variable'}               | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11'}
+      ${'variable with brackets'} | ${'${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/mariadb:10.4.11'}
+    `('offical image - $name', ({ imageName }: { imageName: string }) => {
       expect(getGitlabDep(imageName)).toMatchObject({
         replaceString: 'mariadb:10.4.11',
         depName: 'mariadb',
@@ -20,23 +15,21 @@ describe('modules/manager/gitlabci/utils', () => {
       });
     });
 
-    it.each([
-      ['no variable', 'renovate/renovate:19.70.8-slim'],
-      [
-        'variable',
-        '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/renovate/renovate:19.70.8-slim',
-      ],
-      [
-        'variable with brackets',
-        '${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/renovate/renovate:19.70.8-slim',
-      ],
-    ])('image with organization - %s', (_case, imageName) => {
-      expect(getGitlabDep(imageName)).toMatchObject({
-        replaceString: 'renovate/renovate:19.70.8-slim',
-        depName: 'renovate/renovate',
-        currentValue: '19.70.8-slim',
-      });
-    });
+    it.each`
+      name                        | imageName
+      ${'no variable'}            | ${'renovate/renovate:19.70.8-slim'}
+      ${'variable'}               | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/renovate/renovate:19.70.8-slim'}
+      ${'variable with brackets'} | ${'${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/renovate/renovate:19.70.8-slim'}
+    `(
+      'image with organization - %s',
+      ({ imageName }: { imageName: string }) => {
+        expect(getGitlabDep(imageName)).toMatchObject({
+          replaceString: 'renovate/renovate:19.70.8-slim',
+          depName: 'renovate/renovate',
+          currentValue: '19.70.8-slim',
+        });
+      }
+    );
 
     it('no Docker hub', () => {
       expect(
