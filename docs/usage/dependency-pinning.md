@@ -6,7 +6,7 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 # Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
-The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you.
+The answer is "It's your choice", but we can certainly make some generalisations/recommendations to help you.
 
 If you do not want to read the in-depth discussion, and just want our recommendations, skip ahead to the ["So what's best?" section](#so-whats-best).
 
@@ -94,7 +94,7 @@ Depending on how many repositories you maintain, and how many dependencies are i
 ## Reducing the "noise" of dependency updates
 
 The increased volume of Pull Requests for upgrading dependencies may be considered by some to be undesirable "noise" in their day.
-To some extent this is simply a trade-off for having your dependencies pinned and predictable, however there are also ways you can reduce this noise while still gaining the majority of the benefits:
+To some extent this is simply a trade-off for having your dependencies pinned and predictable, but there are also ways you can reduce this noise while still gaining the majority of the benefits:
 
 ### Pull Request automerging
 

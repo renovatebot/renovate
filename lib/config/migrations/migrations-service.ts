@@ -16,6 +16,7 @@ import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackagesMigration } from './custom/packages-migration';
@@ -26,9 +27,11 @@ import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
+import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
+import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
@@ -78,6 +81,7 @@ export class MigrationsService {
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
+    IgnoreNpmrcFileMigration,
     PackageNameMigration,
     PackagePatternMigration,
     PackagesMigration,
@@ -88,9 +92,11 @@ export class MigrationsService {
     RebaseStalePrsMigration,
     RenovateForkMigration,
     RequiredStatusChecksMigration,
+    ScheduleMigration,
     SemanticCommitsMigration,
     SuppressNotificationsMigration,
     TrustLevelMigration,
+    UnpublishSafeMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,
   ];
