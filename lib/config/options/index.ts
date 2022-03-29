@@ -245,10 +245,9 @@ const options: RenovateOptions[] = [
     name: 'dryRun',
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.',
-    type: 'string',
+    type: 'boolean',
     globalOnly: true,
-    allowedValues: ['extract', 'lookup', 'full'],
-    default: null,
+    default: false,
   },
   {
     name: 'printConfig',

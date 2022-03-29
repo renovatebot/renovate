@@ -49,7 +49,10 @@ expect.extend({
 
     if (!this.equals(migratedConfig, expectedConfig)) {
       return {
-        message: (): string => 'Migration failed',
+        message: (): string =>
+          `Migration failed\n\nReceived config:\n${JSON.stringify(
+            migratedConfig
+          )}\n\nExpected config:\n${JSON.stringify(expectedConfig)}`,
         pass: false,
       };
     }

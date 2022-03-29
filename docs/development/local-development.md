@@ -164,7 +164,7 @@ To do this, see these GitHub guides:
 ### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-However, by default Renovate skips over repositories that are forked.
+But by default Renovate skips over repositories that are forked.
 To override this default, you need to specify the setting `includeForks` as `true`.
 
 Tell Renovate to run on your forked repository by doing one of the following:
