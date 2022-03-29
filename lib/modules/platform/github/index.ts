@@ -610,7 +610,7 @@ export async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
     logger.debug('Retrieving PR list');
     try {
-      const ghRestPrs = (
+      const ghPrs = (
         await githubApi.getJson<GhRestPr[]>(
           `repos/${
             config.parentRepo || config.repository
@@ -618,7 +618,7 @@ export async function getPrList(): Promise<Pr[]> {
           { paginate: true }
         )
       ).body;
-      config.prList = ghRestPrs
+      config.prList = ghPrs
         .filter(
           (pr) =>
             config.forkMode ||
@@ -1399,14 +1399,14 @@ export async function createPr({
     options.body.maintainer_can_modify = true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
-  const ghRestPr = (
+  const ghPr = (
     await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
-  const { node_id: prNodeId } = ghRestPr;
-  const pr = coerceGhRestPr(ghRestPr);
+  const { node_id: prNodeId } = ghPr;
+  const pr = coerceGhRestPr(ghPr);
   logger.debug(
     { branch: sourceBranch, pr: pr.number, draft: draftPR },
     'PR created'
