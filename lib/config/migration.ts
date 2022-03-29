@@ -240,6 +240,13 @@ export function migrateConfig(
           migratedConfig.platformAutomerge = migratedConfig[key];
         }
         delete migratedConfig[key];
+      } else if (key === 'dryRun') {
+        if (val === true) {
+          migratedConfig.dryRun = 'full';
+        }
+        if (val === false) {
+          migratedConfig.dryRun = null;
+        }
       }
 
       const migratedTemplates = {
