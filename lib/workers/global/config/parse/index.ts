@@ -42,16 +42,6 @@ export async function parseConfigs(
     );
     envConfig.dryRun = null;
   }
-  if (fileConfig?.dryRun === true) {
-    logger.warn('config file dryRun property has been changed to full');
-    fileConfig.dryRun = 'full';
-  }
-  if (fileConfig?.dryRun === false) {
-    logger.warn(
-      'env config dryRun property has been changed to null, running with normal mode.'
-    );
-    fileConfig.dryRun = null;
-  }
 
   let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
