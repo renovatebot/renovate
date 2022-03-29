@@ -2051,10 +2051,19 @@ describe('modules/platform/github/index', () => {
       const pr = await github.getPr(0);
       expect(pr).toBeNull();
     });
-    it('should return PR from graphql result', async () => {
+    it('should return PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
+        {
+          number: 2499,
+          head: {
+            ref: 'renovate/delay-4.x',
+            repo: { full_name: 'some/repo' },
+          },
+          title: 'build(deps): update dependency delay to v4.0.1',
+          state: PrState.Closed,
+        },
         {
           number: 2500,
           head: {
@@ -2073,7 +2082,7 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should return PR from closed graphql result', async () => {
+    it('should return merged PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
@@ -2088,30 +2097,34 @@ describe('modules/platform/github/index', () => {
           merged_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
         },
+      ]);
+      await github.initRepo({ repository: 'some/repo' } as any);
+
+      const pr = await github.getPr(2500);
+
+      expect(pr).toMatchObject({ number: 2500, state: 'merged' });
+    });
+    it('should return closed PR', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
         {
-          number: 2499,
+          number: 2500,
           head: {
-            ref: 'renovate/delay-4.x',
+            ref: 'renovate/jest-monorepo',
             repo: { full_name: 'some/repo' },
           },
-          title: 'build(deps): update dependency delay to v4.0.1',
+          title: 'chore(deps): update dependency jest to v23.6.0',
           state: PrState.Closed,
-          merged_at: DateTime.now().minus({ minutes: 10 }).toISO(),
-          closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
         },
       ]);
       await github.initRepo({ repository: 'some/repo' } as any);
-      const pr = await github.getPr(2499);
-      expect(pr).toBeDefined();
-      expect(pr).toMatchObject({
-        number: 2499,
-        sourceBranch: 'renovate/delay-4.x',
-        sourceRepo: 'some/repo',
-        state: 'merged',
-        title: 'build(deps): update dependency delay to v4.0.1',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
+      const pr = await github.getPr(2500);
+
+      expect(pr).toMatchObject({ number: 2500, state: 'closed' });
     });
+
     it('should return null if no PR is returned from GitHub', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

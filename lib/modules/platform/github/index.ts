@@ -54,6 +54,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import { coerceGhRestPr } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -583,26 +584,6 @@ function matchesState(state: string, desiredState: string): boolean {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
-}
-
-function coerceGhRestPr(pr: GhRestPr): Pr {
-  return {
-    displayNumber: `Pull Request #${pr.number}`,
-    number: pr.number,
-    sourceBranch: pr.head?.ref,
-    sha: pr.head?.sha,
-    title: pr.title,
-    state:
-      pr.state === PrState.Closed && pr.merged_at?.length
-        ? /* istanbul ignore next */ PrState.Merged
-        : pr.state,
-    createdAt: pr.created_at,
-    closedAt: pr.closed_at,
-    sourceRepo: pr.head?.repo?.full_name,
-    hasAssignees: !!(pr.assignee || is.nonEmptyArray(pr.assignees)),
-    hasReviewers: !!pr.requested_reviewers,
-    labels: pr.labels?.map(({ name }) => name),
-  };
 }
 
 export async function getPrList(): Promise<Pr[]> {

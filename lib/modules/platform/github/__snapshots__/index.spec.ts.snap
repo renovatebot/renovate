@@ -4232,68 +4232,7 @@ Array [
 ]
 `;
 
-exports[`modules/platform/github/index getPr(prNo) should return PR from closed graphql result 1`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "__vars": Object {
-          "$name": "String!",
-          "$owner": "String!",
-        },
-        "repository": Object {
-          "__args": Object {
-            "name": "$name",
-            "owner": "$owner",
-          },
-          "autoMergeAllowed": null,
-          "defaultBranchRef": Object {
-            "name": null,
-            "target": Object {
-              "oid": null,
-            },
-          },
-          "hasIssuesEnabled": null,
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-      "variables": Object {
-        "name": "repo",
-        "owner": "some",
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "content-length": "395",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
-  },
-]
-`;
-
-exports[`modules/platform/github/index getPr(prNo) should return PR from graphql result 1`] = `
+exports[`modules/platform/github/index getPr(prNo) should return PR 1`] = `
 Object {
   "closedAt": undefined,
   "createdAt": undefined,
@@ -4310,7 +4249,7 @@ Object {
 }
 `;
 
-exports[`modules/platform/github/index getPr(prNo) should return PR from graphql result 2`] = `
+exports[`modules/platform/github/index getPr(prNo) should return PR 2`] = `
 Array [
   Object {
     "graphql": Object {
@@ -4634,6 +4573,67 @@ Array [
     },
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/1234",
+  },
+]
+`;
+
+exports[`modules/platform/github/index getPr(prNo) should return closed PR 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "autoMergeAllowed": null,
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "hasIssuesEnabled": null,
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "395",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
 ]
 `;
