@@ -3,7 +3,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { FlutterResponse } from './types';
 
-export const stableVersionRegex = /^\d+\.\d+\.\d+$/;
+export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 
 export class FlutterVersionDatasource extends Datasource {
   static readonly id = 'flutter-version';
@@ -41,7 +41,7 @@ export class FlutterVersionDatasource extends Datasource {
         // The API response contains a stable version being released as a non-stable
         // release. And so we filter out these releases here.
         .filter(({ version, channel }) => {
-          if (regEx(stableVersionRegex).test(version)) {
+          if (stableVersionRegex.test(version)) {
             return channel === 'stable';
           }
           return true;
