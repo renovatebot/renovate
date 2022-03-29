@@ -70,11 +70,16 @@ export interface ReleaseResult {
   replacementVersion?: string;
 }
 
+export type MetadataResult = Pick<
+  ReleaseResult,
+  'changelogUrl' | 'dependencyUrl' | 'homepage' | 'sourceUrl'
+>;
+
 export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  getMetadata?(config: GetReleasesConfig): Promise<ReleaseResult | null>;
+  getMetadata?(config: GetReleasesConfig): Promise<MetadataResult | null>;
   defaultRegistryUrls?: string[];
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
