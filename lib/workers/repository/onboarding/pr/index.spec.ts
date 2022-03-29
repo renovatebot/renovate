@@ -159,7 +159,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
     it('dryrun of updates PR when modified', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
@@ -178,7 +178,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       );
     });
     it('dryrun of creates PR', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure'

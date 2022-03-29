@@ -175,7 +175,7 @@
     "js-yaml": "4.1.0",
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
-    "json5": "2.2.0",
+    "json5": "2.2.1",
     "luxon": "2.3.1",
     "markdown-it": "12.3.2",
     "markdown-table": "2.0.0",
