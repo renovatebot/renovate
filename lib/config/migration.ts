@@ -161,23 +161,6 @@ export function migrateConfig(
           }
         }
         migratedConfig.extends = migratedConfig.extends.filter(Boolean);
-      } else if (key === 'unpublishSafe') {
-        if (val === true) {
-          migratedConfig.extends = migratedConfig.extends || [];
-          if (is.string(migratedConfig.extends)) {
-            migratedConfig.extends = [migratedConfig.extends];
-          }
-          if (
-            ![
-              ':unpublishSafe',
-              'default:unpublishSafe',
-              'npm:unpublishSafe',
-            ].some((x) => migratedConfig.extends.includes(x))
-          ) {
-            migratedConfig.extends.push('npm:unpublishSafe');
-          }
-        }
-        delete migratedConfig.unpublishSafe;
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;

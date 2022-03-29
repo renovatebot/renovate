@@ -55,7 +55,7 @@ describe('workers/repository/update/branch/commit', () => {
       expect(platform.commitFiles.mock.calls).toMatchSnapshot();
     });
     it('dry runs', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({ dryRun: true });
       config.updatedPackageFiles.push({
         type: 'addition',
         path: 'package.json',

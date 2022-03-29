@@ -69,7 +69,7 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('does nothing on dryRun', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({ dryRun: true });
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
@@ -107,7 +107,7 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('skips comment if dry run', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({ dryRun: true });
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
@@ -122,7 +122,7 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('dry run delete branch no PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({ dryRun: true });
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );

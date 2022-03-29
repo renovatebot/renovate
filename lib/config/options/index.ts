@@ -152,7 +152,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extends',
-    description: 'Configuration presets to use/extend.',
+    description:
+      'Configuration presets to use/extend. Note: does not work if configured in config.js.',
     stage: 'package',
     type: 'array',
     subType: 'string',
@@ -245,10 +246,9 @@ const options: RenovateOptions[] = [
     name: 'dryRun',
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.',
-    type: 'string',
+    type: 'boolean',
     globalOnly: true,
-    allowedValues: ['extract', 'lookup', 'full'],
-    default: null,
+    default: false,
   },
   {
     name: 'printConfig',
