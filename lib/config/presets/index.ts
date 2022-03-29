@@ -195,7 +195,6 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
-  logger.debug(parsePreset(preset));
   let presetConfig = await presetSources[presetSource].getPreset({
     repo,
     presetPath,
@@ -203,7 +202,6 @@ export async function getPreset(
     baseConfig,
     tag,
   });
-  logger.debug(presetConfig);
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
