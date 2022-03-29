@@ -1,6 +1,6 @@
 import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import { PackageDependency } from '../types';
+import type { PackageDependency } from '../types';
 
 const re = /!reference \[(.*?)\]/g;
 

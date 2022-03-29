@@ -156,6 +156,7 @@
     "lib/modules/manager/gitlabci-include/index.ts",
     "lib/modules/manager/gitlabci/extract.ts",
     "lib/modules/manager/gitlabci/index.ts",
+    "lib/modules/manager/gitlabci/utils.ts",
     "lib/modules/manager/gomod/artifacts.ts",
     "lib/modules/manager/gomod/extract.ts",
     "lib/modules/manager/gomod/index.ts",
