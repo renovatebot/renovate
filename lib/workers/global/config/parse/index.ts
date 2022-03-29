@@ -46,7 +46,6 @@ export async function parseConfigs(
     logger.warn('config file dryRun property has been changed to full');
     fileConfig.dryRun = 'full';
   }
-
   if (fileConfig?.dryRun === false) {
     logger.warn(
       'env config dryRun property has been changed to null, running with normal mode.'
