@@ -81,12 +81,12 @@ export async function getHash(manager) {
       hashes.push(hash);
     }
 
-    //append hashes to hashMap {key->manager, value->hash}
+    //add manager hashes to hashMap {key->manager, value->hash}
     hashes = (await Promise.all(hashes)).map(
       (hash, index) => `hashMap.set('${managers[index]}', '${hash}');`
     );
 
-    //write hashMap to fingerprint.js in dist/
+    //write hashMap to fingerprint.ts
     await fs.writeFile(
       './lib/modules/manager/fingerprint.ts',
       [hashMap, hashes.join('\n')].join('\n\n')
