@@ -161,7 +161,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
 - [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
 - [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
-- [GitHub (Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
+- [github.com or GHES](https://docs.renovatebot.com/modules/platform/github/)
 - [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 
 ### Running as a GitHub App
