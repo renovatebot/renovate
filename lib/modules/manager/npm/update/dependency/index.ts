@@ -1,11 +1,9 @@
 import { dequal } from 'dequal';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
+import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
-
-const patchReg = regEx('(patch:.*@(npm:)?).*#.*');
 
 function replaceAsString(
   parsedContents: PackageJson,
@@ -30,10 +28,11 @@ function replaceAsString(
   const searchString = `"${oldValue}"`;
   let newString = `"${newValue}"`;
 
-  if (patchReg.test(oldValue)) {
-    const replaceRegex = regEx(`(patch:${depName}@(npm:)?).*#`);
-    const match = patchReg.exec(oldValue);
-    const patch = oldValue.replace(replaceRegex, `${match[1]}${newValue}#`);
+  const escapedDepName = escapeRegExp(depName);
+  const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
+  const match = patchRe.exec(oldValue);
+  if (match) {
+    const patch = oldValue.replace(patchRe, `${match[1]}${newValue}#`);
     parsedContents[depType][depName] = patch;
     newString = `"${patch}"`;
   }
