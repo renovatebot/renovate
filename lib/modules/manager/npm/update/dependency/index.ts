@@ -1,8 +1,12 @@
 import { dequal } from 'dequal';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
+import { regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
+import type { NpmPackage } from '../../extract/types';
+
+const patchReg = regEx('(patch:.*@(npm:)?).*#.*');
 
 function replaceAsString(
   parsedContents: PackageJson,
@@ -19,13 +23,31 @@ function replaceAsString(
     delete Object.assign(parsedContents[depType], {
       [newValue]: parsedContents[depType][oldValue],
     })[oldValue];
+  } else if (depType === 'dependenciesMeta') {
+    if (oldValue !== newValue) {
+      Object.defineProperty(
+        parsedContents[depType],
+        newValue,
+        Object.getOwnPropertyDescriptor(parsedContents[depType], oldValue)
+      );
+      delete parsedContents[depType][oldValue];
+    }
   } else {
     // The old value is the version of the dependency
     parsedContents[depType][depName] = newValue;
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
-  const newString = `"${newValue}"`;
+  let newString = `"${newValue}"`;
+
+  if (patchReg.test(oldValue)) {
+    const replaceRegex = regEx(`(patch:${depName}@(npm:)?).*#`);
+    const match = patchReg.exec(oldValue);
+    const patch = oldValue.replace(replaceRegex, `${match[1]}${newValue}#`);
+    parsedContents[depType][depName] = patch;
+    newString = `"${patch}"`;
+  }
+
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
@@ -78,7 +100,7 @@ export function updateDependency({
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
-    const parsedContents: PackageJson = JSON.parse(fileContent);
+    const parsedContents: NpmPackage = JSON.parse(fileContent);
     // Save the old version
     let oldVersion: string;
     if (depType === 'packageManager') {
@@ -157,6 +179,20 @@ export function updateDependency({
             depKey,
             depKey,
             upgrade.newName
+          );
+        }
+      }
+    }
+    if (parsedContents?.dependenciesMeta) {
+      for (const [depKey] of Object.entries(parsedContents.dependenciesMeta)) {
+        if (depKey.startsWith(depName + '@')) {
+          newFileContent = replaceAsString(
+            parsedContents,
+            newFileContent,
+            'dependenciesMeta',
+            depName,
+            depKey,
+            depName + '@' + newValue
           );
         }
       }
