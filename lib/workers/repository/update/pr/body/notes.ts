@@ -40,7 +40,7 @@ export function getPrExtraNotes(config: BranchConfig): string {
 
   if (config.isPin) {
     res += emojify(
-      `Add the preset \`:preserveSemverRanges\` to your config if you instead don't wish to pin dependencies.\n\n`
+      `Add the preset \`:preserveSemverRanges\` to your config if you don't want to pin your dependencies.\n\n`
     );
   }
 
