@@ -2,7 +2,6 @@ import type { Readable } from 'stream';
 import url from 'url';
 import type { S3 } from '@aws-sdk/client-s3';
 import { DateTime } from 'luxon';
-import parseS3Url from 'parse-aws-s3-url';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -94,7 +93,7 @@ export async function downloadHttpProtocol(
       // istanbul ignore next
       logger.debug({ failedUrl }, 'Unsupported host');
     } else {
-      logger.info({ failedUrl, err }, 'Unknown error');
+      logger.info({ failedUrl, err }, 'Unknown HTTP download error');
     }
     return {};
   }
@@ -109,7 +108,17 @@ function isS3RegionError(err: { name: string; message: string }): boolean {
 }
 
 function isS3NotFound(err: { name: string; message: string }): boolean {
-  return err.message === 'NotFound';
+  return err.message === 'NotFound' || err.message === 'NoSuchKey';
+}
+
+function parseS3Url(rawUrl: url.URL | string): { Bucket: string; Key: string } {
+  const parsedUrl = (
+    typeof rawUrl === 'string' ? url.parse(rawUrl, false) : rawUrl
+  ) as url.URL;
+  return {
+    Bucket: parsedUrl.host,
+    Key: parsedUrl.pathname.substring(1),
+  };
 }
 
 export async function downloadS3Protocol(
@@ -143,11 +152,16 @@ export async function downloadS3Protocol(
         { failedUrl },
         'Dependency lookup failed. Please a correct AWS_REGION env var'
       );
+    } else if (isS3NotFound(err)) {
+      logger.trace({ failedUrl }, `S3 url not found`);
     } else {
-      logger.info({ failedUrl, err }, 'Unknown error');
+      logger.info(
+        { failedUrl, message: err.message },
+        'Unknown S3 download error'
+      );
     }
   }
-  return null;
+  return '';
 }
 
 async function checkHttpResource(

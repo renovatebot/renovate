@@ -189,7 +189,6 @@
     "p-all": "3.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
-    "parse-aws-s3-url": "1.0.1",
     "parse-link-header": "2.0.0",
     "redis": "4.0.4",
     "remark": "13.0.0",
