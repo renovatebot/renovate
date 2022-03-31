@@ -7691,6 +7691,11 @@ parent-module@^1.0.0:
   dependencies:
     callsites "^3.0.0"
 
+parse-aws-s3-url@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/parse-aws-s3-url/-/parse-aws-s3-url-1.0.1.tgz#a286dc2eb655b2dc2e4d135e97ddb37b19ef19a4"
+  integrity sha512-HRO+ONV1qAf3gDvoRcAc3HaexR2cLCobw629ppXMTMvG1+1iXq5jOAhcgg05NwytbrDCM/zrq/+cB2qg4pxdvQ==
+
 parse-conflict-json@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/parse-conflict-json/-/parse-conflict-json-2.0.1.tgz#76647dd072e6068bcaff20be6ccea68a18e1fb58"

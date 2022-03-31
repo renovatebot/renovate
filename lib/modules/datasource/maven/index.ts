@@ -114,6 +114,7 @@ export class MavenDatasource extends Datasource {
 
     const { authorization, xml: mavenMetadata } = await downloadMavenXml(
       this.http,
+      this.s3,
       metadataUrl
     );
     if (!mavenMetadata) {
@@ -205,6 +206,7 @@ export class MavenDatasource extends Datasource {
 
     const { xml: mavenMetadata } = await downloadMavenXml(
       this.http,
+      this.s3,
       metadataUrl
     );
     if (!mavenMetadata) {
@@ -400,6 +402,7 @@ export class MavenDatasource extends Datasource {
       latestSuitableVersion &&
       (await getDependencyInfo(
         this.http,
+        this.s3,
         dependency,
         repoUrl,
         latestSuitableVersion

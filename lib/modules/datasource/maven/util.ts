@@ -1,14 +1,16 @@
 import url from 'url';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
+import parseS3Url from 'parse-aws-s3-url';
+import { S3 } from "@aws-sdk/client-s3";
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
-import { normalizeDate } from '../metadata';
 
+import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type {
@@ -16,6 +18,7 @@ import type {
   MavenDependency,
   MavenXml,
 } from './types';
+import {Readable} from "stream";
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -97,6 +100,56 @@ export async function downloadHttpProtocol(
   }
 }
 
+function isS3CedentialsError(err: { name: string, message: string }): boolean {
+  return err.name === "CredentialsProviderError";
+}
+
+function isS3RegionError(err: { name: string, message: string }): boolean {
+  return err.message === "Region is missing";
+}
+
+export async function downloadS3Protocol(
+  s3: S3,
+  pkgUrl: url.URL | string
+): Promise<string> {
+  logger.debug({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
+  // let raw: GetObjectCommandOutput;
+  let body: string;
+  try {
+    const s3Url = parseS3Url(pkgUrl.toString());
+    logger.debug({ s3Url }, `Parsed URL`);
+    const response = await s3.getObject(s3Url);
+    logger.debug(`Request complete`);
+    const stream = response.Body as Readable
+    const buffers = await new Promise<Buffer>((resolve, reject) => {
+      const chunks: Buffer[] = []
+      stream.on('data', chunk => chunks.push(chunk))
+      stream.once('end', () => resolve(Buffer.concat(chunks)))
+      stream.once('error', reject)
+    })
+    body = buffers.toString();
+    logger.debug({ body }, `S3 response`);
+    return body;
+  }
+  catch (err) {
+    const failedUrl = pkgUrl.toString();
+    if (isS3CedentialsError(err)) {
+      logger.debug(
+        { failedUrl },
+        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
+      );
+    } else if (isS3RegionError(err)) {
+      logger.debug(
+        { failedUrl },
+        'Dependency lookup failed. Please a correct AWS_REGION env var'
+      );
+    } else {
+      logger.info({ failedUrl, err }, 'Unknown error');
+    }
+  }
+  return null;
+}
+
 export async function checkHttpResource(
   http: Http,
   pkgUrl: url.URL | string
@@ -142,6 +195,7 @@ export function getMavenUrl(
 
 export async function downloadMavenXml(
   http: Http,
+  s3: S3,
   pkgUrl: url.URL | null
 ): Promise<MavenXml> {
   /* istanbul ignore if */
@@ -161,8 +215,8 @@ export async function downloadMavenXml(
       } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
-      logger.debug('Skipping s3 dependency');
-      return {};
+      rawContent = await downloadS3Protocol(s3, pkgUrl);
+      break;
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
       return {};
@@ -192,6 +246,7 @@ export function getDependencyParts(packageName: string): MavenDependency {
 
 export async function getDependencyInfo(
   http: Http,
+  s3: S3,
   dependency: MavenDependency,
   repoUrl: string,
   version: string,
@@ -201,7 +256,7 @@ export async function getDependencyInfo(
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const { xml: pomContent } = await downloadMavenXml(http, pomUrl);
+  const { xml: pomContent } = await downloadMavenXml(http, s3, pomUrl);
   // istanbul ignore if
   if (!pomContent) {
     return result;
@@ -242,6 +297,7 @@ export async function getDependencyInfo(
       const parentDependency = getDependencyParts(parentDisplayId);
       const parentInformation = await getDependencyInfo(
         http,
+        s3,
         parentDependency,
         repoUrl,
         parentVersion,
