@@ -8,7 +8,7 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline, Image, Services } from './types';
 import { replaceReferenceTags } from './utils';
 
-function extractFromImage(image: Image): PackageDependency {
+export function extractFromImage(image: Image): PackageDependency {
   let dep: PackageDependency = {};
   if (is.undefined(image)) {
     return undefined;
@@ -23,7 +23,7 @@ function extractFromImage(image: Image): PackageDependency {
   return dep;
 }
 
-function extractFromServices(services: Services): PackageDependency[] {
+export function extractFromServices(services: Services): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   if (is.undefined(services)) {

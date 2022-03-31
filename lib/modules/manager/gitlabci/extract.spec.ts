@@ -2,7 +2,11 @@ import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
-import { extractAllPackageFiles } from './extract';
+import {
+  extractAllPackageFiles,
+  extractFromImage,
+  extractFromServices,
+} from './extract';
 
 const config: ExtractConfig = {};
 
@@ -154,6 +158,60 @@ describe('modules/manager/gitlabci/extract', () => {
             'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.7.yaml',
         },
       ]);
+    });
+    it('extracts from image', () => {
+      let expectedRes = {
+        autoReplaceStringTemplate:
+          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        currentDigest: undefined,
+        currentValue: 'test',
+        datasource: 'docker',
+        depName: 'image',
+        depType: 'image',
+        replaceString: 'image:test',
+      };
+
+      expect(extractFromImage('image:test')).toEqual(expectedRes);
+
+      expectedRes = { ...expectedRes, depType: 'image-name' };
+      expect(
+        extractFromImage({
+          name: 'image:test',
+        })
+      ).toEqual(expectedRes);
+
+      expect(extractFromImage(undefined) === undefined).toBeTruthy();
+    });
+
+    it('extracts from services', () => {
+      const expectedRes = [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'test',
+          datasource: 'docker',
+          depName: 'image',
+          depType: 'service-image',
+          replaceString: 'image:test',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'test2',
+          datasource: 'docker',
+          depName: 'image2',
+          depType: 'service-image',
+          replaceString: 'image2:test2',
+        },
+      ];
+      const services = ['image:test', 'image2:test2'];
+      expect(extractFromServices(undefined) === undefined).toBeTruthy();
+      expect(extractFromServices(services)).toEqual(expectedRes);
+      expect(
+        extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }])
+      ).toEqual(expectedRes);
     });
   });
 });
