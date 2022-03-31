@@ -6,7 +6,8 @@ import { AbstractMigration } from '../base/abstract-migration';
 export class ExtendsMigration extends AbstractMigration {
   override readonly propertyName = 'extends';
 
-  override run(value: unknown): void {
+  override run(): void {
+    const value = this.get('extends');
     let newPresets: string[] = [];
 
     if (is.string(value)) {
