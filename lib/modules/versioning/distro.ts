@@ -3,27 +3,26 @@ import dataFiles, { DataFile } from '../../data-files.generated';
 export type DistroInfoRecord = Record<string, string>;
 
 export default class DistroInfo {
-  private codenameToVersion: Map<string, string>;
-  private readonly distroInfo: DistroInfoRecord;
+  private readonly _codenameToVersion = new Map<string, string>();
+  private readonly _distroInfo: DistroInfoRecord;
 
   constructor(distroJsonKey: string) {
-    this.codenameToVersion = new Map<string, string>();
-    this.distroInfo = JSON.parse(
+    this._distroInfo = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      dataFiles.get(<DataFile>distroJsonKey)!
+      dataFiles.get(distroJsonKey as DataFile)!
     );
-    for (const version of Object.keys(this.distroInfo)) {
-      const codename = this.distroInfo[version];
-      this.codenameToVersion.set(codename, version);
+    for (const version of Object.keys(this._distroInfo)) {
+      const codename = this._distroInfo[version];
+      this._codenameToVersion.set(codename, version);
     }
   }
 
   public isCodename(input: string): boolean {
-    return this.codenameToVersion.has(input);
+    return this._codenameToVersion.has(input);
   }
 
   public getVersionByCodename(input: string): string {
-    const ver = this.codenameToVersion.get(input);
+    const ver = this._codenameToVersion.get(input);
     if (ver) {
       return ver;
     }
@@ -31,7 +30,7 @@ export default class DistroInfo {
   }
 
   public getCodenameByVersion(input: string): string {
-    const codename = this.distroInfo[input];
+    const codename = this._distroInfo[input];
     if (codename) {
       return codename;
     }
