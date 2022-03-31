@@ -473,7 +473,11 @@ describe('workers/repository/update/pr/index', () => {
           sourceBranch: 'renovate/dummy-1.x',
         },
       ]);
+      expect(platform.createPr.mock.calls[0][0].prBody).toContain(
+        "you don't want to pin your dependencies"
+      );
     });
+
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.createPr.mockImplementationOnce(() => {
