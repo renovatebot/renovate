@@ -24,7 +24,7 @@ export class ExtendsMigration extends AbstractMigration {
     return presets
       .filter(is.string)
       .map((preset) => this.normalizePreset(preset))
-      .filter(Boolean);
+      .filter(is.nonEmptyString);
   }
 
   private normalizePreset(preset: string): string | null {
