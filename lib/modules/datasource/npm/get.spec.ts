@@ -286,6 +286,27 @@ describe('modules/datasource/npm/get', () => {
     `);
   });
 
+  it('handles missing dist-tags latest', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep.sourceDirectory).toBe('packages/react');
+  });
+
   it('handles mixed sourceUrls in releases', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 

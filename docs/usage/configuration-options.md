@@ -164,7 +164,7 @@ Important: Renovate won't automerge on GitHub if a PR has a negative review outs
 <!-- prettier-ignore -->
 !!! note
     On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
-    Renovate tries to delay until Azure is in the expected state, however if it takes too long it will continue.
+    Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 ## automergeComment
@@ -238,7 +238,7 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
-However, Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
+Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
@@ -260,7 +260,7 @@ By default, Renovate won't enforce any concurrent branch limits.
 The `config:base` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
-However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
+But if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
 This limit is enforced on a per-repository basis.
 
@@ -372,7 +372,7 @@ The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
-The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
+The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
 ## commitMessageSuffix
 
@@ -823,7 +823,8 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 ## golang
 
-Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
+Configuration added here applies for all Go-related updates.
+The only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
 For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
@@ -838,7 +839,7 @@ Also we support the `off` keyword which will stop any fetching immediately.
     Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
-However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
+But you may _add_ settings to any group by defining your own `group` configuration object.
 
 ## groupName
 
@@ -1169,7 +1170,8 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 }
 ```
 
-Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
+Renovate's default ignore is `node_modules` and `bower_components` only.
+If you are extending from the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
 ## ignorePlugins
 
@@ -1756,6 +1758,21 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+### matchSourceUrls
+
+Here's an example of where you use this to match exact package urls:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/facebook/react"],
+      "groupName": "React"
+    }
+  ]
+}
+```
+
 ### matchUpdateTypes
 
 Use this field to match rules against types of updates.
@@ -1837,11 +1854,11 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## platformCommit
 
-Supports only GitHub App mode and not when using Personal Access Tokens.
+Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
+It does not apply when you use a Personal Access Token as credential.
 
-To avoid errors, `gitAuthor` or `gitIgnoredAuthors` should be manually adjusted accordingly.
-
-The primary reason to use this option is because commits will then be signed automatically if authenticating as an app.
+When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
+This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
 ## postUpdateOptions
 
@@ -2097,7 +2114,7 @@ Using the `in-range-only` strategy may result in you being multiple releases beh
 ## rebaseLabel
 
 On supported platforms it is possible to add a label to a PR to manually request Renovate to recreate/rebase it.
-By default this label is `"rebase"` however you can configure it to anything you want by changing this `rebaseLabel` field.
+By default this label is `"rebase"` but you can configure it to anything you want by changing this `rebaseLabel` field.
 
 ## rebaseWhen
 
@@ -2142,7 +2159,7 @@ Users can define custom managers for cases such as:
 The custom manager concept is based on using Regular Expression named capture groups.
 For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`).
 It's not recommended to do both, due to the potential for confusion.
-It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
+It is recommended to also include `versioning` but if it is missing then it will default to `semver`.
 
 For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
@@ -2207,7 +2224,7 @@ ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 
 If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
 This can be used to narrow down the search area to prevent multiple matches.
-However, the `recursive` strategy still allows the matching of multiple dependencies as described below.
+But the `recursive` strategy still allows the matching of multiple dependencies as described below.
 All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
 If the next `matchStrings` pattern has multiple matches then it will split again.
 This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
@@ -2216,7 +2233,7 @@ Matched groups will be available in subsequent matching layers.
 
 This is an example how this can work.
 The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
-However, the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
+But the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
 
 renovate.json:
 
@@ -2410,7 +2427,7 @@ In case there is a need to configure them manually, it can be done using this `r
 }
 ```
 
-The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
+The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
 
 ## replacement
 
@@ -2539,7 +2556,7 @@ If you are using a semantic prefix for your commits, then you will want to enabl
 Although it's configurable to a package-level, it makes most sense to configure it at a repository level.
 If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
-However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
+Renovate autodetects if your repository is already using semantic commits or not and follows suit, so you only need to configure this if you wish to _override_ Renovate's autodetected setting.
 
 ## separateMajorMinor
 
@@ -2624,7 +2641,7 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 ## stopUpdatingLabel
 
 On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
-By default this label is `"stop-updating"` however you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+By default this label is `"stop-updating"` but you can configure it to anything you want by changing this `stopUpdatingLabel` field.
 
 ## suppressNotifications
 
