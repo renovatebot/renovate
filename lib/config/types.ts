@@ -105,7 +105,7 @@ export interface RepoGlobalConfig {
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
-  dryRun?: DryRunConfig | boolean;
+  dryRun?: DryRunConfig;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;

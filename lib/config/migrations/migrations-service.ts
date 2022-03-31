@@ -12,6 +12,7 @@ import { BinarySourceMigration } from './custom/binary-source-migration';
 import { BranchNameMigration } from './custom/branch-name-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
@@ -99,6 +100,7 @@ export class MigrationsService {
     UnpublishSafeMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,
+    DryRunMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

@@ -27,7 +27,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('"host":"', '"matchHost":"')
         .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
         .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
-        .replace(/^--dry-run$/, '--dry-run=true')
+        .replace(/^--dry-run$/, '--dry-run=full')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
