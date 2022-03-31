@@ -69,7 +69,7 @@ export async function getHash(manager) {
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     let hashes = [];
-    //get managers-list
+    //get managers list
     const managers = (
       await fs.readdir('./lib/modules/manager', { withFileTypes: true })
     )
