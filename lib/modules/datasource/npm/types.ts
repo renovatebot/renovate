@@ -42,7 +42,7 @@ export interface NpmDependency extends ReleaseResult {
   homepage: string;
   sourceUrl: string;
   versions: Record<string, any>;
-  'dist-tags': Record<string, string>;
+  'dist-tags'?: Record<string, string>;
   sourceDirectory?: string;
 }
 
