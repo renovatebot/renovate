@@ -63,7 +63,7 @@ describe('workers/repository/update/branch/automerge', () => {
     it('returns true if automerge succeeds (dry-run)', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({ dryRun: true });
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });

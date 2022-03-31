@@ -487,7 +487,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -831,7 +831,7 @@ describe('workers/repository/update/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as Pr);
-      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -845,7 +845,7 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -871,7 +871,7 @@ describe('workers/repository/update/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -908,7 +908,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: {},
       } as ResultWithPr);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       expect(
         await branchWorker.processBranch({
           ...config,

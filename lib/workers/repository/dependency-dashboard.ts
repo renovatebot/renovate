@@ -350,7 +350,7 @@ export async function ensureDependencyDashboard(
       { title: config.dependencyDashboardTitle },
       'DRY-RUN: Would ensure Dependency Dashboard'
     );
-  } else if (!GlobalConfig.get('dryRun')) {
+  } else {
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle,
       reuseTitle,

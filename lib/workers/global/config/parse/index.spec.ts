@@ -135,35 +135,5 @@ describe('workers/global/config/parse/index', () => {
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.hostRules).toContainEqual({ matchHost: 'example.org' });
     });
-
-    it('env dryRun = true replaced to full', async () => {
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_DRY_RUN: 'true',
-      };
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([['dryRun', 'full']]);
-    });
-
-    it('cli dryRun = true replaced to full', async () => {
-      defaultArgv = defaultArgv.concat(['--dry-run=true']);
-      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
-      expect(parsed).toContainEntries([['dryRun', 'full']]);
-    });
-
-    it('env dryRun = false replaced to null', async () => {
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_DRY_RUN: 'false',
-      };
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([['dryRun', null]]);
-    });
-
-    it('cli dryRun = false replaced to null', async () => {
-      defaultArgv = defaultArgv.concat(['--dry-run=false']);
-      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
-      expect(parsed).toContainEntries([['dryRun', null]]);
-    });
   });
 });
