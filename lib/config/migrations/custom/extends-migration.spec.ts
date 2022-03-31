@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../global';
 import { ExtendsMigration } from './extends-migration';
 
 describe('config/migrations/custom/extends-migration', () => {
@@ -52,5 +53,23 @@ describe('config/migrations/custom/extends-migration', () => {
         extends: [],
       }
     );
+  });
+
+  it('it migrates presets', () => {
+    GlobalConfig.set({
+      migratePresets: {
+        '@org': 'local>org/renovate-config',
+        '@org2/foo': '',
+      },
+    });
+    expect(ExtendsMigration).toMigrate(
+      {
+        extends: ['@org', '@org2/foo'],
+      },
+      {
+        extends: ['local>org/renovate-config'],
+      }
+    );
+    GlobalConfig.reset();
   });
 });

@@ -87,9 +87,9 @@ export async function getDependency(
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags'].latest];
-    res.repository = res.repository || latestVersion.repository;
-    res.homepage = res.homepage || latestVersion.homepage;
+    const latestVersion = res.versions[res['dist-tags']?.latest];
+    res.repository = res.repository || latestVersion?.repository;
+    res.homepage = res.homepage || latestVersion?.homepage;
 
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
@@ -105,7 +105,7 @@ export async function getDependency(
       registryUrl,
     };
 
-    if (latestVersion.deprecated) {
+    if (latestVersion?.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
     }

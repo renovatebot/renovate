@@ -185,28 +185,16 @@ describe('workers/repository/init/merge', () => {
     it('migrates nested config', async () => {
       git.getFileList.mockResolvedValue(['renovate.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
-        Promise.resolve({
-          ...c,
-          warnings: [],
-          errors: [],
-        })
-      );
-      migrate.migrateConfig.mockImplementation((c) => ({
-        isMigrated: true,
-        migratedConfig: c,
-      }));
-      config.extends = [':automergeAll'];
-      config.packageRules = [{ extends: ['monorepo:react'] }];
-      const ret = await mergeRenovateConfig(config);
-      expect(ret).toMatchObject({
-        automerge: true,
-        packageRules: [
-          {
-            matchSourceUrlPrefixes: ['https://github.com/facebook/react'],
-          },
-        ],
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
       });
+      migrate.migrateConfig.mockReturnValueOnce({
+        isMigrated: true,
+        migratedConfig: {},
+      });
+      config.extends = [':automergeDisabled'];
+      expect(await mergeRenovateConfig(config)).toBeDefined();
     });
     it('continues if no errors', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
