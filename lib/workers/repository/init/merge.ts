@@ -177,13 +177,6 @@ export async function mergeRenovateConfig(
     ];
     delete returnConfig.extends;
   }
-  if (is.nonEmptyArray(returnConfig.packageRules)) {
-    configFileParsed.packageRules = [
-      ...returnConfig.packageRules,
-      ...(configFileParsed.packageRules || []),
-    ];
-    delete returnConfig.packageRules;
-  }
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
