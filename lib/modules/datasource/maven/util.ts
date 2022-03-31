@@ -1,8 +1,9 @@
+import type { Readable } from "stream";
 import url from 'url';
+import type { S3 } from "@aws-sdk/client-s3";
 import { DateTime } from 'luxon';
-import { XmlDocument } from 'xmldoc';
 import parseS3Url from 'parse-aws-s3-url';
-import { S3 } from "@aws-sdk/client-s3";
+import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -18,7 +19,6 @@ import type {
   MavenDependency,
   MavenXml,
 } from './types';
-import {Readable} from "stream";
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -108,18 +108,20 @@ function isS3RegionError(err: { name: string, message: string }): boolean {
   return err.message === "Region is missing";
 }
 
+function isS3NotFound(err: { name: string, message: string }): boolean {
+  return err.message === "NotFound";
+}
+
 export async function downloadS3Protocol(
   s3: S3,
   pkgUrl: url.URL | string
 ): Promise<string> {
-  logger.debug({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
+  logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   // let raw: GetObjectCommandOutput;
   let body: string;
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
-    logger.debug({ s3Url }, `Parsed URL`);
     const response = await s3.getObject(s3Url);
-    logger.debug(`Request complete`);
     const stream = response.Body as Readable
     const buffers = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = []
@@ -128,7 +130,6 @@ export async function downloadS3Protocol(
       stream.once('error', reject)
     })
     body = buffers.toString();
-    logger.debug({ body }, `S3 response`);
     return body;
   }
   catch (err) {
@@ -150,7 +151,7 @@ export async function downloadS3Protocol(
   return null;
 }
 
-export async function checkHttpResource(
+async function checkHttpResource(
   http: Http,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
@@ -178,6 +179,57 @@ export async function checkHttpResource(
       `Can't check HTTP resource existence`
     );
     return 'error';
+  }
+}
+
+async function checkS3Resource(
+  s3: S3,
+  pkgUrl: url.URL | string
+): Promise<HttpResourceCheckResult> {
+  try {
+    const s3Url = parseS3Url(pkgUrl.toString());
+    const response = await s3.headObject(s3Url);
+    logger.trace({
+      s3Url,
+      response
+    }, `Checked resource"`);
+    if (response.DeleteMarker) {
+      return 'not-found';
+    }
+    if (response.LastModified) {
+      return response.LastModified;
+    }
+    return 'found';
+  } catch (err) {
+    if (isS3NotFound(err)) {
+      return 'not-found';
+    } else {
+      logger.debug(
+        { pkgUrl, name: err.name, message: err.message },
+        `Can't check S3 resource existence`
+      );
+    }
+    return 'error';
+  }
+}
+
+export async function checkResource(
+  http: Http,
+  s3: S3,
+  pkgUrl: url.URL | string
+): Promise<HttpResourceCheckResult> {
+  const parsedUrl = typeof pkgUrl === 'string' ? url.parse(pkgUrl, false) : pkgUrl;
+  switch (parsedUrl.protocol) {
+    case 'http:':
+    case 'https:':
+      return await checkHttpResource(http, parsedUrl as url.URL);
+      break;
+    case 's3:':
+      return await checkS3Resource(s3, pkgUrl as url.URL);
+      break;
+    default:
+      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol in check resource`);
+      return 'not-found';
   }
 }
 
