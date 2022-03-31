@@ -30,9 +30,6 @@ export function extractFromServices(services: Services): PackageDependency[] {
     return undefined;
   }
   services.forEach((s) => {
-    if (is.undefined(s)) {
-      return;
-    }
     if (is.string(s)) {
       const dep = getDep(s);
       dep.depType = 'service-image';
@@ -47,7 +44,7 @@ export function extractFromServices(services: Services): PackageDependency[] {
   return deps;
 }
 
-function extractFromObject(prop: any, value: any): PackageDependency[] {
+export function extractFromObject(prop: any, value: any): PackageDependency[] {
   let deps: PackageDependency[] = [];
 
   if (is.string(value) && prop === 'image') {

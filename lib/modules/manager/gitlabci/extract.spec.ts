@@ -5,6 +5,7 @@ import type { ExtractConfig, PackageDependency } from '../types';
 import {
   extractAllPackageFiles,
   extractFromImage,
+  extractFromObject,
   extractFromServices,
 } from './extract';
 
@@ -212,6 +213,21 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(
         extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }])
       ).toEqual(expectedRes);
+    });
+    it('extracts from job object', () => {
+      const expectedRes = [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'test',
+          datasource: 'docker',
+          depName: 'image',
+          depType: 'image',
+          replaceString: 'image:test',
+        },
+      ];
+      expect(extractFromObject('image', 'image:test')).toEqual(expectedRes);
     });
   });
 });
