@@ -1,6 +1,6 @@
-import type { Readable } from "stream";
+import type { Readable } from 'stream';
 import url from 'url';
-import type { S3 } from "@aws-sdk/client-s3";
+import type { S3 } from '@aws-sdk/client-s3';
 import { DateTime } from 'luxon';
 import parseS3Url from 'parse-aws-s3-url';
 import { XmlDocument } from 'xmldoc';
@@ -100,16 +100,16 @@ export async function downloadHttpProtocol(
   }
 }
 
-function isS3CedentialsError(err: { name: string, message: string }): boolean {
-  return err.name === "CredentialsProviderError";
+function isS3CedentialsError(err: { name: string; message: string }): boolean {
+  return err.name === 'CredentialsProviderError';
 }
 
-function isS3RegionError(err: { name: string, message: string }): boolean {
-  return err.message === "Region is missing";
+function isS3RegionError(err: { name: string; message: string }): boolean {
+  return err.message === 'Region is missing';
 }
 
-function isS3NotFound(err: { name: string, message: string }): boolean {
-  return err.message === "NotFound";
+function isS3NotFound(err: { name: string; message: string }): boolean {
+  return err.message === 'NotFound';
 }
 
 export async function downloadS3Protocol(
@@ -122,17 +122,16 @@ export async function downloadS3Protocol(
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     const response = await s3.getObject(s3Url);
-    const stream = response.Body as Readable
+    const stream = response.Body as Readable;
     const buffers = await new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = []
-      stream.on('data', chunk => chunks.push(chunk))
-      stream.once('end', () => resolve(Buffer.concat(chunks)))
-      stream.once('error', reject)
-    })
+      const chunks: Buffer[] = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.once('end', () => resolve(Buffer.concat(chunks)));
+      stream.once('error', reject);
+    });
     body = buffers.toString();
     return body;
-  }
-  catch (err) {
+  } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isS3CedentialsError(err)) {
       logger.debug(
@@ -189,10 +188,13 @@ async function checkS3Resource(
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     const response = await s3.headObject(s3Url);
-    logger.trace({
-      s3Url,
-      response
-    }, `Checked resource"`);
+    logger.trace(
+      {
+        s3Url,
+        response,
+      },
+      `Checked resource"`
+    );
     if (response.DeleteMarker) {
       return 'not-found';
     }
@@ -218,7 +220,8 @@ export async function checkResource(
   s3: S3,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
-  const parsedUrl = typeof pkgUrl === 'string' ? url.parse(pkgUrl, false) : pkgUrl;
+  const parsedUrl =
+    typeof pkgUrl === 'string' ? url.parse(pkgUrl, false) : pkgUrl;
   switch (parsedUrl.protocol) {
     case 'http:':
     case 'https:':
@@ -228,7 +231,10 @@ export async function checkResource(
       return await checkS3Resource(s3, pkgUrl as url.URL);
       break;
     default:
-      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol in check resource`);
+      logger.debug(
+        { url: pkgUrl.toString() },
+        `Unsupported Maven protocol in check resource`
+      );
       return 'not-found';
   }
 }
