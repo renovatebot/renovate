@@ -18,9 +18,9 @@ export class OnboardingCommitMessageFactory {
     const commitMessage = commitMessageFactory.create();
 
     if (onboardingCommitMessage) {
-      commitMessage.setSubject(onboardingCommitMessage);
+      commitMessage.subject = onboardingCommitMessage;
     } else {
-      commitMessage.setSubject(`add ${this.configFile}`);
+      commitMessage.subject = `add ${this.configFile}`;
     }
 
     return commitMessage;

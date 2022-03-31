@@ -3,24 +3,24 @@ import { SemanticCommitMessage } from './semantic-commit-message';
 describe('workers/repository/model/semantic-commit-message', () => {
   it('should format message without prefix', () => {
     const message = new SemanticCommitMessage();
-    message.setSubject('test');
+    message.subject = 'test';
 
     expect(message.toString()).toBe('Test');
   });
 
   it('should format sematic type', () => {
     const message = new SemanticCommitMessage();
-    message.setSubject('test');
-    message.setType(' fix ');
+    message.subject = 'test';
+    message.type = ' fix ';
 
     expect(message.toString()).toBe('fix: test');
   });
 
   it('should format sematic prefix with scope', () => {
     const message = new SemanticCommitMessage();
-    message.setSubject('test');
-    message.setType(' fix ');
-    message.setScope(' scope ');
+    message.subject = 'test';
+    message.type = ' fix ';
+    message.scope = ' scope ';
 
     expect(message.toString()).toBe('fix(scope): test');
   });
@@ -31,7 +31,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
     expect(json.type).toBe('feat');
-    expect(json.scope).toBeUndefined();
+    expect(json.scope).toBe('');
     expect(json.subject).toBe('ticket 123');
   });
 

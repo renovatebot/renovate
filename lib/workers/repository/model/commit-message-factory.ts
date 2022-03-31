@@ -12,10 +12,10 @@ type CommitMessageConfig = Pick<
 >;
 
 export class CommitMessageFactory {
-  private readonly config: CommitMessageConfig;
+  #config: CommitMessageConfig;
 
   constructor(config: CommitMessageConfig) {
-    this.config = config;
+    this.#config = config;
   }
 
   create(): CommitMessage {
@@ -29,23 +29,23 @@ export class CommitMessageFactory {
   private createSemanticCommitMessage(): SemanticCommitMessage {
     const message = new SemanticCommitMessage();
 
-    message.setType(this.config.semanticCommitType ?? '');
-    message.setScope(this.config.semanticCommitScope ?? '');
+    message.type = this.#config.semanticCommitType ?? '';
+    message.scope = this.#config.semanticCommitScope ?? '';
 
     return message;
   }
 
   private createCustomCommitMessage(): CustomCommitMessage {
     const message = new CustomCommitMessage();
-    message.setPrefix(this.config.commitMessagePrefix);
+    message.prefix = this.#config.commitMessagePrefix ?? '';
 
     return message;
   }
 
   private get areSemanticCommitsEnabled(): boolean {
     return (
-      !this.config.commitMessagePrefix &&
-      this.config.semanticCommits === 'enabled'
+      !this.#config.commitMessagePrefix &&
+      this.#config.semanticCommits === 'enabled'
     );
   }
 }

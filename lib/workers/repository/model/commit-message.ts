@@ -11,9 +11,9 @@ export abstract class CommitMessage {
   static readonly SEPARATOR: string = ':';
   private static readonly EXTRA_WHITESPACES = /\s+/g;
 
-  private body?: string;
-  private footer?: string;
-  private subject?: string;
+  #body = '';
+  #footer = '';
+  #subject = '';
 
   public static formatPrefix(prefix: string): string {
     if (!prefix) {
@@ -27,11 +27,19 @@ export abstract class CommitMessage {
     return `${prefix}${CommitMessage.SEPARATOR}`;
   }
 
+  toJSON(): CommitMessageJSON {
+    return {
+      body: this.#body,
+      footer: this.#footer,
+      subject: this.#subject,
+    };
+  }
+
   toString(): string {
     const parts: ReadonlyArray<string | undefined> = [
       this.title,
-      this.body,
-      this.footer,
+      this.#body,
+      this.#footer,
     ];
 
     return parts.filter(Boolean).join('\n\n');
@@ -43,37 +51,32 @@ export abstract class CommitMessage {
       .trim();
   }
 
-  toJSON(): CommitMessageJSON {
-    return {
-      body: this.body,
-      footer: this.footer,
-      subject: this.subject,
-    };
+  set body(value: string) {
+    this.#body = value.trim();
   }
 
-  setBody(body?: string): void {
-    this.body = body?.trim();
+  set footer(value: string) {
+    this.#footer = value.trim();
   }
 
-  setFooter(footer?: string): void {
-    this.footer = footer?.trim();
-  }
-
-  setSubject(subject?: string): void {
-    this.subject = subject?.trim();
-    this.subject = this.subject?.replace(CommitMessage.EXTRA_WHITESPACES, ' ');
+  set subject(value: string) {
+    this.#subject = value.trim();
+    this.#subject = this.#subject?.replace(
+      CommitMessage.EXTRA_WHITESPACES,
+      ' '
+    );
   }
 
   formatSubject(): string {
-    if (!this.subject) {
+    if (!this.#subject) {
       return '';
     }
 
     if (this.prefix) {
-      return this.subject.charAt(0).toLowerCase() + this.subject.slice(1);
+      return this.#subject.charAt(0).toLowerCase() + this.#subject.slice(1);
     }
 
-    return this.subject.charAt(0).toUpperCase() + this.subject.slice(1);
+    return this.#subject.charAt(0).toUpperCase() + this.#subject.slice(1);
   }
 
   protected abstract get prefix(): string;
