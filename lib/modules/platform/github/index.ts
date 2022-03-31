@@ -628,15 +628,6 @@ async function getOpenPrs(): Promise<PrList> {
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
-        // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
-        const hasNegativeReview = pr.reviews?.nodes?.length > 0;
-        // istanbul ignore if
-        if (hasNegativeReview) {
-          pr.cannotMergeReason = `PR has a negative review`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
-          pr.cannotMergeReason = `pr.mergeStateStatus = ${pr.mergeStateStatus}`;
-        }
         if (pr.labels) {
           pr.labels = pr.labels.nodes.map((label) => label.name);
         }
@@ -1686,10 +1677,18 @@ export function massageMarkdown(input: string): string {
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
+
+  const gheSupportsStateFilter = semver.satisfies(
+    platformConfig.gheVersion,
+    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
+  );
+  const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
+  const query = vulnerabilityAlertsQuery(filterByState);
+
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
-    }>(vulnerabilityAlertsQuery, 'vulnerabilityAlerts', {
+    }>(query, 'vulnerabilityAlerts', {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',

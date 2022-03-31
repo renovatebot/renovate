@@ -80,7 +80,7 @@ Maybe you find Renovate too noisy, and want to opt-out of getting automatic upda
 In this case, you can tell Renovate to wait for your approval before making any pull requests.
 This means that you have full control over when you get updates.
 
-However, vulnerability remediation PRs will still get created immediately without requiring approval.
+But vulnerability remediation PRs will still get created immediately without requiring approval.
 
 To require manual approval for _all updates_, add the `:dependencyDashboardApproval` presets to the `extends` array in your Renovate configuration file:
 
