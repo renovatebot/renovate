@@ -28,7 +28,7 @@ export function coerceGraphqlPr(pr: GhGraphQlPr): Pr {
     result.hasReviewers = !!(pr.reviewRequests.totalCount > 0);
   }
 
-  if (pr.labels) {
+  if (pr.labels?.nodes) {
     result.labels = pr.labels.nodes.map((label) => label.name);
   }
 

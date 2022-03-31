@@ -52,7 +52,7 @@ export interface GhGraphQlPr {
   assignees?: { totalCount: number };
   reviewRequests?: { totalCount: number };
   comments?: {
-    nodes: {
+    nodes?: {
       databaseId: number;
       body: string;
     }[];
