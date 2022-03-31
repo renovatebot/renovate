@@ -12,7 +12,7 @@ type CommitMessageConfig = Pick<
 >;
 
 export class CommitMessageFactory {
-  #config: CommitMessageConfig;
+  readonly #config: CommitMessageConfig;
 
   constructor(config: CommitMessageConfig) {
     this.#config = config;

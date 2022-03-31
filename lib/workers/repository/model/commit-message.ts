@@ -8,8 +8,8 @@ import type { CommitMessageJSON } from '../../../types';
  * [optional footer]
  */
 export abstract class CommitMessage {
-  static readonly SEPARATOR: string = ':';
-  private static readonly EXTRA_WHITESPACES = /\s+/g;
+  static readonly #SEPARATOR: string = ':';
+  static readonly #EXTRA_WHITESPACES = /\s+/g;
 
   #body = '';
   #footer = '';
@@ -20,11 +20,11 @@ export abstract class CommitMessage {
       return '';
     }
 
-    if (prefix.endsWith(CommitMessage.SEPARATOR)) {
+    if (prefix.endsWith(CommitMessage.#SEPARATOR)) {
       return prefix;
     }
 
-    return `${prefix}${CommitMessage.SEPARATOR}`;
+    return `${prefix}${CommitMessage.#SEPARATOR}`;
   }
 
   toJSON(): CommitMessageJSON {
@@ -62,7 +62,7 @@ export abstract class CommitMessage {
   set subject(value: string) {
     this.#subject = value.trim();
     this.#subject = this.#subject?.replace(
-      CommitMessage.EXTRA_WHITESPACES,
+      CommitMessage.#EXTRA_WHITESPACES,
       ' '
     );
   }
