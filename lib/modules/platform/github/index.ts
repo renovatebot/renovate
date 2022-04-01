@@ -54,12 +54,10 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { coerceGraphqlPr, coerceRestPr } from './common';
+import { coerceRestPr } from './common';
 import {
-  closedPrsQuery,
   enableAutoMergeMutation,
   getIssuesQuery,
-  openPrsQuery,
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
@@ -70,12 +68,10 @@ import type {
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
-  GhGraphQlPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
   PlatformConfig,
-  PrList,
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
 
@@ -357,10 +353,7 @@ export async function initRepo({
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.issueList = null;
   config.prList = null;
-  config.openPrList = null;
-  config.closedPrList = null;
   config.branchPrs = [];
-  config.prComments = {};
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -555,81 +548,29 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-export async function getClosedPrs(): Promise<PrList> {
-  if (!config.closedPrList) {
-    config.closedPrList = {};
-    try {
-      // prettier-ignore
-      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        closedPrsQuery,
-        'pullRequests',
-        {
-          variables: {
-            owner: config.repositoryOwner,
-            name: config.repositoryName,
-          },
-        }
-      );
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!nodes?.length) {
-        logger.debug('getClosedPrs(): no graphql data');
-        return {};
-      }
-      for (const gqlPr of nodes) {
-        const pr = coerceGraphqlPr(gqlPr);
-        config.closedPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-        if (gqlPr.comments?.nodes) {
-          config.prComments[pr.number] = gqlPr.comments.nodes.map(
-            ({ databaseId: id, body }) => ({ id, body })
-          );
-        }
-      }
-      prNumbers.sort();
-      logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'getClosedPrs(): error');
-    }
+function removeFromCachedPrList(prNo: number): void {
+  if (is.array(config.prList)) {
+    config.prList = config.prList.filter(({ number }) => number !== prNo);
   }
-  return config.closedPrList;
 }
 
-async function getOpenPrs(): Promise<PrList> {
-  // The graphql query is supported in the current oldest GHE version 2.19
-  if (!config.openPrList) {
-    config.openPrList = {};
-    try {
-      // prettier-ignore
-      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        openPrsQuery,
-        'pullRequests',
-        {
-          variables: {
-            owner: config.repositoryOwner,
-            name: config.repositoryName,
-          },
-          acceptHeader: 'application/vnd.github.merge-info-preview+json',
-        }
-      );
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!nodes?.length) {
-        logger.debug('getOpenPrs(): no graphql data');
-        return {};
-      }
-      for (const gqlPr of nodes) {
-        const pr = coerceGraphqlPr(gqlPr);
-        config.openPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'getOpenPrs(): error');
-    }
+function addToCachedPrList(pr: Pr | null | undefined): void {
+  if (pr && is.array(config.prList)) {
+    removeFromCachedPrList(pr.number);
+    config.prList.push(pr);
   }
-  return config.openPrList;
+}
+
+// Fetch fresh Pull Request and cache it to `config.prList` when possible
+async function fetchPr(prNo: number): Promise<Pr | null> {
+  const ghRestPr = (
+    await githubApi.getJson<GhRestPr>(
+      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+    )
+  ).body;
+  const result = ghRestPr ? coerceRestPr(ghRestPr) : null;
+  addToCachedPrList(result);
+  return result;
 }
 
 // Gets details for a PR
@@ -637,28 +578,13 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (!prNo) {
     return null;
   }
-  const openPrs = await getOpenPrs();
-  const openPr = openPrs[prNo];
-  if (openPr) {
-    logger.debug('Returning from graphql open PR list');
-    return openPr;
+  const prList = await getPrList();
+  const cachedPr = prList.find(({ number }) => number === prNo);
+  if (cachedPr) {
+    logger.debug('Returning from PR list');
+    return cachedPr;
   }
-  const closedPrs = await getClosedPrs();
-  const closedPr = closedPrs[prNo];
-  if (closedPr) {
-    logger.debug('Returning from graphql closed PR list');
-    return closedPr;
-  }
-  logger.debug(
-    { prNo },
-    'PR not found in open or closed PRs list - trying to fetch it directly'
-  );
-  const ghRestPr = (
-    await githubApi.getJson<GhRestPr>(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-    )
-  ).body;
-  return ghRestPr ? coerceRestPr(ghRestPr) : null;
+  return fetchPr(prNo);
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -675,9 +601,8 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let prList: GhRestPr[];
     try {
-      prList = (
+      const ghPrs = (
         await githubApi.getJson<GhRestPr[]>(
           `repos/${
             config.parentRepo || config.repository
@@ -685,20 +610,20 @@ export async function getPrList(): Promise<Pr[]> {
           { paginate: true }
         )
       ).body;
+      config.prList = ghPrs
+        .filter(
+          (pr) =>
+            config.forkMode ||
+            config.ignorePrAuthor ||
+            (pr?.user?.login && config?.renovateUsername
+              ? pr.user.login === config.renovateUsername
+              : true)
+        )
+        .map(coerceRestPr);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PlatformId.Github);
     }
-    config.prList = prList
-      .filter(
-        (pr) =>
-          config.forkMode ||
-          config.ignorePrAuthor ||
-          (pr?.user?.login && config?.renovateUsername
-            ? pr.user.login === config.renovateUsername
-            : true)
-      )
-      .map(coerceRestPr);
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
@@ -728,19 +653,21 @@ const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  // istanbul ignore if
   if (config.branchPrs[branchName]) {
     return config.branchPrs[branchName];
   }
+
   logger.debug(`getBranchPr(${branchName})`);
+
   const openPr = await findPr({
     branchName,
     state: PrState.Open,
   });
   if (openPr) {
-    config.branchPrs[branchName] = await getPr(openPr.number);
-    return config.branchPrs[branchName];
+    config.branchPrs[branchName] = openPr;
+    return openPr;
   }
+
   const autoclosedPr = await findPr({
     branchName,
     state: PrState.Closed,
@@ -779,14 +706,12 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
         { branchName, title, number },
         'Successfully reopened autoclosed PR'
       );
+      config.branchPrs[branchName] = await fetchPr(number);
+      return config.branchPrs[branchName];
     } catch (err) {
       logger.debug('Could not reopen autoclosed PR');
       return null;
     }
-    delete config.openPrList; // So that it gets refreshed
-    delete config.closedPrList?.[number]; // So that it's no longer found in the closed list
-    config.branchPrs[branchName] = await getPr(number);
-    return config.branchPrs[branchName];
   }
   return null;
 }
@@ -1283,11 +1208,6 @@ async function deleteComment(commentId: number): Promise<void> {
 }
 
 async function getComments(issueNo: number): Promise<Comment[]> {
-  const cachedComments = config.prComments[issueNo];
-  if (cachedComments) {
-    logger.debug('Returning closed PR list comments');
-    return cachedComments;
-  }
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `repos/${
@@ -1470,22 +1390,19 @@ export async function createPr({
     options.body.maintainer_can_modify = true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
-  const ghRestPr = (
+  const ghPr = (
     await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
   logger.debug(
-    { branch: sourceBranch, pr: ghRestPr.number, draft: draftPR },
+    { branch: sourceBranch, pr: ghPr.number, draft: draftPR },
     'PR created'
   );
-  const { node_id } = ghRestPr;
-  const pr = coerceRestPr(ghRestPr);
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
-  }
+  const { node_id } = ghPr;
+  const pr = coerceRestPr(ghPr);
+  config.prList?.push(pr);
   await addLabels(pr.number, labels);
   await tryPrAutomerge(pr.number, node_id, platformOptions);
   return pr;
@@ -1514,10 +1431,11 @@ export async function updatePr({
     options.token = config.forkToken;
   }
   try {
-    await githubApi.patchJson(
+    const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
+    addToCachedPrList(coerceRestPr(ghPr));
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
@@ -1616,6 +1534,10 @@ export async function mergePr({
     { automergeResult: automergeResult.body, pr: prNo },
     'PR merged'
   );
+  const cachedPr = config.prList?.find(({ number }) => number === prNo);
+  if (cachedPr) {
+    addToCachedPrList({ ...cachedPr, state: PrState.Merged });
+  }
   return true;
 }
 
