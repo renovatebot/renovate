@@ -31,7 +31,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     });
 
     it('skips status (dry-run)', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({ dryRun: true });
       platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();

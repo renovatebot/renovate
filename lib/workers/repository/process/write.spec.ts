@@ -1,5 +1,4 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -49,7 +48,6 @@ describe('workers/repository/process/write', () => {
         branchExists: false,
         result: BranchResult.Automerged,
       });
-      GlobalConfig.set({ dryRun: 'full' });
       const res = await writeUpdates(config, branches);
       expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
@@ -64,7 +62,6 @@ describe('workers/repository/process/write', () => {
       git.branchExists.mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
       expect(isLimitReached(Limit.Branches)).toBeFalse();
-      GlobalConfig.set({ dryRun: 'full' });
       await writeUpdates({ config }, branches);
       expect(isLimitReached(Limit.Branches)).toBeTrue();
     });
