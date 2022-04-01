@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import hasha from 'hasha';
 import minimatch from 'minimatch';
 import shell from 'shelljs';
@@ -83,13 +83,13 @@ export async function getHash(manager) {
 
     //add manager hashes to hashMap {key->manager, value->hash}
     hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set('${managers[index]}', '${hash}');`
+      (hash, index) => `hashMap.set(\n  '${managers[index]}',\n  '${hash}'\n);`
     );
 
     //write hashMap to fingerprint.ts
     await fs.writeFile(
-      './lib/modules/manager/fingerprint.ts',
-      [hashMap, hashes.join('\n')].join('\n\n')
+      './lib/modules/manager/fingerprint.generated.ts',
+      [hashMap, hashes.join('\n')].join('\n\n') + '\n'
     );
   } catch (err) {
     shell.echo('ERROR:', err.message);
