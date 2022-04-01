@@ -231,6 +231,10 @@ describe('workers/repository/update/pr/changelog/index', () => {
       ).toBeNull();
     });
     it('handles missing Github token', async () => {
+      hostRules.clear();
+      hostRules.add({
+        githubTokenWarn: true,
+      });
       expect(
         await getChangeLogJSON({
           ...upgrade,

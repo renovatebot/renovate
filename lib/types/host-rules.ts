@@ -14,4 +14,5 @@ export interface HostRule {
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
   resolvedHost?: string;
+  githubTokenWarn?: boolean;
 }

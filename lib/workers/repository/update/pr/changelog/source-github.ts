@@ -53,7 +53,7 @@ export async function getChangeLogJSON({
   });
   // istanbul ignore if
   if (!config.token) {
-    if (host.endsWith('github.com')) {
+    if (host.endsWith('github.com') && config.githubTokenWarn) {
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'

@@ -392,6 +392,13 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'githubTokenWarn',
+    description: 'Display warnings about GitHub token not being set.',
+    type: 'boolean',
+    default: true,
+    globalOnly: true,
+  },
+  {
     name: 'requireConfig',
     description:
       'Set to false if it is optional for repositories to contain a config.',
