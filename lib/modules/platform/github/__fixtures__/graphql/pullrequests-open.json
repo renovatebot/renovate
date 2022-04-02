@@ -21,7 +21,14 @@
             "number": 2500,
             "baseRefName": "master",
             "headRefName": "renovate/jest-monorepo",
-            "title": "chore(deps): update dependency jest to v23.6.0"
+            "title": "chore(deps): update dependency jest to v23.6.0",
+            "body": "Some body",
+            "assignees": {
+              "totalCount": 1
+            },
+            "reviewRequests": {
+              "totalCount": 2
+            }
           },
           {
             "number": 2079,
