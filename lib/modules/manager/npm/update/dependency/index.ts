@@ -32,7 +32,7 @@ function replaceAsString(
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
   const match = patchRe.exec(oldValue);
   if (match) {
-    const patch = oldValue.replace(patchRe, `${match[1]}${newValue}#`);
+    const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
     parsedContents[depType][depName] = patch;
     newString = `"${patch}"`;
   }
