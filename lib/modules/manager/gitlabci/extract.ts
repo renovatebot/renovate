@@ -8,11 +8,11 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline, Image, Services } from './types';
 import { replaceReferenceTags } from './utils';
 
-export function extractFromImage(image: Image): PackageDependency {
-  let dep: PackageDependency = {};
+export function extractFromImage(image: Image | undefined): PackageDependency {
   if (is.undefined(image)) {
     return undefined;
   }
+  let dep: PackageDependency = {};
   if (is.string(image)) {
     dep = getDep(image);
     dep.depType = 'image';
@@ -23,35 +23,42 @@ export function extractFromImage(image: Image): PackageDependency {
   return dep;
 }
 
-export function extractFromServices(services: Services): PackageDependency[] {
-  const deps: PackageDependency[] = [];
-
+export function extractFromServices(
+  services: Services | undefined
+): PackageDependency[] {
   if (is.undefined(services)) {
     return undefined;
   }
-  services.forEach((s) => {
+
+  const deps: PackageDependency[] = [];
+  let dep: PackageDependency<Record<string, any>> = {};
+  for (const s of services) {
     if (is.string(s)) {
-      const dep = getDep(s);
+      dep = getDep(s);
       dep.depType = 'service-image';
-      deps.push(dep);
-      return;
+    } else {
+      dep = getDep(s.name);
+      dep.depType = 'service-image';
     }
-    const dep = getDep(s.name);
-    dep.depType = 'service-image';
     deps.push(dep);
-  });
+  }
 
   return deps;
 }
 
-export function extractFromObject(prop: any, value: any): PackageDependency[] {
-  let deps: PackageDependency[] = [];
-
-  if (is.string(value) && prop === 'image') {
-    deps.push(extractFromImage(value as Image));
-    return deps;
+export function extractFromObject(
+  property: string,
+  value: Image | Services | undefined
+): PackageDependency[] {
+  if (is.undefined(value)) {
+    return undefined;
   }
-  const spreadOfVal = { ...value };
+  if (is.string(value) && property === 'image') {
+    return [extractFromImage(value as Image)];
+  }
+
+  let deps: PackageDependency[] = [];
+  const spreadOfVal = { ...(value as any) };
   const { image, services } = spreadOfVal;
   deps.push(extractFromImage(image as Image));
   deps = deps.concat(extractFromServices(services as Services));
@@ -61,7 +68,7 @@ export function extractFromObject(prop: any, value: any): PackageDependency[] {
 export function extractPackageFile(content: string): PackageFile | null {
   let deps: PackageDependency[] = [];
   try {
-    const doc: any = load(replaceReferenceTags(content), {
+    const doc = load(replaceReferenceTags(content), {
       json: true,
     });
     for (const [property, value] of Object.entries(doc)) {

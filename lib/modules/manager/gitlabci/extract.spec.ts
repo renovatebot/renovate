@@ -208,7 +208,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
       ];
       const services = ['image:test', 'image2:test2'];
-      expect(extractFromServices(undefined) === undefined).toBeTruthy();
+      expect(extractFromServices(undefined)).toBeUndefined();
       expect(extractFromServices(services)).toEqual(expectedRes);
       expect(
         extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }])
