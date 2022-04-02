@@ -372,8 +372,7 @@ export async function getBranchStatusCheck(
   context: string
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
-  const bbState = (statuses.find((status) => status.key === context) || {})
-    .state;
+  const bbState = statuses.find((status) => status.key === context)?.state;
   return bbToRenovateStatusMapping[bbState] || null;
 }
 

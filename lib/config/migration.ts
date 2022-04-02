@@ -1,13 +1,10 @@
-import later from '@breejs/later';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';
-import { removedPresets } from './presets/common';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
@@ -44,7 +41,6 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
       if (key === 'matchStrings' && is.array(val)) {
         migratedConfig.matchStrings = val
@@ -61,11 +57,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'packageRules' && is.plainObject(val)) {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        migratedConfig.packageRules.push(val);
       } else if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
@@ -127,11 +118,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'ignoreNpmrcFile') {
-        delete migratedConfig.ignoreNpmrcFile;
-        if (!is.string(migratedConfig.npmrc)) {
-          migratedConfig.npmrc = '';
-        }
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
@@ -150,121 +136,9 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (
-        key === 'extends' &&
-        (is.array<string>(val) || is.string(val))
-      ) {
-        if (is.string(migratedConfig.extends)) {
-          migratedConfig.extends = [migratedConfig.extends];
-        }
-        const presets = migratedConfig.extends;
-        for (let i = 0; i < presets.length; i += 1) {
-          const preset = presets[i];
-          if (is.string(preset)) {
-            let newPreset = removedPresets[preset];
-            if (newPreset !== undefined) {
-              presets[i] = newPreset;
-            }
-            newPreset = migratePresets?.[preset];
-            if (newPreset !== undefined) {
-              presets[i] = newPreset;
-            }
-          }
-        }
-        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
-      } else if (key === 'unpublishSafe') {
-        if (val === true) {
-          migratedConfig.extends = migratedConfig.extends || [];
-          if (is.string(migratedConfig.extends)) {
-            migratedConfig.extends = [migratedConfig.extends];
-          }
-          if (
-            ![
-              ':unpublishSafe',
-              'default:unpublishSafe',
-              'npm:unpublishSafe',
-            ].some((x) => migratedConfig.extends.includes(x))
-          ) {
-            migratedConfig.extends.push('npm:unpublishSafe');
-          }
-        }
-        delete migratedConfig.unpublishSafe;
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'packages') {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages
-        );
-        delete migratedConfig.packages;
-      } else if (key === 'schedule' && val) {
-        // massage to array first
-        const schedules = is.string(val) ? [val] : [...(val as string[])];
-        // split 'and'
-        const schedulesLength = schedules.length;
-        const afterBeforeRe = regEx(
-          /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-        );
-        for (let i = 0; i < schedulesLength; i += 1) {
-          if (
-            schedules[i].includes(' and ') &&
-            schedules[i].includes('before ') &&
-            schedules[i].includes('after ')
-          ) {
-            const parsedSchedule = later.parse.text(
-              // We need to massage short hours first before we can parse it
-              fixShortHours(schedules[i])
-            ).schedules[0];
-            // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
-            if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
-              const toSplit = schedules[i];
-              schedules[i] = toSplit
-                .replace(afterBeforeRe, '$1$2 $3 $7')
-                .trim();
-              schedules.push(
-                toSplit.replace(afterBeforeRe, '$1$4 $5 $7').trim()
-              );
-            }
-          }
-        }
-        for (let i = 0; i < schedules.length; i += 1) {
-          if (schedules[i].includes('on the last day of the month')) {
-            schedules[i] = schedules[i].replace(
-              'on the last day of the month',
-              'on the first day of the month'
-            );
-          }
-          if (schedules[i].includes('on every weekday')) {
-            schedules[i] = schedules[i].replace(
-              'on every weekday',
-              'every weekday'
-            );
-          }
-          if (schedules[i].endsWith(' every day')) {
-            schedules[i] = schedules[i].replace(' every day', '');
-          }
-          if (
-            regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
-              schedules[i]
-            )
-          ) {
-            schedules[i] = schedules[i].replace(
-              regEx(/every ([a-z]*day)$/),
-              'on $1'
-            );
-          }
-          if (schedules[i].endsWith('days')) {
-            schedules[i] = schedules[i].replace('days', 'day');
-          }
-        }
-        if (is.string(val) && schedules.length === 1) {
-          [migratedConfig.schedule] = schedules as any; // TODO: fixme
-        } else {
-          migratedConfig.schedule = schedules;
-        }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',

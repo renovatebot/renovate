@@ -8,7 +8,7 @@ The original use case, and the most popular one, is for developers to automate d
 
 ### Updating of package files
 
-The term "package file" is used to describe files which contain references to dependencies.
+The term "package file" is used to describe files which have references to dependencies.
 Package files are managed by a "package manager".
 
 Example package files include:
@@ -61,7 +61,7 @@ If your dependencies are not detected by default, you can use use our "regex" ma
 You configure the regex manager by telling it:
 
 - Which file pattern(s) to match
-- How to identify the dependency name and version from within the file
+- How to find the dependency name and version from within the file
 - Which datasource (e.g. Docker registry, npm registry, etc) to use to look up new versions
 
 The end result is that Renovate can keep dependencies in custom file formats up-to-date as long as the dependency datasource is known to Renovate.
@@ -111,7 +111,7 @@ Renovate detects and updates internal dependencies just like external or Open So
 We automatically update our documentation site with Renovate bot.
 We use Renovate's git submodule support to do this.
 
-- Our main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) contains most of the Markdown documentation files
+- Our main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) has most of the Markdown documentation files
 - The documentation build repository [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) has a submodule link to our main repository `renovatebot/renovate`
 - Submodule updates are performed automatically whenever detected
 - After the automatic update is merged, the documentation site is rebuilt and pushed live

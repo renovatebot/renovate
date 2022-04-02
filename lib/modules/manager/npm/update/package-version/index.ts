@@ -19,10 +19,10 @@ export function bumpPackageVersion(
       const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
       newPjVersion =
-        (parsedContent.dependencies || {})[mirrorPackage] ||
-        (parsedContent.devDependencies || {})[mirrorPackage] ||
-        (parsedContent.optionalDependencies || {})[mirrorPackage] ||
-        (parsedContent.peerDependencies || {})[mirrorPackage];
+        parsedContent.dependencies?.[mirrorPackage] ??
+        parsedContent.devDependencies?.[mirrorPackage] ??
+        parsedContent.optionalDependencies?.[mirrorPackage] ??
+        parsedContent.peerDependencies?.[mirrorPackage];
       if (!newPjVersion) {
         logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
         return { bumpedContent };
