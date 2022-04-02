@@ -13,6 +13,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
+import { ExtendsMigration } from './custom/extends-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -78,6 +79,7 @@ export class MigrationsService {
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
+    ExtendsMigration,
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
