@@ -20,6 +20,7 @@ import {
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
+  getPomXmlDependencies,
 } from './util';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
@@ -353,6 +354,36 @@ export class MavenDatasource extends Datasource {
     return releaseMap;
   }
 
+  async addReleaseDependencies(
+    inputReleaseMap: ReleaseMap,
+    dependency: MavenDependency,
+    repoUrl: string
+  ): Promise<ReleaseMap> {
+    if (!repoUrl.startsWith('https://repo.maven.apache.org/maven2')) {
+      return inputReleaseMap;
+    }
+    const releaseMap = { ...inputReleaseMap };
+
+    const { group, name: artifact } = dependency;
+    const versions = Object.keys(releaseMap);
+    const queue = versions.map((version) => async (): Promise<void> => {
+      const dependencies = await getPomXmlDependencies(
+        this.http,
+        group,
+        artifact,
+        version
+      );
+      if (dependencies) {
+        const release = { ...releaseMap[version], version, dependencies };
+        releaseMap[version] = release;
+      }
+    });
+
+    await pAll(queue, { concurrency: 5 });
+
+    return releaseMap;
+  }
+
   getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
     const releases = Object.values(releaseMap).filter(is.truthy);
     if (releases.length) {
@@ -381,7 +412,12 @@ export class MavenDatasource extends Datasource {
       dependency,
       repoUrl
     );
-    releaseMap = await this.addReleasesUsingHeadRequests(
+    // releaseMap = await this.addReleasesUsingHeadRequests(
+    //   releaseMap,
+    //   dependency,
+    //   repoUrl
+    // );
+    releaseMap = await this.addReleaseDependencies(
       releaseMap,
       dependency,
       repoUrl

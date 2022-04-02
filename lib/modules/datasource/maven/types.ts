@@ -15,4 +15,6 @@ export interface MavenXml {
 
 export type ReleaseMap = Record<string, Release | null>;
 
+export type Dependencies = Record<string, string>;
+
 export type HttpResourceCheckResult = 'found' | 'not-found' | 'error' | Date;

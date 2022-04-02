@@ -1,12 +1,14 @@
 import url from 'url';
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { parsePom } from '../../manager/maven/extract';
 import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
@@ -102,7 +104,8 @@ export async function checkHttpResource(
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
-    const res = await http.head(pkgUrl.toString());
+    const url = pkgUrl.toString();
+    const res = await http.get(url);
     const timestamp = res?.headers?.['last-modified'];
     if (timestamp) {
       const isoTimestamp = normalizeDate(timestamp);
@@ -257,4 +260,143 @@ export async function getDependencyInfo(
   }
 
   return result;
+}
+
+function getPomXmlUrl(
+  group: string,
+  artifact: string,
+  version: string
+): string {
+  const groupPath = group.replaceAll('.', '/');
+  const basePath = 'https://repo.maven.apache.org/maven2';
+  const urlStr = `${basePath}/${groupPath}/${artifact}/${version}/${artifact}-${version}.pom`;
+  return urlStr;
+}
+
+async function fetchPomXml(
+  http: Http,
+  url: string
+): Promise<XmlDocument | null> {
+  let result: null | XmlDocument = null;
+  try {
+    const { body: rawXml } = await http.get(url);
+    result = parsePom(rawXml);
+  } catch (err) {
+    logger.error(`Can't fetch XML: ${url}`);
+  }
+
+  return result;
+}
+
+const xmlCache: Record<string, Promise<XmlDocument | null>> = {};
+
+function getPomXml(http: Http, url: string): Promise<XmlDocument | null> {
+  const cachedResult = xmlCache[url];
+  if (is.promise<XmlDocument | null>(cachedResult)) {
+    return cachedResult;
+  }
+  const result = fetchPomXml(http, url);
+  xmlCache[url] = result;
+  return result;
+}
+
+const cachedProps: Record<string, Record<string, string>> = {};
+
+async function getPomXmlProperties(
+  http: Http,
+  url: string
+): Promise<Record<string, string>> {
+  if (cachedProps[url]) {
+    return cachedProps[url];
+  }
+
+  const pomXml = await getPomXml(http, url);
+  const props: Record<string, string> = {};
+  if (pomXml) {
+    const parent = pomXml.descendantWithPath('parent');
+    if (parent) {
+      const parentGroup = parent.valueWithPath('groupId');
+      const parentArtifact = parent.valueWithPath('artifactId');
+      const parentVersion = parent.valueWithPath('version');
+      if (parentGroup && parentArtifact && parentVersion) {
+        const parentUrl = getPomXmlUrl(
+          parentGroup,
+          parentArtifact,
+          parentVersion
+        );
+
+        const parentProps = await getPomXmlProperties(http, parentUrl);
+        Object.assign(props, parentProps);
+      }
+    }
+
+    const propsElem = pomXml.descendantWithPath('properties');
+    propsElem?.eachChild((elem: XmlElement) => {
+      if (elem.type === 'element') {
+        props[elem.name] = elem.val.replace(regEx(/\${.*?}/g), (substr) => {
+          const propKey = substr.slice(2, -1).trim();
+          const propValue = props[propKey];
+          return propValue ? propValue : substr;
+        });
+      }
+    });
+  }
+
+  cachedProps[url] = props;
+  return props;
+}
+
+async function visitAllDependencies(
+  root: XmlElement,
+  cb: (elem: XmlElement) => Promise<void>
+): Promise<void> {
+  if (root.type === 'element') {
+    if (root.name === 'dependencies') {
+      await cb(root);
+    } else {
+      for (const child of root.children) {
+        if (child.type === 'element') {
+          await visitAllDependencies(child, cb);
+        }
+      }
+    }
+  }
+}
+
+export async function getPomXmlDependencies(
+  http: Http,
+  group: string,
+  artifact: string,
+  version: string
+): Promise<Record<string, string> | null> {
+  const url = getPomXmlUrl(group, artifact, version);
+  const pomXml = await getPomXml(http, url);
+  if (!pomXml) {
+    return null;
+  }
+
+  const deps: Record<string, string> = {};
+  const cb = async (depsRoot: XmlElement): Promise<void> => {
+    const props = await getPomXmlProperties(http, url);
+    depsRoot.eachChild((depElem) => {
+      if (depElem.type === 'element' && depElem.name === 'dependency') {
+        const depGroup = depElem.valueWithPath('groupId');
+        const depArtifact = depElem.valueWithPath('artifactId');
+        const depVersion = depElem.valueWithPath('version');
+        if (depGroup && depArtifact && depVersion) {
+          deps[`${depGroup}:${depArtifact}`] = depVersion.replace(
+            regEx(/\${.*?}/g),
+            (substr) => {
+              const propKey = substr.slice(2, -1).trim();
+              const propValue = props[propKey];
+              return propValue ? propValue : substr;
+            }
+          );
+        }
+      }
+    });
+  };
+  await visitAllDependencies(pomXml, cb);
+
+  return deps;
 }
