@@ -5,7 +5,7 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { GitlabPipeline, Image, Services } from './types';
+import type { GitlabPipeline, Image, JobTemplate, Services } from './types';
 import { replaceReferenceTags } from './utils';
 
 export function extractFromImage(image: Image | undefined): PackageDependency {
@@ -48,7 +48,7 @@ export function extractFromServices(
 
 export function extractFromObject(
   property: string,
-  value: Image | Services | undefined
+  value: Image | JobTemplate | undefined
 ): PackageDependency[] {
   if (is.undefined(value)) {
     return undefined;
@@ -58,10 +58,14 @@ export function extractFromObject(
   }
 
   let deps: PackageDependency[] = [];
-  const spreadOfVal = { ...(value as any) };
-  const { image, services } = spreadOfVal;
-  deps.push(extractFromImage(image as Image));
-  deps = deps.concat(extractFromServices(services as Services));
+  const { image, services } = { ...(value as JobTemplate) };
+  if (!is.undefined(image)) {
+    deps.push(extractFromImage(image));
+  }
+  if (!is.undefined(services)) {
+    deps = deps.concat(extractFromServices(services));
+  }
+
   return deps;
 }
 

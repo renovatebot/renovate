@@ -228,6 +228,10 @@ describe('modules/manager/gitlabci/extract', () => {
         },
       ];
       expect(extractFromObject('image', 'image:test')).toEqual(expectedRes);
+      expect(extractFromObject('something', undefined)).toBeUndefined();
+      expect(extractFromObject('SomeJob', { image: 'image:test' })).toEqual(
+        expectedRes
+      );
     });
   });
 });

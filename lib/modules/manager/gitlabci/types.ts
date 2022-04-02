@@ -16,6 +16,9 @@ export interface ServicesObject {
   command?: string[];
   alias?: string;
 }
-
+export interface JobTemplate {
+  image?: Image;
+  services?: Services;
+}
 export type Image = ImageObject | string;
 export type Services = (string | ServicesObject)[];
