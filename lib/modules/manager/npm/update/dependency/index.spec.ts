@@ -257,5 +257,31 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(JSON.parse(testContent).resolutions.config).toBeUndefined();
       expect(JSON.parse(testContent).resolutions['**/abc']).toBe('2.0.0');
     });
+    it('pins also the version in patch with npm protocol in resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'lodash',
+        newValue: '4.17.21',
+      };
+      const outputContent = readFixture('outputs/patch1o.json');
+      const testContent = npmUpdater.updateDependency({
+        fileContent: readFixture('inputs/patch1.json'),
+        upgrade,
+      });
+      expect(testContent).toEqual(outputContent);
+    });
+    it('replaces also the version in patch with range in resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'metro',
+        newValue: '^0.60.0',
+      };
+      const outputContent = readFixture('outputs/patch2o.json');
+      const testContent = npmUpdater.updateDependency({
+        fileContent: readFixture('inputs/patch2.json'),
+        upgrade,
+      });
+      expect(testContent).toEqual(outputContent);
+    });
   });
 });
