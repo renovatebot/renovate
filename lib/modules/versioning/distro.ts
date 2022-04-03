@@ -1,19 +1,38 @@
 import dataFiles, { DataFile } from '../../data-files.generated';
 
-export type DistroInfoRecord = Record<string, string>;
+interface DistroSchedule {
+  codename: string;
+  series: string;
+  created: string;
+  release: string;
+  eol: string;
+  eol_server?: string;
+  eol_esm?: string;
+  eol_lts?: string;
+  eol_elts?: string;
+}
+
+type DistroDataFile = 'data/ubuntu-distro-info.json';
+
+export type DistroInfoRecord = Record<string, DistroSchedule>;
+
+export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
 
 export default class DistroInfo {
-  private readonly _codenameToVersion = new Map<string, string>();
+  private readonly _codenameToVersion = new Map<
+    string,
+    DistroInfoRecordWithVersion
+  >();
   private readonly _distroInfo: DistroInfoRecord;
 
-  constructor(distroJsonKey: string) {
+  constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       dataFiles.get(distroJsonKey as DataFile)!
     );
     for (const version of Object.keys(this._distroInfo)) {
-      const codename = this._distroInfo[version];
-      this._codenameToVersion.set(codename, version);
+      const schedule = this._distroInfo[version];
+      this._codenameToVersion.set(schedule.series, { version, ...schedule });
     }
   }
 
@@ -22,17 +41,17 @@ export default class DistroInfo {
   }
 
   public getVersionByCodename(input: string): string {
-    const ver = this._codenameToVersion.get(input);
-    if (ver) {
-      return ver;
+    const schedule = this._codenameToVersion.get(input);
+    if (schedule) {
+      return schedule.version;
     }
     return input;
   }
 
   public getCodenameByVersion(input: string): string {
-    const codename = this._distroInfo[input];
-    if (codename) {
-      return codename;
+    const di = this._distroInfo[input];
+    if (di) {
+      return di.series;
     }
     // istanbul ignore next
     return input;

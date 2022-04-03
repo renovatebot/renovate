@@ -1,40 +1,69 @@
+import https from 'https';
 import fs from 'fs-extra';
 import shell from 'shelljs';
 
-shell.echo(`Verifying required packages...`);
-
-if (!shell.which(`distro-info`)) {
-  shell.echo('This script requires distro-info, exiting...');
-  shell.exit(2);
-}
-
-if (!shell.which(`sed`)) {
-  shell.echo('This script requires sed, exiting...');
-  shell.exit(2);
-}
-
-shell.echo(`OK`);
-
-const ubuntuDistroInfo = shell.exec(
-  `ubuntu-distro-info --all -f | sed -r 's/Ubuntu|"|LTS |Debian //g; s/([0-9]+.[0-9]+) /\\1 /; s/.*/\\L&/; s/( [a-z]*) [a-z]*/\\1/g; s/^[ \\t]*//'`,
-  { silent: true }
-);
+let url = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
 
 /**
- * @param {string} str
- * @returns {{}}
+ * @param {string} url
+ * @param {function} cb
  */
-function objectify(str) {
-  let obj = {};
+function csv(url, cb) {
+  https.get(url, (response) => {
+    let buffer = '';
+    response
+      .on('data', (d) => {
+        buffer += d.toString();
+      })
+      .on('end', () => {
+        cb(buffer);
+      })
+      .on('error', (e) => {
+        shell.echo(
+          `csv - Error fetching distro data from URL:${url} e: ${e}\n Exiting...`
+        );
+        shell.exit(2);
+      })
+      .setEncoding('utf8');
+  });
+}
 
-  for (const line of str.split(/\r?\n/)) {
-    let [ver, codename] = line.split(' ');
-    // eslint-disable-next-line
-    // @ts-ignore
-    obj[ver] = codename;
-  }
+/**
+ * @param {string} raw
+ * @returns {string}
+ */
+function csvToJson(raw) {
+  const lines = raw.split(/\r?\n/);
+  const res = {};
+  const headers = lines[0].split(',');
 
-  return obj;
+  // drop headers
+  lines.shift();
+
+  // drop "version" header
+  headers.shift();
+
+  lines
+    // drop empty lines
+    .filter((l) => !!l)
+    .map((l) => {
+      const obj = {};
+      const line = l.split(',');
+      // eslint-disable-next-line
+      // @ts-ignore
+      const ver = line.shift().replace(/LTS|\s/g, '');
+
+      headers.map((h, i) => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        obj[h.replace('-', '_')] = line[i];
+      });
+
+      // eslint-disable-next-line
+      // @ts-ignore
+      res[ver] = obj;
+    });
+  return JSON.stringify(res);
 }
 
 /**
@@ -46,28 +75,36 @@ async function updateJsonFile(file, newData) {
 
   try {
     oldData = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
-    // Eliminate formatting
-    oldData = oldData?.replace(/\s/g, '') ?? null;
+    // Eliminate formatting. removes WS in the beginning, end. before & after non characters
+    oldData = oldData?.replace(/^\s|\s$|\B\s|\s\B/g, '') ?? null;
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);
   }
 
-  const parsedData = JSON.stringify(objectify(newData), undefined, 2);
-
-  if (oldData === parsedData) {
+  if (oldData === newData) {
     shell.echo(`${file} is up to date.`);
     return;
   }
 
   try {
     shell.echo(`Updating ${file}`);
-    await fs.writeFile(file, parsedData);
+    await fs.writeFile(file, newData);
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-updateJsonFile(`../data/ubuntu-distro-info.json`, ubuntuDistroInfo.toString());
+csv(
+  url,
+  /**
+   * @param {string} raw
+   */
+  (raw) => {
+    let json = csvToJson(raw);
+    //shell.echo(json);
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    updateJsonFile(`../data/ubuntu-distro-info.json`, json);
+  }
+);

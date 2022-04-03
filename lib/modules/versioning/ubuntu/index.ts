@@ -4,7 +4,10 @@ import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
-export const urls = ['https://changelogs.ubuntu.com/meta-release'];
+export const urls = [
+  'https://changelogs.ubuntu.com/meta-release',
+  "https://debian.pages.debian.net/distro-info-data/ubuntu.csv'",
+];
 export const supportsRanges = false;
 
 // #12509
@@ -12,6 +15,7 @@ const temporarilyUnstable = ['22.04'];
 
 const ubuntuJsonKey = 'data/ubuntu-distro-info.json';
 const di = new DistroInfo(ubuntuJsonKey);
+
 // validation
 
 function isValid(input: string): boolean {
