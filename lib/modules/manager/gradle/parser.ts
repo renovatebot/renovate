@@ -301,7 +301,12 @@ function processPredefinedRegistryUrl({
   return { urls: [registryUrl] };
 }
 
-const annoyingMethods = new Set(['createXmlValueRemover']);
+const annoyingMethods = new Set([
+  'createXmlValueRemover',
+  'events',
+  'args',
+  'listOf',
+]);
 
 function processLongFormDep({
   tokenMap,
