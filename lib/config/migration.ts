@@ -3,10 +3,8 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';
-import { removedPresets } from './presets/common';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
@@ -43,7 +41,6 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
       if (key === 'matchStrings' && is.array(val)) {
         migratedConfig.matchStrings = val
@@ -121,14 +118,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (
-        key === 'branchPrefix' &&
-        is.string(val) &&
-        val.includes('{{')
-      ) {
-        const templateIndex = val.indexOf(`{{`);
-        migratedConfig.branchPrefix = val.substring(0, templateIndex);
-        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
@@ -139,28 +128,6 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (
-        key === 'extends' &&
-        (is.array<string>(val) || is.string(val))
-      ) {
-        if (is.string(migratedConfig.extends)) {
-          migratedConfig.extends = [migratedConfig.extends];
-        }
-        const presets = migratedConfig.extends;
-        for (let i = 0; i < presets.length; i += 1) {
-          const preset = presets[i];
-          if (is.string(preset)) {
-            let newPreset = removedPresets[preset];
-            if (newPreset !== undefined) {
-              presets[i] = newPreset;
-            }
-            newPreset = migratePresets?.[preset];
-            if (newPreset !== undefined) {
-              presets[i] = newPreset;
-            }
-          }
-        }
-        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
