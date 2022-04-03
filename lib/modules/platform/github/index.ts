@@ -598,7 +598,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
     logger.debug('Retrieving PR list');
     try {
