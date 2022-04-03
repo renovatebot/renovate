@@ -2158,7 +2158,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
-        .reply(200);
+        .reply(404);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.getPr(1234);
       expect(pr).toBeNull();

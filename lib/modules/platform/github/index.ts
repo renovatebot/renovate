@@ -554,7 +554,7 @@ function removeFromCachedPrList(prNo: number): void {
   }
 }
 
-function addToCachedPrList(pr: Pr | null | undefined): void {
+function addToCachedPrList(pr: GhRestPr | null | undefined): void {
   if (pr && is.array(config.prList)) {
     removeFromCachedPrList(pr.number);
     config.prList.push(pr);
@@ -562,15 +562,16 @@ function addToCachedPrList(pr: Pr | null | undefined): void {
 }
 
 // Fetch fresh Pull Request and cache it to `config.prList` when possible
-async function fetchPr(prNo: number): Promise<Pr | null> {
-  const ghRestPr = (
-    await githubApi.getJson<GhRestPr>(
+async function fetchPr(prNo: number): Promise<GhRestPr | null> {
+  try {
+    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-    )
-  ).body;
-  const result = ghRestPr ? coerceRestPr(ghRestPr) : null;
-  addToCachedPrList(result);
-  return result;
+    );
+    addToCachedPrList(ghRestPr);
+    return ghRestPr;
+  } catch (err) {
+    return null;
+  }
 }
 
 // Gets details for a PR
@@ -579,12 +580,13 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
   const prList = await getPrList();
-  const cachedPr = prList.find(({ number }) => number === prNo);
-  if (cachedPr) {
+  let ghRestPr = prList.find(({ number }) => number === prNo);
+  if (ghRestPr) {
     logger.debug('Returning from PR list');
-    return cachedPr;
   }
-  return fetchPr(prNo);
+  ghRestPr ??= await fetchPr(prNo);
+  const result = coerceRestPr(ghRestPr);
+  return result;
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -597,7 +599,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<GhRestPr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
@@ -610,16 +612,14 @@ export async function getPrList(): Promise<Pr[]> {
           { paginate: true }
         )
       ).body;
-      config.prList = ghPrs
-        .filter(
-          (pr) =>
-            config.forkMode ||
-            config.ignorePrAuthor ||
-            (pr?.user?.login && config?.renovateUsername
-              ? pr.user.login === config.renovateUsername
-              : true)
-        )
-        .map(coerceRestPr);
+      config.prList = ghPrs.filter(
+        (pr) =>
+          config.forkMode ||
+          config.ignorePrAuthor ||
+          (pr?.user?.login && config?.renovateUsername
+            ? pr.user.login === config.renovateUsername
+            : true)
+      );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PlatformId.Github);
@@ -636,7 +636,7 @@ export async function findPr({
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  const pr = prList.find(
+  const pr = prList.map(coerceRestPr).find(
     (p) =>
       p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
@@ -1405,7 +1405,7 @@ export async function createPr({
   );
   const { node_id } = ghPr;
   const pr = coerceRestPr(ghPr);
-  config.prList?.push(pr);
+  config.prList?.push(ghPr);
   await addLabels(pr.number, labels);
   await tryPrAutomerge(pr.number, node_id, platformOptions);
   return pr;
@@ -1438,7 +1438,7 @@ export async function updatePr({
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
-    addToCachedPrList(coerceRestPr(ghPr));
+    addToCachedPrList(ghPr);
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {

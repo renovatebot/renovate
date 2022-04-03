@@ -6,7 +6,11 @@ import type { GhRestPr } from './types';
 /**
  * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests
  */
-export function coerceRestPr(pr: GhRestPr): Pr {
+export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
+  if (!pr) {
+    return null;
+  }
+
   const result: Pr = {
     displayNumber: `Pull Request #${pr.number}`,
     number: pr.number,
