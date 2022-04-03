@@ -20,6 +20,7 @@
     "eslint": "eslint . --report-unused-disable-directives",
     "eslint-fix": "eslint --fix . --report-unused-disable-directives",
     "generate": "run-s generate:*",
+    "generate:distro-json-generate": "npx ts-node tools/distro-json-generate.ts",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "cross-env LOG_LEVEL=fatal node --expose-gc --no-compilation-cache node_modules/jest/bin/jest.js --logHeapUsage",
@@ -48,7 +49,6 @@
     "test-schema": "run-s create-json-schema",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
-    "update:ubuntu-distro-info": "node tools/distro-json-generate.mjs",
     "verify": "node tools/verify.mjs"
   },
   "repository": {

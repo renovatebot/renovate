@@ -18,7 +18,7 @@ export type DistroInfoRecord = Record<string, DistroSchedule>;
 
 export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
 
-export default class DistroInfo {
+export class DistroInfo {
   private readonly _codenameToVersion = new Map<
     string,
     DistroInfoRecordWithVersion
