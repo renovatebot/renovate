@@ -305,7 +305,11 @@ const annoyingMethods = new Set([
   'createXmlValueRemover',
   'events',
   'args',
+  'arrayOf',
   'listOf',
+  'mutableListOf',
+  'setOf',
+  'mutableSetOf',
 ]);
 
 function processLongFormDep({
