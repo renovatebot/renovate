@@ -1,6 +1,7 @@
 import { dequal } from 'dequal';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
+import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
@@ -25,7 +26,17 @@ function replaceAsString(
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
-  const newString = `"${newValue}"`;
+  let newString = `"${newValue}"`;
+
+  const escapedDepName = escapeRegExp(depName);
+  const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
+  const match = patchRe.exec(oldValue);
+  if (match) {
+    const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
+    parsedContents[depType][depName] = patch;
+    newString = `"${patch}"`;
+  }
+
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
@@ -91,6 +102,7 @@ export function updateDependency({
       logger.trace('Version is already updated');
       return fileContent;
     }
+
     let newFileContent = replaceAsString(
       parsedContents,
       fileContent,
