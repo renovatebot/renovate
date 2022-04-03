@@ -3063,7 +3063,7 @@ Object {
   "sourceBranch": "somebranch",
   "sourceRepo": "some/repo",
   "state": "open",
-  "title": "new title - reopened",
+  "title": "old title",
 }
 `;
 
@@ -3156,17 +3156,6 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "PATCH",
-    "url": "https://api.github.com/repos/some/repo/pulls/91",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/91",
   },
 ]

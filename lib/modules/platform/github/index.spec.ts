@@ -606,19 +606,12 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
-        .reply(201)
-        .get('/repos/some/repo/pulls/91')
         .reply(200, {
           number: 91,
-          additions: 1,
-          deletions: 1,
-          commits: 1,
-          base: {
-            sha: '1234',
-          },
+          base: { sha: '1234' },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: PrState.Open,
-          title: 'new title - reopened',
+          title: 'old title',
         });
       await github.initRepo({
         repository: 'some/repo',

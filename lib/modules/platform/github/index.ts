@@ -696,17 +696,20 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     }
     try {
       const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
-      await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
-        body: {
-          state: 'open',
-          title,
-        },
-      });
+      const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
+        `repos/${config.repository}/pulls/${number}`,
+        {
+          body: {
+            state: 'open',
+            title,
+          },
+        }
+      );
       logger.info(
         { branchName, title, number },
         'Successfully reopened autoclosed PR'
       );
-      config.branchPrs[branchName] = await fetchPr(number);
+      config.branchPrs[branchName] = coerceRestPr(ghPr);
       return config.branchPrs[branchName];
     } catch (err) {
       logger.debug('Could not reopen autoclosed PR');
