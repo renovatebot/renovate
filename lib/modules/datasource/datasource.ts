@@ -5,7 +5,7 @@ import type {
   DatasourceApi,
   DigestConfig,
   GetReleasesConfig,
-  MetadataResult,
+  PackageMetadata,
   ReleaseResult,
 } from './types';
 
@@ -34,7 +34,7 @@ export abstract class Datasource implements DatasourceApi {
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
-  getMetadata?(config: GetReleasesConfig): Promise<MetadataResult | null>;
+  getMetadata?(config: GetReleasesConfig): Promise<PackageMetadata | null>;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   handleSpecificErrors(err: HttpError): void {}

@@ -54,10 +54,9 @@ export interface Release {
   sourceDirectory?: string;
 }
 
-export interface ReleaseResult {
+export interface PackageMetadata {
   deprecationMessage?: string;
   isPrivate?: boolean;
-  releases: Release[];
   tags?: Record<string, string>;
   // URL metadata
   changelogUrl?: string;
@@ -70,16 +69,15 @@ export interface ReleaseResult {
   replacementVersion?: string;
 }
 
-export type MetadataResult = Pick<
-  ReleaseResult,
-  'changelogUrl' | 'dependencyUrl' | 'homepage' | 'sourceUrl'
->;
+export interface ReleaseResult extends PackageMetadata {
+  releases: Release[];
+}
 
 export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  getMetadata?(config: GetReleasesConfig): Promise<MetadataResult | null>;
+  getMetadata?(config: GetReleasesConfig): Promise<PackageMetadata | null>;
   defaultRegistryUrls?: string[];
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
