@@ -353,6 +353,21 @@ async function getPomXmlProperties(
       props['project.version'] = projectVersion;
     }
 
+    const projectParentGroupId = pomXml.valueWithPath('parent.groupId');
+    if (projectParentGroupId) {
+      props['project.parent.groupId'] = projectParentGroupId;
+    }
+
+    const projectParentArtifactId = pomXml.valueWithPath('parent.artifactId');
+    if (projectParentArtifactId) {
+      props['project.parent.artifactId'] = projectParentArtifactId;
+    }
+
+    const projectParentVersion = pomXml.valueWithPath('parent.version');
+    if (projectParentVersion) {
+      props['project.parent.version'] = projectParentVersion;
+    }
+
     const propsElem = pomXml.descendantWithPath('properties');
     propsElem?.eachChild((elem: XmlElement) => {
       if (elem.type === 'element') {
