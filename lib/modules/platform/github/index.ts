@@ -562,13 +562,13 @@ function addToCachedPrList(pr: GhRestPr | null | undefined): void {
 }
 
 // Fetch fresh Pull Request and cache it to `config.prList` when possible
-async function fetchPr(prNo: number): Promise<GhRestPr | null> {
+async function fetchPr(prNo: number): Promise<Pr | null> {
   try {
     const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
     );
     addToCachedPrList(ghRestPr);
-    return ghRestPr;
+    return coerceRestPr(ghRestPr);
   } catch (err) {
     return null;
   }
@@ -580,13 +580,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
   const prList = await getPrList();
-  let ghRestPr = prList.find(({ number }) => number === prNo);
-  if (ghRestPr) {
-    logger.debug('Returning from PR list');
+  let pr = prList.find(({ number }) => number === prNo);
+  if (pr) {
+    logger.debug('Returning PR from cache');
   }
-  ghRestPr ??= await fetchPr(prNo);
-  const result = coerceRestPr(ghRestPr);
-  return result;
+  pr ??= await fetchPr(prNo);
+  return pr;
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -599,8 +598,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function getPrList(): Promise<GhRestPr[]> {
-  logger.trace('getPrList()');
+async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
     logger.debug('Retrieving PR list');
     try {
@@ -626,7 +624,7 @@ export async function getPrList(): Promise<GhRestPr[]> {
     }
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
-  return config.prList;
+  return config.prList.map(coerceRestPr);
 }
 
 export async function findPr({
@@ -636,7 +634,7 @@ export async function findPr({
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  const pr = prList.map(coerceRestPr).find(
+  const pr = prList.find(
     (p) =>
       p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
@@ -1403,12 +1401,11 @@ export async function createPr({
     { branch: sourceBranch, pr: ghPr.number, draft: draftPR },
     'PR created'
   );
-  const { node_id } = ghPr;
-  const pr = coerceRestPr(ghPr);
+  const { number, node_id } = ghPr;
   config.prList?.push(ghPr);
-  await addLabels(pr.number, labels);
-  await tryPrAutomerge(pr.number, node_id, platformOptions);
-  return pr;
+  await addLabels(number, labels);
+  await tryPrAutomerge(number, node_id, platformOptions);
+  return coerceRestPr(ghPr);
 }
 
 export async function updatePr({
