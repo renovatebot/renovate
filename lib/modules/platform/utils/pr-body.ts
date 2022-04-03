@@ -9,6 +9,7 @@ export function smartTruncate(input: string, len: number): string {
   if (!reMatch) {
     return input.substring(0, len);
   }
+
   const divider = `\n\n</details>\n\n---\n\n### Configuration`;
   const preNotes = reMatch[1];
   const releaseNotes = reMatch[2];
