@@ -1,4 +1,4 @@
-import { getManagers, hashMap } from './index';
+import { getManagers, hashMap } from '.';
 
 describe('modules/manager/fingerprint', () => {
   it('validate manager hash', () => {

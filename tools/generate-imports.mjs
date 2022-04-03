@@ -1,8 +1,12 @@
+import util from 'util';
 import fs from 'fs-extra';
+import _glob from 'glob';
 import hasha from 'hasha';
 import minimatch from 'minimatch';
 import shell from 'shelljs';
 import upath from 'upath';
+
+const glob = util.promisify(_glob);
 
 shell.echo('generating imports');
 const newFiles = new Set();
@@ -68,21 +72,15 @@ function expandPaths(paths) {
     .reduce((x, y) => x.concat(y));
 }
 /**
- * @param {string} manager
  * @param {string} filePath
  * @returns {Promise<string>}
  */
-async function getFileHash(manager, filePath) {
+async function getFileHash(filePath) {
   try {
-    const hash = await hasha.fromFile(
-      `lib/modules/manager/${manager}/${filePath}`,
-      options
-    );
+    const hash = await hasha.fromFile(filePath, options);
     return hash;
   } catch (err) {
-    throw new Error(
-      `ERROR: Unable to generate hash for manager/${manager}/${filePath}`
-    );
+    throw new Error(`ERROR: Unable to generate hash for ${filePath}`);
   }
 }
 /**
@@ -91,37 +89,23 @@ async function getFileHash(manager, filePath) {
  * @returns {Promise<string>}
  */
 export async function getManagerHash(managerName) {
-  try {
-    let hashes = [];
-    let files = await fs.readdir(`lib/modules/manager/${managerName}`);
+  let hashes = [];
+  const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
+    (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+  );
 
-    if (files.includes('__snapshots__')) {
-      const snapshots = await fs.readdir(
-        `lib/modules/manager/${managerName}/__snapshots__`
-      );
-
-      for (const snap of snapshots) {
-        const hash = getFileHash(managerName, `__snapshots__/${snap}`);
-        hashes.push(hash);
-      }
-    }
-
-    files = files.filter((fileName) => minimatch(fileName, '*.spec.ts'));
-    for (const file of files) {
-      const hash = getFileHash(managerName, file);
-      hashes.push(hash);
-    }
-
-    hashes = await Promise.all(hashes);
-
-    if (hashes.length) {
-      return hasha(hashes, options);
-    }
-
-    throw new Error(`Unable to generate hash for manager/${managerName}`);
-  } catch (err) {
-    throw new Error(err.message);
+  for (const fileAddr of files) {
+    const hash = getFileHash(fileAddr);
+    hashes.push(hash);
   }
+
+  hashes = await Promise.all(hashes);
+
+  if (hashes.length) {
+    return hasha(hashes, options);
+  }
+
+  throw new Error(`Unable to generate hash for manager/${managerName}`);
 }
 async function generateData() {
   const files = expandPaths(dataPaths).sort();
