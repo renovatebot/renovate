@@ -60,6 +60,20 @@ async function updateJsonFile(file: string, newData: string): Promise<void> {
     return;
   }
 
+  const oldLen = oldData.length;
+  const newLen = newData.length;
+
+  if (oldLen > newLen) {
+    shell.echo(`New data might be corrupted!`);
+    shell.echo(`Aborting ${file} update`);
+    shell.echo(
+      `**************** NEW DATA ****************\n${
+        JSON.stringify(newData) || newData
+      } `
+    );
+    return;
+  }
+
   try {
     shell.echo(`Updating ${file}`);
     await fs.writeFile(file, newData);
