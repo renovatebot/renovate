@@ -302,6 +302,14 @@ function getPomXml(http: Http, url: string): Promise<XmlDocument | null> {
 
 const cachedProps: Record<string, Record<string, string>> = {};
 
+function applyXmlProps(input: string, props: Record<string, string>): string {
+  return input.replace(regEx(/\${.*?}/g), (substr) => {
+    const propKey = substr.slice(2, -1).trim();
+    const propValue = props[propKey];
+    return propValue ? propValue : substr;
+  });
+}
+
 async function getPomXmlProperties(
   http: Http,
   url: string
@@ -330,14 +338,25 @@ async function getPomXmlProperties(
       }
     }
 
+    const projectGroupId = pomXml.valueWithPath('groupId');
+    if (projectGroupId) {
+      props['project.groupId'] = projectGroupId;
+    }
+
+    const projectArtifactId = pomXml.valueWithPath('artifactId');
+    if (projectArtifactId) {
+      props['project.artifactId'] = projectArtifactId;
+    }
+
+    const projectVersion = pomXml.valueWithPath('version');
+    if (projectVersion) {
+      props['project.version'] = projectVersion;
+    }
+
     const propsElem = pomXml.descendantWithPath('properties');
     propsElem?.eachChild((elem: XmlElement) => {
       if (elem.type === 'element') {
-        props[elem.name] = elem.val.replace(regEx(/\${.*?}/g), (substr) => {
-          const propKey = substr.slice(2, -1).trim();
-          const propValue = props[propKey];
-          return propValue ? propValue : substr;
-        });
+        props[elem.name] = applyXmlProps(elem.val, props);
       }
     });
   }
@@ -384,14 +403,9 @@ export async function getPomXmlDependencies(
         const depArtifact = depElem.valueWithPath('artifactId');
         const depVersion = depElem.valueWithPath('version');
         if (depGroup && depArtifact && depVersion) {
-          deps[`${depGroup}:${depArtifact}`] = depVersion.replace(
-            regEx(/\${.*?}/g),
-            (substr) => {
-              const propKey = substr.slice(2, -1).trim();
-              const propValue = props[propKey];
-              return propValue ? propValue : substr;
-            }
-          );
+          const key = applyXmlProps(`${depGroup}:${depArtifact}`, props);
+          const val = applyXmlProps(depVersion, props);
+          deps[key] = val;
         }
       }
     });
