@@ -71,6 +71,7 @@ function expandPaths(paths) {
     })
     .reduce((x, y) => x.concat(y));
 }
+
 /**
  * @param {string} filePath
  * @returns {Promise<string>}
@@ -83,6 +84,7 @@ async function getFileHash(filePath) {
     throw new Error(`ERROR: Unable to generate hash for ${filePath}`);
   }
 }
+
 /**
  *
  * @param {string} managerName
@@ -107,6 +109,7 @@ export async function getManagerHash(managerName) {
 
   throw new Error(`Unable to generate hash for manager/${managerName}`);
 }
+
 async function generateData() {
   const files = expandPaths(dataPaths).sort();
 
