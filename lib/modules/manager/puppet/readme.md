@@ -1,6 +1,6 @@
 simply keeps Puppetfiles updated
 
-# How It Works
+### How It Works
 
 1. Renovate searches in each repository for any `Puppetfile` files
 1. Existing dependencies are extracted from the relevant sections of the file
@@ -8,7 +8,7 @@ simply keeps Puppetfiles updated
 1. A PR is created with `Puppetfile` updated in the same commit
 1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
 
-# supported Puppetfile formats
+### supported Puppetfile formats
 
 the manager extracts the deps from one Puppetfile
 
@@ -64,9 +64,9 @@ the Puppetfile supports at the moment different ways to configure forges
     :tag => '5.0.0'
    ```
 
-# possible improvements
+### possible improvements
 
-## further git-support
+#### further git-support
 
 usually you can add the versions to a forge and use the already provided
 way of updating
