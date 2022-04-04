@@ -75,6 +75,39 @@ describe('modules/datasource/puppet-forge/index', () => {
         },
       });
     });
+
+    it('has a deprecated for reason', async () => {
+      httpMock
+        .scope('https://forgeapi.puppet.com')
+        .get('/v3/modules/puppetlabs-apache')
+        .query({ exclude_fields: 'current_release' })
+        .reply(200, Fixtures.get('puppetforge-deprecated-for.json'));
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'puppetlabs/apache',
+        packageName: 'puppetlabs/apache',
+      });
+      expect(res).toBeDefined();
+      expect(res).toEqual({
+        deprecationMessage: 'use another module ...',
+        registryUrl: 'https://forgeapi.puppet.com',
+        releases: [
+          {
+            downloadUrl: '/v3/files/puppetlabs-apache-7.0.0.tar.gz',
+            registryUrl: 'https://forgeapi.puppet.com',
+            releaseTimestamp: '2021-10-11T14:47:24.000Z',
+            version: '7.0.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
+        tags: {
+          endorsement: 'supported',
+          moduleGroup: 'base',
+          premium: 'false',
+        },
+      });
+    });
   });
 
   // https://forgeapi.puppet.com/#operation/getModule
