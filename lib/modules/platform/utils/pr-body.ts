@@ -14,12 +14,9 @@ export function smartTruncate(input: string, len: number): string {
   }
 
   const divider = `\n\n</details>\n\n---\n\n### Configuration`;
-  const preNotes = reMatch.groups?.preNotes;
-  const releaseNotes = reMatch.groups?.releaseNotes;
-  const postNotes = reMatch.groups?.postNotes;
-  if (!preNotes || !releaseNotes || !postNotes) {
-    return input;
-  }
+  const preNotes = reMatch.groups?.preNotes ?? '';
+  const releaseNotes = reMatch.groups?.releaseNotes ?? '';
+  const postNotes = reMatch.groups?.postNotes ?? '';
 
   const availableLength =
     len - (preNotes.length + postNotes.length + divider.length);
