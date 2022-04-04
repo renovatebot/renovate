@@ -123,12 +123,8 @@ export class BaseGoDatasource {
         // get server base url from import url
         const parsedUrl = URL.parse(goSourceUrl);
 
-        // split the go module from the URL: host/go/module -> go/module
-        const split = goModule.split('/');
-        let packageName = split.slice(1).join('/');
-        if (split[split.length - 1].match('^v\\d+$')) {
-          packageName = split.slice(1, split.length - 1).join('/');
-        }
+        // trim leading slash from pathname to obtain the package name
+        const packageName = parsedUrl.pathname.replace(/^\//, '');
 
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
