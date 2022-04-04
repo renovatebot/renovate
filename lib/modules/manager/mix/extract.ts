@@ -30,8 +30,7 @@ export async function extractPackageFile(
         const { depName, datasource, currentValue, organization } =
           depMatchGroups;
 
-        const managerData = { lineNumber: 0 };
-        const dep: PackageDependency<{ lineNumber: number }> = {
+        const dep: PackageDependency = {
           depName,
           currentValue,
         };
@@ -50,14 +49,6 @@ export async function extractPackageFile(
         if (dep.datasource !== HexDatasource.id) {
           dep.skipReason = 'non-hex-dep-types';
         }
-
-        // Find dep's line number
-        for (let i = 0; i < contentArr.length; i += 1) {
-          if (contentArr[i].includes(`:${depName},`)) {
-            managerData.lineNumber = i;
-          }
-        }
-        dep.managerData = managerData;
 
         deps.push(dep);
         depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
