@@ -10,13 +10,11 @@ export interface ImageObject {
   name: string;
   entrypoint?: string[];
 }
-export interface ServicesObject {
-  name: string;
-  entrypoint?: string[];
+export interface ServicesObject extends ImageObject {
   command?: string[];
   alias?: string;
 }
-export interface JobTemplate {
+export interface Job {
   image?: Image;
   services?: Services;
 }

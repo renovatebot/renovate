@@ -5,7 +5,7 @@ import type { ExtractConfig, PackageDependency } from '../types';
 import {
   extractAllPackageFiles,
   extractFromImage,
-  extractFromObject,
+  extractFromJob,
   extractFromServices,
 } from './extract';
 
@@ -181,7 +181,7 @@ describe('modules/manager/gitlabci/extract', () => {
         })
       ).toEqual(expectedRes);
 
-      expect(extractFromImage(undefined) === undefined).toBeTruthy();
+      expect(extractFromImage(undefined)).toBeNull();
     });
 
     it('extracts from services', () => {
@@ -208,7 +208,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
       ];
       const services = ['image:test', 'image2:test2'];
-      expect(extractFromServices(undefined)).toBeUndefined();
+      expect(extractFromServices(undefined)).toBeEmptyArray();
       expect(extractFromServices(services)).toEqual(expectedRes);
       expect(
         extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }])
@@ -227,11 +227,8 @@ describe('modules/manager/gitlabci/extract', () => {
           replaceString: 'image:test',
         },
       ];
-      expect(extractFromObject('image', 'image:test')).toEqual(expectedRes);
-      expect(extractFromObject('something', undefined)).toBeUndefined();
-      expect(extractFromObject('SomeJob', { image: 'image:test' })).toEqual(
-        expectedRes
-      );
+      expect(extractFromJob(undefined)).toBeEmptyArray();
+      expect(extractFromJob({ image: 'image:test' })).toEqual(expectedRes);
     });
   });
 });

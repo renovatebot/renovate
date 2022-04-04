@@ -5,21 +5,23 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { GitlabPipeline, Image, JobTemplate, Services } from './types';
+import type { GitlabPipeline, Image, Job, Services } from './types';
 import { replaceReferenceTags } from './utils';
 
-export function extractFromImage(image: Image | undefined): PackageDependency {
+export function extractFromImage(
+  image: Image | undefined
+): PackageDependency | null {
   if (is.undefined(image)) {
-    return undefined;
+    return null;
   }
-  let dep: PackageDependency = {};
+  let dep: PackageDependency = null;
   if (is.string(image)) {
     dep = getDep(image);
     dep.depType = 'image';
-    return dep;
+  } else if (is.string(image.name)) {
+    dep = getDep(image.name);
+    dep.depType = 'image-name';
   }
-  dep = getDep(image.name);
-  dep.depType = 'image-name';
   return dep;
 }
 
@@ -27,45 +29,37 @@ export function extractFromServices(
   services: Services | undefined
 ): PackageDependency[] {
   if (is.undefined(services)) {
-    return undefined;
+    return [];
   }
-
   const deps: PackageDependency[] = [];
-  let dep: PackageDependency<Record<string, any>> = {};
-  for (const s of services) {
-    if (is.string(s)) {
-      dep = getDep(s);
+  for (const service of services) {
+    if (is.string(service)) {
+      const dep = getDep(service);
       dep.depType = 'service-image';
-    } else {
-      dep = getDep(s.name);
+      deps.push(dep);
+    } else if (is.string(service.name)) {
+      const dep = getDep(service.name);
       dep.depType = 'service-image';
+      deps.push(dep);
     }
-    deps.push(dep);
   }
-
   return deps;
 }
 
-export function extractFromObject(
-  property: string,
-  value: Image | JobTemplate | undefined
-): PackageDependency[] {
-  if (is.undefined(value)) {
-    return undefined;
+export function extractFromJob(job: Job | undefined): PackageDependency[] {
+  if (is.undefined(job)) {
+    return [];
   }
-  if (is.string(value) && property === 'image') {
-    return [extractFromImage(value as Image)];
-  }
-
   let deps: PackageDependency[] = [];
-  const { image, services } = { ...(value as JobTemplate) };
-  if (!is.undefined(image)) {
-    deps.push(extractFromImage(image));
+  if (is.object(job)) {
+    const { image, services } = { ...job };
+    if (is.object(image) || is.string(image)) {
+      deps.push(extractFromImage(image));
+    }
+    if (is.array(services)) {
+      deps = deps.concat(extractFromServices(services));
+    }
   }
-  if (!is.undefined(services)) {
-    deps = deps.concat(extractFromServices(services));
-  }
-
   return deps;
 }
 
@@ -74,23 +68,25 @@ export function extractPackageFile(content: string): PackageFile | null {
   try {
     const doc = load(replaceReferenceTags(content), {
       json: true,
-    });
-    for (const [property, value] of Object.entries(doc)) {
-      switch (property) {
-        case 'image':
-          deps.push(extractFromImage(value as Image));
-          break;
+    }) as Record<string, Image | Services | Job>;
+    if (is.object(doc)) {
+      for (const [property, value] of Object.entries(doc)) {
+        switch (property) {
+          case 'image':
+            deps.push(extractFromImage(value as Image));
+            break;
 
-        case 'services':
-          deps = deps.concat(extractFromServices(value as Services));
-          break;
+          case 'services':
+            deps = deps.concat(extractFromServices(value as Services));
+            break;
 
-        default:
-          deps = deps.concat(extractFromObject(property, value));
-          break;
+          default:
+            deps = deps.concat(extractFromJob(value as Job));
+            break;
+        }
       }
+      deps = deps.filter(is.truthy);
     }
-    deps = deps.filter((dep) => dep !== undefined);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting GitLab CI dependencies');
   }
