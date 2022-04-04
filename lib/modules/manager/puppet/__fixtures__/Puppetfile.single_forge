@@ -1,4 +1,0 @@
-forge "https://forgeapi.puppetlabs.com"
-mod 'puppetlabs/stdlib', '8.0.0'
-mod 'puppetlabs/apache', '6.5.1'
-mod 'puppetlabs/puppetdb', '7.9.0'

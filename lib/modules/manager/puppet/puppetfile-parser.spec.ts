@@ -115,7 +115,13 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
     });
 
     it('Puppetfile_no_forge', () => {
-      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile.no_forge'));
+      const puppetfile = parsePuppetfile(
+        [
+          "mod 'puppetlabs/stdlib', '8.0.0'",
+          "mod 'puppetlabs/apache', '6.5.1'",
+          "mod 'puppetlabs/puppetdb', '7.9.0'",
+        ].join(EOL)
+      );
       expect(puppetfile.size).toBe(1);
 
       const defaultRegistryModules = puppetfile.get(undefined);
@@ -138,7 +144,12 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
     it('Puppetfile_single_forge', () => {
       const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile.single_forge')
+        [
+          'forge "https://forgeapi.puppetlabs.com"',
+          "mod 'puppetlabs/stdlib', '8.0.0'",
+          "mod 'puppetlabs/apache', '6.5.1'",
+          "mod 'puppetlabs/puppetdb', '7.9.0'",
+        ].join(EOL)
       );
       expect(puppetfile.size).toBe(1);
 

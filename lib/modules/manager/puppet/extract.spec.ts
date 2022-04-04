@@ -12,7 +12,13 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('extracts multiple modules from Puppetfile without a forge', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile.no_forge'));
+      const res = extractPackageFile(
+        [
+          "mod 'puppetlabs/stdlib', '8.0.0'",
+          "mod 'puppetlabs/apache', '6.5.1'",
+          "mod 'puppetlabs/puppetdb', '7.9.0'",
+        ].join(EOL)
+      );
 
       expect(res.deps).toEqual([
         {
