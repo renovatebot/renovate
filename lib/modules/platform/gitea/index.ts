@@ -195,7 +195,7 @@ function getRepoUrl(
 
   if (gitUrl === 'endpoint' || repo.clone_url === null) {
     if (repo.clone_url === null) {
-      logger.debug('no clone_url found. Falling back to old behaviour.');
+      logger.debug('No clone_url found. Falling back to old behaviour.');
     }
 
     const { protocol, host, pathname } = parseUrl(defaults.endpoint);
@@ -210,7 +210,7 @@ function getRepoUrl(
     return url;
   }
 
-  logger.debug({ url: repo.clone_url }, `using http URL`);
+  logger.debug({ url: repo.clone_url }, `using HTTP URL`);
   const repoUrl = URL.parse(`${repo.clone_url}?token=${opts.token}`);
   return URL.format(repoUrl);
 }
