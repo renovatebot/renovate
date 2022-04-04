@@ -31,6 +31,8 @@ import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
+import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
@@ -98,6 +100,8 @@ export class MigrationsService {
     RequiredStatusChecksMigration,
     ScheduleMigration,
     SemanticCommitsMigration,
+    SeparateMajorReleasesMigration,
+    SeparateMultipleMajorMigration,
     SuppressNotificationsMigration,
     TrustLevelMigration,
     UnpublishSafeMigration,

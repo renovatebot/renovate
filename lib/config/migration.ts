@@ -128,9 +128,6 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (key === 'separateMajorReleases') {
-        delete migratedConfig.separateMultipleMajor;
-        migratedConfig.separateMajorMinor = val;
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
