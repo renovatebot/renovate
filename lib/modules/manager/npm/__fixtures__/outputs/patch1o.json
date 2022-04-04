@@ -7,7 +7,7 @@
     "lodash": "patch:lodash@npm:4.17.21#patches/lodash.patch"
   },
   "dependenciesMeta": {
-    "lodash@4.16.0": {
+    "lodash@4.17.21": {
       "unplugged": true
     }
   }
