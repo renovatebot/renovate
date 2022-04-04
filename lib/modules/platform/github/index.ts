@@ -563,15 +563,11 @@ function addToCachedPrList(pr: GhRestPr | null | undefined): void {
 
 // Fetch fresh Pull Request and cache it to `config.prList` when possible
 async function fetchPr(prNo: number): Promise<Pr | null> {
-  try {
-    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-    );
-    addToCachedPrList(ghRestPr);
-    return coerceRestPr(ghRestPr);
-  } catch (err) {
-    return null;
-  }
+  const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+    `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+  );
+  addToCachedPrList(ghRestPr);
+  return coerceRestPr(ghRestPr);
 }
 
 // Gets details for a PR
