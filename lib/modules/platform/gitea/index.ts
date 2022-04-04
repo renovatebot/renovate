@@ -4,6 +4,7 @@ import JSON5 from 'json5';
 import semver from 'semver';
 import { PlatformId } from '../../../constants';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -17,7 +18,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -25,6 +26,7 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
+  GitUrlOption,
   Issue,
   MergePRConfig,
   Platform,
@@ -173,6 +175,47 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   return labelList.find((l) => l.name === name)?.id;
 }
 
+function getRepoUrl(
+  repo: helper.Repo,
+  gitUrl: GitUrlOption | undefined
+): string {
+  if (gitUrl === 'ssh') {
+    if (!repo.ssh_url) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
+    logger.debug({ url: repo.ssh_url }, `using ssh URL`);
+    return repo.ssh_url;
+  }
+
+  // Find options for current host and determine Git endpoint
+  const opts = hostRules.find({
+    hostType: PlatformId.Gitea,
+    url: defaults.endpoint,
+  });
+
+  if (gitUrl === 'endpoint' || repo.clone_url === null) {
+    if (repo.clone_url === null) {
+      logger.debug('no clone_url found. Falling back to old behaviour.');
+    }
+
+    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
+    const url = URL.format({
+      protocol: protocol.slice(0, -1) || 'https',
+      auth: 'token' + opts.token,
+      host,
+      pathname: newPathname + '/' + repo.full_name + '.git',
+    });
+    logger.debug({ url }, 'using URL based on configured endpoint');
+    return url;
+  }
+
+  logger.debug({ url: repo.clone_url }, `using http URL`);
+  const repoUrl = URL.parse(`${repo.clone_url}`);
+  repoUrl.auth = 'token:' + opts.token;
+  return URL.format(repoUrl);
+}
+
 const platform: Platform = {
   async initPlatform({
     endpoint,
@@ -235,6 +278,7 @@ const platform: Platform = {
   async initRepo({
     repository,
     cloneSubmodules,
+    gitUrl,
   }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
@@ -293,18 +337,12 @@ const platform: Platform = {
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
-    // Find options for current host and determine Git endpoint
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitea,
-      url: defaults.endpoint,
-    });
-    const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token;
+    const url = getRepoUrl(repo, gitUrl);
 
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: URL.format(gitEndpoint),
+      url,
     });
 
     // Reset cached resources
