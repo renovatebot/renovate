@@ -7,8 +7,7 @@ describe('modules/manager/fingerprint', () => {
     const managers = getManagers();
     for (const [manager] of managers) {
       const managerHash = hashMap.get(manager);
-      expect(managerHash).toBeDefined();
-      expect(managerHash.match(regex)).toHaveLength(1);
+      expect(managerHash.match(regex)).not.toBeNull();
     }
   });
 });
