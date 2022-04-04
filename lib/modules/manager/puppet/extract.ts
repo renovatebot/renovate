@@ -1,10 +1,9 @@
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 import type { PackageDependency, PackageFile } from '../types';
-import { RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT } from './constants';
+import { getGitOwnerRepo, isGithubUrl } from './common';
 import { parsePuppetfile } from './puppetfile-parser';
 import type { PuppetfileModule } from './types';
 
@@ -45,14 +44,16 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
   const githubUrl = isGithubUrl(git, parsedUrl);
 
   if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
-    logger.warn(`Access to github is only allowed for https, your url was: ${git}`);
+    logger.warn(
+      `Access to github is only allowed for https, your url was: ${git}`
+    );
     return {
       datasource: GithubTagsDatasource.id,
       depName: moduleName,
       gitRef: true,
       sourceUrl: git,
       skipReason: 'invalid-url',
-    }
+    };
   }
   const gitOwnerRepo = getGitOwnerRepo(git, githubUrl);
 
@@ -74,44 +75,6 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
     currentValue: tag,
     datasource: githubUrl ? GithubTagsDatasource.id : GitTagsDatasource.id,
   };
-}
-
-function getGitOwnerRepo(
-  git: string,
-  githubUrl: boolean
-): string | PackageDependency {
-  const genericGitSsh = RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT.exec(git);
-
-  if (genericGitSsh) {
-    return genericGitSsh[1].replace(regEx(/\.git$/), '');
-  } else {
-    if (githubUrl) {
-      return git
-        .replace(regEx(/^github:/), '')
-        .replace(regEx(/^git\+/), '')
-        .replace(regEx(/^https:\/\/github\.com\//), '')
-        .replace(regEx(/\.git$/), '');
-    } else {
-      try {
-        const url = new URL(git);
-        return url.pathname
-          .replace(regEx(/\.git$/), '')
-          .replace(regEx(/^\//), '');
-      } catch (err) {
-        return {
-          gitRef: true,
-          sourceUrl: git,
-          skipReason: 'invalid-url',
-        };
-      }
-    }
-  }
-}
-
-function isGithubUrl(git: string, parsedUrl: URL | undefined): boolean {
-  return (
-    parsedUrl && parsedUrl.host === 'github.com' || git.startsWith('git@github.com')
-  );
 }
 
 function tryParseUrl(url: string): URL | undefined {
