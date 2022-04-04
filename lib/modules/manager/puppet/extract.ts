@@ -8,7 +8,7 @@ import { getGitOwnerRepo, isGithubUrl } from './common';
 import { parsePuppetfile } from './puppetfile-parser';
 import type { PuppetfileModule } from './types';
 
-function getForgeDependency(
+function parseForgeDependency(
   module: PuppetfileModule,
   forgeUrl?: string
 ): PackageDependency {
@@ -95,7 +95,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (isGitModule(module)) {
         packageDependency = getGitDependency(module);
       } else {
-        packageDependency = getForgeDependency(module, forgeUrl);
+        packageDependency = parseForgeDependency(module, forgeUrl);
       }
 
       if (module.skipReason) {
