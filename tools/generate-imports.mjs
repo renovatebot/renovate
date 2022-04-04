@@ -91,17 +91,16 @@ async function getFileHash(filePath) {
  * @returns {Promise<string>}
  */
 export async function getManagerHash(managerName) {
+  /** @type {string[]} */
   let hashes = [];
   const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
     (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
   );
 
   for (const fileAddr of files) {
-    const hash = getFileHash(fileAddr);
+    const hash = await getFileHash(fileAddr);
     hashes.push(hash);
   }
-
-  hashes = await Promise.all(hashes);
 
   if (hashes.length) {
     return hasha(hashes, options);
@@ -144,6 +143,7 @@ async function generateHash() {
   shell.echo('generating hashes');
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
+    /** @type {string[]} */
     let hashes = [];
     // get managers list
     const managers = (
@@ -159,13 +159,13 @@ async function generateHash() {
 
     //add manager hashes to hashMap {key->manager, value->hash}
     hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set(\n  '${managers[index]}',\n  '${hash}'\n);`
+      (hash, index) => `hashMap.set('${managers[index]}','${hash}');`
     );
 
     //write hashMap to fingerprint.generated.ts
     await updateFile(
       'lib/modules/manager/fingerprint.generated.ts',
-      [hashMap, hashes.join('\n')].join('\n\n') + '\n'
+      [hashMap, hashes.join('\n')].join('\n\n')
     );
   } catch (err) {
     shell.echo('ERROR:', err.message);
