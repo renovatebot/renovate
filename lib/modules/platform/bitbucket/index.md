@@ -2,8 +2,8 @@
 
 ## Authentication
 
-First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
-Give the bot App password the following permission scopes:
+First, [create an app password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
+Give the bot app password the following permission scopes:
 
 - [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
 - [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
