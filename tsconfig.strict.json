@@ -306,6 +306,7 @@
     "lib/modules/platform/azure/util.ts",
     "lib/modules/platform/bitbucket/index.ts",
     "lib/modules/platform/bitbucket-server/index.ts",
+    "lib/modules/platform/bitbucket-server/utils.ts",
     "lib/modules/platform/comment.ts",
     "lib/modules/platform/commit.ts",
     "lib/modules/platform/gitea/index.ts",
