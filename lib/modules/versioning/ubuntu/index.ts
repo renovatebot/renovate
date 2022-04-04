@@ -13,8 +13,7 @@ export const supportsRanges = false;
 // #12509
 const temporarilyUnstable = ['22.04'];
 
-const ubuntuJsonKey = 'data/ubuntu-distro-info.json';
-const di = new DistroInfo(ubuntuJsonKey);
+const di = new DistroInfo('data/ubuntu-distro-info.json');
 
 // validation
 

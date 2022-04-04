@@ -5,12 +5,13 @@ import shell from 'shelljs';
 const url = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
 
 /**
- * @param {string} raw
- * @returns {string}
+ * Converts valid CSV string into JSON.
+ * @param {string} raw CSV string
+ * @returns {string} JSON representation of input CSV
  */
-function csvToJson(raw: string): string {
+function csvToJson(raw) {
   const lines = raw.split(/\r?\n/);
-  const res: { [index: string]: any } = {};
+  const res = {};
   const headers = lines[0].split(',');
 
   // drop headers
@@ -24,15 +25,19 @@ function csvToJson(raw: string): string {
       continue;
     }
 
-    const obj: { [index: string]: any } = {};
+    const obj = {};
     const line = l.split(',');
     const ver = line?.shift()?.replace(/LTS|\s/g, '');
 
     for (const [i, h] of headers.entries()) {
+      // eslint-disable-next-line
+      // @ts-ignore
       obj[h.replace('-', '_')] = line[i];
     }
 
     if (ver) {
+      // eslint-disable-next-line
+      // @ts-ignore
       res[ver] = obj;
     }
   }
@@ -40,10 +45,11 @@ function csvToJson(raw: string): string {
 }
 
 /**
- * @param {string} file
- * @param {string} newData
+ * Update given file with new provided data.
+ * @param {string} file Path to a data file
+ * @param {string} newData New data to be written
  */
-async function updateJsonFile(file: string, newData: string): Promise<void> {
+async function updateJsonFile(file, newData) {
   let oldData;
 
   try {
@@ -84,14 +90,16 @@ async function updateJsonFile(file: string, newData: string): Promise<void> {
 }
 
 /**
- * @param {string} url
+ * Fetch CSV and update data file.
+ * @param {string} url Url to CSV
+ * @param {string} file File path to update
  */
-async function update(url: string): Promise<void> {
+async function update(url, file) {
   const res = await got(url);
   const csv = res.body;
   const json = csvToJson(csv);
-  await updateJsonFile(`./data/ubuntu-distro-info.json`, json);
+  await updateJsonFile(file, json);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-update(url);
+update(url, `./data/ubuntu-distro-info.json`);
