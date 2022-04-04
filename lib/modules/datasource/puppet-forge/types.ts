@@ -14,7 +14,6 @@ export interface PuppetModule {
   premium: boolean;
   current_release: PuppetRelease;
   releases: PuppetReleaseAbbreviated[];
-  feedback_score: IntRange<101>;
   homepage_url: string;
   issues_url: string;
 }
@@ -32,7 +31,6 @@ export interface PuppetRelease {
   metadata: Record<string, any>;
   tags: string[];
   pdk: boolean;
-  validation_score: IntRange<101>;
   file_uri: string;
   file_size: number;
   file_md5: string;
@@ -89,11 +87,3 @@ export interface PuppetModuleOwner {
 
 export type PuppetEndorsement = 'supported' | 'approved' | 'partner';
 export type PuppetModuleGroup = 'base' | 'pe_only';
-
-type IntRange<MAX_EXCLUSIVE extends number> = number extends MAX_EXCLUSIVE
-  ? number
-  : _IntRangeHelper<MAX_EXCLUSIVE, []>;
-type _IntRangeHelper<
-  T extends number,
-  R extends unknown[]
-> = R['length'] extends T ? R[number] : _IntRangeHelper<T, [R['length'], ...R]>;
