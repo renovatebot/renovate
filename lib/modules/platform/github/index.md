@@ -2,8 +2,15 @@
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account, select `repo` scope.
+
+Let Renovate use your PAT by doing _one_ of the following:
+
+- Set your PAT as a `token` in your `config.js` file
+- Set your PAT as an environment variable `RENOVATE_TOKEN`
+- Set your PAT when you run Renovate in the CLI with `--token=`
+
+Remember to set `platform=github` somewhere in your Renovate config file.
 
 If you use GitHub Enterprise Server then `endpoint` must point to `https://github.enterprise.com/api/v3/`.
 You can choose where you want to set `endpoint`:
