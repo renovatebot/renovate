@@ -1953,7 +1953,6 @@
 
 "@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.4":
   version "0.0.4"
-  uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
 "@renovatebot/pep440@2.1.1":
@@ -2579,6 +2578,11 @@
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/url-join/-/url-join-4.0.1.tgz#4989c97f969464647a8586c7252d97b449cdc045"
   integrity sha512-wDXw9LEEUHyV+7UWy7U315nrJGJ7p1BzaCxDpEoLr789Dk1WDVMMlf3iBfbG2F8NdWnYyFbtTxUn2ZNbm1Q4LQ==
+
+"@types/validate-npm-package-name@3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@types/validate-npm-package-name/-/validate-npm-package-name-3.0.3.tgz#970c1949b0b677e970aa6e60db4e0f6aaf5fb293"
+  integrity sha512-dLhCHEIjf9++/vHaHCo/ngJzGqGGbPh/f7HKwznEk3WFL64t/VKuRiVpyQH4afX93YkCV94I9M0Cx+DBLk1Dsg==
 
 "@types/xmldoc@1.1.6":
   version "1.1.6"
