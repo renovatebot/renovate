@@ -1,13 +1,28 @@
 import { dequal } from 'dequal';
-import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
-import type { NpmPackage } from '../../extract/types';
+import type { DependenciesMeta, NpmPackage } from '../../extract/types';
+
+function renameObjKey(
+  oldObj: DependenciesMeta,
+  oldKey: string,
+  newKey: string
+): DependenciesMeta {
+  const keys = Object.keys(oldObj);
+  return keys.reduce((acc, val) => {
+    if (val === oldKey) {
+      acc[newKey] = oldObj[oldKey];
+    } else {
+      acc[val] = oldObj[val];
+    }
+    return acc;
+  }, {});
+}
 
 function replaceAsString(
-  parsedContents: PackageJson,
+  parsedContent: NpmPackage,
   fileContent: string,
   depType: string,
   depName: string,
@@ -15,24 +30,23 @@ function replaceAsString(
   newValue: string
 ): string | null {
   if (depType === 'packageManager') {
-    parsedContents[depType] = newValue;
+    parsedContent[depType] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
-    delete Object.assign(parsedContents[depType], {
-      [newValue]: parsedContents[depType][oldValue],
+    delete Object.assign(parsedContent[depType], {
+      [newValue]: parsedContent[depType][oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
     if (oldValue !== newValue) {
-      Object.defineProperty(
-        parsedContents[depType],
-        newValue,
-        Object.getOwnPropertyDescriptor(parsedContents[depType], oldValue)
+      parsedContent.dependenciesMeta = renameObjKey(
+        parsedContent.dependenciesMeta,
+        oldValue,
+        newValue
       );
-      delete parsedContents[depType][oldValue];
     }
   } else {
     // The old value is the version of the dependency
-    parsedContents[depType][depName] = newValue;
+    parsedContent[depType][depName] = newValue;
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
@@ -43,7 +57,7 @@ function replaceAsString(
   const match = patchRe.exec(oldValue);
   if (match) {
     const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
-    parsedContents[depType][depName] = patch;
+    parsedContent[depType][depName] = patch;
     newString = `"${patch}"`;
   }
 
@@ -63,7 +77,7 @@ function replaceAsString(
         newString
       );
       // Compare the parsed JSON structure of old and new
-      if (dequal(parsedContents, JSON.parse(testContent))) {
+      if (dequal(parsedContent, JSON.parse(testContent))) {
         return testContent;
       }
     }
