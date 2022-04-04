@@ -126,7 +126,7 @@ export async function updateArtifacts({
     packageFileName,
   ];
 
-  logger.debug(
+  logger.trace(
     { packageFiles },
     `Found ${packageFiles.length} dependent package files`
   );
@@ -168,7 +168,7 @@ export async function updateArtifacts({
         existingLockFileContentMap[lockFileName] ===
         newLockFileContentMap[lockFileName]
       ) {
-        logger.debug(`Lock file ${lockFileName} is unchanged`);
+        logger.trace(`Lock file ${lockFileName} is unchanged`);
       } else {
         retArray.push({
           file: {
@@ -180,7 +180,6 @@ export async function updateArtifacts({
       }
     }
 
-    logger.debug('Returning updated lock files');
     return retArray.length > 0 ? retArray : null;
   } catch (err) {
     // istanbul ignore if

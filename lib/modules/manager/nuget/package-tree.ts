@@ -6,7 +6,9 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 
-// Get all package files at any level of ancestry that depend on `packageFileName`
+/**
+ * Get all package files at any level of ancestry that depend on packageFileName
+ */
 export async function getDependentPackageFiles(
   packageFileName: string
 ): Promise<string[]> {
@@ -29,7 +31,6 @@ export async function getDependentPackageFiles(
       .flat()
       .map((pf) => pf.attr['Include']);
 
-    logger.debug(projectReferenceAttributes);
     const projectReferences = projectReferenceAttributes.map((a) =>
       upath.normalize(a)
     );
@@ -49,7 +50,9 @@ export async function getDependentPackageFiles(
   return recursivelyGetDependentPackageFiles(packageFileName, graph);
 }
 
-// Traverse graph and find dependent package files at any level of ancestry
+/**
+ * Traverse graph and find dependent package files at any level of ancestry
+ */
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
   graph: ReturnType<typeof Graph>
@@ -65,7 +68,9 @@ function recursivelyGetDependentPackageFiles(
   );
 }
 
-// Take the path relative from a project file, and make it relative from the root of the repo
+/**
+ * Take the path relative from a project file, and make it relative from the root of the repo
+ */
 function reframeRelativePathToRootOfRepo(
   dependentProjectRelativePath: string,
   projectReference: string
@@ -87,14 +92,16 @@ function reframeRelativePathToRootOfRepo(
   return relativeProjectReferencePath;
 }
 
-// Get a list of package files in `localDir`
+/**
+ * Get a list of package files in localDir
+ */
 async function getAllPackageFiles(): Promise<string[]> {
   const allFiles = await getFileList();
   const filteredPackageFiles = allFiles.filter(
     minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true })
   );
 
-  logger.debug({ filteredPackageFiles }, 'Found package files');
+  logger.trace({ filteredPackageFiles }, 'Found package files');
 
   return filteredPackageFiles;
 }
