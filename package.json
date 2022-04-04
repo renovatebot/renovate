@@ -249,6 +249,7 @@
     "@types/shelljs": "0.8.11",
     "@types/traverse": "0.6.32",
     "@types/url-join": "4.0.1",
+    "@types/validate-npm-package-name": "3.0.3",
     "@types/xmldoc": "1.1.6",
     "@typescript-eslint/eslint-plugin": "5.16.0",
     "@typescript-eslint/parser": "5.16.0",
