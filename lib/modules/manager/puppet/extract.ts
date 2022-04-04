@@ -26,7 +26,7 @@ function parseForgeDependency(
   return dep;
 }
 
-function getGitDependency(module: PuppetfileModule): PackageDependency {
+function parseGitDependency(module: PuppetfileModule): PackageDependency {
   const moduleName = module.name;
 
   const git = module.tags?.get('git');
@@ -93,7 +93,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       let packageDependency: PackageDependency;
 
       if (isGitModule(module)) {
-        packageDependency = getGitDependency(module);
+        packageDependency = parseGitDependency(module);
       } else {
         packageDependency = parseForgeDependency(module, forgeUrl);
       }
