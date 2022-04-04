@@ -27,7 +27,7 @@ function csvToJson(raw) {
 
     const obj = {};
     const line = l.split(',');
-    const ver = line?.shift()?.replace(/LTS|\s/g, '');
+    let ver = line?.shift()?.replace(/LTS|\s/g, '');
 
     for (const [i, h] of headers.entries()) {
       // eslint-disable-next-line
@@ -36,12 +36,15 @@ function csvToJson(raw) {
     }
 
     if (ver) {
+      // Debian related, example codename "hamm" version is 2.0
+      // change 2.0 -> 2
+      ver = ver.endsWith('.0') ? ver.replace('.0', '') : ver;
       // eslint-disable-next-line
       // @ts-ignore
       res[ver] = obj;
     }
   }
-  return JSON.stringify(res);
+  return JSON.stringify(res, undefined, 2);
 }
 
 /**
@@ -54,8 +57,6 @@ async function updateJsonFile(file, newData) {
 
   try {
     oldData = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
-    // Eliminate formatting. removes WS in the beginning, end. before & after non characters
-    oldData = oldData?.replace(/^\s|\s$|\B\s|\s\B/g, '') ?? null;
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);
@@ -66,17 +67,13 @@ async function updateJsonFile(file, newData) {
     return;
   }
 
-  const oldLen = oldData?.length ?? 0;
-  const newLen = newData?.length ?? 0;
+  const oldLen = oldData?.length ?? -1;
+  const newLen = newData?.length ?? -1;
 
-  if (oldLen === 0 || newLen === 0 || oldLen > newLen) {
+  if (oldLen === -1 || newLen === -1 || oldLen > newLen) {
     shell.echo(`New data might be corrupted!`);
     shell.echo(`Aborting ${file} update`);
-    shell.echo(
-      `**************** NEW DATA ****************\n${
-        JSON.stringify(newData) || newData
-      } `
-    );
+    shell.echo(`**************** NEW DATA ****************\n${newData} `);
     return;
   }
 
