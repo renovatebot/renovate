@@ -1,4 +1,4 @@
-import type { SkipReason } from '../../../types/skip-reason';
+import type { SkipReason } from '../../../types';
 
 export interface PuppetfileModule {
   name?: string;
@@ -8,4 +8,3 @@ export interface PuppetfileModule {
 }
 
 export type PuppetForgeUrl = string | undefined;
-export type Puppetfile = Map<PuppetForgeUrl, PuppetfileModule[]>;

@@ -88,8 +88,8 @@ export function extractPackageFile(content: string): PackageFile | null {
   const puppetFile = parsePuppetfile(content);
   const deps: PackageDependency[] = [];
 
-  for (const [forgeUrl, modules] of puppetFile.entries()) {
-    for (const module of modules) {
+  for (const forgeUrl of puppetFile.getForges()) {
+    for (const module of puppetFile.getModulesOfForge(forgeUrl)) {
       let packageDependency: PackageDependency;
 
       if (isGitModule(module)) {

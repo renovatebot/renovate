@@ -1,11 +1,44 @@
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { PuppetForgeUrl, Puppetfile, PuppetfileModule } from './types';
+import type { PuppetForgeUrl, PuppetfileModule } from './types';
 
 const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
 const commentRegex = regEx(/#.*$/);
 
+/**
+ * For us a Puppetfile is build up of forges that have Modules.
+ *
+ * Modules are the updatable parts.
+ *
+ */
+export class Puppetfile {
+  private forgeModules: Map<PuppetForgeUrl, PuppetfileModule[]> = new Map<
+    PuppetForgeUrl,
+    PuppetfileModule[]
+  >();
+
+  public add(currentForge: PuppetForgeUrl, module: PuppetfileModule): void {
+    if (Object.keys(module).length === 0) {
+      return;
+    }
+
+    if (!this.forgeModules.has(currentForge)) {
+      this.forgeModules.set(currentForge, []);
+    }
+
+    this.forgeModules.get(currentForge)?.push(module);
+  }
+
+  public getForges(): PuppetForgeUrl[] {
+    return Array.from(this.forgeModules.keys());
+  }
+
+  public getModulesOfForge(forgeUrl: any): PuppetfileModule[] {
+    return this.forgeModules.get(forgeUrl);
+  }
+}
+
 export function parsePuppetfile(content: string): Puppetfile {
-  const puppetfile: Puppetfile = new Map<PuppetForgeUrl, PuppetfileModule[]>();
+  const puppetfile: Puppetfile = new Puppetfile();
 
   let currentForge: string | undefined = undefined;
   let currentPuppetfileModule: PuppetfileModule = {};
@@ -16,7 +49,7 @@ export function parsePuppetfile(content: string): Puppetfile {
 
     const forgeResult = forgeRegex.exec(line);
     if (forgeResult) {
-      addPuppetfileModule(puppetfile, currentForge, currentPuppetfileModule);
+      puppetfile.add(currentForge, currentPuppetfileModule);
 
       currentPuppetfileModule = {};
 
@@ -27,7 +60,7 @@ export function parsePuppetfile(content: string): Puppetfile {
     const moduleStart = line.startsWith('mod');
 
     if (moduleStart) {
-      addPuppetfileModule(puppetfile, currentForge, currentPuppetfileModule);
+      puppetfile.add(currentForge, currentPuppetfileModule);
       currentPuppetfileModule = {};
     }
 
@@ -48,7 +81,7 @@ export function parsePuppetfile(content: string): Puppetfile {
     }
   }
 
-  addPuppetfileModule(puppetfile, currentForge, currentPuppetfileModule);
+  puppetfile.add(currentForge, currentPuppetfileModule);
 
   return puppetfile;
 }
@@ -68,20 +101,4 @@ function fillPuppetfileModule(
     // 3+ value without a key is not supported
     currentPuppetfileModule.skipReason = 'invalid-config';
   }
-}
-
-function addPuppetfileModule(
-  puppetfile: Puppetfile,
-  currentForge: string | undefined,
-  module: PuppetfileModule
-): void {
-  if (Object.keys(module).length === 0) {
-    return;
-  }
-
-  if (!puppetfile.has(currentForge)) {
-    puppetfile.set(currentForge, []);
-  }
-
-  puppetfile.get(currentForge)?.push(module);
 }

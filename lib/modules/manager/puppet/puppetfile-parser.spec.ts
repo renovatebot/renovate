@@ -8,7 +8,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
   describe('parsePuppetfile()', () => {
     it('Puppetfile_github_tag', () => {
       const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile.github_tag'));
-      const defaultRegistryModules = puppetfile.get(undefined);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
         {
@@ -35,7 +35,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
           "mod 'stdlib', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git', :tag => '5.0.0'",
         ].join(EOL)
       );
-      const defaultRegistryModules = puppetfile.get(undefined);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
         {
@@ -58,9 +58,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
     it('Puppetfile with an invalid module creates PuppetfileModule with skipReason "invalid-config"', () => {
       const puppetFileContent = `mod 'puppetlabs/stdlib', '8.0.0', 'i should trigger a skip reason'`;
       const puppetfile = parsePuppetfile(puppetFileContent);
-      expect(puppetfile.size).toBe(1);
+      expect(puppetfile.getForges()).toHaveLength(1);
 
-      const defaultRegistryModules = puppetfile.get(undefined);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
         {
@@ -75,9 +75,11 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const puppetfile = parsePuppetfile(
         Fixtures.get('Puppetfile.multiple_forges')
       );
-      expect(puppetfile.size).toBe(2);
+      expect(puppetfile.getForges()).toHaveLength(2);
 
-      const defaultRegistryModules = puppetfile.get(puppetLabsRegistryUrl);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(
+        puppetLabsRegistryUrl
+      );
 
       expect(defaultRegistryModules).toEqual([
         {
@@ -94,7 +96,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
         },
       ]);
 
-      const someOtherPuppetForgeModules = puppetfile.get(
+      const someOtherPuppetForgeModules = puppetfile.getModulesOfForge(
         'https://some-other-puppet-forge.com'
       );
 
@@ -122,9 +124,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
           "mod 'puppetlabs/puppetdb', '7.9.0'",
         ].join(EOL)
       );
-      expect(puppetfile.size).toBe(1);
+      expect(puppetfile.getForges()).toHaveLength(1);
 
-      const defaultRegistryModules = puppetfile.get(undefined);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
         {
@@ -151,9 +153,11 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
           "mod 'puppetlabs/puppetdb', '7.9.0'",
         ].join(EOL)
       );
-      expect(puppetfile.size).toBe(1);
+      expect(puppetfile.getForges()).toHaveLength(1);
 
-      const defaultRegistryModules = puppetfile.get(puppetLabsRegistryUrl);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(
+        puppetLabsRegistryUrl
+      );
 
       expect(defaultRegistryModules).toEqual([
         {
@@ -175,9 +179,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const puppetfile = parsePuppetfile(
         Fixtures.get('Puppetfile.with_comments')
       );
-      expect(puppetfile.size).toBe(1);
+      expect(puppetfile.getForges()).toHaveLength(1);
 
-      const defaultRegistryModules = puppetfile.get(undefined);
+      const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
         {
