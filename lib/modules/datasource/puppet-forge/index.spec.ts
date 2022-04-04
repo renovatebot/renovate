@@ -1,13 +1,9 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { PuppetForgeDatasource } from '.';
 
-const puppetforgeReleases = loadFixture('puppetforge-response.json');
-const puppetforgeReleasesNulls = loadFixture(
-  'puppetforge-response-with-nulls.json'
-);
-const puppetforgeNoReleases = loadFixture('puppetforge-no-releases.json');
+const puppetforgeReleases = Fixtures.get('puppetforge-response.json');
 
 const datasource = PuppetForgeDatasource.id;
 
@@ -167,7 +163,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       .scope('https://forgeapi.puppet.com', {})
       .get('/v3/modules/foobar')
       .query({ exclude_fields: 'current_release' })
-      .reply(200, puppetforgeReleasesNulls);
+      .reply(200, Fixtures.get('puppetforge-response-with-nulls.json'));
 
     const res = await getPkgReleases({
       datasource,
@@ -197,7 +193,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       .scope('https://forgeapi.puppet.com', {})
       .get('/v3/modules/foobar')
       .query({ exclude_fields: 'current_release' })
-      .reply(200, puppetforgeNoReleases);
+      .reply(200, Fixtures.get('puppetforge-no-releases.json'));
 
     const res = await getPkgReleases({
       datasource,
