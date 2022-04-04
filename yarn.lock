@@ -3270,31 +3270,7 @@ bunyan@1.8.15:
     mv "~2"
     safe-json-stringify "~1"
 
-cacache@15.3.0, cacache@^15.2.0:
-  version "15.3.0"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-15.3.0.tgz#dc85380fb2f556fe3dda4c719bfa0ec875a7f1eb"
-  integrity sha512-VVdYzXEn+cnbXpFgWs5hTT7OScegHVmLhJIR8Ufqk3iFD6A6j5iSX1KuBTfNEv4tdJWE2PzA6IVFtcLC7fN9wQ==
-  dependencies:
-    "@npmcli/fs" "^1.0.0"
-    "@npmcli/move-file" "^1.0.1"
-    chownr "^2.0.0"
-    fs-minipass "^2.0.0"
-    glob "^7.1.4"
-    infer-owner "^1.0.4"
-    lru-cache "^6.0.0"
-    minipass "^3.1.1"
-    minipass-collect "^1.0.2"
-    minipass-flush "^1.0.5"
-    minipass-pipeline "^1.2.2"
-    mkdirp "^1.0.3"
-    p-map "^4.0.0"
-    promise-inflight "^1.0.1"
-    rimraf "^3.0.2"
-    ssri "^8.0.1"
-    tar "^6.0.2"
-    unique-filename "^1.1.1"
-
-cacache@^16.0.0, cacache@^16.0.2:
+cacache@16.0.3, cacache@^16.0.0, cacache@^16.0.2:
   version "16.0.3"
   resolved "https://registry.yarnpkg.com/cacache/-/cacache-16.0.3.tgz#0b6314bde969bd4098b03a5f90a351e8a1483f48"
   integrity sha512-eC7wYodNCVb97kuHGk5P+xZsvUJHkhSEOyNwkenqQPAsOtrTjvWOE5vSPNBpz9d8X3acIf6w2Ub5s4rvOCTs4g==
@@ -3316,6 +3292,30 @@ cacache@^16.0.0, cacache@^16.0.2:
     rimraf "^3.0.2"
     ssri "^8.0.1"
     tar "^6.1.11"
+    unique-filename "^1.1.1"
+
+cacache@^15.2.0:
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-15.3.0.tgz#dc85380fb2f556fe3dda4c719bfa0ec875a7f1eb"
+  integrity sha512-VVdYzXEn+cnbXpFgWs5hTT7OScegHVmLhJIR8Ufqk3iFD6A6j5iSX1KuBTfNEv4tdJWE2PzA6IVFtcLC7fN9wQ==
+  dependencies:
+    "@npmcli/fs" "^1.0.0"
+    "@npmcli/move-file" "^1.0.1"
+    chownr "^2.0.0"
+    fs-minipass "^2.0.0"
+    glob "^7.1.4"
+    infer-owner "^1.0.4"
+    lru-cache "^6.0.0"
+    minipass "^3.1.1"
+    minipass-collect "^1.0.2"
+    minipass-flush "^1.0.5"
+    minipass-pipeline "^1.2.2"
+    mkdirp "^1.0.3"
+    p-map "^4.0.0"
+    promise-inflight "^1.0.1"
+    rimraf "^3.0.2"
+    ssri "^8.0.1"
+    tar "^6.0.2"
     unique-filename "^1.1.1"
 
 cacheable-lookup@^5.0.3:
