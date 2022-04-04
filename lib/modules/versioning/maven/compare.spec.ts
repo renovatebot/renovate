@@ -255,12 +255,16 @@ describe('modules/versioning/maven/compare', () => {
     });
 
     test.each`
-      input          | leftType             | leftValue | leftBracket | rightType            | rightValue | rightBracket
-      ${'[1.0]'}     | ${'INCLUDING_POINT'} | ${'1.0'}  | ${'['}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
-      ${'(,1.0]'}    | ${'EXCLUDING_POINT'} | ${null}   | ${'('}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
-      ${'[1.2,1.3]'} | ${'INCLUDING_POINT'} | ${'1.2'}  | ${'['}      | ${'INCLUDING_POINT'} | ${'1.3'}   | ${']'}
-      ${'[1.0,2.0)'} | ${'INCLUDING_POINT'} | ${'1.0'}  | ${'['}      | ${'EXCLUDING_POINT'} | ${'2.0'}   | ${')'}
-      ${'[1.5,)'}    | ${'INCLUDING_POINT'} | ${'1.5'}  | ${'['}      | ${'EXCLUDING_POINT'} | ${null}    | ${')'}
+      input           | leftType             | leftValue | leftBracket | rightType            | rightValue | rightBracket
+      ${'[1.0]'}      | ${'INCLUDING_POINT'} | ${'1.0'}  | ${'['}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
+      ${'(,1.0]'}     | ${'EXCLUDING_POINT'} | ${null}   | ${'('}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
+      ${'(, 1.0]'}    | ${'EXCLUDING_POINT'} | ${null}   | ${'('}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
+      ${'[1.2,1.3]'}  | ${'INCLUDING_POINT'} | ${'1.2'}  | ${'['}      | ${'INCLUDING_POINT'} | ${'1.3'}   | ${']'}
+      ${'[1.2, 1.3]'} | ${'INCLUDING_POINT'} | ${'1.2'}  | ${'['}      | ${'INCLUDING_POINT'} | ${'1.3'}   | ${']'}
+      ${'[1.0,2.0)'}  | ${'INCLUDING_POINT'} | ${'1.0'}  | ${'['}      | ${'EXCLUDING_POINT'} | ${'2.0'}   | ${')'}
+      ${'[1.0,2.0)'}  | ${'INCLUDING_POINT'} | ${'1.0'}  | ${'['}      | ${'EXCLUDING_POINT'} | ${'2.0'}   | ${')'}
+      ${'[1.5,)'}     | ${'INCLUDING_POINT'} | ${'1.5'}  | ${'['}      | ${'EXCLUDING_POINT'} | ${null}    | ${')'}
+      ${'[1.5, )'}    | ${'INCLUDING_POINT'} | ${'1.5'}  | ${'['}      | ${'EXCLUDING_POINT'} | ${null}    | ${')'}
     `(
       'parseRange("$input")',
       ({
@@ -283,7 +287,9 @@ describe('modules/versioning/maven/compare', () => {
           },
         ];
         expect(parseRange(input)).toEqual(parseResult);
-        expect(rangeToStr(parseResult as never)).toEqual(input);
+        expect(rangeToStr(parseResult as never)).toEqual(
+          input.replace(/\s*/g, '')
+        );
       }
     );
 
