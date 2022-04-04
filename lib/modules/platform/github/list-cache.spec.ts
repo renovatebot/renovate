@@ -35,7 +35,7 @@ describe('modules/platform/github/list-cache', () => {
         timestamp: t2,
       };
 
-      reconcileWithPage(cache, [
+      const needNextPage = reconcileWithPage(cache, [
         { number: 3, updated_at: t3 },
         { number: 4, updated_at: t4 },
       ]);
@@ -49,6 +49,7 @@ describe('modules/platform/github/list-cache', () => {
         },
         timestamp: t4,
       });
+      expect(needNextPage).toBeTrue();
     });
 
     it('caches updated items', () => {
@@ -58,10 +59,10 @@ describe('modules/platform/github/list-cache', () => {
           2: { number: 2, updated_at: t2 },
           3: { number: 3, updated_at: t3 },
         },
-        timestamp: t2,
+        timestamp: t3,
       };
 
-      reconcileWithPage(cache, [
+      const needNextPage = reconcileWithPage(cache, [
         { number: 3, updated_at: t3 },
         { number: 1, updated_at: t4 },
         { number: 2, updated_at: t5 },
@@ -75,6 +76,7 @@ describe('modules/platform/github/list-cache', () => {
         },
         timestamp: t5,
       });
+      expect(needNextPage).toBeFalse();
     });
   });
 });

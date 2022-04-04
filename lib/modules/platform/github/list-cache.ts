@@ -18,17 +18,21 @@ export function setItem<T extends CacheableItem>(
 export function reconcileWithPage<T extends CacheableItem>(
   cache: ListCache<T>,
   page: T[]
-): void {
+): boolean {
   const { items, timestamp } = cache;
 
   const oldTimestamp = DateTime.fromISO(timestamp);
   let newTimestamp = oldTimestamp;
+
+  let needNextPage = true;
 
   for (const item of page) {
     const itemTimestamp = DateTime.fromISO(item.updated_at);
 
     if (itemTimestamp > oldTimestamp) {
       items[item.number] = item;
+    } else {
+      needNextPage = false;
     }
 
     if (itemTimestamp > newTimestamp) {
@@ -37,4 +41,6 @@ export function reconcileWithPage<T extends CacheableItem>(
   }
 
   cache.timestamp = newTimestamp.toISO();
+
+  return needNextPage;
 }
