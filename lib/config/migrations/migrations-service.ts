@@ -10,6 +10,7 @@ import { AutomergeTypeMigration } from './custom/automerge-type-migration';
 import { BaseBranchMigration } from './custom/base-branch-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { BranchNameMigration } from './custom/branch-name-migration';
+import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
@@ -78,6 +79,7 @@ export class MigrationsService {
     BaseBranchMigration,
     BinarySourceMigration,
     BranchNameMigration,
+    BranchPrefixMigration,
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
