@@ -118,14 +118,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (
-        key === 'branchPrefix' &&
-        is.string(val) &&
-        val.includes('{{')
-      ) {
-        const templateIndex = val.indexOf(`{{`);
-        migratedConfig.branchPrefix = val.substring(0, templateIndex);
-        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
