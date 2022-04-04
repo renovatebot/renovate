@@ -1,6 +1,6 @@
 const re = new RegExp(
   `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
-  'ms'
+  's'
 );
 
 export function smartTruncate(input: string, len: number): string {
