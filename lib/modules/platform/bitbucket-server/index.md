@@ -2,10 +2,16 @@
 
 ## Authentication
 
-Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for your bot account.
-Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
-Also configure the `username` for your bot account, if you decided not to name it `@renovate-bot`.
-Don't forget to configure `platform=bitbucket-server` somewhere in config.
+First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the bot account.
+Let Renovate use your HTTP access token by doing _one_ of the following:
+
+- Set your HTTP access token as a `password` in your `config.js` file
+- Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`
+- Set your HTTP access token when you run Renovate in the CLI with `--password=`
+
+Remember to set `platform=bitbucket-server` somewhere in your Renovate config file.
+
+If you're not using `@renovate-bot` as username then set your custom `username` for the bot account.
 
 If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
