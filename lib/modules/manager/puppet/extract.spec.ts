@@ -12,7 +12,7 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('extracts multiple modules from Puppetfile without a forge', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile_no_forge'));
+      const res = extractPackageFile(Fixtures.get('Puppetfile.no_forge'));
 
       expect(res.deps).toEqual([
         {
@@ -38,7 +38,7 @@ describe('modules/manager/puppet/extract', () => {
 
     it('extracts multiple modules from Puppetfile with multiple forges/registries', () => {
       const res = extractPackageFile(
-        Fixtures.get('Puppetfile_multiple_forges')
+        Fixtures.get('Puppetfile.multiple_forges')
       );
 
       expect(res.deps).toEqual([
@@ -88,7 +88,7 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('extracts multiple git tag modules from Puppetfile', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile_github_tag'));
+      const res = extractPackageFile(Fixtures.get('Puppetfile.github_tag'));
 
       expect(res.deps).toEqual([
         {
@@ -113,23 +113,29 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('Use GithubTagsDatasource only if host is exactly github.com', () => {
-      const res = extractPackageFile(`mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`);
+      const res = extractPackageFile(
+        `mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`
+      );
 
       expect(res.deps).toEqual([
         {
           datasource: GitTagsDatasource.id,
           depName: 'apache',
-          packageName: 'https://github.com.example.com/puppetlabs/puppetlabs-apache',
-          sourceUrl: 'https://github.com.example.com/puppetlabs/puppetlabs-apache',
+          packageName:
+            'https://github.com.example.com/puppetlabs/puppetlabs-apache',
+          sourceUrl:
+            'https://github.com.example.com/puppetlabs/puppetlabs-apache',
           repo: 'https://github.com.example.com/puppetlabs/puppetlabs-apache',
           currentValue: '0.9.0',
           gitRef: true,
-        }
+        },
       ]);
     });
 
     it('Github url without https is skipped', () => {
-      const res = extractPackageFile(`mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`);
+      const res = extractPackageFile(
+        `mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`
+      );
 
       expect(res.deps).toEqual([
         {
@@ -138,7 +144,7 @@ describe('modules/manager/puppet/extract', () => {
           sourceUrl: 'http://github.com/puppetlabs/puppetlabs-apache',
           skipReason: 'invalid-url',
           gitRef: true,
-        }
+        },
       ]);
     });
 
@@ -179,7 +185,7 @@ describe('modules/manager/puppet/extract', () => {
     });
 
     it('GitTagsDatasource', () => {
-      const res = extractPackageFile(Fixtures.get('Puppetfile_git_tag'));
+      const res = extractPackageFile(Fixtures.get('Puppetfile.git_tag'));
 
       expect(res.deps).toEqual([
         {

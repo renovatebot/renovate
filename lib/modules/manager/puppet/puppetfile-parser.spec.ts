@@ -7,7 +7,7 @@ const puppetLabsRegistryUrl = 'https://forgeapi.puppetlabs.com';
 describe('modules/manager/puppet/puppetfile-parser', () => {
   describe('parsePuppetfile()', () => {
     it('Puppetfile_github_tag', () => {
-      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_github_tag'));
+      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile.github_tag'));
       const defaultRegistryModules = puppetfile.get(undefined);
 
       expect(defaultRegistryModules).toEqual([
@@ -73,7 +73,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
     it('Puppetfile_multiple_forges', () => {
       const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile_multiple_forges')
+        Fixtures.get('Puppetfile.multiple_forges')
       );
       expect(puppetfile.size).toBe(2);
 
@@ -115,7 +115,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
     });
 
     it('Puppetfile_no_forge', () => {
-      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile_no_forge'));
+      const puppetfile = parsePuppetfile(Fixtures.get('Puppetfile.no_forge'));
       expect(puppetfile.size).toBe(1);
 
       const defaultRegistryModules = puppetfile.get(undefined);
@@ -138,7 +138,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
     it('Puppetfile_single_forge', () => {
       const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile_single_forge')
+        Fixtures.get('Puppetfile.single_forge')
       );
       expect(puppetfile.size).toBe(1);
 
@@ -162,7 +162,7 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
 
     it('Puppetfile_with_comments', () => {
       const puppetfile = parsePuppetfile(
-        Fixtures.get('Puppetfile_with_comments')
+        Fixtures.get('Puppetfile.with_comments')
       );
       expect(puppetfile.size).toBe(1);
 
