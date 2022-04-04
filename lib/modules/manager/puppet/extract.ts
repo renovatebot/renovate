@@ -4,7 +4,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 import type { PackageDependency, PackageFile } from '../types';
-import { getGitOwnerRepo, isGithubUrl } from './common';
+import { isGithubUrl, parseGitOwnerRepo } from './common';
 import { parsePuppetfile } from './puppetfile-parser';
 import type { PuppetfileModule } from './types';
 
@@ -56,7 +56,7 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
       skipReason: 'invalid-url',
     };
   }
-  const gitOwnerRepo = getGitOwnerRepo(git, githubUrl);
+  const gitOwnerRepo = parseGitOwnerRepo(git, githubUrl);
 
   if (typeof gitOwnerRepo !== 'string') {
     // failed to parse git url

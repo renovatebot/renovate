@@ -4,7 +4,7 @@ import type { PackageDependency } from '../types';
 export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT =
   regEx(/^(?:git@[^:]*):(.+)$/);
 
-export function getGitOwnerRepo(
+export function parseGitOwnerRepo(
   git: string,
   githubUrl: boolean
 ): string | PackageDependency {
