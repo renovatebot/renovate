@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { parseUrl } from '../../../util/url';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
@@ -40,7 +41,7 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
     };
   }
 
-  const parsedUrl = tryParseUrl(git);
+  const parsedUrl = parseUrl(git);
   const githubUrl = isGithubUrl(git, parsedUrl);
 
   if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
@@ -75,14 +76,6 @@ function getGitDependency(module: PuppetfileModule): PackageDependency {
     currentValue: tag,
     datasource: githubUrl ? GithubTagsDatasource.id : GitTagsDatasource.id,
   };
-}
-
-function tryParseUrl(url: string): URL | undefined {
-  try {
-    return new URL(url);
-  } catch (err) {
-    return undefined;
-  }
 }
 
 function isGitModule(module: PuppetfileModule): boolean {
