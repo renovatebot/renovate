@@ -316,10 +316,7 @@ export async function ensurePr(
             });
           }
         }
-      } else if (
-        logJSON.error === ChangeLogError.MissingGithubToken &&
-        config.githubTokenWarn
-      ) {
+      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
           [
