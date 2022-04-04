@@ -17,6 +17,10 @@ export function smartTruncate(input: string, len: number): string {
   const preNotes = reMatch.groups?.preNotes;
   const releaseNotes = reMatch.groups?.releaseNotes;
   const postNotes = reMatch.groups?.postNotes;
+  if (!preNotes || !releaseNotes || !postNotes) {
+    return input;
+  }
+
   const availableLength =
     len - (preNotes.length + postNotes.length + divider.length);
 
