@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import type { PackageDependency } from '../types';
 
 export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT =
@@ -21,7 +22,7 @@ export function parseGitOwnerRepo(
         .replace(regEx(/\.git$/), '');
     } else {
       try {
-        const url = new URL(git);
+        const url = parseUrl(git);
         return url.pathname
           .replace(regEx(/\.git$/), '')
           .replace(regEx(/^\//), '');
