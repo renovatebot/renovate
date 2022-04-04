@@ -121,3 +121,13 @@ export interface GhAutomergeResponse {
     pullRequest: { number: number };
   };
 }
+
+export interface CacheableItem {
+  number: number;
+  updated_at: string;
+}
+
+export interface ListCache<T extends CacheableItem = CacheableItem> {
+  items: Record<number, T>;
+  timestamp: string;
+}
