@@ -22,7 +22,7 @@ function renameObjKey(
 }
 
 function replaceAsString(
-  parsedContent: NpmPackage,
+  parsedContents: NpmPackage,
   fileContent: string,
   depType: string,
   depName: string,
@@ -30,23 +30,23 @@ function replaceAsString(
   newValue: string
 ): string | null {
   if (depType === 'packageManager') {
-    parsedContent[depType] = newValue;
+    parsedContents[depType] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
-    delete Object.assign(parsedContent[depType], {
-      [newValue]: parsedContent[depType][oldValue],
+    delete Object.assign(parsedContents[depType], {
+      [newValue]: parsedContents[depType][oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
     if (oldValue !== newValue) {
-      parsedContent.dependenciesMeta = renameObjKey(
-        parsedContent.dependenciesMeta,
+      parsedContents.dependenciesMeta = renameObjKey(
+        parsedContents.dependenciesMeta,
         oldValue,
         newValue
       );
     }
   } else {
     // The old value is the version of the dependency
-    parsedContent[depType][depName] = newValue;
+    parsedContents[depType][depName] = newValue;
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
@@ -57,7 +57,7 @@ function replaceAsString(
   const match = patchRe.exec(oldValue);
   if (match) {
     const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
-    parsedContent[depType][depName] = patch;
+    parsedContents[depType][depName] = patch;
     newString = `"${patch}"`;
   }
 
@@ -77,7 +77,7 @@ function replaceAsString(
         newString
       );
       // Compare the parsed JSON structure of old and new
-      if (dequal(parsedContent, JSON.parse(testContent))) {
+      if (dequal(parsedContents, JSON.parse(testContent))) {
         return testContent;
       }
     }
