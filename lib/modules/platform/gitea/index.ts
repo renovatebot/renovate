@@ -203,15 +203,20 @@ function getRepoUrl(
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
       host,
-      pathname:
-        newPathname + '/' + repo.full_name + '.git' + '?token=' + opts.token,
+      pathname: newPathname + '/' + repo.full_name + '.git',
+      query: {
+        token: opts.token,
+      },
     });
     logger.debug({ url }, 'using URL based on configured endpoint');
     return url;
   }
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
-  const repoUrl = URL.parse(`${repo.clone_url}?token=${opts.token}`);
+  const repoUrl = URL.parse(`${repo.clone_url}`, true);
+  repoUrl.query = {
+    token: opts.token,
+  };
   return URL.format(repoUrl);
 }
 
