@@ -2,9 +2,27 @@
 
 ## Authentication
 
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes, or `read_user`, `read_api` and `read_repository` for dry runs).
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=gitlab` somewhere in config.
+First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account.
+
+For real runs, give the PAT these scopes:
+
+- `read_user`
+- `api`
+- `write_repository`
+
+For dry runs, give the PAT these scopes:
+
+- `read_user`
+- `read_api`
+- `read_repository`
+
+Let Renovate use your PAT by doing _one_ of the following:
+
+- Set your PAT as a `token` in your `config.js` file
+- Set your PAT as an environment variable `RENOVATE_TOKEN`
+- Set your PAT when you run Renovate in the CLI with `--token=`
+
+Remember to set `platform=gitlab` somewhere in your Renovate config file.
 
 ## Features awaiting implementation
 
