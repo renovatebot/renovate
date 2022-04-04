@@ -6,9 +6,14 @@ Read the official [Gitea docs](https://docs.gitea.io/en-us/clone-filters/) for m
 
 ## Authentication
 
-First, [create an access token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for your bot account.
-Configure it as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=gitea` somewhere in config.
+First, [create a Personal Access Token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for the bot account.
+Let Renovate use your PAT by doing _one_ of the following:
+
+- Set your PAT as a `token` in your `config.js` file
+- Set your PAT as an environment variable `RENOVATE_TOKEN`
+- Set your PAT when you run Renovate in the CLI with `--token=`
+
+Remember to set `platform=gitea` somewhere in your Renovate config file.
 
 ## Unsupported platform features/concepts
 
