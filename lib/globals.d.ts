@@ -21,3 +21,19 @@ declare module '*.json' {
   const value: Record<string, any>;
   export = value;
 }
+
+declare module 'ssh-agent-js' {
+  class Agent {
+    constructor(socket: any);
+    add_key(key: string);
+    remove_all_keys();
+  }
+}
+
+declare module 'tmp' {
+  function fileSync();
+
+  class FileSyncObject {
+    name: string;
+  }
+}

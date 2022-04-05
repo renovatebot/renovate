@@ -17,10 +17,12 @@ import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
+import type { SshSocket } from '../global/ssh_socket';
 
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
+  ssh_socket: SshSocket,
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
@@ -38,6 +40,7 @@ export async function renovateRepository(
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
+    config.hostRules.forEach((rule) => ssh_socket.addKeyFromHostRule(rule));
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
       config

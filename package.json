@@ -203,6 +203,8 @@
     "shlex": "2.1.0",
     "simple-git": "3.7.1",
     "slugify": "1.6.5",
+    "ssh-agent-js": "2.0.4",
+    "tmp": "0.2.1",
     "traverse": "0.6.6",
     "tslib": "2.4.0",
     "upath": "2.0.1",

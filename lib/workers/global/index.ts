@@ -22,6 +22,7 @@ import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
+import { SshSocket } from './ssh_socket';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -120,6 +121,8 @@ export async function start(): Promise<number> {
 
     checkEnv();
 
+    const sshSocket = new SshSocket();
+
     // validate secrets. Will throw and abort if invalid
     validateConfigSecrets(config);
 
@@ -137,6 +140,7 @@ export async function start(): Promise<number> {
 
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
+      sshSocket.clear();
       if (haveReachedLimits()) {
         break;
       }
@@ -147,7 +151,7 @@ export async function start(): Promise<number> {
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
         repoConfig.hostRules = [];
       }
-      await repositoryWorker.renovateRepository(repoConfig);
+      await repositoryWorker.renovateRepository(repoConfig, sshSocket);
       setMeta({});
     }
   } catch (err) /* istanbul ignore next */ {
