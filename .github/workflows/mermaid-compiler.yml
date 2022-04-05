@@ -6,7 +6,7 @@ on:
       - '**/docs/development/assets/*.md'
 jobs:
   build:
-    runs-on: ubuntu-latest5
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
