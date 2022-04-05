@@ -1,4 +1,8 @@
 import type { PackageFile } from '../../../modules/manager/types';
+import type {
+  GhRestPr,
+  ListCache,
+} from '../../../modules/platform/github/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { GitConflictsCache } from '../../git/types';
 
@@ -49,6 +53,7 @@ export interface Cache {
   platform?: {
     github?: {
       graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
+      prCache?: ListCache<GhRestPr>;
     };
   };
   gitConflicts?: GitConflictsCache;
