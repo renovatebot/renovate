@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '**/docs/development/assets/*.md'
+
 jobs:
   build:
     runs-on: ubuntu-latest
