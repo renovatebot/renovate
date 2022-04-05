@@ -6,6 +6,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
@@ -38,6 +39,9 @@ describe('modules/platform/github/index', () => {
     hostRules.find.mockReturnValue({
       token: '123test',
     });
+
+    const repoCache = repository.getCache();
+    delete repoCache.platform;
   });
 
   describe('initPlatform()', () => {
@@ -546,7 +550,11 @@ describe('modules/platform/github/index', () => {
     it('should return null if no PR exists', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, []);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, []);
 
       await github.initRepo({
         repository: 'some/repo',
@@ -558,21 +566,25 @@ describe('modules/platform/github/index', () => {
     it('should cache and return the PR object', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
-        {
-          number: 90,
-          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-          state: PrState.Open,
-          title: 'PR from another repo',
-        },
-        {
-          number: 91,
-          base: { sha: '1234' },
-          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          state: PrState.Open,
-          title: 'Some title',
-        },
-      ]);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 90,
+            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+            state: PrState.Open,
+            title: 'PR from another repo',
+          },
+          {
+            number: 91,
+            base: { sha: '1234' },
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            state: PrState.Open,
+            title: 'Some title',
+          },
+        ]);
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -588,7 +600,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 90,
@@ -627,20 +641,24 @@ describe('modules/platform/github/index', () => {
     it('aborts reopen if PR is too old', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
-        {
-          number: 90,
-          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-          state: PrState.Open,
-        },
-        {
-          number: 91,
-          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          title: 'old title - autoclosed',
-          state: PrState.Closed,
-          closed_at: DateTime.now().minus({ days: 7 }).toISO(),
-        },
-      ]);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 90,
+            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+            state: PrState.Open,
+          },
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            title: 'old title - autoclosed',
+            state: PrState.Closed,
+            closed_at: DateTime.now().minus({ days: 7 }).toISO(),
+          },
+        ]);
 
       await github.initRepo({
         repository: 'some/repo',
@@ -653,7 +671,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 91,
@@ -679,7 +699,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 91,
@@ -705,7 +727,9 @@ describe('modules/platform/github/index', () => {
       scope
         .patch('/repos/forked/repo/git/refs/heads/master')
         .reply(200)
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 90,
@@ -1780,7 +1804,9 @@ describe('modules/platform/github/index', () => {
     it('returns true if no title and all state', async () => {
       const scope = httpMock
         .scope(githubApiHost)
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 2,
@@ -1817,17 +1843,21 @@ describe('modules/platform/github/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns true if not open', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 1,
-            head: { ref: 'branch-a' },
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
             title: 'branch a pr',
             state: PrState.Closed,
           },
         ]);
+      await github.initRepo({ repository: 'some/repo' } as never);
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -1837,18 +1867,24 @@ describe('modules/platform/github/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('caches pr list', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 1,
-            head: { ref: 'branch-a' },
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
             title: 'branch a pr',
             state: PrState.Open,
           },
         ]);
+      await github.initRepo({ repository: 'some/repo' } as never);
+
       let res = await github.findPr({ branchName: 'branch-a' });
+
       expect(res).toBeDefined();
       res = await github.findPr({
         branchName: 'branch-a',
@@ -2082,26 +2118,30 @@ describe('modules/platform/github/index', () => {
     it('should return PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
-        {
-          number: 2499,
-          head: {
-            ref: 'renovate/delay-4.x',
-            repo: { full_name: 'some/repo' },
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 2499,
+            head: {
+              ref: 'renovate/delay-4.x',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'build(deps): update dependency delay to v4.0.1',
+            state: PrState.Closed,
           },
-          title: 'build(deps): update dependency delay to v4.0.1',
-          state: PrState.Closed,
-        },
-        {
-          number: 2500,
-          head: {
-            ref: 'renovate/jest-monorepo',
-            repo: { full_name: 'some/repo' },
+          {
+            number: 2500,
+            head: {
+              ref: 'renovate/jest-monorepo',
+              repo: { full_name: 'some/repo' },
+            },
+            state: PrState.Open,
+            title: 'chore(deps): update dependency jest to v23.6.0',
           },
-          state: PrState.Open,
-          title: 'chore(deps): update dependency jest to v23.6.0',
-        },
-      ]);
+        ]);
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -2113,17 +2153,21 @@ describe('modules/platform/github/index', () => {
     it('should return closed PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
-        {
-          number: 2500,
-          head: {
-            ref: 'renovate/jest-monorepo',
-            repo: { full_name: 'some/repo' },
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 2500,
+            head: {
+              ref: 'renovate/jest-monorepo',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'chore(deps): update dependency jest to v23.6.0',
+            state: PrState.Closed,
           },
-          title: 'chore(deps): update dependency jest to v23.6.0',
-          state: PrState.Closed,
-        },
-      ]);
+        ]);
       await github.initRepo({ repository: 'some/repo' } as any);
 
       const pr = await github.getPr(2500);
@@ -2133,18 +2177,22 @@ describe('modules/platform/github/index', () => {
     it('should return merged PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
-        {
-          number: 2500,
-          head: {
-            ref: 'renovate/jest-monorepo',
-            repo: { full_name: 'some/repo' },
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 2500,
+            head: {
+              ref: 'renovate/jest-monorepo',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'chore(deps): update dependency jest to v23.6.0',
+            state: PrState.Closed,
+            merged_at: DateTime.now().toISO(),
           },
-          title: 'chore(deps): update dependency jest to v23.6.0',
-          state: PrState.Closed,
-          merged_at: DateTime.now().toISO(),
-        },
-      ]);
+        ]);
       await github.initRepo({ repository: 'some/repo' } as any);
 
       const pr = await github.getPr(2500);
@@ -2155,7 +2203,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
         .reply(200);
@@ -2168,7 +2218,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
@@ -2194,7 +2246,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
@@ -2220,7 +2274,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
@@ -2272,7 +2328,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
         .reply(200, [
           {
             number: 1234,

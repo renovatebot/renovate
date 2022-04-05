@@ -633,7 +633,7 @@ export async function getPrList(): Promise<Pr[]> {
         const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
         const opts: GithubHttpOptions = { paginate: false };
-        if (pageIdx === 1 && config.prCacheRaw.etag) {
+        if (pageIdx === 1 && config.prCacheRaw?.etag) {
           opts.headers = { 'If-None-Match': config.prCacheRaw.etag };
         }
 
@@ -647,7 +647,7 @@ export async function getPrList(): Promise<Pr[]> {
             break;
           }
 
-          if (res.headers.etag) {
+          if (res.headers?.etag) {
             config.prCacheRaw.etag = res.headers.etag;
           }
         }

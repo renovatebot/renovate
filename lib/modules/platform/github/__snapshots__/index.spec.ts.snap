@@ -2551,6 +2551,51 @@ Array [
 exports[`modules/platform/github/index findPr(branchName, prTitle, state) caches pr list 1`] = `
 Array [
   Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "autoMergeAllowed": null,
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "hasIssuesEnabled": null,
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "395",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -2559,7 +2604,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
@@ -2620,13 +2665,58 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
 
 exports[`modules/platform/github/index findPr(branchName, prTitle, state) returns true if not open 1`] = `
 Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "autoMergeAllowed": null,
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "hasIssuesEnabled": null,
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "395",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
@@ -2636,7 +2726,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
@@ -2697,7 +2787,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
@@ -2758,7 +2848,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "body": Object {
@@ -2835,7 +2925,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "body": Object {
@@ -2875,6 +2965,7 @@ Array [
 
 exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #91",
   "number": 91,
   "sourceBranch": "somebranch",
@@ -2940,13 +3031,14 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
 
 exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object in fork mode 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #90",
   "number": 90,
   "sourceBranch": "somebranch",
@@ -3051,13 +3143,14 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
 
 exports[`modules/platform/github/index getBranchPr(branchName) should reopen and cache autoclosed PR 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #91",
   "number": 91,
   "sourceBranch": "somebranch",
@@ -3123,7 +3216,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "body": Object {
@@ -3217,7 +3310,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
@@ -4194,6 +4287,7 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return PR 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #2500",
   "number": 2500,
   "sourceBranch": "renovate/jest-monorepo",
@@ -4259,13 +4353,14 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
 ]
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
 Object {
+  "body": "dummy body",
   "createdAt": "01-01-2022",
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
@@ -4337,7 +4432,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "headers": Object {
@@ -4355,6 +4450,7 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
   "hasReviewers": true,
@@ -4421,7 +4517,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "headers": Object {
@@ -4439,6 +4535,7 @@ Array [
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #1234",
   "number": 1234,
   "sourceBranch": "some/branch",
@@ -4503,7 +4600,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "headers": Object {
@@ -4575,7 +4672,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "headers": Object {
@@ -6375,7 +6472,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1",
   },
   Object {
     "body": Object {
