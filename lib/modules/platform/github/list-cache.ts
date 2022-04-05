@@ -1,6 +1,14 @@
 import { DateTime } from 'luxon';
 import type { CacheableItem, ListCache } from './types';
 
+export function getEmptyCache<T extends CacheableItem>(): ListCache<T> {
+  return {
+    items: {},
+    timestamp: DateTime.fromISO('1900-01-01').toISO(),
+    etag: '',
+  };
+}
+
 export function getItem<T extends CacheableItem>(
   cache: ListCache<T>,
   number: number
@@ -29,9 +37,9 @@ export function reconcileWithPage<T extends CacheableItem>(
   for (const item of page) {
     const itemTimestamp = DateTime.fromISO(item.updated_at);
 
-    if (itemTimestamp > oldTimestamp) {
-      items[item.number] = item;
-    } else {
+    items[item.number] = item;
+
+    if (oldTimestamp >= itemTimestamp) {
       needNextPage = false;
     }
 
