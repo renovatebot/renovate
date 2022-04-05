@@ -746,10 +746,6 @@ Renovate can fetch release notes when you're running it on one of these platform
 
 - GitHub (.com and Enterprise)
 - GitLab (.com and CE/EE)
-- Bitbucket Cloud
-- Bitbucket Server
-- Azure DevOps
-- Gitea
 
 <!-- prettier-ignore -->
 !!! note
