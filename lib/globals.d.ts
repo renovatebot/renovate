@@ -31,9 +31,13 @@ declare module 'ssh-agent-js' {
 }
 
 declare module 'tmp' {
-  function fileSync();
+  function fileSync(options: Options);
 
   class FileSyncObject {
     name: string;
+  }
+
+  class Options {
+    tmpdir: string;
   }
 }

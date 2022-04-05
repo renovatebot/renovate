@@ -9,8 +9,10 @@ export class SshSocket {
   readonly agent_process: cp.ChildProcess;
   readonly agent: saj.Agent;
 
-  constructor() {
-    this.agent_socket = tmp.fileSync();
+  constructor(cacheDir: string) {
+    this.agent_socket = tmp.fileSync({
+      tmpdir: cacheDir,
+    });
     this.agent_process = cp.spawn('ssh-agent', [
       '-d',
       '-a',
@@ -18,6 +20,7 @@ export class SshSocket {
     ]);
     let sock = net.connect(this.agent_socket.name);
     this.agent = new saj.Agent(sock);
+    process.env.SSH_AUTH_SOCKET = this.agent_socket.name;
   }
 
   async addKeyFromHostRule(hostRule: HostRule) {

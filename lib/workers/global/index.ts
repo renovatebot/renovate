@@ -121,7 +121,7 @@ export async function start(): Promise<number> {
 
     checkEnv();
 
-    const sshSocket = new SshSocket();
+    const sshSocket = new SshSocket(config.cacheDir);
 
     // validate secrets. Will throw and abort if invalid
     validateConfigSecrets(config);

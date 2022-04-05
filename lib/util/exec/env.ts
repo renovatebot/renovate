@@ -14,6 +14,7 @@ const basicEnvVars = [
   'DOCKER_HOST',
   'DOCKER_TLS_VERIFY',
   'DOCKER_CERT_PATH',
+  'SSH_AUTH_SOCK',
 ];
 
 export function getChildProcessEnv(
