@@ -1,6 +1,6 @@
 flowchart TB
 subgraph Start
-A[lib/renovate.ts] --> B[get config, ordered by cli->env->file->default]
+A[lib/renovate.ts] --> B[getConfig ordered by cli->env->file->default]
 A --> C[global initialize]
 A --> D[init platform]
 A --> E[set and ensure dir]
