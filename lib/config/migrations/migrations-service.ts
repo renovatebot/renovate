@@ -10,10 +10,12 @@ import { AutomergeTypeMigration } from './custom/automerge-type-migration';
 import { BaseBranchMigration } from './custom/base-branch-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { BranchNameMigration } from './custom/branch-name-migration';
+import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
+import { ExtendsMigration } from './custom/extends-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -30,6 +32,8 @@ import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
+import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
@@ -76,9 +80,11 @@ export class MigrationsService {
     BaseBranchMigration,
     BinarySourceMigration,
     BranchNameMigration,
+    BranchPrefixMigration,
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
+    ExtendsMigration,
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
@@ -95,6 +101,8 @@ export class MigrationsService {
     RequiredStatusChecksMigration,
     ScheduleMigration,
     SemanticCommitsMigration,
+    SeparateMajorReleasesMigration,
+    SeparateMultipleMajorMigration,
     SuppressNotificationsMigration,
     TrustLevelMigration,
     UnpublishSafeMigration,
