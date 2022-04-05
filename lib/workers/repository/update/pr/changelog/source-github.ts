@@ -1,4 +1,5 @@
 import URL from 'url';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -53,7 +54,7 @@ export async function getChangeLogJSON({
   });
   // istanbul ignore if
   if (!config.token) {
-    if (host.endsWith('github.com') && config.githubTokenWarn) {
+    if (host.endsWith('github.com') && GlobalConfig.get().githubTokenWarn) {
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'

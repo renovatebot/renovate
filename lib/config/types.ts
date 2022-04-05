@@ -107,6 +107,7 @@ export interface RepoGlobalConfig {
   dryRun?: boolean;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
+  githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;
   privateKeyOld?: string;
