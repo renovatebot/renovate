@@ -11,11 +11,11 @@ function renameObjKey(
   newKey: string
 ): DependenciesMeta {
   const keys = Object.keys(oldObj);
-  return keys.reduce((acc, val) => {
-    if (val === oldKey) {
+  return keys.reduce((acc, key) => {
+    if (key=== oldKey) {
       acc[newKey] = oldObj[oldKey];
     } else {
-      acc[val] = oldObj[val];
+      acc[key] = oldObj[key];
     }
     return acc;
   }, {});
