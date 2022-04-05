@@ -14,6 +14,7 @@ const http = new Http(DockerDatasource.id);
 
 jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../../util/host-rules');
+
 type ECR = _AWS.ECR;
 type GetAuthorizationTokenCommandOutput =
   _AWS.GetAuthorizationTokenCommandOutput;
