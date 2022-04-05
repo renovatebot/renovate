@@ -1,23 +1,31 @@
-const re = new RegExp(`### Release Notes.*### Configuration`, 'ms');
+const re = new RegExp(
+  `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
+  's'
+);
 
 export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
   }
-  const releaseNotesMatch = re.exec(input);
-  if (releaseNotesMatch) {
-    const divider = `\n\n</details>\n\n---\n\n### Configuration`;
-    const [releaseNotes] = releaseNotesMatch;
-    const nonReleaseNotesLength =
-      input.length - releaseNotes.length - divider.length;
-    const availableLength = len - nonReleaseNotesLength;
-    if (availableLength <= 0) {
-      return input.substring(0, len);
-    }
-    return input.replace(
-      releaseNotes,
-      releaseNotes.slice(0, availableLength) + divider
+
+  const reMatch = re.exec(input);
+  if (!reMatch) {
+    return input.substring(0, len);
+  }
+
+  const divider = `\n\n</details>\n\n---\n\n### Configuration`;
+  const preNotes = reMatch.groups?.preNotes ?? '';
+  const releaseNotes = reMatch.groups?.releaseNotes ?? '';
+  const postNotes = reMatch.groups?.postNotes ?? '';
+
+  const availableLength =
+    len - (preNotes.length + postNotes.length + divider.length);
+
+  if (availableLength <= 0) {
+    return input.substring(0, len);
+  } else {
+    return (
+      preNotes + releaseNotes.slice(0, availableLength) + divider + postNotes
     );
   }
-  return input.substring(0, len);
 }
