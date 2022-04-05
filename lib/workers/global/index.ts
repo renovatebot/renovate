@@ -104,6 +104,7 @@ export async function resolveGlobalExtends(
 
 export async function start(): Promise<number> {
   let config: AllConfig;
+  let sshSocket: SshSocket = undefined;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
@@ -121,7 +122,8 @@ export async function start(): Promise<number> {
 
     checkEnv();
 
-    const sshSocket = new SshSocket(config.cacheDir);
+    sshSocket = new SshSocket();
+    await sshSocket.start(config.cacheDir);
 
     // validate secrets. Will throw and abort if invalid
     validateConfigSecrets(config);
@@ -140,7 +142,7 @@ export async function start(): Promise<number> {
 
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
-      sshSocket.clear();
+      await sshSocket.clear();
       if (haveReachedLimits()) {
         break;
       }
@@ -166,6 +168,9 @@ export async function start(): Promise<number> {
       return 2;
     }
   } finally {
+    if (sshSocket) {
+      sshSocket.stop();
+    }
     await globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }
