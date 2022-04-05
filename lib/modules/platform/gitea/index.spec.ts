@@ -7,6 +7,7 @@ import type {
 } from '..';
 import { partial } from '../../../../test/util';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -44,6 +45,7 @@ describe('modules/platform/gitea/index', () => {
   const mockRepo = partial<ght.Repo>({
     allow_rebase: true,
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
+    ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
     permissions: {
@@ -322,6 +324,98 @@ describe('modules/platform/gitea/index', () => {
           allow_merge_commits: true,
         })
       ).toMatchSnapshot();
+    });
+
+    it('should use clone_url of repo if gitUrl is not specified', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: mockRepo.clone_url })
+      );
+    });
+
+    it('should use clone_url of repo if gitUrl has value default', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'default',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: mockRepo.clone_url })
+      );
+    });
+
+    it('should use ssh_url of repo if gitUrl has value ssh', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'ssh',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: mockRepo.ssh_url })
+      );
+    });
+
+    it('should abort when gitUrl has value ssh but ssh_url is empty', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ssh_url: null });
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'ssh',
+      };
+
+      await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE
+      );
+    });
+
+    it('should use generated url of repo if gitUrl has value endpoint', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'endpoint',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://gitea.com/${mockRepo.full_name}.git`,
+        })
+      );
+    });
+
+    it('should use generated url of repo if clone_url of repo is empty', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, clone_url: null });
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'endpoint',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://gitea.com/${mockRepo.full_name}.git`,
+        })
+      );
     });
   });
 
