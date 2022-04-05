@@ -39,11 +39,14 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => {
-      throw new Error('not found');
-    }) as never;
+    fs.readFile = jest
+      .fn()
+      .mockReturnValueOnce(undefined)
+      .mockImplementation(() => {
+        throw new Error('not found');
+      });
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();

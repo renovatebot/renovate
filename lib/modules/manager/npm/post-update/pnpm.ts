@@ -23,10 +23,6 @@ export async function generateLockFile(
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    const pnpmUpdate = upgrades.find(
-      (upgrade) =>
-        upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
-    );
     let pnpmEngine;
     const rootPackageJson = upath.join(cwd, 'package.json');
     const content = await readFile(rootPackageJson, 'utf8');
@@ -34,9 +30,6 @@ export async function generateLockFile(
       const packageJson: NpmPackage = JSON.parse(content);
       const engines = packageJson?.engines;
       pnpmEngine = engines['pnpm'];
-    }
-    if (pnpmUpdate?.newValue) {
-      pnpmEngine = pnpmUpdate.newValue;
     }
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
