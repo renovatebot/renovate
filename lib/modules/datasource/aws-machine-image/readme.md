@@ -17,12 +17,12 @@ Read the [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/dev
 The least IAM privileges required for this datasource are:
 
 ```json
-  {
-    "Sid": "AllowEc2ImageLookup",
-    "Effect": "Allow",
-    "Action": ["ec2:DescribeImages"],
-    "Resource": "*"
-  }
+{
+  "Sid": "AllowEc2ImageLookup",
+  "Effect": "Allow",
+  "Action": ["ec2:DescribeImages"],
+  "Resource": "*"
+}
 ```
 
 Read the [AWS IAM Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonec2.html) for more information.
