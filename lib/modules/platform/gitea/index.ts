@@ -13,7 +13,12 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import {
+  BranchStatus,
+  HostRule,
+  PrState,
+  VulnerabilityAlert,
+} from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
@@ -188,7 +193,7 @@ function getRepoUrl(
   }
 
   // Find options for current host and determine Git endpoint
-  const opts = hostRules.find({
+  const opts: HostRule = hostRules.find({
     hostType: PlatformId.Gitea,
     url: defaults.endpoint,
   });
@@ -202,21 +207,17 @@ function getRepoUrl(
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
+      auth: opts.token,
       host,
       pathname: newPathname + '/' + repo.full_name + '.git',
-      query: {
-        token: opts.token,
-      },
     });
     logger.debug({ url }, 'using URL based on configured endpoint');
     return url;
   }
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
-  const repoUrl = URL.parse(`${repo.clone_url}`, true);
-  repoUrl.query = {
-    token: opts.token,
-  };
+  const repoUrl = URL.parse(`${repo.clone_url}`);
+  repoUrl.auth = opts.token;
   return URL.format(repoUrl);
 }
 
