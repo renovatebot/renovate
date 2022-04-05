@@ -142,5 +142,20 @@ describe('workers/global/config/parse/cli', () => {
         Error("Invalid JSON value: 'Hello_World'")
       );
     });
+    it('dryRun boolean true', () => {
+      argv.push('--dry-run=true');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: 'full' });
+      argv = argv.slice(0, -1);
+    });
+    it('dryRun boolean false', () => {
+      argv.push('--dry-run=false');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: null });
+      argv = argv.slice(0, -1);
+    });
+    it('dryRun  null', () => {
+      argv.push('--dry-run=null');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: null });
+      argv = argv.slice(0, -1);
+    });
   });
 });
