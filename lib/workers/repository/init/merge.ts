@@ -177,13 +177,6 @@ export async function mergeRenovateConfig(
     ];
     delete returnConfig.extends;
   }
-  if (is.nonEmptyArray(returnConfig.packageRules)) {
-    configFileParsed.packageRules = [
-      ...returnConfig.packageRules,
-      ...(configFileParsed.packageRules || []),
-    ];
-    delete returnConfig.packageRules;
-  }
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
@@ -205,6 +198,14 @@ export async function mergeRenovateConfig(
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
+  // Copy packageRules in for "extends" expansion post-validation to allow for undocumented settings to skip validation (#14827).
+  if (is.nonEmptyArray(returnConfig.packageRules)) {
+    migratedConfig.packageRules = [
+      ...returnConfig.packageRules,
+      ...(migratedConfig.packageRules || []),
+    ];
+    delete returnConfig.packageRules;
+  }
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(
     migratedConfig,
