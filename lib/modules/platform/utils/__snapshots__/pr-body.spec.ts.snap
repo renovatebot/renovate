@@ -33,9 +33,7 @@ exports[`modules/platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 ### [\`v19.47.0\`](https://togithub.com/renovatebot/renovate/releases/19.47.0)
 
-##### Features
-
--   **docker:** AWS ECR authentication support ([#&#8203;4497](htt
+##### Feat
 
 </details>
 
