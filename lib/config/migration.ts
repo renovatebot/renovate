@@ -264,13 +264,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         );
       }
     }
-    if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
-      migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle || {},
-        migratedConfig['gradle-lite']
-      );
-    }
-    delete migratedConfig['gradle-lite'];
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating

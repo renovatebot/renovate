@@ -16,6 +16,7 @@ import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-pl
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
+import { GradleLiteMigration } from './custom/gradle-lite-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
@@ -85,6 +86,7 @@ export class MigrationsService {
     EnabledManagersMigration,
     ExtendsMigration,
     GoModTidyMigration,
+    GradleLiteMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
     IgnoreNpmrcFileMigration,
