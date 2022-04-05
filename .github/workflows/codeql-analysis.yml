@@ -28,7 +28,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@4c1021c5041fca6023824e45efb7f83178d52fe2 # tag=v1.1.6
         with:
-          config-file: ./.github/codeql/codeql-config.yml
+          # config-file: ./.github/codeql/codeql-config.yml
           languages: javascript
 
         # Override language selection by uncommenting this and choosing your languages
