@@ -12,7 +12,7 @@ function renameObjKey(
 ): DependenciesMeta {
   const keys = Object.keys(oldObj);
   return keys.reduce((acc, key) => {
-    if (key=== oldKey) {
+    if (key === oldKey) {
       acc[newKey] = oldObj[oldKey];
     } else {
       acc[key] = oldObj[key];
