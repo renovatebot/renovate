@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { SimpleGitOptions } from 'simple-git';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -81,6 +82,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  gitTimeout?: Partial<SimpleGitOptions>;
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;

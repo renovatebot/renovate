@@ -22,8 +22,5 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
       onClose: true,
       onExit: false,
     },
-    timeout: {
-      block: 10000,
-    },
   };
 }
