@@ -188,7 +188,7 @@ function getRepoUrl(
     if (!repo.ssh_url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: repo.ssh_url }, `using ssh URL`);
+    logger.debug({ url: repo.ssh_url }, `using SSH URL`);
     return repo.ssh_url;
   }
 
