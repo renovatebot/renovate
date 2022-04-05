@@ -130,4 +130,5 @@ export interface CacheableItem {
 export interface ListCache<T extends CacheableItem = CacheableItem> {
   items: Record<number, T>;
   timestamp: string;
+  etag: string;
 }

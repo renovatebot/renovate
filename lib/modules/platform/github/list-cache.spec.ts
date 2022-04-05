@@ -1,5 +1,10 @@
 import { DateTime } from 'luxon';
-import { getItem, reconcileWithPage, setItem } from './list-cache';
+import {
+  getEmptyCache,
+  getItem,
+  reconcileWithPage,
+  setItem,
+} from './list-cache';
 import type { ListCache } from './types';
 
 describe('modules/platform/github/list-cache', () => {
@@ -14,6 +19,7 @@ describe('modules/platform/github/list-cache', () => {
     const item1 = { number: 1, updated_at: t1 };
     const item2 = { number: 2, updated_at: t2 };
     const cache: ListCache = {
+      ...getEmptyCache(),
       items: { 1: item1 },
       timestamp: t2,
     };
@@ -33,6 +39,7 @@ describe('modules/platform/github/list-cache', () => {
           2: { number: 2, updated_at: t2 },
         },
         timestamp: t2,
+        etag: '',
       };
 
       const needNextPage = reconcileWithPage(cache, [
@@ -48,6 +55,7 @@ describe('modules/platform/github/list-cache', () => {
           4: { number: 4, updated_at: t4 },
         },
         timestamp: t4,
+        etag: '',
       });
       expect(needNextPage).toBeTrue();
     });
@@ -60,6 +68,7 @@ describe('modules/platform/github/list-cache', () => {
           3: { number: 3, updated_at: t3 },
         },
         timestamp: t3,
+        etag: '',
       };
 
       const needNextPage = reconcileWithPage(cache, [
@@ -75,6 +84,7 @@ describe('modules/platform/github/list-cache', () => {
           2: { number: 2, updated_at: t5 },
         },
         timestamp: t5,
+        etag: '',
       });
       expect(needNextPage).toBeFalse();
     });
