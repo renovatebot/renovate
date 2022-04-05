@@ -196,7 +196,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.0",
-    "simple-git": "3.4.0",
+    "simple-git": "3.5.0",
     "slugify": "1.6.5",
     "traverse": "0.6.6",
     "tslib": "2.3.1",
