@@ -565,7 +565,7 @@ async function fetchPr(prNo: number): Promise<Pr | null> {
   const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
     `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
   );
-  config.prCache.setItem(ghRestPr);
+  config.prCache.updateItem(ghRestPr);
   return coerceRestPr(ghRestPr);
 }
 
@@ -738,7 +738,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
         { branchName, title, number },
         'Successfully reopened autoclosed PR'
       );
-      config.prCache.setItem(ghPr);
+      config.prCache.updateItem(ghPr);
       return coerceRestPr(ghPr);
     } catch (err) {
       logger.debug('Could not reopen autoclosed PR');
@@ -1435,7 +1435,7 @@ export async function createPr({
   const { number, node_id } = ghPr;
   await addLabels(number, labels);
   await tryPrAutomerge(number, node_id, platformOptions);
-  config.prCache.setItem(ghPr);
+  config.prCache.updateItem(ghPr);
   return coerceRestPr(ghPr);
 }
 
@@ -1466,7 +1466,7 @@ export async function updatePr({
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
-    config.prCache.setItem(ghPr);
+    config.prCache.updateItem(ghPr);
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
@@ -1567,7 +1567,7 @@ export async function mergePr({
   );
   const cachedPr = config.prCache.getItem(prNo);
   if (cachedPr) {
-    config.prCache.setItem({ ...cachedPr, state: PrState.Merged });
+    config.prCache.updateItem({ ...cachedPr, state: PrState.Merged });
   }
   return true;
 }
