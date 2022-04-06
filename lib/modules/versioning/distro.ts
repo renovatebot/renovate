@@ -30,6 +30,7 @@ export class DistroInfo {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       dataFiles.get(distroJsonKey as DataFile)!
     );
+
     for (const version of Object.keys(this._distroInfo)) {
       const schedule = this._distroInfo[version];
       this._codenameToVersion.set(schedule.series, { version, ...schedule });
@@ -55,5 +56,9 @@ export class DistroInfo {
     }
     // istanbul ignore next
     return input;
+  }
+
+  public getSchedule(input: string): DistroSchedule {
+    return this._distroInfo[input];
   }
 }

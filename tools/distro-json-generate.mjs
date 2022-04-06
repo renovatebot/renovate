@@ -54,21 +54,25 @@ function csvToJson(raw) {
  */
 async function updateJsonFile(file, newData) {
   let oldData;
+  let newAdj;
 
   try {
     oldData = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
+    // Eliminate formatting. removes WS in the beginning, end. before & after non characters
+    oldData = oldData?.replace(/^\s|\s$|\B\s|\s\B/g, '') ?? null;
+    newAdj = newData?.replace(/^\s|\s$|\B\s|\s\B/g, '') ?? null;
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);
   }
 
-  if (oldData === newData) {
+  if (oldData === newAdj) {
     shell.echo(`${file} is up to date.`);
     return;
   }
 
   const oldLen = oldData?.length ?? -1;
-  const newLen = newData?.length ?? -1;
+  const newLen = newAdj?.length ?? -1;
 
   if (oldLen === -1 || newLen === -1 || oldLen > newLen) {
     shell.echo(`New data might be corrupted!`);

@@ -10,9 +10,6 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-// #12509
-const temporarilyUnstable = ['22.04'];
-
 const di = new DistroInfo('data/ubuntu-distro-info.json');
 
 // validation
@@ -44,9 +41,12 @@ function isStable(version: string): boolean {
   if (!isValid(ver)) {
     return false;
   }
-  if (temporarilyUnstable.includes(ver)) {
+
+  const schedule = di.getSchedule(ver);
+  if (schedule && new Date(schedule.release) > new Date()) {
     return false;
   }
+
   return regEx(/^\d?[02468]\.04/).test(ver);
 }
 
