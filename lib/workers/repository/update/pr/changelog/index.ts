@@ -1,4 +1,5 @@
 import { logger } from '../../../../../logger';
+import { detectPlatform } from '../../../../../modules/platform/util';
 import * as allVersioning from '../../../../../modules/versioning';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getInRangeReleases } from './releases';
@@ -27,15 +28,24 @@ export async function getChangeLogJSON(
 
     let res: ChangeLogResult | null = null;
 
-    if (
-      args.sourceUrl?.includes('gitlab') ||
-      (args.platform === 'gitlab' &&
-        new URL(args.sourceUrl).hostname === new URL(args.endpoint).hostname)
-    ) {
-      res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
-    } else {
-      res = await sourceGithub.getChangeLogJSON({ ...args, releases });
+    const platform = detectPlatform(sourceUrl);
+
+    switch (platform) {
+      case 'gitlab':
+        res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
+        break;
+      case 'github':
+        res = await sourceGithub.getChangeLogJSON({ ...args, releases });
+        break;
+
+      default:
+        logger.info(
+          { sourceUrl, hostType: platform },
+          ' Unknown platform, skipping changelog fetching.'
+        );
+        break;
     }
+
     return res;
   } catch (err) /* istanbul ignore next */ {
     logger.error({ config: args, err }, 'getChangeLogJSON error');
