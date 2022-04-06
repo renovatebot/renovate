@@ -1,14 +1,6 @@
 import { DateTime } from 'luxon';
 import type { ApiPageCache, ApiPageItem } from './types';
 
-export function getEmptyCache<T extends ApiPageItem>(): ApiPageCache<T> {
-  return {
-    items: {},
-    timestamp: DateTime.fromISO('1900-01-01').toISO(),
-    etag: '',
-  };
-}
-
 export function getItem<T extends ApiPageItem>(
   cache: ApiPageCache<T>,
   number: number
@@ -16,6 +8,12 @@ export function getItem<T extends ApiPageItem>(
   return cache.items[number] ?? null;
 }
 
+/**
+ * It intentionally doesn't alter `lastUpdated` cache field.
+ *
+ * The point is to allow cache modifications during run, but
+ * force fetch and refresh modified items in the next run.
+ */
 export function setItem<T extends ApiPageItem>(
   cache: ApiPageCache<T>,
   item: T
@@ -28,38 +26,40 @@ export function setItem<T extends ApiPageItem>(
  * Updates internal cache timestamp.
  *
  * @param cache Cache object
- * @param page List of cacheable items, sorted by `updated_at` field.
- * @returns `true` when all page items are new. In this case, we assume
- * next page to contain contain new items too. Otherwise, returns `false`
- * meaning some of page items are updated earlier than cache timestamp,
- * so that we conclude all the "fresh" items are fetched.
+ * @param page List of cacheable items, sorted by `updated_at` field
+ * starting from the most recently updated.
+ * @returns `true` when the next page is likely to contain fresh items,
+ * otherwise `false`.
  */
 export function reconcileWithPage<T extends ApiPageItem>(
   cache: ApiPageCache<T>,
   page: T[]
 ): boolean {
-  const { items, timestamp } = cache;
-
-  const oldTimestamp = DateTime.fromISO(timestamp);
-  let newTimestamp = oldTimestamp;
+  const { items } = cache;
+  let { lastUpdated } = cache;
 
   let needNextPage = true;
 
-  for (const item of page) {
-    const itemTimestamp = DateTime.fromISO(item.updated_at);
+  for (const newItem of page) {
+    const number = newItem.number;
+    const oldItem = items[number];
 
-    items[item.number] = item;
+    const itemNewTime = DateTime.fromISO(newItem.updated_at);
+    const itemOldTime = oldItem?.updated_at
+      ? DateTime.fromISO(oldItem.updated_at)
+      : null;
 
-    if (oldTimestamp >= itemTimestamp) {
-      needNextPage = false;
-    }
+    items[number] = newItem;
 
-    if (itemTimestamp > newTimestamp) {
-      newTimestamp = itemTimestamp;
+    needNextPage = itemOldTime ? itemOldTime < itemNewTime : true;
+
+    const cacheOldTime = lastUpdated ? DateTime.fromISO(lastUpdated) : null;
+    if (!cacheOldTime || itemNewTime > cacheOldTime) {
+      lastUpdated = newItem.updated_at;
     }
   }
 
-  cache.timestamp = newTimestamp.toISO();
+  cache.lastUpdated = lastUpdated;
 
   return needNextPage;
 }
