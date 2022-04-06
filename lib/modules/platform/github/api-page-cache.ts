@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import type { RestPageCache, RestPageItem } from './types';
+import type { ApiPageCache, ApiPageItem } from './types';
 
-export function getEmptyCache<T extends RestPageItem>(): RestPageCache<T> {
+export function getEmptyCache<T extends ApiPageItem>(): ApiPageCache<T> {
   return {
     items: {},
     timestamp: DateTime.fromISO('1900-01-01').toISO(),
@@ -9,15 +9,15 @@ export function getEmptyCache<T extends RestPageItem>(): RestPageCache<T> {
   };
 }
 
-export function getItem<T extends RestPageItem>(
-  cache: RestPageCache<T>,
+export function getItem<T extends ApiPageItem>(
+  cache: ApiPageCache<T>,
   number: number
 ): T | null {
   return cache.items[number] ?? null;
 }
 
-export function setItem<T extends RestPageItem>(
-  cache: RestPageCache<T>,
+export function setItem<T extends ApiPageItem>(
+  cache: ApiPageCache<T>,
   item: T
 ): void {
   cache.items[item.number] = item;
@@ -34,8 +34,8 @@ export function setItem<T extends RestPageItem>(
  * meaning some of page items are updated earlier than cache timestamp,
  * so that we conclude all the "fresh" items are fetched.
  */
-export function reconcileWithPage<T extends RestPageItem>(
-  cache: RestPageCache<T>,
+export function reconcileWithPage<T extends ApiPageItem>(
+  cache: ApiPageCache<T>,
   page: T[]
 ): boolean {
   const { items, timestamp } = cache;
