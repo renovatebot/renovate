@@ -618,9 +618,9 @@ export async function getPrList(): Promise<Pr[]> {
 
         const opts: GithubHttpOptions = { paginate: false };
         if (pageIdx === 1) {
-          const lastUpdated = config.prCache.lastUpdated();
-          if (lastUpdated) {
-            opts.headers = { 'If-Modified-Since': lastUpdated };
+          const etag = config.prCache.etag();
+          if (etag) {
+            opts.headers = { 'If-None-Match': etag };
           }
         }
 
@@ -632,6 +632,11 @@ export async function getPrList(): Promise<Pr[]> {
           if (res.statusCode === 304) {
             apiQuotaAffected = false;
             break;
+          }
+
+          const etag = res.headers.etag;
+          if (etag) {
+            config.prCache.etag(etag);
           }
         }
 
