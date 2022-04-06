@@ -4,8 +4,12 @@ import type { ApiPageCache, ApiPageItem } from './types';
 export class ApiCache<T extends ApiPageItem> {
   constructor(private cache: ApiPageCache<T>) {}
 
-  lastUpdated(): string | undefined {
-    return this.cache.lastUpdated;
+  /**
+   * @returns Date formatted to use in HTTP headers
+   */
+  lastUpdated(): string | null {
+    const { lastUpdated } = this.cache;
+    return lastUpdated ? DateTime.fromISO(lastUpdated).toHTTP() : null;
   }
 
   getItems(): T[] {
