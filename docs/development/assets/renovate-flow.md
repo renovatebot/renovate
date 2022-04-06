@@ -1,14 +1,15 @@
+```mermaid
 flowchart TB
-subgraph Start
-A[lib/renovate.ts] --> B[getConfig ordered by cli->env->file->default]
-A --> C[global initialize]
-A --> D[init platform]
-A --> E[set and ensure dir]
-A --> F[init cache limit commits]
-A --> G[init host rules]
-A --> H[validations]
-A --> I[auto discover repositories]
-end
+    subgraph Start
+    A[lib/renovate.ts] --> B[getConfig ordered by cli->env->file->default]
+    A --> C[global initialize]
+    A --> D[init platform]
+    A --> E[set and ensure dir]
+    A --> F[init cache limit commits]
+    A --> G[init host rules]
+    A --> H[validations]
+    A --> I[auto discover repositories]
+    end
 
     subgraph Repository
     J[workers/repository/index.ts, for each repository]
@@ -53,3 +54,4 @@ end
     K ---> initializeRepository
     L ----> extractDependencies
     N -----> updateRepository
+```
