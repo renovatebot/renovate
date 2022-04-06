@@ -751,7 +751,7 @@ Renovate can fetch release notes when you're running it on one of these platform
 !!! note
     Renovate can only show release notes from some platforms and some package managers.
     We're planning improvements so that Renovate can show more release notes.
-    Read [issue # #14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
 
 ## fileMatch
 
