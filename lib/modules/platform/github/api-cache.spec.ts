@@ -140,4 +140,25 @@ describe('modules/platform/github/api-cache', () => {
       expect(needNextPage).toBeFalse();
     });
   });
+
+  describe('etag', () => {
+    it('returns null', () => {
+      const apiCache = new ApiCache({ items: {} });
+      expect(apiCache.etag()).toBeNull();
+    });
+
+    it('sets and retrieves non-null value', () => {
+      const apiCache = new ApiCache({ items: {} });
+      const res = apiCache.etag('foobar');
+      expect(res).toBe('foobar');
+      expect(apiCache.etag()).toBe('foobar');
+    });
+
+    it('deletes value for null parameter', () => {
+      const apiCache = new ApiCache({ items: {} });
+      apiCache.etag('foobar');
+      apiCache.etag(null);
+      expect(apiCache.etag()).toBeNull();
+    });
+  });
 });
