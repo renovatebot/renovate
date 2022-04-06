@@ -41,7 +41,7 @@ export async function getChangeLogJSON(
       default:
         logger.info(
           { sourceUrl, hostType: platform },
-          ' Unknown platform, skipping changelog fetching.'
+          'Unknown platform, skipping changelog fetching.'
         );
         break;
     }
