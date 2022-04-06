@@ -41,7 +41,7 @@ function csvToJson(raw) {
       ver = ver.endsWith('.0') ? ver.replace('.0', '') : ver;
       // eslint-disable-next-line
       // @ts-ignore
-      res[ver] = obj;
+      res[`v${ver}`] = obj;
     }
   }
   return JSON.stringify(res, undefined, 2);
