@@ -5,7 +5,7 @@ import {
   reconcileWithPage,
   setItem,
 } from './list-cache';
-import type { ListCache } from './types';
+import type { RestPageCache } from './types';
 
 describe('modules/platform/github/list-cache', () => {
   const now = DateTime.now();
@@ -18,7 +18,7 @@ describe('modules/platform/github/list-cache', () => {
   it('stores and retrieves items', () => {
     const item1 = { number: 1, updated_at: t1 };
     const item2 = { number: 2, updated_at: t2 };
-    const cache: ListCache = {
+    const cache: RestPageCache = {
       ...getEmptyCache(),
       items: { 1: item1 },
       timestamp: t2,
@@ -33,7 +33,7 @@ describe('modules/platform/github/list-cache', () => {
 
   describe('reconcileWithPage', () => {
     it('appends items', () => {
-      const cache: ListCache = {
+      const cache: RestPageCache = {
         items: {
           1: { number: 1, updated_at: t1 },
           2: { number: 2, updated_at: t2 },
@@ -61,7 +61,7 @@ describe('modules/platform/github/list-cache', () => {
     });
 
     it('caches updated items', () => {
-      const cache: ListCache = {
+      const cache: RestPageCache = {
         items: {
           1: { number: 1, updated_at: t1 },
           2: { number: 2, updated_at: t2 },

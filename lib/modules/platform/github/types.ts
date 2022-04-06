@@ -126,12 +126,12 @@ export interface GhAutomergeResponse {
   };
 }
 
-export interface CacheableItem {
+export interface RestPageItem {
   number: number;
   updated_at: string;
 }
 
-export interface ListCache<T extends CacheableItem = CacheableItem> {
+export interface RestPageCache<T extends RestPageItem = RestPageItem> {
   items: Record<number, T>;
   timestamp: string;
   etag: string;

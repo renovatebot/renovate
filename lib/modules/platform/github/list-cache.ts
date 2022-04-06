@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import type { CacheableItem, ListCache } from './types';
+import type { RestPageCache, RestPageItem } from './types';
 
-export function getEmptyCache<T extends CacheableItem>(): ListCache<T> {
+export function getEmptyCache<T extends RestPageItem>(): RestPageCache<T> {
   return {
     items: {},
     timestamp: DateTime.fromISO('1900-01-01').toISO(),
@@ -9,22 +9,33 @@ export function getEmptyCache<T extends CacheableItem>(): ListCache<T> {
   };
 }
 
-export function getItem<T extends CacheableItem>(
-  cache: ListCache<T>,
+export function getItem<T extends RestPageItem>(
+  cache: RestPageCache<T>,
   number: number
 ): T | null {
   return cache.items[number] ?? null;
 }
 
-export function setItem<T extends CacheableItem>(
-  cache: ListCache<T>,
+export function setItem<T extends RestPageItem>(
+  cache: RestPageCache<T>,
   item: T
 ): void {
   cache.items[item.number] = item;
 }
 
-export function reconcileWithPage<T extends CacheableItem>(
-  cache: ListCache<T>,
+/**
+ * Copies items from `page` to `cache`.
+ * Updates internal cache timestamp.
+ *
+ * @param cache Cache object
+ * @param page List of cacheable items, sorted by `updated_at` field.
+ * @returns `true` when all page items are new. In this case, we assume
+ * next page to contain contain new items too. Otherwise, returns `false`
+ * meaning some of page items are updated earlier than cache timestamp,
+ * so that we conclude all the "fresh" items are fetched.
+ */
+export function reconcileWithPage<T extends RestPageItem>(
+  cache: RestPageCache<T>,
   page: T[]
 ): boolean {
   const { items, timestamp } = cache;
