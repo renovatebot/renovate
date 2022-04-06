@@ -136,5 +136,6 @@ export interface ApiPageItem {
  */
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
-  lastUpdated?: string;
+  lastModified?: string;
+  etag?: string;
 }

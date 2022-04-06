@@ -7,9 +7,9 @@ export class ApiCache<T extends ApiPageItem> {
   /**
    * @returns Date formatted to use in HTTP headers
    */
-  lastUpdated(): string | null {
-    const { lastUpdated } = this.cache;
-    return lastUpdated ? DateTime.fromISO(lastUpdated).toHTTP() : null;
+  lastModified(): string | null {
+    const { lastModified } = this.cache;
+    return lastModified ? DateTime.fromISO(lastModified).toHTTP() : null;
   }
 
   getItems(): T[] {
@@ -21,7 +21,7 @@ export class ApiCache<T extends ApiPageItem> {
   }
 
   /**
-   * It intentionally doesn't alter `lastUpdated` cache field.
+   * It intentionally doesn't alter `lastModified` cache field.
    *
    * The point is to allow cache modifications during run, but
    * force fetching and refreshing of modified items next run.
@@ -42,7 +42,7 @@ export class ApiCache<T extends ApiPageItem> {
    */
   reconcile(page: T[]): boolean {
     const { items } = this.cache;
-    let { lastUpdated } = this.cache;
+    let { lastModified } = this.cache;
 
     let needNextPage = true;
 
@@ -59,13 +59,13 @@ export class ApiCache<T extends ApiPageItem> {
 
       needNextPage = itemOldTime ? itemOldTime < itemNewTime : true;
 
-      const cacheOldTime = lastUpdated ? DateTime.fromISO(lastUpdated) : null;
+      const cacheOldTime = lastModified ? DateTime.fromISO(lastModified) : null;
       if (!cacheOldTime || itemNewTime > cacheOldTime) {
-        lastUpdated = newItem.updated_at;
+        lastModified = newItem.updated_at;
       }
     }
 
-    this.cache.lastUpdated = lastUpdated;
+    this.cache.lastModified = lastModified;
 
     return needNextPage;
   }

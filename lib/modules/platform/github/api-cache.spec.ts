@@ -23,7 +23,7 @@ describe('modules/platform/github/api-cache', () => {
     const item2 = { number: 2, updated_at: t2 };
     const apiCache = new ApiCache({
       items: { 1: item1 },
-      lastUpdated: t1,
+      lastModified: t1,
     });
 
     expect(apiCache.getItem(1)).toBe(item1);
@@ -31,27 +31,27 @@ describe('modules/platform/github/api-cache', () => {
 
     apiCache.updateItem(item2);
     expect(apiCache.getItem(2)).toBe(item2);
-    expect(apiCache.lastUpdated()).toBe(t1_http); // Not `t2`, see jsdoc for `setItem`
+    expect(apiCache.lastModified()).toBe(t1_http); // Not `t2`, see jsdoc for `setItem`
     expect(apiCache.getItems()).toEqual([item1, item2]);
   });
 
   describe('reconcile', () => {
     it('appends new items', () => {
       const apiCache = new ApiCache({ items: {} });
-      expect(apiCache.lastUpdated()).toBeNull();
+      expect(apiCache.lastModified()).toBeNull();
 
       const res1 = apiCache.reconcile([
         { number: 2, updated_at: t2 },
         { number: 1, updated_at: t1 },
       ]);
-      expect(apiCache.lastUpdated()).toBe(t2_http);
+      expect(apiCache.lastModified()).toBe(t2_http);
       expect(res1).toBeTrue();
 
       const res2 = apiCache.reconcile([
         { number: 4, updated_at: t4 },
         { number: 3, updated_at: t3 },
       ]);
-      expect(apiCache.lastUpdated()).toBe(t4_http);
+      expect(apiCache.lastModified()).toBe(t4_http);
       expect(res2).toBeTrue();
 
       expect(apiCache.getItems()).toEqual([
@@ -69,7 +69,7 @@ describe('modules/platform/github/api-cache', () => {
           2: { number: 2, updated_at: t2 },
           3: { number: 3, updated_at: t3 },
         },
-        lastUpdated: t3,
+        lastModified: t3,
       });
 
       const needNextPage = apiCache.reconcile([
@@ -83,7 +83,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 2, updated_at: t4 },
         { number: 3, updated_at: t3 },
       ]);
-      expect(apiCache.lastUpdated()).toBe(t5_http);
+      expect(apiCache.lastModified()).toBe(t5_http);
       expect(needNextPage).toBeFalse();
     });
 
@@ -110,7 +110,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 4, updated_at: t4 },
         { number: 5, updated_at: t5 },
       ]);
-      expect(apiCache.lastUpdated()).toBe(t5_http);
+      expect(apiCache.lastModified()).toBe(t5_http);
       expect(res1).toBeTrue();
       expect(res2).toBeTrue();
     });
@@ -122,7 +122,7 @@ describe('modules/platform/github/api-cache', () => {
           2: { number: 2, updated_at: t2 },
           3: { number: 3, updated_at: t3 },
         },
-        lastUpdated: t3,
+        lastModified: t3,
       });
 
       const needNextPage = apiCache.reconcile([
@@ -136,7 +136,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 2, updated_at: t2 },
         { number: 3, updated_at: t3 },
       ]);
-      expect(apiCache.lastUpdated()).toBe(t3_http);
+      expect(apiCache.lastModified()).toBe(t3_http);
       expect(needNextPage).toBeFalse();
     });
   });
