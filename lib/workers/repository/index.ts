@@ -22,7 +22,7 @@ import type { SshSocket } from '../global/ssh_socket';
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
-  sshSocket: SshSocket = undefined,
+  sshSocket: SshSocket | undefined = undefined,
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();

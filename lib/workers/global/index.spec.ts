@@ -24,6 +24,7 @@ const limits = _limits;
 
 describe('workers/global/index', () => {
   beforeEach(() => {
+    delete process.env.SSH_AUTH_SOCK;
     jest.resetAllMocks();
     logger.getProblems.mockImplementationOnce(() => []);
     configParser.parseConfigs = jest.fn();

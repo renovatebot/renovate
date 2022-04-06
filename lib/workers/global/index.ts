@@ -104,7 +104,7 @@ export async function resolveGlobalExtends(
 
 export async function start(): Promise<number> {
   let config: AllConfig;
-  let sshSocket: SshSocket = undefined;
+  let sshSocket: SshSocket = null;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
