@@ -618,7 +618,7 @@ export async function getPrList(): Promise<Pr[]> {
 
         const opts: GithubHttpOptions = { paginate: false };
         if (pageIdx === 1) {
-          const etag = config.prCache.etag();
+          const etag = config.prCache.getEtag();
           if (etag) {
             opts.headers = { 'If-None-Match': etag };
           }
@@ -636,7 +636,7 @@ export async function getPrList(): Promise<Pr[]> {
 
           const etag = res.headers.etag;
           if (etag) {
-            config.prCache.etag(etag);
+            config.prCache.setEtag(etag);
           }
         }
 
