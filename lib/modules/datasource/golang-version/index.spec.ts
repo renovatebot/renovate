@@ -15,8 +15,6 @@ const golangReleasesInvalidContent6 = loadFixture('releases-invalid6.go');
 const datasource = GolangVersionDatasource.id;
 
 describe('modules/datasource/golang-version/index', () => {
-  jest.setTimeout(50 * 1000);
-
   describe('getReleases', () => {
     it('parses real data', async () => {
       httpMock
@@ -105,12 +103,9 @@ describe('modules/datasource/golang-version/index', () => {
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent5);
-
       await expect(
         getPkgReleases({ datasource, depName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
-
-      // await expect(res).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
     it('throws ExternalHostError for invalid release format', async () => {
       httpMock
