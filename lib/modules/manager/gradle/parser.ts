@@ -301,7 +301,16 @@ function processPredefinedRegistryUrl({
   return { urls: [registryUrl] };
 }
 
-const annoyingMethods = new Set(['createXmlValueRemover']);
+const annoyingMethods = new Set([
+  'createXmlValueRemover',
+  'events',
+  'args',
+  'arrayOf',
+  'listOf',
+  'mutableListOf',
+  'setOf',
+  'mutableSetOf',
+]);
 
 function processLongFormDep({
   tokenMap,
@@ -494,7 +503,25 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processCustomRegistryUrl,
   },
   {
-    // maven { url = uri("https://maven.springframework.org/release") }
+    // maven { url = "https://maven.springframework.org/release"
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { url = uri("https://maven.springframework.org/release")
     matchers: [
       {
         matchType: TokenType.Word,
@@ -513,13 +540,12 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
       { matchType: TokenType.RightParen },
-      { matchType: TokenType.RightBrace },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
   },
   {
-    // maven { url "https://maven.springframework.org/release" }
+    // maven { url "https://maven.springframework.org/release"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -531,7 +557,6 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'url',
       },
       { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
-      { matchType: TokenType.RightBrace },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,

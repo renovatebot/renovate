@@ -6,7 +6,7 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 # Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
-The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you.
+The answer is "It's your choice", but we can certainly make some generalisations/recommendations to help you.
 
 If you do not want to read the in-depth discussion, and just want our recommendations, skip ahead to the ["So what's best?" section](#so-whats-best).
 
@@ -43,7 +43,7 @@ A second reason for using ranges applies to "libraries" that are published as np
 In this case, it is usually a bad idea to pin all your dependencies because it will introduce an unnecessarily narrow range (one release!) and cause most users of your package to bloat their `node_modules` with duplicates.
 
 For example, you might have pinned `foobar` to version `1.1.0` and another author pinned his/her `foobar` dependency to `1.2.2`.
-Any user of both your packages will end up with npm attempting to install two separate versions of `foobar`, which might not even work.
+Any user of both your packages will end up with npm trying to install two separate versions of `foobar`, which might not even work.
 Even if both projects use a service like Renovate to keep their pinned dependencies up to date with the very latest versions, it's still not a good idea - there will always be times when one package has updated/released before the other one and they will be out of sync.
 e.g. there might be a space of 30 minutes where your package specifies foobar `1.1.0` and the other one specifies `1.1.1` and your joint downstream users end up with a duplicate.
 
@@ -94,7 +94,7 @@ Depending on how many repositories you maintain, and how many dependencies are i
 ## Reducing the "noise" of dependency updates
 
 The increased volume of Pull Requests for upgrading dependencies may be considered by some to be undesirable "noise" in their day.
-To some extent this is simply a trade-off for having your dependencies pinned and predictable, however there are also ways you can reduce this noise while still gaining the majority of the benefits:
+To some extent this is simply a trade-off for having your dependencies pinned and predictable, but there are also ways you can reduce this noise while still gaining the majority of the benefits:
 
 ### Pull Request automerging
 
@@ -159,12 +159,12 @@ The lock file has only delayed the inevitable problem, and provides much less vi
 
 ![all-dead](assets/images/all-dead.jpg)
 
-If the `package.json` contains a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
+If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
 The upside is that the lockfile will hold back `foobar` to `1.1.0` unless it's forced to upgrade, so the break is postponed.
 The downside is _how_ you will discover the break eventually.
 
-The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it contains, so you might run something like `yarn upgrade foobar`.
+The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it has, so you might run something like `yarn upgrade foobar`.
 Then you might either discover the break during your development or when you push your new development to CI for testing.
 In this case, hopefully you'll guess it's `foobar` that broke it and not your own code.
 

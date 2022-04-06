@@ -39,7 +39,7 @@ sidebar_label: ${displayName}
         md += `{\n  "${manager}": {\n    "enabled": true\n  }\n}`;
         md += '\n```\n\n';
         md +=
-          'If you encounter any bugs, please [raise a bug report](https://github.com/renovatebot/renovate/issues/new?template=3-Bug_report.md). If you find that it works well, then feedback on that would be welcome too.\n\n';
+          'If you find any bugs, please [raise a bug report](https://github.com/renovatebot/renovate/issues/new?template=3-Bug_report.md). If you find that it works well, then feedback on that would be welcome too.\n\n';
       }
       md += '## File Matching\n\n';
       if (!Array.isArray(fileMatch) || fileMatch.length === 0) {

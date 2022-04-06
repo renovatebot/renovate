@@ -139,7 +139,7 @@ You can find the Renovate team's preset configs at the "Config Presets" section 
 
 ## Preset Parameters
 
-If you browse the "default" presets, you will see some that contain parameters, e.g.:
+If you browse the "default" presets, you will see some that have parameters, e.g.:
 
 ```json
 {
@@ -217,7 +217,7 @@ Please consider contributing it to the [Renovate](https://github.com/renovatebot
 
 ## Organization level presets
 
-Whenever repository onboarding happens, Renovate checks if the current user/group/org contains a default config to extend.
+Whenever repository onboarding happens, Renovate checks if the current user/group/org has a default config to extend.
 It looks for:
 
 - A repository called `renovate-config` under the same user/group/org with a `default.json` file or
@@ -246,7 +246,7 @@ Let's say that your username on npm and elsewhere is "fastcore".
 In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
 Let's assume you choose `renovate-config-fastcore` as the package name.
 
-You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
+You then need to publish the `renovate-config-fastcore` package where the `package.json` has the field `renovate-config` and then put your config under the field `default`.
 For example:
 
 ```json

@@ -39,7 +39,7 @@ Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 The recommended way of using local presets is to configure then using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
 
 It's not recommended that you use a private repository to host your config while then extending it from a public repository.
-If your preset doesn't contain secrets then you should make it public, while if it does contain secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
+If your preset doesn't have secrets then you should make it public, while if it does have secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
 
 In summary, the recommended approach to private presets is:
 
@@ -49,14 +49,14 @@ In summary, the recommended approach to private presets is:
 
 ## Dependency Version Lookups
 
-Whenever Renovate detects that a project uses a particular dependency, it attempts to look up that dependency to see if any new versions exist.
+Whenever Renovate detects that a project uses a particular dependency, it tries to look up that dependency to see if any new versions exist.
 If such a package is private, then Renovate must be configured with the relevant credentials.
 Renovate does not use any package managers for this step and performs all HTTP(S) lookups itself, including insertion of authentication headers.
 
 Configuring Renovate with credentials requires `hostRules`.
 Each host rule consists of a `hostType` value and/or a way to match against hosts using `matchHost`.
 
-`hostType` is not particularly important at this step unless you have different credentials for the same host, however it is sometimes useful in later steps so is good to include if you can.
+`hostType` is not particularly important at this step unless you have different credentials for the same host, but it is sometimes useful in later steps so is good to include if you can.
 It can be either a "platform" name (e.g. `github`, `azure`, etc) or a "datasource" name (e.g. `npm`, `maven`, `github-tags`, etc).
 
 If you want to apply credentials only for a nested path within a host then write `matchHost` as a base URL like `https://registry.company.com/nested/path/`.
@@ -94,7 +94,7 @@ When Renovate creates Pull Requests, its default behavior is to locate and embed
 These release notes are fetched from the source repository of packages and not from the registries themselves, so if they are private then they will require different credentials.
 
 When it comes to open source, most packages host their source on `github.com` in public repositories.
-However, GitHub greatly rate limits unauthenticated API requests so there is a need to configure credentials for github.com as otherwise the bot will get rate limited quickly.
+GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for github.com or the bot will get rate limited quickly.
 It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it Release Notes for most open source packages will be blocked.
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
@@ -250,8 +250,8 @@ If instead you use an alternative registry or need an `.npmrc` file for some oth
 Renovate will then use the following logic:
 
 1. If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
-1. If an `npmrc` string is present and contains `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
-1. If an `npmrc` string is present but doesn't contain `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+1. If an `npmrc` string is present and has a `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+1. If an `npmrc` string is present but doesn't have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
 
 #### Encrypted entire .npmrc file into config
 
