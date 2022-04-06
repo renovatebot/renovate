@@ -352,6 +352,10 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitTimeout
+
+To handle the case where the underlying git processes appear to hang, configure the timeout with a number of milliseconds to wait after last received content on either stdOut or stdErr streams before sending a SIGINT kill message.
+
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
