@@ -1,10 +1,5 @@
 import { DateTime } from 'luxon';
-import {
-  getEmptyCache,
-  getItem,
-  reconcileWithPage,
-  setItem,
-} from './api-page-cache';
+import { getItem, reconcileWithPage, setItem } from './api-page-cache';
 import type { ApiPageCache } from './types';
 
 describe('modules/platform/github/api-page-cache', () => {
@@ -19,9 +14,8 @@ describe('modules/platform/github/api-page-cache', () => {
     const item1 = { number: 1, updated_at: t1 };
     const item2 = { number: 2, updated_at: t2 };
     const cache: ApiPageCache = {
-      ...getEmptyCache(),
       items: { 1: item1 },
-      timestamp: t2,
+      lastUpdated: t1,
     };
 
     expect(getItem(cache, 1)).toBe(item1);
@@ -29,22 +23,22 @@ describe('modules/platform/github/api-page-cache', () => {
 
     setItem(cache, item2);
     expect(getItem(cache, 2)).toBe(item2);
+    expect(cache.lastUpdated).toBe(t1); // @see `setItem` jsdoc
   });
 
   describe('reconcileWithPage', () => {
-    it('appends items', () => {
+    it('appends new items', () => {
       const cache: ApiPageCache = {
         items: {
           1: { number: 1, updated_at: t1 },
           2: { number: 2, updated_at: t2 },
         },
-        timestamp: t2,
-        etag: '',
+        lastUpdated: t2,
       };
 
       const needNextPage = reconcileWithPage(cache, [
-        { number: 3, updated_at: t3 },
         { number: 4, updated_at: t4 },
+        { number: 3, updated_at: t3 },
       ]);
 
       expect(cache).toEqual({
@@ -54,37 +48,89 @@ describe('modules/platform/github/api-page-cache', () => {
           3: { number: 3, updated_at: t3 },
           4: { number: 4, updated_at: t4 },
         },
-        timestamp: t4,
-        etag: '',
+        lastUpdated: t4,
       });
       expect(needNextPage).toBeTrue();
     });
 
-    it('caches updated items', () => {
+    it('handles updated items', () => {
       const cache: ApiPageCache = {
         items: {
           1: { number: 1, updated_at: t1 },
           2: { number: 2, updated_at: t2 },
           3: { number: 3, updated_at: t3 },
         },
-        timestamp: t3,
-        etag: '',
+        lastUpdated: t3,
       };
 
       const needNextPage = reconcileWithPage(cache, [
+        { number: 1, updated_at: t5 },
+        { number: 2, updated_at: t4 },
         { number: 3, updated_at: t3 },
-        { number: 1, updated_at: t4 },
-        { number: 2, updated_at: t5 },
       ]);
 
       expect(cache).toEqual({
         items: {
+          1: { number: 1, updated_at: t5 },
+          2: { number: 2, updated_at: t4 },
           3: { number: 3, updated_at: t3 },
-          1: { number: 1, updated_at: t4 },
-          2: { number: 2, updated_at: t5 },
         },
-        timestamp: t5,
-        etag: '',
+        lastUpdated: t5,
+      });
+      expect(needNextPage).toBeFalse();
+    });
+
+    it('ignores page overlap', () => {
+      const cache: ApiPageCache = { items: {} };
+
+      const res1 = reconcileWithPage(cache, [
+        { number: 5, updated_at: t5 },
+        { number: 4, updated_at: t4 },
+        { number: 3, updated_at: t3 },
+      ]);
+      const res2 = reconcileWithPage(cache, [
+        { number: 3, updated_at: t3 },
+        { number: 2, updated_at: t2 },
+        { number: 1, updated_at: t1 },
+      ]);
+
+      expect(cache).toEqual({
+        items: {
+          1: { number: 1, updated_at: t1 },
+          2: { number: 2, updated_at: t2 },
+          3: { number: 3, updated_at: t3 },
+          4: { number: 4, updated_at: t4 },
+          5: { number: 5, updated_at: t5 },
+        },
+        lastUpdated: t5,
+      });
+      expect(res1).toBeTrue();
+      expect(res2).toBeTrue();
+    });
+
+    it('does not require new page if all items are old', () => {
+      const cache: ApiPageCache = {
+        items: {
+          1: { number: 1, updated_at: t1 },
+          2: { number: 2, updated_at: t2 },
+          3: { number: 3, updated_at: t3 },
+        },
+        lastUpdated: t3,
+      };
+
+      const needNextPage = reconcileWithPage(cache, [
+        { number: 3, updated_at: t3 },
+        { number: 2, updated_at: t2 },
+        { number: 1, updated_at: t1 },
+      ]);
+
+      expect(cache).toEqual({
+        items: {
+          1: { number: 1, updated_at: t1 },
+          2: { number: 2, updated_at: t2 },
+          3: { number: 3, updated_at: t3 },
+        },
+        lastUpdated: t3,
       });
       expect(needNextPage).toBeFalse();
     });
