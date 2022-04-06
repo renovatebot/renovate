@@ -10,22 +10,6 @@ import type { NpmPackage } from '../extract/types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
-async function getPnpmContraint(cwd: string) {
-  let pnpmEngine;
-  const rootPackageJson = upath.join(cwd, 'package.json');
-  const content = await readFile(rootPackageJson, 'utf8');
-  if (content) {
-    const packageJson: NpmPackage = JSON.parse(content);
-    const engines = packageJson?.engines;
-    if (engines) {
-      pnpmEngine = engines['pnpm'];
-    }
-    if (!pnpmEngine) {
-    }
-  }
-  return pnpmEngine;
-}
-
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
@@ -103,4 +87,27 @@ export async function generateLockFile(
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
+}
+
+async function getPnpmContraint(cwd: string): Promise<string> {
+  let result;
+  const rootPackageJson = upath.join(cwd, 'package.json');
+  const content = await readFile(rootPackageJson, 'utf8');
+  if (content) {
+    const packageJson: NpmPackage = JSON.parse(content);
+    const packageManager = packageJson?.packageManager;
+    if (packageManager?.includes('@')) {
+      const nameAndVersion = packageManager.split('@');
+      const name = nameAndVersion[0];
+      if (name === 'pnpm') {
+        result = nameAndVersion[1];
+      }
+    } else {
+      const engines = packageJson?.engines;
+      if (engines) {
+        result = engines['pnpm'];
+      }
+    }
+  }
+  return result;
 }
