@@ -4,10 +4,10 @@ import {
   getItem,
   reconcileWithPage,
   setItem,
-} from './rest-page-cache';
-import type { RestPageCache } from './types';
+} from './api-page-cache';
+import type { ApiPageCache } from './types';
 
-describe('modules/platform/github/rest-page-cache', () => {
+describe('modules/platform/github/api-page-cache', () => {
   const now = DateTime.now();
   const t1 = now.plus({ hours: 1 }).toISO();
   const t2 = now.plus({ hours: 2 }).toISO();
@@ -18,7 +18,7 @@ describe('modules/platform/github/rest-page-cache', () => {
   it('stores and retrieves items', () => {
     const item1 = { number: 1, updated_at: t1 };
     const item2 = { number: 2, updated_at: t2 };
-    const cache: RestPageCache = {
+    const cache: ApiPageCache = {
       ...getEmptyCache(),
       items: { 1: item1 },
       timestamp: t2,
@@ -33,7 +33,7 @@ describe('modules/platform/github/rest-page-cache', () => {
 
   describe('reconcileWithPage', () => {
     it('appends items', () => {
-      const cache: RestPageCache = {
+      const cache: ApiPageCache = {
         items: {
           1: { number: 1, updated_at: t1 },
           2: { number: 2, updated_at: t2 },
@@ -61,7 +61,7 @@ describe('modules/platform/github/rest-page-cache', () => {
     });
 
     it('caches updated items', () => {
-      const cache: RestPageCache = {
+      const cache: ApiPageCache = {
         items: {
           1: { number: 1, updated_at: t1 },
           2: { number: 2, updated_at: t2 },

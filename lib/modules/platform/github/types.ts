@@ -124,7 +124,7 @@ export interface GhAutomergeResponse {
   };
 }
 
-export interface RestPageItem {
+export interface ApiPageItem {
   number: number;
   updated_at: string;
 }
@@ -132,7 +132,7 @@ export interface RestPageItem {
 /**
  * Mutable object designed to be used in the repository cache
  */
-export interface RestPageCache<T extends RestPageItem = RestPageItem> {
+export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   timestamp: string;
   etag: string;
