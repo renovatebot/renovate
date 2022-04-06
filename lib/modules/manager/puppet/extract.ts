@@ -42,7 +42,7 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
   }
 
   const parsedUrl = parseUrl(git);
-  const githubUrl = isGithubUrl(git, parsedUrl);
+  const githubUrl = isGithubUrl(git, parsedUrl || undefined);
 
   if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
     logger.warn(

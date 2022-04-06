@@ -20,21 +20,29 @@ export function parseGitOwnerRepo(
         .replace(regEx(/^git\+/), '')
         .replace(regEx(/^https:\/\/github\.com\//), '')
         .replace(regEx(/\.git$/), '');
-    } else {
-      try {
-        const url = parseUrl(git);
-        return url.pathname
-          .replace(regEx(/\.git$/), '')
-          .replace(regEx(/^\//), '');
-      } catch (err) {
-        return {
-          gitRef: true,
-          sourceUrl: git,
-          skipReason: 'invalid-url',
-        };
+    }
+    try {
+      const url = parseUrl(git);
+
+      if (!url) {
+        return invalidUrl(git);
       }
+
+      return url.pathname
+        .replace(regEx(/\.git$/), '')
+        .replace(regEx(/^\//), '');
+    } catch (err) {
+      return invalidUrl(git);
     }
   }
+}
+
+function invalidUrl(git: string): PackageDependency {
+  return {
+    gitRef: true,
+    sourceUrl: git,
+    skipReason: 'invalid-url',
+  };
 }
 
 export function isGithubUrl(git: string, parsedUrl: URL | undefined): boolean {

@@ -33,7 +33,9 @@ export class Puppetfile {
   }
 
   public getModulesOfForge(forgeUrl: any): PuppetfileModule[] {
-    return this.forgeModules.get(forgeUrl);
+    const modules = this.forgeModules.get(forgeUrl);
+
+    return modules || [];
   }
 }
 
