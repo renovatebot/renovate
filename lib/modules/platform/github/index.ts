@@ -63,7 +63,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
-import * as listCache from './list-cache';
+import * as pageCache from './api-page-cache';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import type {
   BranchProtection,
@@ -238,7 +238,7 @@ function initPrCache(): void {
   const repoCache = getRepoCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
-  repoCache.platform.github.prCache ??= listCache.getEmptyCache();
+  repoCache.platform.github.prCache ??= pageCache.getEmptyCache();
   config.prCacheRaw = repoCache.platform.github.prCache;
   config.prCacheReady = null;
 }
@@ -561,7 +561,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
 }
 
 function updatePrCacheItem(ghRestPr: GhRestPr): Pr {
-  listCache.setItem(config.prCacheRaw, ghRestPr);
+  pageCache.setItem(config.prCacheRaw, ghRestPr);
 
   const newPr = coerceRestPr(ghRestPr);
   if (config.prCacheReady) {
@@ -654,7 +654,7 @@ export async function getPrList(): Promise<Pr[]> {
 
         const { body: page } = res;
         const renovatePrs = page.filter(isRenovateRestPr);
-        needNextPage = listCache.reconcileWithPage(
+        needNextPage = pageCache.reconcileWithPage(
           config.prCacheRaw,
           renovatePrs
         );
@@ -1585,7 +1585,7 @@ export async function mergePr({
     { automergeResult: automergeResult.body, pr: prNo },
     'PR merged'
   );
-  const cachedPr = listCache.getItem(config.prCacheRaw, prNo);
+  const cachedPr = pageCache.getItem(config.prCacheRaw, prNo);
   if (cachedPr) {
     updatePrCacheItem({ ...cachedPr, state: PrState.Merged });
   }

@@ -85,7 +85,7 @@ export interface LocalRepoConfig {
   parentRepo: string;
   forkMode?: boolean;
   forkToken?: string;
-  prCacheRaw: ListCache<GhRestPr>;
+  prCacheRaw: ApiPageCache<GhRestPr>;
   prCacheReady: Pr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
