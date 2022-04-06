@@ -20,7 +20,7 @@ describe('modules/platform/github/api-cache', () => {
     expect(apiCache.getItem(1)).toBe(item1);
     expect(apiCache.getItem(2)).toBeNull();
 
-    apiCache.setItem(item2);
+    apiCache.updateItem(item2);
     expect(apiCache.getItem(2)).toBe(item2);
     expect(apiCache.lastUpdated()).toBe(t1); // Not `t2`, see jsdoc for `setItem`
     expect(apiCache.getItems()).toEqual([item1, item2]);
