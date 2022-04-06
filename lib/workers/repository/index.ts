@@ -43,7 +43,6 @@ export async function renovateRepository(
     config = await initRepo(config);
     if (sshSocket) {
       for (var hostRule of hostRules.getAll()) {
-        console.log(hostRule);
         await sshSocket.addKeyFromHostRule(hostRule);
       }
     }
