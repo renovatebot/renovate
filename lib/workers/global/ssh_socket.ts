@@ -28,8 +28,8 @@ export class SshSocket {
   }
 
   async addKeyFromHostRule(hostRule: HostRule) {
-    if (hostRule.ssh_key && this.agent) {
-      await this.agent.add_key(hostRule.ssh_key);
+    if (hostRule.sshKey && this.agent) {
+      await this.agent.add_key(hostRule.sshKey);
     }
   }
 

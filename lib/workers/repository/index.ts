@@ -18,6 +18,7 @@ import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
 import type { SshSocket } from '../global/ssh_socket';
+import * as hostRules from '../../util/host-rules';
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -41,8 +42,9 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     if (sshSocket) {
-      for (var rule of config.hostRules) {
-        await sshSocket.addKeyFromHostRule(rule);
+      for (var hostRule of hostRules.getAll()) {
+        console.log(hostRule);
+        await sshSocket.addKeyFromHostRule(hostRule);
       }
     }
     addSplit('init');

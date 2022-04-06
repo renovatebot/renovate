@@ -3,7 +3,7 @@ export interface HostRuleSearchResult {
   token?: string;
   username?: string;
   password?: string;
-  ssh_key?: string;
+  sshKey?: string;
   insecureRegistry?: boolean;
   timeout?: number;
   abortOnError?: boolean;
