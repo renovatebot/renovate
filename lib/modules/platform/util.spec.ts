@@ -19,11 +19,15 @@ describe('modules/platform/util', () => {
     it('uses host rules', () => {
       hostRules.add({
         hostType: 'gitlab-changelog',
-        matchHost: 'https://gl.example.com',
+        matchHost: 'gl.example.com',
       });
       hostRules.add({
         hostType: 'github-changelog',
-        matchHost: 'https://gh.example.com',
+        matchHost: 'gh.example.com',
+      });
+      hostRules.add({
+        hostType: 'gitea',
+        matchHost: 'gt.example.com',
       });
       expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
         'gitlab'
@@ -31,6 +35,7 @@ describe('modules/platform/util', () => {
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github'
       );
+      expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBeNull();
     });
   });
 });
