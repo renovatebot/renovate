@@ -4,10 +4,10 @@ import {
   getItem,
   reconcileWithPage,
   setItem,
-} from './list-cache';
+} from './rest-page-cache';
 import type { RestPageCache } from './types';
 
-describe('modules/platform/github/list-cache', () => {
+describe('modules/platform/github/rest-page-cache', () => {
   const now = DateTime.now();
   const t1 = now.plus({ hours: 1 }).toISO();
   const t2 = now.plus({ hours: 2 }).toISO();
