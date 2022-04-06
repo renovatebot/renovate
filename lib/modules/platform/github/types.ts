@@ -129,6 +129,9 @@ export interface RestPageItem {
   updated_at: string;
 }
 
+/**
+ * Mutable object designed to be used in the repository cache
+ */
 export interface RestPageCache<T extends RestPageItem = RestPageItem> {
   items: Record<number, T>;
   timestamp: string;
