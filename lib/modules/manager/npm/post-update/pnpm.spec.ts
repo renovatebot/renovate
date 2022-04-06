@@ -12,8 +12,6 @@ jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs/proxies');
 jest.mock('./node-version');
 
-const readFixture = (x: string): string => Fixtures.get(x, '.');
-
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
@@ -39,12 +37,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest
-      .fn()
-      .mockReturnValueOnce(undefined)
-      .mockImplementation(() => {
-        throw new Error('not found');
-      });
+    fs.readFile.mockReturnValueOnce(undefined).mockImplementation(() => {
+      throw new Error('not found');
+    });
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
@@ -98,7 +93,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('uses constraint version if parent json has constraints', async () => {
-    const childPkgJson = readFixture('parent/package.json');
+    const childPkgJson = Fixtures.get('parent/package.json');
     const execSnapshots = mockExecAll(exec);
     const configTemp = { cacheDir: 'some-cache-dir' };
     fs.readFile = jest
