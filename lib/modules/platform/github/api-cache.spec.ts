@@ -31,27 +31,27 @@ describe('modules/platform/github/api-cache', () => {
 
     apiCache.updateItem(item2);
     expect(apiCache.getItem(2)).toBe(item2);
-    expect(apiCache.lastModified()).toBe(t1_http); // Not `t2`, see jsdoc for `setItem`
+    expect(apiCache.getLastModified()).toBe(t1_http); // Not `t2`, see jsdoc for `setItem`
     expect(apiCache.getItems()).toEqual([item1, item2]);
   });
 
   describe('reconcile', () => {
     it('appends new items', () => {
       const apiCache = new ApiCache({ items: {} });
-      expect(apiCache.lastModified()).toBeNull();
+      expect(apiCache.getLastModified()).toBeNull();
 
       const res1 = apiCache.reconcile([
         { number: 2, updated_at: t2 },
         { number: 1, updated_at: t1 },
       ]);
-      expect(apiCache.lastModified()).toBe(t2_http);
+      expect(apiCache.getLastModified()).toBe(t2_http);
       expect(res1).toBeTrue();
 
       const res2 = apiCache.reconcile([
         { number: 4, updated_at: t4 },
         { number: 3, updated_at: t3 },
       ]);
-      expect(apiCache.lastModified()).toBe(t4_http);
+      expect(apiCache.getLastModified()).toBe(t4_http);
       expect(res2).toBeTrue();
 
       expect(apiCache.getItems()).toEqual([
@@ -83,7 +83,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 2, updated_at: t4 },
         { number: 3, updated_at: t3 },
       ]);
-      expect(apiCache.lastModified()).toBe(t5_http);
+      expect(apiCache.getLastModified()).toBe(t5_http);
       expect(needNextPage).toBeFalse();
     });
 
@@ -110,7 +110,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 4, updated_at: t4 },
         { number: 5, updated_at: t5 },
       ]);
-      expect(apiCache.lastModified()).toBe(t5_http);
+      expect(apiCache.getLastModified()).toBe(t5_http);
       expect(res1).toBeTrue();
       expect(res2).toBeTrue();
     });
@@ -136,7 +136,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 2, updated_at: t2 },
         { number: 3, updated_at: t3 },
       ]);
-      expect(apiCache.lastModified()).toBe(t3_http);
+      expect(apiCache.getLastModified()).toBe(t3_http);
       expect(needNextPage).toBeFalse();
     });
   });
@@ -144,21 +144,19 @@ describe('modules/platform/github/api-cache', () => {
   describe('etag', () => {
     it('returns null', () => {
       const apiCache = new ApiCache({ items: {} });
-      expect(apiCache.etag()).toBeNull();
+      expect(apiCache.getEtag()).toBeNull();
     });
 
     it('sets and retrieves non-null value', () => {
       const apiCache = new ApiCache({ items: {} });
-      const res = apiCache.etag('foobar');
-      expect(res).toBe('foobar');
-      expect(apiCache.etag()).toBe('foobar');
+      apiCache.setEtag('foobar');
+      expect(apiCache.getEtag()).toBe('foobar');
     });
 
     it('deletes value for null parameter', () => {
       const apiCache = new ApiCache({ items: {} });
-      apiCache.etag('foobar');
-      apiCache.etag(null);
-      expect(apiCache.etag()).toBeNull();
+      apiCache.setEtag(null);
+      expect(apiCache.getEtag()).toBeNull();
     });
   });
 });

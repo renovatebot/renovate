@@ -4,20 +4,22 @@ import type { ApiPageCache, ApiPageItem } from './types';
 export class ApiCache<T extends ApiPageItem> {
   constructor(private cache: ApiPageCache<T>) {}
 
-  etag(value?: string | null): string | null {
+  getEtag(): string | null {
+    return this.cache.etag ?? null;
+  }
+
+  setEtag(value: string | null): void {
     if (value === null) {
       delete this.cache.etag;
-    } else if (value) {
+    } else {
       this.cache.etag = value;
     }
-
-    return this.cache.etag ?? null;
   }
 
   /**
    * @returns Date formatted to use in HTTP headers
    */
-  lastModified(): string | null {
+  getLastModified(): string | null {
     const { lastModified } = this.cache;
     return lastModified ? DateTime.fromISO(lastModified).toHTTP() : null;
   }
