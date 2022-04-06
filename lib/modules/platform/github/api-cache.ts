@@ -22,7 +22,7 @@ export class ApiCache<T extends ApiPageItem> {
    * The point is to allow cache modifications during run, but
    * force fetching and refreshing of modified items next run.
    */
-  setItem(item: T): void {
+  updateItem(item: T): void {
     this.cache.items[item.number] = item;
   }
 
