@@ -1812,7 +1812,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigest
 
-If enabled renovate will pin the digest value.
+Add to this object if you wish to define rules that apply only to PRs that pin digests.
 
 ## pinDigests
 
