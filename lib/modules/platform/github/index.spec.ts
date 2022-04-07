@@ -551,6 +551,7 @@ describe('modules/platform/github/index', () => {
     const t1 = t.plus({ minutes: 1 }).toISO();
     const t2 = t.plus({ minutes: 2 }).toISO();
     const t3 = t.plus({ minutes: 3 }).toISO();
+    const t4 = t.plus({ minutes: 4 }).toISO();
 
     const pr1 = {
       number: 1,
@@ -597,7 +598,9 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(pagePath(1))
-        .reply(200, [pr3], { link: pageLink(2) })
+        .reply(200, [pr3], {
+          link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
+        })
         .get(pagePath(2))
         .reply(200, [pr2], { link: pageLink(3) })
         .get(pagePath(3))
@@ -627,6 +630,53 @@ describe('modules/platform/github/index', () => {
 
       expect(res1).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
       expect(res1).toEqual(res2);
+    });
+
+    it('synchronizes cache', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      initRepoMock(scope, 'some/repo');
+
+      scope
+        .get(pagePath(1))
+        .reply(200, [pr3], {
+          link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
+          etag: 'foo',
+        })
+        .get(pagePath(2))
+        .reply(200, [pr2])
+        .get(pagePath(3))
+        .reply(200, [pr1]);
+
+      await github.initRepo({ repository: 'some/repo' } as never);
+      const res1 = await github.getPrList();
+
+      scope
+        .get(pagePath(1))
+        .reply(200, [{ ...pr3, updated_at: t4, title: 'PR #3 (updated)' }], {
+          link: `${pageLink(2)}`,
+          etag: 'bar',
+        })
+        .get(pagePath(2))
+        .reply(200, [{ ...pr2, updated_at: t4, title: 'PR #2 (updated)' }], {
+          link: `${pageLink(3)}`,
+        })
+        .get(pagePath(3))
+        .reply(200, [{ ...pr1, updated_at: t4, title: 'PR #1 (updated)' }]);
+
+      await github.initRepo({ repository: 'some/repo' } as never);
+      const res2 = await github.getPrList();
+
+      expect(res1).toMatchObject([
+        { number: 1, title: 'PR #1' },
+        { number: 2, title: 'PR #2' },
+        { number: 3, title: 'PR #3' },
+      ]);
+      expect(res2).toMatchObject([
+        { number: 1, title: 'PR #1 (updated)' },
+        { number: 2, title: 'PR #2 (updated)' },
+        { number: 3, title: 'PR #3 (updated)' },
+      ]);
     });
   });
   describe('getBranchPr(branchName)', () => {

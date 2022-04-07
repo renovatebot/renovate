@@ -608,11 +608,11 @@ export async function getPrList(): Promise<Pr[]> {
     try {
       let requestsTotal = 0;
       let apiQuotaAffected = false;
-      let hasNextPage = true;
-      let needNextPage = true;
+      let needNextPageFetch = true;
+      let needNextPageSync = true;
 
       let pageIdx = 1;
-      while (hasNextPage && needNextPage) {
+      while (needNextPageFetch && needNextPageSync) {
         const repo = config.parentRepo || config.repository;
         const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
@@ -621,12 +621,18 @@ export async function getPrList(): Promise<Pr[]> {
           const etag = config.prCache.etag;
           if (etag) {
             opts.headers = { 'If-None-Match': etag };
+          } else {
+            // Speed up initial fetch
+            opts.paginate = true;
           }
         }
 
         const res = await githubApi.getJson<GhRestPr[]>(urlPath, opts);
         apiQuotaAffected = true;
         requestsTotal += 1;
+
+        const nextPage = parseLinkHeader(res.headers?.link)?.next;
+        needNextPageFetch = !!nextPage;
 
         if (pageIdx === 1) {
           if (res.statusCode === 304) {
@@ -638,14 +644,14 @@ export async function getPrList(): Promise<Pr[]> {
           if (etag) {
             config.prCache.etag = etag;
           }
+
+          needNextPageFetch &&= !opts.paginate;
         }
 
         const { body: page } = res;
         const renovatePrs = page.filter(isRenovateRestPr);
-        needNextPage = config.prCache.reconcile(renovatePrs);
+        needNextPageSync = config.prCache.reconcile(renovatePrs);
 
-        const linkHeader = parseLinkHeader(res.headers?.link);
-        hasNextPage = !!linkHeader?.next;
         pageIdx += 1;
       }
 
