@@ -842,4 +842,5 @@ of non-Git repositories under certain conditions.`,
 	{
 		Date: Date{2012, 3, 28}, Version: Version{1, 0, 0},
 	},
+	},
 }

@@ -1,12 +1,28 @@
 import { dequal } from 'dequal';
-import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
+import type { DependenciesMeta, NpmPackage } from '../../extract/types';
+
+function renameObjKey(
+  oldObj: DependenciesMeta,
+  oldKey: string,
+  newKey: string
+): DependenciesMeta {
+  const keys = Object.keys(oldObj);
+  return keys.reduce((acc, key) => {
+    if (key === oldKey) {
+      acc[newKey] = oldObj[oldKey];
+    } else {
+      acc[key] = oldObj[key];
+    }
+    return acc;
+  }, {});
+}
 
 function replaceAsString(
-  parsedContents: PackageJson,
+  parsedContents: NpmPackage,
   fileContent: string,
   depType: string,
   depName: string,
@@ -20,6 +36,14 @@ function replaceAsString(
     delete Object.assign(parsedContents[depType], {
       [newValue]: parsedContents[depType][oldValue],
     })[oldValue];
+  } else if (depType === 'dependenciesMeta') {
+    if (oldValue !== newValue) {
+      parsedContents.dependenciesMeta = renameObjKey(
+        parsedContents.dependenciesMeta,
+        oldValue,
+        newValue
+      );
+    }
   } else {
     // The old value is the version of the dependency
     parsedContents[depType][depName] = newValue;
@@ -89,7 +113,7 @@ export function updateDependency({
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
-    const parsedContents: PackageJson = JSON.parse(fileContent);
+    const parsedContents: NpmPackage = JSON.parse(fileContent);
     // Save the old version
     let oldVersion: string;
     if (depType === 'packageManager') {
@@ -169,6 +193,20 @@ export function updateDependency({
             depKey,
             depKey,
             upgrade.newName
+          );
+        }
+      }
+    }
+    if (parsedContents?.dependenciesMeta) {
+      for (const [depKey] of Object.entries(parsedContents.dependenciesMeta)) {
+        if (depKey.startsWith(depName + '@')) {
+          newFileContent = replaceAsString(
+            parsedContents,
+            newFileContent,
+            'dependenciesMeta',
+            depName,
+            depKey,
+            depName + '@' + newValue
           );
         }
       }
