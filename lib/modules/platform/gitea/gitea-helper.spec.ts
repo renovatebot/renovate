@@ -29,6 +29,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     allow_merge_commits: true,
     allow_squash_merge: true,
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
+    ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
     archived: false,
