@@ -57,7 +57,7 @@ Not all dependencies are detected by default, this can be because:
 - The package manager/file format is not supported, or
 - The file format is not a standard or is proprietary
 
-If your dependencies are not detected by default, you can use use our "regex" manager to set your own custom patterns to extract dependencies.
+If your dependencies are not detected by default, you can use our "regex" manager to set your own custom patterns to extract dependencies.
 You configure the regex manager by telling it:
 
 - Which file pattern(s) to match
