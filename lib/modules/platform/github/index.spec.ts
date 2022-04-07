@@ -717,7 +717,7 @@ describe('modules/platform/github/index', () => {
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
 
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({ number: 91 });
       expect(pr2).toEqual(pr);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -837,7 +837,7 @@ describe('modules/platform/github/index', () => {
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
 
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({ number: 90 });
       expect(pr2).toEqual(pr);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
