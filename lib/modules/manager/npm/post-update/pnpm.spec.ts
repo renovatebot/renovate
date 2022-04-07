@@ -65,7 +65,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses the new version if packageManager is updated', async () => {
     const execSnapshots = mockExecAll(exec);
-    // when(fs.readFile).calledWith(1).mockReturnValue('yay!')
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       {
