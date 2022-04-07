@@ -1,4 +1,4 @@
-import {S3} from "@aws-sdk/client-s3";
+import { S3 } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
