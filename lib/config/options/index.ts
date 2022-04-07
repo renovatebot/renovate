@@ -1255,6 +1255,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       branchTopic: '{{{depNameSanitized}}}-pin-digest',
+      prTitle: 'Pin {{{depName}}} digest to {{{newDigestShort}}}',
       commitMessageExtra: 'to {{newDigestShort}}',
       commitMessageTopic: '{{{depName}}} digest',
     },
