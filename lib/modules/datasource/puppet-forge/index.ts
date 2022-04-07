@@ -22,18 +22,18 @@ export class PuppetForgeDatasource extends Datasource {
 
     const { body: module } = await this.http.getJson<PuppetModule>(url);
 
-    const releases: Release[] = module.releases.map((release) => ({
+    const releases: Release[] = module?.releases?.map((release) => ({
       version: release.version,
       downloadUrl: release.file_uri,
       releaseTimestamp: release.created_at,
       registryUrl,
     }));
 
-    if (!releases.length) {
+    if (!releases?.length) {
       return null;
     }
 
-    return PuppetForgeDatasource.createReleaseResult(releases, module);
+    return PuppetForgeDatasource.createReleaseResult(releases || [], module);
   }
 
   static createReleaseResult(
