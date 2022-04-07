@@ -18,7 +18,7 @@ export function extractFromImage(
   if (is.string(image)) {
     dep = getDep(image);
     dep.depType = 'image';
-  } else if (is.string(image.name)) {
+  } else if (is.string(image?.name)) {
     dep = getDep(image.name);
     dep.depType = 'image-name';
   }
@@ -50,14 +50,14 @@ export function extractFromJob(job: Job | undefined): PackageDependency[] {
   if (is.undefined(job)) {
     return [];
   }
-  let deps: PackageDependency[] = [];
+  const deps: PackageDependency[] = [];
   if (is.object(job)) {
     const { image, services } = { ...job };
     if (is.object(image) || is.string(image)) {
       deps.push(extractFromImage(image));
     }
     if (is.array(services)) {
-      deps = deps.concat(extractFromServices(services));
+      deps.push(...extractFromServices(services));
     }
   }
   return deps;
@@ -77,11 +77,11 @@ export function extractPackageFile(content: string): PackageFile | null {
             break;
 
           case 'services':
-            deps = deps.concat(extractFromServices(value as Services));
+            deps.push(...extractFromServices(value as Services));
             break;
 
           default:
-            deps = deps.concat(extractFromJob(value as Job));
+            deps.push(...extractFromJob(value as Job));
             break;
         }
       }
