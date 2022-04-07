@@ -657,10 +657,6 @@ export async function getPrList(): Promise<Pr[]> {
         const nextPage = parseLinkHeader(res.headers?.link)?.next;
         needNextPageFetch = !!nextPage;
 
-        const { body: page } = res;
-        const renovatePrs = page.filter(isRenovateRestPr);
-        needNextPageSync = config.prCache.reconcile(renovatePrs);
-
         if (pageIdx === 1) {
           if (res.statusCode === 304) {
             apiQuotaAffected = false;
@@ -674,6 +670,10 @@ export async function getPrList(): Promise<Pr[]> {
 
           needNextPageFetch &&= !opts.paginate;
         }
+
+        const { body: page } = res;
+        const renovatePrs = page.filter(isRenovateRestPr);
+        needNextPageSync = config.prCache.reconcile(renovatePrs);
 
         pageIdx += 1;
       }
