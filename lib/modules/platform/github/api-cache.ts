@@ -28,8 +28,8 @@ export class ApiCache<T extends ApiPageItem> {
   }
 
   getItems(): T[];
-  getItems<U = unknown>(mapFn: (T) => U): U[];
-  getItems<U = unknown>(mapFn?: (T) => U): T[] | U[] {
+  getItems<U = unknown>(mapFn: (_: T) => U): U[];
+  getItems<U = unknown>(mapFn?: (_: T) => U): T[] | U[] {
     if (mapFn) {
       const cachedResult = this.itemsMapCache.get(mapFn);
       if (cachedResult) {

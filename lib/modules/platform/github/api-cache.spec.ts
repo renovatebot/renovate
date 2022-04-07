@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { ApiCache } from './api-cache';
+import type { ApiPageItem } from './types';
 
 describe('modules/platform/github/api-cache', () => {
   const now = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
@@ -66,13 +67,13 @@ describe('modules/platform/github/api-cache', () => {
       });
 
       let numbersMapCalls = 0;
-      const mapNumbers = ({ number }) => {
+      const mapNumbers = ({ number }: ApiPageItem) => {
         numbersMapCalls += 1;
         return number;
       };
 
       let datesMapCalls = 0;
-      const mapDates = ({ updated_at }) => {
+      const mapDates = ({ updated_at }: ApiPageItem) => {
         datesMapCalls += 1;
         return updated_at;
       };
@@ -103,7 +104,7 @@ describe('modules/platform/github/api-cache', () => {
       });
 
       let numbersMapCalls = 0;
-      const mapNumbers = ({ number }) => {
+      const mapNumbers = ({ number }: ApiPageItem) => {
         numbersMapCalls += 1;
         return number;
       };
@@ -128,7 +129,7 @@ describe('modules/platform/github/api-cache', () => {
       });
 
       let numbersMapCalls = 0;
-      const mapNumbers = ({ number }) => {
+      const mapNumbers = ({ number }: ApiPageItem) => {
         numbersMapCalls += 1;
         return number;
       };
