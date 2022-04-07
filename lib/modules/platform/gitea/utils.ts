@@ -2,7 +2,7 @@ import URL from 'url';
 import { PlatformId } from '../../../constants';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
+import type { HostRuleSearchResult } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -27,7 +27,7 @@ export function getRepoUrl(
   }
 
   // Find options for current host and determine Git endpoint
-  const opts: HostRule = hostRules.find({
+  const opts: HostRuleSearchResult = hostRules.find({
     hostType: PlatformId.Gitea,
     url: endpoint,
   });
@@ -37,10 +37,10 @@ export function getRepoUrl(
       logger.debug('No clone_url found. Falling back to old behaviour.');
     }
 
-    const { protocol, host, pathname } = parseUrl(endpoint);
-    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
+    const { protocol, host, pathname } = parseUrl(endpoint) ?? {};
+    const newPathname = pathname?.slice(0, pathname?.indexOf('/api'));
     const url = URL.format({
-      protocol: protocol.slice(0, -1) || 'https',
+      protocol: protocol?.slice(0, -1) || 'https',
       auth: opts.token,
       host,
       pathname: newPathname + '/' + repo.full_name + '.git',
@@ -51,6 +51,6 @@ export function getRepoUrl(
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
   const repoUrl = URL.parse(`${repo.clone_url}`);
-  repoUrl.auth = opts.token;
+  repoUrl.auth = opts.token || null;
   return URL.format(repoUrl);
 }
