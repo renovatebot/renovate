@@ -603,6 +603,29 @@ function isRenovateRestPr(ghPr: GhRestPr): boolean {
   );
 }
 
+/**
+ * Unless cache is initialized, there is 3 general cases:
+ *
+ *   1. We never fetched PR list for this repo before.
+ *      This is detected by `etag` presense in the cache.
+ *
+ *      In this case, we're falling back to quick fetch via
+ *      `paginate=true` option (see `util/http/github.ts`).
+ *
+ *   2. None of PRs has changed since last run.
+ *
+ *      We detect this by setting `If-None-Match` HTTP header
+ *      with the `etag` value from the previous run.
+ *
+ *   3. Some of PRs had changed since last run.
+ *
+ *      In this case, we sequentially fetch page by page
+ *      until `ApiCache.coerce` function indicates that
+ *      no more fresh items can be found in the next page.
+ *
+ *      We expect to fetch just one page per run in average,
+ *      since it's rare to have more than 100 updated PRs.
+ */
 export async function getPrList(): Promise<Pr[]> {
   if (!config.prCacheReady) {
     try {
