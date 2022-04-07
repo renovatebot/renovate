@@ -665,7 +665,8 @@ export async function getPrList(): Promise<Pr[]> {
     config.prCacheReady = true;
   }
 
-  return Object.values(config.prCache.getItems()).map(coerceRestPr);
+  const ghPrs = config.prCache.getItems();
+  return ghPrs.map(coerceRestPr);
 }
 
 export async function findPr({
