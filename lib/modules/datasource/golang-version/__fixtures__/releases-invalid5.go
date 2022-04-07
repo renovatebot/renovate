@@ -23,6 +23,7 @@ var Releases = []*Release{
 		Date: Date{2022, 4, 7}, Version: Version{1, 17, 9},
 		Future:   true,
 		Security: &FixSummary{Quantifier: "a", Components: []template.HTML{"the standard library"}},
+	{
 	},
 	{
 		Date: Date{2022, 3, 15}, Version: Version{1, 18, 0},
