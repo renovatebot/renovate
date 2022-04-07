@@ -37,7 +37,7 @@ export function extractFromServices(
       const dep = getDep(service);
       dep.depType = 'service-image';
       deps.push(dep);
-    } else if (is.string(service.name)) {
+    } else if (is.string(service?.name)) {
       const dep = getDep(service.name);
       dep.depType = 'service-image';
       deps.push(dep);
