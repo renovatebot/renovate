@@ -742,7 +742,7 @@ A similar one could strip leading `v` prefixes:
 
 Set this to `false` if you want to disable release notes fetching.
 
-Renovate can fetch release notes when you're running it on one of these platforms:
+Renovate can fetch release notes when they are hosted on one of these platforms:
 
 - GitHub (.com and Enterprise)
 - GitLab (.com and CE/EE)
