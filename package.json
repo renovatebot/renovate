@@ -168,6 +168,7 @@
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.7",
     "got": "11.8.3",
+    "graph-data-structure": "2.0.0",
     "handlebars": "4.7.7",
     "hasha": "5.2.2",
     "ignore": "5.2.0",
