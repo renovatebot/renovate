@@ -35,6 +35,113 @@ describe('modules/platform/github/api-cache', () => {
     expect(apiCache.getItems()).toEqual([item1, item2]);
   });
 
+  describe('getItems', () => {
+    it('maps items', () => {
+      const item1 = { number: 1, updated_at: t1 };
+      const item2 = { number: 2, updated_at: t2 };
+      const item3 = { number: 3, updated_at: t3 };
+      const apiCache = new ApiCache({
+        items: {
+          1: item1,
+          2: item2,
+          3: item3,
+        },
+      });
+
+      const res = apiCache.getItems(({ number }) => number);
+
+      expect(res).toEqual([1, 2, 3]);
+    });
+
+    it('caches mapping results', () => {
+      const item1 = { number: 1, updated_at: t1 };
+      const item2 = { number: 2, updated_at: t2 };
+      const item3 = { number: 3, updated_at: t3 };
+      const apiCache = new ApiCache({
+        items: {
+          1: item1,
+          2: item2,
+          3: item3,
+        },
+      });
+
+      let numbersMapCalls = 0;
+      const mapNumbers = ({ number }) => {
+        numbersMapCalls += 1;
+        return number;
+      };
+
+      let datesMapCalls = 0;
+      const mapDates = ({ updated_at }) => {
+        datesMapCalls += 1;
+        return updated_at;
+      };
+
+      const numbers1 = apiCache.getItems(mapNumbers);
+      const numbers2 = apiCache.getItems(mapNumbers);
+      const dates1 = apiCache.getItems(mapDates);
+      const dates2 = apiCache.getItems(mapDates);
+
+      expect(numbers1).toEqual([1, 2, 3]);
+      expect(numbers1).toBe(numbers2);
+      expect(numbersMapCalls).toBe(3);
+
+      expect(dates1).toEqual([t1, t2, t3]);
+      expect(dates1).toBe(dates2);
+      expect(datesMapCalls).toBe(3);
+    });
+
+    it('resets cache on item update', () => {
+      const item1 = { number: 1, updated_at: t1 };
+      const item2 = { number: 2, updated_at: t2 };
+      const item3 = { number: 3, updated_at: t3 };
+      const apiCache = new ApiCache({
+        items: {
+          1: item1,
+          2: item2,
+        },
+      });
+
+      let numbersMapCalls = 0;
+      const mapNumbers = ({ number }) => {
+        numbersMapCalls += 1;
+        return number;
+      };
+      const numbers1 = apiCache.getItems(mapNumbers);
+      apiCache.updateItem(item3);
+      const numbers2 = apiCache.getItems(mapNumbers);
+
+      expect(numbers1).toEqual([1, 2]);
+      expect(numbers2).toEqual([1, 2, 3]);
+      expect(numbersMapCalls).toBe(5);
+    });
+
+    it('resets cache on page reconcile', () => {
+      const item1 = { number: 1, updated_at: t1 };
+      const item2 = { number: 2, updated_at: t2 };
+      const item3 = { number: 3, updated_at: t3 };
+      const apiCache = new ApiCache({
+        items: {
+          1: item1,
+          2: item2,
+        },
+      });
+
+      let numbersMapCalls = 0;
+      const mapNumbers = ({ number }) => {
+        numbersMapCalls += 1;
+        return number;
+      };
+      const numbers1 = apiCache.getItems(mapNumbers);
+      apiCache.reconcile([item3]);
+      const numbers2 = apiCache.getItems(mapNumbers);
+
+      expect(numbers1).toEqual([1, 2]);
+      expect(numbers2).toEqual([1, 2, 3]);
+      expect(numbersMapCalls).toBe(5);
+    });
+  });
+
   describe('reconcile', () => {
     it('appends new items', () => {
       const apiCache = new ApiCache({ items: {} });
