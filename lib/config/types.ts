@@ -275,6 +275,7 @@ export interface PackageRule
   excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
+  matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
