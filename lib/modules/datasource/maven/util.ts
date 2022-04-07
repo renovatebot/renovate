@@ -125,6 +125,7 @@ export async function downloadS3Protocol(
   s3: S3,
   pkgUrl: url.URL | string
 ): Promise<string> {
+  console.log("downloadS3Protocol", pkgUrl.toString(), s3);
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   // let raw: GetObjectCommandOutput;
   let body: string;
@@ -139,8 +140,10 @@ export async function downloadS3Protocol(
       stream.once('error', reject);
     });
     body = buffers.toString();
+    console.log("downloadS3Protocol", {body});
     return body;
   } catch (err) {
+    console.log("err", err);
     const failedUrl = pkgUrl.toString();
     if (isS3CedentialsError(err)) {
       logger.debug(
@@ -270,6 +273,7 @@ export async function downloadMavenXml(
   s3: S3,
   pkgUrl: url.URL | null
 ): Promise<MavenXml> {
+  console.log("downloadMavenXml", pkgUrl.toString());
   /* istanbul ignore if */
   if (!pkgUrl) {
     return {};

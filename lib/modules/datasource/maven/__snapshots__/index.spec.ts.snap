@@ -1487,6 +1487,10 @@ Array [
 ]
 `;
 
+exports[`modules/datasource/maven/index returns releases from S3 repository 1`] = `null`;
+
+exports[`modules/datasource/maven/index returns releases from S3 repository 2`] = `Array []`;
+
 exports[`modules/datasource/maven/index returns releases from custom repository 1`] = `
 Object {
   "display": "org.example:package",

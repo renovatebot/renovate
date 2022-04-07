@@ -1,5 +1,6 @@
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import * as s3Mock from '../../../../test/s3-mock';
 import { loadFixture } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
@@ -10,6 +11,7 @@ const datasource = MavenDatasource.id;
 
 const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
+const baseUrlS3 = 's3://repobucket';
 
 interface SnapshotOpts {
   version: string;
@@ -224,6 +226,17 @@ describe('modules/datasource/maven/index', () => {
     mockGenericPackage({ base: baseUrlCustom });
 
     const res = await get('org.example:package', baseUrlCustom);
+
+    expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('returns releases from S3 repository', async () => {
+    //mockGenericPackage({ base: baseUrlS3 });
+
+    console.log("qwe =========");
+    const res = await get('org.example:package', baseUrlS3);
+    console.log("asd =========");
 
     expect(res).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
