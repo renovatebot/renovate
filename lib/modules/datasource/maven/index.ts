@@ -1,3 +1,4 @@
+import {S3} from "@aws-sdk/client-s3";
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
@@ -84,6 +85,7 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 
 export class MavenDatasource extends Datasource {
   static id = 'maven';
+  protected s3: S3;
 
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
@@ -93,6 +95,7 @@ export class MavenDatasource extends Datasource {
 
   constructor(id = MavenDatasource.id) {
     super(id);
+    this.s3 = new S3({});
   }
 
   async fetchReleasesFromMetadata(
