@@ -179,7 +179,7 @@ When you use the Dependency Dashboard Approval workflow you have full visibility
 
 You may run Renovate on many, or even all your repositories.
 This also means that you might want a similar config for all of your repositories.
-You can use configuration "presets" to avoid duplicating your configuration accross your repositories.
+You can use configuration "presets" to avoid duplicating your configuration across your repositories.
 
 Configuration presets are JSON configuration files which are committed to repositories and then referenced from others.
 Renovate includes over 100 built-in presets, like the default recommended `config:base` preset.
