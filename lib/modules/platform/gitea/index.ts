@@ -1,10 +1,8 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
 import { PlatformId } from '../../../constants';
 import {
-  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -13,17 +11,11 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import {
-  BranchStatus,
-  HostRule,
-  PrState,
-  VulnerabilityAlert,
-} from '../../../types';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url';
+import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -31,7 +23,6 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
-  GitUrlOption,
   Issue,
   MergePRConfig,
   Platform,
@@ -44,7 +35,7 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { smartLinks } from './utils';
+import { getRepoUrl, smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -180,47 +171,6 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   return labelList.find((l) => l.name === name)?.id;
 }
 
-function getRepoUrl(
-  repo: helper.Repo,
-  gitUrl: GitUrlOption | undefined
-): string {
-  if (gitUrl === 'ssh') {
-    if (!repo.ssh_url) {
-      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-    }
-    logger.debug({ url: repo.ssh_url }, `using SSH URL`);
-    return repo.ssh_url;
-  }
-
-  // Find options for current host and determine Git endpoint
-  const opts: HostRule = hostRules.find({
-    hostType: PlatformId.Gitea,
-    url: defaults.endpoint,
-  });
-
-  if (gitUrl === 'endpoint' || repo.clone_url === null) {
-    if (repo.clone_url === null) {
-      logger.debug('No clone_url found. Falling back to old behaviour.');
-    }
-
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
-    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
-    const url = URL.format({
-      protocol: protocol.slice(0, -1) || 'https',
-      auth: opts.token,
-      host,
-      pathname: newPathname + '/' + repo.full_name + '.git',
-    });
-    logger.debug({ url }, 'using URL based on configured endpoint');
-    return url;
-  }
-
-  logger.debug({ url: repo.clone_url }, `using HTTP URL`);
-  const repoUrl = URL.parse(`${repo.clone_url}`);
-  repoUrl.auth = opts.token;
-  return URL.format(repoUrl);
-}
-
 const platform: Platform = {
   async initPlatform({
     endpoint,
@@ -342,7 +292,7 @@ const platform: Platform = {
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
-    const url = getRepoUrl(repo, gitUrl);
+    const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
 
     // Initialize Git storage
     await git.initRepo({
