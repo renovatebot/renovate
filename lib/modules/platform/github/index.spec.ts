@@ -546,6 +546,89 @@ describe('modules/platform/github/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+  describe('getPrList()', () => {
+    const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
+    const t1 = t.plus({ minutes: 1 }).toISO();
+    const t2 = t.plus({ minutes: 2 }).toISO();
+    const t3 = t.plus({ minutes: 3 }).toISO();
+
+    const pr1 = {
+      number: 1,
+      head: { ref: 'branch-1', repo: { full_name: 'some/repo' } },
+      state: PrState.Open,
+      title: 'PR #1',
+      updated_at: t1,
+    };
+
+    const pr2 = {
+      number: 2,
+      head: { ref: 'branch-2', repo: { full_name: 'some/repo' } },
+      state: PrState.Open,
+      title: 'PR #2',
+      updated_at: t2,
+    };
+
+    const pr3 = {
+      number: 3,
+      head: { ref: 'branch-3', repo: { full_name: 'some/repo' } },
+      state: PrState.Open,
+      title: 'PR #3',
+      updated_at: t3,
+    };
+
+    const pagePath = (x: number) =>
+      `/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${x}`;
+    const pageLink = (x: number) =>
+      `<${githubApiHost}${pagePath(x)}>; rel="next"`;
+
+    it('fetches single page', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get(pagePath(1)).reply(200, [pr1]);
+      await github.initRepo({ repository: 'some/repo' } as never);
+
+      const res = await github.getPrList();
+
+      expect(res).toMatchObject([{ number: 1, title: 'PR #1' }]);
+    });
+
+    it('fetches multiple pages', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(pagePath(1))
+        .reply(200, [pr3], { link: pageLink(2) })
+        .get(pagePath(2))
+        .reply(200, [pr2], { link: pageLink(3) })
+        .get(pagePath(3))
+        .reply(200, [pr1]);
+      await github.initRepo({ repository: 'some/repo' } as never);
+
+      const res = await github.getPrList();
+
+      expect(res).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
+    });
+
+    it('uses ETag', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(pagePath(1))
+        .reply(200, [pr3, pr2, pr1], { etag: 'foobar' })
+        .get(pagePath(1))
+        .reply(304);
+
+      await github.initRepo({ repository: 'some/repo' } as never);
+      const res1 = await github.getPrList();
+
+      await github.initRepo({ repository: 'some/repo' } as never);
+      const res2 = await github.getPrList();
+
+      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
+      expect(res1).toEqual(res2);
+    });
+  });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       const scope = httpMock.scope(githubApiHost);
@@ -593,7 +676,7 @@ describe('modules/platform/github/index', () => {
       const pr2 = await github.getBranchPr('somebranch');
 
       expect(pr).toMatchSnapshot();
-      expect(pr2).toBe(pr);
+      expect(pr2).toEqual(pr);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should reopen and cache autoclosed PR', async () => {
@@ -635,7 +718,7 @@ describe('modules/platform/github/index', () => {
       const pr2 = await github.getBranchPr('somebranch');
 
       expect(pr).toMatchSnapshot();
-      expect(pr2).toBe(pr);
+      expect(pr2).toEqual(pr);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('aborts reopen if PR is too old', async () => {
@@ -755,7 +838,7 @@ describe('modules/platform/github/index', () => {
       const pr2 = await github.getBranchPr('somebranch');
 
       expect(pr).toMatchSnapshot();
-      expect(pr2).toBe(pr);
+      expect(pr2).toEqual(pr);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
