@@ -86,12 +86,17 @@ export async function generateLockFile(
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
-    let installYarn = 'npm i -g yarn';
-    if (isYarn1 && minYarnVersion) {
-      installYarn += `@${quote(yarnCompatibility)}`;
-    }
+    const preCommands = [];
+    if (config.managerData?.packageManager) {
+      preCommands.push('npm i -g corepack', 'corepack enable');
+    } else {
+      let installYarn = 'npm i -g yarn';
+      if (isYarn1 && minYarnVersion) {
+        installYarn += `@${quote(yarnCompatibility)}`;
+      }
 
-    const preCommands = [installYarn];
+      preCommands.push(installYarn);
+    }
 
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,

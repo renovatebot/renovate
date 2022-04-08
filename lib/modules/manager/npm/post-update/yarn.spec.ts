@@ -123,6 +123,24 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
+  it('uses corepack if packageManager is set', async () => {
+    Fixtures.mock(
+      {
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir'
+    );
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = { managerData: { packageManager: true } };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    // TODO: check docker preCommands
+  });
+
   it.each([
     ['1.22.0', '^1.10.0'],
     ['2.1.0', '>= 2.0.0'],

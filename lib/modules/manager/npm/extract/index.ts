@@ -332,6 +332,7 @@ export async function extractPackageFile(
     return dep;
   }
 
+  let packageManager = false;
   for (const depType of Object.keys(depTypes)) {
     let dependencies = packageJson[depType];
     if (dependencies) {
@@ -343,6 +344,7 @@ export async function extractPackageFile(
             break;
           }
           dependencies = { [match.groups.name]: match.groups.range };
+          packageManager = true;
         }
         for (const [key, val] of Object.entries(
           dependencies as NpmPackageDependency
@@ -409,6 +411,7 @@ export async function extractPackageFile(
     managerData: {
       lernaJsonFile,
       yarnZeroInstall,
+      packageManager,
     },
     lernaClient,
     lernaPackages,
