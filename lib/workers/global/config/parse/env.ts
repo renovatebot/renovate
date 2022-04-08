@@ -107,11 +107,17 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
           config[option.name] = coerce(envVal);
           if (option.name === 'dryRun') {
             if (config[option.name] === 'true') {
+              logger.warn(
+                'env config dryRun property has been changed to full'
+              );
               config[option.name] = 'full';
             } else if (
               config[option.name] === 'false' ||
               config[option.name] === 'null'
             ) {
+              logger.warn(
+                'env config dryRun property has been changed to null'
+              );
               config[option.name] = null;
             }
           }

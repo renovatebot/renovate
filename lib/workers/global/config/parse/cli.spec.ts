@@ -147,6 +147,11 @@ describe('workers/global/config/parse/cli', () => {
       expect(cli.getConfig(argv)).toEqual({ dryRun: 'full' });
       argv = argv.slice(0, -1);
     });
+    it('dryRun no value', () => {
+      argv.push('--dry-run');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: 'full' });
+      argv = argv.slice(0, -1);
+    });
     it('dryRun boolean false', () => {
       argv.push('--dry-run=false');
       expect(cli.getConfig(argv)).toEqual({ dryRun: null });
