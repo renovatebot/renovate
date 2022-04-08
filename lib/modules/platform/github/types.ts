@@ -20,11 +20,7 @@ export interface Comment {
   body: string;
 }
 
-export interface GhPr extends Pr {
-  comments: Comment[];
-}
-
-export interface GhRestPr extends GhPr {
+export interface GhRestPr {
   head: {
     ref: string;
     sha: string;
@@ -39,17 +35,28 @@ export interface GhRestPr extends GhPr {
   closed_at: string;
   user?: { login?: string };
   node_id: string;
+  assignee?: { login?: string };
+  assignees?: { login?: string }[];
+  requested_reviewers?: { login?: string }[];
+  labels?: { name: string }[];
 }
 
-export interface GhGraphQlPr extends GhPr {
-  reviewRequests: any;
-  assignees: any;
-  mergeStateStatus: string;
-  reviews: any;
-  baseRefName: string;
+export interface GhGraphQlPr {
+  number: number;
+  title: string;
+  body?: string;
+  state?: string;
   headRefName: string;
-  comments: Comment[] & { nodes?: { databaseId: number; body: string }[] };
-  labels: string[] & { nodes?: { name: string }[] };
+  baseRefName?: string;
+  labels?: { nodes?: { name: string }[] };
+  assignees?: { totalCount: number };
+  reviewRequests?: { totalCount: number };
+  comments?: {
+    nodes?: {
+      databaseId: number;
+      body: string;
+    }[];
+  };
 }
 
 export interface UserDetails {
@@ -78,7 +85,8 @@ export interface LocalRepoConfig {
   forkToken?: string;
   closedPrList: PrList | null;
   openPrList: PrList | null;
-  prList: GhPr[] | null;
+  prList: Pr[] | null;
+  prComments: Record<number, Comment[]>;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
@@ -93,7 +101,7 @@ export interface LocalRepoConfig {
 }
 
 export type BranchProtection = any;
-export type PrList = Record<number, GhPr>;
+export type PrList = Record<number, Pr>;
 
 export interface GhRepo {
   isFork: boolean;
@@ -116,4 +124,18 @@ export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
     pullRequest: { number: number };
   };
+}
+
+export interface ApiPageItem {
+  number: number;
+  updated_at: string;
+}
+
+/**
+ * Mutable object designed to be used in the repository cache
+ */
+export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
+  items: Record<number, T>;
+  lastModified?: string;
+  etag?: string;
 }

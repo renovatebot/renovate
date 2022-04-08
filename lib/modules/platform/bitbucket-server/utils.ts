@@ -1,14 +1,16 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
 import is from '@sindresorhus/is';
-import { PrState } from '../../../types';
+import { HostRule, PrState } from '../../../types';
+import type { GitProtocol } from '../../../types/git';
+import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import type {
   HttpOptions,
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
-import type { BbsPr, BbsRestPr, BitbucketError } from './types';
+import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
@@ -151,4 +153,40 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
   }
 
   return invalidReviewers;
+}
+
+export function getRepoGitUrl(
+  repository: string,
+  defaultEndpoint: string,
+  info: BbsRestRepo,
+  opts: HostRule
+): string {
+  let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+  if (!cloneUrl) {
+    // Http access might be disabled, try to find ssh url in this case
+    cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+  }
+
+  let gitUrl: string;
+  if (!cloneUrl) {
+    // Fallback to generating the url if the API didn't give us an URL
+    const { host, pathname } = url.parse(defaultEndpoint);
+    gitUrl = git.getUrl({
+      protocol: defaultEndpoint.split(':')[0] as GitProtocol,
+      auth: `${opts.username}:${opts.password}`,
+      host: `${host}${pathname}${
+        pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      }scm`,
+      repository,
+    });
+  } else if (cloneUrl.name === 'http') {
+    // Inject auth into the API provided URL
+    const repoUrl = url.parse(cloneUrl.href);
+    repoUrl.auth = `${opts.username}:${opts.password}`;
+    gitUrl = url.format(repoUrl);
+  } else {
+    // SSH urls can be used directly
+    gitUrl = cloneUrl.href;
+  }
+  return gitUrl;
 }
