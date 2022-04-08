@@ -106,7 +106,7 @@ export interface RepoGlobalConfig {
   dockerUser?: string;
   dryRun?: boolean;
   executionTimeout?: number;
-  gitTimeout?: Record<string, string>;
+  gitTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;

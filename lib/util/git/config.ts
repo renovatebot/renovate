@@ -23,6 +23,8 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
       onClose: true,
       onExit: false,
     },
-    ...GlobalConfig.get('gitTimeout'),
+    timeout: {
+      block: GlobalConfig.get('gitTimeout'),
+    },
   };
 }

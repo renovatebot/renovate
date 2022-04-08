@@ -716,5 +716,17 @@ describe('config/validation', () => {
         },
       ]);
     });
+    it.each([
+      [
+        'invalid value',
+        {
+          gitTimeout: 'string',
+        },
+      ],
+      ['out of range', { gitTimeout: 1000 }],
+    ])('checks invalid git timeout values', async (_case, config) => {
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(1);
+    });
   });
 });

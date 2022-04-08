@@ -85,7 +85,9 @@ function getDeprecationMessage(option: string): string {
   };
   return deprecatedOptions[option];
 }
-
+function validGitTimeout(gitTimeout: number): boolean {
+  return gitTimeout >= 2000 && gitTimeout <= 10000;
+}
 export function getParentName(parentPath: string): string {
   return parentPath
     ? parentPath
@@ -127,6 +129,19 @@ export async function validateConfig(
         message: '__proto__',
       });
       continue;
+    }
+    if (key === 'gitTimeout') {
+      if (!is.number(val)) {
+        errors.push({
+          topic: 'Config Error',
+          message: `GitTimeout must be set to an integer value`,
+        });
+      } else if (!validGitTimeout(val)) {
+        errors.push({
+          topic: 'Config Error',
+          message: `GitTimeout value must be within 2 to 10 seconds`,
+        });
+      }
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
