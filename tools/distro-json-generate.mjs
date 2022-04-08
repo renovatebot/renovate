@@ -11,6 +11,8 @@ const url = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
  */
 function csvToJson(raw) {
   const lines = raw.split(/\r?\n/);
+
+  /** @type {{[index: string]:any}} */
   const res = {};
   const headers = lines[0].split(',');
 
@@ -25,6 +27,7 @@ function csvToJson(raw) {
       continue;
     }
 
+    /** @type {{[index: string]:any}} */
     const obj = {};
     const line = l.split(',');
     let ver = line?.shift()?.replace(/LTS|\s/g, '');
@@ -49,34 +52,6 @@ function csvToJson(raw) {
  * @param {string} newData New data to be written
  */
 async function updateJsonFile(file, newData) {
-  let oldData;
-  let newAdj;
-
-  try {
-    oldData = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
-    // Eliminate formatting. removes WS in the beginning, end. before & after non characters
-    oldData = oldData?.replace(/^\s|\s$|\B\s|\s\B/g, '') ?? null;
-    newAdj = newData?.replace(/^\s|\s$|\B\s|\s\B/g, '') ?? null;
-  } catch (e) {
-    shell.echo(e.toString());
-    shell.exit(1);
-  }
-
-  if (oldData === newAdj) {
-    shell.echo(`${file} is up to date.`);
-    return;
-  }
-
-  const oldLen = oldData?.length ?? -1;
-  const newLen = newAdj?.length ?? -1;
-
-  if (oldLen === -1 || newLen === -1 || oldLen > newLen) {
-    shell.echo(`New data might be corrupted!`);
-    shell.echo(`Aborting ${file} update`);
-    shell.echo(`**************** NEW DATA ****************\n${newData} `);
-    return;
-  }
-
   try {
     shell.echo(`Updating ${file}`);
     await fs.writeFile(file, newData);
