@@ -40,4 +40,4 @@ The limitation to only automerge branches which are up-to-date is a decision due
 - PRs exist for `alice@2.0.0` and `bob@2.0.0` and both pass tests
 - The PR for `alice@2.0.0` is automerged
 - The PR for `bob@2.0.0` remains open, does not have conflicts, and has all tests passing
-- However, `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
+- But `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch

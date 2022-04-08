@@ -1024,6 +1024,18 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchSourceUrls',
+    description: 'A list of source URLs to exact match against.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementName',
     description:
       'The name of the new dependency that replaces the old deprecated dependency.',

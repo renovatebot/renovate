@@ -18,7 +18,7 @@ describe('modules/manager/github-actions/extract', () => {
         res.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(8);
     });
-    it('extracts tag line with double quotes', () => {
+    it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(Fixtures.get('workflow_3.yml'));
       expect(res.deps).toMatchSnapshot([
         {
@@ -27,6 +27,31 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pascalgn/automerge-action',
           depType: 'action',
           replaceString: '"pascalgn/automerge-action@v0.13.1"',
+          versioning: 'docker',
+        },
+        {
+          currentValue: 'v2.3.5',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
+          versioning: 'docker',
+        },
+        {
+          currentValue: 'v1',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString: 'actions/checkout@v1',
+          versioning: 'docker',
+        },
+        {
+          currentValue: 'v1.1.2',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString: '"actions/checkout@v1.1.2"',
           versioning: 'docker',
         },
       ]);

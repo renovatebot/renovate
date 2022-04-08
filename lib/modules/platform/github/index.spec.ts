@@ -40,7 +40,7 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');
+  const graphqlOpenPullRequests = loadFixture('graphql/pullrequests-open.json');
   const graphqlClosedPullRequests = loadFixture(
     'graphql/pullrequests-closed.json'
   );
@@ -593,6 +593,7 @@ describe('modules/platform/github/index', () => {
           },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: PrState.Open,
+          title: 'Some title',
         });
 
       await github.initRepo({
@@ -641,6 +642,7 @@ describe('modules/platform/github/index', () => {
           },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: PrState.Open,
+          title: 'Some title',
         });
 
       await github.initRepo({
@@ -758,6 +760,7 @@ describe('modules/platform/github/index', () => {
           },
           head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
           state: PrState.Open,
+          title: 'Some title',
         })
         .patch('/repos/forked/repo/git/refs/heads/master')
         .reply(200);
@@ -1671,23 +1674,20 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
         .post('/repos/some/repo/issues/42/comments')
         .reply(200);
-
       await github.initRepo({
         repository: 'some/repo',
       } as any);
+
       await github.ensureComment({
         number: 42,
         topic: 'some-subject',
         content: 'some\ncontent',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('adds comment if found in closed PR list', async () => {
@@ -1701,21 +1701,20 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
+      await github.getClosedPrs();
+
       await github.ensureComment({
         number: 2499,
         topic: 'some-subject',
         content: 'some\ncontent',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('add updates comment if necessary', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .patch('/repos/some/repo/issues/comments/1234')
@@ -1723,51 +1722,49 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
+
       await github.ensureComment({
         number: 42,
         topic: 'some-subject',
         content: 'some\ncontent',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('skips comment', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
       await github.initRepo({
         repository: 'some/repo',
       } as any);
+
       await github.ensureComment({
         number: 42,
         topic: 'some-subject',
         content: 'some\ncontent',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles comment with no description', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
       await github.initRepo({
         repository: 'some/repo',
       } as any);
+
       await github.ensureComment({
         number: 42,
         topic: null,
         content: '!merge',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1776,40 +1773,36 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/repos/some/repo/issues/comments/1234')
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
       await github.ensureCommentRemoval({
         type: 'by-topic',
         number: 42,
         topic: 'some-subject',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes comment by content if found', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: { repository: { pullRequests: { pageInfo: {} } } },
-        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
         .delete('/repos/some/repo/issues/comments/1234')
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
       await github.ensureCommentRemoval({
         type: 'by-content',
         number: 42,
         content: 'some-content',
       });
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1923,7 +1916,7 @@ describe('modules/platform/github/index', () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({ number: 123 });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should use defaultBranch', async () => {
@@ -1941,7 +1934,7 @@ describe('modules/platform/github/index', () => {
         prBody: 'Hello world',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({ number: 123 });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should create a draftPR if set in the settings', async () => {
@@ -1949,7 +1942,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
-        head: { repo: { full_name: 'some/repo' } },
+        head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
@@ -1960,7 +1953,7 @@ describe('modules/platform/github/index', () => {
         labels: null,
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({ number: 123 });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     describe('automerge', () => {
@@ -2164,10 +2157,15 @@ describe('modules/platform/github/index', () => {
       scope
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
-          number: 1,
+          number: 1234,
           state: PrState.Closed,
-          base: { sha: '1234' },
+          base: { sha: 'abc' },
+          head: { sha: 'def', ref: 'some/branch' },
           merged_at: 'sometime',
+          title: 'Some title',
+          labels: [{ name: 'foo' }, { name: 'bar' }],
+          assignee: { login: 'foobar' },
+          created_at: '01-01-2022',
         })
         .post('/graphql')
         .twice()
@@ -2177,7 +2175,7 @@ describe('modules/platform/github/index', () => {
         token: 'token',
       } as any);
       const pr = await github.getPr(1234);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({ state: 'merged' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it(`should return a PR object - 1`, async () => {
@@ -2186,11 +2184,15 @@ describe('modules/platform/github/index', () => {
       scope
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
-          number: 1,
+          number: 1234,
           state: PrState.Open,
           mergeable_state: 'dirty',
           base: { sha: '1234' },
+          head: { ref: 'some/branch' },
           commits: 1,
+          title: 'Some title',
+          assignees: [{ login: 'foo' }],
+          requested_reviewers: [{ login: 'bar' }],
         })
         .post('/graphql')
         .twice()
@@ -2209,10 +2211,12 @@ describe('modules/platform/github/index', () => {
       scope
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
-          number: 1,
+          number: 1234,
           state: PrState.Open,
           base: { sha: '5678' },
+          head: { ref: 'some/branch' },
           commits: 1,
+          title: 'Some title',
         })
         .post('/graphql')
         .twice()
@@ -2461,6 +2465,56 @@ describe('modules/platform/github/index', () => {
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns array if found on GHE', async () => {
+      const gheApiHost = 'https://ghe.renovatebot.com';
+
+      httpMock
+        .scope(gheApiHost)
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+
+      httpMock
+        .scope(gheApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              vulnerabilityAlerts: {
+                edges: [
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH', references: [] },
+                      securityVulnerability: {
+                        package: {
+                          ecosystem: 'NPM',
+                          name: 'left-pad',
+                          range: '0.0.2',
+                        },
+                        vulnerableVersionRange: '0.0.2',
+                        firstPatchedVersion: { identifier: '0.0.3' },
+                      },
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    } as VulnerabilityAlert,
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+      await github.initPlatform({
+        endpoint: gheApiHost,
+        token: '123test',
+      });
+
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(1);
     });
     it('returns empty if disabled', async () => {
       // prettier-ignore

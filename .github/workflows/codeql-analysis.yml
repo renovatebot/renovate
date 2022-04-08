@@ -22,13 +22,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+
+      - name: Delete fixtures to suppress false positives
+        run: |
+          find ./lib -type d -name '__fixtures__' -exec rm -rf {} \; || true
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@883476649888a9e8e219d5b2e6b789dc024f690c # tag=v1.1.5
+        uses: github/codeql-action/init@0182a2c78c8a55b763909348834ed54d735ab3e2 # tag=v2.1.7
         with:
-          config-file: ./.github/codeql/codeql-config.yml
           languages: javascript
 
         # Override language selection by uncommenting this and choosing your languages
@@ -37,7 +40,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@883476649888a9e8e219d5b2e6b789dc024f690c # tag=v1.1.5
+        uses: github/codeql-action/autobuild@0182a2c78c8a55b763909348834ed54d735ab3e2 # tag=v2.1.7
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -51,4 +54,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@883476649888a9e8e219d5b2e6b789dc024f690c # tag=v1.1.5
+        uses: github/codeql-action/analyze@0182a2c78c8a55b763909348834ed54d735ab3e2 # tag=v2.1.7
