@@ -43,18 +43,10 @@ export class PuppetForgeDatasource extends Datasource {
     const result: ReleaseResult = {
       releases,
       homepage: module.homepage_url,
-      tags: {
-        moduleGroup: module.module_group,
-        premium: `${module.premium}`,
-      },
     };
 
     if (module.deprecated_for) {
       result.deprecationMessage = module.deprecated_for;
-    }
-
-    if (result.tags && module.endorsement) {
-      result.tags.endorsement = module.endorsement;
     }
 
     return result;

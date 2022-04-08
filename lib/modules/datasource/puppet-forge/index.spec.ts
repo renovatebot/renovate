@@ -68,11 +68,6 @@ describe('modules/datasource/puppet-forge/index', () => {
           },
         ],
         sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
-        tags: {
-          endorsement: 'supported',
-          moduleGroup: 'base',
-          premium: 'false',
-        },
       });
     });
 
@@ -101,11 +96,6 @@ describe('modules/datasource/puppet-forge/index', () => {
           },
         ],
         sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
-        tags: {
-          endorsement: 'supported',
-          moduleGroup: 'base',
-          premium: 'false',
-        },
       });
     });
   });
@@ -183,11 +173,6 @@ describe('modules/datasource/puppet-forge/index', () => {
         },
       ],
       sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
-      tags: {
-        endorsement: 'supported',
-        moduleGroup: 'base',
-        premium: 'false',
-      },
     });
   });
 
@@ -214,10 +199,6 @@ describe('modules/datasource/puppet-forge/index', () => {
         },
       ],
       sourceUrl: 'https://github.com/puppetlabs/puppetlabs-apache',
-      tags: {
-        moduleGroup: 'base',
-        premium: 'false',
-      },
     });
   });
 
