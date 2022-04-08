@@ -594,6 +594,43 @@ describe('modules/manager/dockerfile/extract', () => {
       `);
     });
 
+    it('handles debian with codename', () => {
+      const res = extractPackageFile('FROM debian:buster\n').deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "buster",
+            "datasource": "docker",
+            "depName": "debian",
+            "depType": "final",
+            "replaceString": "debian:buster",
+            "versioning": "debian",
+          },
+        ]
+      `);
+    });
+
+    it('handles debian with prefixes', () => {
+      const res = extractPackageFile('FROM amd64/debian:10\n').deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "10",
+            "datasource": "docker",
+            "depName": "debian",
+            "depType": "final",
+            "packageName": "amd64/debian",
+            "replaceString": "amd64/debian:10",
+            "versioning": "debian",
+          },
+        ]
+      `);
+    });
+
     it('handles prefixes', () => {
       const res = extractPackageFile('FROM amd64/ubuntu:18.04\n').deps;
       expect(res).toMatchInlineSnapshot(`

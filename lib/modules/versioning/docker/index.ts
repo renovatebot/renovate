@@ -13,7 +13,7 @@ const versionPattern = regEx(/^(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 
-class DockerVersioningApi extends GenericVersioningApi {
+export class DockerVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
     if (!version) {
       return null;
