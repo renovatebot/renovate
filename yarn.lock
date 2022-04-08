@@ -1572,10 +1572,10 @@
   resolved "https://registry.yarnpkg.com/@node-redis/bloom/-/bloom-1.0.1.tgz#144474a0b7dc4a4b91badea2cfa9538ce0a1854e"
   integrity sha512-mXEBvEIgF4tUzdIN89LiYsbi6//EdpFA7L8M+DHCvePXg+bfHWi+ct5VI6nHUFQE5+ohm/9wmgihCH3HSkeKsw==
 
-"@node-redis/client@1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@node-redis/client/-/client-1.0.4.tgz#fe185750df3bcc07524f63fe8dbc8d14d22d6cbb"
-  integrity sha512-IM/NRAqg7MvNC3bIRQipXGrEarunrdgvrbAzsd3ty93LSHi/M+ybQulOERQi8a3M+P5BL8HenwXjiIoKm6ml2g==
+"@node-redis/client@1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@node-redis/client/-/client-1.0.5.tgz#ebac5e2bbf12214042a37621604973a954ede755"
+  integrity sha512-ESZ3bd1f+od62h4MaBLKum+klVJfA4wAeLHcVQBkoXa1l0viFesOWnakLQqKg+UyrlJhZmXJWtu0Y9v7iTMrig==
   dependencies:
     cluster-key-slot "1.1.0"
     generic-pool "3.8.2"
@@ -1592,10 +1592,10 @@
   resolved "https://registry.yarnpkg.com/@node-redis/json/-/json-1.0.2.tgz#8ad2d0f026698dc1a4238cc3d1eb099a3bee5ab8"
   integrity sha512-qVRgn8WfG46QQ08CghSbY4VhHFgaTY71WjpwRBGEuqGPfWwfRcIf3OqSpR7Q/45X+v3xd8mvYjywqh0wqJ8T+g==
 
-"@node-redis/search@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@node-redis/search/-/search-1.0.3.tgz#7c3d026bf994caf82019fd0c3924cfc09f041a29"
-  integrity sha512-rsrzkGWI84di/uYtEctS/4qLusWt0DESx/psjfB0TFpORDhe7JfC0h8ary+eHulTksumor244bXLRSqQXbFJmw==
+"@node-redis/search@1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@node-redis/search/-/search-1.0.5.tgz#96050007eb7c50a7e47080320b4f12aca8cf94c4"
+  integrity sha512-MCOL8iCKq4v+3HgEQv8zGlSkZyXSXtERgrAJ4TSryIG/eLFy84b57KmNNa/V7M1Q2Wd2hgn2nPCGNcQtk1R1OQ==
 
 "@node-redis/time-series@1.0.2":
   version "1.0.2"
@@ -4169,10 +4169,10 @@ emittery@^0.8.1:
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.8.1.tgz#bb23cc86d03b30aa75a7f734819dee2e1ba70860"
   integrity sha512-uDfvUjVrfGJJhymx/kz6prltenw1u7WrCg1oa94zYY8xxVpLLUu045LAT0dhDZdXG58/EpPL/5kA180fQ/qudg==
 
-emoji-regex@10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.0.1.tgz#77180edb279b99510a21b79b19e1dc283d8f3991"
-  integrity sha512-cLuZzriSWVE+rllzeq4zpUEoCPfYEbQ6ZVhIq+ed6ynWST7Bw9XnOr+bKWgCup4paq72DI21gw9M3aaFkm4HAw==
+emoji-regex@10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.1.0.tgz#d50e383743c0f7a5945c47087295afc112e3cf66"
+  integrity sha512-xAEnNCT3w2Tg6MA7ly6QqYJvEoY1tm9iIjJ3yMKK9JPlWuRHAMoe5iETwQnx3M9TVbFMfsrBgWKR+IsmswwNjg==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -5066,6 +5066,11 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.4, 
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.9.tgz#041b05df45755e587a24942279b9d113146e1c96"
   integrity sha512-NtNxqUcXgpW2iMrfqSfR73Glt39K+BLwWsPs94yR63v45T0Wbej7eRmL5cWfwEgqXnmjQp3zaJTshdRW/qC2ZQ==
 
+graph-data-structure@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-2.0.0.tgz#a95762a067f81f0fe4ea77525253b946a941fa89"
+  integrity sha512-ravWDe9LaV0u27ZDme/8w5xHyyTqIWQsetpzDvBNJsGy4nZQB5IVw/u+7ngdEMZWsHYim+PAHatV4cGQX1XKpQ==
+
 grapheme-splitter@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
@@ -5929,10 +5934,10 @@ jest-message-util@^27.0.6, jest-message-util@^27.5.1:
     slash "^3.0.0"
     stack-utils "^2.0.3"
 
-jest-mock-extended@2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/jest-mock-extended/-/jest-mock-extended-2.0.4.tgz#2bb430ba0adb9e10ea6a68d08731f2129330c8fe"
-  integrity sha512-MgL3B3GjURQFjjPGqbCANydA5BFNPygv0mYp4Tjfxohh9MWwxxX8Eq2p6ncCt/Vt+RAnaLlDaI7gwrDRD7Pt9A==
+jest-mock-extended@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/jest-mock-extended/-/jest-mock-extended-2.0.5.tgz#1feca6866ecbb4e5e79e57d9286969fde53a07cf"
+  integrity sha512-cQjKRqzZ/hUyy3AdmB7Aa+0DB45dt/eEApwfZFZzup9oefGnw2QodW/BLR39aCpPkK0Qb54P5OKYRXJ98kQ8cQ==
   dependencies:
     ts-essentials "^7.0.3"
 
@@ -8249,16 +8254,16 @@ redis-parser@3.0.0:
   dependencies:
     redis-errors "^1.0.0"
 
-redis@4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-4.0.4.tgz#b567f82f59086df38433982f7f424b48e924ec7a"
-  integrity sha512-KaM1OAj/nGrSeybmmOWSMY0LXTGT6FVWgUZZrd2MYzXKJ+VGtqVaciGQeNMfZiQX+kDM8Ke4uttb54m2rm6V0A==
+redis@4.0.6:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-4.0.6.tgz#a2ded4d9f4f4bad148e54781051618fc684cd858"
+  integrity sha512-IaPAxgF5dV0jx+A9l6yd6R9/PAChZIoAskDVRzUODeLDNhsMlq7OLLTmu0AwAr0xjrJ1bibW5xdpRwqIQ8Q0Xg==
   dependencies:
     "@node-redis/bloom" "1.0.1"
-    "@node-redis/client" "1.0.4"
+    "@node-redis/client" "1.0.5"
     "@node-redis/graph" "1.0.0"
     "@node-redis/json" "1.0.2"
-    "@node-redis/search" "1.0.3"
+    "@node-redis/search" "1.0.5"
     "@node-redis/time-series" "1.0.2"
 
 regexp-to-ast@0.5.0:
@@ -9228,10 +9233,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.12.1:
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.12.1.tgz#d2be8f50bf5f8f0a5fd916d29bf3e98c17e960be"
-  integrity sha512-AiknQSEqKVGDDjtZqeKrUoTlcj7FKhupmnVUgz6KoOKtvMwRGE6hUNJ/nVear+h7fnUPO1q/htSkYKb1pyntkQ==
+type-fest@2.12.2:
+  version "2.12.2"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.12.2.tgz#80a53614e6b9b475eb9077472fb7498dc7aa51d0"
+  integrity sha512-qt6ylCGpLjZ7AaODxbpyBZSs9fCI9SkL3Z9q2oxMBQhs/uyY+VD8jHA8ULCGmWQJlBgqvO3EJeAngOHD8zQCrQ==
 
 type-fest@^0.13.1:
   version "0.13.1"
