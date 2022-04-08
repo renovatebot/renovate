@@ -21,6 +21,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { getDependentPackageFiles } from './package-tree';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
@@ -57,6 +58,7 @@ async function addSourceCmds(
 
 async function runDotnetRestore(
   packageFileName: string,
+  dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const execOptions: ExecOptions = {
@@ -72,13 +74,31 @@ async function runDotnetRestore(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
   );
+
   const cmds = [
     ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
-    `dotnet restore ${packageFileName} --force-evaluate --configfile ${nugetConfigFile}`,
+    ...dependentPackageFileNames.map(
+      (f) =>
+        `dotnet restore ${f} --force-evaluate --configfile ${nugetConfigFile}`
+    ),
   ];
-  logger.debug({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
   await remove(nugetConfigDir);
+}
+
+async function getLockFileContentMap(
+  lockFileNames: string[]
+): Promise<Record<string, string>> {
+  const lockFileContentMap: Record<string, string> = {};
+
+  for (const lockFileName of lockFileNames) {
+    lockFileContentMap[lockFileName] = await readLocalFile(
+      lockFileName,
+      'utf8'
+    );
+  }
+
+  return lockFileContentMap;
 }
 
 export async function updateArtifacts({
@@ -101,15 +121,29 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(
+  const packageFiles = [
+    ...(await getDependentPackageFiles(packageFileName)),
     packageFileName,
-    'packages.lock.json'
+  ];
+
+  logger.trace(
+    { packageFiles },
+    `Found ${packageFiles.length} dependent package files`
   );
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+
+  const lockFileNames = packageFiles.map((f) =>
+    getSiblingFileName(f, 'packages.lock.json')
+  );
+
+  const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
+
+  const hasLockFileContent = Object.values(existingLockFileContentMap).some(
+    (val) => !!val
+  );
+  if (!hasLockFileContent) {
     logger.debug(
       { packageFileName },
-      'No lock file found beneath package file.'
+      'No lock file found for package or dependents'
     );
     return null;
   }
@@ -124,23 +158,29 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, config);
+    await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (existingLockFileContent === newLockFileContent) {
-      logger.debug(`Lock file is unchanged`);
-      return null;
+    const newLockFileContentMap = await getLockFileContentMap(lockFileNames);
+
+    const retArray = [];
+    for (const lockFileName of lockFileNames) {
+      if (
+        existingLockFileContentMap[lockFileName] ===
+        newLockFileContentMap[lockFileName]
+      ) {
+        logger.trace(`Lock file ${lockFileName} is unchanged`);
+      } else {
+        retArray.push({
+          file: {
+            type: 'addition',
+            path: lockFileName,
+            contents: newLockFileContentMap[lockFileName],
+          },
+        });
+      }
     }
-    logger.debug('Returning updated lock file');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: await readLocalFile(lockFileName),
-        },
-      },
-    ];
+
+    return retArray.length > 0 ? retArray : null;
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
@@ -150,7 +190,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          lockFile: lockFileNames.join(', '),
           stderr: err.message,
         },
       },

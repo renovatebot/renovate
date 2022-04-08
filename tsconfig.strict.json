@@ -241,6 +241,7 @@
     "lib/modules/manager/nuget/extract.ts",
     "lib/modules/manager/nuget/extract/global-manifest.ts",
     "lib/modules/manager/nuget/index.ts",
+    "lib/modules/manager/nuget/package-tree.ts",
     "lib/modules/manager/nuget/util.ts",
     "lib/modules/manager/nvm/extract.ts",
     "lib/modules/manager/nvm/index.ts",
