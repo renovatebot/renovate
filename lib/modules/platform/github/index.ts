@@ -641,9 +641,9 @@ export async function getPrList(): Promise<Pr[]> {
 
         const opts: GithubHttpOptions = { paginate: false };
         if (pageIdx === 1) {
-          const etag = config.prCache.etag;
-          if (etag) {
-            opts.headers = { 'If-None-Match': etag };
+          const oldEtag = config.prCache.etag;
+          if (oldEtag) {
+            opts.headers = { 'If-None-Match': oldEtag };
           } else {
             // Speed up initial fetch
             opts.paginate = true;
@@ -654,26 +654,27 @@ export async function getPrList(): Promise<Pr[]> {
         apiQuotaAffected = true;
         requestsTotal += 1;
 
-        const nextPage = parseLinkHeader(res.headers?.link)?.next;
-        needNextPageFetch = !!nextPage;
+        if (pageIdx === 1 && res.statusCode === 304) {
+          apiQuotaAffected = false;
+          break;
+        }
+
+        const {
+          body: page,
+          headers: { link: linkHeader, etag: newEtag },
+        } = res;
+
+        const renovatePrs = page.filter(isRenovateRestPr);
+        needNextPageSync = config.prCache.reconcile(renovatePrs);
+        needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
         if (pageIdx === 1) {
-          if (res.statusCode === 304) {
-            apiQuotaAffected = false;
-            break;
-          }
-
-          const etag = res.headers.etag;
-          if (etag) {
-            config.prCache.etag = etag;
+          if (newEtag) {
+            config.prCache.etag = newEtag;
           }
 
           needNextPageFetch &&= !opts.paginate;
         }
-
-        const { body: page } = res;
-        const renovatePrs = page.filter(isRenovateRestPr);
-        needNextPageSync = config.prCache.reconcile(renovatePrs);
 
         pageIdx += 1;
       }
