@@ -30,8 +30,6 @@ function csvToJson(raw) {
     let ver = line?.shift()?.replace(/LTS|\s/g, '');
 
     for (const [i, h] of headers.entries()) {
-      // eslint-disable-next-line
-      // @ts-ignore
       obj[h.replace('-', '_')] = line[i];
     }
 
@@ -39,8 +37,6 @@ function csvToJson(raw) {
       // Debian related, example codename "hamm" version is 2.0
       // change 2.0 -> 2
       ver = ver.endsWith('.0') ? ver.replace('.0', '') : ver;
-      // eslint-disable-next-line
-      // @ts-ignore
       res[`v${ver}`] = obj;
     }
   }
