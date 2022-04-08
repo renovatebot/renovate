@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { fs, mocked } from '../../../../test/util';
+import { fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -19,6 +19,7 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules');
+jest.mock('../../../util/git');
 jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -48,6 +49,7 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
       Promise.resolve(`others/${dirName}`)
     );
+    git.getFileList.mockResolvedValueOnce([]);
     getRandomString.mockReturnValue('not-so-random' as any);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
