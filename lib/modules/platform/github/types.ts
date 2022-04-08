@@ -1,4 +1,4 @@
-import type { ApiCache } from './api-cache';
+import type { Pr } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
@@ -85,8 +85,7 @@ export interface LocalRepoConfig {
   parentRepo: string;
   forkMode?: boolean;
   forkToken?: string;
-  prCache: ApiCache<GhRestPr>;
-  prCacheReady: boolean;
+  prCache?: Record<number, Pr>;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;

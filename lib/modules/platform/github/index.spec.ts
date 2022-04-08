@@ -11,7 +11,7 @@ import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
-import type { CreatePRConfig } from '../types';
+import type { CreatePRConfig, UpdatePrConfig } from '../types';
 import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
@@ -2431,28 +2431,34 @@ describe('modules/platform/github/index', () => {
   });
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope.patch('/repos/some/repo/pulls/1234').reply(200);
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      await github.updatePr({
+      const pr: UpdatePrConfig = {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-      });
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await github.updatePr(pr);
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should update and close the PR', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope.patch('/repos/some/repo/pulls/1234').reply(200);
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      await github.updatePr({
+      const pr: UpdatePrConfig = {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Closed,
-      });
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await github.updatePr(pr);
+
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

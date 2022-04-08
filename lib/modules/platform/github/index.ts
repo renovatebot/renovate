@@ -234,15 +234,6 @@ export async function getJsonFile(
   return JSON.parse(raw);
 }
 
-function initPrCache(): void {
-  const repoCache = getRepoCache();
-  repoCache.platform ??= {};
-  repoCache.platform.github ??= {};
-  repoCache.platform.github.prCache ??= { items: {} };
-  config.prCache = new ApiCache(repoCache.platform.github.prCache);
-  config.prCacheReady = false;
-}
-
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -364,8 +355,7 @@ export async function initRepo({
   }
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.issueList = null;
-
-  initPrCache();
+  config.prCache = null;
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -560,13 +550,21 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-// Fetch fresh Pull Request and cache it to `config.prList` when possible
+function cachePr(pr?: Pr): void {
+  config.prCache ??= {};
+  if (pr) {
+    config.prCache[pr.number] = pr;
+  }
+}
+
+// Fetch fresh Pull Request and cache it when possible
 async function fetchPr(prNo: number): Promise<Pr | null> {
   const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
     `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
   );
-  config.prCache.updateItem(ghRestPr);
-  return coerceRestPr(ghRestPr);
+  const result = coerceRestPr(ghRestPr);
+  cachePr(result);
+  return result;
 }
 
 // Gets details for a PR
@@ -627,7 +625,15 @@ function isRenovateRestPr(ghPr: GhRestPr): boolean {
  *      since it's rare to have more than 100 updated PRs.
  */
 export async function getPrList(): Promise<Pr[]> {
-  if (!config.prCacheReady) {
+  if (!config.prCache) {
+    config.prCache = {};
+
+    const repoCache = getRepoCache();
+    repoCache.platform ??= {};
+    repoCache.platform.github ??= {};
+    repoCache.platform.github.prCache ??= { items: {} };
+    const prCache = new ApiCache(repoCache.platform.github.prCache);
+
     try {
       let requestsTotal = 0;
       let apiQuotaAffected = false;
@@ -641,7 +647,7 @@ export async function getPrList(): Promise<Pr[]> {
 
         const opts: GithubHttpOptions = { paginate: false };
         if (pageIdx === 1) {
-          const oldEtag = config.prCache.etag;
+          const oldEtag = prCache.etag;
           if (oldEtag) {
             opts.headers = { 'If-None-Match': oldEtag };
           } else {
@@ -665,12 +671,12 @@ export async function getPrList(): Promise<Pr[]> {
         } = res;
 
         const renovatePrs = page.filter(isRenovateRestPr);
-        needNextPageSync = config.prCache.reconcile(renovatePrs);
+        needNextPageSync = prCache.reconcile(renovatePrs);
         needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
         if (pageIdx === 1) {
           if (newEtag) {
-            config.prCache.etag = newEtag;
+            prCache.etag = newEtag;
           }
 
           needNextPageFetch &&= !opts.paginate;
@@ -681,7 +687,7 @@ export async function getPrList(): Promise<Pr[]> {
 
       logger.debug(
         {
-          pullsTotal: config.prCache.getItems().length,
+          pullsTotal: prCache.getItems().length,
           requestsTotal,
           apiQuotaAffected,
         },
@@ -692,11 +698,15 @@ export async function getPrList(): Promise<Pr[]> {
       throw new ExternalHostError(err, PlatformId.Github);
     }
 
-    config.prCacheReady = true;
+    for (const ghPr of prCache.getItems()) {
+      const pr = coerceRestPr(ghPr);
+      if (pr) {
+        config.prCache[ghPr.number] = pr;
+      }
+    }
   }
 
-  const ghPrs = config.prCache.getItems();
-  return ghPrs.map(coerceRestPr);
+  return Object.values(config.prCache);
 }
 
 export async function findPr({
@@ -774,8 +784,9 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
         { branchName, title, number },
         'Successfully reopened autoclosed PR'
       );
-      config.prCache.updateItem(ghPr);
-      return coerceRestPr(ghPr);
+      const result = coerceRestPr(ghPr);
+      cachePr(result);
+      return result;
     } catch (err) {
       logger.debug('Could not reopen autoclosed PR');
       return null;
@@ -1471,8 +1482,9 @@ export async function createPr({
   const { number, node_id } = ghPr;
   await addLabels(number, labels);
   await tryPrAutomerge(number, node_id, platformOptions);
-  config.prCache.updateItem(ghPr);
-  return coerceRestPr(ghPr);
+  const result = coerceRestPr(ghPr);
+  cachePr(result);
+  return result;
 }
 
 export async function updatePr({
@@ -1502,7 +1514,8 @@ export async function updatePr({
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
-    config.prCache.updateItem(ghPr);
+    const result = coerceRestPr(ghPr);
+    cachePr(result);
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
@@ -1601,9 +1614,9 @@ export async function mergePr({
     { automergeResult: automergeResult.body, pr: prNo },
     'PR merged'
   );
-  const cachedPr = config.prCache.getItem(prNo);
+  const cachedPr = config.prCache?.[prNo];
   if (cachedPr) {
-    config.prCache.updateItem({ ...cachedPr, state: PrState.Merged });
+    cachePr({ ...cachedPr, state: PrState.Merged });
   }
   return true;
 }
