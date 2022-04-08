@@ -22,10 +22,7 @@ Please do not create GitHub issues for security-related doubts or problems.
 
 ## Permissions
 
-We only request those permissions we need for our apps to do useful work.
-If we do not need a specific permission, we will not request it.
-
-We also limit each permission to the lowest level possible.
+We apply the Principle of Least Privilege (PoLP) but do need substantial privileges in order for our apps to work.
 
 ### Global Permissions
 
