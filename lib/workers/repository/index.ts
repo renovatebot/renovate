@@ -23,7 +23,7 @@ import * as hostRules from '../../util/host-rules';
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
-  sshSocket: SshSocket | undefined = undefined,
+  sshSocket: SshSocket | null = null,
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();

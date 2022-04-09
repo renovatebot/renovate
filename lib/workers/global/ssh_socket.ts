@@ -4,13 +4,14 @@ import * as net from 'net';
 import Agent from 'ssh-agent-js/client/index';
 import { join } from 'upath';
 import { logger } from '../../logger';
+import is from '@sindresorhus/is';
 
 export class SshSocket {
   agent_process: cp.ChildProcess | undefined;
   agent: Agent | undefined;
 
   async start(cacheDir: string) {
-    if (!process.env.SSH_AUTH_SOCK || process.env.SSH_AUTH_SOCK.length == 0) {
+    if (!is.nonEmptyStringAndNotWhitespace(process.env.SSH_AUTH_SOCK)) {
       let agent_socket = join(cacheDir, '.ssh-agent');
       this.agent_process = cp.spawn('ssh-agent', ['-d', '-a', agent_socket]);
       this.agent_process.on('error', function (err) {
