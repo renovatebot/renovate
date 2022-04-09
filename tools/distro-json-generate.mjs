@@ -12,7 +12,7 @@ const url = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
 function csvToJson(raw) {
   const lines = raw.split(/\r?\n/);
 
-  /** @type {{[index: string]:any}} */
+  /** @type {Record<string, any>} */
   const res = {};
   const headers = lines[0].split(',');
 
@@ -27,7 +27,7 @@ function csvToJson(raw) {
       continue;
     }
 
-    /** @type {{[index: string]:any}} */
+    /** @type {Record<string, any>} */
     const obj = {};
     const line = l.split(',');
     let ver = line?.shift()?.replace(/LTS|\s/g, '');
