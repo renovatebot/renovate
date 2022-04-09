@@ -1,7 +1,8 @@
 {
   "name": "renovate-repro",
   "dependencies": {
-    "lodash": "^4.16.0"
+    "lodash": "^4.16.0",
+    "mermaid": "8.8.1"
   },
   "resolutions": {
     "lodash": "patch:lodash@npm:4.16.0#patches/lodash.patch"
@@ -9,6 +10,9 @@
   "dependenciesMeta": {
     "lodash@4.16.0": {
       "unplugged": true
+    },
+    "mermaid@8.8.1": {
+      "optional": true
     }
   }
 }
