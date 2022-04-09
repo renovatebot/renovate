@@ -120,9 +120,6 @@ export function getConfig(input: string[]): AllConfig {
                 config[option.name] === 'false' ||
                 config[option.name] === 'null'
               ) {
-                logger.warn(
-                  'cli config dryRun property has been changed to null'
-                );
                 config[option.name] = null;
               } else if (config[option.name] === 'true') {
                 logger.warn(
