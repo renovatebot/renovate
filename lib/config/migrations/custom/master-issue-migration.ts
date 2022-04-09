@@ -9,6 +9,6 @@ export class MasterIssueMigration extends AbstractMigration {
     const newKey = key.replace('masterIssue', 'dependencyDashboard');
     const isTrue = getOptionType(newKey) === 'boolean' && value === 'true';
 
-    this.setSafely(newKey, isTrue ? true : value);
+    this.setHard(newKey, isTrue ? true : value);
   }
 }
