@@ -1,7 +1,7 @@
-import type { RenovateOptions } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 import * as env from './env';
+import type { ParseConfigOptions } from './types';
 
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
@@ -234,21 +234,21 @@ describe('workers/global/config/parse/env', () => {
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {
-      const option: Partial<RenovateOptions> = {
+      const option: ParseConfigOptions = {
         name: 'foo',
         env: false,
       };
       expect(env.getEnvName(option)).toBe('');
     });
     it('returns existing env', () => {
-      const option: Partial<RenovateOptions> = {
+      const option: ParseConfigOptions = {
         name: 'foo',
         env: 'FOO',
       };
       expect(env.getEnvName(option)).toBe('FOO');
     });
     it('generates RENOVATE_ env', () => {
-      const option: Partial<RenovateOptions> = {
+      const option: ParseConfigOptions = {
         name: 'oneTwoThree',
       };
       expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');

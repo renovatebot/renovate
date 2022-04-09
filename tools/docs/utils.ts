@@ -19,7 +19,7 @@ export function getDisplayName(
   moduleName: string,
   moduleDefinition: ModuleApi
 ): string {
-  return moduleDefinition.displayName || formatName(moduleName);
+  return moduleDefinition.displayName ?? formatName(moduleName);
 }
 
 export function getNameWithUrl(
@@ -61,7 +61,7 @@ export async function formatDescription(
   type: string,
   name: string
 ): Promise<string> {
-  const content = await readFile(`lib/${type}/${name}/readme.md`);
+  const content = await readFile(`lib/modules/${type}/${name}/readme.md`);
   if (!content) {
     return '';
   }

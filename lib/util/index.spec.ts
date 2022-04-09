@@ -7,7 +7,7 @@ describe('util/index', () => {
       expect(sampleSize(array, 2)).toHaveLength(2);
     });
     it('returns full array for undefined number', () => {
-      expect(sampleSize(array, undefined)).toEqual(array);
+      expect(sampleSize(array, undefined as never)).toEqual(array);
     });
     it('returns full array for null number', () => {
       expect(sampleSize(array, null)).toBeEmptyArray();

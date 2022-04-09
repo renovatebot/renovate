@@ -1,0 +1,858 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/gitea/gitea-helper addReviewers should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {},
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "2",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls/13/requested_reviewers",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper closeIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "state": "closed",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "18",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper closePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "state": "closed",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "18",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls/13",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper createComment should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "body": "some-comment",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "23",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7/comments",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper createCommitStatus should call /api/v1/repos/[repo]/statuses/[commit] endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "context": "some-context",
+      "description": "some-description",
+      "state": "success",
+      "target_url": "https://gitea.renovatebot.com/commit-status",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "136",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper createIssue should call /api/v1/repos/[repo]/issues endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "assignees": Array [
+        "admin",
+      ],
+      "body": "just some issue",
+      "state": "open",
+      "title": "Some Issue",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "84",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper createPR should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "assignees": Array [
+        "admin",
+      ],
+      "base": "master",
+      "body": "Lorem ipsum dolor sit amet",
+      "head": "pull-req-13",
+      "labels": Array [
+        100,
+      ],
+      "state": "open",
+      "title": "Some PR",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "144",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper deleteComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "DELETE",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/comments/31",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getBranch should call /api/v1/repos/[repo]/branches/[branch] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/branches/some-branch",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getBranch should properly escape branch names 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/branches/other%2Fbranch%2Fwith%2Fslashes",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should call /api/v1/repos/[repo]/commits/[branch]/statuses endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 3`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 4`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 5`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCombinedCommitStatus should properly determine worst commit status 6`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/commits/some-branch/statuses",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getComments should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7/comments",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getCurrentUser should call /api/v1/user endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/user",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getOrgLabels should call /api/v1/orgs/[org]/labels endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/orgs/admin/labels",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getPR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls/13",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getRepo should call /api/v1/repos/[repo] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getRepoContents should call /api/v1/repos/[repo]/contents/[file] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/contents/dummy.txt?",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getRepoContents should properly escape paths 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/contents/nested%2Fpath%2Fdummy.txt?",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getRepoContents should support passing reference by query 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/contents/dummy.txt?ref=0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getRepoLabels should call /api/v1/repos/[repo]/labels endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/labels",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper getVersion should call /api/v1/version endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/version",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper mergePR should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "Do": "rebase",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "15",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls/13/merge",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchIssues should call /api/v1/repos/[repo]/issues endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues?type=issues",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchIssues should construct proper query parameters 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues?state=open&type=issues",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchPRs should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls?",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchPRs should construct proper query parameters 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls?state=open&labels=100&labels=200",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchRepos should abort if ok flag was not set 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/search?",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchRepos should call /api/v1/repos/search endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/search?",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper searchRepos should construct proper query parameters 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/search?uid=13&archived=false",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper unassignLabel should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "DELETE",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7/labels/100",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper updateComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "body": "new-body",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "19",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/comments/31",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper updateIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "assignees": Array [
+        "renovate",
+      ],
+      "body": "new-body",
+      "state": "closed",
+      "title": "new-title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "81",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper updateIssueLabels should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "labels": Array [
+        1,
+        3,
+      ],
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "16",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues/7/labels",
+  },
+]
+`;
+
+exports[`modules/platform/gitea/gitea-helper updatePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "assignees": Array [
+        "renovate",
+      ],
+      "body": "new-body",
+      "labels": Array [
+        200,
+      ],
+      "state": "closed",
+      "title": "new-title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "96",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls/13",
+  },
+]
+`;

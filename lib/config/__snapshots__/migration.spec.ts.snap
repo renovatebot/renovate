@@ -51,6 +51,32 @@ Object {
 }
 `;
 
+exports[`config/migration it migrates regexManagers 1`] = `
+Object {
+  "regexManagers": Array [
+    Object {
+      "fileMatch": Array [
+        "(^|/|\\\\.)Dockerfile$",
+        "(^|/)Dockerfile\\\\.[^/]*$",
+      ],
+      "matchStrings": Array [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<packageName>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
+      ],
+    },
+    Object {
+      "fileMatch": Array [
+        "(^|/|\\\\.)Dockerfile$",
+        "(^|/)Dockerfile\\\\.[^/]*$",
+      ],
+      "matchStrings": Array [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<holder>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
+      ],
+      "packageNameTemplate": "{{{holder}}}",
+    },
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 Object {
   "schedule": "after 5:00pm on wednesday and thursday",
@@ -95,7 +121,7 @@ Object {
   "binarySource": "global",
   "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}{{{packageFileDir}}}",
   "branchPrefix": "renovate/",
-  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message {{depName}}",
+  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message {{depName}} {{packageName}}",
   "constraints": Object {
     "python": "3.7",
   },
@@ -154,14 +180,6 @@ Object {
   "onboarding": false,
   "packageRules": Array [
     Object {
-      "extends": Array [
-        "foo",
-      ],
-      "matchPaths": Array [
-        "examples/**",
-      ],
-    },
-    Object {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
       "matchPackagePatterns": "^(@angular|typescript)",
@@ -194,6 +212,14 @@ Object {
       ],
       "matchPackageNames": Array [
         "foo",
+      ],
+    },
+    Object {
+      "extends": Array [
+        "foo",
+      ],
+      "matchPaths": Array [
+        "examples/**",
       ],
     },
     Object {
@@ -341,22 +367,6 @@ Object {
         "other/package.json",
       ],
       "rangeStrategy": "pin",
-    },
-  ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) migrates packageRules objects 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
-      "matchPackageNames": Array [
-        "typescript",
-      ],
-      "matchUpdateTypes": Array [
-        "major",
-      ],
     },
   ],
 }

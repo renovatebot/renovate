@@ -1,9 +1,12 @@
 # Contributing
 
-## Security
+## Security / Disclosure
 
-If you think you've found a **security issue**, please do not mention it in this repository.
-Instead, email renovate-disclosure@whitesourcesoftware.com with as much details as possible so that it can be handled confidentially.
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com).
+This way we can evaluate the bug and hopefully fix it before it gets abused.
+Please give us enough time to investigate the bug before you report it anywhere else.
+
+Please do not create GitHub issues for security-related doubts or problems.
 
 ## Support
 
@@ -15,9 +18,9 @@ If you've found a **bug** or have a **feature request** then please create an is
 
 ## Code
 
-If you would like to fix a bug or implement a feature, please fork the repository and create a Pull Request.
+If you would like to fix a bug or work on a feature, please fork the repository and create a Pull Request.
 To learn how to setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
-Also skim the [docs/development](../docs/development/) folder, it contains a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
+Also skim the [docs/development](../docs/development/) folder, it has a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
 
 Before you start any Pull Request, it's recommended that you open a [discussion](https://github.com/renovatebot/renovate/discussions) first if you have any doubts about requirements or implementation.
 That way you can be sure that the maintainer(s) agree on what to change and how, and you can hopefully get a quick merge afterwards.
@@ -31,6 +34,8 @@ Please do not force push to your PR's branch after you have created your PR, as 
 This makes it harder for us to review your work because we don't know what has changed.
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
+
+If you are updating your PR branch from within the GitHub PR interface, then only use the default "Update branch" button.
 
 Force pushing a PR is OK when:
 
@@ -64,7 +69,7 @@ Read more about this in the [GitHub docs, Re-requesting a review](https://docs.g
 
 ## Slack collaboration with maintainers
 
-Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
+The codebase can be difficult to navigate, especially for a first-time contributor.
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.

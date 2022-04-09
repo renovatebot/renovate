@@ -4,9 +4,9 @@ This document describes the steps to take if you want to add a new language/pack
 
 ## Code structure
 
-Each package manager lives under `lib/manager/*`, and is often tightly coupled to datasources under `lib/datasource/*`.
+Each package manager lives under `lib/modules/manager/*`, and is often tightly coupled to datasources under `lib/modules/datasource/*`.
 
-Versioning logic (e.g. SemVer, PEP 440) lives under `lib/versioning/*`.
+Versioning logic (e.g. SemVer, PEP 440) lives under `lib/modules/versioning/*`.
 
 Common application logic for Renovate, not specific to particular managers, usually lives under `lib/workers/*`.
 
@@ -31,14 +31,14 @@ The function returns an array of detected/extracted dependencies, including:
 - currentValue
 - versioning used (e.g. SemVer, PEP 440)
 
-The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it receives.
+The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract an accurate list of dependencies.
 
-As a general approach, we extract _all_ dependencies from each dependency file, even if they contain values we don't support.
+As a general approach, we extract _all_ dependencies from each dependency file, even if they have values we don't support.
 Any dependency file that has values we cannot renovate, should have a `skipReason` message added to the `extractPackageFile` function.
 Make sure the `skipReason` variable string is helpful to someone reading the logs.
 
-Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files.
+Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g. not an actual package file, or has no dependencies) then this function can return `null` to have it ignored and removed from the list of package files.
 
 ### `extractAllPackageFiles(packageFiles)` (async, optional)
 

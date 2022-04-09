@@ -1,8 +1,8 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
 import { ProgrammingLanguage } from '../constants';
 
-import * as datasourceDocker from '../datasource/docker';
-import { OrbDatasource } from '../datasource/orb';
+import { DockerDatasource } from '../modules/datasource/docker';
+import { OrbDatasource } from '../modules/datasource/orb';
 import { applyPackageRules } from './package-rules';
 
 type TestConfig = PackageRuleInputConfig & {
@@ -319,7 +319,7 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [OrbDatasource.id, datasourceDocker.id],
+          matchDatasources: [OrbDatasource.id, DockerDatasource.id],
           x: 1,
         },
       ],
@@ -480,6 +480,68 @@ describe('util/package-rules', () => {
       packageRules: [
         {
           matchSourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('matches matchSourceUrls', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/presets',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('non-matches matchSourceUrls', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/facebook/react',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/facebook/react-native',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('handles matchSourceUrls when missing sourceUrl', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
             'https://github.com/foo/bar',
             'https://github.com/renovatebot/',
           ],
@@ -787,6 +849,27 @@ describe('util/package-rules', () => {
       depName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/Presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('matches matchSourceUrls(case-insensitive)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrls: [
+            'https://github.com/foo/bar',
+            'https://github.com/Renovatebot/renovate',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/Renovate',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);

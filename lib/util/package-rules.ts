@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../config';
 import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
-import * as allVersioning from '../versioning';
+import * as allVersioning from '../modules/versioning';
 import { configRegexPredicate, regEx } from './regex';
 
 function matchesRule(
@@ -45,6 +45,7 @@ function matchesRule(
   const excludePackagePatterns = packageRule.excludePackagePatterns || [];
   const excludePackagePrefixes = packageRule.excludePackagePrefixes || [];
   const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
+  const matchSourceUrls = packageRule.matchSourceUrls || [];
   const matchCurrentVersion = packageRule.matchCurrentVersion || null;
   const matchUpdateTypes = packageRule.matchUpdateTypes || [];
   let positiveMatch = false;
@@ -204,6 +205,16 @@ function matchesRule(
     const upperCaseSourceUrl = sourceUrl?.toUpperCase();
     const isMatch = matchSourceUrlPrefixes.some((prefix) =>
       upperCaseSourceUrl?.startsWith(prefix.toUpperCase())
+    );
+    if (!isMatch) {
+      return false;
+    }
+    positiveMatch = true;
+  }
+  if (matchSourceUrls.length) {
+    const upperCaseSourceUrl = sourceUrl?.toUpperCase();
+    const isMatch = matchSourceUrls.some(
+      (url) => upperCaseSourceUrl === url.toUpperCase()
     );
     if (!isMatch) {
       return false;

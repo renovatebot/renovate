@@ -1,4 +1,9 @@
-import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  defaultConfig,
+  git,
+  platform,
+} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { rebaseOnboardingBranch } from './rebase';
 
@@ -38,6 +43,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
+    });
+    it('rebases via platform', async () => {
+      platform.commitFiles = jest.fn();
+      config.platformCommit = true;
+      git.isBranchStale.mockResolvedValueOnce(true);
+      await rebaseOnboardingBranch(config);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
     });
     it('uses the onboardingConfigFileName if set', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);

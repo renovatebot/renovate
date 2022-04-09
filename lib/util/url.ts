@@ -26,6 +26,10 @@ export function trimTrailingSlash(url: string): string {
   return url.replace(regEx(/\/+$/), '');
 }
 
+export function trimLeadingSlash(path: string): string {
+  return path.replace(/^\//, '');
+}
+
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 
@@ -67,7 +71,11 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
   }
 }
 
-export function parseUrl(url: string): URL | null {
+export function parseUrl(url: string | undefined | null): URL | null {
+  if (!url) {
+    return null;
+  }
+
   try {
     return new URL(url);
   } catch (err) {

@@ -6,7 +6,7 @@ import {
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
-import { AllConfig, RenovateConfig } from './types';
+import type { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 
@@ -70,7 +70,7 @@ function replaceSecretsInString(
     throw error;
   }
   return value.replace(secretTemplateRegex, (_, secretName) => {
-    if (secrets[secretName]) {
+    if (secrets?.[secretName]) {
       return secrets[secretName];
     }
     const error = new Error(CONFIG_VALIDATION);
@@ -83,15 +83,18 @@ function replaceSecretsInString(
   });
 }
 
-function replaceSecretsinObject(
+function replaceSecretsInObject(
   config_: RenovateConfig,
-  secrets: Record<string, string> = {}
+  secrets: Record<string, string>,
+  deleteSecrets: boolean
 ): RenovateConfig {
   const config = { ...config_ };
-  delete config.secrets;
+  if (deleteSecrets) {
+    delete config.secrets;
+  }
   for (const [key, value] of Object.entries(config)) {
     if (is.plainObject(value)) {
-      config[key] = replaceSecretsinObject(value, secrets);
+      config[key] = replaceSecretsInObject(value, secrets, deleteSecrets);
     }
     if (is.string(value)) {
       config[key] = replaceSecretsInString(key, value, secrets);
@@ -99,13 +102,13 @@ function replaceSecretsinObject(
     if (is.array(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
         if (is.plainObject(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsinObject(arrayItem, secrets);
-        } else if (is.string(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsInString(
-            key,
+          value[arrayIndex] = replaceSecretsInObject(
             arrayItem,
-            secrets
+            secrets,
+            deleteSecrets
           );
+        } else if (is.string(arrayItem)) {
+          value[arrayIndex] = replaceSecretsInString(key, arrayItem, secrets);
         }
       }
     }
@@ -115,7 +118,8 @@ function replaceSecretsinObject(
 
 export function applySecretsToConfig(
   config: RenovateConfig,
-  secrets = config.secrets
+  secrets = config.secrets,
+  deleteSecrets = true
 ): RenovateConfig {
   // Add all secrets to be sanitized
   if (is.plainObject(secrets)) {
@@ -123,5 +127,6 @@ export function applySecretsToConfig(
       addSecretForSanitizing(String(secret));
     }
   }
-  return replaceSecretsinObject(config, secrets);
+  // TODO: fix types (#9610)
+  return replaceSecretsInObject(config, secrets as never, deleteSecrets);
 }

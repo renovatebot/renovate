@@ -19,7 +19,7 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 ### File Matching
 
 Most managers have a default `fileMatch` array.
-The `fileMatch` array contains regular expression strings that match against the repository file list.
+The `fileMatch` array has regular expression strings that match against the repository file list.
 
 #### Managers with no default fileMatch
 
@@ -106,4 +106,4 @@ You can use the `enabledManagers` array, to list the managers you want to use (`
 }
 ```
 
-Using the `enabledManager` array disables all other managers, this includes Bundler, Composer, Docker Compose, etc.
+Using the `enabledManagers` array disables all other managers, this includes Bundler, Composer, Docker Compose, etc.

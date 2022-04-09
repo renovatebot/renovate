@@ -2,6 +2,13 @@ name: Bug report
 description: You've found a bug with Renovate.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you begin to fill out the form, make sure you have actually found a bug.
+        If you're not sure then create a [discussion](https://github.com/renovatebot/renovate/discussions) first.
+        If you have questions or want help with Renovate, then also create a [discussion](https://github.com/renovatebot/renovate/discussions).
+
   - type: dropdown
     id: how-are-you-running-renovate
     attributes:
@@ -40,6 +47,14 @@ body:
     id: platform-version-if-selfhosting
     attributes:
       label: If you're self-hosting Renovate, tell us what version of the platform you run.
+      description: |
+        This field is for the version number of your _platform_, so one of these:
+          - GitHub (.com and Enterprise)
+          - GitLab (.com and CE/EE)
+          - Bitbucket Cloud
+          - Bitbucket Server
+          - Azure DevOps
+          - Gitea
     validations:
       required: false
 

@@ -1,7 +1,8 @@
 import is from '@sindresorhus/is';
 import { PlatformId } from '../../constants';
 import { resolveBaseUrl } from '../url';
-import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
+import { Http } from '.';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {

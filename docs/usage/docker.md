@@ -16,7 +16,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 ## How It Works
 
 1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
-1. Matching files are parsed, Renovate checks if the file(s) contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
 1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
 ## Preservation of Version Precision
@@ -24,7 +24,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 By default, Renovate preserves the precision level specified in the Docker images.
 For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
 This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, however it's a feature we'd like to implement one day.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to work on one day.
 
 ## Version compatibility
 
@@ -66,7 +66,7 @@ You can tell Renovate to use the `pep440` versioning scheme with this set of `pa
 ```
 
 If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
-Renovate will perform a best-effort sort of the versions, regardless of whether they contain letters or digits.
+Renovate will perform a best-effort sort of the versions, regardless of whether they have letters or digits.
 
 If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
 This approach uses regex capture group syntax to specify which part of the version string is major, minor, patch, pre-release, or compatibility.
@@ -93,13 +93,13 @@ Read on to see how Renovate updates Docker digests.
 
 ## Digest Updating
 
-If you follow our advice to go from a simple tag like `node:14` to using a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will receive Renovate PRs whenever the `node:14` image is updated on Docker Hub.
+If you follow our advice to go from a simple tag like `node:14` to using a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
 Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you get code that represents `node:14.15.1`.
 But you can never be sure, especially as Docker caches.
 Perhaps some of your colleagues or worse still your build machine are stuck on an older version with a security vulnerability.
 
-By pinning to a digest instead, you will receive these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
+By pinning to a digest instead, you will get these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
 This ensures everyone on the team uses the latest versions and is in sync.
 
 ## Version Upgrading
@@ -116,6 +116,27 @@ If you wish to enable major versions then add the preset `docker:enableMajor` to
 
 Renovate has some Docker-specific intelligence when it comes to versions.
 For example:
+
+### Ubuntu codenames
+
+Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release (e.g. from `ubuntu:xenial` to `ubuntu:focal`).
+
+For this to work you must follow this naming scheme:
+
+- The first term of the full codename is used (e.g. `bionic` for `Bionic Beaver` release)
+- The codename is in lowercase
+
+For example, Renovate will offer to upgrade the following `Dockerfile` layer:
+
+```dockerfile
+FROM ubuntu:yakkety
+```
+
+To
+
+```dockerfile
+FROM ubuntu:focal
+```
 
 ## Configuring/Disabling
 
@@ -229,7 +250,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:31.49.0
+FROM renovate/renovate:32.7.5
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

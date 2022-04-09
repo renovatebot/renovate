@@ -6,7 +6,7 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 # Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
-The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you.
+The answer is "It's your choice", but we can certainly make some generalisations/recommendations to help you.
 
 If you do not want to read the in-depth discussion, and just want our recommendations, skip ahead to the ["So what's best?" section](#so-whats-best).
 
@@ -43,7 +43,7 @@ A second reason for using ranges applies to "libraries" that are published as np
 In this case, it is usually a bad idea to pin all your dependencies because it will introduce an unnecessarily narrow range (one release!) and cause most users of your package to bloat their `node_modules` with duplicates.
 
 For example, you might have pinned `foobar` to version `1.1.0` and another author pinned his/her `foobar` dependency to `1.2.2`.
-Any user of both your packages will end up with npm attempting to install two separate versions of `foobar`, which might not even work.
+Any user of both your packages will end up with npm trying to install two separate versions of `foobar`, which might not even work.
 Even if both projects use a service like Renovate to keep their pinned dependencies up to date with the very latest versions, it's still not a good idea - there will always be times when one package has updated/released before the other one and they will be out of sync.
 e.g. there might be a space of 30 minutes where your package specifies foobar `1.1.0` and the other one specifies `1.1.1` and your joint downstream users end up with a duplicate.
 
@@ -52,7 +52,10 @@ e.g. there might be a space of 30 minutes where your package specifies foobar `1
 You mainly pin versions for certainty, and visibility.
 When you have a pinned version of each dependency in your `package.json`, you know exactly which version of each dependency is installed at any time.
 This benefits when upgrading versions as well as when rolling back in case of problems.
-Note: we'll cover lock files later, don't worry.
+
+<!-- prettier-ignore -->
+!!! note
+    We'll cover lock files later, don't worry.
 
 ### Upgrading pinned versions
 
@@ -72,7 +75,7 @@ This is more common and more dangerous.
 If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realise you need to fix it.
 Like before, you need to manually work out which dependency caused it - assuming you guess correctly that it was a new dependency version at fault - and pin it manually by editing `package.json` one dependency at a time.
 
-Alternatively, if you were instead pinning `foobar` then you would receive a PR for `foobar@1.2.0` which awaits your approval.
+Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
 So first of all, you can choose to read the release notes and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
 
 If you did not catch the fault before merging, you are still better off with a pinned version.
@@ -85,13 +88,13 @@ As you can see in the above, pinning dependencies makes your build more consiste
 ### Downside of pinned dependencies - upgrade "noise"
 
 The one major downside to your development workflow of pinning dependencies is the potential for increased "noise" in your repository.
-As mentioned above, you can expect to receive Pull Requests whenever there is a new version of your dependencies available.
+As mentioned above, you can expect to get Pull Requests whenever there is a new version of your dependencies available.
 Depending on how many repositories you maintain, and how many dependencies are in each, you may find this default approach to be overwhelming (e.g. waking up to 10 new Pull Requests each day).
 
 ## Reducing the "noise" of dependency updates
 
 The increased volume of Pull Requests for upgrading dependencies may be considered by some to be undesirable "noise" in their day.
-To some extent this is simply a trade-off for having your dependencies pinned and predictable, however there are also ways you can reduce this noise while still gaining the majority of the benefits:
+To some extent this is simply a trade-off for having your dependencies pinned and predictable, but there are also ways you can reduce this noise while still gaining the majority of the benefits:
 
 ### Pull Request automerging
 
@@ -106,7 +109,7 @@ In that case if the `pg` package has a minor or patch update and passes all test
 
 ### Branch automerging
 
-In the above suggestion of Pull Request automerging, you might still find it annoying if you receive GitHub Notifications for every PR that is created and merged.
+In the above suggestion of Pull Request automerging, you might still find it annoying if you get GitHub Notifications for every PR that is created and merged.
 In that case, you could set `automergeType` to `branch`, which means Renovate will:
 
 - Create a new branch for testing
@@ -118,7 +121,7 @@ With this approach, updates will be essentially "silent" - causing no notificati
 
 ### Scheduling
 
-Although it can feel satisfying to receive updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
+Although it can feel satisfying to get updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
 And worse still, npm package versions that are less than 24 hours [can be unpublished](https://blog.npmjs.org/post/141905368000/changes-to-npms-unpublish-policy), which would really break your build if you've pinned to a version that no longer exists.
 
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
@@ -156,12 +159,12 @@ The lock file has only delayed the inevitable problem, and provides much less vi
 
 ![all-dead](assets/images/all-dead.jpg)
 
-If the `package.json` contains a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
+If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
 The upside is that the lockfile will hold back `foobar` to `1.1.0` unless it's forced to upgrade, so the break is postponed.
 The downside is _how_ you will discover the break eventually.
 
-The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it contains, so you might run something like `yarn upgrade foobar`.
+The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it has, so you might run something like `yarn upgrade foobar`.
 Then you might either discover the break during your development or when you push your new development to CI for testing.
 In this case, hopefully you'll guess it's `foobar` that broke it and not your own code.
 
@@ -225,6 +228,5 @@ If/when this starts bothering you, add Renovate rules to reduce the volume, such
 ## References
 
 This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood.
-[GitHub Location](https://github.com/renovatebot/renovate/blob/main/docs/usage/dependency-pinning.md)
 
 Updated 2018-01-19 after [excellent feedback on lockfiles](https://github.com/commitizen/cz-conventional-changelog-default-export/pull/4#issuecomment-358038966) by [@LinusU](https://github.com/LinusU)

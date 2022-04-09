@@ -9,14 +9,14 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
-import { RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
 } from '../../../constants/error-messages';
-import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import * as npmApi from '../../../modules/datasource/npm';
+import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
