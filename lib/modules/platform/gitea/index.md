@@ -6,7 +6,7 @@ Read the official [Gitea docs](https://docs.gitea.io/en-us/clone-filters/) for m
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for the bot account.
+First, [create a Personal Access Token](https://docs.gitea.io/en-us/api-usage/#authentication) for the bot account.
 Let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file

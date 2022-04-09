@@ -10,7 +10,7 @@ Give the bot app password the following permission scopes:
 - [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
 - [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
 
-The bot also needs to be able to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
+The bot also needs to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
 
 Let Renovate use your app password by doing _one_ of the following:
 
