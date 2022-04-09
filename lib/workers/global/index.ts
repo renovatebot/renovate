@@ -22,7 +22,7 @@ import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
-import { SshSocket } from './ssh_socket';
+import { SshSocket } from './ssh-socket';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,

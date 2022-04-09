@@ -17,7 +17,7 @@ import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
-import type { SshSocket } from '../global/ssh_socket';
+import type { SshSocket } from '../global/ssh-socket';
 import * as hostRules from '../../util/host-rules';
 
 // istanbul ignore next

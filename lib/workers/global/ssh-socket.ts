@@ -7,18 +7,18 @@ import { logger } from '../../logger';
 import is from '@sindresorhus/is';
 
 export class SshSocket {
-  agent_process: cp.ChildProcess | undefined;
+  agentProcess: cp.ChildProcess | undefined;
   agent: Agent | undefined;
 
   async start(cacheDir: string) {
     if (!is.nonEmptyStringAndNotWhitespace(process.env.SSH_AUTH_SOCK)) {
-      let agent_socket = join(cacheDir, '.ssh-agent');
-      this.agent_process = cp.spawn('ssh-agent', ['-d', '-a', agent_socket]);
-      this.agent_process.on('error', function (err) {
+      let agentSocket = join(cacheDir, '.ssh-agent');
+      this.agentProcess = cp.spawn('ssh-agent', ['-d', '-a', agentSocket]);
+      this.agentProcess.on('error', function (err) {
         logger.error({ err }, 'Unable to spawn ssh-agent');
       });
       await new Promise((r) => setTimeout(r, 2000));
-      process.env.SSH_AUTH_SOCK = agent_socket;
+      process.env.SSH_AUTH_SOCK = agentSocket;
     }
     try {
       let socket = net.connect(process.env.SSH_AUTH_SOCK);
@@ -41,8 +41,8 @@ export class SshSocket {
   }
 
   stop() {
-    if (this.agent_process) {
-      this.agent_process.kill('SIGINT');
+    if (this.agentProcess) {
+      this.agentProcess.kill('SIGINT');
     }
   }
 }
