@@ -11,6 +11,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
   const externalHostFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
+    'The requested URL returned error: 403',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
@@ -22,7 +23,6 @@ export function checkForPlatformFailure(err: Error): Error | null {
     'early EOF',
     'fatal: bad config', // .gitmodules problem
     'expected flush after ref listing',
-    '[rejected] (stale info)',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {

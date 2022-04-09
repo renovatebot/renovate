@@ -906,7 +906,6 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commitSha = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -915,6 +914,7 @@ export async function prepareCommit({
       return null;
     }
 
+    const commitSha = (await git.revparse([branchName])).trim();
     const result: CommitResult = {
       parentCommitSha,
       commitSha,
@@ -980,16 +980,27 @@ export async function fetchCommit({
 }
 
 export async function commitFiles(
-  config: CommitFilesConfig
+  commitConfig: CommitFilesConfig
 ): Promise<CommitSha | null> {
-  const commitResult = await prepareCommit(config);
-  if (commitResult) {
-    const pushResult = await pushCommit(config);
-    if (pushResult) {
-      return fetchCommit(config);
+  try {
+    const commitResult = await prepareCommit(commitConfig);
+    if (commitResult) {
+      const pushResult = await pushCommit(commitConfig);
+      if (pushResult) {
+        const { branchName } = commitConfig;
+        const { commitSha } = commitResult;
+        config.branchCommits[branchName] = commitSha;
+        config.branchIsModified[branchName] = false;
+        return commitSha;
+      }
     }
+    return null;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message.includes('[rejected] (stale info)')) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
   }
-  return null;
 }
 
 export function getUrl({

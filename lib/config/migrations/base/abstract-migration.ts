@@ -21,6 +21,10 @@ export abstract class AbstractMigration implements Migration {
     return this.migratedConfig[key] ?? this.originalConfig[key];
   }
 
+  protected has<Key extends keyof RenovateConfig>(key: Key): boolean {
+    return key in this.originalConfig;
+  }
+
   protected setSafely<Key extends keyof RenovateConfig>(
     key: Key,
     value: RenovateConfig[Key]

@@ -11,7 +11,7 @@ You should understand GitLab's security model, before deciding to run a "bot" se
 ## `CI_JOB_TOKEN` permissions
 
 The concept of `CI_JOB_TOKEN` permissions was [overhauled in GitLab release 8.12](https://docs.gitlab.com/ee/user/project/new_ci_build_permissions_model.html), jobs are now run with the permissions of the user account which _triggered_ the pipeline.
-For security reasons the token was limited to read-only permissions and a limited set of API endpoints, however it’s since been extended to allow [write access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/README.html#gitlab-ci-job-token).
+For security reasons the token was limited to read-only permissions and a limited set of API endpoints, but it’s been extended to allow [write access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/README.html#gitlab-ci-job-token).
 Any pipeline triggered by a user account thus has permissions to read any repository which that account has access to as well as publish packages to them.
 
 With the current GitLab CI permissions model, you should avoid committing to any project which you don’t trust completely, because that project could maliciously steal repository data, publish fake releases, or spam releases.
@@ -34,7 +34,7 @@ The following research notes may help you to assess the GitLab bot security risk
 ### Public projects only
 
 If a bot service is run on public projects only, then the risk of private project data being accessed by unauthorized users is zero.
-However, malicious users can still spoof or spam packages to any other public project they themselves are not a member of, so that rules out this approach for a public hosted service.
+But malicious users can still spoof or spam packages to any other public project they are not a member of, so that rules out this approach for a public hosted service.
 
 A public-visibility-only bot service should be low risk for most self-hosted GitLab instances.
 There is still a small problem that you can't _prevent_ users from inviting the bot into private projects if they are not aware of the risks of doing so.
