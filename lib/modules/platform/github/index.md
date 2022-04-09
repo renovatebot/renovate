@@ -25,15 +25,17 @@ Instead of a bot account with a Personal Access Token you can run `renovate` as 
 
 When creating the GitHub App give it the following permissions:
 
-- Checks: Read & write
-- Contents: Read & write
-- Issues: Read & write
-- Metadata: Read-only
-- Pull requests: Read & write
-- Commit statuses: Read & write
-- Dependabot alerts: Read-only
-- Workflows: Read & write
-- Members: Read
+| Permission        | Scope            |
+| ----------------- | ---------------- |
+| Checks            | `read` + `write` |
+| Contents          | `read` + `write` |
+| Issues            | `read` + `write` |
+| Metadata          | `read`           |
+| Pull requests     | `read` + `write` |
+| Commit statuses   | `read` + `write` |
+| Dependabot alerts | `read`           |
+| Workflows         | `read` + `write` |
+| Members           | `read`           |
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
