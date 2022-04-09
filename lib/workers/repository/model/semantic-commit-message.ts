@@ -28,9 +28,9 @@ export class SemanticCommitMessage extends CommitMessage {
     const { groups = {} } = value.match(SemanticCommitMessage.#REGEXP) ?? {};
 
     const message = new SemanticCommitMessage();
-    message.type = groups.type ?? '';
-    message.scope = groups.scope ?? '';
-    message.subject = groups.description ?? '';
+    message.type = groups.type;
+    message.scope = groups.scope;
+    message.subject = groups.description;
 
     return message;
   }
@@ -46,11 +46,11 @@ export class SemanticCommitMessage extends CommitMessage {
   }
 
   set scope(value: string) {
-    this.#scope = value.trim();
+    this.#scope = this.normalizeInput(value);
   }
 
   set type(value: string) {
-    this.#type = value.trim();
+    this.#type = this.normalizeInput(value);
   }
 
   protected get prefix(): string {

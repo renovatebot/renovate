@@ -15,7 +15,7 @@ export abstract class CommitMessage {
   #footer = '';
   #subject = '';
 
-  public static formatPrefix(prefix: string): string {
+  static formatPrefix(prefix: string): string {
     if (!prefix) {
       return '';
     }
@@ -52,15 +52,15 @@ export abstract class CommitMessage {
   }
 
   set body(value: string) {
-    this.#body = value.trim();
+    this.#body = this.normalizeInput(value);
   }
 
   set footer(value: string) {
-    this.#footer = value.trim();
+    this.#footer = this.normalizeInput(value);
   }
 
   set subject(value: string) {
-    this.#subject = value.trim();
+    this.#subject = this.normalizeInput(value);
     this.#subject = this.#subject?.replace(
       CommitMessage.#EXTRA_WHITESPACES,
       ' '
@@ -80,4 +80,8 @@ export abstract class CommitMessage {
   }
 
   protected abstract get prefix(): string;
+
+  protected normalizeInput(value?: string | null): string {
+    return value?.trim() ?? '';
+  }
 }

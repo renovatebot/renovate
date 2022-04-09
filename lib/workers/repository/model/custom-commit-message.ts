@@ -13,7 +13,7 @@ export class CustomCommitMessage extends CommitMessage {
   }
 
   set prefix(value: string) {
-    this.#prefix = value.trim();
+    this.#prefix = this.normalizeInput(value);
   }
 
   override toJSON(): CustomCommitMessageJSON {
