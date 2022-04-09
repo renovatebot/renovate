@@ -28,14 +28,14 @@ When creating the GitHub App give it the following permissions:
 | Permission        | Scope            |
 | ----------------- | ---------------- |
 | Checks            | `read` + `write` |
+| Commit statuses   | `read` + `write` |
 | Contents          | `read` + `write` |
 | Issues            | `read` + `write` |
-| Metadata          | `read`           |
 | Pull requests     | `read` + `write` |
-| Commit statuses   | `read` + `write` |
-| Dependabot alerts | `read`           |
 | Workflows         | `read` + `write` |
+| Dependabot alerts | `read`           |
 | Members           | `read`           |
+| Metadata          | `read`           |
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
