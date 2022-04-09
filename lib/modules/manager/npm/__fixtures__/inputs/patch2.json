@@ -1,0 +1,9 @@
+{
+  "name": "renovate-repro",
+  "dependencies": {
+    "metro": "^0.58.0"
+  },
+  "resolutions": {
+    "metro": "patch:metro@^0.58.0#./.patches/metro.patch"
+  }
+}

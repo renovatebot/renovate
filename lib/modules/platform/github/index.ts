@@ -54,6 +54,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import { coerceGraphqlPr, coerceRestPr } from './common';
 import {
   closedPrsQuery,
   enableAutoMergeMutation,
@@ -359,6 +360,7 @@ export async function initRepo({
   config.openPrList = null;
   config.closedPrList = null;
   config.branchPrs = [];
+  config.prComments = {};
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -553,7 +555,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-async function getClosedPrs(): Promise<PrList> {
+export async function getClosedPrs(): Promise<PrList> {
   if (!config.closedPrList) {
     config.closedPrList = {};
     try {
@@ -574,19 +576,15 @@ async function getClosedPrs(): Promise<PrList> {
         logger.debug('getClosedPrs(): no graphql data');
         return {};
       }
-      for (const pr of nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = pr.state.toLowerCase();
-        pr.sourceBranch = pr.headRefName;
-        delete pr.headRefName;
-        pr.comments = pr.comments.nodes.map((comment) => ({
-          id: comment.databaseId,
-          body: comment.body,
-        }));
-        pr.body = 'dummy body'; // just in case
+      for (const gqlPr of nodes) {
+        const pr = coerceGraphqlPr(gqlPr);
         config.closedPrList[pr.number] = pr;
         prNumbers.push(pr.number);
+        if (gqlPr.comments?.nodes) {
+          config.prComments[pr.number] = gqlPr.comments.nodes.map(
+            ({ databaseId: id, body }) => ({ id, body })
+          );
+        }
       }
       prNumbers.sort();
       logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
@@ -620,31 +618,8 @@ async function getOpenPrs(): Promise<PrList> {
         logger.debug('getOpenPrs(): no graphql data');
         return {};
       }
-      for (const pr of nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = PrState.Open;
-        pr.sourceBranch = pr.headRefName;
-        delete pr.headRefName;
-        pr.targetBranch = pr.baseRefName;
-        delete pr.baseRefName;
-        // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
-        const hasNegativeReview = pr.reviews?.nodes?.length > 0;
-        // istanbul ignore if
-        if (hasNegativeReview) {
-          pr.cannotMergeReason = `PR has a negative review`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
-          pr.cannotMergeReason = `pr.mergeStateStatus = ${pr.mergeStateStatus}`;
-        }
-        if (pr.labels) {
-          pr.labels = pr.labels.nodes.map((label) => label.name);
-        }
-        pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
-        delete pr.assignees;
-        pr.hasReviewers = !!(pr.reviewRequests?.totalCount > 0);
-        delete pr.reviewRequests;
-        delete pr.mergeStateStatus;
+      for (const gqlPr of nodes) {
+        const pr = coerceGraphqlPr(gqlPr);
         config.openPrList[pr.number] = pr;
         prNumbers.push(pr.number);
       }
@@ -678,21 +653,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     { prNo },
     'PR not found in open or closed PRs list - trying to fetch it directly'
   );
-  const pr = (
+  const ghRestPr = (
     await githubApi.getJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
     )
   ).body;
-  if (!pr) {
-    return null;
-  }
-  // Harmonise PR values
-  pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === PrState.Open) {
-    pr.sourceBranch = pr.head ? pr.head.ref : undefined;
-    pr.sha = pr.head ? pr.head.sha : undefined;
-  }
-  return pr;
+  return ghRestPr ? coerceRestPr(ghRestPr) : null;
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -732,22 +698,7 @@ export async function getPrList(): Promise<Pr[]> {
             ? pr.user.login === config.renovateUsername
             : true)
       )
-      .map(
-        (pr) =>
-          ({
-            number: pr.number,
-            sourceBranch: pr.head.ref,
-            sha: pr.head.sha,
-            title: pr.title,
-            state:
-              pr.state === PrState.Closed && pr.merged_at?.length
-                ? /* istanbul ignore next */ PrState.Merged
-                : pr.state,
-            createdAt: pr.created_at,
-            closedAt: pr.closed_at,
-            sourceRepo: pr.head?.repo?.full_name,
-          } as never)
-      );
+      .map(coerceRestPr);
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
@@ -1332,10 +1283,10 @@ async function deleteComment(commentId: number): Promise<void> {
 }
 
 async function getComments(issueNo: number): Promise<Comment[]> {
-  const pr = (await getClosedPrs())[issueNo];
-  if (pr) {
+  const cachedComments = config.prComments[issueNo];
+  if (cachedComments) {
     logger.debug('Returning closed PR list comments');
-    return pr.comments;
+    return cachedComments;
   }
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
@@ -1519,25 +1470,24 @@ export async function createPr({
     options.body.maintainer_can_modify = true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
-  const pr = (
+  const ghRestPr = (
     await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
   logger.debug(
-    { branch: sourceBranch, pr: pr.number, draft: draftPR },
+    { branch: sourceBranch, pr: ghRestPr.number, draft: draftPR },
     'PR created'
   );
+  const { node_id } = ghRestPr;
+  const pr = coerceRestPr(ghRestPr);
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
   }
-  pr.displayNumber = `Pull Request #${pr.number}`;
-  pr.sourceBranch = sourceBranch;
-  pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
-  await tryPrAutomerge(pr.number, pr.node_id, platformOptions);
+  await tryPrAutomerge(pr.number, node_id, platformOptions);
   return pr;
 }
 
@@ -1686,10 +1636,18 @@ export function massageMarkdown(input: string): string {
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
+
+  const gheSupportsStateFilter = semver.satisfies(
+    platformConfig.gheVersion,
+    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
+  );
+  const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
+  const query = vulnerabilityAlertsQuery(filterByState);
+
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
-    }>(vulnerabilityAlertsQuery, 'vulnerabilityAlerts', {
+    }>(query, 'vulnerabilityAlerts', {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
