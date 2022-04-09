@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { loadJsonFixture } from '../../../../test/util';
+import type { HostRule } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
@@ -23,7 +24,7 @@ describe('modules/datasource/packagist/index', () => {
     let config: any;
     beforeEach(() => {
       jest.resetAllMocks();
-      hostRules.find = jest.fn((input) => input);
+      hostRules.find = jest.fn((input: HostRule) => input);
       hostRules.hosts = jest.fn(() => []);
       config = {
         versioning: composerVersioning.id,

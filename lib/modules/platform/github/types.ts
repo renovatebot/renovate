@@ -125,3 +125,17 @@ export interface GhAutomergeResponse {
     pullRequest: { number: number };
   };
 }
+
+export interface ApiPageItem {
+  number: number;
+  updated_at: string;
+}
+
+/**
+ * Mutable object designed to be used in the repository cache
+ */
+export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
+  items: Record<number, T>;
+  lastModified?: string;
+  etag?: string;
+}
