@@ -23,6 +23,7 @@
     "lib/config/massage.ts",
     "lib/config/migrate-validate.ts",
     "lib/config/migration.ts",
+    "lib/config/migrations/custom/master-issue-migration.ts",
     "lib/config/options/index.ts",
     "lib/config/presets/azure/index.ts",
     "lib/config/presets/bitbucket-server/index.ts",
