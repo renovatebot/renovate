@@ -21,7 +21,6 @@ import {
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { getCache as getRepoCache } from '../../../util/cache/repository';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -31,11 +30,10 @@ import type {
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
-import type { GithubHttpOptions } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64 } from '../../../util/string';
-import { ensureTrailingSlash, parseLinkHeader } from '../../../util/url';
+import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -56,7 +54,6 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
 import {
   enableAutoMergeMutation,
@@ -65,6 +62,7 @@ import {
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
+import { getPrCache } from './pr';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -591,119 +589,14 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-function isRenovateRestPr(ghPr: GhRestPr): boolean {
-  return (
-    config.forkMode ||
-    config.ignorePrAuthor ||
-    (ghPr?.user?.login && config?.renovateUsername
-      ? ghPr.user.login === config.renovateUsername
-      : true)
-  );
-}
-
-/**
- * Unless cache is initialized, there is 3 general cases:
- *
- *   1. We never fetched PR list for this repo before.
- *      This is detected by `etag` presense in the cache.
- *
- *      In this case, we're falling back to quick fetch via
- *      `paginate=true` option (see `util/http/github.ts`).
- *
- *   2. None of PRs has changed since last run.
- *
- *      We detect this by setting `If-None-Match` HTTP header
- *      with the `etag` value from the previous run.
- *
- *   3. Some of PRs had changed since last run.
- *
- *      In this case, we sequentially fetch page by page
- *      until `ApiCache.coerce` function indicates that
- *      no more fresh items can be found in the next page.
- *
- *      We expect to fetch just one page per run in average,
- *      since it's rare to have more than 100 updated PRs.
- */
 export async function getPrList(): Promise<Pr[]> {
   if (!config.prCache) {
-    config.prCache = {};
-
-    const repoCache = getRepoCache();
-    repoCache.platform ??= {};
-    repoCache.platform.github ??= {};
-    repoCache.platform.github.prCache ??= { items: {} };
-    const prCache = new ApiCache(repoCache.platform.github.prCache);
-
-    try {
-      let requestsTotal = 0;
-      let apiQuotaAffected = false;
-      let needNextPageFetch = true;
-      let needNextPageSync = true;
-
-      let pageIdx = 1;
-      while (needNextPageFetch && needNextPageSync) {
-        const repo = config.parentRepo || config.repository;
-        const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
-
-        const opts: GithubHttpOptions = { paginate: false };
-        if (pageIdx === 1) {
-          const oldEtag = prCache.etag;
-          if (oldEtag) {
-            opts.headers = { 'If-None-Match': oldEtag };
-          } else {
-            // Speed up initial fetch
-            opts.paginate = true;
-          }
-        }
-
-        const res = await githubApi.getJson<GhRestPr[]>(urlPath, opts);
-        apiQuotaAffected = true;
-        requestsTotal += 1;
-
-        if (pageIdx === 1 && res.statusCode === 304) {
-          apiQuotaAffected = false;
-          break;
-        }
-
-        const {
-          body: page,
-          headers: { link: linkHeader, etag: newEtag },
-        } = res;
-
-        const renovatePrs = page.filter(isRenovateRestPr);
-        needNextPageSync = prCache.reconcile(renovatePrs);
-        needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
-
-        if (pageIdx === 1) {
-          if (newEtag) {
-            prCache.etag = newEtag;
-          }
-
-          needNextPageFetch &&= !opts.paginate;
-        }
-
-        pageIdx += 1;
-      }
-
-      logger.debug(
-        {
-          pullsTotal: prCache.getItems().length,
-          requestsTotal,
-          apiQuotaAffected,
-        },
-        `getPrList success`
-      );
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'getPrList err');
-      throw new ExternalHostError(err, PlatformId.Github);
-    }
-
-    for (const ghPr of prCache.getItems()) {
-      const pr = coerceRestPr(ghPr);
-      if (pr) {
-        config.prCache[ghPr.number] = pr;
-      }
-    }
+    const repo = config.parentRepo ?? config.repository;
+    const username =
+      !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
+        ? config.renovateUsername
+        : null;
+    config.prCache = await getPrCache(githubApi, repo, username);
   }
 
   return Object.values(config.prCache);
