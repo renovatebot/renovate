@@ -327,7 +327,6 @@ describe('modules/manager/npm/extract/index', () => {
         constraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
-          pnpm: '^1.2.0',
           vscode: '>=1.49.3',
           yarn: 'disabled',
         },
