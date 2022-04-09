@@ -7,14 +7,16 @@ import { parseLinkHeader } from '../../../util/url';
 import type { Pr } from '../types';
 import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
-import type { GhRestPr } from './types';
+import type { ApiPageCache, GhRestPr } from './types';
 
 function getPrApiCache(): ApiCache<GhRestPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
   repoCache.platform.github.prCache ??= { items: {} };
-  const prCache = new ApiCache(repoCache.platform.github.prCache);
+  const prCache = new ApiCache(
+    repoCache.platform.github.prCache as ApiPageCache<GhRestPr>
+  );
   return prCache;
 }
 

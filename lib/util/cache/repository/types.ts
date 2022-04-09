@@ -1,8 +1,4 @@
 import type { PackageFile } from '../../../modules/manager/types';
-import type {
-  ApiPageCache,
-  GhRestPr,
-} from '../../../modules/platform/github/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { GitConflictsCache } from '../../git/types';
 
@@ -36,11 +32,6 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface GithubGraphqlPageCache {
-  pageLastResizedAt: string;
-  pageSize: number;
-}
-
 export interface Cache {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
@@ -51,10 +42,7 @@ export interface Cache {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    github?: {
-      graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
-      prCache?: ApiPageCache<GhRestPr>;
-    };
+    github?: Record<string, unknown>;
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
