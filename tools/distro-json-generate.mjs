@@ -2,7 +2,8 @@ import fs from 'fs-extra';
 import got from 'got';
 import shell from 'shelljs';
 
-const url = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
+const ubuntuUrl = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
+const debianUrl = 'https://debian.pages.debian.net/distro-info-data/debian.csv';
 
 /**
  * Converts valid CSV string into JSON.
@@ -74,4 +75,7 @@ async function update(url, file) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-update(url, `./data/ubuntu-distro-info.json`);
+update(ubuntuUrl, `./data/ubuntu-distro-info.json`);
+
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+update(debianUrl, `./data/debian-distro-info.json`);
