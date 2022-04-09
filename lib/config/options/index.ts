@@ -2260,6 +2260,12 @@ export function getOptions(): RenovateOptions[] {
   return options;
 }
 
+export function getOptionType(
+  name: string
+): RenovateOptions['type'] | undefined {
+  return options.find((option) => option.name === name)?.type;
+}
+
 function loadManagerOptions(): void {
   for (const [name, config] of getManagers().entries()) {
     if (config.defaultConfig) {

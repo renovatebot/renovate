@@ -46,13 +46,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
               matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
           )
           .filter(Boolean);
-      } else if (key.startsWith('masterIssue')) {
-        const newKey = key.replace('masterIssue', 'dependencyDashboard');
-        migratedConfig[newKey] = val;
-        if (optionTypes[newKey] === 'boolean' && val === 'true') {
-          migratedConfig[newKey] = true;
-        }
-        delete migratedConfig[key];
       } else if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {

@@ -19,6 +19,7 @@ import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
+import { MasterIssueMigration } from './custom/master-issue-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackagesMigration } from './custom/packages-migration';
@@ -88,6 +89,7 @@ export class MigrationsService {
     HostRulesMigration,
     IgnoreNodeModulesMigration,
     IgnoreNpmrcFileMigration,
+    MasterIssueMigration,
     PackageNameMigration,
     PackagePatternMigration,
     PackagesMigration,
@@ -115,10 +117,16 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = migrations.find((item) => item.propertyName === key);
+      const migration = migrations.find((item) => {
+        if (item.propertyName instanceof RegExp) {
+          return item.propertyName.test(key);
+        }
+
+        return item.propertyName === key;
+      });
 
       if (migration) {
-        migration.run(value);
+        migration.run(value, key);
 
         if (migration.deprecated) {
           delete migratedConfig[key];
