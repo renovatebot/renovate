@@ -20,7 +20,7 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
       pr.state === PrState.Closed && is.string(pr.merged_at)
         ? PrState.Merged
         : pr.state,
-    body: pr.body ? pr.body : 'dummy body',
+    body: pr.body ?? 'dummy body',
   };
 
   if (pr.head?.sha) {
