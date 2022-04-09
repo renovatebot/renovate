@@ -55,7 +55,7 @@ export async function getPrCache(
   repo: string,
   username: string | null
 ): Promise<Record<number, Pr>> {
-  const prCache = {};
+  const prCache: Record<number, Pr> = {};
   const prApiCache = getPrApiCache();
 
   try {
