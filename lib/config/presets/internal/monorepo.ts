@@ -101,6 +101,7 @@ const repoGroups = {
   fontsource: 'https://github.com/fontsource/fontsource',
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
+  'futures-rs': 'https://github.com/rust-lang/futures-rs',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   graphqlcodegenerator: [
     'https://github.com/dotansimha/graphql-code-generator',
@@ -198,11 +199,13 @@ const repoGroups = {
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
+  tauri: 'https://github.com/tauri-apps/tauri',
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   vuepress: 'https://github.com/vuejs/vuepress',
+  'wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
