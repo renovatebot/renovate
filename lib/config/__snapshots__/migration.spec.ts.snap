@@ -372,22 +372,6 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates packageRules objects 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
-      "matchPackageNames": Array [
-        "typescript",
-      ],
-      "matchUpdateTypes": Array [
-        "major",
-      ],
-    },
-  ],
-}
-`;
-
 exports[`config/migration migrateConfig(config, parentConfig) migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {

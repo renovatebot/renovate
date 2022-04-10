@@ -21,7 +21,6 @@ This manager uses three `depType`s to allow a fine-grained control of which depe
 
 **Limitations**
 
-- Needs to have `kind: Kustomization` or `kind: Component` defined
 - Currently this hasn't been tested using HTTPS to fetch the repos
 - The keys for the image tags can be in any order
 

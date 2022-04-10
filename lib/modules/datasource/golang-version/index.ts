@@ -6,8 +6,8 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 const lineTerminationRegex = regEx(`\r?\n`);
-const releaseBeginningChar = '{';
-const releaseTerminationChar = '},';
+const releaseBeginningChar = '\t{';
+const releaseTerminationChar = '\t},';
 const releaseDateRegex = regEx(
   `Date\\{(?<year>\\d+),\\s+(?<month>\\d+),\\s+(?<day>\\d+)\\}`
 );
@@ -58,8 +58,7 @@ export class GolangVersionDatasource extends Datasource {
     // Parse the release list
     let release: Release = { version: undefined };
     while (lines.length !== 0) {
-      const line = lines.shift().trim();
-
+      const line = lines.shift();
       if (line === releaseBeginningChar) {
         if (release.version !== undefined) {
           throw new ExternalHostError(
