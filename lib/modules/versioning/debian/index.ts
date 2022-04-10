@@ -1,5 +1,5 @@
 import { DistroInfo, DistroInfoRecordWithVersion } from '../distro';
-import { DockerVersioningApi } from '../docker';
+import { GenericVersioningApi } from '../generic';
 import type { GenericVersion } from '../generic';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -12,7 +12,7 @@ export const supportsRanges = false;
 
 const EOL_PROP = 'eol';
 
-class DebianVersioningApi extends DockerVersioningApi {
+class DebianVersioningApi extends GenericVersioningApi {
   private _distroInfo: DistroInfo;
   private readonly _ltsToVer = new Map<string, DistroInfoRecordWithVersion>();
   private readonly _verToLts = new Map<string, DistroInfoRecordWithVersion>();
@@ -61,15 +61,29 @@ class DebianVersioningApi extends DockerVersioningApi {
     if (!this._distroInfo.exists(ver)) {
       return null;
     }
-    return super._parse(ver);
+    return { release: ver.split('.').map(Number) };
   }
 
   protected override _compare(version: string, other: string): number {
     let ver: string;
+    let otherVer: string;
+
     ver = this._getVersionByLts(version);
     ver = this._distroInfo.getVersionByCodename(ver);
-    const otherVer = this._distroInfo.getVersionByCodename(other);
-    return super._compare(ver, otherVer);
+
+    otherVer = this._getVersionByLts(other);
+    otherVer = this._distroInfo.getVersionByCodename(otherVer);
+
+    const f1 = parseFloat(ver);
+    const f2 = parseFloat(otherVer);
+
+    if (f1 > f2) {
+      return 1;
+    }
+    if (f1 === f2) {
+      return 0;
+    }
+    return -1;
   }
 
   override isValid(version: string): boolean {

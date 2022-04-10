@@ -39,6 +39,7 @@ describe('modules/versioning/debian/index', () => {
     ${'8'}            | ${true}
     ${'9'}            | ${true}
     ${'10'}           | ${true}
+    ${'10-slim'}      | ${false}
     ${'11'}           | ${true}
     ${'12'}           | ${false}
     ${'13'}           | ${false}
@@ -247,8 +248,8 @@ describe('modules/versioning/debian/index', () => {
     ${'11'}           | ${'10'}           | ${true}
     ${'5'}            | ${'6'}            | ${false}
     ${'11'}           | ${'1.1'}          | ${true}
-    ${'xxx'}          | ${'yyy'}          | ${true}
-    ${'yyy'}          | ${'xxx'}          | ${true}
+    ${'xxx'}          | ${'yyy'}          | ${false}
+    ${'yyy'}          | ${'xxx'}          | ${false}
     ${'lenny'}        | ${'squeeze'}      | ${false}
     ${'squeeze'}      | ${'lenny'}        | ${true}
     ${'lenny'}        | ${'buster'}       | ${false}
@@ -335,9 +336,9 @@ describe('modules/versioning/debian/index', () => {
 
   test.each`
     a                 | b                 | expected
-    ${'woody'}        | ${'sarge'}        | ${1}
-    ${'lenny'}        | ${'3'}            | ${2}
-    ${'3'}            | ${'lenny'}        | ${-2}
+    ${'woody'}        | ${'sarge'}        | ${-1}
+    ${'lenny'}        | ${'3'}            | ${1}
+    ${'3'}            | ${'lenny'}        | ${-1}
     ${'lenny'}        | ${'5'}            | ${0}
     ${'squeeze'}      | ${'6'}            | ${0}
     ${'10'}           | ${'buster'}       | ${0}
@@ -346,18 +347,18 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${'8'}            | ${1}
     ${'oldstable'}    | ${'oldoldstable'} | ${1}
     ${'stable'}       | ${'oldstable'}    | ${1}
-    ${'11'}           | ${'oldoldstable'} | ${2}
+    ${'11'}           | ${'oldoldstable'} | ${1}
     ${'10'}           | ${'oldstable'}    | ${0}
-    ${'9'}            | ${'stable'}       | ${-2}
+    ${'9'}            | ${'stable'}       | ${-1}
   `('debian.sortVersions($a, $b) === $expected ', ({ a, b, expected }) => {
     expect(debian.sortVersions(a, b)).toEqual(expected);
   });
 
   test.each`
     version | range        | expected
-    ${'10'} | ${'10-slim'} | ${false}
+    ${'10'} | ${'10-slim'} | ${true}
     ${'11'} | ${'11'}      | ${true}
-    ${'11'} | ${'11.0'}    | ${false}
+    ${'11'} | ${'11.0'}    | ${true}
   `(
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
