@@ -1254,10 +1254,13 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      branchTopic: '{{{depNameSanitized}}}-pin-digest',
-      prTitle: 'Pin {{{depName}}} digest to {{{newDigestShort}}}',
-      commitMessageExtra: 'to {{newDigestShort}}',
-      commitMessageTopic: '{{{depName}}} digest',
+      groupName: 'Pin Dependencies',
+      groupSlug: 'pin-dependencies',
+      commitMessageAction: 'Pin',
+      group: {
+        commitMessageTopic: 'dependencies',
+        commitMessageExtra: '',
+      },
     },
     cli: false,
     mergeable: true,
