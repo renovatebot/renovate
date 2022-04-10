@@ -6,7 +6,7 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readFile } from '../../../util/fs';
-import { simpleGitConfig } from '../../../util/git/config';
+import { gitTimeoutConfig, simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -220,8 +220,8 @@ export class CrateDatasource extends Datasource {
           { clonePath, registryUrl },
           `Cloning private cargo registry`
         );
-
-        const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
+        const gitConfig = { ...simpleGitConfig(), ...gitTimeoutConfig() };
+        const git = Git({ ...gitConfig, maxConcurrentProcesses: 1 });
         const clonePromise = git.clone(registryUrl, clonePath, {
           '--depth': 1,
         });
