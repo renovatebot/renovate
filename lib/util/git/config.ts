@@ -26,7 +26,7 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
   };
 }
 
-export function gitConfWithTimeout(): Partial<SimpleGitOptions> {
+export function gitTimeoutConfig(): Partial<SimpleGitOptions> {
   return {
     timeout: {
       block: GlobalConfig.get('gitTimeout'),
