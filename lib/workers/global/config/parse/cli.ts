@@ -29,6 +29,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
         .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
         .replace(/^--dry-run$/, '--dry-run=true')
+        .replace(/^--dry-run=null$/, '--dry-run=false')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -88,6 +89,7 @@ export function getConfig(input: string[]): AllConfig {
   });
 
   /* eslint-disable no-console */
+
   /* istanbul ignore next */
   function helpConsole(): void {
     console.log('  Examples:');
@@ -116,16 +118,16 @@ export function getConfig(input: string[]): AllConfig {
           if (opts[option.name] !== undefined) {
             config[option.name] = opts[option.name];
             if (option.name === 'dryRun') {
-              if (
-                config[option.name] === 'false' ||
-                config[option.name] === 'null'
-              ) {
-                config[option.name] = null;
-              } else if (config[option.name] === 'true') {
+              if (config[option.name] === 'true') {
                 logger.warn(
                   'cli config dryRun property has been changed to full'
                 );
                 config[option.name] = 'full';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config dryRun property has been changed to null'
+                );
+                config[option.name] = null;
               }
             }
           }
