@@ -743,6 +743,7 @@ const options: RenovateOptions[] = [
     description:
       'Skip any package file whose path matches one of these. Can be a string or glob pattern.',
     type: 'array',
+    mergeable: false,
     subType: 'string',
     stage: 'repository',
     default: ['**/node_modules/**', '**/bower_components/**'],
