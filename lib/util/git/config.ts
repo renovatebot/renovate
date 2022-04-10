@@ -29,7 +29,7 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
 export function gitTimeoutConfig(): Partial<SimpleGitOptions> {
   return {
     timeout: {
-      block: GlobalConfig.get('gitTimeout'),
+      block: GlobalConfig.get('gitTimeout') as number,
     },
   };
 }
