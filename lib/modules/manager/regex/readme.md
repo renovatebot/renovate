@@ -13,21 +13,24 @@ The first two required fields are `fileMatch` and `matchStrings`. `fileMatch` wo
 In order for Renovate to look up a dependency and decide about updates, it then needs the following information about each dependency:
 
 - The dependency's name
-- Which `datasource` to look up (e.g. npm, Docker, GitHub tags, etc)
-- Which version scheme to apply (defaults to `semver`, but also may be other values like `pep440`)
+- Which [`datasource`](https://docs.renovatebot.com/modules/datasource/#supported-datasources) to look up (e.g. [npm](https://docs.renovatebot.com/modules/datasource/#npm-datasource), [Docker](https://docs.renovatebot.com/modules/datasource/#docker-datasource), [GitHub tags](https://docs.renovatebot.com/modules/datasource/#github-tags-datasource), [etc.](https://docs.renovatebot.com/modules/datasource/#supported-datasources))
+- Which [version scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) to apply (defaults to [`semver`](https://docs.renovatebot.com/modules/versioning/#semantic-versioning), but also may be other values like [`pep440`](https://docs.renovatebot.com/modules/versioning/#pep440-versioning))
+
+Note: capture groups below are similar to [available fields](https://docs.renovatebot.com/templates/#other-available-fields), but these available fields are not available in templates below, because most of those are coming from managers, and `regex` is a manager.
 
 Configuration-wise, it works like this:
 
 - You must capture the `currentValue` of the dependency in a named capture group
-- You must have either a `depName` capture group or a `depNameTemplate` config field
-- You can optionally have a `packageName` capture group or a `packageNameTemplate` if it differs from `depName`
-- You must have either a `datasource` capture group or a `datasourceTemplate` config field
-- You can optionally have a `depType` capture group or a `depTypeTemplate` config field
-- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
-- You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
-- You can optionally have a `currentDigest` capture group.
-- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field
-  - If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array.
+- You must have either a `depName` capture group or a [`depNameTemplate` config field](https://docs.renovatebot.com/configuration-options/#depnametemplate)
+- You can optionally have a `packageName` capture group or a [`packageNameTemplate` config field] if it differs from `depName`
+- You must have either a [`datasource` capture group](https://docs.renovatebot.com/modules/datasource/#supported-datasources) or a [`datasourceTemplate` config field](https://docs.renovatebot.com/configuration-options/#datasourcetemplate)
+- You can optionally have a `depType` capture group or a [`depTypeTemplate` config field](https://docs.renovatebot.com/configuration-options/#deptypetemplate)  
+  See [manager specific documentation pages](https://docs.renovatebot.com/modules/manager/#supported-managers) for recommended values, other values are also possible.
+- You can optionally have a [`versioning` capture group](https://docs.renovatebot.com/modules/versioning/#supported-versioning) or a [`versioningTemplate` config field](https://docs.renovatebot.com/configuration-options/#versioningtemplate). If neither are present, `semver` will be used as the default
+- You can optionally have an `extractVersion` capture group or an [`extractVersionTemplate` config field](https://docs.renovatebot.com/configuration-options/#extractversiontemplate)
+- You can optionally have a [`currentDigest` capture group](https://docs.renovatebot.com/configuration-options/#digest).
+- You can optionally have a [`registryUrl` capture group](https://docs.renovatebot.com/configuration-options/#registryurls) or a [`registryUrlTemplate` config field](https://docs.renovatebot.com/configuration-options/#registryurltemplate)
+  - If it's a valid URL, it will be converted to the [`registryUrls` field](https://docs.renovatebot.com/configuration-options/#registryurls) as a single-length array.
 
 ### Regular Expression Capture Groups
 
@@ -44,8 +47,7 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VER
 You would need to capture the `currentValue` using a named capture group, like so: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`.
 
 If you're looking for an online regex testing tool that supports capture groups, try [https://regex101.com/](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
-Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
-You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
+Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g `\n\s` --> `\\n\\s`.
 
 ### Configuration templates
 
