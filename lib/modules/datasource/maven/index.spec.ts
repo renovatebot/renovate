@@ -34,10 +34,10 @@ interface MockOpts {
 
 function mockResource(
   protocol: string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
   mockers: {http?: Function; s3?: Function}
 ) {
   const {http, s3} = mockers;
-  console.log("mockResource:", protocol);
   switch (protocol) {
     case 'http:':
     case 'https:':
@@ -46,11 +46,9 @@ function mockResource(
       }
       break;
     case 's3:':
-      console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
       if (s3) {
         s3();
       }
-      console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
       break;
     default:
       throw new Error(`Unknown protocol: ${protocol}`)
@@ -279,15 +277,15 @@ describe('modules/datasource/maven/index', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  // it('returns releases from S3 repository', async () => {
-  //   mockGenericPackage({ base: baseUrlS3 });
-  //
-  //   console.log("qwe =========");
-  //   const res = await get('org.example:package', baseUrlS3);
-  //   console.log("asd =========");
-  //
-  //   expect(res).toMatchSnapshot();
-  // });
+  it('returns releases from S3 repository', async () => {
+    console.log("qwe =========");
+    mockGenericPackage({ base: baseUrlS3 });
+
+    const res = await get('org.example:package', baseUrlS3);
+    console.log("asd =========");
+
+    expect(res).toMatchSnapshot();
+  });
 
   it('collects releases from all registry urls', async () => {
     mockGenericPackage({ html: null });

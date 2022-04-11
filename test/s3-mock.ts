@@ -13,7 +13,7 @@ interface S3Url {
 let mockedObjects: any = {};
 
 function objectKey(url: S3Url) {
-  return `${url.Bucket}/${url.Key}`;
+  return `s3://${url.Bucket}/${url.Key}`;
 }
 
 function listObject(url: S3Url) {
@@ -42,7 +42,7 @@ function getObject(url: S3Url) {
 
 function mockObject(url: string, content: string | null) {
   console.log("mockObject:", url);
-  //mockedObjects[objectKey(url)] = !content ? true : content;
+  mockedObjects[url] = !content ? true : content;
 }
 
 const s3mock = {

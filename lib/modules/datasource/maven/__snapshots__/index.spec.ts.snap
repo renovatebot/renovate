@@ -1487,9 +1487,40 @@ Array [
 ]
 `;
 
-exports[`modules/datasource/maven/index returns releases from S3 repository 1`] = `null`;
-
-exports[`modules/datasource/maven/index returns releases from S3 repository 2`] = `Array []`;
+exports[`modules/datasource/maven/index returns releases from S3 repository 1`] = exports[`modules/datasource/maven/index returns releases from custom repository 1`] = `
+Object {
+  "display": "org.example:package",
+  "group": "org.example",
+  "name": "package",
+  "registryUrl": "s3://repobucket",
+  "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.0.1",
+    },
+    Object {
+      "version": "1.0.2",
+    },
+    Object {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    Object {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    Object {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    Object {
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
 
 exports[`modules/datasource/maven/index returns releases from custom repository 1`] = `
 Object {
