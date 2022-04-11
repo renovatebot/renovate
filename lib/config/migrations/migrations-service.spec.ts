@@ -1,5 +1,7 @@
 import type { RenovateConfig } from '../types';
+import { AbstractMigration } from './base/abstract-migration';
 import { MigrationsService } from './migrations-service';
+import type { Migration } from './types';
 
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
@@ -51,5 +53,33 @@ describe('config/migrations/migrations-service', () => {
       MigrationsService.isMigrated(originalConfig, migratedConfig)
     ).toBeTrue();
     expect(mappedProperties).toEqual(Object.keys(migratedConfig));
+  });
+
+  it('should allow custom migrations by regexp', () => {
+    let isMigrationDone = false;
+    const originalConfig: RenovateConfig = {
+      fooBar: 'one',
+    };
+    class CustomMigration extends AbstractMigration {
+      override readonly deprecated = true;
+      override readonly propertyName = /^foo/;
+
+      override run(): void {
+        isMigrationDone = true;
+      }
+    }
+
+    class CustomMigrationsService extends MigrationsService {
+      protected static override getMigrations(
+        original: RenovateConfig,
+        migrated: RenovateConfig
+      ): ReadonlyArray<Migration> {
+        return [new CustomMigration(original, migrated)];
+      }
+    }
+
+    const migratedConfig = CustomMigrationsService.run(originalConfig);
+    expect(migratedConfig).toEqual({});
+    expect(isMigrationDone).toBeTrue();
   });
 });
