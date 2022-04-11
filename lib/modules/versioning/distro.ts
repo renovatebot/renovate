@@ -47,6 +47,7 @@ export class DistroInfo {
     for (const v of arr) {
       const obj = { version: v, ...this._distroInfo[v.toString()] };
       if (!obj.eol) {
+        // istanbul ignore next
         continue;
       }
       this._sortedInfo.push(obj);
@@ -84,7 +85,8 @@ export class DistroInfo {
   }
 
   public isEolLts(input: string): boolean {
-    const schedule = this.getSchedule(input);
+    const ver = this.getVersionByCodename(input);
+    const schedule = this.getSchedule(ver);
     const endLts = schedule?.eol ?? null;
     let end = schedule?.eol_lts ?? null;
 
@@ -100,6 +102,7 @@ export class DistroInfo {
       return eol < now;
     }
 
+    // istanbul ignore next
     return true;
   }
 
