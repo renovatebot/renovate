@@ -17,6 +17,7 @@ import type {
   MavenDependency,
   MavenXml,
 } from './types';
+import {parseUrl} from "../../../util/url";
 
 // Singleton S3 instance initialized on-demand.
 let s3Instance: S3;
@@ -119,10 +120,8 @@ function isS3NotFound(err: { name: string; message: string }): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
 
-function parseS3Url(rawUrl: url.URL | string): { Bucket: string; Key: string } {
-  const parsedUrl = (
-    typeof rawUrl === 'string' ? url.parse(rawUrl, false) : rawUrl
-  ) as url.URL;
+function parseS3Url(rawUrl: string): { Bucket: string; Key: string } {
+  const parsedUrl = parseUrl(rawUrl);
   return {
     Bucket: parsedUrl.host,
     Key: parsedUrl.pathname.substring(1),
@@ -239,12 +238,11 @@ export async function checkResource(
   http: Http,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
-  const parsedUrl =
-    typeof pkgUrl === 'string' ? url.parse(pkgUrl, false) : pkgUrl;
+  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
   switch (parsedUrl.protocol) {
     case 'http:':
     case 'https:':
-      return await checkHttpResource(http, parsedUrl as url.URL);
+      return await checkHttpResource(http, parsedUrl);
       break;
     case 's3:':
       return await checkS3Resource(pkgUrl as url.URL);
