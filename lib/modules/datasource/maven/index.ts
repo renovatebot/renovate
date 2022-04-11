@@ -1,4 +1,3 @@
-import { S3 } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
@@ -85,7 +84,6 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 
 export class MavenDatasource extends Datasource {
   static id = 'maven';
-  protected s3: S3;
 
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
@@ -95,7 +93,6 @@ export class MavenDatasource extends Datasource {
 
   constructor(id = MavenDatasource.id) {
     super(id);
-    this.s3 = new S3({});
   }
 
   async fetchReleasesFromMetadata(
@@ -117,7 +114,6 @@ export class MavenDatasource extends Datasource {
 
     const { authorization, xml: mavenMetadata } = await downloadMavenXml(
       this.http,
-      this.s3,
       metadataUrl
     );
     if (!mavenMetadata) {
@@ -209,7 +205,6 @@ export class MavenDatasource extends Datasource {
 
     const { xml: mavenMetadata } = await downloadMavenXml(
       this.http,
-      this.s3,
       metadataUrl
     );
     if (!mavenMetadata) {
@@ -330,7 +325,7 @@ export class MavenDatasource extends Datasource {
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
 
-        const res = await checkResource(this.http, this.s3, artifactUrl);
+        const res = await checkResource(this.http, artifactUrl);
 
         if (is.date(res)) {
           release.releaseTimestamp = res.toISOString();
@@ -405,7 +400,6 @@ export class MavenDatasource extends Datasource {
       latestSuitableVersion &&
       (await getDependencyInfo(
         this.http,
-        this.s3,
         dependency,
         repoUrl,
         latestSuitableVersion

@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 import url from 'url';
-import type { S3 } from '@aws-sdk/client-s3';
+import { S3 } from '@aws-sdk/client-s3';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -17,6 +17,15 @@ import type {
   MavenDependency,
   MavenXml,
 } from './types';
+
+// Singleton S3 instance initialized on-demand.
+let s3Instance: S3;
+function getS3Client(): S3 {
+  if (!s3Instance) {
+    s3Instance = new S3({});
+  }
+  return s3Instance;
+}
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -121,7 +130,6 @@ function parseS3Url(rawUrl: url.URL | string): { Bucket: string; Key: string } {
 }
 
 export async function downloadS3Protocol(
-  s3: S3,
   pkgUrl: url.URL | string
 ): Promise<string> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
@@ -129,7 +137,7 @@ export async function downloadS3Protocol(
   let body: string;
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
-    const response = await s3.getObject(s3Url);
+    const response = await getS3Client().getObject(s3Url);
     const stream = response.Body as Readable;
     const buffers = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
@@ -195,12 +203,11 @@ async function checkHttpResource(
 }
 
 async function checkS3Resource(
-  s3: S3,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
-    const response = await s3.headObject(s3Url);
+    const response = await getS3Client().headObject(s3Url);
     logger.trace(
       {
         s3Url,
@@ -230,7 +237,6 @@ async function checkS3Resource(
 
 export async function checkResource(
   http: Http,
-  s3: S3,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl =
@@ -241,7 +247,7 @@ export async function checkResource(
       return await checkHttpResource(http, parsedUrl as url.URL);
       break;
     case 's3:':
-      return await checkS3Resource(s3, pkgUrl as url.URL);
+      return await checkS3Resource(pkgUrl as url.URL);
       break;
     default:
       logger.debug(
@@ -266,7 +272,6 @@ export function getMavenUrl(
 
 export async function downloadMavenXml(
   http: Http,
-  s3: S3,
   pkgUrl: url.URL | null
 ): Promise<MavenXml> {
   /* istanbul ignore if */
@@ -286,7 +291,7 @@ export async function downloadMavenXml(
       } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
-      rawContent = await downloadS3Protocol(s3, pkgUrl);
+      rawContent = await downloadS3Protocol(pkgUrl);
       break;
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
@@ -317,7 +322,6 @@ export function getDependencyParts(packageName: string): MavenDependency {
 
 export async function getDependencyInfo(
   http: Http,
-  s3: S3,
   dependency: MavenDependency,
   repoUrl: string,
   version: string,
@@ -327,7 +331,7 @@ export async function getDependencyInfo(
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const { xml: pomContent } = await downloadMavenXml(http, s3, pomUrl);
+  const { xml: pomContent } = await downloadMavenXml(http, pomUrl);
   // istanbul ignore if
   if (!pomContent) {
     return result;
@@ -368,7 +372,6 @@ export async function getDependencyInfo(
       const parentDependency = getDependencyParts(parentDisplayId);
       const parentInformation = await getDependencyInfo(
         http,
-        s3,
         parentDependency,
         repoUrl,
         parentVersion,
