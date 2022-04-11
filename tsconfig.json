@@ -31,5 +31,9 @@
     "coverage",
     "config.js",
     "tmp"
-  ]
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "swc": true
+  }
 }

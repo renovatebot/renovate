@@ -1,9 +1,12 @@
-import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
+import fs from 'fs';
+import type { Config } from '@jest/types';
+import JSON5 from 'json5';
+
+const swcrc = JSON5.parse(fs.readFileSync(`${__dirname}/.swcrc`, 'utf-8'));
 
 const ci = !!process.env.CI;
 
-const config: InitialOptionsTsJest = {
-  preset: 'ts-jest',
+const config: Config.InitialOptions = {
   cacheDirectory: '.cache/jest',
   coverageDirectory: './coverage',
   collectCoverage: true,
@@ -36,12 +39,14 @@ const config: InitialOptionsTsJest = {
   testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
   watchPathIgnorePatterns: ['<rootDir>/.cache/', '<rootDir>/coverage/'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-      diagnostics: false,
-      isolatedModules: true,
-    },
+
+  transform: {
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
+      {
+        ...swcrc,
+      },
+    ],
   },
 };
 

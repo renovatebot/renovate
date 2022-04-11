@@ -1,0 +1,18 @@
+{
+  "sourceMaps": true,
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "decorators": true,
+      "dynamicImport": false,
+      "keepClassNames": true
+    },
+    "transform": null,
+    "target": "es2020",
+    // TODO: fails, file bug
+    "preserveAllComments": false
+  },
+  "module": {
+    "type": "commonjs"
+  }
+}
