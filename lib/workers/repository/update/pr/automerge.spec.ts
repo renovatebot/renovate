@@ -1,4 +1,5 @@
 import { getConfig, git, mocked, partial } from '../../../../../test/util';
+import { GlobalConfig } from '../../../../config/global';
 import { Pr, platform as _platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
@@ -103,6 +104,29 @@ describe('workers/repository/update/pr/automerge', () => {
         automerged: false,
         prAutomergeBlockReason: 'Conflicted',
       });
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun full should not automerge', async () => {
+      config.automerge = true;
+      GlobalConfig.set({ dryRun: 'full' });
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      });
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+    it('dryRun full pr-comment', async () => {
+      config.automergeType = 'pr-comment';
+      const expectedResult = {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      GlobalConfig.set({ dryRun: 'full' });
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual(expectedResult);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });

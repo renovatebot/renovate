@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
@@ -110,6 +111,7 @@ export class MigrationsService {
     UnpublishSafeMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,
+    DryRunMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
