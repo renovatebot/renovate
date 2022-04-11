@@ -9,6 +9,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
@@ -17,7 +18,6 @@ import type {
   MavenDependency,
   MavenXml,
 } from './types';
-import {parseUrl} from "../../../util/url";
 
 // Singleton S3 instance initialized on-demand.
 let s3Instance: S3;
