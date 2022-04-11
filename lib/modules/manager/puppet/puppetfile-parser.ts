@@ -11,9 +11,15 @@ const commentRegex = regEx(/#.*$/);
  *
  */
 export class Puppetfile {
-  private readonly forgeModules = new Map<PuppetForgeUrl, PuppetfileModule[]>();
+  private readonly forgeModules = new Map<
+    PuppetForgeUrl | null,
+    PuppetfileModule[]
+  >();
 
-  public add(currentForge: PuppetForgeUrl, module: PuppetfileModule): void {
+  public add(
+    currentForge: PuppetForgeUrl | null,
+    module: PuppetfileModule
+  ): void {
     if (Object.keys(module).length === 0) {
       return;
     }

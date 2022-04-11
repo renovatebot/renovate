@@ -7,4 +7,4 @@ export interface PuppetfileModule {
   skipReason?: SkipReason;
 }
 
-export type PuppetForgeUrl = string | undefined;
+export type PuppetForgeUrl = string | null;

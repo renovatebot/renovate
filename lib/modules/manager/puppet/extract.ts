@@ -10,7 +10,7 @@ import type { PuppetfileModule } from './types';
 
 function parseForgeDependency(
   module: PuppetfileModule,
-  forgeUrl?: string
+  forgeUrl: string | null
 ): PackageDependency {
   const dep: PackageDependency = {
     depName: module.name,
