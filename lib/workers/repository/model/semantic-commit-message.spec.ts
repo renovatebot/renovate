@@ -27,33 +27,47 @@ describe('workers/repository/model/semantic-commit-message', () => {
 
   it('should create instance from string without scope', () => {
     const instance = SemanticCommitMessage.fromString('feat: ticket 123');
-    const json = instance.toJSON();
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(json.type).toBe('feat');
-    expect(json.scope).toBe('');
-    expect(json.subject).toBe('ticket 123');
+    expect(instance.toJSON()).toEqual({
+      body: '',
+      footer: '',
+      scope: '',
+      subject: 'ticket 123',
+      type: 'feat',
+    });
   });
 
   it('should create instance from string with scope', () => {
     const instance = SemanticCommitMessage.fromString(
       'fix(dashboard): ticket 123'
     );
-    const json = instance.toJSON();
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(json.type).toBe('fix');
-    expect(json.scope).toBe('dashboard');
-    expect(json.subject).toBe('ticket 123');
+    expect(instance.toJSON()).toEqual({
+      body: '',
+      footer: '',
+      scope: 'dashboard',
+      subject: 'ticket 123',
+      type: 'fix',
+    });
   });
 
   it('should create instance from string with empty description', () => {
     const instance = SemanticCommitMessage.fromString('fix(deps): ');
-    const json = instance.toJSON();
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(json.type).toBe('fix');
-    expect(json.scope).toBe('deps');
-    expect(json.subject).toBe('');
+    expect(instance.toJSON()).toEqual({
+      body: '',
+      footer: '',
+      scope: 'deps',
+      subject: '',
+      type: 'fix',
+    });
+  });
+
+  it('should return undefined for invalid string', () => {
+    const instance = SemanticCommitMessage.fromString('test');
+    expect(instance).toBeUndefined();
   });
 });

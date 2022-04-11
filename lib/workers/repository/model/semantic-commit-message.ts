@@ -24,9 +24,14 @@ export class SemanticCommitMessage extends CommitMessage {
     return value instanceof SemanticCommitMessage;
   }
 
-  static fromString(value: string): SemanticCommitMessage {
-    const { groups = {} } = value.match(SemanticCommitMessage.#REGEXP) ?? {};
+  static fromString(value: string): SemanticCommitMessage | undefined {
+    const match = value.match(SemanticCommitMessage.#REGEXP);
 
+    if (!match) {
+      return undefined;
+    }
+
+    const { groups = {} } = match;
     const message = new SemanticCommitMessage();
     message.type = groups.type;
     message.scope = groups.scope;
