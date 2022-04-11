@@ -4,8 +4,8 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
-import { resolvePackage } from './npmrc';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
 
 let memcache: Record<string, string> = {};
@@ -52,6 +52,7 @@ function getPackageSource(repository: any): PackageSource {
 
 export async function getDependency(
   http: Http,
+  registryUrl: string,
   packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
@@ -62,7 +63,7 @@ export async function getDependency(
     return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
-  const { packageUrl, registryUrl } = resolvePackage(packageName);
+  const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
@@ -86,9 +87,9 @@ export async function getDependency(
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags'].latest];
-    res.repository = res.repository || latestVersion.repository;
-    res.homepage = res.homepage || latestVersion.homepage;
+    const latestVersion = res.versions[res['dist-tags']?.latest];
+    res.repository = res.repository || latestVersion?.repository;
+    res.homepage = res.homepage || latestVersion?.homepage;
 
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
@@ -104,7 +105,7 @@ export async function getDependency(
       registryUrl,
     };
 
-    if (latestVersion.deprecated) {
+    if (latestVersion?.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
     }

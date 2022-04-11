@@ -717,7 +717,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Additional git authors which are ignored by Renovate. Must conform to RFC5322.',
+      'Additional Git authors which are ignored by Renovate. Must conform to RFC5322.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -742,6 +742,7 @@ const options: RenovateOptions[] = [
     description:
       'Skip any package file whose path matches one of these. Can be a string or glob pattern.',
     type: 'array',
+    mergeable: false,
     subType: 'string',
     stage: 'repository',
     default: ['**/node_modules/**', '**/bower_components/**'],
@@ -1024,6 +1025,18 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchSourceUrls',
+    description: 'A list of source URLs to exact match against.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementName',
     description:
       'The name of the new dependency that replaces the old deprecated dependency.',
@@ -1242,7 +1255,7 @@ const options: RenovateOptions[] = [
     default: {
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
-      commitMessageTopic: '{{{depName}}} commit hash',
+      commitMessageTopic: '{{{depName}}} digest',
     },
     cli: false,
     mergeable: true,
@@ -2180,7 +2193,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitNoVerify',
     description:
-      'Which git commands will be run with the `--no-verify` option.',
+      'Which Git commands will be run with the `--no-verify` option.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -2199,7 +2212,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitUrl',
     description:
-      'Overrides the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
+      'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
@@ -2237,7 +2250,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'platformCommit',
-    description: `Use platform API to perform commits instead of using git directly.`,
+    description: `Use platform API to perform commits instead of using Git directly.`,
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],

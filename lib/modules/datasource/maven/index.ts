@@ -237,6 +237,37 @@ export class MavenDatasource extends Datasource {
     return `${version}/${dependency.name}-${version}.pom`;
   }
 
+  /**
+   *
+   * Double-check releases using HEAD request and
+   * attach timestamps obtained from `Last-Modified` header.
+   *
+   * Example input:
+   *
+   * {
+   *   '1.0.0': {
+   *     version: '1.0.0',
+   *     releaseTimestamp: '2020-01-01T01:00:00.000Z',
+   *   },
+   *   '1.0.1': null,
+   * }
+   *
+   * Example output:
+   *
+   * {
+   *   '1.0.0': {
+   *     version: '1.0.0',
+   *     releaseTimestamp: '2020-01-01T01:00:00.000Z',
+   *   },
+   *   '1.0.1': {
+   *     version: '1.0.1',
+   *     releaseTimestamp: '2021-01-01T01:00:00.000Z',
+   *   }
+   * }
+   *
+   * It should validate `1.0.0` with HEAD request, but leave `1.0.1` intact.
+   *
+   */
   async addReleasesUsingHeadRequests(
     inputReleaseMap: ReleaseMap,
     dependency: MavenDependency,
@@ -249,62 +280,76 @@ export class MavenDatasource extends Datasource {
     }
 
     const cacheNs = 'datasource-maven:head-requests';
+    const cacheTimeoutNs = 'datasource-maven:head-requests-timeout';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-    const oldReleaseMap: ReleaseMap | undefined =
-      await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
-    const newReleaseMap: ReleaseMap = oldReleaseMap ?? {};
 
-    if (!oldReleaseMap) {
-      const unknownVersions = Object.entries(releaseMap)
-        .filter(([version, release]) => {
-          const isDiscoveredOutside = !!release;
-          const isDiscoveredInsideAndCached = !is.undefined(
-            newReleaseMap[version]
-          );
-          const isDiscovered =
-            isDiscoveredOutside || isDiscoveredInsideAndCached;
-          return !isDiscovered;
-        })
-        .map(([k]) => k);
+    // Store cache validity as the separate flag.
+    // This allows both cache updating and resetting.
+    //
+    // Even if new version is being released each 10 minutes,
+    // we still want to reset the whole cache after 24 hours.
+    const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
 
-      if (unknownVersions.length) {
-        let retryEarlier = false;
-        const queue = unknownVersions.map(
-          (version) => async (): Promise<void> => {
-            const pomUrl = await this.createUrlForDependencyPom(
-              version,
-              dependency,
-              repoUrl
-            );
-            const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
-            const release: Release = { version };
-
-            const res = await checkHttpResource(this.http, artifactUrl);
-
-            if (res === 'error') {
-              retryEarlier = true;
-            }
-
-            if (is.date(res)) {
-              release.releaseTimestamp = res.toISOString();
-            }
-
-            if (res !== 'not-found' && res !== 'error') {
-              newReleaseMap[version] = release;
-            }
-          }
-        );
-
-        await pAll(queue, { concurrency: 5 });
-        const cacheTTL = retryEarlier ? 60 : 24 * 60;
-        await packageCache.set(cacheNs, cacheKey, newReleaseMap, cacheTTL);
+    let cachedReleaseMap: ReleaseMap = {};
+    // istanbul ignore if
+    if (isCacheValid) {
+      const cache = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
+      if (cache) {
+        cachedReleaseMap = cache;
       }
     }
 
-    for (const version of Object.keys(releaseMap)) {
-      releaseMap[version] ||= newReleaseMap[version] ?? null;
+    // List versions to check with HEAD request
+    const freshVersions = Object.entries(releaseMap)
+      .filter(([version, release]) => {
+        // Release is present in maven-metadata.xml,
+        // but haven't been validated yet
+        const isValidatedAtPreviousSteps = release !== null;
+
+        // Release was validated and cached with HEAD request during previous run
+        const isValidatedHere = !is.undefined(cachedReleaseMap[version]);
+
+        // Select only valid releases not yet verified with HEAD request
+        return !isValidatedAtPreviousSteps && !isValidatedHere;
+      })
+      .map(([k]) => k);
+
+    // Update cached data with freshly discovered versions
+    if (freshVersions.length) {
+      const queue = freshVersions.map((version) => async (): Promise<void> => {
+        const pomUrl = await this.createUrlForDependencyPom(
+          version,
+          dependency,
+          repoUrl
+        );
+        const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
+        const release: Release = { version };
+
+        const res = await checkHttpResource(this.http, artifactUrl);
+
+        if (is.date(res)) {
+          release.releaseTimestamp = res.toISOString();
+        }
+
+        cachedReleaseMap[version] =
+          res !== 'not-found' && res !== 'error' ? release : null;
+      });
+
+      await pAll(queue, { concurrency: 5 });
+
+      if (!isCacheValid) {
+        // Store new TTL flag for 24 hours if the previous one is invalidated
+        await packageCache.set(cacheTimeoutNs, cacheKey, 'long', 24 * 60);
+      }
+
+      // Store updated cache object
+      await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, 24 * 60);
     }
 
+    // Filter releases with the versions validated via HEAD request
+    for (const version of Object.keys(releaseMap)) {
+      releaseMap[version] = cachedReleaseMap[version] ?? null;
+    }
     return releaseMap;
   }
 

@@ -12,7 +12,6 @@ import type {
 } from './types';
 import {
   getVars,
-  isGradleFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -68,7 +67,7 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else if (isGradleFile(packageFile)) {
+      } else {
         const vars = getVars(registry, dir);
         const {
           deps,
@@ -118,5 +117,6 @@ export async function extractAllPackageFiles(
     }
   });
 
-  return Object.values(packageFilesByName);
+  const result = Object.values(packageFilesByName);
+  return result;
 }

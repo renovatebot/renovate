@@ -179,9 +179,8 @@ export async function ensurePr(
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle, upgrades } = config;
-  const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
-    config.branchName
-  ];
+  const dependencyDashboardCheck =
+    config.dependencyDashboardChecks?.[config.branchName];
   // Check if existing PR exists
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {
