@@ -41,7 +41,7 @@ export class DistroInfo {
     }
 
     const arr = Object.keys(this._distroInfo).sort(
-      (a, b) => parseFloat(a) - parseInt(b)
+      (a, b) => parseFloat(a) - parseFloat(b)
     );
 
     for (const v of arr) {
@@ -54,15 +54,30 @@ export class DistroInfo {
     }
   }
 
+  /**
+   * Check if input is a valid release codename
+   * @param input A codename
+   * @returns true if input is a codename, false otherwise
+   */
   public isCodename(input: string): boolean {
     return this._codenameToVersion.has(input);
   }
 
+  /**
+   * Checks if given input string is a valid release version
+   * @param input A codename/semVer
+   * @returns true if release exists, false otherwise
+   */
   public exists(input: string): boolean {
     const ver = this.getVersionByCodename(input);
     return !!this._distroInfo[ver];
   }
 
+  /**
+   * Get semVer representation of a given codename
+   * @param input A codename
+   * @returns A semVer if exists, otherwise input string is returned
+   */
   public getVersionByCodename(input: string): string {
     const schedule = this._codenameToVersion.get(input);
     if (schedule) {
@@ -71,6 +86,11 @@ export class DistroInfo {
     return input;
   }
 
+  /**
+   * Get codename representation of a given semVer
+   * @param input A semVer
+   * @returns A codename if exists, otherwise input string is returned
+   */
   public getCodenameByVersion(input: string): string {
     const di = this._distroInfo[input];
     if (di) {
@@ -80,10 +100,21 @@ export class DistroInfo {
     return input;
   }
 
+  /**
+   * Get schedule of a given release
+   * @param input A codename/semVer
+   * @returns A schedule if available, otherwise undefined
+   */
   public getSchedule(input: string): DistroSchedule {
-    return this._distroInfo[input];
+    const ver = this.getVersionByCodename(input);
+    return this._distroInfo[ver];
   }
 
+  /**
+   * Check if a given release has passed its EOL
+   * @param input A codename/semVer
+   * @returns false if still supported, true otherwise
+   */
   public isEolLts(input: string): boolean {
     const ver = this.getVersionByCodename(input);
     const schedule = this.getSchedule(ver);
@@ -106,6 +137,13 @@ export class DistroInfo {
     return true;
   }
 
+  /**
+   * Get distro info for the release that has N other newer releases.
+   * Example: n=0 corresponds to the latest available release, n=1 the release before, etc.
+   * In Debian terms: N = 0 -> stable, N = 1 -> oldstable, N = 2 -> oldoldstalbe
+   * @param n
+   * @returns Distro info of the Nth latest release
+   */
   public getNLatest(n: number): DistroInfoRecordWithVersion | null {
     const len = this._sortedInfo.length - 1;
     const i = len - n;

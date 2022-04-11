@@ -3,14 +3,14 @@ import { DistroInfo } from './distro';
 describe('modules/versioning/distro', () => {
   const di = new DistroInfo('data/ubuntu-distro-info.json');
 
-  test.each`
+  it.each`
     version            | expected
-    ${'warty'}         | ${true}
+    ${'jammy'}         | ${true}
+    ${'impish'}        | ${true}
+    ${'hirsute'}       | ${true}
+    ${'groovy'}        | ${true}
     ${'focal'}         | ${true}
-    ${'breezy'}        | ${true}
-    ${'edgy'}          | ${true}
-    ${'lucid'}         | ${true}
-    ${'xenial'}        | ${true}
+    ${'eoan'}          | ${true}
     ${'Wily Werewolf'} | ${false}
     ${'asdf'}          | ${false}
     ${'Yakkety'}       | ${false}
@@ -18,16 +18,16 @@ describe('modules/versioning/distro', () => {
     expect(di.isCodename(version)).toBe(expected);
   });
 
-  test.each`
-    version     | expected
-    ${'warty'}  | ${'4.10'}
-    ${'focal'}  | ${'20.04'}
-    ${'breezy'} | ${'5.10'}
-    ${'edgy'}   | ${'6.10'}
-    ${'lucid'}  | ${'10.04'}
-    ${'xenial'} | ${'16.04'}
-    ${'asd'}    | ${'asd'}
-    ${'16.06'}  | ${'16.06'}
+  it.each`
+    version      | expected
+    ${'jammy'}   | ${'22.04'}
+    ${'impish'}  | ${'21.10'}
+    ${'hirsute'} | ${'21.04'}
+    ${'groovy'}  | ${'20.10'}
+    ${'focal'}   | ${'20.04'}
+    ${'eoan'}    | ${'19.10'}
+    ${'asd'}     | ${'asd'}
+    ${'16.06'}   | ${'16.06'}
   `(
     'getVersionByCodename("$version") === $expected',
     ({ version, expected }) => {
@@ -35,17 +35,16 @@ describe('modules/versioning/distro', () => {
     }
   );
 
-  test.each`
-    version     | expected
-    ${'4.10'}   | ${'warty'}
-    ${'20.04'}  | ${'focal'}
-    ${'5.10'}   | ${'breezy'}
-    ${'6.10'}   | ${'edgy'}
-    ${'10.04'}  | ${'lucid'}
-    ${'16.04'}  | ${'xenial'}
-    ${'asd'}    | ${'asd'}
-    ${'16.06'}  | ${'16.06'}
-    ${'breezy'} | ${'breezy'}
+  it.each`
+    version    | expected
+    ${'22.04'} | ${'jammy'}
+    ${'21.10'} | ${'impish'}
+    ${'21.04'} | ${'hirsute'}
+    ${'20.10'} | ${'groovy'}
+    ${'20.04'} | ${'focal'}
+    ${'19.10'} | ${'eoan'}
+    ${'asd'}   | ${'asd'}
+    ${'16.06'} | ${'16.06'}
   `(
     'getCodenameByVersion("$version") === $expected',
     ({ version, expected }) => {
@@ -53,45 +52,37 @@ describe('modules/versioning/distro', () => {
     }
   );
 
-  test.each`
+  it.each`
     version            | expected
-    ${'warty'}         | ${true}
+    ${'jammy'}         | ${true}
+    ${'impish'}        | ${true}
+    ${'hirsute'}       | ${true}
+    ${'groovy'}        | ${true}
     ${'focal'}         | ${true}
-    ${'breezy'}        | ${true}
-    ${'edgy'}          | ${true}
-    ${'lucid'}         | ${true}
-    ${'xenial'}        | ${true}
+    ${'Wily Werewolf'} | ${false}
+    ${'22.04'}         | ${true}
+    ${'21.10'}         | ${true}
+    ${'21.04'}         | ${true}
+    ${'20.10'}         | ${true}
     ${'Wily Werewolf'} | ${false}
     ${'asdf'}          | ${false}
-    ${'Yakkety'}       | ${false}
-    ${'20.04'}         | ${true}
-    ${'5.10'}          | ${true}
-    ${'6.10'}          | ${true}
-    ${'10.04'}         | ${true}
-    ${'16.04'}         | ${true}
-    ${'Wily Werewolf'} | ${false}
-    ${'asdf'}          | ${false}
-    ${'Yakkety'}       | ${false}
+    ${'Jellyfish'}     | ${false}
   `('exists("$version") === $expected', ({ version, expected }) => {
     expect(di.exists(version)).toBe(expected);
   });
 
-  test.each`
-    version     | expected
-    ${'warty'}  | ${true}
-    ${'breezy'} | ${true}
-    ${'edgy'}   | ${true}
-    ${'lucid'}  | ${true}
-    ${'xenial'} | ${true}
-    ${'5.10'}   | ${true}
-    ${'6.10'}   | ${true}
-    ${'10.04'}  | ${true}
-    ${'16.04'}  | ${true}
-    ${'20.04'}  | ${false}
-    ${'focal'}  | ${false}
-    ${'21.04'}  | ${true}
-    ${'21.10'}  | ${false}
-    ${'22.04'}  | ${false}
+  it.each`
+    version      | expected
+    ${'focal'}   | ${false}
+    ${'groovy'}  | ${true}
+    ${'hirsute'} | ${true}
+    ${'impish'}  | ${false}
+    ${'jammy'}   | ${false}
+    ${'20.04'}   | ${false}
+    ${'20.10'}   | ${true}
+    ${'21.04'}   | ${true}
+    ${'21.10'}   | ${false}
+    ${'22.04'}   | ${false}
   `('isEolLts("$version") === $expected', ({ version, expected }) => {
     expect(di.isEolLts(version)).toBe(expected);
   });
@@ -117,16 +108,6 @@ describe('modules/versioning/distro', () => {
       release: '2021-10-14',
       eol: '2022-07-14',
       version: '21.10',
-    });
-  });
-
-  it('retrieves warty release schedule', () => {
-    expect(di.getSchedule('4.10')).toEqual({
-      codename: 'Warty Warthog',
-      created: '2004-03-05',
-      eol: '2006-04-30',
-      release: '2004-10-20',
-      series: 'warty',
     });
   });
 
