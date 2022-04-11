@@ -4,8 +4,6 @@ import { resolveBaseUrl } from '../url';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from '.';
 
-const API_PATH = 'api/v1/';
-
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
   baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12875
@@ -29,7 +27,7 @@ function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
 }
 
 function resolveUrl(path: string, base: string): URL {
-  const resolvedUrlString = resolveBaseUrl(base, API_PATH + path);
+  const resolvedUrlString = resolveBaseUrl(base, path);
   return new URL(resolvedUrlString);
 }
 
