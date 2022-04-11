@@ -1,11 +1,13 @@
+// eslint-disable-next-line import/order
+import s3mock from '../../../../test/s3-mock';
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import * as s3Mock from '../../../../test/s3-mock';
 import { loadFixture } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';
+import {parseUrl} from "../../../util/url";
 
 const datasource = MavenDatasource.id;
 
@@ -30,6 +32,31 @@ interface MockOpts {
   html?: string;
 }
 
+function mockResource(
+  protocol: string,
+  mockers: {http?: Function; s3?: Function}
+) {
+  const {http, s3} = mockers;
+  console.log("mockResource:", protocol);
+  switch (protocol) {
+    case 'http:':
+    case 'https:':
+      if (http) {
+        http();
+      }
+      break;
+    case 's3:':
+      console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+      if (s3) {
+        s3();
+      }
+      console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      break;
+    default:
+      throw new Error(`Unknown protocol: ${protocol}`)
+  }
+}
+
 function mockGenericPackage(opts: MockOpts = {}) {
   const {
     dep = 'org.example:package',
@@ -37,6 +64,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
     latest = '2.0.0',
     html,
   } = opts;
+  const protocol = parseUrl(base).protocol;
   const meta =
     opts.meta === undefined ? loadFixture('metadata.xml') : opts.meta;
   const pom = opts.pom === undefined ? loadFixture('pom.xml') : opts.pom;
@@ -69,25 +97,32 @@ function mockGenericPackage(opts: MockOpts = {}) {
         ]
       : opts.snapshots;
 
-  const scope = httpMock.scope(base);
-
   const [group, artifact] = dep.split(':');
   const packagePath = `${group.replace(/\./g, '/')}/${artifact}`;
 
-  if (meta) {
-    scope.get(`/${packagePath}/maven-metadata.xml`).reply(200, meta);
-  }
+  mockResource(protocol, {
+    http: () => httpMock.scope(base).get(`/${packagePath}/maven-metadata.xml`).reply(200, meta),
+    s3: () => s3mock.mockObject(`${base}/${packagePath}/maven-metadata.xml`, meta)
+  });
 
   if (html) {
-    scope.get(`/${packagePath}/index.html`).reply(200, html);
+    mockResource(protocol, {
+      http: () => httpMock.scope(base).get(`/${packagePath}/index.html`).reply(200, html),
+      s3: () => s3mock.mockObject(`${base}/${packagePath}/index.html`, html)
+    });
   } else if (html === null) {
-    scope.get(`/${packagePath}/index.html`).reply(404);
+    mockResource(protocol, {
+      http: () => httpMock.scope(base).get(`/${packagePath}/index.html`).reply(404)
+    });
   }
 
   if (pom) {
-    scope
-      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
-      .reply(200, pom);
+    mockResource(protocol, {
+      http: () => httpMock.scope(base)
+        .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
+        .reply(200, pom),
+      s3: () => s3mock.mockObject(`${base}/${packagePath}/${latest}/${artifact}-${latest}.pom`, pom)
+    });
   }
 
   if (jars) {
@@ -101,22 +136,30 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const headers = version.startsWith('0.')
         ? {}
         : { 'Last-Modified': timestamp };
-      scope
-        .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
-        .reply(status, '', headers);
+      mockResource(protocol, {
+        http: () => httpMock.scope(base)
+          .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
+          .reply(status, '', headers),
+        s3: () => s3mock.mockObject(`${base}/${packagePath}/${version}/${artifact}-${version}.pom`, '')
+      });
     });
   }
 
   if (snapshots) {
     snapshots.forEach((snapshot) => {
       if (snapshot.meta) {
-        scope
-          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
-          .reply(200, snapshot.meta);
+        mockResource(protocol, {
+          http: () => httpMock.scope(base)
+            .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+            .reply(200, snapshot.meta),
+          s3: () => s3mock.mockObject(`${base}/${packagePath}/${snapshot.version}/maven-metadata.xml`, snapshot.meta)
+        });
       } else {
-        scope
-          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
-          .reply(404, '');
+        mockResource(protocol, {
+          http: () => httpMock.scope(base)
+            .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+            .reply(404, '')
+        });
       }
 
       if (snapshot.jarStatus) {
@@ -126,22 +169,27 @@ function mockGenericPackage(opts: MockOpts = {}) {
           .map((x) => parseInt(x, 10))
           .map((x) => (x < 10 ? `0${x}` : `${x}`));
         const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
-        scope
-          .head(
-            `/${packagePath}/${
-              snapshot.version
-            }/${artifact}-${snapshot.version.replace(
-              '-SNAPSHOT',
-              ''
-            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
-          )
-          .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
+        const pomUrl =
+          `/${packagePath}/${
+            snapshot.version
+          }/${artifact}-${snapshot.version.replace(
+            '-SNAPSHOT',
+            ''
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`;
+        mockResource(protocol, {
+          http: () => httpMock.scope(base)
+            .head(pomUrl)
+            .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp }),
+          s3: () => s3mock.mockObject(`${base}${pomUrl}`, '')
+        });
       } else {
-        scope
-          .head(
-            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
-          )
-          .reply(404, '');
+        mockResource(protocol, {
+          http: () => httpMock.scope(base)
+            .head(
+              `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+            )
+            .reply(404, '')
+        });
       }
     });
   }
@@ -231,16 +279,15 @@ describe('modules/datasource/maven/index', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('returns releases from S3 repository', async () => {
-    //mockGenericPackage({ base: baseUrlS3 });
-
-    console.log("qwe =========");
-    const res = await get('org.example:package', baseUrlS3);
-    console.log("asd =========");
-
-    expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
+  // it('returns releases from S3 repository', async () => {
+  //   mockGenericPackage({ base: baseUrlS3 });
+  //
+  //   console.log("qwe =========");
+  //   const res = await get('org.example:package', baseUrlS3);
+  //   console.log("asd =========");
+  //
+  //   expect(res).toMatchSnapshot();
+  // });
 
   it('collects releases from all registry urls', async () => {
     mockGenericPackage({ html: null });

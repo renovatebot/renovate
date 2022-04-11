@@ -131,7 +131,7 @@ function parseS3Url(rawUrl: string): { Bucket: string; Key: string } {
 export async function downloadS3Protocol(
   pkgUrl: url.URL | string
 ): Promise<string> {
-  console.log("downloadS3Protocol", pkgUrl.toString(), s3);
+  console.log("downloadS3Protocol", pkgUrl.toString());
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   // let raw: GetObjectCommandOutput;
   let body: string;
@@ -146,7 +146,7 @@ export async function downloadS3Protocol(
       stream.once('error', reject);
     });
     body = buffers.toString();
-    console.log("downloadS3Protocol", {body});
+    console.log("downloadS3Protocol complete", {body});
     return body;
   } catch (err) {
     console.log("err", err);
@@ -275,7 +275,6 @@ export async function downloadMavenXml(
   http: Http,
   pkgUrl: url.URL | null
 ): Promise<MavenXml> {
-  console.log("downloadMavenXml", pkgUrl.toString());
   /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
