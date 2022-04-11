@@ -8,7 +8,7 @@ import { AutomergeMigration } from './custom/automerge-migration';
 import { AutomergeMinorMigration } from './custom/automerge-minor-migration';
 import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
-import { AzureAutoCompleteMigration } from './custom/azure-auto-complete-migration';
+import { AzureGitLabAutomergeMigration } from './custom/azure-gitlab-automerge-migration';
 import { BaseBranchMigration } from './custom/base-branch-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { BranchNameMigration } from './custom/branch-name-migration';
@@ -17,7 +17,6 @@ import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
-import { GitLabAutomergeMigration } from './custom/gitlab-automerge-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -79,7 +78,7 @@ export class MigrationsService {
     AutomergeMinorMigration,
     AutomergePatchMigration,
     AutomergeTypeMigration,
-    AzureAutoCompleteMigration,
+    AzureGitLabAutomergeMigration,
     BaseBranchMigration,
     BinarySourceMigration,
     BranchNameMigration,
@@ -88,7 +87,6 @@ export class MigrationsService {
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
     ExtendsMigration,
-    GitLabAutomergeMigration,
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,
