@@ -153,100 +153,16 @@ Regardless of platform, you need to select a user account for `renovate` to assu
 It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
 It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
-#### GitHub (Enterprise Server)
+#### Docs
 
-First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+Read the platform-specific docs to learn how to setup authentication on your platform:
 
-For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
-
-##### Running as a GitHub App
-
-Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
-
-When creating the GitHub App give it the following permissions:
-
-- Checks: Read & write
-- Contents: Read & write
-- Issues: Read & write
-- Metadata: Read-only
-- Pull requests: Read & write
-- Commit statuses: Read & write
-- Dependabot alerts: Read-only
-- Workflows: Read & write
-- Members: Read
-
-Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
-
-Inside your `config.js` you need to set the following values, assuming the name of your app is `self-hosted-renovate`:
-
-**`username:"self-hosted-renovate[bot]"`**
-
-The slug name of your app with `[bot]` appended
-
-**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
-
-The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
-A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
-
-**`token:"x-access-token:${github-app-installation}"`**
-
-The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
-
-<!-- prettier-ignore -->
-!!! note
-    The installation tokens expire after 1 hour and need to be regenerated regularly.
-    Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-
-**`repositories: ["orgname/repo-1","orgname/repo-2"]`**
-
-List of repositories to run on.
-Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
-The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
-
-#### GitLab
-
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes, or `read_user`, `read_api` and `read_repository` for dry runs).
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=gitlab` somewhere in config.
-
-#### Bitbucket Cloud
-
-First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
-Give the bot App password the following permission scopes:
-
-- [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
-- [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
-- [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
-- [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
-
-The bot also needs to be able to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
-
-Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
-Also be sure to configure the `username` for your bot account too.
-Don't forget to configure `platform=bitbucket` somewhere in config.
-
-#### Bitbucket Server
-
-Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for your bot account.
-Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
-Also configure the `username` for your bot account too, if you decided not to name it `@renovate-bot`.
-Don't forget to configure `platform=bitbucket-server` somewhere in config.
-
-If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
-
-#### Azure DevOps
-
-First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=azure` somewhere in config.
-
-#### Gitea
-
-First, [create an access token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for your bot account.
-Configure it as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=gitea` somewhere in config.
+- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
+- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
+- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
+- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [github.com and GitHub Enterprise Server](https://docs.renovatebot.com/modules/platform/github/)
+- [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 
 ### GitHub.com token for release notes
 
