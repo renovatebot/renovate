@@ -88,7 +88,6 @@ export function getConfig(input: string[]): AllConfig {
   });
 
   /* eslint-disable no-console */
-
   /* istanbul ignore next */
   function helpConsole(): void {
     console.log('  Examples:');
