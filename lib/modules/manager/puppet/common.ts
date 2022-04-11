@@ -46,8 +46,5 @@ function invalidUrl(git: string): PackageDependency {
 }
 
 export function isGithubUrl(git: string, parsedUrl: URL | undefined): boolean {
-  return (
-    (parsedUrl && parsedUrl.host === 'github.com') ||
-    git.startsWith('git@github.com')
-  );
+  return parsedUrl?.host === 'github.com' || git.startsWith('git@github.com');
 }

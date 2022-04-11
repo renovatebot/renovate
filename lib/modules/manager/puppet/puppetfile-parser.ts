@@ -11,10 +11,7 @@ const commentRegex = regEx(/#.*$/);
  *
  */
 export class Puppetfile {
-  private forgeModules: Map<PuppetForgeUrl, PuppetfileModule[]> = new Map<
-    PuppetForgeUrl,
-    PuppetfileModule[]
-  >();
+  private readonly forgeModules = new Map<PuppetForgeUrl, PuppetfileModule[]>();
 
   public add(currentForge: PuppetForgeUrl, module: PuppetfileModule): void {
     if (Object.keys(module).length === 0) {
@@ -32,17 +29,19 @@ export class Puppetfile {
     return Array.from(this.forgeModules.keys());
   }
 
-  public getModulesOfForge(forgeUrl: any): PuppetfileModule[] {
-    const modules = this.forgeModules.get(forgeUrl);
+  public getModulesOfForge(
+    forgeUrl: string | null | undefined
+  ): PuppetfileModule[] {
+    const modules = this.forgeModules.get(forgeUrl ?? null);
 
-    return modules || [];
+    return modules ?? [];
   }
 }
 
 export function parsePuppetfile(content: string): Puppetfile {
   const puppetfile: Puppetfile = new Puppetfile();
 
-  let currentForge: string | undefined = undefined;
+  let currentForge: string | null = null;
   let currentPuppetfileModule: PuppetfileModule = {};
 
   for (const rawLine of content.split(newlineRegex)) {

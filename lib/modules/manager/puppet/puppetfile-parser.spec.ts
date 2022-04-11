@@ -71,6 +71,20 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       ]);
     });
 
+    it('get default forge with null or undefined returns the same', () => {
+      const puppetFileContent = `mod 'puppetlabs/stdlib', '8.0.0', 'i should trigger a skip reason'`;
+      const puppetfile = parsePuppetfile(puppetFileContent);
+      expect(puppetfile.getForges()).toHaveLength(1);
+
+      const defaultRegistryModulesUndefined =
+        puppetfile.getModulesOfForge(undefined);
+      const defaultRegistryModulesNull = puppetfile.getModulesOfForge(null);
+
+      expect(defaultRegistryModulesUndefined).toEqual(
+        defaultRegistryModulesNull
+      );
+    });
+
     it('Puppetfile_multiple_forges', () => {
       const puppetfile = parsePuppetfile(
         Fixtures.get('Puppetfile.multiple_forges')

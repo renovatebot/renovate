@@ -66,20 +66,28 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
     };
   }
 
-  return {
+  const packageDependency: PackageDependency = {
     depName: moduleName,
-    packageName: githubUrl ? gitOwnerRepo : git,
-    repo: githubUrl ? undefined : git,
-    githubRepo: githubUrl ? gitOwnerRepo : undefined,
+    packageName: git,
+    repo: git,
     sourceUrl: git,
     gitRef: true,
     currentValue: tag,
-    datasource: githubUrl ? GithubTagsDatasource.id : GitTagsDatasource.id,
+    datasource: GitTagsDatasource.id,
   };
+
+  if (githubUrl) {
+    packageDependency.packageName = gitOwnerRepo;
+    packageDependency.repo = undefined;
+    packageDependency.githubRepo = gitOwnerRepo;
+    packageDependency.datasource = GithubTagsDatasource.id;
+  }
+
+  return packageDependency;
 }
 
 function isGitModule(module: PuppetfileModule): boolean {
-  return module.tags?.has('git') || false;
+  return module.tags?.has('git') ?? false;
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
