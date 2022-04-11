@@ -47,7 +47,8 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VER
 You would need to capture the `currentValue` using a named capture group, like so: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`.
 
 If you're looking for an online regex testing tool that supports capture groups, try [https://regex101.com/](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
-Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g `\n\s` --> `\\n\\s`.
+Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
+You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
 ### Configuration templates
 
