@@ -121,7 +121,7 @@ function isS3NotFound(err: { name: string; message: string }): boolean {
 }
 
 function parseS3Url(rawUrl: string): { Bucket: string; Key: string } {
-  const parsedUrl = parseUrl(rawUrl);
+  const parsedUrl = parseUrl(rawUrl) as url.URL;
   return {
     Bucket: parsedUrl.host,
     Key: parsedUrl.pathname.substring(1),
@@ -238,7 +238,7 @@ export async function checkResource(
   http: Http,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
-  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
+  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) as url.URL : pkgUrl;
   switch (parsedUrl.protocol) {
     case 'http:':
     case 'https:':
