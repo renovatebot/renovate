@@ -4,7 +4,7 @@ import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
-import { trimTrailingSlash } from '../../../util/url';
+import { trimLeadingSlash, trimTrailingSlash } from '../../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
@@ -123,9 +123,7 @@ export class BaseGoDatasource {
         // get server base url from import url
         const parsedUrl = URL.parse(goSourceUrl);
 
-        // split the go module from the URL: host/go/module -> go/module
-        const split = goModule.split('/');
-        const packageName = split[1] + '/' + split[2];
+        const packageName = trimLeadingSlash(parsedUrl.pathname);
 
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
