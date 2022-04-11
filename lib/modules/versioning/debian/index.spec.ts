@@ -49,7 +49,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${true}
     ${'experimental'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    expect(!!debian.isValid(version)).toBe(expected);
+    expect(debian.isValid(version)).toBe(expected);
   });
 
   test.each`
@@ -70,7 +70,7 @@ describe('modules/versioning/debian/index', () => {
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
       const res = debian.isCompatible(version, range);
-      expect(!!res).toBe(expected);
+      expect(res).toBe(expected);
     }
   );
 
@@ -82,7 +82,7 @@ describe('modules/versioning/debian/index', () => {
     ${'6'}       | ${true}
     ${'>=6'}     | ${false}
   `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!debian.isSingleVersion(version)).toBe(expected);
+    expect(debian.isSingleVersion(version)).toBe(expected);
   });
 
   test.each`
@@ -132,8 +132,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    const res = !!debian.isStable(version);
-    expect(res).toBe(expected);
+    expect(debian.isStable(version)).toBe(expected);
   });
 
   test.each`
@@ -193,7 +192,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!debian.isVersion(version)).toBe(expected);
+    expect(debian.isVersion(version)).toBe(expected);
   });
 
   test.each`

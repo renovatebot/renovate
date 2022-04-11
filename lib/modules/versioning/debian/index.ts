@@ -10,7 +10,7 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const EOL_PROP = 'eol';
+const RELEASE_PROP = 'release';
 
 class DebianVersioningApi extends GenericVersioningApi {
   private _distroInfo: DistroInfo;
@@ -92,7 +92,7 @@ class DebianVersioningApi extends GenericVersioningApi {
     ver = this._distroInfo.getVersionByCodename(ver);
     const isValid = super.isValid(ver);
     const schedule = this._distroInfo.getSchedule(ver);
-    return isValid && schedule && EOL_PROP in schedule;
+    return isValid && schedule && RELEASE_PROP in schedule;
   }
 
   override isCompatible(version: string, _current?: string): boolean {

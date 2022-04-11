@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import dataFiles, { DataFile } from '../../data-files.generated';
 
 interface DistroSchedule {
@@ -95,8 +96,8 @@ export class DistroInfo {
     }
 
     if (end) {
-      const now = new Date();
-      const eol = new Date(end);
+      const now = DateTime.now();
+      const eol = DateTime.fromISO(end);
       return eol < now;
     }
 

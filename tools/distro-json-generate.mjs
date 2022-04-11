@@ -74,8 +74,7 @@ async function update(url, file) {
   await updateJsonFile(file, json);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-update(ubuntuUrl, `./data/ubuntu-distro-info.json`);
-
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-update(debianUrl, `./data/debian-distro-info.json`);
+(async () => {
+  await update(ubuntuUrl, `./data/ubuntu-distro-info.json`);
+  await update(debianUrl, `./data/debian-distro-info.json`);
+})();
