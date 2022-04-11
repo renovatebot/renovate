@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
@@ -115,10 +116,10 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = migrations.find((item) => item.propertyName === key);
+      const migration = MigrationsService.#getMigration(migrations, key);
 
       if (migration) {
-        migration.run(value);
+        migration.run(value, key);
 
         if (migration.deprecated) {
           delete migratedConfig[key];
@@ -171,5 +172,18 @@ export class MigrationsService {
     }
 
     return migrations;
+  }
+
+  static #getMigration(
+    migrations: ReadonlyArray<Migration>,
+    key: string
+  ): Migration | undefined {
+    return migrations.find((migration) => {
+      if (is.regExp(migration.propertyName)) {
+        return migration.propertyName.test(key);
+      }
+
+      return migration.propertyName === key;
+    });
   }
 }

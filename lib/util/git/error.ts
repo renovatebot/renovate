@@ -11,6 +11,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
   const externalHostFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
+    'The requested URL returned error: 403',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',

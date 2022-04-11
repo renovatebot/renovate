@@ -2,95 +2,90 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { GitlabPipeline } from './types';
+import type { GitlabPipeline, Image, Job, Services } from './types';
 import { replaceReferenceTags } from './utils';
 
-const commentsRe = regEx(/^\s*#/);
-const aliasesRe = regEx(`^\\s*-?\\s*alias:`);
-const whitespaceRe = regEx(`^(?<whitespace>\\s*)`);
-const imageRe = regEx(
-  `^(?<whitespace>\\s*)image:(?:\\s+['"]?(?<image>[^\\s'"]+)['"]?)?\\s*$`
-);
-const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
-const serviceRe = regEx(
-  `^\\s*-?\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+[^:]$)['"]?\\s*$`
-);
-function skipCommentAndAliasLines(
-  lines: string[],
-  lineNumber: number
-): { lineNumber: number; line: string } {
-  let ln = lineNumber;
-  while (
-    ln < lines.length - 1 &&
-    (commentsRe.test(lines[ln]) || aliasesRe.test(lines[ln]))
-  ) {
-    ln += 1;
+export function extractFromImage(
+  image: Image | undefined
+): PackageDependency | null {
+  if (is.undefined(image)) {
+    return null;
   }
-  return { line: lines[ln], lineNumber: ln };
+  let dep: PackageDependency = null;
+  if (is.string(image)) {
+    dep = getDep(image);
+    dep.depType = 'image';
+  } else if (is.string(image?.name)) {
+    dep = getDep(image.name);
+    dep.depType = 'image-name';
+  }
+  return dep;
+}
+
+export function extractFromServices(
+  services: Services | undefined
+): PackageDependency[] {
+  if (is.undefined(services)) {
+    return [];
+  }
+  const deps: PackageDependency[] = [];
+  for (const service of services) {
+    if (is.string(service)) {
+      const dep = getDep(service);
+      dep.depType = 'service-image';
+      deps.push(dep);
+    } else if (is.string(service?.name)) {
+      const dep = getDep(service.name);
+      dep.depType = 'service-image';
+      deps.push(dep);
+    }
+  }
+  return deps;
+}
+
+export function extractFromJob(job: Job | undefined): PackageDependency[] {
+  if (is.undefined(job)) {
+    return [];
+  }
+  const deps: PackageDependency[] = [];
+  if (is.object(job)) {
+    const { image, services } = { ...job };
+    if (is.object(image) || is.string(image)) {
+      deps.push(extractFromImage(image));
+    }
+    if (is.array(services)) {
+      deps.push(...extractFromServices(services));
+    }
+  }
+  return deps;
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
-  const deps: PackageDependency[] = [];
+  let deps: PackageDependency[] = [];
   try {
-    const lines = content.split(newlineRegex);
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
-      const imageMatch = imageRe.exec(line);
-      if (imageMatch) {
-        switch (imageMatch.groups.image) {
-          case undefined:
-          case '': {
-            let blockLine;
-            do {
-              lineNumber += 1;
-              blockLine = lines[lineNumber];
-              const imageNameMatch = nameRe.exec(blockLine);
-              if (imageNameMatch) {
-                logger.trace(`Matched image name on line ${lineNumber}`);
-                const dep = getDep(imageNameMatch.groups.depName);
-                dep.depType = 'image-name';
-                deps.push(dep);
-                break;
-              }
-            } while (
-              whitespaceRe.exec(blockLine)?.groups.whitespace.length >
-              imageMatch.groups.whitespace.length
-            );
+    const doc = load(replaceReferenceTags(content), {
+      json: true,
+    }) as Record<string, Image | Services | Job>;
+    if (is.object(doc)) {
+      for (const [property, value] of Object.entries(doc)) {
+        switch (property) {
+          case 'image':
+            deps.push(extractFromImage(value as Image));
             break;
-          }
-          default: {
-            logger.trace(`Matched image on line ${lineNumber}`);
-            const dep = getDep(imageMatch.groups.image);
-            dep.depType = 'image';
-            deps.push(dep);
-          }
+
+          case 'services':
+            deps.push(...extractFromServices(value as Services));
+            break;
+
+          default:
+            deps.push(...extractFromJob(value as Job));
+            break;
         }
       }
-      const services = regEx(/^\s*services:\s*$/).test(line);
-      if (services) {
-        logger.trace(`Matched services on line ${lineNumber}`);
-        let foundImage: boolean;
-        do {
-          foundImage = false;
-          const serviceImageLine = skipCommentAndAliasLines(
-            lines,
-            lineNumber + 1
-          );
-          logger.trace(`serviceImageLine: "${serviceImageLine.line}"`);
-          const serviceImageMatch = serviceRe.exec(serviceImageLine.line);
-          if (serviceImageMatch) {
-            logger.trace('serviceImageMatch');
-            foundImage = true;
-            lineNumber = serviceImageLine.lineNumber;
-            const dep = getDep(serviceImageMatch.groups.depName);
-            dep.depType = 'service-image';
-            deps.push(dep);
-          }
-        } while (foundImage);
-      }
+      deps = deps.filter(is.truthy);
     }
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting GitLab CI dependencies');
