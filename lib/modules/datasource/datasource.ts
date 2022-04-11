@@ -1,4 +1,3 @@
-import { S3 } from '@aws-sdk/client-s3';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import type { HttpError } from '../../util/http';
@@ -12,7 +11,6 @@ import type {
 export abstract class Datasource implements DatasourceApi {
   protected constructor(public readonly id: string) {
     this.http = new Http(id);
-    this.s3 = new S3({});
   }
 
   caching: boolean | undefined;
@@ -28,7 +26,6 @@ export abstract class Datasource implements DatasourceApi {
   registryStrategy: 'first' | 'hunt' | 'merge' | undefined = 'first';
 
   protected http: Http;
-  protected s3: S3;
 
   abstract getReleases(
     getReleasesConfig: GetReleasesConfig

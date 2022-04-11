@@ -1,38 +1,269 @@
 {
-  "4.10": "warty",
-  "5.04": "hoary",
-  "5.10": "breezy",
-  "6.06": "dapper",
-  "6.10": "edgy",
-  "7.04": "feisty",
-  "7.10": "gutsy",
-  "8.04": "hardy",
-  "8.10": "intrepid",
-  "9.04": "jaunty",
-  "9.10": "karmic",
-  "10.04": "lucid",
-  "10.10": "maverick",
-  "11.04": "natty",
-  "11.10": "oneiric",
-  "12.04": "precise",
-  "12.10": "quantal",
-  "13.04": "raring",
-  "13.10": "saucy",
-  "14.04": "trusty",
-  "14.10": "utopic",
-  "15.04": "vivid",
-  "15.10": "wily",
-  "16.04": "xenial",
-  "16.10": "yakkety",
-  "17.04": "zesty",
-  "17.10": "artful",
-  "18.04": "bionic",
-  "18.10": "cosmic",
-  "19.04": "disco",
-  "19.10": "eoan",
-  "20.04": "focal",
-  "20.10": "groovy",
-  "21.04": "hirsute",
-  "21.10": "impish",
-  "22.04": "jammy"
+  "v4.10": {
+    "codename": "Warty Warthog",
+    "series": "warty",
+    "created": "2004-03-05",
+    "release": "2004-10-20",
+    "eol": "2006-04-30"
+  },
+  "v5.04": {
+    "codename": "Hoary Hedgehog",
+    "series": "hoary",
+    "created": "2004-10-20",
+    "release": "2005-04-08",
+    "eol": "2006-10-31"
+  },
+  "v5.10": {
+    "codename": "Breezy Badger",
+    "series": "breezy",
+    "created": "2005-04-08",
+    "release": "2005-10-12",
+    "eol": "2007-04-13"
+  },
+  "v6.06": {
+    "codename": "Dapper Drake",
+    "series": "dapper",
+    "created": "2005-10-12",
+    "release": "2006-06-01",
+    "eol": "2009-07-14",
+    "eol_server": "2011-06-01"
+  },
+  "v6.10": {
+    "codename": "Edgy Eft",
+    "series": "edgy",
+    "created": "2006-06-01",
+    "release": "2006-10-26",
+    "eol": "2008-04-26"
+  },
+  "v7.04": {
+    "codename": "Feisty Fawn",
+    "series": "feisty",
+    "created": "2006-10-26",
+    "release": "2007-04-19",
+    "eol": "2008-10-19"
+  },
+  "v7.10": {
+    "codename": "Gutsy Gibbon",
+    "series": "gutsy",
+    "created": "2007-04-19",
+    "release": "2007-10-18",
+    "eol": "2009-04-18"
+  },
+  "v8.04": {
+    "codename": "Hardy Heron",
+    "series": "hardy",
+    "created": "2007-10-18",
+    "release": "2008-04-24",
+    "eol": "2011-05-12",
+    "eol_server": "2013-05-09"
+  },
+  "v8.10": {
+    "codename": "Intrepid Ibex",
+    "series": "intrepid",
+    "created": "2008-04-24",
+    "release": "2008-10-30",
+    "eol": "2010-04-30"
+  },
+  "v9.04": {
+    "codename": "Jaunty Jackalope",
+    "series": "jaunty",
+    "created": "2008-10-30",
+    "release": "2009-04-23",
+    "eol": "2010-10-23"
+  },
+  "v9.10": {
+    "codename": "Karmic Koala",
+    "series": "karmic",
+    "created": "2009-04-23",
+    "release": "2009-10-29",
+    "eol": "2011-04-30"
+  },
+  "v10.04": {
+    "codename": "Lucid Lynx",
+    "series": "lucid",
+    "created": "2009-10-29",
+    "release": "2010-04-29",
+    "eol": "2013-05-09",
+    "eol_server": "2015-04-30"
+  },
+  "v10.10": {
+    "codename": "Maverick Meerkat",
+    "series": "maverick",
+    "created": "2010-04-29",
+    "release": "2010-10-10",
+    "eol": "2012-04-10"
+  },
+  "v11.04": {
+    "codename": "Natty Narwhal",
+    "series": "natty",
+    "created": "2010-10-10",
+    "release": "2011-04-28",
+    "eol": "2012-10-28"
+  },
+  "v11.10": {
+    "codename": "Oneiric Ocelot",
+    "series": "oneiric",
+    "created": "2011-04-28",
+    "release": "2011-10-13",
+    "eol": "2013-05-09"
+  },
+  "v12.04": {
+    "codename": "Precise Pangolin",
+    "series": "precise",
+    "created": "2011-10-13",
+    "release": "2012-04-26",
+    "eol": "2017-04-28",
+    "eol_server": "2017-04-28",
+    "eol_esm": "2019-04-28"
+  },
+  "v12.10": {
+    "codename": "Quantal Quetzal",
+    "series": "quantal",
+    "created": "2012-04-26",
+    "release": "2012-10-18",
+    "eol": "2014-05-16"
+  },
+  "v13.04": {
+    "codename": "Raring Ringtail",
+    "series": "raring",
+    "created": "2012-10-18",
+    "release": "2013-04-25",
+    "eol": "2014-01-27"
+  },
+  "v13.10": {
+    "codename": "Saucy Salamander",
+    "series": "saucy",
+    "created": "2013-04-25",
+    "release": "2013-10-17",
+    "eol": "2014-07-17"
+  },
+  "v14.04": {
+    "codename": "Trusty Tahr",
+    "series": "trusty",
+    "created": "2013-10-17",
+    "release": "2014-04-17",
+    "eol": "2019-04-25",
+    "eol_server": "2019-04-25",
+    "eol_esm": "2024-04-25"
+  },
+  "v14.10": {
+    "codename": "Utopic Unicorn",
+    "series": "utopic",
+    "created": "2014-04-17",
+    "release": "2014-10-23",
+    "eol": "2015-07-23"
+  },
+  "v15.04": {
+    "codename": "Vivid Vervet",
+    "series": "vivid",
+    "created": "2014-10-23",
+    "release": "2015-04-23",
+    "eol": "2016-02-04"
+  },
+  "v15.10": {
+    "codename": "Wily Werewolf",
+    "series": "wily",
+    "created": "2015-04-23",
+    "release": "2015-10-22",
+    "eol": "2016-07-28"
+  },
+  "v16.04": {
+    "codename": "Xenial Xerus",
+    "series": "xenial",
+    "created": "2015-10-22",
+    "release": "2016-04-21",
+    "eol": "2021-04-21",
+    "eol_server": "2021-04-21",
+    "eol_esm": "2026-04-23"
+  },
+  "v16.10": {
+    "codename": "Yakkety Yak",
+    "series": "yakkety",
+    "created": "2016-04-21",
+    "release": "2016-10-13",
+    "eol": "2017-07-20"
+  },
+  "v17.04": {
+    "codename": "Zesty Zapus",
+    "series": "zesty",
+    "created": "2016-10-13",
+    "release": "2017-04-13",
+    "eol": "2018-01-13"
+  },
+  "v17.10": {
+    "codename": "Artful Aardvark",
+    "series": "artful",
+    "created": "2017-04-13",
+    "release": "2017-10-19",
+    "eol": "2018-07-19"
+  },
+  "v18.04": {
+    "codename": "Bionic Beaver",
+    "series": "bionic",
+    "created": "2017-10-19",
+    "release": "2018-04-26",
+    "eol": "2023-04-26",
+    "eol_server": "2023-04-26",
+    "eol_esm": "2028-04-26"
+  },
+  "v18.10": {
+    "codename": "Cosmic Cuttlefish",
+    "series": "cosmic",
+    "created": "2018-04-26",
+    "release": "2018-10-18",
+    "eol": "2019-07-18"
+  },
+  "v19.04": {
+    "codename": "Disco Dingo",
+    "series": "disco",
+    "created": "2018-10-18",
+    "release": "2019-04-18",
+    "eol": "2020-01-23"
+  },
+  "v19.10": {
+    "codename": "Eoan Ermine",
+    "series": "eoan",
+    "created": "2019-04-18",
+    "release": "2019-10-17",
+    "eol": "2020-07-17"
+  },
+  "v20.04": {
+    "codename": "Focal Fossa",
+    "series": "focal",
+    "created": "2019-10-17",
+    "release": "2020-04-23",
+    "eol": "2025-04-23",
+    "eol_server": "2025-04-23",
+    "eol_esm": "2030-04-23"
+  },
+  "v20.10": {
+    "codename": "Groovy Gorilla",
+    "series": "groovy",
+    "created": "2020-04-23",
+    "release": "2020-10-22",
+    "eol": "2021-07-22"
+  },
+  "v21.04": {
+    "codename": "Hirsute Hippo",
+    "series": "hirsute",
+    "created": "2020-10-22",
+    "release": "2021-04-22",
+    "eol": "2022-01-20"
+  },
+  "v21.10": {
+    "codename": "Impish Indri",
+    "series": "impish",
+    "created": "2021-04-22",
+    "release": "2021-10-14",
+    "eol": "2022-07-14"
+  },
+  "v22.04": {
+    "codename": "Jammy Jellyfish",
+    "series": "jammy",
+    "created": "2021-10-14",
+    "release": "2022-04-21",
+    "eol": "2027-04-21",
+    "eol_server": "2027-04-21",
+    "eol_esm": "2032-04-21"
+  }
 }

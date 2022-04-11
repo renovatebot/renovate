@@ -114,7 +114,6 @@ export class MavenDatasource extends Datasource {
 
     const { authorization, xml: mavenMetadata } = await downloadMavenXml(
       this.http,
-      this.s3,
       metadataUrl
     );
     if (!mavenMetadata) {
@@ -206,7 +205,6 @@ export class MavenDatasource extends Datasource {
 
     const { xml: mavenMetadata } = await downloadMavenXml(
       this.http,
-      this.s3,
       metadataUrl
     );
     if (!mavenMetadata) {
@@ -327,7 +325,7 @@ export class MavenDatasource extends Datasource {
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
 
-        const res = await checkResource(this.http, this.s3, artifactUrl);
+        const res = await checkResource(this.http, artifactUrl);
 
         if (is.date(res)) {
           release.releaseTimestamp = res.toISOString();
@@ -402,7 +400,6 @@ export class MavenDatasource extends Datasource {
       latestSuitableVersion &&
       (await getDependencyInfo(
         this.http,
-        this.s3,
         dependency,
         repoUrl,
         latestSuitableVersion
