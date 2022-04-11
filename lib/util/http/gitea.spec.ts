@@ -2,8 +2,7 @@ import * as httpMock from '../../../test/http-mock';
 import { GiteaHttp, setBaseUrl } from './gitea';
 
 describe('util/http/gitea', () => {
-  const giteaApiHost = 'https://gitea.renovatebot.com/';
-  const basePath = '/api/v1';
+  const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   let giteaHttp: GiteaHttp;
 
@@ -12,13 +11,13 @@ describe('util/http/gitea', () => {
 
     jest.resetAllMocks();
 
-    setBaseUrl(giteaApiHost);
+    setBaseUrl(baseUrl);
   });
 
   it('supports responses without pagination when enabled', async () => {
     httpMock
-      .scope(giteaApiHost)
-      .get(`${basePath}/pagination-example-1`)
+      .scope(baseUrl)
+      .get('/pagination-example-1')
       .reply(200, { hello: 'world' });
 
     const res = await giteaHttp.getJson('pagination-example-1', {
@@ -30,15 +29,15 @@ describe('util/http/gitea', () => {
 
   it('supports root-level pagination', async () => {
     httpMock
-      .scope(giteaApiHost)
-      .get(`${basePath}/pagination-example-1`)
+      .scope(baseUrl)
+      .get('/pagination-example-1')
       .reply(200, ['abc', 'def', 'ghi'], { 'x-total-count': '5' })
-      .get(`${basePath}/pagination-example-1?page=2`)
+      .get('/pagination-example-1?page=2')
       .reply(200, ['jkl'])
-      .get(`${basePath}/pagination-example-1?page=3`)
+      .get('/pagination-example-1?page=3')
       .reply(200, ['mno', 'pqr']);
 
-    const res = await giteaHttp.getJson(`pagination-example-1`, {
+    const res = await giteaHttp.getJson(`${baseUrl}/pagination-example-1`, {
       paginate: true,
     });
 
@@ -49,12 +48,12 @@ describe('util/http/gitea', () => {
 
   it('supports pagination on data property', async () => {
     httpMock
-      .scope(giteaApiHost)
-      .get(`${basePath}/pagination-example-2`)
+      .scope(baseUrl)
+      .get('/pagination-example-2')
       .reply(200, { data: ['abc', 'def', 'ghi'] }, { 'x-total-count': '5' })
-      .get(`${basePath}/pagination-example-2?page=2`)
+      .get('/pagination-example-2?page=2')
       .reply(200, { data: ['jkl'] })
-      .get(`${basePath}/pagination-example-2?page=3`)
+      .get('/pagination-example-2?page=3')
       .reply(200, { data: ['mno', 'pqr'] });
 
     const res = await giteaHttp.getJson<{ data: string[] }>(
@@ -69,10 +68,10 @@ describe('util/http/gitea', () => {
   });
   it('handles pagination with empty response', async () => {
     httpMock
-      .scope(giteaApiHost)
-      .get(`${basePath}/pagination-example-3`)
+      .scope(baseUrl)
+      .get('/pagination-example-3')
       .reply(200, { data: ['abc', 'def', 'ghi'] }, { 'x-total-count': '5' })
-      .get(`${basePath}/pagination-example-3?page=2`)
+      .get('/pagination-example-3?page=2')
       .reply(200, { data: [] });
 
     const res = await giteaHttp.getJson<{ data: string[] }>(
