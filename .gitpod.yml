@@ -2,9 +2,8 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: |
-      yarn install
-      yarn build
+  - init: yarn install && yarn run build
+    command: yarn run start
 
 vscode:
   extensions:
