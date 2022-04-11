@@ -5,6 +5,5 @@ export function smartLinks(body: string): string {
 }
 
 export function trimTrailingApiPath(url: string): string {
-  const apiPathIndex = url.indexOf('api/v1');
-  return url.slice(0, apiPathIndex > 0 ? apiPathIndex : url.length);
+  return url?.replace(regEx(/api\/v1\/?/g), '');
 }
