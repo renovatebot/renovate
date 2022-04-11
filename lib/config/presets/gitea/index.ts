@@ -12,7 +12,7 @@ import {
   fetchPreset,
 } from '../util';
 
-export const Endpoint = 'https://gitea.com/api/v1/';
+export const Endpoint = 'https://gitea.com/';
 
 export async function fetchJSONFile(
   repo: string,

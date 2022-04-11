@@ -11,7 +11,7 @@ jest.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
 const giteaApiHost = gitea.Endpoint;
-const basePath = '/repos/some/repo/contents';
+const basePath = '/api/v1/repos/some/repo/contents';
 
 describe('config/presets/gitea/index', () => {
   beforeEach(() => {

@@ -5,7 +5,8 @@ import { toBase64 } from '../../../util/string';
 import * as ght from './gitea-helper';
 
 describe('modules/platform/gitea/gitea-helper', () => {
-  const baseUrl = 'https://gitea.renovatebot.com/api/v1';
+  const giteaApiHost = 'https://gitea.renovatebot.com/';
+  const basePath = '/api/v1';
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -141,12 +142,12 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    setBaseUrl(baseUrl);
+    setBaseUrl(giteaApiHost);
   });
 
   describe('getCurrentUser', () => {
     it('should call /api/v1/user endpoint', async () => {
-      httpMock.scope(baseUrl).get('/user').reply(200, mockUser);
+      httpMock.scope(giteaApiHost).get(`${basePath}/user`).reply(200, mockUser);
 
       const res = await ght.getCurrentUser();
       expect(res).toEqual(mockUser);
@@ -157,7 +158,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getVersion', () => {
     it('should call /api/v1/version endpoint', async () => {
       const version = '1.13.01.14.0+dev-754-g5d2b7ba63';
-      httpMock.scope(baseUrl).get('/version').reply(200, { version });
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/version`)
+        .reply(200, { version });
 
       const res = await ght.getVersion();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -168,8 +172,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('searchRepos', () => {
     it('should call /api/v1/repos/search endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get('/repos/search')
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/search`)
         .reply(200, {
           ok: true,
           data: [mockRepo, otherMockRepo],
@@ -182,8 +186,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
     it('should construct proper query parameters', async () => {
       httpMock
-        .scope(baseUrl)
-        .get('/repos/search?uid=13&archived=false')
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/search?uid=13&archived=false`)
         .reply(200, {
           ok: true,
           data: [otherMockRepo],
@@ -198,7 +202,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     });
 
     it('should abort if ok flag was not set', async () => {
-      httpMock.scope(baseUrl).get('/repos/search').reply(200, {
+      httpMock.scope(giteaApiHost).get(`${basePath}/repos/search`).reply(200, {
         ok: false,
         data: [],
       });
@@ -211,8 +215,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getRepo', () => {
     it('should call /api/v1/repos/[repo] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/${mockRepo.full_name}`)
         .reply(200, mockRepo);
 
       const res = await ght.getRepo(mockRepo.full_name);
@@ -226,8 +230,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
       // The official API only returns the base64-encoded content, so we strip `contentString`
       // from our mock to verify base64 decoding.
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/contents/${mockContents.path}`
+        )
         .reply(200, { ...mockContents, contentString: undefined });
 
       const res = await ght.getRepoContents(
@@ -240,9 +246,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
     it('should support passing reference by query', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(giteaApiHost)
         .get(
-          `/repos/${mockRepo.full_name}/contents/${mockContents.path}?ref=${mockCommitHash}`
+          `${basePath}/repos/${mockRepo.full_name}/contents/${mockContents.path}?ref=${mockCommitHash}`
         )
         .reply(200, { ...mockContents, contentString: undefined });
 
@@ -259,8 +265,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
       const escapedPath = encodeURIComponent(otherMockContents.path);
 
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${escapedPath}`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/${mockRepo.full_name}/contents/${escapedPath}`)
         .reply(200, otherMockContents);
 
       const res = await ght.getRepoContents(
@@ -273,8 +279,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
     it('should not fail if no content is returned', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/contents/${mockContents.path}`
+        )
         .reply(200, {
           ...mockContents,
           content: undefined,
@@ -296,8 +304,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('createPR', () => {
     it('should call /api/v1/repos/[repo]/pulls endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .post(`/repos/${mockRepo.full_name}/pulls`)
+        .scope(giteaApiHost)
+        .post(`${basePath}/repos/${mockRepo.full_name}/pulls`)
         .reply(200, mockPR);
 
       const res = await ght.createPR(mockRepo.full_name, {
@@ -324,8 +332,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
       };
 
       httpMock
-        .scope(baseUrl)
-        .patch(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
+        .scope(giteaApiHost)
+        .patch(`${basePath}/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
         .reply(200, updatedMockPR);
 
       const res = await ght.updatePR(mockRepo.full_name, mockPR.number, {
@@ -343,8 +351,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('closePR', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .patch(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
+        .scope(giteaApiHost)
+        .patch(`${basePath}/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
         .reply(200);
 
       const res = await ght.closePR(mockRepo.full_name, mockPR.number);
@@ -356,8 +364,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('mergePR', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .post(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}/merge`)
+        .scope(giteaApiHost)
+        .post(
+          `${basePath}/repos/${mockRepo.full_name}/pulls/${mockPR.number}/merge`
+        )
         .reply(200);
 
       const res = await ght.mergePR(
@@ -373,8 +383,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getPR', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
         .reply(200, mockPR);
 
       const res = await ght.getPR(mockRepo.full_name, mockPR.number);
@@ -386,9 +396,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('addReviewers', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(giteaApiHost)
         .post(
-          `/repos/${mockRepo.full_name}/pulls/${mockPR.number}/requested_reviewers`
+          `${basePath}/repos/${mockRepo.full_name}/pulls/${mockPR.number}/requested_reviewers`
         )
         .reply(200);
 
@@ -400,8 +410,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('searchPRs', () => {
     it('should call /api/v1/repos/[repo]/pulls endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/pulls`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/${mockRepo.full_name}/pulls`)
         .reply(200, [mockPR]);
 
       const res = await ght.searchPRs(mockRepo.full_name, {});
@@ -411,9 +421,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
     it('should construct proper query parameters', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(giteaApiHost)
         .get(
-          `/repos/${mockRepo.full_name}/pulls?state=open&labels=${mockLabel.id}&labels=${otherMockLabel.id}`
+          `${basePath}/repos/${mockRepo.full_name}/pulls?state=open&labels=${mockLabel.id}&labels=${otherMockLabel.id}`
         )
         .reply(200, [mockPR]);
 
@@ -429,8 +439,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('createIssue', () => {
     it('should call /api/v1/repos/[repo]/issues endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .post(`/repos/${mockRepo.full_name}/issues`)
+        .scope(giteaApiHost)
+        .post(`${basePath}/repos/${mockRepo.full_name}/issues`)
         .reply(200, mockIssue);
 
       const res = await ght.createIssue(mockRepo.full_name, {
@@ -455,8 +465,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
       };
 
       httpMock
-        .scope(baseUrl)
-        .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
+        .scope(giteaApiHost)
+        .patch(
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}`
+        )
         .reply(200, updatedMockIssue);
 
       const res = await ght.updateIssue(mockRepo.full_name, mockIssue.number, {
@@ -478,8 +490,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
       ];
 
       httpMock
-        .scope(baseUrl)
-        .put(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels`)
+        .scope(giteaApiHost)
+        .put(
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels`
+        )
         .reply(200, updatedMockLabels);
 
       const res = await ght.updateIssueLabels(
@@ -497,8 +511,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('closeIssue', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
+        .scope(giteaApiHost)
+        .patch(
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}`
+        )
         .reply(200);
 
       const res = await ght.closeIssue(mockRepo.full_name, mockIssue.number);
@@ -510,8 +526,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('searchIssues', () => {
     it('should call /api/v1/repos/[repo]/issues endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues?type=issues`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/${mockRepo.full_name}/issues?type=issues`)
         .reply(200, [mockIssue]);
 
       const res = await ght.searchIssues(mockRepo.full_name, {});
@@ -521,8 +537,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
     it('should construct proper query parameters', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues?state=open&type=issues`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/issues?state=open&type=issues`
+        )
         .reply(200, [mockIssue]);
 
       const res = await ght.searchIssues(mockRepo.full_name, {
@@ -536,8 +554,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getIssue', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}`
+        )
         .reply(200, mockIssue);
 
       const res = await ght.getIssue(mockRepo.full_name, mockIssue.number);
@@ -549,8 +569,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getRepoLabels', () => {
     it('should call /api/v1/repos/[repo]/labels endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/labels`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/repos/${mockRepo.full_name}/labels`)
         .reply(200, [mockLabel, otherMockLabel]);
 
       const res = await ght.getRepoLabels(mockRepo.full_name);
@@ -562,8 +582,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getOrgLabels', () => {
     it('should call /api/v1/orgs/[org]/labels endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/orgs/${mockRepo.owner.username}/labels`)
+        .scope(giteaApiHost)
+        .get(`${basePath}/orgs/${mockRepo.owner.username}/labels`)
         .reply(200, [mockLabel, otherMockLabel]);
 
       const res = await ght.getOrgLabels(mockRepo.owner.username);
@@ -575,9 +595,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('unassignLabel', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(giteaApiHost)
         .delete(
-          `/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels/${mockLabel.id}`
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels/${mockLabel.id}`
         )
         .reply(200);
 
@@ -594,9 +614,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('createComment', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(giteaApiHost)
         .post(
-          `/repos/${mockRepo.full_name}/issues/${mockIssue.number}/comments`
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}/comments`
         )
         .reply(200, mockComment);
 
@@ -618,8 +638,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
       };
 
       httpMock
-        .scope(baseUrl)
-        .patch(`/repos/${mockRepo.full_name}/issues/comments/${mockComment.id}`)
+        .scope(giteaApiHost)
+        .patch(
+          `${basePath}/repos/${mockRepo.full_name}/issues/comments/${mockComment.id}`
+        )
         .reply(200, updatedMockComment);
 
       const res = await ght.updateComment(
@@ -635,9 +657,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('deleteComment', () => {
     it('should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(giteaApiHost)
         .delete(
-          `/repos/${mockRepo.full_name}/issues/comments/${mockComment.id}`
+          `${basePath}/repos/${mockRepo.full_name}/issues/comments/${mockComment.id}`
         )
         .reply(200);
 
@@ -650,8 +672,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getComments', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/comments`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/issues/${mockIssue.number}/comments`
+        )
         .reply(200, [mockComment]);
 
       const res = await ght.getComments(mockRepo.full_name, mockIssue.number);
@@ -663,8 +687,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('createCommitStatus', () => {
     it('should call /api/v1/repos/[repo]/statuses/[commit] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .post(`/repos/${mockRepo.full_name}/statuses/${mockCommitHash}`)
+        .scope(giteaApiHost)
+        .post(
+          `${basePath}/repos/${mockRepo.full_name}/statuses/${mockCommitHash}`
+        )
         .reply(200, mockCommitStatus);
 
       const res = await ght.createCommitStatus(
@@ -685,8 +711,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getCombinedCommitStatus', () => {
     it('should call /api/v1/repos/[repo]/commits/[branch]/statuses endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/commits/${mockBranch.name}/statuses`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/commits/${mockBranch.name}/statuses`
+        )
         .reply(200, [mockCommitStatus, otherMockCommitStatus]);
 
       const res = await ght.getCombinedCommitStatus(
@@ -749,9 +777,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
           created_at: statusElem.created_at,
         });
         httpMock
-          .scope(baseUrl)
+          .scope(giteaApiHost)
           .get(
-            `/repos/${mockRepo.full_name}/commits/${mockBranch.name}/statuses`
+            `${basePath}/repos/${mockRepo.full_name}/commits/${mockBranch.name}/statuses`
           )
           .reply(200, commitStatuses);
 
@@ -770,8 +798,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
   describe('getBranch', () => {
     it('should call /api/v1/repos/[repo]/branches/[branch] endpoint', async () => {
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/branches/${mockBranch.name}`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/branches/${mockBranch.name}`
+        )
         .reply(200, mockBranch);
 
       const res = await ght.getBranch(mockRepo.full_name, mockBranch.name);
@@ -783,8 +813,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
       const escapedBranchName = encodeURIComponent(otherMockBranch.name);
 
       httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/branches/${escapedBranchName}`)
+        .scope(giteaApiHost)
+        .get(
+          `${basePath}/repos/${mockRepo.full_name}/branches/${escapedBranchName}`
+        )
         .reply(200, otherMockBranch);
 
       const res = await ght.getBranch(mockRepo.full_name, otherMockBranch.name);
