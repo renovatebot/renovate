@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import dataFiles, { DataFile } from '../../data-files.generated';
 
 interface DistroSchedule {
@@ -13,9 +12,7 @@ interface DistroSchedule {
   eol_elts?: string;
 }
 
-export type DistroDataFile =
-  | 'data/ubuntu-distro-info.json'
-  | 'data/debian-distro-info.json';
+type DistroDataFile = 'data/ubuntu-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 
@@ -26,9 +23,6 @@ export class DistroInfo {
     string,
     DistroInfoRecordWithVersion
   >();
-
-  private readonly _sortedInfo = new Array<DistroInfoRecordWithVersion>();
-
   private readonly _distroInfo: DistroInfoRecord;
 
   constructor(distroJsonKey: DistroDataFile) {
@@ -41,27 +35,10 @@ export class DistroInfo {
       const schedule = this._distroInfo[version];
       this._codenameToVersion.set(schedule.series, { version, ...schedule });
     }
-
-    const arr = Object.keys(this._distroInfo).sort(
-      (a, b) => parseFloat(a) - parseInt(b)
-    );
-
-    for (const v of arr) {
-      const obj = { version: v, ...this._distroInfo[v.toString()] };
-      if (!obj.eol) {
-        continue;
-      }
-      this._sortedInfo.push(obj);
-    }
   }
 
   public isCodename(input: string): boolean {
     return this._codenameToVersion.has(input);
-  }
-
-  public exists(input: string): boolean {
-    const ver = this.getVersionByCodename(input);
-    return !!this._distroInfo[ver];
   }
 
   public getVersionByCodename(input: string): string {
@@ -83,36 +60,5 @@ export class DistroInfo {
 
   public getSchedule(input: string): DistroSchedule {
     return this._distroInfo[input];
-  }
-
-  public isEolLts(input: string): boolean {
-    const schedule = this.getSchedule(input);
-    const endLts = schedule?.eol ?? null;
-    let end = schedule?.eol_lts ?? null;
-
-    // only "Stable" has no eol_lts, old and oldold has both
-    if (!end) {
-      end = endLts;
-    }
-
-    if (end) {
-      const now = DateTime.now();
-      const eol = DateTime.fromISO(end);
-      return eol < now;
-    }
-
-    return true;
-  }
-
-  public getNLatest(n: number): DistroInfoRecordWithVersion | null {
-    const len = this._sortedInfo.length - 1;
-    const i = len - n;
-
-    if (len >= i && i >= 0) {
-      return this._sortedInfo[i];
-    }
-
-    // istanbul ignore next
-    return null;
   }
 }
