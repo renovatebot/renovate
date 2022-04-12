@@ -12,14 +12,17 @@ describe('util/cache/repository/index', () => {
     jest.resetAllMocks();
     GlobalConfig.set({ cacheDir: '/tmp/renovate/cache/' });
   });
+
   const config = {
     platform: 'github',
     repository: 'abc/def',
   };
+
   it('catches and returns', async () => {
     await repositoryCache.initialize({});
     expect(fs.readFile.mock.calls).toHaveLength(0);
   });
+
   it('returns if cache not enabled', async () => {
     await repositoryCache.initialize({
       ...config,
@@ -27,6 +30,7 @@ describe('util/cache/repository/index', () => {
     });
     expect(fs.readFile.mock.calls).toHaveLength(0);
   });
+
   it('resets if invalid', async () => {
     fs.readFile.mockResolvedValueOnce('{}' as any);
     await repositoryCache.initialize({
@@ -38,6 +42,7 @@ describe('util/cache/repository/index', () => {
       revision: repositoryCache.CACHE_REVISION,
     });
   });
+
   it('reads from cache and finalizes', async () => {
     fs.readFile.mockResolvedValueOnce(
       `{"repository":"abc/def","revision":${repositoryCache.CACHE_REVISION}}` as any
@@ -50,6 +55,7 @@ describe('util/cache/repository/index', () => {
     expect(fs.readFile.mock.calls).toHaveLength(1);
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
+
   it('gets', () => {
     expect(repositoryCache.getCache()).toEqual({});
   });

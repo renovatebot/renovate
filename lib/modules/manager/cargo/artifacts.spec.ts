@@ -29,6 +29,7 @@ describe('modules/manager/cargo/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });
@@ -195,6 +196,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');

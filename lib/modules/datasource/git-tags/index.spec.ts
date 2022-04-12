@@ -24,6 +24,7 @@ describe('modules/datasource/git-tags/index', () => {
       const versions = await getPkgReleases({ datasource, depName });
       expect(versions).toBeNull();
     });
+
     it('returns nil if remote call throws exception', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -33,6 +34,7 @@ describe('modules/datasource/git-tags/index', () => {
       const versions = await getPkgReleases({ datasource, depName });
       expect(versions).toBeNull();
     });
+
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -47,6 +49,7 @@ describe('modules/datasource/git-tags/index', () => {
       expect(versions).toMatchSnapshot();
     });
   });
+
   describe('getDigest()', () => {
     it('returns null if not found', async () => {
       simpleGit.mockReturnValue({
@@ -60,6 +63,7 @@ describe('modules/datasource/git-tags/index', () => {
       );
       expect(digest).toBeNull();
     });
+
     it('returns digest for tag', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -72,6 +76,7 @@ describe('modules/datasource/git-tags/index', () => {
       );
       expect(digest).toMatchSnapshot();
     });
+
     it('returns digest for HEAD', async () => {
       simpleGit.mockReturnValue({
         listRemote() {

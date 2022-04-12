@@ -33,6 +33,7 @@ import handleError from './error';
 jest.mock('./error-config');
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -72,6 +73,7 @@ describe('workers/repository/error', () => {
         expect(res).toEqual(err);
       });
     });
+
     it(`handles ExternalHostError`, async () => {
       const res = await handleError(
         config,
@@ -79,6 +81,7 @@ describe('workers/repository/error', () => {
       );
       expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
+
     it('rewrites git 5xx error', async () => {
       const gitError = new Error(
         "fatal: unable to access 'https://**redacted**@gitlab.com/learnox/learnox.git/': The requested URL returned error: 500\n"
@@ -86,6 +89,7 @@ describe('workers/repository/error', () => {
       const res = await handleError(config, gitError);
       expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
+
     it('rewrites git remote error', async () => {
       const gitError = new Error(
         'fatal: remote error: access denied or repository not exported: /b/nw/bd/27/47/159945428/108610112.git\n'
@@ -93,6 +97,7 @@ describe('workers/repository/error', () => {
       const res = await handleError(config, gitError);
       expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
+
     it('rewrites git fatal error', async () => {
       const gitError = new Error(
         'fatal: not a git repository (or any parent up to mount point /mnt)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n'
@@ -100,6 +105,7 @@ describe('workers/repository/error', () => {
       const res = await handleError(config, gitError);
       expect(res).toEqual(TEMPORARY_ERROR);
     });
+
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));
       expect(res).toEqual(UNKNOWN_ERROR);
