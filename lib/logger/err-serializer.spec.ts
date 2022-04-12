@@ -76,7 +76,6 @@ describe('logger/err-serializer', () => {
         err = errSerializer(error);
       }
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
       expect(err.response.body).toBeDefined();
       expect(err.options).toBeDefined();
@@ -94,7 +93,6 @@ describe('logger/err-serializer', () => {
         err = error;
       }
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
 
       // remove platform related props

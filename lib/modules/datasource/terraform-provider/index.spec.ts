@@ -30,7 +30,6 @@ describe('modules/datasource/terraform-provider/index', () => {
           depName: 'azurerm',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       httpMock
@@ -46,7 +45,6 @@ describe('modules/datasource/terraform-provider/index', () => {
           depName: 'azurerm',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock
@@ -62,7 +60,6 @@ describe('modules/datasource/terraform-provider/index', () => {
           depName: 'azurerm',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
       httpMock
@@ -77,7 +74,6 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real data from packageName', async () => {
@@ -95,7 +91,6 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes data with alternative backend', async () => {
       httpMock
@@ -117,7 +112,6 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('simulate failing secondary release source', async () => {
       httpMock
@@ -134,9 +128,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         datasource: TerraformProviderDatasource.id,
         depName: 'datadog',
       });
-      expect(res).toMatchSnapshot();
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for error in service discovery', async () => {
       httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(404);
@@ -147,7 +139,6 @@ describe('modules/datasource/terraform-provider/index', () => {
           depName: 'azurerm',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getBuilds', () => {
@@ -165,7 +156,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.50.0'
       );
       expect(result).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for non hashicorp dependency and releases.hashicorp.com registryUrl', async () => {
@@ -190,7 +180,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.8.0'
       );
       expect(result).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real data', async () => {
@@ -235,7 +224,6 @@ describe('modules/datasource/terraform-provider/index', () => {
       );
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('return null if the retrieval of a single build fails', async () => {
@@ -274,7 +262,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.6.1'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -36,7 +36,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getDigest', () => {
@@ -74,7 +73,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getDigest with no commits', () => {
@@ -96,9 +94,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         datasource,
         depName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getTagCommit', () => {
@@ -124,7 +120,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

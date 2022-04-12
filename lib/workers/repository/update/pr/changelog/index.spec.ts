@@ -43,27 +43,22 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('returns null if @types', async () => {
-      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: null,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('returns null if no currentVersion', async () => {
-      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('returns null if currentVersion equals newVersion', async () => {
-      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -71,17 +66,14 @@ describe('workers/repository/update/pr/changelog/index', () => {
           newVersion: '1.0.0',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('skips invalid repos', async () => {
-      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/about',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('works without Github', async () => {
       httpMock
@@ -116,7 +108,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      expect(httpMock.getTrace()).toHaveLength(9);
     });
     it('uses GitHub tags', async () => {
       httpMock
@@ -155,7 +146,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('filters unnecessary warns', async () => {
       httpMock
@@ -185,7 +175,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports node engines', async () => {
       expect(
@@ -284,7 +273,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports github enterprise and github enterprise changelog', async () => {
       httpMock
@@ -322,7 +310,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('supports github.com and github enterprise changelog', async () => {
@@ -359,7 +346,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

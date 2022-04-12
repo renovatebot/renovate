@@ -74,7 +74,6 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'vendor/package-name',
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles timeouts', async () => {
       httpMock
@@ -89,7 +88,6 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'vendor/package-name2',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles auth rejections', async () => {
       httpMock
@@ -104,7 +102,6 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'vendor/package-name',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles not found registries', async () => {
       httpMock
@@ -119,7 +116,6 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'drewm/mailchimp-api',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports includes packages', async () => {
       hostRules.find = jest.fn(() => ({
@@ -148,7 +144,6 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports lazy repositories', async () => {
       const packagesJson = {
@@ -187,7 +182,6 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports provider-includes', async () => {
       const packagesJson = {
@@ -232,7 +226,6 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles provider-includes miss', async () => {
       const packagesJson = {
@@ -273,7 +266,6 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'some/other',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports providers', async () => {
       const packagesJson = {
@@ -306,7 +298,6 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports providers without a hash', async () => {
       const packagesJson = {
@@ -363,7 +354,6 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'some/other',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real versioned data', async () => {
       httpMock
@@ -383,7 +373,6 @@ describe('modules/datasource/packagist/index', () => {
           depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('adds packagist source implicitly', async () => {
       httpMock
@@ -403,7 +392,6 @@ describe('modules/datasource/packagist/index', () => {
           depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

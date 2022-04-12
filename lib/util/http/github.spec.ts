@@ -106,8 +106,6 @@ describe('util/http/github', () => {
         .reply(200, ['e']);
       const res = await githubApi.getJson(url, { paginate: true });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(3);
     });
     it('uses paginationField', async () => {
       const url = '/some-url';
@@ -136,8 +134,6 @@ describe('util/http/github', () => {
         paginationField: 'the_field',
       });
       expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(3);
     });
     it('attempts to paginate', async () => {
       const url = '/some-url';
@@ -150,8 +146,6 @@ describe('util/http/github', () => {
       const res = await githubApi.getJson('some-url', { paginate: true });
       expect(res).toBeDefined();
       expect(res.body).toEqual(['a']);
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(1);
     });
     describe('handleGotError', () => {
       async function fail(
@@ -439,8 +433,9 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      await githubApi.queryRepoField(graphqlQuery, 'testItem');
-      expect(httpMock.getTrace()).toHaveLength(7);
+      expect(
+        await githubApi.queryRepoField(graphqlQuery, 'testItem')
+      ).toMatchInlineSnapshot(`Array []`);
     });
     it('queryRepo', async () => {
       const repository = {
@@ -453,7 +448,6 @@ describe('util/http/github', () => {
         .reply(200, { data: { repository } });
 
       const res = await githubApi.requestGraphql(graphqlQuery);
-      expect(httpMock.getTrace()).toHaveLength(1);
       expect(res?.data).toStrictEqual({ repository });
     });
     it('queryRepoField', async () => {
@@ -467,7 +461,6 @@ describe('util/http/github', () => {
         .reply(200, page3);
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
-      expect(httpMock.getTrace()).toHaveLength(3);
       expect(items).toHaveLength(3);
     });
     it('limit result size', async () => {
@@ -481,7 +474,6 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem', {
         limit: 2,
       });
-      expect(httpMock.getTrace()).toHaveLength(2);
       expect(items).toHaveLength(2);
     });
     it('shrinks items count on 50x', async () => {
@@ -511,10 +503,6 @@ describe('util/http/github', () => {
       expect(
         repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
       ).toBe(25);
-
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(4);
-      expect(trace).toMatchSnapshot();
     });
     it('expands items count on timeout', async () => {
       repoCache.platform ??= {};
@@ -542,7 +530,6 @@ describe('util/http/github', () => {
       expect(
         repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
       ).toBe(84);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('continues to iterate with a lower page size on error 502', async () => {
       httpMock
@@ -558,9 +545,6 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(4);
     });
     it('removes cache record once expanded to the maximum', async () => {
       repoCache.platform ??= {};
@@ -589,9 +573,6 @@ describe('util/http/github', () => {
       expect(
         repoCache?.platform?.github?.graphqlPageCache?.testItem
       ).toBeUndefined();
-
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(3);
     });
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);

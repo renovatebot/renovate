@@ -101,7 +101,6 @@ describe('modules/datasource/go/index', () => {
         null
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for wrong name', async () => {
       httpMock
@@ -113,7 +112,6 @@ describe('modules/datasource/go/index', () => {
         null
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports gitlab digest', async () => {
       httpMock
@@ -151,7 +149,6 @@ describe('modules/datasource/go/index', () => {
         null
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('support bitbucket digest', async () => {
       getDigestBitbucketMock.mockResolvedValueOnce('123');
@@ -164,7 +161,6 @@ describe('modules/datasource/go/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

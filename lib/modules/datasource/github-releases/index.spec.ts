@@ -55,7 +55,6 @@ describe('modules/datasource/github-releases/index', () => {
       expect(
         res.releases.find((release) => release.version === '2.0.0').isStable
       ).toBeFalse();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports ghe', async () => {
       const packageName = 'some/dep';
@@ -67,9 +66,7 @@ describe('modules/datasource/github-releases/index', () => {
         registryUrl: 'https://git.enterprise.com',
         packageName,
       });
-      httpMock.getTrace();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
