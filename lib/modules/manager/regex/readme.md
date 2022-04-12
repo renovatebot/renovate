@@ -31,8 +31,7 @@ Configuration-wise, it works like this:
 - You can optionally have a [`versioning` capture group](https://docs.renovatebot.com/modules/versioning/#supported-versioning) or a [`versioningTemplate` config field](https://docs.renovatebot.com/configuration-options/#versioningtemplate). If neither are present, `semver` will be used as the default
 - You can optionally have an [`extractVersion`](https://docs.renovatebot.com/configuration-options/#extractversion) capture group or an [`extractVersionTemplate` config field](https://docs.renovatebot.com/configuration-options/#extractversiontemplate)
 - You can optionally have a [`currentDigest` capture group](https://docs.renovatebot.com/configuration-options/#digest).
-- You can optionally have a [`registryUrl` capture group](https://docs.renovatebot.com/configuration-options/#registryurls) or a [`registryUrlTemplate` config field](https://docs.renovatebot.com/configuration-options/#registryurltemplate)
-  - If it's a valid URL, it will be converted to the [`registryUrls` field](https://docs.renovatebot.com/configuration-options/#registryurls) as a single-length array.
+- You can optionally have a [`registryUrl` capture group](https://docs.renovatebot.com/configuration-options/#registryurls) or a [`registryUrlTemplate` config field](https://docs.renovatebot.com/configuration-options/#registryurltemplate). If it is a valid URL, it will be converted to the [`registryUrls` field](https://docs.renovatebot.com/configuration-options/#registryurls) as a single-length array.
 
 ### Regular Expression Capture Groups
 
