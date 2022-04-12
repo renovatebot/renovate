@@ -1339,19 +1339,19 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jamiemagee/osv-offline-db@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline-db/-/osv-offline-db-1.1.0.tgz#ea2f73761aaa8f939a0a5cac8c5b33e6c141abee"
-  integrity sha512-C53cFTZSkmBpF5KqAs6QMe2mS7lnqNeo87pCzOQQmgumOmO3ADHjWWcdnld+wzb5LB/dfyL/0x8O3bGa26CEjQ==
+"@jamiemagee/osv-offline-db@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline-db/-/osv-offline-db-1.1.4.tgz#b5f637fda46ed5cb9ae8575f3c8d0c6c9685da9d"
+  integrity sha512-xuXQ3PDwtxp1Tg++6SOeDUdrDNOfzO+ESOXkB756mv/v1Izm+Ss/4irO14SIAySU8YC8w2EJ6XXRmanZXLjunA==
   dependencies:
-    "@seald-io/nedb" "3.0.0-6"
+    "@seald-io/nedb" "3.0.0"
 
-"@jamiemagee/osv-offline@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.0.tgz#f67d0c701597fb5edbdc7fb72e53b4c2a74cafa0"
-  integrity sha512-g9+DINl9Jbkmf47HWwTkqsIZw73OJ+ySOLbIWkT1cUUYVNaZhr4N3pKAA7yf08FQC+cEnZqBsh3oL5a2ISdoAw==
+"@jamiemagee/osv-offline@1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.4.tgz#31b7d039ae9261e90f097be6f6b089b0220147a9"
+  integrity sha512-QXIQNdoOoI1BsjllJKYdIhsqroiD5UT0pTDLhXY1o3wvP+Vg5LH4nJlLf12vDnrKtdGNKpPYuuRTWi2z+dCQmA==
   dependencies:
-    "@jamiemagee/osv-offline-db" "1.1.0"
+    "@jamiemagee/osv-offline-db" "1.1.4"
     "@octokit/rest" "18.12.0"
     adm-zip "^0.5.9"
     fs-extra "10.0.0"
@@ -1998,10 +1998,10 @@
   resolved "https://registry.yarnpkg.com/@seald-io/binary-search-tree/-/binary-search-tree-1.0.2.tgz#9f0e5cec5e0acf97f1b495f2f6d3476ddb6a94ed"
   integrity sha512-+pYGvPFAk7wUR+ONMOlc6A+LUN4kOCFwyPLjyaeS7wVibADPHWYJNYsNtyIAwjF1AXQkuaXElnIc4XjKt55QZA==
 
-"@seald-io/nedb@3.0.0-6":
-  version "3.0.0-6"
-  resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-3.0.0-6.tgz#652bead606ae71ce1b484498dd568e631665db7b"
-  integrity sha512-NRPu9O7uiMf/+e8gfFsFWw0jY2X2RAYiMw/2PhP2YPZ9XOwlt/mB7Zng3SSUwoyNlgpmTrv/8jb1t3/7TQhVFw==
+"@seald-io/nedb@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-3.0.0.tgz#1bf681140d408c290cfdceb46cf8b224f373ae83"
+  integrity sha512-nJLQPbosz84BlJdE9qLRbIfQDYpB7PPMi6yGfQbN7YoWsnGef/sIFLDGWcV/rqsOfzJD5wtQYEcA42MIDerFvg==
   dependencies:
     "@seald-io/binary-search-tree" "^1.0.2"
     localforage "^1.9.0"
