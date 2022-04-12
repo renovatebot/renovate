@@ -16,7 +16,9 @@ In order for Renovate to look up a dependency and decide about updates, it then 
 - Which [`datasource`](https://docs.renovatebot.com/modules/datasource/#supported-datasources) to look up (e.g. [npm](https://docs.renovatebot.com/modules/datasource/#npm-datasource), [Docker](https://docs.renovatebot.com/modules/datasource/#docker-datasource), [GitHub tags](https://docs.renovatebot.com/modules/datasource/#github-tags-datasource))
 - Which [version scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) to apply (defaults to [`semver`](https://docs.renovatebot.com/modules/versioning/#semantic-versioning), but also may be other values like [`pep440`](https://docs.renovatebot.com/modules/versioning/#pep440-versioning))
 
-Note: capture groups below are similar to [available fields](https://docs.renovatebot.com/templates/#other-available-fields), but these available fields are not available in templates below, because most of those are coming from managers, and `regex` is a manager.
+<!-- prettier-ignore -->
+!!! note
+The capture groups below are similar to [available fields](https://docs.renovatebot.com/templates/#other-available-fields), but these available fields are not available in templates below, because most of those are coming from managers, and `regex` is a manager.
 
 Configuration-wise, it works like this:
 
