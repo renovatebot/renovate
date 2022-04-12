@@ -56,7 +56,6 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('support gitlab', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -74,7 +73,6 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('support self hosted gitlab private repositories', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -93,7 +91,6 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('support bitbucket tags', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -115,7 +112,6 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('support ghe', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -135,7 +131,6 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('works for known servers', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -176,9 +171,6 @@ describe('modules/datasource/go/releases-direct', () => {
         const res = await datasource.getReleases(pkg);
         expect(res.releases).toBeEmpty();
       }
-      const httpCalls = httpMock.getTrace();
-      expect(httpCalls).toHaveLength(6);
-      expect(httpCalls).toMatchSnapshot();
     });
     it('support gitlab subgroups', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -198,7 +190,6 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('works for nested modules on github', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
@@ -234,10 +225,6 @@ describe('modules/datasource/go/releases-direct', () => {
         const result = await datasource.getReleases(pkg);
         expect(result.releases).toHaveLength(1);
         expect(result.releases[0].version.startsWith(prefix)).toBeFalse();
-
-        const httpCalls = httpMock.getTrace();
-        expect(httpCalls).toMatchSnapshot();
-        httpMock.clear();
       }
     });
     it('returns none if no tags match submodules', async () => {
@@ -267,10 +254,6 @@ describe('modules/datasource/go/releases-direct', () => {
 
         const result = await datasource.getReleases(pkg);
         expect(result.releases).toHaveLength(0);
-
-        const httpCalls = httpMock.getTrace();
-        expect(httpCalls).toMatchSnapshot();
-        httpMock.clear();
       }
     });
     it('works for nested modules on github v2+ major upgrades', async () => {
@@ -299,9 +282,6 @@ describe('modules/datasource/go/releases-direct', () => {
         { gitRef: 'b/v2.0.0', version: 'v2.0.0' },
         { gitRef: 'b/v3.0.0', version: 'v3.0.0' },
       ]);
-
-      const httpCalls = httpMock.getTrace();
-      expect(httpCalls).toMatchSnapshot();
     });
   });
 });

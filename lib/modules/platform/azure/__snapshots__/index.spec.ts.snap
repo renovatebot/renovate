@@ -199,8 +199,6 @@ Object {
 }
 `;
 
-exports[`modules/platform/azure/index getBranchPr(branchName) should return the pr 1`] = `null`;
-
 exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
 Array [
   Array [

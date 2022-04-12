@@ -32,7 +32,6 @@ describe('modules/datasource/terraform-module/index', () => {
           depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       httpMock
@@ -47,7 +46,6 @@ describe('modules/datasource/terraform-module/index', () => {
           depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock
@@ -62,7 +60,6 @@ describe('modules/datasource/terraform-module/index', () => {
           depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
       httpMock
@@ -77,7 +74,6 @@ describe('modules/datasource/terraform-module/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes with registry in name', async () => {
       httpMock
@@ -92,7 +88,6 @@ describe('modules/datasource/terraform-module/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('rejects mismatch', async () => {
       httpMock
@@ -107,7 +102,6 @@ describe('modules/datasource/terraform-module/index', () => {
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('rejects servicediscovery', async () => {
       httpMock
@@ -120,7 +114,6 @@ describe('modules/datasource/terraform-module/index', () => {
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data on changed subpath', async () => {
       httpMock
@@ -134,7 +127,7 @@ describe('modules/datasource/terraform-module/index', () => {
         registryUrls: ['https://terraform.foo.bar'],
         depName: 'hashicorp/consul/aws',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
