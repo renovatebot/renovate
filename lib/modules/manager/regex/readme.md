@@ -13,7 +13,7 @@ The first two required fields are `fileMatch` and `matchStrings`. `fileMatch` wo
 In order for Renovate to look up a dependency and decide about updates, it then needs the following information about each dependency:
 
 - The dependency's name
-- Which [`datasource`](https://docs.renovatebot.com/modules/datasource/#supported-datasources) to look up (e.g. [npm](https://docs.renovatebot.com/modules/datasource/#npm-datasource), [Docker](https://docs.renovatebot.com/modules/datasource/#docker-datasource), [GitHub tags](https://docs.renovatebot.com/modules/datasource/#github-tags-datasource), [etc.](https://docs.renovatebot.com/modules/datasource/#supported-datasources))
+- Which [`datasource`](https://docs.renovatebot.com/modules/datasource/#supported-datasources) to look up (e.g. [npm](https://docs.renovatebot.com/modules/datasource/#npm-datasource), [Docker](https://docs.renovatebot.com/modules/datasource/#docker-datasource), [GitHub tags](https://docs.renovatebot.com/modules/datasource/#github-tags-datasource))
 - Which [version scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) to apply (defaults to [`semver`](https://docs.renovatebot.com/modules/versioning/#semantic-versioning), but also may be other values like [`pep440`](https://docs.renovatebot.com/modules/versioning/#pep440-versioning))
 
 Note: capture groups below are similar to [available fields](https://docs.renovatebot.com/templates/#other-available-fields), but these available fields are not available in templates below, because most of those are coming from managers, and `regex` is a manager.
@@ -24,7 +24,7 @@ Configuration-wise, it works like this:
 - You must have either a `depName` capture group or a [`depNameTemplate` config field](https://docs.renovatebot.com/configuration-options/#depnametemplate)
 - You can optionally have a `packageName` capture group or a [`packageNameTemplate` config field] if it differs from `depName`
 - You must have either a [`datasource` capture group](https://docs.renovatebot.com/modules/datasource/#supported-datasources) or a [`datasourceTemplate` config field](https://docs.renovatebot.com/configuration-options/#datasourcetemplate)
-- You can optionally have a `depType` capture group or a [`depTypeTemplate` config field](https://docs.renovatebot.com/configuration-options/#deptypetemplate)  
+- You can optionally have a `depType` capture group or a [`depTypeTemplate` config field](https://docs.renovatebot.com/configuration-options/#deptypetemplate)
   See [manager specific documentation pages](https://docs.renovatebot.com/modules/manager/#supported-managers) for recommended values, other values are also possible.
 - You can optionally have a [`versioning` capture group](https://docs.renovatebot.com/modules/versioning/#supported-versioning) or a [`versioningTemplate` config field](https://docs.renovatebot.com/configuration-options/#versioningtemplate). If neither are present, `semver` will be used as the default
 - You can optionally have an `extractVersion` capture group or an [`extractVersionTemplate` config field](https://docs.renovatebot.com/configuration-options/#extractversiontemplate)
