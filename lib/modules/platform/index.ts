@@ -8,6 +8,7 @@ import * as hostRules from '../../util/host-rules';
 import platforms from './api';
 import type { Platform } from './types';
 
+// istanbul ignore next: required for swc
 export * from './types';
 
 export const getPlatformList = (): string[] => Array.from(platforms.keys());

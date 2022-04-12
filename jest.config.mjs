@@ -15,13 +15,14 @@ const config = {
     '!lib/**/*.{d,spec}.ts',
     '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
     '!lib/**/types.ts',
+    '!lib/types/**',
   ],
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 98,
+      branches: 97.7,
       functions: 100,
       lines: 100,
       statements: 100,

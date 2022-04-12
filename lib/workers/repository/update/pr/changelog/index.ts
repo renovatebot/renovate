@@ -7,6 +7,7 @@ import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
 import type { ChangeLogResult } from './types';
 
+// istanbul ignore next: required for swc
 export * from './types';
 
 export async function getChangeLogJSON(

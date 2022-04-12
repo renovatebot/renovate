@@ -22,6 +22,7 @@ import type {
   ReleaseResult,
 } from './types';
 
+// istanbul ignore next: required for swc
 export * from './types';
 export { isGetPkgReleasesConfig } from './common';
 

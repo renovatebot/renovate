@@ -3,6 +3,7 @@ import versionings from './api';
 import { isVersioningApiConstructor } from './common';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 
+// istanbul ignore next: required for swc
 export * from './types';
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());

@@ -7,6 +7,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 
+// istanbul ignore next: required for swc
 export * from './proxies';
 
 export const pipeline = util.promisify(stream.pipeline);
