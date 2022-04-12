@@ -35,6 +35,7 @@ describe('modules/datasource/hex/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for missing fields', async () => {
       httpMock
         .scope(baseUrl)
@@ -47,30 +48,35 @@ describe('modules/datasource/hex/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(404);
       expect(
         await getPkgReleases({ datasource, depName: 'some_package' })
       ).toBeNull();
     });
+
     it('returns null for 401', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(401);
       expect(
         await getPkgReleases({ datasource, depName: 'some_package' })
       ).toBeNull();
     });
+
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get('/packages/some_crate').reply(429);
       await expect(
         getPkgReleases({ datasource, depName: 'some_crate' })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/packages/some_crate').reply(502);
       await expect(
         getPkgReleases({ datasource, depName: 'some_crate' })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').replyWithError('');
       expect(
@@ -114,6 +120,7 @@ describe('modules/datasource/hex/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('process public repo without auth', async () => {
       httpMock
         .scope(baseUrl)

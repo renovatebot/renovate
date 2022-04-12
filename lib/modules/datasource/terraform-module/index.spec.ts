@@ -33,6 +33,7 @@ describe('modules/datasource/terraform-module/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope(baseUrl)
@@ -47,6 +48,7 @@ describe('modules/datasource/terraform-module/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseUrl)
@@ -61,6 +63,7 @@ describe('modules/datasource/terraform-module/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -75,6 +78,7 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('processes with registry in name', async () => {
       httpMock
         .scope(baseUrl)
@@ -89,6 +93,7 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('rejects mismatch', async () => {
       httpMock
         .scope('https://terraform.company.com')
@@ -103,6 +108,7 @@ describe('modules/datasource/terraform-module/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('rejects servicediscovery', async () => {
       httpMock
         .scope('https://terraform.company.com')
@@ -115,6 +121,7 @@ describe('modules/datasource/terraform-module/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('processes real data on changed subpath', async () => {
       httpMock
         .scope(localTerraformEnterprisebaseUrl)

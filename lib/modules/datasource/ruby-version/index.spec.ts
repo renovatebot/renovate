@@ -18,6 +18,7 @@ describe('modules/datasource/ruby-version/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('throws for empty result', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')

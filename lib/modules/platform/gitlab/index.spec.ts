@@ -69,6 +69,7 @@ describe('modules/platform/gitlab/index', () => {
     it(`should throw if no token`, async () => {
       await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
     });
+
     it(`should throw if auth fails`, async () => {
       // user
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(403);
@@ -78,6 +79,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       await expect(res).rejects.toThrow('Init: Authentication failure');
     });
+
     it(`should default to gitlab.com`, async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
         email: 'a@b.com',
@@ -93,6 +95,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it(`should accept custom endpoint`, async () => {
       const endpoint = 'https://gitlab.renovatebot.com';
       httpMock
@@ -138,6 +141,7 @@ describe('modules/platform/gitlab/index', () => {
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
     });
+
     it('should return an array of repos', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -187,6 +191,7 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('initRepo', () => {
     const okReturn = { default_branch: 'master', url: 'https://some-url' };
+
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -203,6 +208,7 @@ describe('modules/platform/gitlab/index', () => {
         }
       `);
     });
+
     it('should throw an error if receiving an error', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -214,6 +220,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow('always error');
     });
+
     it('should throw an error if repository is archived', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -225,6 +232,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
     });
+
     it('should throw an error if repository is a mirror', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -236,6 +244,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
     });
+
     it('should throw an error if repository access is disabled', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -247,6 +256,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
+
     it('should throw an error if MRs are disabled', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -258,6 +268,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
+
     it('should throw an error if repository has empty_repo property', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -269,6 +280,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
     });
+
     it('should throw an error if repository is empty', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -280,6 +292,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
     });
+
     it('should fall back if http_url_to_repo is empty', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -364,6 +377,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(git.initRepo.mock.calls).toMatchSnapshot();
     });
   });
+
   describe('getRepoForceRebase', () => {
     it('should return false', async () => {
       await initRepo(
@@ -405,6 +419,7 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
     });
+
     it('should return the PR object', async () => {
       const scope = await initRepo();
       scope
@@ -439,6 +454,7 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
     });
+
     it('should strip draft prefix from title', async () => {
       const scope = await initRepo();
       scope
@@ -473,6 +489,7 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
     });
+
     it('should strip deprecated draft prefix from title', async () => {
       const scope = await initRepo();
       scope
@@ -508,6 +525,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+
   describe('getBranchStatus(branchName, ignoreTests)', () => {
     it('returns pending if no results', async () => {
       const scope = await initRepo();
@@ -519,6 +537,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
+
     it('returns success if all are success', async () => {
       const scope = await initRepo();
       scope
@@ -529,6 +548,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
+
     it('returns success if optional jobs fail', async () => {
       const scope = await initRepo();
       scope
@@ -542,6 +562,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
+
     it('returns success if all are optional', async () => {
       const scope = await initRepo();
       scope
@@ -552,6 +573,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
+
     it('returns success if job is skipped', async () => {
       const scope = await initRepo();
       scope
@@ -562,6 +584,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
+
     it('returns yellow if there are no jobs expect skipped', async () => {
       const scope = await initRepo();
       scope
@@ -572,6 +595,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
+
     it('returns failure if any mandatory jobs fails and one job is skipped', async () => {
       const scope = await initRepo();
       scope
@@ -582,6 +606,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
+
     it('returns failure if any mandatory jobs fails', async () => {
       const scope = await initRepo();
       scope
@@ -596,6 +621,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
+
     it('maps custom statuses to yellow', async () => {
       const scope = await initRepo();
       scope
@@ -606,6 +632,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
+
     it('throws repository-changed', async () => {
       expect.assertions(1);
       git.branchExists.mockReturnValue(false);
@@ -615,6 +642,7 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
   });
+
   describe('getBranchStatusCheck', () => {
     it('returns null if no results', async () => {
       const scope = await initRepo();
@@ -629,6 +657,7 @@ describe('modules/platform/gitlab/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('returns null if no matching results', async () => {
       const scope = await initRepo();
       scope
@@ -642,6 +671,7 @@ describe('modules/platform/gitlab/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('returns status if name found', async () => {
       const scope = await initRepo();
       scope
@@ -660,6 +690,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toEqual(BranchStatus.green);
     });
   });
+
   describe('setBranchStatus', () => {
     it.each([BranchStatus.green, BranchStatus.yellow, BranchStatus.red])(
       'sets branch status %s',
@@ -708,6 +739,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.findIssue('title-3');
       expect(res).toBeNull();
     });
+
     it('finds issue', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -730,6 +762,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).not.toBeNull();
     });
   });
+
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
       httpMock
@@ -908,6 +941,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBe('updated');
     });
   });
+
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
       httpMock
@@ -941,6 +975,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200);
       await expect(gitlab.addAssignees(42, ['someuser'])).toResolve();
     });
+
     it('should add the given assignees to the issue', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -956,6 +991,7 @@ describe('modules/platform/gitlab/index', () => {
         gitlab.addAssignees(42, ['someuser', 'someotheruser'])
       ).toResolve();
     });
+
     it('should swallow error', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1093,6 +1129,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toResolve();
     });
+
     it('add updates comment if necessary', async () => {
       const scope = await initRepo();
       scope
@@ -1108,6 +1145,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toResolve();
     });
+
     it('skips comment', async () => {
       const scope = await initRepo();
       scope
@@ -1121,6 +1159,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toResolve();
     });
+
     it('handles comment with no description', async () => {
       const scope = await initRepo();
       scope
@@ -1135,6 +1174,7 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
   });
+
   describe('ensureCommentRemoval', () => {
     it('deletes comment by topic if found', async () => {
       const scope = await initRepo();
@@ -1151,6 +1191,7 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toResolve();
     });
+
     it('deletes comment by content if found', async () => {
       const scope = await initRepo();
       scope
@@ -1167,6 +1208,7 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
   });
+
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
       httpMock
@@ -1187,6 +1229,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
+
     it('returns true if not open', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1250,6 +1293,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
+
     it('returns true with draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1270,6 +1314,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
+
     it('returns true with deprecated draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1330,6 +1375,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(pr).toMatchSnapshot();
     });
+
     it('uses default branch', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1349,6 +1395,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(pr).toMatchSnapshot();
     });
+
     it('supports draftPR on < 13.2', async () => {
       await initPlatform('13.1.0-ee');
       httpMock
@@ -1368,6 +1415,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(pr).toMatchSnapshot();
     });
+
     it('supports draftPR on >= 13.2', async () => {
       await initPlatform('13.2.0-ee');
       httpMock
@@ -1387,6 +1435,7 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(pr).toMatchSnapshot();
     });
+
     it('auto-accepts the MR when requested', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1654,6 +1703,7 @@ describe('modules/platform/gitlab/index', () => {
       `);
     });
   });
+
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
       httpMock
@@ -1677,6 +1727,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBeFalse();
     });
+
     it('removes draft prefix from returned title', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1699,6 +1750,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr.title).toBe('do something');
     });
+
     it('removes deprecated draft prefix from returned title', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1721,6 +1773,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr.title).toBe('do something');
     });
+
     it('returns the mergeable PR', async () => {
       const scope = await initRepo();
       scope
@@ -1744,6 +1797,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBeTrue();
     });
+
     it('returns the PR with nonexisting branch', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1771,8 +1825,10 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr.hasAssignees).toBeTrue();
     });
   });
+
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
+
     it('updates the PR', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1794,6 +1850,7 @@ describe('modules/platform/gitlab/index', () => {
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
+
     it('retains draft status when draft uses current prefix', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1815,6 +1872,7 @@ describe('modules/platform/gitlab/index', () => {
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
+
     it('retains draft status when draft uses deprecated prefix', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1836,6 +1894,7 @@ describe('modules/platform/gitlab/index', () => {
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
+
     it('closes the PR', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1863,8 +1922,10 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
   });
+
   describe('mergePr(pr)', () => {
     jest.resetAllMocks();
+
     it('merges the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1926,6 +1987,7 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(res).toHaveLength(0);
     });
   });
+
   describe('deleteLabel(issueNo, label)', () => {
     it('should delete the label', async () => {
       httpMock
@@ -1949,6 +2011,7 @@ These updates have all been created already. Click a checkbox below to force a r
       await expect(gitlab.deleteLabel(42, 'rebase')).toResolve();
     });
   });
+
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
@@ -2026,6 +2089,7 @@ These updates have all been created already. Click a checkbox below to force a r
         });
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       const scope = await initRepo();
       scope
@@ -2036,6 +2100,7 @@ These updates have all been created already. Click a checkbox below to force a r
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
     });
   });
+
   describe('filterUnavailableUsers(users)', () => {
     it('filters users that are busy', async () => {
       httpMock

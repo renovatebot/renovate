@@ -160,6 +160,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
       ]);
     });
+
     it('extracts from image', () => {
       let expectedRes = {
         autoReplaceStringTemplate:
@@ -214,6 +215,7 @@ describe('modules/manager/gitlabci/extract', () => {
         extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }])
       ).toEqual(expectedRes);
     });
+
     it('extracts from job object', () => {
       const expectedRes = [
         {

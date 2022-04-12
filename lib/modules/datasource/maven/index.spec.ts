@@ -587,6 +587,7 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/child-scm/child',
       });
     });
+
     it('should be able to detect git://@github.com/child-scm as valid sourceUrl', async () => {
       mockGenericPackage({
         meta: loadFixture('child-scm-gitprotocol/meta.xml'),

@@ -21,6 +21,7 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null if repository was not provided', async () => {
       // FIXME: should it call default rtegisty?
       httpMock
@@ -35,6 +36,7 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty response', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -48,6 +50,7 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for missing response body', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -61,6 +64,7 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -74,6 +78,7 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('throws for 5xx', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -92,6 +97,7 @@ describe('modules/datasource/helm/index', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -105,6 +111,7 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null if index.yaml in response is empty', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -117,6 +124,7 @@ describe('modules/datasource/helm/index', () => {
       });
       expect(releases).toBeNull();
     });
+
     it('returns null if index.yaml in response is invalid', async () => {
       const res = {
         body: `some
@@ -135,6 +143,7 @@ describe('modules/datasource/helm/index', () => {
       });
       expect(releases).toBeNull();
     });
+
     it('returns null if packageName is not in index.yaml', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -147,6 +156,7 @@ describe('modules/datasource/helm/index', () => {
       });
       expect(releases).toBeNull();
     });
+
     it('returns list of versions for normal response', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -160,6 +170,7 @@ describe('modules/datasource/helm/index', () => {
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();
     });
+
     it('adds trailing slash to subdirectories', async () => {
       httpMock
         .scope('https://example-repository.com')

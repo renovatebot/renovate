@@ -18,6 +18,7 @@ jest.mock('./extract-update');
 const extract = mocked(_extractUpdate).extract;
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -29,6 +30,7 @@ describe('workers/repository/process/index', () => {
       const res = await extractDependencies(config);
       expect(res).toBeUndefined();
     });
+
     it('processes baseBranches', async () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
@@ -100,6 +102,7 @@ describe('workers/repository/process/index', () => {
         CONFIG_VALIDATION
       );
     });
+
     it('processes baseBranches dryRun extract', async () => {
       extract.mockResolvedValue({} as never);
       GlobalConfig.set({ dryRun: 'extract' });

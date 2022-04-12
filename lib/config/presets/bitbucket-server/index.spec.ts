@@ -129,6 +129,7 @@ describe('config/presets/bitbucket-server/index', () => {
         )
       ).toEqual({ from: 'api' });
     });
+
     it('uses custom path', async () => {
       httpMock
         .scope('https://api.github.example.org')

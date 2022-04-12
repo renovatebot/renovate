@@ -30,6 +30,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toBeNull();
     });
+
     it('throws for getDatasource error', async () => {
       getDatasourceSpy.mockRejectedValueOnce(new Error('unknown'));
       await expect(
@@ -38,6 +39,7 @@ describe('modules/datasource/go/releases-direct', () => {
         })
       ).rejects.toThrow();
     });
+
     it('processes real data', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
@@ -57,6 +59,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('support gitlab', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'gitlab-tags',
@@ -74,6 +77,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('support self hosted gitlab private repositories', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'gitlab-tags',
@@ -92,6 +96,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('support bitbucket tags', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'bitbucket-tags',
@@ -113,6 +118,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('support ghe', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
@@ -132,6 +138,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('works for known servers', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
@@ -172,6 +179,7 @@ describe('modules/datasource/go/releases-direct', () => {
         expect(res.releases).toBeEmpty();
       }
     });
+
     it('support gitlab subgroups', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'gitlab-tags',
@@ -191,6 +199,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('works for nested modules on github', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
@@ -227,6 +236,7 @@ describe('modules/datasource/go/releases-direct', () => {
         expect(result.releases[0].version.startsWith(prefix)).toBeFalse();
       }
     });
+
     it('returns none if no tags match submodules', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
@@ -256,6 +266,7 @@ describe('modules/datasource/go/releases-direct', () => {
         expect(result.releases).toHaveLength(0);
       }
     });
+
     it('works for nested modules on github v2+ major upgrades', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',

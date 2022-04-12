@@ -121,6 +121,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for invalid registry url', async () => {
       expect(
         await getPkgReleases({
@@ -130,6 +131,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
       expect(
@@ -140,6 +142,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for missing fields', async () => {
       httpMock
         .scope(baseUrl)
@@ -153,6 +156,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty list', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
       expect(
@@ -163,6 +167,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(404);
       expect(
@@ -173,6 +178,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(502);
       let e;
@@ -188,6 +194,7 @@ describe('modules/datasource/crate/index', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
+
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').replyWithError('');
       expect(
@@ -198,6 +205,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data: libc', async () => {
       httpMock
         .scope(baseUrl)
@@ -212,6 +220,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('processes real data: amethyst', async () => {
       httpMock
         .scope(baseUrl)
@@ -226,6 +235,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -238,6 +248,7 @@ describe('modules/datasource/crate/index', () => {
       expect(mockClone).toHaveBeenCalledTimes(0);
       expect(res).toBeNull();
     });
+
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -252,6 +263,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -266,6 +278,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -282,6 +295,7 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
+
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -308,6 +322,7 @@ describe('modules/datasource/crate/index', () => {
 
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
+
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
