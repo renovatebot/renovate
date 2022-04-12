@@ -247,5 +247,26 @@ describe('workers/global/config/parse/env', () => {
       };
       expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
+    it('dryRun boolean true', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_DRY_RUN: 'true',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.dryRun).toBe('full');
+    });
+    it('dryRun boolean false', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_DRY_RUN: 'false',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.dryRun).toBeNull();
+    });
+    it('dryRun null', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_DRY_RUN: 'null',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.dryRun).toBeNull();
+    });
   });
 });
