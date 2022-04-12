@@ -38,7 +38,6 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(aide);
     expect(newContent).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('updates "archive" github dependency', async () => {
     const upgrade = {
@@ -66,7 +65,6 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if fromStream promise rejects', async () => {
     const upgrade = {
@@ -95,7 +93,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(ibazel);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if url field in upgrade object is invalid', async () => {
     const content = ibazel;
@@ -146,7 +143,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if repoName in upgrade object is wrong', async () => {
     const content = ibazel;
@@ -178,7 +174,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if url field in Formula file is invalid', async () => {
     const content = `
@@ -213,7 +208,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if url field in Formula file is missing', async () => {
     const content = `
@@ -247,7 +241,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if sha256 field in Formula file is invalid', async () => {
     const content = `
@@ -282,7 +275,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if sha256 field in Formula file is missing', async () => {
     const content = `
@@ -316,7 +308,6 @@ describe('modules/manager/homebrew/update', () => {
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if both got requests fail', async () => {
     const upgrade = {
@@ -344,6 +335,5 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(aide);
     expect(newContent).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

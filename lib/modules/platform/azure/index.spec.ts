@@ -355,7 +355,8 @@ describe('modules/platform/azure/index', () => {
           } as any)
       );
       const pr = await azure.getBranchPr('somebranch');
-      expect(pr).toMatchSnapshot();
+      // TODO: should this return a PR instead?
+      expect(pr).toBeNull();
     });
   });
   describe('getBranchStatusCheck(branchName, context)', () => {

@@ -119,7 +119,6 @@ describe('modules/manager/bazel/update', () => {
         upgrade,
       });
       expect(res).not.toEqual(content);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('updates http archive with content other then WORKSPACE', async () => {
       const upgrade = {
@@ -147,7 +146,6 @@ describe('modules/manager/bazel/update', () => {
       });
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('updates finds url instead of urls', async () => {
       const upgrade = {
@@ -175,7 +173,6 @@ describe('modules/manager/bazel/update', () => {
       });
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null if no urls resolve hashes', async () => {
       const upgrade = {
@@ -266,7 +263,6 @@ http_archive(
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.5.0')).toBe(-1);
       expect(res.indexOf('0.6.2')).not.toBe(-1);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

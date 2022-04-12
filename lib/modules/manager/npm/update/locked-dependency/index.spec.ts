@@ -204,7 +204,6 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const packageLock = JSON.parse(res.files['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toBe('1.4.1');
       expect(packageLock.dependencies.express.version).toBe('4.16.0');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('fails remediation if cannot update parent', async () => {
       config.depName = 'mime';

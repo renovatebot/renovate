@@ -41,7 +41,6 @@ describe('modules/datasource/orb/index', () => {
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for missing orb', async () => {
       httpMock
@@ -54,7 +53,6 @@ describe('modules/datasource/orb/index', () => {
           depName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(404);
@@ -64,7 +62,6 @@ describe('modules/datasource/orb/index', () => {
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').replyWithError('');
@@ -74,7 +71,6 @@ describe('modules/datasource/orb/index', () => {
           depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
@@ -84,7 +80,6 @@ describe('modules/datasource/orb/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
@@ -95,7 +90,6 @@ describe('modules/datasource/orb/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res?.homepage).toBe('https://google.com');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
