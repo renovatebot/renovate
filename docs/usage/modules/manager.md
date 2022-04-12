@@ -93,7 +93,7 @@ To disable all managers within a language like `python`, do this:
 ```
 
 Only languages declared by a Renovate manager are supported.
-Please check the [list of supported managers](https://docs.renovatebot.com/modules/manager/#supported-managers).
+Please check the [list of supported managers](#supported-managers).
 
 #### Limiting enabled managers
 
