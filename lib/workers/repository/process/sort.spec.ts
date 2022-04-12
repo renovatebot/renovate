@@ -30,6 +30,7 @@ describe('workers/repository/process/sort', () => {
         { prTitle: 'some major update', updateType: 'major' },
       ]);
     });
+
     it('sorts based on prPriority', () => {
       const branches = [
         {
@@ -61,6 +62,7 @@ describe('workers/repository/process/sort', () => {
         { prPriority: -1, prTitle: 'a minor update', updateType: 'minor' },
       ]);
     });
+
     it('sorts based on isVulnerabilityAlert', () => {
       const branches = [
         {

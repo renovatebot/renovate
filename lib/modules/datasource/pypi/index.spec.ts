@@ -42,6 +42,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
       httpMock.scope(baseUrl).get('/something/').reply(404);
@@ -52,6 +53,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -64,6 +66,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('supports custom datasource url', async () => {
       httpMock
         .scope('https://custom.pypi.net/foo')
@@ -101,6 +104,7 @@ describe('modules/datasource/pypi/index', () => {
       });
       expect(res.isPrivate).toBeTrue();
     });
+
     it('supports multiple custom datasource urls', async () => {
       httpMock
         .scope('https://custom.pypi.net/foo')
@@ -131,6 +135,7 @@ describe('modules/datasource/pypi/index', () => {
         releaseTimestamp: '2019-06-18T13:58:55.000Z',
       });
     });
+
     it('returns non-github home_page', async () => {
       httpMock
         .scope(baseUrl)
@@ -151,6 +156,7 @@ describe('modules/datasource/pypi/index', () => {
         ).homepage
       ).toMatchSnapshot();
     });
+
     it('find url from project_urls', async () => {
       const info = {
         name: 'flexget',
@@ -174,6 +180,7 @@ describe('modules/datasource/pypi/index', () => {
       expect(result.sourceUrl).toBe(info.project_urls.Repository);
       expect(result.changelogUrl).toBe(info.project_urls.changelog);
     });
+
     it('normalizes the package name according to PEP 503', async () => {
       const expectedHttpCall = httpMock
         .scope(baseUrl)
@@ -188,6 +195,7 @@ describe('modules/datasource/pypi/index', () => {
 
       expect(expectedHttpCall.isDone()).toBeTrue();
     });
+
     it('normalizes the package name according to PEP 503 when falling back to simple endpoint', async () => {
       httpMock
         .scope(baseUrl)
@@ -206,6 +214,7 @@ describe('modules/datasource/pypi/index', () => {
 
       expect(expectedFallbackHttpCall.isDone()).toBeTrue();
     });
+
     it('normalizes the package name according to PEP 503 querying a simple endpoint', async () => {
       const simpleRegistryUrl = 'https://pypi.org/simple/';
       const expectedHttpCall = httpMock
@@ -249,6 +258,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('process data from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -266,6 +276,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('process data from +simple endpoint', async () => {
       httpMock
         .scope('https://some.registry.org/+simple/')
@@ -283,6 +294,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('sets private simple if authorization provided', async () => {
       hostRules.add({
         matchHost: 'some.private.registry.org',
@@ -303,6 +315,7 @@ describe('modules/datasource/pypi/index', () => {
       });
       expect(res.isPrivate).toBeTrue();
     });
+
     it('process data from simple endpoint with hyphens', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -322,6 +335,7 @@ describe('modules/datasource/pypi/index', () => {
         { version: '2.0.2' },
       ]);
     });
+
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -339,6 +353,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('process data from simple endpoint with mixed-case characters', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -358,6 +373,7 @@ describe('modules/datasource/pypi/index', () => {
         { version: '2.0.2' },
       ]);
     });
+
     it('process data from simple endpoint with mixed-case characters when using lower case dependency name', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -377,6 +393,7 @@ describe('modules/datasource/pypi/index', () => {
         { version: '2.0.2' },
       ]);
     });
+
     it('process data from simple endpoint with periods', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -396,6 +413,7 @@ describe('modules/datasource/pypi/index', () => {
         { version: '2.0.2' },
       ]);
     });
+
     it('returns null for empty response', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -413,6 +431,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404 response from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -430,6 +449,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for response with no versions', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -447,6 +467,7 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toBeNull();
     });
+
     it('fall back from json and process data from simple endpoint', async () => {
       httpMock
         .scope('https://custom.pypi.net/foo')
@@ -466,6 +487,7 @@ describe('modules/datasource/pypi/index', () => {
       });
       expect(result).toMatchSnapshot();
     });
+
     it('parses data-requires-python and respects constraints from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')

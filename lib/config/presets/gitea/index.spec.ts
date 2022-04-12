@@ -211,6 +211,7 @@ describe('config/presets/gitea/index', () => {
         )
       ).toEqual({ from: 'api' });
     });
+
     it('uses custom endpoint with a tag', async () => {
       httpMock
         .scope('https://api.gitea.example.org')

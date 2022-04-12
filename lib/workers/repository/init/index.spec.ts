@@ -26,6 +26,7 @@ describe('workers/repository/init/index', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: '', cacheDir: '' });
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });
@@ -40,6 +41,7 @@ describe('workers/repository/init/index', () => {
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
     });
+
     it('warns on unsupported options', async () => {
       apis.initApis.mockResolvedValue({} as never);
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});

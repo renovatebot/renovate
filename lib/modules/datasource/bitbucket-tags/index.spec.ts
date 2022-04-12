@@ -38,6 +38,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res.releases).toHaveLength(3);
     });
   });
+
   describe('getDigest', () => {
     it('returns commits from bitbucket cloud', async () => {
       const body = {
@@ -75,6 +76,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toBe('123');
     });
   });
+
   describe('getDigest with no commits', () => {
     it('returns commits from bitbucket cloud', async () => {
       const body = {
@@ -97,6 +99,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toBeNull();
     });
   });
+
   describe('getTagCommit', () => {
     it('returns tags commit hash from bitbucket cloud', async () => {
       const body = {

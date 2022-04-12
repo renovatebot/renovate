@@ -22,6 +22,7 @@ describe('modules/platform/bitbucket/index', () => {
   let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
+
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -72,6 +73,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect.assertions(1);
       await expect(bitbucket.initPlatform({})).rejects.toThrow();
     });
+
     it('should show warning message if custom endpoint', async () => {
       await bitbucket.initPlatform({
         endpoint: 'endpoint',
@@ -82,6 +84,7 @@ describe('modules/platform/bitbucket/index', () => {
         'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?'
       );
     });
+
     it('should init', async () => {
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
@@ -91,6 +94,7 @@ describe('modules/platform/bitbucket/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('should warn for missing "profile" scope', async () => {
       const scope = httpMock.scope(baseUrl);
       scope
@@ -150,6 +154,7 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(await bitbucket.getBranchPr('branch')).toMatchSnapshot();
     });
+
     it('returns null if no PR for branch', async () => {
       const scope = await initRepoMock();
       scope
@@ -185,6 +190,7 @@ describe('modules/platform/bitbucket/index', () => {
         });
       expect(await bitbucket.getBranchStatus('master')).toBe(BranchStatus.red);
     });
+
     it('getBranchStatus 4', async () => {
       const scope = await initRepoMock();
       scope
@@ -211,6 +217,7 @@ describe('modules/platform/bitbucket/index', () => {
         BranchStatus.green
       );
     });
+
     it('getBranchStatus 5', async () => {
       const scope = await initRepoMock();
       scope
@@ -237,6 +244,7 @@ describe('modules/platform/bitbucket/index', () => {
         BranchStatus.yellow
       );
     });
+
     it('getBranchStatus 6', async () => {
       const scope = await initRepoMock();
       scope
@@ -283,14 +291,17 @@ describe('modules/platform/bitbucket/index', () => {
           ],
         });
     });
+
     it('getBranchStatusCheck 1', async () => {
       expect(await bitbucket.getBranchStatusCheck('master', null)).toBeNull();
     });
+
     it('getBranchStatusCheck 2', async () => {
       expect(await bitbucket.getBranchStatusCheck('master', 'foo')).toBe(
         BranchStatus.red
       );
     });
+
     it('getBranchStatusCheck 3', async () => {
       expect(await bitbucket.getBranchStatusCheck('master', 'bar')).toBeNull();
     });
@@ -357,6 +368,7 @@ describe('modules/platform/bitbucket/index', () => {
         });
       expect(await bitbucket.findIssue('title')).toMatchSnapshot();
     });
+
     it('returns null if no issues', async () => {
       const scope = await initRepoMock(
         {
@@ -374,6 +386,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(await bitbucket.findIssue('title')).toBeNull();
     });
   });
+
   describe('ensureIssue()', () => {
     it('updates existing issues', async () => {
       const scope = await initRepoMock({}, { has_issues: true });
@@ -403,6 +416,7 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.ensureIssue({ title: 'title', body: 'body' })
       ).toBe('updated');
     });
+
     it('creates new issue', async () => {
       const scope = await initRepoMock(
         { repository: 'some/empty' },
@@ -427,6 +441,7 @@ describe('modules/platform/bitbucket/index', () => {
         })
       ).toBe('created');
     });
+
     it('noop for existing issue', async () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
@@ -463,6 +478,7 @@ describe('modules/platform/bitbucket/index', () => {
       await initRepoMock();
       await expect(bitbucket.ensureIssueClosing('title')).toResolve();
     });
+
     it('closes issue', async () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
@@ -496,6 +512,7 @@ describe('modules/platform/bitbucket/index', () => {
       await initRepoMock();
       expect(await bitbucket.getIssueList()).toEqual([]);
     });
+
     it('get issues', async () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
@@ -522,6 +539,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(issues).toHaveLength(2);
       expect(issues).toMatchSnapshot();
     });
+
     it('does not throw', async () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
@@ -592,6 +610,7 @@ describe('modules/platform/bitbucket/index', () => {
     it('exists', () => {
       expect(bitbucket.getPrList).toBeDefined();
     });
+
     it('filters PR list by author', async () => {
       const scope = httpMock.scope(baseUrl);
       scope.get('/2.0/user').reply(200, { uuid: '12345' });
@@ -658,6 +677,7 @@ describe('modules/platform/bitbucket/index', () => {
       });
       expect(number).toBe(5);
     });
+
     it('removes inactive reviewers when updating pr', async () => {
       const inactiveReviewer = {
         display_name: 'Bob Smith',
@@ -706,6 +726,7 @@ describe('modules/platform/bitbucket/index', () => {
       });
       expect(number).toBe(5);
     });
+
     it('removes default reviewers no longer member of the workspace when creating pr', async () => {
       const notMemberReviewer = {
         display_name: 'Bob Smith',
@@ -757,6 +778,7 @@ describe('modules/platform/bitbucket/index', () => {
       });
       expect(number).toBe(5);
     });
+
     it('throws exception when unable to check default reviewers workspace membership', async () => {
       const reviewer = {
         display_name: 'Bob Smith',
@@ -798,6 +820,7 @@ describe('modules/platform/bitbucket/index', () => {
         })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
+
     it('rethrows exception when PR create error due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
@@ -832,6 +855,7 @@ describe('modules/platform/bitbucket/index', () => {
         })
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
+
     it('rethrows exception when PR create error not due to reviewers field', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
@@ -926,6 +950,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
+
     it('removes inactive reviewers when updating pr', async () => {
       const inactiveReviewer = {
         display_name: 'Bob Smith',
@@ -965,6 +990,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
+
     it('removes reviewers no longer member of the workspace when updating pr', async () => {
       const notMemberReviewer = {
         display_name: 'Bob Smith',
@@ -1008,6 +1034,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
+
     it('throws exception when unable to check reviewers workspace membership', async () => {
       const reviewer = {
         display_name: 'Bob Smith',
@@ -1039,6 +1066,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
+
     it('rethrows exception when PR update error due to unknown reviewers error', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
@@ -1063,6 +1091,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
     });
+
     it('rethrows exception when PR create error not due to reviewers field', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
@@ -1087,6 +1116,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
+
     it('throws an error on failure to get current list of reviewers', async () => {
       const scope = await initRepoMock();
       scope
@@ -1096,6 +1126,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
     });
+
     it('closes PR', async () => {
       const scope = await initRepoMock();
       scope
@@ -1262,6 +1293,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, '!@#');
       await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       const scope = await initRepoMock();
       scope

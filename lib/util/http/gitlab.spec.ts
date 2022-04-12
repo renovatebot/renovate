@@ -49,6 +49,7 @@ describe('util/http/gitlab', () => {
     const res = await gitlabApi.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
   });
+
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
     process.env.GITLAB_IGNORE_REPO_URL = 'true';
     setBaseUrl(`${selfHostedUrl}/api/v4/`);
@@ -91,12 +92,14 @@ describe('util/http/gitlab', () => {
     const res = await gitlabApi.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
   });
+
   it('posts', async () => {
     const body = ['a', 'b'];
     httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(200, body);
     const res = await gitlabApi.postJson('some-url');
     expect(res.body).toEqual(body);
   });
+
   it('sets baseUrl', () => {
     expect(() => setBaseUrl(`${selfHostedUrl}/api/v4/`)).not.toThrow();
   });

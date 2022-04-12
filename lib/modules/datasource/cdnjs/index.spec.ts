@@ -24,6 +24,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('throws for error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
@@ -33,6 +34,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(404);
       expect(
@@ -42,6 +44,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty 200 OK', async () => {
       httpMock
         .scope(baseUrl)
@@ -54,6 +57,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).toBeNull();
     });
+
     it('throws for 401', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(401);
       await expect(
@@ -63,6 +67,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(429);
       await expect(
@@ -72,6 +77,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(502);
       await expect(
@@ -81,6 +87,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('throws for unknown error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
@@ -90,6 +97,7 @@ describe('modules/datasource/cdnjs/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -101,6 +109,7 @@ describe('modules/datasource/cdnjs/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('filters releases by asset presence', async () => {
       httpMock
         .scope(baseUrl)

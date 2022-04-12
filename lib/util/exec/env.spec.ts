@@ -12,14 +12,17 @@ describe('util/exec/env', () => {
     'LANG',
     'DOCKER_HOST',
   ];
+
   beforeEach(() => {
     envVars.forEach((env) => {
       process.env[env] = env;
     });
   });
+
   afterEach(() => {
     envVars.forEach((env) => delete process.env[env]);
   });
+
   it('returns default environment variables', () => {
     expect(getChildProcessEnv()).toMatchObject({
       DOCKER_HOST: 'DOCKER_HOST',
@@ -32,10 +35,12 @@ describe('util/exec/env', () => {
       PATH: 'PATH',
     });
   });
+
   it('returns environment variable only if defined', () => {
     delete process.env.PATH;
     expect(getChildProcessEnv()).not.toHaveProperty('PATH');
   });
+
   it('returns custom environment variables if passed and defined', () => {
     process.env.FOOBAR = 'FOOBAR';
     expect(getChildProcessEnv(['FOOBAR'])).toMatchObject({

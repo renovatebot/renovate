@@ -36,6 +36,7 @@ describe('logger/err-serializer', () => {
       },
     });
   });
+
   it('handles missing fields', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,

@@ -22,6 +22,7 @@ const datasource = PackagistDatasource.id;
 describe('modules/datasource/packagist/index', () => {
   describe('getReleases', () => {
     let config: any;
+
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.find = jest.fn((input: HostRule) => input);
@@ -75,6 +76,7 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('handles timeouts', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -89,6 +91,7 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('handles auth rejections', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -103,6 +106,7 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('handles not found registries', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -117,6 +121,7 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('supports includes packages', async () => {
       hostRules.find = jest.fn(() => ({
         username: 'some-username',
@@ -145,6 +150,7 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('supports lazy repositories', async () => {
       const packagesJson = {
         packages: [],
@@ -183,6 +189,7 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('supports provider-includes', async () => {
       const packagesJson = {
         packages: [],
@@ -227,6 +234,7 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('handles provider-includes miss', async () => {
       const packagesJson = {
         packages: [],
@@ -267,6 +275,7 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('supports providers', async () => {
       const packagesJson = {
         packages: [],
@@ -299,6 +308,7 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('supports providers without a hash', async () => {
       const packagesJson = {
         packages: [],
@@ -327,6 +337,7 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('handles providers miss', async () => {
       const packagesJson = {
         packages: [],
@@ -355,6 +366,7 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('processes real versioned data', async () => {
       httpMock
         .scope(baseUrl)
@@ -374,6 +386,7 @@ describe('modules/datasource/packagist/index', () => {
         })
       ).toMatchSnapshot();
     });
+
     it('adds packagist source implicitly', async () => {
       httpMock
         .scope(baseUrl)

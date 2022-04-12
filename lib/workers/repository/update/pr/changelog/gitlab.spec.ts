@@ -54,6 +54,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('returns null if currentVersion equals newVersion', async () => {
       expect(
         await getChangeLogJSON({
@@ -63,6 +64,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('skips invalid repos', async () => {
       expect(
         await getChangeLogJSON({
@@ -71,6 +73,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('works without GitLab', async () => {
       expect(
         await getChangeLogJSON({
@@ -95,6 +98,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         ],
       });
     });
+
     it('uses GitLab tags', async () => {
       httpMock
         .scope(matchHost)
@@ -136,6 +140,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         ],
       });
     });
+
     it('handles empty GitLab tags response', async () => {
       httpMock
         .scope(matchHost)
@@ -170,6 +175,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         ],
       });
     });
+
     it('uses GitLab tags with error', async () => {
       httpMock
         .scope(matchHost)
@@ -204,6 +210,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         ],
       });
     });
+
     it('handles no sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -212,6 +219,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('handles invalid sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -220,6 +228,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('handles no releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -228,6 +237,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('handles not enough releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -236,6 +246,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         })
       ).toBeNull();
     });
+
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
         hostType: PlatformId.Gitlab,
@@ -268,6 +279,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         ],
       });
     });
+
     it('supports self-hosted gitlab changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({

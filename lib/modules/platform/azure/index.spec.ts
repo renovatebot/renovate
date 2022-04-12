@@ -23,6 +23,7 @@ describe('modules/platform/azure/index', () => {
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
+
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -80,6 +81,7 @@ describe('modules/platform/azure/index', () => {
       expect.assertions(1);
       expect(() => azure.initPlatform({})).toThrow();
     });
+
     it('should throw if no token nor a username and password', () => {
       expect.assertions(1);
       expect(() =>
@@ -88,6 +90,7 @@ describe('modules/platform/azure/index', () => {
         })
       ).toThrow();
     });
+
     it('should throw if a username but no password', () => {
       expect.assertions(1);
       expect(() =>
@@ -97,6 +100,7 @@ describe('modules/platform/azure/index', () => {
         })
       ).toThrow();
     });
+
     it('should throw if a password but no username', () => {
       expect.assertions(1);
       expect(() =>
@@ -106,6 +110,7 @@ describe('modules/platform/azure/index', () => {
         })
       ).toThrow();
     });
+
     it('should init', async () => {
       expect(
         await azure.initPlatform({
@@ -230,6 +235,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('returns pr if found not open', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -256,6 +262,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('returns pr if found it close', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -282,6 +289,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('returns pr if found it all state', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -308,6 +316,7 @@ describe('modules/platform/azure/index', () => {
       expect(res).toMatchSnapshot();
     });
   });
+
   describe('getPrList()', () => {
     it('returns empty array', async () => {
       azureApi.gitApi.mockImplementationOnce(
@@ -335,6 +344,7 @@ describe('modules/platform/azure/index', () => {
       const pr = await azure.getBranchPr('somebranch');
       expect(pr).toBeNull();
     });
+
     it('should return the pr', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
@@ -359,6 +369,7 @@ describe('modules/platform/azure/index', () => {
       expect(pr).toBeNull();
     });
   });
+
   describe('getBranchStatusCheck(branchName, context)', () => {
     it('should return green if status is succeeded', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -401,6 +412,7 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toBe(BranchStatus.green);
     });
+
     it('should return red if status is failed', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -421,6 +433,7 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toBe(BranchStatus.red);
     });
+
     it('should return red if context status is error', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -441,6 +454,7 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toEqual(BranchStatus.red);
     });
+
     it('should return yellow if status is pending', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -461,6 +475,7 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toBe(BranchStatus.yellow);
     });
+
     it('should return yellow if status is not set', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -481,6 +496,7 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toBe(BranchStatus.yellow);
     });
+
     it('should return null if status not found', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -502,6 +518,7 @@ describe('modules/platform/azure/index', () => {
       expect(res).toBeNull();
     });
   });
+
   describe('getBranchStatus(branchName, ignoreTests)', () => {
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -515,6 +532,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
+
     it('should pass through failed', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -527,6 +545,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
+
     it('should pass through pending', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -539,6 +558,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
+
     it('should fall back to yellow if no statuses returned', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -558,6 +578,7 @@ describe('modules/platform/azure/index', () => {
       const pr = await azure.getPr(0);
       expect(pr).toBeNull();
     });
+
     it('should return null if no PR is returned from azure', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -569,6 +590,7 @@ describe('modules/platform/azure/index', () => {
       const pr = await azure.getPr(1234);
       expect(pr).toBeNull();
     });
+
     it('should return a pr in the right format', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
@@ -621,6 +643,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(pr).toMatchSnapshot();
     });
+
     it('should create and return a PR object from base branch', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -642,6 +665,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(pr).toMatchSnapshot();
     });
+
     it('should create and return a PR object with auto-complete set', async () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
@@ -685,6 +709,7 @@ describe('modules/platform/azure/index', () => {
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
+
     it('should create and return an approved PR object', async () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
@@ -818,6 +843,7 @@ describe('modules/platform/azure/index', () => {
       expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
       expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
+
     it('updates comment if missing', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
@@ -843,6 +869,7 @@ describe('modules/platform/azure/index', () => {
       expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
       expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
+
     it('does nothing if comment exists and is the same', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
@@ -868,6 +895,7 @@ describe('modules/platform/azure/index', () => {
       expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
       expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
+
     it('does nothing if comment exists and is the same when there is no topic', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
@@ -893,6 +921,7 @@ describe('modules/platform/azure/index', () => {
 
   describe('ensureCommentRemoval', () => {
     let gitApiMock;
+
     beforeEach(() => {
       gitApiMock = {
         getThreads: jest.fn(() => [
@@ -909,6 +938,7 @@ describe('modules/platform/azure/index', () => {
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock);
     });
+
     it('deletes comment by topic if found', async () => {
       await initRepo({ repository: 'some/repo' });
       await azure.ensureCommentRemoval({
@@ -924,6 +954,7 @@ describe('modules/platform/azure/index', () => {
         123
       );
     });
+
     it('deletes comment by content if found', async () => {
       await initRepo({ repository: 'some/repo' });
       await azure.ensureCommentRemoval({
@@ -939,6 +970,7 @@ describe('modules/platform/azure/index', () => {
         124
       );
     });
+
     it('comment not found', async () => {
       await initRepo({ repository: 'some/repo' });
       await azure.ensureCommentRemoval({
@@ -1048,6 +1080,7 @@ describe('modules/platform/azure/index', () => {
         '1'
       );
     });
+
     it('should build and call the create status api properly with a complex context', async () => {
       await initRepo({ repository: 'some/repo' });
       const createCommitStatusMock = jest.fn();
@@ -1126,6 +1159,7 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toBeTrue();
     });
+
     it('should return false if the PR does not update successfully', async () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
@@ -1271,6 +1305,7 @@ describe('modules/platform/azure/index', () => {
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
+
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
@@ -1330,6 +1365,7 @@ describe('modules/platform/azure/index', () => {
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -1341,6 +1377,7 @@ describe('modules/platform/azure/index', () => {
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('supports fetch from another repo', async () => {
       const data = { foo: 'bar' };
       const gitApiMock = {

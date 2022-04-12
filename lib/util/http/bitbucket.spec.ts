@@ -7,6 +7,7 @@ const baseUrl = 'https://api.bitbucket.org';
 
 describe('util/http/bitbucket', () => {
   let api: BitbucketHttp;
+
   beforeEach(() => {
     api = new BitbucketHttp();
 
@@ -30,6 +31,7 @@ describe('util/http/bitbucket', () => {
     const res = await api.postJson('some-url');
     expect(res.body).toEqual(body);
   });
+
   it('accepts custom baseUrl', async () => {
     const customBaseUrl = 'https://api-test.bitbucket.org';
     httpMock.scope(baseUrl).post('/some-url').reply(200, {});
