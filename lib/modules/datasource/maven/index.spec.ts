@@ -279,10 +279,18 @@ describe('modules/datasource/maven/index', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('returns releases from S3 repository', async () => {
+  it('returns releases from an S3 repository', async () => {
     mockGenericPackage({ base: baseUrlS3 });
 
     const res = await get('org.example:package', baseUrlS3);
+
+    expect(res).toMatchSnapshot();
+  });
+
+  it('falls back to HTTP when checking an S3 repository', async () => {
+    mockGenericPackage({ base: baseUrl });
+
+    const res = await get('org.example:package', baseUrlS3, baseUrl);
 
     expect(res).toMatchSnapshot();
   });
@@ -363,7 +371,6 @@ describe('modules/datasource/maven/index', () => {
     const { releases } = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      's3://protocol_error_repo',
       base
     );
 
