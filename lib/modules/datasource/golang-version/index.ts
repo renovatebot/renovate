@@ -14,6 +14,7 @@ const releaseDateRegex = regEx(
 const releaseVersionRegex = regEx(
   `Version\\{(?<versionMajor>\\d+),\\s+(?<versionMinor>\\d+),\\s+(?<patch>\\d+)\\}`
 );
+const releaseFutureRegex = regEx(`Future:\\s+true`);
 
 export class GolangVersionDatasource extends Datasource {
   static readonly id = 'golang-version';
@@ -57,6 +58,7 @@ export class GolangVersionDatasource extends Datasource {
 
     // Parse the release list
     let release: Release = { version: undefined };
+    let skipFutureRelease = false;
     while (lines.length !== 0) {
       const line = lines.shift();
       if (line === releaseBeginningChar) {
@@ -66,14 +68,22 @@ export class GolangVersionDatasource extends Datasource {
           );
         }
       } else if (line === releaseTerminationChar) {
-        if (release.version === undefined) {
-          throw new ExternalHostError(
-            new Error('Invalid file - release has empty version')
-          );
+        if (skipFutureRelease) {
+          skipFutureRelease = false;
+        } else {
+          if (release.version === undefined) {
+            throw new ExternalHostError(
+              new Error('Invalid file - release has empty version')
+            );
+          }
+          res.releases.push(release);
         }
-        res.releases.push(release);
         release = { version: undefined };
       } else {
+        const isFutureRelease = releaseFutureRegex.test(line);
+        if (isFutureRelease) {
+          skipFutureRelease = true;
+        }
         const releaseDateMatch = releaseDateRegex.exec(line);
         if (releaseDateMatch) {
           // Make a valid UTC timestamp
