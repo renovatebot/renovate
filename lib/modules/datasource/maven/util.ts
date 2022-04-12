@@ -238,7 +238,8 @@ export async function checkResource(
   http: Http,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
-  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) as url.URL : pkgUrl;
+  const parsedUrl =
+    typeof pkgUrl === 'string' ? (parseUrl(pkgUrl) as url.URL) : pkgUrl;
   switch (parsedUrl.protocol) {
     case 'http:':
     case 'https:':

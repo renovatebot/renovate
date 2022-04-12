@@ -1,6 +1,6 @@
+import { Readable } from 'stream';
+import type { S3 } from '@aws-sdk/client-s3';
 import { afterEach } from '@jest/globals';
-import {S3} from "@aws-sdk/client-s3";
-import {Readable} from "stream";
 
 interface S3Url {
   Bucket: string;
@@ -16,7 +16,7 @@ function objectKey(url: S3Url) {
 function listObject(url: S3Url) {
   const k = objectKey(url);
   if (!mockedObjects[k]) {
-    return Promise.reject({message: 'NotFound'})
+    return Promise.reject({ message: 'NotFound' });
   }
   return Promise.resolve({});
 }
@@ -24,7 +24,7 @@ function listObject(url: S3Url) {
 function getObject(url: S3Url) {
   const k = objectKey(url);
   if (!mockedObjects[k]) {
-    return Promise.reject({message: 'NotFound'})
+    return Promise.reject({ message: 'NotFound' });
   }
   const Body = new Readable();
   const content = mockedObjects[k];
@@ -32,11 +32,11 @@ function getObject(url: S3Url) {
     Body.push(content);
   }
   Body.push(null);
-  return Promise.resolve({Body});
+  return Promise.resolve({ Body });
 }
 
 function mockObject(url: string, content: string | null) {
-  mockedObjects[url] = !content ? true : content;
+  mockedObjects[url] = content ? content : true;
 }
 
 const s3mock = {
