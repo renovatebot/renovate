@@ -6,7 +6,7 @@ import {
   platform,
 } from '../../../../../test/util';
 import { PlatformId } from '../../../../constants';
-import type { Pr } from '../../../../modules/platform/types';
+import type { Pr } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig } from '../../../types';
@@ -474,9 +474,10 @@ describe('workers/repository/update/pr/index', () => {
         },
       ]);
       expect(platform.createPr.mock.calls[0][0].prBody).toContain(
-        'this Pin PR'
+        "you don't want to pin your dependencies"
       );
     });
+
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.createPr.mockImplementationOnce(() => {

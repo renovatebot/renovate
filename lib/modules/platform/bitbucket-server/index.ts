@@ -1,4 +1,3 @@
-import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
@@ -10,19 +9,11 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import {
-  BranchStatus,
-  HostRule,
-  PrState,
-  VulnerabilityAlert,
-} from '../../../types';
-import type { GitProtocol } from '../../../types/git';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { HttpResponse } from '../../../util/http';
-
 import {
   BitbucketServerHttp,
   setBaseUrl,
@@ -39,7 +30,6 @@ import type {
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
-  GitUrlOption,
   Issue,
   MergePRConfig,
   PlatformParams,
@@ -161,54 +151,6 @@ export async function getJsonFile(
   return JSON.parse(raw);
 }
 
-function getRepoUrl(
-  repository: string,
-  gitUrl: GitUrlOption | undefined,
-  info: BbsRestRepo,
-  opts: HostRule
-): string {
-  if (gitUrl === 'ssh') {
-    const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-
-    if (sshUrl) {
-      logger.debug({ url: sshUrl.href }, `using ssh URL`);
-      return sshUrl.href;
-    } else {
-      logger.warn(
-        `ssh URL could not be found for ${repository}. Falling back to use http.`
-      );
-    }
-  }
-
-  const httpUrl = info.links.clone?.find(({ name }) => name === 'http');
-  if (gitUrl === 'endpoint' || httpUrl === null) {
-    if (httpUrl === null) {
-      logger.debug(
-        `no http url found for ${repository}. Falling back to generating the url.`
-      );
-    }
-
-    // Fallback to generating the url if the API didn't give us an URL
-    const { host, pathname } = url.parse(defaults.endpoint);
-    const endpointUrl = git.getUrl({
-      protocol: defaults.endpoint.split(':')[0] as GitProtocol,
-      auth: `${opts.username}:${opts.password}`,
-      host: `${host}${pathname}${
-        pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
-      }scm`,
-      repository,
-    });
-    logger.debug({ endpointUrl }, 'using URL based on configured endpoint');
-    return endpointUrl;
-  }
-
-  logger.debug({ url: httpUrl.href }, `using http URL`);
-  //Inject auth into the API provided URL
-  const repoUrl = url.parse(httpUrl.href);
-  repoUrl.auth = `${opts.username}:${opts.password}`;
-  return url.format(repoUrl);
-}
-
 // Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
@@ -250,7 +192,13 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
-    const url = getRepoUrl(config.repositorySlug, gitUrl, info, opts);
+    const url = utils.getRepoGitUrl(
+      config.repositorySlug,
+      defaults.endpoint,
+      gitUrl,
+      info,
+      opts
+    );
 
     await git.initRepo({
       ...config,
@@ -383,7 +331,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {
-    logger.debug(`DID NOT Found PR from branch #${branchName}`);
+    logger.debug(`Renovate did not find a PR for branch #${branchName}`);
   }
   return pr;
 }

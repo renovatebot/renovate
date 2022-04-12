@@ -2561,6 +2561,150 @@ Array [
 ]
 `;
 
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() gitURL endpoint returns generates endpoint URL 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() gitURL endpoint returns generates endpoint URL 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() gitUrl default returns http from API with injected auth 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() gitUrl default returns http from API with injected auth 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() gitUrl ssh returns ssh url 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() gitUrl ssh returns ssh url 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() no git url 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() no git url 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
 exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() throws REPOSITORY_EMPTY if there is no default branch 1`] = `
 Array [
   Object {
@@ -6721,6 +6865,150 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() generates URL if API does not contain clone links 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() gitURL endpoint returns generates endpoint URL 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() gitURL endpoint returns generates endpoint URL 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() gitUrl default returns http from API with injected auth 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() gitUrl default returns http from API with injected auth 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() gitUrl ssh returns ssh url 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() gitUrl ssh returns ssh url 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() no git url 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() no git url 2`] = `
 Array [
   Object {
     "headers": Object {

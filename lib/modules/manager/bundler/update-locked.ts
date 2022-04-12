@@ -17,7 +17,7 @@ export function updateLockedDependency(
     }
     return { status: 'unsupported' };
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'composer.updateLockedDependency() error');
+    logger.debug({ err }, 'bundler.updateLockedDependency() error');
     return { status: 'update-failed' };
   }
 }

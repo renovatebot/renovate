@@ -22,7 +22,6 @@ export function checkForPlatformFailure(err: Error): Error | null {
     'early EOF',
     'fatal: bad config', // .gitmodules problem
     'expected flush after ref listing',
-    '[rejected] (stale info)',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {

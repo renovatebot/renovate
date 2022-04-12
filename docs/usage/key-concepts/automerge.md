@@ -6,7 +6,7 @@ description: Learn all about Renovate's automerge functionality here
 # Introduction
 
 Automerging is a Renovate feature that you can use to automate upgrading dependencies.
-When enabled, Renovate will attempt to merge the proposed update once the tests pass.
+When enabled, Renovate tries to merge the proposed update once the tests pass.
 
 Keep in mind that Renovate automerges take a bit of time, do not expect Renovate to automerge a PR the second it opens and passes tests.
 Wait for at least an hour or two before troubleshooting to ensure that Renovate has had the time to run once in a state where tests have passed and the branch is up-to-date with its base branch.
@@ -50,7 +50,7 @@ Here is an example of automerging lock file maintenance:
 
 Automerging lint tool updates can be a real time-saver.
 Sometimes an update to a lint tool or plugin definition causes tests to fail, and that is usually deliberate/intentional because the lint authors have added a new rule that you need to adhere to.
-However, in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
+But in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
 
 ```json
 {

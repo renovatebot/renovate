@@ -29,7 +29,8 @@ Renovate does not support:
 - Gradle versions older than version 5.0
 - Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML
 - Catalogs with version ranges
-- Catalogs using the `required`, `strictly`, `preferred`, `reject`, and `rejectAll` version declarations
+- Catalogs versions using `reject`, and `rejectAll` constraints
+- Catalogs versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
 - Catalogs outside the `gradle` folder whose names do not end in `.versions.toml`
 
@@ -53,7 +54,7 @@ As Renovate takes the `distributionUrl` defined inside the `gradle-wrapper.prope
 
 This can be used for hosting the official distributions with a proxy server, an offline mirror or even providing a custom distribution of the Gradle Wrapper, e.g. to provide a company-wide base configuration for all Gradle projects.
 
-However, the `gradle-version` datasource is used to determine available versions.
+But the `gradle-version` datasource is used to determine available versions.
 In case the available versions at the defined source differ from those available from Gradle or the [default datasource](https://services.gradle.org/versions/all) cannot be reached, e.g. due to network restrictions, the datasource may be reconfigured via a `packageRule`:
 
 ```json

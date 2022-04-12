@@ -1,14 +1,18 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
 import is from '@sindresorhus/is';
-import { PrState } from '../../../types';
+import { logger } from '../../../logger';
+import { HostRule, PrState } from '../../../types';
+import type { GitProtocol } from '../../../types/git';
+import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import type {
   HttpOptions,
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
-import type { BbsPr, BbsRestPr, BitbucketError } from './types';
+import type { GitUrlOption } from '../types';
+import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
@@ -151,4 +155,82 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
   }
 
   return invalidReviewers;
+}
+
+function generateUrlFromEndpoint(
+  defaultEndpoint: string,
+  opts: HostRule,
+  repository: string
+): string {
+  const { host, pathname } = url.parse(defaultEndpoint);
+  const generatedUrl = git.getUrl({
+    protocol: defaultEndpoint.split(':')[0] as GitProtocol,
+    auth: `${opts.username}:${opts.password}`,
+    host: `${host}${pathname}${
+      pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+    }scm`,
+    repository,
+  });
+  logger.debug({ url: generatedUrl }, `using generated endpoint URL`);
+  return generatedUrl;
+}
+
+export function getRepoGitUrl(
+  repository: string,
+  defaultEndpoint: string,
+  gitUrl: GitUrlOption,
+  info: BbsRestRepo,
+  opts: HostRule
+): string {
+  if (gitUrl === undefined) {
+    let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+    if (!cloneUrl) {
+      // Http access might be disabled, try to find ssh url in this case
+      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+    }
+
+    let gitUrl: string;
+    if (!cloneUrl) {
+      // Fallback to generating the url if the API didn't give us an URL
+      gitUrl = generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+    } else if (cloneUrl.name === 'http') {
+      logger.debug({ url: cloneUrl.href }, `using http URL`);
+      // Inject auth into the API provided URL
+      const repoUrl = url.parse(cloneUrl.href);
+      repoUrl.auth = `${opts.username}:${opts.password}`;
+      gitUrl = url.format(repoUrl);
+    } else {
+      logger.debug({ url: cloneUrl.href }, `using ssh URL`);
+      // SSH urls can be used directly
+      gitUrl = cloneUrl.href;
+    }
+    return gitUrl;
+  } else {
+    if (gitUrl === 'ssh') {
+      const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+      if (sshUrl) {
+        logger.debug({ url: sshUrl.href }, `using ssh URL`);
+        return sshUrl.href;
+      } else {
+        logger.warn(`ssh URL could not be found for ${repository}.`);
+      }
+    } else if (gitUrl === 'default') {
+      const httpUrl = info.links.clone?.find(({ name }) => name === 'http');
+      if (httpUrl) {
+        logger.debug({ url: httpUrl.href }, `using default URL`);
+        // Inject auth into the API provided URL
+        const repoUrl = url.parse(httpUrl.href);
+        repoUrl.auth = `${opts.username}:${opts.password}`;
+        return url.format(repoUrl);
+      } else {
+        logger.warn(
+          `endpoint URL could not be found for ${repository}. Falling back to generating`
+        );
+      }
+    } else if (gitUrl === 'endpoint') {
+      // Fallback to generating the url if the API didn't give us an URL
+      return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+    }
+    return undefined;
+  }
 }

@@ -72,7 +72,7 @@ function getFutureVersion(
   const baseRelease: number[] =
     parseVersion(baseVersion || newVersion)?.release ?? [];
   return baseRelease.map((_, index) => {
-    const toPart = toRelease[index] || 0;
+    const toPart: number = toRelease[index] ?? 0;
     if (index < policy) {
       return toPart;
     }
@@ -176,8 +176,12 @@ export function getNewValue({
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
   }
+  const checkedResult = checkRangeAndRemoveUnnecessaryRangeLimit(
+    result,
+    newVersion
+  );
 
-  if (!satisfies(newVersion, result)) {
+  if (!satisfies(newVersion, checkedResult)) {
     // we failed at creating the range
     logger.warn(
       { result, newVersion, currentValue },
@@ -185,7 +189,7 @@ export function getNewValue({
     );
     return null;
   }
-  return result;
+  return checkedResult;
 }
 
 export function isLessThanRange(input: string, range: string): boolean {
@@ -479,4 +483,27 @@ function handleBumpStrategy(
       range
     );
   });
+}
+
+export function checkRangeAndRemoveUnnecessaryRangeLimit(
+  rangeInput: string,
+  newVersion: string
+): string {
+  let newRange: string = rangeInput;
+  if (rangeInput.includes(',')) {
+    const newRes = rangeInput.split(',');
+    if (
+      newRes[0].includes('.*') &&
+      newRes[0].includes('==') &&
+      newRes[1].includes('>=')
+    ) {
+      if (satisfies(newVersion, newRes[0])) {
+        newRange = newRes[0];
+      }
+    }
+  } else {
+    return rangeInput;
+  }
+
+  return newRange;
 }

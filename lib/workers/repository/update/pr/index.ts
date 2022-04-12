@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -14,7 +15,6 @@ import { sampleSize } from '../../../../util';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { regEx } from '../../../../util/regex';
-import { nonEmptyStringAndNotWhitespace } from '../../../../util/string';
 import * as template from '../../../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -63,9 +63,9 @@ export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
   return [...new Set([...labels, ...addLabels])]
-    .filter(nonEmptyStringAndNotWhitespace)
+    .filter(is.nonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
-    .filter(nonEmptyStringAndNotWhitespace);
+    .filter(is.nonEmptyStringAndNotWhitespace);
 }
 
 export async function addAssigneesReviewers(
@@ -179,9 +179,8 @@ export async function ensurePr(
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle, upgrades } = config;
-  const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
-    config.branchName
-  ];
+  const dependencyDashboardCheck =
+    config.dependencyDashboardChecks?.[config.branchName];
   // Check if existing PR exists
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {

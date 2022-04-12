@@ -4,7 +4,7 @@ import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
-import * as _poetry from '../../../../modules/manager/poetry';
+import * as _terraform from '../../../../modules/manager/terraform';
 import type { BranchConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -13,14 +13,14 @@ const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
-const poetry = mocked(_poetry);
+const terraform = mocked(_terraform);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/poetry');
+jest.mock('../../../../modules/manager/terraform');
 jest.mock('../../../../util/git');
 jest.mock('./auto-replace');
 
@@ -336,16 +336,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
       config.upgrades.push({
-        packageFile: 'pyproject.toml',
-        manager: 'poetry',
+        packageFile: 'abc.tf',
+        manager: 'terraform',
         branchName: undefined,
         isLockfileUpdate: true,
       });
-      poetry.updateArtifacts.mockResolvedValueOnce([
+      terraform.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
             type: 'addition',
-            path: 'poetry.lock',
+            path: 'terraform.lock',
             contents: 'some contents',
           },
         },
@@ -353,12 +353,16 @@ describe('workers/repository/update/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedArtifacts: [
-          { type: 'addition', path: 'poetry.lock', contents: 'some contents' },
+          {
+            type: 'addition',
+            path: 'terraform.lock',
+            contents: 'some contents',
+          },
         ],
         updatedPackageFiles: [
           {
             type: 'addition',
-            path: 'pyproject.toml',
+            path: 'abc.tf',
             contents: 'existing content',
           },
         ],
