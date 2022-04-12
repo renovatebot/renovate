@@ -373,7 +373,6 @@ describe('modules/manager/regex/index', () => {
       'example.json',
       config
     );
-    expect(res).toMatchSnapshot();
     expect(res).toBeNull();
   });
   it('extracts with recursive strategy and fail because there is no match', async () => {
@@ -386,7 +385,6 @@ describe('modules/manager/regex/index', () => {
       'example.json',
       config
     );
-    expect(res).toMatchSnapshot();
     expect(res).toBeNull();
   });
   it('extracts with recursive strategy and merged groups', async () => {

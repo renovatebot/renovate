@@ -18,7 +18,6 @@ describe('modules/datasource/galaxy/index', () => {
           depName: 'non_existent_crate',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for missing fields', async () => {
       httpMock
@@ -31,7 +30,6 @@ describe('modules/datasource/galaxy/index', () => {
           depName: 'non_existent_crate',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for empty list', async () => {
       httpMock
@@ -44,7 +42,6 @@ describe('modules/datasource/galaxy/index', () => {
           depName: 'non_existent_crate',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       httpMock
@@ -57,7 +54,6 @@ describe('modules/datasource/galaxy/index', () => {
           depName: 'some_crate',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock
@@ -70,7 +66,6 @@ describe('modules/datasource/galaxy/index', () => {
           depName: 'some_crate',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
       httpMock
@@ -84,7 +79,6 @@ describe('modules/datasource/galaxy/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('return null if searching random username and project name', async () => {
       httpMock
@@ -96,7 +90,6 @@ describe('modules/datasource/galaxy/index', () => {
         depName: 'foo.bar',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 5xx', async () => {
       httpMock
@@ -114,7 +107,6 @@ describe('modules/datasource/galaxy/index', () => {
       }
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 404', async () => {
       httpMock
@@ -126,7 +118,6 @@ describe('modules/datasource/galaxy/index', () => {
         depName: 'foo.bar',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

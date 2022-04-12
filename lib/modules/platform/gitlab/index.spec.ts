@@ -77,7 +77,6 @@ describe('modules/platform/gitlab/index', () => {
         endpoint: undefined,
       });
       await expect(res).rejects.toThrow('Init: Authentication failure');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it(`should default to gitlab.com`, async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
@@ -93,7 +92,6 @@ describe('modules/platform/gitlab/index', () => {
           endpoint: undefined,
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it(`should accept custom endpoint`, async () => {
       const endpoint = 'https://gitlab.renovatebot.com';
@@ -114,7 +112,6 @@ describe('modules/platform/gitlab/index', () => {
           token: 'some-token',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it(`should reuse existing gitAuthor`, async () => {
@@ -140,7 +137,6 @@ describe('modules/platform/gitlab/index', () => {
         )
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should return an array of repos', async () => {
       httpMock
@@ -166,7 +162,6 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const repos = await gitlab.getRepos();
       expect(repos).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -197,10 +192,16 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, okReturn);
-      await gitlab.initRepo({
-        repository: 'some/repo/project',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.initRepo({
+          repository: 'some/repo/project',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "defaultBranch": "master",
+          "isFork": false,
+        }
+      `);
     });
     it('should throw an error if receiving an error', async () => {
       httpMock
@@ -212,7 +213,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow('always error');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw an error if repository is archived', async () => {
       httpMock
@@ -224,7 +224,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw an error if repository is a mirror', async () => {
       httpMock
@@ -236,7 +235,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw an error if repository access is disabled', async () => {
       httpMock
@@ -248,7 +246,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw an error if MRs are disabled', async () => {
       httpMock
@@ -260,7 +257,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw an error if repository has empty_repo property', async () => {
       httpMock
@@ -272,7 +268,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw an error if repository is empty', async () => {
       httpMock
@@ -284,7 +279,6 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should fall back if http_url_to_repo is empty', async () => {
       httpMock
@@ -294,10 +288,16 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           http_url_to_repo: null,
         });
-      await gitlab.initRepo({
-        repository: 'some/repo/project',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.initRepo({
+          repository: 'some/repo/project',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "defaultBranch": "master",
+          "isFork": false,
+        }
+      `);
     });
 
     it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
@@ -313,7 +313,7 @@ describe('modules/platform/gitlab/index', () => {
         repository: 'some/repo/project',
         gitUrl: 'ssh',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(git.initRepo.mock.calls).toMatchSnapshot();
     });
 
@@ -331,7 +331,6 @@ describe('modules/platform/gitlab/index', () => {
           gitUrl: 'ssh',
         })
       ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
@@ -363,7 +362,6 @@ describe('modules/platform/gitlab/index', () => {
         repository: 'some/repo/project',
       });
       expect(git.initRepo.mock.calls).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getRepoForceRebase', () => {
@@ -379,7 +377,6 @@ describe('modules/platform/gitlab/index', () => {
         }
       );
       expect(await gitlab.getRepoForceRebase()).toBeFalse();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return true', async () => {
@@ -394,7 +391,6 @@ describe('modules/platform/gitlab/index', () => {
         }
       );
       expect(await gitlab.getRepoForceRebase()).toBeTrue();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -408,7 +404,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, []);
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should return the PR object', async () => {
       const scope = await initRepo();
@@ -443,7 +438,6 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should strip draft prefix from title', async () => {
       const scope = await initRepo();
@@ -478,7 +472,6 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should strip deprecated draft prefix from title', async () => {
       const scope = await initRepo();
@@ -513,7 +506,6 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getBranchStatus(branchName, ignoreTests)', () => {
@@ -526,7 +518,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns success if all are success', async () => {
       const scope = await initRepo();
@@ -537,7 +528,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ status: 'success' }, { status: 'success' }]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns success if optional jobs fail', async () => {
       const scope = await initRepo();
@@ -551,7 +541,6 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns success if all are optional', async () => {
       const scope = await initRepo();
@@ -562,7 +551,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ status: 'failed', allow_failure: true }]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns success if job is skipped', async () => {
       const scope = await initRepo();
@@ -573,7 +561,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ status: 'success' }, { status: 'skipped' }]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns yellow if there are no jobs expect skipped', async () => {
       const scope = await initRepo();
@@ -584,7 +571,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ status: 'skipped' }]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns failure if any mandatory jobs fails and one job is skipped', async () => {
       const scope = await initRepo();
@@ -595,7 +581,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ status: 'skipped' }, { status: 'failed' }]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns failure if any mandatory jobs fails', async () => {
       const scope = await initRepo();
@@ -610,7 +595,6 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('maps custom statuses to yellow', async () => {
       const scope = await initRepo();
@@ -621,16 +605,14 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ status: 'success' }, { status: 'foo' }]);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws repository-changed', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
       git.branchExists.mockReturnValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch')).rejects.toThrow(
         REPOSITORY_CHANGED
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getBranchStatusCheck', () => {
@@ -646,7 +628,6 @@ describe('modules/platform/gitlab/index', () => {
         'some-context'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null if no matching results', async () => {
       const scope = await initRepo();
@@ -660,7 +641,6 @@ describe('modules/platform/gitlab/index', () => {
         'some-context'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns status if name found', async () => {
       const scope = await initRepo();
@@ -678,7 +658,6 @@ describe('modules/platform/gitlab/index', () => {
         'some-context'
       );
       expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('setBranchStatus', () => {
@@ -696,14 +675,15 @@ describe('modules/platform/gitlab/index', () => {
           )
           .reply(200, []);
 
-        await gitlab.setBranchStatus({
-          branchName: 'some-branch',
-          context: 'some-context',
-          description: 'some-description',
-          state,
-          url: 'some-url',
-        });
-        expect(httpMock.getTrace()).toMatchSnapshot();
+        await expect(
+          gitlab.setBranchStatus({
+            branchName: 'some-branch',
+            context: 'some-context',
+            description: 'some-description',
+            state,
+            url: 'some-url',
+          })
+        ).toResolve();
       }
     );
   });
@@ -727,7 +707,6 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const res = await gitlab.findIssue('title-3');
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('finds issue', async () => {
       httpMock
@@ -749,7 +728,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, { description: 'new-content' });
       const res = await gitlab.findIssue('title-2');
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('ensureIssue()', () => {
@@ -776,7 +754,6 @@ describe('modules/platform/gitlab/index', () => {
         body: 'new-content',
       });
       expect(res).toBe('created');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('sets issue labels', async () => {
@@ -794,7 +771,6 @@ describe('modules/platform/gitlab/index', () => {
         labels: ['Renovate', 'Maintenance'],
       });
       expect(res).toBe('created');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('updates issue', async () => {
@@ -822,7 +798,6 @@ describe('modules/platform/gitlab/index', () => {
         body: 'newer-content',
       });
       expect(res).toBe('updated');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('updates issue with labels', async () => {
@@ -851,7 +826,6 @@ describe('modules/platform/gitlab/index', () => {
         labels: ['Renovate', 'Maintenance'],
       });
       expect(res).toBe('updated');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('skips update if unchanged', async () => {
@@ -877,7 +851,6 @@ describe('modules/platform/gitlab/index', () => {
         body: 'newer-content',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('creates confidential issue', async () => {
@@ -904,7 +877,6 @@ describe('modules/platform/gitlab/index', () => {
         confidential: true,
       });
       expect(res).toBe('created');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('updates confidential issue', async () => {
@@ -934,7 +906,6 @@ describe('modules/platform/gitlab/index', () => {
         confidential: true,
       });
       expect(res).toBe('updated');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('ensureIssueClosing()', () => {
@@ -956,8 +927,7 @@ describe('modules/platform/gitlab/index', () => {
         ])
         .put('/api/v4/projects/undefined/issues/2')
         .reply(200);
-      await gitlab.ensureIssueClosing('title-2');
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(gitlab.ensureIssueClosing('title-2')).toResolve();
     });
   });
 
@@ -969,8 +939,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ id: 123 }])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123')
         .reply(200);
-      await gitlab.addAssignees(42, ['someuser']);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(gitlab.addAssignees(42, ['someuser'])).toResolve();
     });
     it('should add the given assignees to the issue', async () => {
       httpMock
@@ -983,16 +952,18 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
         )
         .reply(200);
-      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.addAssignees(42, ['someuser', 'someotheruser'])
+      ).toResolve();
     });
     it('should swallow error', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
         .replyWithError('some error');
-      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.addAssignees(42, ['someuser', 'someotheruser'])
+      ).toResolve();
     });
   });
 
@@ -1114,12 +1085,13 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200);
-      await gitlab.ensureComment({
-        number: 42,
-        topic: 'some-subject',
-        content: 'some\ncontent',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        })
+      ).toResolve();
     });
     it('add updates comment if necessary', async () => {
       const scope = await initRepo();
@@ -1128,36 +1100,39 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .put('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureComment({
-        number: 42,
-        topic: 'some-subject',
-        content: 'some\ncontent',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        })
+      ).toResolve();
     });
     it('skips comment', async () => {
       const scope = await initRepo();
       scope
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
-      await gitlab.ensureComment({
-        number: 42,
-        topic: 'some-subject',
-        content: 'some\ncontent',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        })
+      ).toResolve();
     });
     it('handles comment with no description', async () => {
       const scope = await initRepo();
       scope
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [{ id: 1234, body: '!merge' }]);
-      await gitlab.ensureComment({
-        number: 42,
-        topic: null,
-        content: '!merge',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: null,
+          content: '!merge',
+        })
+      ).toResolve();
     });
   });
   describe('ensureCommentRemoval', () => {
@@ -1168,12 +1143,13 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({
-        type: 'by-topic',
-        number: 42,
-        topic: 'some-subject',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.ensureCommentRemoval({
+          type: 'by-topic',
+          number: 42,
+          topic: 'some-subject',
+        })
+      ).toResolve();
     });
     it('deletes comment by content if found', async () => {
       const scope = await initRepo();
@@ -1182,12 +1158,13 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [{ id: 1234, body: 'some-body\n' }])
         .delete('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
-      await gitlab.ensureCommentRemoval({
-        type: 'by-content',
-        number: 42,
-        content: 'some-body',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.ensureCommentRemoval({
+          type: 'by-content',
+          number: 42,
+          content: 'some-body',
+        })
+      ).toResolve();
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
@@ -1209,7 +1186,6 @@ describe('modules/platform/gitlab/index', () => {
         branchName: 'branch-a',
       });
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns true if not open', async () => {
       httpMock
@@ -1230,7 +1206,6 @@ describe('modules/platform/gitlab/index', () => {
         state: PrState.NotOpen,
       });
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns true if open and with title', async () => {
@@ -1253,7 +1228,6 @@ describe('modules/platform/gitlab/index', () => {
         state: PrState.Open,
       });
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns true with title', async () => {
@@ -1275,7 +1249,6 @@ describe('modules/platform/gitlab/index', () => {
         prTitle: 'branch a pr',
       });
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns true with draft prefix title', async () => {
       httpMock
@@ -1296,7 +1269,6 @@ describe('modules/platform/gitlab/index', () => {
         prTitle: 'branch a pr',
       });
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns true with deprecated draft prefix title', async () => {
       httpMock
@@ -1317,7 +1289,6 @@ describe('modules/platform/gitlab/index', () => {
         prTitle: 'branch a pr',
       });
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -1358,7 +1329,6 @@ describe('modules/platform/gitlab/index', () => {
         labels: null,
       });
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('uses default branch', async () => {
       await initPlatform('13.3.6-ee');
@@ -1378,7 +1348,6 @@ describe('modules/platform/gitlab/index', () => {
         labels: [],
       });
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports draftPR on < 13.2', async () => {
       await initPlatform('13.1.0-ee');
@@ -1398,7 +1367,6 @@ describe('modules/platform/gitlab/index', () => {
         draftPR: true,
       });
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports draftPR on >= 13.2', async () => {
       await initPlatform('13.2.0-ee');
@@ -1418,7 +1386,6 @@ describe('modules/platform/gitlab/index', () => {
         draftPR: true,
       });
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('auto-accepts the MR when requested', async () => {
       await initPlatform('13.3.6-ee');
@@ -1444,17 +1411,27 @@ describe('modules/platform/gitlab/index', () => {
         })
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
-      await gitlab.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'master',
-        prTitle: 'some-title',
-        prBody: 'the-body',
-        labels: [],
-        platformOptions: {
-          usePlatformAutomerge: true,
-        },
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            usePlatformAutomerge: true,
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "displayNumber": "Merge Request #12345",
+          "id": 1,
+          "iid": 12345,
+          "number": 12345,
+          "sourceBranch": "some-branch",
+          "title": "some title",
+        }
+      `);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {
@@ -1487,7 +1464,6 @@ describe('modules/platform/gitlab/index', () => {
         labels: null,
       });
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('raises with squash enabled when repository squash option is always', async () => {
@@ -1520,7 +1496,6 @@ describe('modules/platform/gitlab/index', () => {
         labels: null,
       });
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('adds approval rule to ignore all approvals', async () => {
@@ -1551,18 +1526,28 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      await gitlab.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'master',
-        prTitle: 'some-title',
-        prBody: 'the-body',
-        labels: [],
-        platformOptions: {
-          usePlatformAutomerge: true,
-          gitLabIgnoreApprovals: true,
-        },
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            usePlatformAutomerge: true,
+            gitLabIgnoreApprovals: true,
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "displayNumber": "Merge Request #12345",
+          "id": 1,
+          "iid": 12345,
+          "number": 12345,
+          "sourceBranch": "some-branch",
+          "title": "some title",
+        }
+      `);
     });
 
     it('does not try to create already existing approval rule', async () => {
@@ -1593,18 +1578,28 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [
           { name: 'renovateIgnoreApprovals', approvals_required: 0 },
         ]);
-      await gitlab.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'master',
-        prTitle: 'some-title',
-        prBody: 'the-body',
-        labels: [],
-        platformOptions: {
-          usePlatformAutomerge: true,
-          gitLabIgnoreApprovals: true,
-        },
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            usePlatformAutomerge: true,
+            gitLabIgnoreApprovals: true,
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "displayNumber": "Merge Request #12345",
+          "id": 1,
+          "iid": 12345,
+          "number": 12345,
+          "sourceBranch": "some-branch",
+          "title": "some title",
+        }
+      `);
     });
 
     it('silently ignores approval rules adding errors', async () => {
@@ -1635,18 +1630,28 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .replyWithError('Unknown');
-      await gitlab.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'master',
-        prTitle: 'some-title',
-        prBody: 'the-body',
-        labels: [],
-        platformOptions: {
-          usePlatformAutomerge: true,
-          gitLabIgnoreApprovals: true,
-        },
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            usePlatformAutomerge: true,
+            gitLabIgnoreApprovals: true,
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "displayNumber": "Merge Request #12345",
+          "id": 1,
+          "iid": 12345,
+          "number": 12345,
+          "sourceBranch": "some-branch",
+          "title": "some title",
+        }
+      `);
     });
   });
   describe('getPr(prNo)', () => {
@@ -1671,7 +1676,6 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBeFalse();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('removes draft prefix from returned title', async () => {
       httpMock
@@ -1694,7 +1698,6 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.title).toBe('do something');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('removes deprecated draft prefix from returned title', async () => {
       httpMock
@@ -1717,7 +1720,6 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.title).toBe('do something');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the mergeable PR', async () => {
       const scope = await initRepo();
@@ -1741,7 +1743,6 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBeTrue();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the PR with nonexisting branch', async () => {
       httpMock
@@ -1768,7 +1769,6 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBeTrue();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('updatePr(prNo, title, body)', () => {
@@ -1790,8 +1790,9 @@ describe('modules/platform/gitlab/index', () => {
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
-      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+      ).toResolve();
     });
     it('retains draft status when draft uses current prefix', async () => {
       await initPlatform('13.3.6-ee');
@@ -1810,8 +1811,9 @@ describe('modules/platform/gitlab/index', () => {
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
-      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+      ).toResolve();
     });
     it('retains draft status when draft uses deprecated prefix', async () => {
       await initPlatform('13.3.6-ee');
@@ -1830,8 +1832,9 @@ describe('modules/platform/gitlab/index', () => {
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
-      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+      ).toResolve();
     });
     it('closes the PR', async () => {
       await initPlatform('13.3.6-ee');
@@ -1850,13 +1853,14 @@ describe('modules/platform/gitlab/index', () => {
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
-      await gitlab.updatePr({
-        number: 1,
-        prTitle: 'title',
-        prBody: 'body',
-        state: PrState.Closed,
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        gitlab.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: PrState.Closed,
+        })
+      ).toResolve();
     });
   });
   describe('mergePr(pr)', () => {
@@ -1866,10 +1870,11 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .put('/api/v4/projects/undefined/merge_requests/1/merge')
         .reply(200);
-      await gitlab.mergePr({
-        id: 1,
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(
+        await gitlab.mergePr({
+          id: 1,
+        })
+      ).toBeTrue();
     });
   });
 
@@ -1941,8 +1946,7 @@ These updates have all been created already. Click a checkbox below to force a r
         })
         .put('/api/v4/projects/undefined/merge_requests/42')
         .reply(200);
-      await gitlab.deleteLabel(42, 'rebase');
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(gitlab.deleteLabel(42, 'rebase')).toResolve();
     });
   });
   describe('getJsonFile()', () => {
@@ -1958,7 +1962,6 @@ These updates have all been created already. Click a checkbox below to force a r
         });
       const res = await gitlab.getJsonFile('dir/file.json');
       expect(res).toEqual(data);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns file content in json5 format', async () => {
@@ -1978,7 +1981,6 @@ These updates have all been created already. Click a checkbox below to force a r
         });
       const res = await gitlab.getJsonFile('dir/file.json5');
       expect(res).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns file content from given repo', async () => {
@@ -1993,7 +1995,6 @@ These updates have all been created already. Click a checkbox below to force a r
         });
       const res = await gitlab.getJsonFile('dir/file.json', 'different%2Frepo');
       expect(res).toEqual(data);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns file content from branch or tag', async () => {
@@ -2012,7 +2013,6 @@ These updates have all been created already. Click a checkbox below to force a r
         'dev'
       );
       expect(res).toEqual(data);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws on malformed JSON', async () => {
@@ -2025,7 +2025,6 @@ These updates have all been created already. Click a checkbox below to force a r
           content: toBase64('!@#'),
         });
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws on errors', async () => {
       const scope = await initRepo();
@@ -2035,7 +2034,6 @@ These updates have all been created already. Click a checkbox below to force a r
         )
         .replyWithError('some error');
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('filterUnavailableUsers(users)', () => {
@@ -2055,7 +2053,6 @@ These updates have all been created already. Click a checkbox below to force a r
         'john',
       ]);
       expect(filteredUsers).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('keeps users with missing availability', async () => {
@@ -2065,7 +2062,6 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(200, {});
       const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
       expect(filteredUsers).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('keeps users with failing requests', async () => {
@@ -2075,7 +2071,6 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(404);
       const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
       expect(filteredUsers).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
