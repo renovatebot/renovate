@@ -21,12 +21,14 @@ import {
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import type { Cache } from '../../../util/cache/repository/types';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
   CommitSha,
+  RepoCacheKey,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
@@ -505,6 +507,23 @@ export async function initRepo({
     isFork: repo.isFork === true,
   };
   return repoConfig;
+}
+
+export async function fetchRepoCache({
+  blob,
+}: RepoCacheKey): Promise<Cache | null> {
+  try {
+    const {
+      body: { content },
+    } = await githubApi.getJson<{ content: string }>(
+      `/repos/${config.repository}/git/blobs/${blob}`
+    );
+    const result: Cache = JSON.parse(fromBase64(content));
+    return result;
+  } catch (err) {
+    logger.debug({ err }, `Github: failed to fetch repo cache`);
+    return null;
+  }
 }
 
 export async function getRepoForceRebase(): Promise<boolean> {

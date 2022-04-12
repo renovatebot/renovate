@@ -38,6 +38,10 @@ function validate(config: RenovateConfig, input: any): Cache | null {
   return null;
 }
 
+export function reset(): void {
+  cache = null;
+}
+
 function createCache(repository?: string): Cache {
   const res: Cache = Object.create({});
   res.repository = repository;
@@ -45,8 +49,16 @@ function createCache(repository?: string): Cache {
   return res;
 }
 
-export async function initialize(config: RenovateConfig): Promise<void> {
-  cache = null;
+export async function initialize(
+  config: RenovateConfig,
+  value?: Cache | null
+): Promise<void> {
+  if (value) {
+    cache = value;
+    return;
+  }
+
+  reset();
   try {
     cacheFileName = getCacheFileName(config);
     repositoryCache = config.repositoryCache;

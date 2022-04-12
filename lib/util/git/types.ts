@@ -19,6 +19,11 @@ export interface StorageConfig {
   fullClone?: boolean;
 }
 
+export interface RepoCacheKey {
+  commit: string;
+  blob: string;
+}
+
 export interface LocalConfig extends StorageConfig {
   additionalBranches: string[];
   currentBranch: string;
@@ -30,6 +35,8 @@ export interface LocalConfig extends StorageConfig {
   gitAuthorEmail?: string;
 
   writeGitDone?: boolean;
+
+  repoCacheKeys: Record<number, RepoCacheKey>;
 }
 
 export interface FileAddition {

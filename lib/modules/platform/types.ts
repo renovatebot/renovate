@@ -1,6 +1,11 @@
 import type { MergeStrategy } from '../../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
+import type { Cache } from '../../util/cache/repository/types';
+import type {
+  CommitFilesConfig,
+  CommitSha,
+  RepoCacheKey,
+} from '../../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -196,4 +201,5 @@ export interface Platform {
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  fetchRepoCache?(repoCacheKey: RepoCacheKey): Promise<Cache | null>;
 }
