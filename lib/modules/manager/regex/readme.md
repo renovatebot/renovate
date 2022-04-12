@@ -14,7 +14,7 @@ In order for Renovate to look up a dependency and decide about updates, it then 
 
 - The dependency's name
 - Which [`datasource`](https://docs.renovatebot.com/modules/datasource/#supported-datasources) to look up (e.g. [npm](https://docs.renovatebot.com/modules/datasource/#npm-datasource), [Docker](https://docs.renovatebot.com/modules/datasource/#docker-datasource), [GitHub tags](https://docs.renovatebot.com/modules/datasource/#github-tags-datasource))
-- Which [version scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) to apply (defaults to [`semver`](https://docs.renovatebot.com/modules/versioning/#semantic-versioning), but also may be other values like [`pep440`](https://docs.renovatebot.com/modules/versioning/#pep440-versioning))
+- Which [version scheme](https://docs.renovatebot.com/modules/versioning/) to apply (defaults to [`semver`](https://docs.renovatebot.com/modules/versioning/#semantic-versioning), but also may be [other values](https://docs.renovatebot.com/modules/versioning/#supported-versioning) like [`pep440`](https://docs.renovatebot.com/modules/versioning/#pep440-versioning))
 
 <!-- prettier-ignore -->
 !!! note
