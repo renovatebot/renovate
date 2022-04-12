@@ -23,6 +23,8 @@
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "cross-env LOG_LEVEL=fatal node --expose-gc node_modules/jest/bin/jest.js --logHeapUsage",
+    "jest:14": "node --expose-gc node_modules/jest/bin/jest.js --logHeapUsage",
+    "jest:16": "node --expose-gc --no-compilation-cache node_modules/jest/bin/jest.js --logHeapUsage",
     "jest-debug": "cross-env NODE_OPTIONS=--inspect-brk yarn jest --testTimeout=100000000",
     "jest-silent": "cross-env yarn jest --reporters jest-silent-reporter",
     "lint": "run-s ls-lint eslint prettier markdown-lint git-check doc-fence-check",
