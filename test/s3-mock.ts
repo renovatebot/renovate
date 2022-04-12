@@ -1,9 +1,6 @@
-import type { Url } from 'url';
-import { afterAll, afterEach, beforeAll } from '@jest/globals';
-import {clear} from "./http-mock";
+import { afterEach } from '@jest/globals';
 import {S3} from "@aws-sdk/client-s3";
 import {Readable} from "stream";
-import {loadFixture} from "./util";
 
 interface S3Url {
   Bucket: string;
@@ -17,7 +14,6 @@ function objectKey(url: S3Url) {
 }
 
 function listObject(url: S3Url) {
-  console.log("listObject:", url);
   const k = objectKey(url);
   if (!mockedObjects[k]) {
     return Promise.reject({message: 'NotFound'})
@@ -26,7 +22,6 @@ function listObject(url: S3Url) {
 }
 
 function getObject(url: S3Url) {
-  console.log("getObject:", url);
   const k = objectKey(url);
   if (!mockedObjects[k]) {
     return Promise.reject({message: 'NotFound'})
@@ -41,7 +36,6 @@ function getObject(url: S3Url) {
 }
 
 function mockObject(url: string, content: string | null) {
-  console.log("mockObject:", url);
   mockedObjects[url] = !content ? true : content;
 }
 
