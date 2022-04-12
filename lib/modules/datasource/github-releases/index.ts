@@ -152,6 +152,18 @@ export class GithubReleasesDatasource extends Datasource {
     return null;
   }
 
+  /**
+   * github.getDigest
+   *
+   * The `newValue` supplied here should be a valid tag for the GitHub release.
+   * Requires `currentValue` and `currentDigest`.
+   *
+   * There may be many assets attached to the release. This function will:
+   *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
+   *     - Download small release assets, parse as checksum manifests (e.g. `SHASUMS.txt`).
+   *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
+   *  - Map the hashed asset to `newValue` and return the updated digest as a string
+   */
   @cache({
     ttlMinutes: 1440,
     namespace: 'datasource-github-releases',
@@ -166,18 +178,6 @@ export class GithubReleasesDatasource extends Datasource {
     ) =>
       `${registryUrl}:${repo}:${currentValue}:${currentDigest}:${newValue}:digest`,
   })
-  /**
-   * github.getDigest
-   *
-   * The `newValue` supplied here should be a valid tag for the GitHub release.
-   * Requires `currentValue` and `currentDigest`.
-   *
-   * There may be many assets attached to the release. This function will:
-   *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
-   *     - Download small release assets, parse as checksum manifests (e.g. `SHASUMS.txt`).
-   *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
-   *  - Map the hashed asset to `newValue` and return the updated digest as a string
-   */
   override async getDigest(
     {
       packageName: repo,
@@ -218,11 +218,6 @@ export class GithubReleasesDatasource extends Datasource {
     return newDigest;
   }
 
-  @cache({
-    namespace: 'datasource-github-releases',
-    key: ({ packageName: repo, registryUrl }: GetReleasesConfig) =>
-      `${registryUrl}:${repo}:tags`,
-  })
   /**
    * github.getReleases
    *
@@ -233,6 +228,11 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
+  @cache({
+    namespace: 'datasource-github-releases',
+    key: ({ packageName: repo, registryUrl }: GetReleasesConfig) =>
+      `${registryUrl}:${repo}:tags`,
+  })
   async getReleases({
     packageName: repo,
     registryUrl,
