@@ -1522,12 +1522,13 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('massageMarkdown', () => {
-    it('should truncate body to 1000000 characters', () => {
-      const excessiveBody = '*'.repeat(1000001);
+    it('replaces pr links', () => {
+      const body =
+        '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
-      // TODO: fails on swc compiler
-      // expect(gitea.massageMarkdown(excessiveBody)).toHaveLength(1000000);
-      expect(excessiveBody).toBeTruthy();
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)'
+      );
     });
   });
 
