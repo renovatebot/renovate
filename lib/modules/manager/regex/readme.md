@@ -24,12 +24,12 @@ Configuration-wise, it works like this:
 
 - You must capture the `currentValue` of the dependency in a named capture group
 - You must have either a `depName` capture group or a [`depNameTemplate` config field](https://docs.renovatebot.com/configuration-options/#depnametemplate)
-- You can optionally have a `packageName` capture group or a [`packageNameTemplate` config field] if it differs from `depName`
+- You can optionally have a `packageName` capture group or a [`packageNameTemplate` config field](https://docs.renovatebot.com/configuration-options/#packagenametemplate) if it differs from `depName`
 - You must have either a [`datasource` capture group](https://docs.renovatebot.com/modules/datasource/#supported-datasources) or a [`datasourceTemplate` config field](https://docs.renovatebot.com/configuration-options/#datasourcetemplate)
 - You can optionally have a `depType` capture group or a [`depTypeTemplate` config field](https://docs.renovatebot.com/configuration-options/#deptypetemplate)
   See [manager specific documentation pages](https://docs.renovatebot.com/modules/manager/#supported-managers) for recommended values, other values are also possible.
 - You can optionally have a [`versioning` capture group](https://docs.renovatebot.com/modules/versioning/#supported-versioning) or a [`versioningTemplate` config field](https://docs.renovatebot.com/configuration-options/#versioningtemplate). If neither are present, `semver` will be used as the default
-- You can optionally have an `extractVersion` capture group or an [`extractVersionTemplate` config field](https://docs.renovatebot.com/configuration-options/#extractversiontemplate)
+- You can optionally have an [`extractVersion`](https://docs.renovatebot.com/configuration-options/#extractversion) capture group or an [`extractVersionTemplate` config field](https://docs.renovatebot.com/configuration-options/#extractversiontemplate)
 - You can optionally have a [`currentDigest` capture group](https://docs.renovatebot.com/configuration-options/#digest).
 - You can optionally have a [`registryUrl` capture group](https://docs.renovatebot.com/configuration-options/#registryurls) or a [`registryUrlTemplate` config field](https://docs.renovatebot.com/configuration-options/#registryurltemplate)
   - If it's a valid URL, it will be converted to the [`registryUrls` field](https://docs.renovatebot.com/configuration-options/#registryurls) as a single-length array.
