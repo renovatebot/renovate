@@ -151,6 +151,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
           newValue: '^1.0.0',
           isLockfileUpdate: true,
         },
+        {
+          depName: 'some-dep',
+          newValue: '^1.0.0',
+          isLockfileUpdate: true,
+        },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
