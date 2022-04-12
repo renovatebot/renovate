@@ -27,6 +27,7 @@ jest.mock('./auto-replace');
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
+
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -35,6 +36,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       npm.updateDependency = jest.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
+
     it('handles autoreplace base updated', async () => {
       config.upgrades.push({
         packageFile: 'index.html',
@@ -49,6 +51,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles autoreplace branch no update', async () => {
       config.upgrades.push({
         packageFile: 'index.html',
@@ -64,11 +67,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         updatedPackageFiles: [],
       });
     });
+
     it('handles autoreplace failure', async () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
+
     it('handles autoreplace branch needs update', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -85,6 +90,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toEqual({
@@ -94,6 +100,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         updatedPackageFiles: [],
       });
     });
+
     it('handles null content', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -101,6 +108,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       } as never);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
+
     it('handles content change', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -119,6 +127,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -154,6 +163,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -179,6 +189,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -200,6 +211,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles unsupported isRemediation', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -219,6 +231,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('handles isRemediation rebase', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -241,6 +254,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -259,6 +273,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
       });
     });
+
     it('handles lock file errors', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -279,6 +294,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
       });
     });
+
     it('handles git submodules', async () => {
       config.upgrades.push({
         packageFile: '.gitmodules',
@@ -297,6 +313,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
@@ -334,6 +351,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
       config.upgrades.push({
         packageFile: 'abc.tf',
@@ -368,6 +386,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({
         packageFile: 'package.json',
@@ -389,6 +408,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('attempts updateLockedDependency and handles already-updated', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -411,6 +431,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -435,6 +456,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
         packageFile: 'package.json',
@@ -455,6 +477,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('bumps versions in autoReplace managers', async () => {
       config.upgrades.push({
         packageFile: 'Chart.yaml',

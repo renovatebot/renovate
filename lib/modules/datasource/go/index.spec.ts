@@ -102,6 +102,7 @@ describe('modules/datasource/go/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('returns null for wrong name', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -113,6 +114,7 @@ describe('modules/datasource/go/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('supports gitlab digest', async () => {
       httpMock
         .scope('https://gitlab.com/')
@@ -125,6 +127,7 @@ describe('modules/datasource/go/index', () => {
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
+
     it('supports gitlab digest with a specific branch', async () => {
       const branch = 'some-branch';
       httpMock
@@ -138,6 +141,7 @@ describe('modules/datasource/go/index', () => {
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
+
     it('returns digest', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -150,6 +154,7 @@ describe('modules/datasource/go/index', () => {
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
+
     it('support bitbucket digest', async () => {
       getDigestBitbucketMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(

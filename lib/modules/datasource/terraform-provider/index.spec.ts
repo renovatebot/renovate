@@ -31,6 +31,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope(primaryUrl)
@@ -46,6 +47,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(primaryUrl)
@@ -61,6 +63,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(primaryUrl)
@@ -92,6 +95,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('processes data with alternative backend', async () => {
       httpMock
         .scope(primaryUrl)
@@ -113,6 +117,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('simulate failing secondary release source', async () => {
       httpMock
         .scope(primaryUrl)
@@ -130,6 +135,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('returns null for error in service discovery', async () => {
       httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(404);
       httpMock.scope(secondaryUrl).get('/index.json').replyWithError('');
@@ -141,6 +147,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       ).toBeNull();
     });
   });
+
   describe('getBuilds', () => {
     it('returns null for empty result', async () => {
       httpMock

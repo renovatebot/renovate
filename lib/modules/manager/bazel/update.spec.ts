@@ -97,6 +97,7 @@ describe('modules/manager/bazel/update', () => {
         '"aaa09d789f3dba190787f8b4454c7d3c936fe123",  # v1.0.3'
       );
     });
+
     it('updates commit-based http archive', async () => {
       const upgrade = {
         depName: 'distroless',
@@ -120,6 +121,7 @@ describe('modules/manager/bazel/update', () => {
       });
       expect(res).not.toEqual(content);
     });
+
     it('updates http archive with content other then WORKSPACE', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
@@ -147,6 +149,7 @@ describe('modules/manager/bazel/update', () => {
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
+
     it('updates finds url instead of urls', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
@@ -174,6 +177,7 @@ describe('modules/manager/bazel/update', () => {
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
+
     it('returns null if no urls resolve hashes', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
@@ -202,6 +206,7 @@ describe('modules/manager/bazel/update', () => {
       });
       expect(res).toBeNull();
     });
+
     it('errors for http_archive without urls', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
@@ -226,6 +231,7 @@ http_archive(
       });
       expect(res).toBeNull();
     });
+
     it('updates http_archive with urls array', async () => {
       const upgrade = {
         depName: 'bazel_skylib',

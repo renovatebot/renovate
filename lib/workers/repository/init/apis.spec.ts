@@ -8,6 +8,7 @@ import { initApis } from './apis';
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       config = { ...getConfig() };
       config.errors = [];
@@ -16,9 +17,11 @@ describe('workers/repository/init/apis', () => {
       delete config.optimizeForDisabled;
       delete config.includeForks;
     });
+
     afterEach(() => {
       jest.resetAllMocks();
     });
+
     it('runs', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -27,6 +30,7 @@ describe('workers/repository/init/apis', () => {
       const workerPlatformConfig = await initApis(config);
       expect(workerPlatformConfig).toBeTruthy();
     });
+
     it('throws for disabled', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -40,6 +44,7 @@ describe('workers/repository/init/apis', () => {
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
+
     it('throws for forked', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -53,6 +58,7 @@ describe('workers/repository/init/apis', () => {
         })
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
+
     it('ignores platform.getJsonFile() failures', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -68,6 +74,7 @@ describe('workers/repository/init/apis', () => {
         })
       ).resolves.not.toThrow();
     });
+
     it('uses the onboardingConfigFileName if set', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -88,6 +95,7 @@ describe('workers/repository/init/apis', () => {
       );
       expect(platform.getJsonFile).not.toHaveBeenCalledWith('renovate.json');
     });
+
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -103,6 +111,7 @@ describe('workers/repository/init/apis', () => {
       expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
       expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
     });
+
     it('falls back to "renovate.json" if onboardingConfigFileName is not valid', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',

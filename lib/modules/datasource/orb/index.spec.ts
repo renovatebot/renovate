@@ -42,6 +42,7 @@ describe('modules/datasource/orb/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for missing orb', async () => {
       httpMock
         .scope(baseUrl)
@@ -54,6 +55,7 @@ describe('modules/datasource/orb/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(404);
       expect(
@@ -63,6 +65,7 @@ describe('modules/datasource/orb/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').replyWithError('');
       expect(
@@ -72,6 +75,7 @@ describe('modules/datasource/orb/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
       const res = await getPkgReleases({
@@ -81,6 +85,7 @@ describe('modules/datasource/orb/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);

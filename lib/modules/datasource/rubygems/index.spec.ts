@@ -160,6 +160,7 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe(railsInfo.version);
     });
+
     it('errors when version request fails with anything other than 400 or 404', async () => {
       httpMock
         .scope('https://thirdparty.com/')

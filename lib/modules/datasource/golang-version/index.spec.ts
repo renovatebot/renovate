@@ -25,7 +25,7 @@ describe('modules/datasource/golang-version/index', () => {
         datasource,
         depName: 'golang',
       });
-      expect(res.releases).toHaveLength(134);
+      expect(res.releases).toHaveLength(132);
       expect(res.releases[0]).toEqual({
         releaseTimestamp: '2012-03-28T00:00:00.000Z',
         version: '1.0.0',
@@ -98,6 +98,7 @@ describe('modules/datasource/golang-version/index', () => {
         await getPkgReleases({ datasource, depName: 'golang' })
       ).toBeNull();
     });
+
     it('throws ExternalHostError for invalid release format beginning ', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
@@ -107,6 +108,7 @@ describe('modules/datasource/golang-version/index', () => {
         getPkgReleases({ datasource, depName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
+
     it('throws ExternalHostError for invalid release format', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')

@@ -63,6 +63,7 @@ describe('util/http/gitea', () => {
     expect(res.body.data).toHaveLength(6);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
   });
+
   it('handles pagination with empty response', async () => {
     httpMock
       .scope(baseUrl)

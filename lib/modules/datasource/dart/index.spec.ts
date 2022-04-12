@@ -18,6 +18,7 @@ describe('modules/datasource/dart/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty fields', async () => {
       const withoutVersions = {
         ...body,
@@ -49,6 +50,7 @@ describe('modules/datasource/dart/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(404);
       expect(
@@ -58,6 +60,7 @@ describe('modules/datasource/dart/index', () => {
         })
       ).toBeNull();
     });
+
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(502);
       let e;
@@ -72,6 +75,7 @@ describe('modules/datasource/dart/index', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
+
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').replyWithError('');
       expect(
@@ -81,6 +85,7 @@ describe('modules/datasource/dart/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(200, body);
       const res = await getPkgReleases({

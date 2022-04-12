@@ -56,6 +56,7 @@ describe('modules/datasource/github-releases/index', () => {
         res.releases.find((release) => release.version === '2.0.0').isStable
       ).toBeFalse();
     });
+
     it('supports ghe', async () => {
       const packageName = 'some/dep';
       httpMock

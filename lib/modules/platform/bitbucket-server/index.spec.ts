@@ -232,12 +232,14 @@ describe('modules/platform/bitbucket-server/index', () => {
           expect.assertions(1);
           expect(() => bitbucket.initPlatform({})).toThrow();
         });
+
         it('should throw if no username/password', () => {
           expect.assertions(1);
           expect(() =>
             bitbucket.initPlatform({ endpoint: 'endpoint' })
           ).toThrow();
         });
+
         it('should init', async () => {
           expect(
             await bitbucket.initPlatform({
@@ -1101,6 +1103,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.getBranchPr('userName1/pullRequest5')
           ).toMatchSnapshot();
         });
+
         it('has no pr', async () => {
           const scope = await initRepo();
           scope
@@ -1140,6 +1143,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             })
           ).toMatchSnapshot();
         });
+
         it('has no pr', async () => {
           const scope = await initRepo();
           scope
@@ -1221,6 +1225,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock.scope(urlHost);
           expect(await bitbucket.getPr(undefined as any)).toBeNull();
         });
+
         it('gets a PR', async () => {
           const scope = await initRepo();
           scope
@@ -1817,6 +1822,7 @@ Followed by some information.
             })
           ).toResolve();
         });
+
         it('should be success 2', async () => {
           const scope = await initRepo();
           scope
@@ -1846,6 +1852,7 @@ Followed by some information.
             })
           ).toResolve();
         });
+
         it('should be success 3', async () => {
           const scope = await initRepo();
           scope
@@ -1875,6 +1882,7 @@ Followed by some information.
             })
           ).toResolve();
         });
+
         it('should be success 4', async () => {
           const scope = await initRepo();
           scope
@@ -1904,6 +1912,7 @@ Followed by some information.
             })
           ).toResolve();
         });
+
         it('should be success 5', async () => {
           const scope = await initRepo();
           scope
@@ -1928,6 +1937,7 @@ Followed by some information.
             })
           ).toResolve();
         });
+
         it('should be success 6', async () => {
           const scope = await initRepo();
           scope
@@ -2035,6 +2045,7 @@ Followed by some information.
             });
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
         });
+
         it('throws on long content', async () => {
           const scope = await initRepo();
           scope
@@ -2047,6 +2058,7 @@ Followed by some information.
             });
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
         });
+
         it('throws on errors', async () => {
           const scope = await initRepo();
           scope

@@ -67,6 +67,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('releaseNotesCacheMinutes', () => {
     const now = DateTime.local();
+
     it.each([
       [now, 55],
       [now.minus({ weeks: 2 }), 1435],
@@ -307,6 +308,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         url: 'https://github.com/some/other-repository/releases/1.0.1',
       });
     });
+
     it('gets release notes with body "v"', async () => {
       const prefix = 'v';
       httpMock
@@ -337,6 +339,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         url: 'https://github.com/some/other-repository/releases/v1.0.1',
       });
     });
+
     it('gets release notes with body "other-"', async () => {
       const prefix = 'other-';
       httpMock
@@ -367,6 +370,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         url: 'https://github.com/some/other-repository/releases/other-1.0.1',
       });
     });
+
     it('gets release notes with body "other_v"', async () => {
       const prefix = 'other_v';
       httpMock
@@ -397,6 +401,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         url: 'https://github.com/some/other-repository/releases/other_v1.0.1',
       });
     });
+
     it('gets release notes with body "other@"', async () => {
       const prefix = 'other@';
       httpMock
@@ -460,6 +465,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         url: 'https://gitlab.com/some/other-repository/tags/1.0.1',
       });
     });
+
     it('gets release notes with body from gitlab repo "v"', async () => {
       const prefix = 'v';
       httpMock
@@ -492,6 +498,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         url: 'https://gitlab.com/some/other-repository/tags/v1.0.1',
       });
     });
+
     it('gets release notes with body from gitlab repo "other-"', async () => {
       const prefix = 'other-';
       httpMock
@@ -792,6 +799,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     describe('ReleaseNotes Correctness', () => {
       let versionOneNotes: ChangeLogNotes;
       let versionTwoNotes: ChangeLogNotes;
+
       it('parses yargs 15.3.0', async () => {
         httpMock
           .scope('https://api.github.com')

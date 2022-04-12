@@ -5,6 +5,7 @@ describe('util/git/auth', () => {
   afterEach(() => {
     delete process.env.GIT_CONFIG_COUNT;
   });
+
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
     it('returns url with token', () => {
       expect(

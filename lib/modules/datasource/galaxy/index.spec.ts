@@ -19,6 +19,7 @@ describe('modules/datasource/galaxy/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for missing fields', async () => {
       httpMock
         .scope(baseUrl)
@@ -31,6 +32,7 @@ describe('modules/datasource/galaxy/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty list', async () => {
       httpMock
         .scope(baseUrl)
@@ -43,6 +45,7 @@ describe('modules/datasource/galaxy/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope(baseUrl)
@@ -55,6 +58,7 @@ describe('modules/datasource/galaxy/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseUrl)
@@ -67,6 +71,7 @@ describe('modules/datasource/galaxy/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -80,6 +85,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('return null if searching random username and project name', async () => {
       httpMock
         .scope(baseUrl)
@@ -91,6 +97,7 @@ describe('modules/datasource/galaxy/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('throws for 5xx', async () => {
       httpMock
         .scope(baseUrl)
@@ -108,6 +115,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
+
     it('throws for 404', async () => {
       httpMock
         .scope(baseUrl)

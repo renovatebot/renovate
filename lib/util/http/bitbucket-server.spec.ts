@@ -7,6 +7,7 @@ const baseUrl = 'https://git.example.com';
 
 describe('util/http/bitbucket-server', () => {
   let api: BitbucketServerHttp;
+
   beforeEach(() => {
     api = new BitbucketServerHttp();
 

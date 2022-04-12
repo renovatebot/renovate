@@ -32,6 +32,7 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await github.getDigest({ packageName }, null);
       expect(res).toBeNull();
     });
+
     it('returns digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -40,6 +41,7 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await github.getDigest({ packageName }, null);
       expect(res).toBe('abcdef');
     });
+
     it('returns commit digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -48,6 +50,7 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBe('ddd111');
     });
+
     it('returns tagged commit digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -60,6 +63,7 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBe('ddd111');
     });
+
     it('warns if unknown ref', async () => {
       httpMock
         .scope(githubApiHost)
@@ -68,6 +72,7 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBeNull();
     });
+
     it('returns null for missed tagged digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -98,6 +103,7 @@ describe('modules/datasource/github-tags/index', () => {
       expect(sha2).toBe('ddd111');
     });
   });
+
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();

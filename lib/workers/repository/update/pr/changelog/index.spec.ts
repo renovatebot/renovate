@@ -50,6 +50,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null if no currentVersion', async () => {
       expect(
         await getChangeLogJSON({
@@ -58,6 +59,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null if currentVersion equals newVersion', async () => {
       expect(
         await getChangeLogJSON({
@@ -67,6 +69,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('skips invalid repos', async () => {
       expect(
         await getChangeLogJSON({
@@ -75,6 +78,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('works without Github', async () => {
       httpMock
         .scope(githubApiHost)
@@ -109,6 +113,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         ],
       });
     });
+
     it('uses GitHub tags', async () => {
       httpMock
         .scope(githubApiHost)
@@ -147,6 +152,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         ],
       });
     });
+
     it('filters unnecessary warns', async () => {
       httpMock
         .scope(githubApiHost)
@@ -176,6 +182,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         ],
       });
     });
+
     it('supports node engines', async () => {
       expect(
         await getChangeLogJSON({
@@ -203,6 +210,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       // FIXME: missing mocks
       httpMock.clear(false);
     });
+
     it('handles no sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -211,6 +219,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('handles invalid sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -219,6 +228,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('handles missing Github token', async () => {
       expect(
         await getChangeLogJSON({
@@ -227,6 +237,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toEqual({ error: ChangeLogError.MissingGithubToken });
     });
+
     it('handles no releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -235,6 +246,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('handles not enough releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -243,6 +255,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         })
       ).toBeNull();
     });
+
     it('supports github enterprise and github.com changelog', async () => {
       httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
       hostRules.add({
@@ -274,6 +287,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         ],
       });
     });
+
     it('supports github enterprise and github enterprise changelog', async () => {
       httpMock
         .scope('https://github-enterprise.example.com')
