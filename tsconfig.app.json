@@ -6,7 +6,6 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "inlineSources": true,
-    "importHelpers": true,
     "types": ["node"]
   },
   "files": ["lib/renovate.ts", "lib/config-validator.ts"],

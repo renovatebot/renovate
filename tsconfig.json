@@ -16,6 +16,7 @@
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for esbuild */,
+    "importHelpers": true,
     "lib": ["es2020"],
     "types": ["node", "jest", "jest-extended", "expect-more-jest"],
     "allowJs": true,
@@ -31,9 +32,5 @@
     "coverage",
     "config.js",
     "tmp"
-  ],
-  "ts-node": {
-    "transpileOnly": true,
-    "swc": true
-  }
+  ]
 }
