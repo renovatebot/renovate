@@ -21,9 +21,6 @@ import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';
 import type * as ght from './gitea-helper';
 
-jest.mock('./gitea-helper');
-jest.mock('../../../util/git');
-
 /**
  * latest tested gitea version.
  */
@@ -169,12 +166,13 @@ describe('modules/platform/gitea/index', () => {
     // reset module
     jest.resetModules();
     jest.resetAllMocks();
+    jest.mock('./gitea-helper');
+    jest.mock('../../../util/git');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../../logger')).logger as any;
-
-    gitvcs = (await import('../../../util/git')) as never;
+    gitvcs = require('../../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 
