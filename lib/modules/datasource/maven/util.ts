@@ -222,11 +222,13 @@ async function checkS3Resource(
     if (isS3NotFound(err)) {
       return 'not-found';
     } else {
+      // istanbul ignore next
       logger.debug(
         { pkgUrl, name: err.name, message: err.message },
         `Can't check S3 resource existence`
       );
     }
+    // istanbul ignore next
     return 'error';
   }
 }

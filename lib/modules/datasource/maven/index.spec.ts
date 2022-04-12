@@ -141,7 +141,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
       mockResource(protocol, {
         http: () =>
           httpMock.scope(base).head(pomPath).reply(status, '', headers),
-        s3: () => s3mock.mockObject(`${base}${pomPath}`, ''),
+        s3: () => s3mock.mockObject(`${base}${pomPath}`, '', headers),
       });
     });
   }
@@ -282,7 +282,12 @@ describe('modules/datasource/maven/index', () => {
   });
 
   it('returns releases from an S3 repository', async () => {
-    mockGenericPackage({ base: baseUrlS3, html: null });
+    mockGenericPackage({
+      base: baseUrlS3,
+      html: null,
+      latest: '2.0.0',
+      jars: { '2.0.0': 200 },
+    });
 
     const res = await get('org.example:package', baseUrlS3);
 

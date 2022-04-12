@@ -8,17 +8,19 @@ interface S3Url {
 }
 
 let mockedObjects: any = {};
+let mockedTimestamps: any = {};
 
 function objectKey(url: S3Url) {
   return `s3://${url.Bucket}/${url.Key}`;
 }
 
-function listObject(url: S3Url) {
+function headObject(url: S3Url) {
   const k = objectKey(url);
   if (!mockedObjects[k]) {
     return Promise.reject({ message: 'NotFound' });
   }
-  return Promise.resolve({});
+  const LastModified = mockedTimestamps[k];
+  return Promise.resolve({ LastModified });
 }
 
 function getObject(url: S3Url) {
@@ -32,15 +34,19 @@ function getObject(url: S3Url) {
     Body.push(content);
   }
   Body.push(null);
-  return Promise.resolve({ Body });
+  const LastModified = mockedTimestamps[k];
+  return Promise.resolve({ Body, LastModified });
 }
 
-function mockObject(url: string, content: string | null) {
+function mockObject(url: string, content?: string, headers?: any) {
   mockedObjects[url] = content ? content : true;
+  if (headers?.['Last-Modified']) {
+    mockedTimestamps[url] = headers['Last-Modified'];
+  }
 }
 
 const s3mock = {
-  listObject,
+  headObject,
   getObject,
   mockObject,
 };
@@ -54,4 +60,5 @@ jest.mock('@aws-sdk/client-s3', () => ({
 
 afterEach(() => {
   mockedObjects = {};
+  mockedTimestamps = {};
 });
