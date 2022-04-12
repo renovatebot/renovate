@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['@renovate', 'typescript-enum'],
+  plugins: ['@renovate', 'typescript-enum', 'jest-formatting'],
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -15,6 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
+    'plugin:jest-formatting/recommended',
     'prettier',
   ],
   parserOptions: {

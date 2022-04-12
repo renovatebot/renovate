@@ -9,6 +9,7 @@ describe('modules/manager/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('returns manager strategy', () => {
     const config: RangeConfig = {
       manager: 'npm',
@@ -18,6 +19,7 @@ describe('modules/manager/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('pin');
   });
+
   it('defaults to replace', () => {
     const config: RangeConfig = {
       manager: 'circleci',
@@ -25,6 +27,7 @@ describe('modules/manager/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('replace');
   });
+
   it('returns rangeStrategy if not auto', () => {
     const config: RangeConfig = {
       manager: 'circleci',

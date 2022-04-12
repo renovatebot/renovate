@@ -32,6 +32,7 @@ describe('modules/manager/terraform/extract', () => {
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
   });
+
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();

@@ -1,21 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/datasource/npm/index should cache package info from npm 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abcdefghijklmnopqrstuvwxyz",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should fetch package info from custom registry 1`] = `
 Object {
   "name": "foobar",
@@ -37,21 +21,6 @@ Object {
   },
   "versions": Object {},
 }
-`;
-
-exports[`modules/datasource/npm/index should fetch package info from custom registry 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "npm.mycustomregistry.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://npm.mycustomregistry.com/foobar",
-  },
-]
 `;
 
 exports[`modules/datasource/npm/index should fetch package info from npm 1`] = `
@@ -77,21 +46,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/npm/index should fetch package info from npm 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should handle foobar 1`] = `
 Object {
   "name": "foobar",
@@ -115,21 +69,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/npm/index should handle foobar 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should handle no time 1`] = `
 Object {
   "name": "foobar",
@@ -150,21 +89,6 @@ Object {
   },
   "versions": Object {},
 }
-`;
-
-exports[`modules/datasource/npm/index should handle no time 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
 `;
 
 exports[`modules/datasource/npm/index should not send an authorization header if public package 1`] = `
@@ -190,21 +114,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/npm/index should not send an authorization header if public package 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should parse repo url (string) 1`] = `
 Object {
   "name": "foobar",
@@ -223,21 +132,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/npm/index should parse repo url (string) 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should parse repo url 1`] = `
 Object {
   "name": "foobar",
@@ -254,21 +148,6 @@ Object {
   },
   "versions": Object {},
 }
-`;
-
-exports[`modules/datasource/npm/index should parse repo url 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
 `;
 
 exports[`modules/datasource/npm/index should replace any environment variable in npmrc 1`] = `
@@ -292,21 +171,6 @@ Object {
   },
   "versions": Object {},
 }
-`;
-
-exports[`modules/datasource/npm/index should replace any environment variable in npmrc 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.from-env.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.from-env.com/foobar",
-  },
-]
 `;
 
 exports[`modules/datasource/npm/index should return deprecated 1`] = `
@@ -346,66 +210,6 @@ exports[`modules/datasource/npm/index should return deprecated 2`] = `
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
 `;
 
-exports[`modules/datasource/npm/index should return deprecated 3`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should return null for no versions 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should return null if lookup fails 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should return null if lookup fails 401 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should send an authorization header if provided 1`] = `
 Object {
   "name": "@foobar/core",
@@ -427,97 +231,6 @@ Object {
   },
   "versions": Object {},
 }
-`;
-
-exports[`modules/datasource/npm/index should send an authorization header if provided 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic 1234",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/@foobar%2Fcore",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should throw error for 5xx 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should throw error for 408 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should throw error for 429 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should throw error for others 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
-exports[`modules/datasource/npm/index should throw error for unparseable 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
 `;
 
 exports[`modules/datasource/npm/index should use default registry if missing from npmrc 1`] = `
@@ -543,21 +256,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/npm/index should use default registry if missing from npmrc 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "registry.npmjs.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://registry.npmjs.org/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 Object {
   "name": "foobar",
@@ -581,22 +279,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/npm/index should use host rules by baseUrl if provided 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "npm.mycustomregistry.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/foobar",
-  },
-]
-`;
-
 exports[`modules/datasource/npm/index should use host rules by hostName if provided 1`] = `
 Object {
   "name": "foobar",
@@ -618,20 +300,4 @@ Object {
   },
   "versions": Object {},
 }
-`;
-
-exports[`modules/datasource/npm/index should use host rules by hostName if provided 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "npm.mycustomregistry.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://npm.mycustomregistry.com/foobar",
-  },
-]
 `;
