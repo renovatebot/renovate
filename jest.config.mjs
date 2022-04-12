@@ -1,12 +1,12 @@
 import fs from 'fs';
-import type { Config } from '@jest/types';
 import JSON5 from 'json5';
 
-const swcrc = JSON5.parse(fs.readFileSync(`${__dirname}/.swcrc`, 'utf-8'));
+const swcrc = JSON5.parse(fs.readFileSync(`./.swcrc`, 'utf-8'));
 
 const ci = !!process.env.CI;
 
-const config: Config.InitialOptions = {
+/** @type {import('@jest/types').Config.InitialOptions} */
+const config = {
   cacheDirectory: '.cache/jest',
   coverageDirectory: './coverage',
   collectCoverage: true,
