@@ -711,4 +711,17 @@ describe('config/migration', () => {
       migratedConfig: { automerge: true, platformAutomerge: true },
     });
   });
+
+  it('it migrates dryRun', () => {
+    let config: TestRenovateConfig;
+    let res: MigratedConfig;
+
+    config = { dryRun: true };
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+
+    config = { dryRun: false };
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+  });
 });
