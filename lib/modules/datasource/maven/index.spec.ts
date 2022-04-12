@@ -98,11 +98,13 @@ function mockGenericPackage(opts: MockOpts = {}) {
   const [group, artifact] = dep.split(':');
   const packagePath = `${group.replace(/\./g, '/')}/${artifact}`;
 
-  const metadataPath = `/${packagePath}/maven-metadata.xml`;
-  mockResource(protocol, {
-    http: () => httpMock.scope(base).get(metadataPath).reply(200, meta),
-    s3: () => s3mock.mockObject(`${base}${metadataPath}`, meta),
-  });
+  if (meta) {
+    const metadataPath = `/${packagePath}/maven-metadata.xml`;
+    mockResource(protocol, {
+      http: () => httpMock.scope(base).get(metadataPath).reply(200, meta),
+      s3: () => s3mock.mockObject(`${base}${metadataPath}`, meta),
+    });
+  }
 
   const indexPath = `/${packagePath}/index.html`;
   if (html) {
@@ -280,7 +282,7 @@ describe('modules/datasource/maven/index', () => {
   });
 
   it('returns releases from an S3 repository', async () => {
-    mockGenericPackage({ base: baseUrlS3 });
+    mockGenericPackage({ base: baseUrlS3, html: null });
 
     const res = await get('org.example:package', baseUrlS3);
 
@@ -288,7 +290,7 @@ describe('modules/datasource/maven/index', () => {
   });
 
   it('falls back to HTTP when checking an S3 repository', async () => {
-    mockGenericPackage({ base: baseUrl });
+    mockGenericPackage({ html: null });
 
     const res = await get('org.example:package', baseUrlS3, baseUrl);
 
