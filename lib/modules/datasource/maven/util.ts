@@ -149,11 +149,13 @@ export async function downloadS3Protocol(
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isS3CedentialsError(err)) {
+      // istanbul ignore next
       logger.debug(
         { failedUrl },
         'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
       );
     } else if (isS3RegionError(err)) {
+      // istanbul ignore next
       logger.debug(
         { failedUrl },
         'Dependency lookup failed. Please a correct AWS_REGION env var'
@@ -161,6 +163,7 @@ export async function downloadS3Protocol(
     } else if (isS3NotFound(err)) {
       logger.trace({ failedUrl }, `S3 url not found`);
     } else {
+      // istanbul ignore next
       logger.info(
         { failedUrl, message: err.message },
         'Unknown S3 download error'
@@ -207,13 +210,7 @@ async function checkS3Resource(
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     const response = await getS3Client().headObject(s3Url);
-    logger.trace(
-      {
-        s3Url,
-        response,
-      },
-      `Checked resource"`
-    );
+    // istanbul ignore next
     if (response.DeleteMarker) {
       return 'not-found';
     }
@@ -244,15 +241,15 @@ export async function checkResource(
     case 'http:':
     case 'https:':
       return await checkHttpResource(http, parsedUrl);
-      break;
     case 's3:':
       return await checkS3Resource(pkgUrl as url.URL);
-      break;
     default:
+      // istanbul ignore next
       logger.debug(
         { url: pkgUrl.toString() },
         `Unsupported Maven protocol in check resource`
       );
+      // istanbul ignore next
       return 'not-found';
   }
 }
