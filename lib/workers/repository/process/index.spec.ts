@@ -5,9 +5,11 @@ import {
   mocked,
   platform,
 } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
+import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
 jest.mock('../../../util/git');
@@ -97,6 +99,18 @@ describe('workers/repository/process/index', () => {
       await expect(extractDependencies(config)).rejects.toThrow(
         CONFIG_VALIDATION
       );
+    });
+    it('processes baseBranches dryRun extract', async () => {
+      extract.mockResolvedValue({} as never);
+      GlobalConfig.set({ dryRun: 'extract' });
+      const res = await extractDependencies(config);
+      await updateRepo(config, res.branches);
+      expect(res).toEqual({
+        branchList: [],
+        branches: [],
+        packageFiles: {},
+      });
+      expect(lookup).toHaveBeenCalledTimes(0);
     });
   });
 });

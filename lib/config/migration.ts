@@ -20,11 +20,7 @@ export function fixShortHours(input: string): string {
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 // Returns a migrated config
-export function migrateConfig(
-  config: RenovateConfig,
-  // TODO: remove any type (#9611)
-  parentKey?: string | any
-): MigratedConfig {
+export function migrateConfig(config: RenovateConfig): MigratedConfig {
   try {
     if (!optionTypes) {
       optionTypes = {};
@@ -69,8 +65,7 @@ export function migrateConfig(
                 ? migratedConfig.packageRules
                 : [];
               const payload = migrateConfig(
-                packageFile as RenovateConfig,
-                key
+                packageFile as RenovateConfig
               ).migratedConfig;
               for (const subrule of payload.packageRules || []) {
                 subrule.paths = [(packageFile as any).packageFile];
@@ -96,8 +91,7 @@ export function migrateConfig(
           ? migratedConfig.packageRules
           : [];
         const depTypePackageRule = migrateConfig(
-          val as RenovateConfig,
-          key
+          val as RenovateConfig
         ).migratedConfig;
         depTypePackageRule.depTypeList = [key];
         delete depTypePackageRule.packageRules;
@@ -128,9 +122,6 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (key === 'separateMajorReleases') {
-        delete migratedConfig.separateMultipleMajor;
-        migratedConfig.separateMajorMinor = val;
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
@@ -147,8 +138,7 @@ export function migrateConfig(
                 ? migratedConfig.packageRules
                 : [];
               const newPackageRule = migrateConfig(
-                depType as RenovateConfig,
-                key
+                depType as RenovateConfig
               ).migratedConfig;
               delete newPackageRule.depType;
               newPackageRule.depTypeList = [depTypeName];
@@ -176,7 +166,7 @@ export function migrateConfig(
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
         if (Object.keys(migratedConfig.node).length) {
-          const subMigrate = migrateConfig(migratedConfig.node, key);
+          const subMigrate = migrateConfig(migratedConfig.node);
           migratedConfig.node = subMigrate.migratedConfig;
         } else {
           delete migratedConfig.node;
@@ -186,7 +176,7 @@ export function migrateConfig(
           const newArray = [];
           for (const item of migratedConfig[key] as unknown[]) {
             if (is.object(item) && !is.array(item)) {
-              const arrMigrate = migrateConfig(item as RenovateConfig, key);
+              const arrMigrate = migrateConfig(item as RenovateConfig);
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);
@@ -195,18 +185,10 @@ export function migrateConfig(
           migratedConfig[key] = newArray;
         }
       } else if (is.object(val)) {
-        const subMigrate = migrateConfig(
-          migratedConfig[key] as RenovateConfig,
-          key
-        );
+        const subMigrate = migrateConfig(migratedConfig[key] as RenovateConfig);
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
-        if (migratedConfig[key] !== undefined) {
-          migratedConfig.platformAutomerge = migratedConfig[key];
-        }
-        delete migratedConfig[key];
       }
 
       const migratedTemplates = {

@@ -236,8 +236,8 @@ Nest it inside config objects `patch` or `minor` if you want it to apply to cert
 Renovate's default behavior is to separate major and minor releases, patch releases are also considered "minor".
 Let's explain the default behavior with an example:
 
-Say you are using a package `snorgleborf`, it's the `0.8.0` version.
-The `snorgleborf` maintainers then release the following versions:
+Say you are using a package `foo`, it's the `0.8.0` version.
+The `foo` maintainers then release the following versions:
 
 - `0.8.1` (patch)
 - `0.9.0` (minor)
@@ -245,8 +245,8 @@ The `snorgleborf` maintainers then release the following versions:
 
 Renovate would then open the following PRs:
 
-- Update dependency `snorgleborf` to `0.9.0` (minor)
-- Update dependency `snorgleborf` to `1.0.0` (major)
+- Update dependency `foo` to `0.9.0` (minor)
+- Update dependency `foo` to `1.0.0` (major)
 
 Note how Renovate groups the patch and minor versions together into one PR.
 This means you only get a PR for the minor version, `0.9.0`.
@@ -256,15 +256,15 @@ To learn more read the section below.
 
 #### Overriding the default behavior for major/minor releases
 
-You can see in the example above that Renovate won't normally open a PR for the `snorgleborf` patch release.
+You can see in the example above that Renovate won't normally open a PR for the `foo` patch release.
 
 You can tell Renovate to open a separate PR for the patch release by setting `separateMinorPatch` to `true`.
 
 In both cases, Renovate will open 3 PRs:
 
-- Update dependency `snorgleborf` to `0.8.1` (patch)
-- Update dependency `snorgleborf` to `0.9.0` (minor)
-- Update dependency `snorgleborf` to `1.0.0` (major)
+- Update dependency `foo` to `0.8.1` (patch)
+- Update dependency `foo` to `0.9.0` (minor)
+- Update dependency `foo` to `1.0.0` (major)
 
 Most people don't want more PRs though.
 But it can still be handy to get PRs for patches when using automerge:
