@@ -66,13 +66,16 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
 #### Local Docker
+
 If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
 To build the correct docker image:
+
 ```
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
 Then you can run Yarn directly from Docker, for instance:
+
 ```
 docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local yarn install
 ```
