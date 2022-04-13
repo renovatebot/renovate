@@ -100,6 +100,23 @@ describe('modules/versioning/distro', () => {
     });
   });
 
+  it('sends an out of bound argument', () => {
+    expect(di.getNLatest(-1)).toBeNull();
+  });
+
+  it('sends a float as an argument', () => {
+    expect(di.getNLatest(0.1)).toEqual({
+      codename: 'Jammy Jellyfish',
+      created: '2021-10-14',
+      eol: '2027-04-21',
+      eol_esm: '2032-04-21',
+      eol_server: '2027-04-21',
+      release: '2022-04-21',
+      series: 'jammy',
+      version: '22.04',
+    });
+  });
+
   it('retrieves before most recent release schedule with version', () => {
     expect(di.getNLatest(1)).toEqual({
       codename: 'Impish Indri',

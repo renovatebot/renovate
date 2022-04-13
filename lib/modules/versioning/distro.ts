@@ -146,13 +146,12 @@ export class DistroInfo {
    */
   public getNLatest(n: number): DistroInfoRecordWithVersion | null {
     const len = this._sortedInfo.length - 1;
-    const i = len - n;
+    const i = len - Math.floor(n);
 
     if (len >= i && i >= 0) {
       return this._sortedInfo[i];
     }
 
-    // istanbul ignore next
     return null;
   }
 }
