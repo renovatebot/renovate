@@ -286,7 +286,32 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', baseUrlS3);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      name: 'package',
+      registryUrl: 's3://repobucket',
+      releases: [
+        {
+          version: '0.0.1',
+        },
+        {
+          version: '1.0.0',
+        },
+        {
+          version: '1.0.1',
+        },
+        {
+          version: '1.0.2',
+        },
+        {
+          version: '1.0.3-SNAPSHOT',
+        },
+        {
+          version: '2.0.0',
+        },
+      ],
+    });
   });
 
   it('falls back to HTTP when checking an S3 repository', async () => {
@@ -294,7 +319,30 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', baseUrlS3, baseUrl);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        {
+          version: '0.0.1',
+        },
+        {
+          releaseTimestamp: '2020-01-01T01:00:00.000Z',
+          version: '1.0.0',
+        },
+        {
+          releaseTimestamp: '2020-01-01T01:00:03.000Z',
+          version: '1.0.3-SNAPSHOT',
+        },
+        {
+          releaseTimestamp: '2020-01-01T02:00:00.000Z',
+          version: '2.0.0',
+        },
+      ],
+    });
   });
 
   it('collects releases from all registry urls', async () => {
