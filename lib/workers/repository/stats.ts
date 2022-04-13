@@ -22,17 +22,17 @@ export function printRequestStats(): void {
   const requestHosts: Record<string, RequestStats[]> = {};
   const rawUrls: Record<string, number> = {};
   for (const httpRequest of httpRequests) {
-    const { method, url, duration, queueDuration } = httpRequest;
+    const { method, url, duration, queueDuration, statusCode } = httpRequest;
     const [baseUrl] = url.split('?');
     // put method last for better sorting
-    const urlKey = `${baseUrl} (${method.toUpperCase()})`;
+    const urlKey = `${baseUrl} (${method.toUpperCase()},${statusCode})`;
     if (rawUrls[urlKey]) {
       rawUrls[urlKey] += 1;
     } else {
       rawUrls[urlKey] = 1;
     }
     allRequests.push(
-      `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
+      `${method.toUpperCase()} ${url} ${statusCode} ${duration} ${queueDuration}`
     );
     const { hostname } = URL.parse(url);
 
