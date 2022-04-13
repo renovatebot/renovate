@@ -1,6 +1,5 @@
 import type { Readable } from 'stream';
 import url from 'url';
-import { S3 } from '@aws-sdk/client-s3';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -13,20 +12,12 @@ import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
+import { getS3Client, parseS3Url } from './s3';
 import type {
   HttpResourceCheckResult,
   MavenDependency,
   MavenXml,
 } from './types';
-
-// Singleton S3 instance initialized on-demand.
-let s3Instance: S3;
-function getS3Client(): S3 {
-  if (!s3Instance) {
-    s3Instance = new S3({});
-  }
-  return s3Instance;
-}
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -112,16 +103,8 @@ function isS3NotFound(err: { name: string; message: string }): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
 
-function parseS3Url(rawUrl: string): { Bucket: string; Key: string } {
-  const parsedUrl = parseUrl(rawUrl) as url.URL;
-  return {
-    Bucket: parsedUrl.host,
-    Key: parsedUrl.pathname.substring(1),
-  };
-}
-
 export async function downloadS3Protocol(
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<string> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   // let raw: GetObjectCommandOutput;
@@ -197,7 +180,7 @@ async function checkHttpResource(
 }
 
 async function checkS3Resource(
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
@@ -229,8 +212,7 @@ export async function checkResource(
   http: Http,
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
-  const parsedUrl =
-    typeof pkgUrl === 'string' ? (parseUrl(pkgUrl) as url.URL) : pkgUrl;
+  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
   switch (parsedUrl.protocol) {
     case 'http:':
     case 'https:':

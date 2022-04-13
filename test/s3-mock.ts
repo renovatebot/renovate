@@ -2,11 +2,6 @@ import { Readable } from 'stream';
 import type { S3 } from '@aws-sdk/client-s3';
 import { afterEach } from '@jest/globals';
 
-interface S3Url {
-  Bucket: string;
-  Key: number;
-}
-
 let mockedObjects: Record<string, string> = {};
 let mockedTimestamps: Record<string, string> = {};
 
