@@ -9,6 +9,7 @@ describe('util/template/index', () => {
     );
     expect(missingOptions).toEqual([]);
   });
+
   it('filters out disallowed fields', () => {
     const userTemplate =
       '{{#if isFoo}}foo{{/if}}{{platform}} token = "{{token}}"';
@@ -18,6 +19,7 @@ describe('util/template/index', () => {
     expect(output).toContain('github');
     expect(output).not.toContain('123test');
   });
+
   it('containsString', () => {
     const userTemplate =
       "{{#if (containsString platform 'git')}}True{{else}}False{{/if}}";
@@ -25,6 +27,7 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toContain('True');
   });
+
   it('not containsString', () => {
     const userTemplate =
       "{{#if (containsString platform 'hub')}}True{{else}}False{{/if}}";
@@ -32,6 +35,7 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toContain('False');
   });
+
   it('and returns true when all parameters are true', () => {
     const userTemplate =
       '{{#if (and isMajor isSingleVersion isReplacement)}}True{{else}}False{{/if}}';
@@ -39,6 +43,7 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toContain('True');
   });
+
   it('and returns false when at least one parameter is false', () => {
     const userTemplate =
       '{{#if (and isMajor isPatch isGithub)}}True{{else}}False{{/if}}';
@@ -46,6 +51,7 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toContain('False');
   });
+
   it('or returns true when at least one is true', () => {
     const userTemplate =
       '{{#if (or isMajor isPatch isReplacement)}}True{{else}}False{{/if}}';
@@ -53,6 +59,7 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toContain('True');
   });
+
   it('or returns false when all are false', () => {
     const userTemplate =
       '{{#if (or isMajor isPatch isReplacement)}}True{{else}}False{{/if}}';
@@ -60,6 +67,7 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toContain('False');
   });
+
   it('string to pretty JSON ', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';

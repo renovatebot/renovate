@@ -10,6 +10,7 @@ describe('modules/manager/gomod/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1).deps;
       expect(res).toMatchSnapshot();
@@ -17,11 +18,13 @@ describe('modules/manager/gomod/extract', () => {
       expect(res.filter((e) => e.skipReason)).toHaveLength(1);
       expect(res.filter((e) => e.depType === 'replace')).toHaveLength(1);
     });
+
     it('extracts constraints', () => {
       const res = extractPackageFile(gomod3);
       expect(res).toMatchSnapshot();
       expect(res.constraints.go).toBe('^1.13');
     });
+
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2).deps;
       expect(res).toMatchSnapshot();

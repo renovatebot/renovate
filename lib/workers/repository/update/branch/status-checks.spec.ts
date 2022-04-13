@@ -11,31 +11,37 @@ import {
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
     let config: StabilityConfig;
+
     beforeEach(() => {
       config = {
         ...defaultConfig,
         branchName: 'renovate/some-branch',
       };
     });
+
     afterEach(() => {
       jest.resetAllMocks();
     });
+
     it('returns if not configured', async () => {
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
+
     it('sets status yellow', async () => {
       config.stabilityStatus = BranchStatus.yellow;
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
+
     it('sets status green', async () => {
       config.stabilityStatus = BranchStatus.green;
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
+
     it('skips status if already set', async () => {
       config.stabilityStatus = BranchStatus.green;
       platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
@@ -47,12 +53,14 @@ describe('workers/repository/update/branch/status-checks', () => {
 
   describe('setConfidence', () => {
     let config: ConfidenceConfig;
+
     beforeEach(() => {
       config = {
         ...defaultConfig,
         branchName: 'renovate/some-branch',
       };
     });
+
     afterEach(() => {
       jest.resetAllMocks();
     });

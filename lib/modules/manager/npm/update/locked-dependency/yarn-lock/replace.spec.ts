@@ -17,6 +17,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       );
       expect(res).toBe(yarn2Lock);
     });
+
     it('replaces without dependencies', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
@@ -41,6 +42,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         "
       `);
     });
+
     it('replaces with dependencies', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
@@ -65,6 +67,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
               "
           `);
     });
+
     it('replaces constraint too', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
@@ -92,6 +95,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
                   "
               `);
     });
+
     it('handles escaped constraints', () => {
       const res = replaceConstraintVersion(
         yarnLock2,
@@ -117,6 +121,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         "
       `);
     });
+
     it('handles quoted', () => {
       const res = replaceConstraintVersion(
         yarnLock2,

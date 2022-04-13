@@ -1,5 +1,6 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
+import { Fixtures } from '../../../../../test/fixtures';
 import { mocked } from '../../../../../test/util';
 import * as _env from '../../../../util/exec/env';
 import * as _fs from '../../../../util/fs/proxies';
@@ -19,10 +20,12 @@ delete process.env.NPM_CONFIG_CACHE;
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
+
   beforeEach(() => {
     config = { cacheDir: 'some-cache-dir', constraints: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
+
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -31,6 +34,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => {
@@ -42,6 +46,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('finds pnpm globally', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -50,6 +55,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -76,5 +82,91 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
     // TODO: check docker preCommands
+  });
+
+  it('uses constraint version if parent json has constraints', async () => {
+    const execSnapshots = mockExecAll(exec);
+    const configTemp = { cacheDir: 'some-cache-dir' };
+    const fileContent = Fixtures.get('parent/package.json');
+    fs.readFile = jest
+      .fn()
+      .mockReturnValueOnce(fileContent)
+      .mockReturnValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      configTemp,
+      [
+        {
+          depType: 'packageManager',
+          depName: 'pnpm',
+        },
+      ]
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: {
+          cwd: 'some-folder',
+          encoding: 'utf-8',
+          env: {
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+  });
+
+  it('uses packageManager version and puts it into constraint', async () => {
+    const execSnapshots = mockExecAll(exec);
+    const configTemp = { cacheDir: 'some-cache-dir' };
+    const fileContent = Fixtures.get('manager-field/package.json');
+    fs.readFile = jest
+      .fn()
+      .mockReturnValueOnce(fileContent)
+      .mockReturnValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      configTemp,
+      [
+        {
+          depType: 'packageManager',
+          depName: 'pnpm',
+        },
+      ]
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: {
+          cwd: 'some-folder',
+          encoding: 'utf-8',
+          env: {
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 });

@@ -17,6 +17,7 @@ describe('util/http/index', () => {
     hostRules.clear();
     queue.clear();
   });
+
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
     expect(await http.get('http://renovate.com/test')).toEqual({
@@ -27,6 +28,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('returns 429 error', async () => {
     httpMock.scope(baseUrl).get('/test').reply(429);
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
@@ -34,6 +36,7 @@ describe('util/http/index', () => {
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('converts 404 error to ExternalHostError', async () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true });
@@ -42,12 +45,14 @@ describe('util/http/index', () => {
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('disables hosts', async () => {
     hostRules.add({ matchHost: 'renovate.com', enabled: false });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       HOST_DISABLED
     );
   });
+
   it('ignores 404 error and does not throw ExternalHostError', async () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
@@ -56,6 +61,7 @@ describe('util/http/index', () => {
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('getJson', async () => {
     httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toEqual({
@@ -67,6 +73,7 @@ describe('util/http/index', () => {
       statusCode: 200,
     });
   });
+
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
     expect(
@@ -81,6 +88,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('putJson', async () => {
     httpMock.scope(baseUrl).put('/').reply(200, {});
     expect(
@@ -95,6 +103,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('patchJson', async () => {
     httpMock.scope(baseUrl).patch('/').reply(200, {});
     expect(
@@ -109,6 +118,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('deleteJson', async () => {
     httpMock.scope(baseUrl).delete('/').reply(200, {});
     expect(
@@ -123,6 +133,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('headJson', async () => {
     httpMock.scope(baseUrl).head('/').reply(200, {});
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({

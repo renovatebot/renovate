@@ -77,6 +77,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses yarn.lock with yarn v2.1.0', async () => {
       const yarnVersion = '2.1.0';
       const lockfileVersion = undefined;
@@ -123,6 +124,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses yarn.lock with yarn v2.2.0', async () => {
       const yarnVersion = '2.2.0';
       const lockfileVersion = 6;
@@ -169,6 +171,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses yarn.lock with yarn v3.0.0', async () => {
       const yarnVersion = '3.0.0';
       const lockfileVersion = 8;
@@ -236,6 +239,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses package-lock.json with npm v7.0.0', async () => {
       npm.getNpmLock.mockReturnValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
@@ -305,6 +309,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('ignores pnpm', async () => {
       const packageFiles = [
         {
