@@ -1,7 +1,7 @@
 import simpleGit from 'simple-git';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { gitTimeoutConfig, simpleGitConfig } from '../../../util/git/config';
+import { simpleGitConfig } from '../../../util/git/config';
 import { getRemoteUrlWithToken } from '../../../util/git/url';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { GetReleasesConfig } from '../types';
@@ -22,8 +22,7 @@ export class GitDatasource {
     { packageName }: GetReleasesConfig,
     hostType: string
   ): Promise<RawRefs[] | null> {
-    const gitConfig = { ...simpleGitConfig(), ...gitTimeoutConfig() };
-    const git = simpleGit(gitConfig);
+    const git = simpleGit(simpleGitConfig());
 
     // fetch remote tags
     const lsRemote = await git.listRemote([

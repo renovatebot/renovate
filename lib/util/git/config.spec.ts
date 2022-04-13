@@ -1,15 +1,19 @@
+import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { gitTimeoutConfig, simpleGitConfig } from './config';
+import { simpleGitConfig } from './config';
+
+jest.mock('../../config/global');
+const globalConfig = mocked(GlobalConfig);
+
 describe('util/git/config', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('uses "close" events, ignores "exit" events from child processes', () => {
+    globalConfig.get.mockReturnValue(10000);
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },
-    });
-  });
-  it('uses git timeout', () => {
-    const mockStaticF = jest.fn().mockReturnValue(10000);
-    GlobalConfig.get = mockStaticF;
-    expect(gitTimeoutConfig()).toEqual({
       timeout: {
         block: 10000,
       },

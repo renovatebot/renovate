@@ -27,7 +27,7 @@ import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { getNoVerify, gitTimeoutConfig, simpleGitConfig } from './config';
+import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
@@ -219,8 +219,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  const gitConfig = { ...simpleGitConfig(), ...gitTimeoutConfig() };
-  git = simpleGit(localDir, gitConfig);
+  git = simpleGit(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }

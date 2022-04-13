@@ -3,7 +3,7 @@ import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { gitTimeoutConfig, simpleGitConfig } from '../../../util/git/config';
+import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -36,8 +36,7 @@ async function getUrl(
 const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const gitConfig = { ...simpleGitConfig(), ...gitTimeoutConfig() };
-  const val = await Git(gitConfig).listRemote([
+  const val = await Git(simpleGitConfig()).listRemote([
     '--symref',
     subModuleUrl,
     'HEAD',
@@ -50,9 +49,8 @@ async function getBranch(
   submoduleName: string,
   subModuleUrl: string
 ): Promise<string> {
-  const gitConfig = { ...simpleGitConfig(), ...gitTimeoutConfig() };
   return (
-    (await Git(gitConfig).raw([
+    (await Git(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -97,8 +95,7 @@ export default async function extractPackageFile(
   config: ExtractConfig
 ): Promise<PackageFile | null> {
   const { localDir } = GlobalConfig.get();
-  const gitConfig = { ...simpleGitConfig(), ...gitTimeoutConfig() };
-  const git = Git(localDir, gitConfig);
+  const git = Git(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, fileName);
 
   const depNames = await getModules(git, gitModulesPath);
