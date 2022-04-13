@@ -12,7 +12,7 @@ function objectKey(url: S3Url) {
 
 function headObject(url: S3Url) {
   const k = objectKey(url);
-  if (!mockedObjects[k]) {
+  if (mockedObjects[k] === undefined) {
     return Promise.reject({ message: 'NotFound' });
   }
   const LastModified = mockedTimestamps[k];

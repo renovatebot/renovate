@@ -20,6 +20,9 @@ export function parseS3Url(rawUrl: string): S3Url | null {
   if (parsedUrl === null) {
     return null;
   }
+  if (parsedUrl.protocol !== "s3:") {
+    return null;
+  }
   return {
     Bucket: parsedUrl.host,
     Key: parsedUrl.pathname.substring(1),

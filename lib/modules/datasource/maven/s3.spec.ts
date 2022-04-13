@@ -7,4 +7,12 @@ describe('modules/datasource/maven/s3', () => {
       Key: 'key/path',
     });
   });
+
+  it('returns null for non-S3 URLs', () => {
+    expect(parseS3Url('http://example.com/key/path')).toBeNull();
+  });
+
+  it('returns null for invalid URLs', () => {
+    expect(parseS3Url('thisisnotaurl')).toBeNull();
+  });
 });

@@ -111,6 +111,7 @@ export async function downloadS3Protocol(
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     if (s3Url === null) {
+      // istanbul ignore next
       return '';
     }
     const response = await getS3Client().getObject(s3Url);
@@ -186,6 +187,7 @@ async function checkS3Resource(
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
+    // istanbul ignore next
     if (s3Url === null) {
       return 'error';
     }
@@ -218,6 +220,7 @@ export async function checkResource(
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
+  // istanbul ignore next
   if (parsedUrl === null) {
     return 'error';
   }

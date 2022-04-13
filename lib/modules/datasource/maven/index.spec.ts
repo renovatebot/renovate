@@ -174,13 +174,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
           '-SNAPSHOT',
           ''
         )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`;
+        const headers = { 'Last-Modified': timestamp };
         mockResource(protocol, {
           http: () =>
             httpMock
               .scope(base)
               .head(pomUrl)
-              .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp }),
-          s3: () => s3mock.mockObject(`${base}${pomUrl}`, ''),
+              .reply(snapshot.jarStatus, '', headers),
+          s3: () => s3mock.mockObject(`${base}${pomUrl}`, '', headers),
         });
       } else {
         mockResource(protocol, {
@@ -281,8 +282,6 @@ describe('modules/datasource/maven/index', () => {
     mockGenericPackage({
       base: baseUrlS3,
       html: null,
-      latest: '2.0.0',
-      jars: { '2.0.0': 200 },
     });
 
     const res = await get('org.example:package', baseUrlS3);
