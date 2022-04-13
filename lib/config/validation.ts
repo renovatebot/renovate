@@ -86,10 +86,6 @@ function getDeprecationMessage(option: string): string {
   return deprecatedOptions[option];
 }
 
-function validGitTimeout(gitTimeout: number): boolean {
-  return gitTimeout >= 2000 && gitTimeout <= 60000;
-}
-
 export function getParentName(parentPath: string): string {
   return parentPath
     ? parentPath
@@ -138,7 +134,7 @@ export async function validateConfig(
           topic: 'Config Error',
           message: `GitTimeout must be set to an integer value`,
         });
-      } else if (!validGitTimeout(val)) {
+      } else if (!(val >= 2000 && val <= 60000)) {
         errors.push({
           topic: 'Config Error',
           message: `GitTimeout value must be within 2 to 60 seconds`,

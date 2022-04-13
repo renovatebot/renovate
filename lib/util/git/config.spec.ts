@@ -11,11 +11,20 @@ describe('util/git/config', () => {
   });
 
   it('uses "close" events, ignores "exit" events from child processes', () => {
-    globalConfig.get.mockReturnValue(10000);
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },
       timeout: {
         block: 10000,
+      },
+    });
+  });
+
+  it('uses timeout value from GlobalConfig', () => {
+    globalConfig.get.mockReturnValue(50000);
+    expect(simpleGitConfig()).toEqual({
+      completion: { onClose: true, onExit: false },
+      timeout: {
+        block: 50000,
       },
     });
   });
