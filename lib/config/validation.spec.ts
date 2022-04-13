@@ -716,6 +716,7 @@ describe('config/validation', () => {
         },
       ]);
     });
+
     it.each([
       [
         'invalid value',
