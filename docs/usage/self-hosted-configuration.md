@@ -376,9 +376,9 @@ Possible values:
 
 ## githubTokenWarn
 
-By default, Renovate will log and display a warning when `GITHUB_COM_TOKEN` is not set.
-By configuring this setting to `false`, Renovate will instead suppress these warnings on Pull Requests, etc.
-This is useful for self-hosted environments that don't have access to github.com and don't want to see this displayed when it's expected behavior to not have that configured.
+By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
+Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
 ## globalExtends
 
