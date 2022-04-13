@@ -108,14 +108,6 @@ export async function downloadHttpProtocol(
   }
 }
 
-function isS3CedentialsError(err: { name: string; message: string }): boolean {
-  return err.name === 'CredentialsProviderError';
-}
-
-function isS3RegionError(err: { name: string; message: string }): boolean {
-  return err.message === 'Region is missing';
-}
-
 function isS3NotFound(err: { name: string; message: string }): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
@@ -148,13 +140,13 @@ export async function downloadS3Protocol(
     return body;
   } catch (err) {
     const failedUrl = pkgUrl.toString();
-    if (isS3CedentialsError(err)) {
+    if (err.name === 'CredentialsProviderError') {
       // istanbul ignore next
       logger.debug(
         { failedUrl },
         'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
       );
-    } else if (isS3RegionError(err)) {
+    } else if (err.message === 'Region is missing') {
       // istanbul ignore next
       logger.debug(
         { failedUrl },

@@ -7,8 +7,8 @@ interface S3Url {
   Key: number;
 }
 
-let mockedObjects: any = {};
-let mockedTimestamps: any = {};
+let mockedObjects: Record<string, string> = {};
+let mockedTimestamps: Record<string, string> = {};
 
 function objectKey(url: S3Url) {
   return `s3://${url.Bucket}/${url.Key}`;
@@ -39,7 +39,7 @@ function getObject(url: S3Url) {
 }
 
 function mockObject(url: string, content?: string, headers?: any) {
-  mockedObjects[url] = content ? content : true;
+  mockedObjects[url] = content ? content : '';
   if (headers?.['Last-Modified']) {
     mockedTimestamps[url] = headers['Last-Modified'];
   }
@@ -50,7 +50,7 @@ const s3mock = {
   getObject,
   mockObject,
 };
-export default s3mock;
+export { s3mock };
 
 jest.mock('@aws-sdk/client-s3', () => ({
   S3: function (this: S3) {

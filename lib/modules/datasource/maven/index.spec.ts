@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/order
-import s3mock from '../../../../test/s3-mock';
+import { s3mock } from "../../../../test/s3-mock";
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
