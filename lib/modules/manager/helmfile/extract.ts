@@ -18,7 +18,9 @@ export function extractPackageFile(
   let docs: Doc[];
   const aliases: Record<string, string> = {};
   try {
-    docs = loadAll(content, null, { json: true });
+    docs = loadAll(content.replace(/\s*({{.+}})\s*(\n)/gi, '$2'), null, {
+      json: true,
+    });
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;

@@ -1,5 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/helmfile/extract extractPackageFile() parses a chart with a go templating 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [
+        "https://charts.helm.sh/stable",
+      ],
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [
+        "https://charts.helm.sh/stable",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() parses a chart with empty strings for template values 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "depName": "example",
+      "skipReason": "invalid-version",
+    },
+    Object {
+      "depName": "example-external",
+      "skipReason": "invalid-name",
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [
+        "https://charts.helm.sh/stable",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`modules/manager/helmfile/extract extractPackageFile() parses multidoc yaml 1`] = `
 Object {
   "datasource": "helm",
@@ -116,7 +161,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "1.0.0",
-      "depName": "{{\`{{ .Release.Name }}\`}}",
+      "depName": "!!!!--!",
       "registryUrls": Array [
         "https://charts.helm.sh/stable",
       ],

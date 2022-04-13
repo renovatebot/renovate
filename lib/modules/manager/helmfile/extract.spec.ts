@@ -68,7 +68,7 @@ describe('modules/manager/helmfile/extract', () => {
       releases:
         - name: example
           version: 1.0.0
-          chart: stable/{{\`{{ .Release.Name }}\`}}
+          chart: stable/!!!!--!
         - name: example-internal
           version: 1.0.0
           chart: stable/example
@@ -199,6 +199,83 @@ describe('modules/manager/helmfile/extract', () => {
           { depName: 'kube-prometheus-stack', currentValue: '13.7' },
           { depName: 'invalid', skipReason: 'invalid-name' },
           { depName: 'external-dns', skipReason: 'invalid-version' },
+        ],
+      });
+    });
+
+    it('parses a chart with a go templating', () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+      {{- if neq .Values.example.version  "" }}
+          version: {{ .Values.example.version }}
+      {{- else }}
+          version: 1.0.0
+      {{- end }}
+          chart: stable/example
+        - name: example-internal
+          version: 1.0.0
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+        ],
+      });
+    });
+
+    it('parses a chart with empty strings for template values', () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: {{ .Values.example.version }}
+          chart: stable/example
+        - name: example-external
+          version: 1.0.0
+          chart: {{ .Values.example.repository }}
+        - name: example-internal
+          version: 1.0.0
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          {
+            skipReason: 'invalid-version',
+          },
+          {
+            skipReason: 'invalid-name',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
         ],
       });
     });
