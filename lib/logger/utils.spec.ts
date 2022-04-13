@@ -1,4 +1,4 @@
-import { validateLogLevel } from './utils';
+import { sanitizeValue, validateLogLevel } from './utils';
 
 describe('logger/utils', () => {
   afterEach(() => {
@@ -29,5 +29,15 @@ describe('logger/utils', () => {
       validateLogLevel(input);
     }).toThrow();
     expect(mockExit).toHaveBeenCalledWith(1);
+  });
+
+  it.each`
+    input                                                                 | output
+    ${'https://somepw@domain.com'}                                        | ${'https://**redacted**@domain.com'}
+    ${'https://someuser:somepw@domain.com'}                               | ${'https://**redacted**:**redacted**@domain.com'}
+    ${'redis://:somepw@172.32.11.71:6379/0'}                              | ${'redis://:**redacted**@172.32.11.71:6379/0'}
+    ${'some text with\r\n url: https://somepw@domain.com\nand some more'} | ${'some text with\n url: https://**redacted**@domain.com\nand some more'}
+  `('sanitizeValue($input) == $output', ({ input, output }) => {
+    expect(sanitizeValue(input)).toBe(output);
   });
 });

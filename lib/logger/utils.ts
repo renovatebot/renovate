@@ -103,7 +103,10 @@ export function sanitizeValue(
   seen = new WeakMap<NestedValue, unknown>()
 ): any {
   if (is.string(value)) {
-    return sanitize(value);
+    return sanitize(value)
+      .split(/\r?\n/)
+      .map((line) => line.split(' ').map(sanitizeUrl).join(' '))
+      .join('\n');
   }
 
   if (is.date(value)) {
@@ -242,4 +245,22 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
   });
   logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
   process.exit(1);
+}
+
+export function sanitizeUrl(text: string): string {
+  if (!is.urlString(text)) return text;
+  try {
+    const url = text.trim();
+    const parsed = new URL(url);
+    if (parsed.password) {
+      parsed.password = '**redacted**';
+    }
+    if (parsed.username) {
+      parsed.username = '**redacted**';
+    }
+    console.dir({ url });
+    return text.replace(url, parsed.toString().replace(/\/$/, ''));
+  } catch /** istanbul ignore next */ {
+    return '**redacted-url**';
+  }
 }
