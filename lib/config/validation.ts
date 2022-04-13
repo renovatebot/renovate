@@ -139,7 +139,7 @@ export async function validateConfig(
       } else if (!validGitTimeout(val)) {
         errors.push({
           topic: 'Config Error',
-          message: `GitTimeout value must be within 2 to 10 seconds`,
+          message: `GitTimeout value must be within 2 to 60 seconds`,
         });
       }
     }
