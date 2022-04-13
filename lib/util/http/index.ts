@@ -80,7 +80,7 @@ async function gotRoutine<T>(
         error.response?.statusCode ??
         /* istanbul ignore next: can't be tested */ 0;
       duration =
-        error.timings.phases.total ??
+        error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ 0;
     }
 
@@ -160,7 +160,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       const queueTask = (): Promise<Response<T>> => {
         const queueDuration = Date.now() - startTime;
         return gotRoutine(url, options, {
-          method: options.method,
+          method: options.method ?? 'get',
           url,
           queueDuration,
         });
