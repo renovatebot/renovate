@@ -248,7 +248,9 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
 }
 
 export function sanitizeUrl(text: string): string {
-  if (!is.urlString(text)) return text;
+  if (!is.urlString(text)) {
+    return text;
+  }
   try {
     const url = text.trim();
     const parsed = new URL(url);
@@ -258,9 +260,8 @@ export function sanitizeUrl(text: string): string {
     if (parsed.username) {
       parsed.username = '**redacted**';
     }
-    console.dir({ url });
     return text.replace(url, parsed.toString().replace(/\/$/, ''));
-  } catch /** istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return '**redacted-url**';
   }
 }
