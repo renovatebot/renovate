@@ -85,6 +85,7 @@ Object {
       "updateType": "minor",
     },
     Object {
+      "isPinDigest": true,
       "newDigest": "sha256:0123456789abcdef",
       "newValue": "8.0.0",
       "updateType": "pinDigest",
@@ -99,6 +100,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
 Object {
   "updates": Array [
     Object {
+      "isPinDigest": true,
       "newDigest": "sha256:abcdef1234567890",
       "newValue": "alpine",
       "updateType": "pinDigest",
@@ -119,6 +121,7 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
+      "isPinDigest": true,
       "newDigest": "sha256:abcdef1234567890",
       "newValue": "8.1.0",
       "updateType": "pinDigest",

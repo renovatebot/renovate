@@ -350,6 +350,7 @@ describe('workers/repository/updates/generate', () => {
           newDigest: 'abcdefg987612345',
           currentDigest: '',
           updateType: 'pinDigest',
+          isPinDigest: true,
         }),
       ];
       const res = generateBranchConfig(branch);

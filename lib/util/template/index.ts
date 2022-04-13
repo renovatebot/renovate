@@ -84,6 +84,7 @@ export const allowedFields = {
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
+  isPinDigest: 'true if the upgrade is pinning digests',
   isRollback: 'true if the upgrade is a rollback PR',
   isReplacement: 'true if the upgrade is a replacement',
   isRange: 'true if the new value is a range',
