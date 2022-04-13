@@ -49,7 +49,6 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/api/v1/gems/rails.json')
         .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for rubygems.org package miss', async () => {
@@ -61,7 +60,6 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, rubygemsOrgVersions);
       const res = await getPkgReleases(newparams);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
@@ -84,7 +82,6 @@ describe('modules/datasource/rubygems/index', () => {
       expect(
         res.releases.find((release) => release.version === '0.1.2')
       ).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses rubygems.org if no registry urls were provided', async () => {
@@ -108,7 +105,6 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).not.toBeNull();
       expect(res.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('works with real data', async () => {
@@ -122,7 +118,6 @@ describe('modules/datasource/rubygems/index', () => {
       const res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses multiple source urls', async () => {
@@ -140,7 +135,6 @@ describe('modules/datasource/rubygems/index', () => {
       const res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null if mismatched name', async () => {
@@ -153,7 +147,6 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/basepath/api/v1/gems/rails.json')
         .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('falls back to info when version request fails', async () => {
@@ -167,6 +160,7 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe(railsInfo.version);
     });
+
     it('errors when version request fails with anything other than 400 or 404', async () => {
       httpMock
         .scope('https://thirdparty.com/')

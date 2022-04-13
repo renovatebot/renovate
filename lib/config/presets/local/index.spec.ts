@@ -32,6 +32,7 @@ describe('config/presets/local/index', () => {
     github.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     gitlab.getPresetFromEndpoint.mockResolvedValueOnce(preset);
   });
+
   describe('getPreset()', () => {
     it('throws for unsupported platform', async () => {
       await expect(async () => {
@@ -44,6 +45,7 @@ describe('config/presets/local/index', () => {
         });
       }).rejects.toThrow();
     });
+
     it('throws for missing platform', async () => {
       await expect(async () => {
         await local.getPreset({
@@ -105,6 +107,7 @@ describe('config/presets/local/index', () => {
       expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to custom gitea', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -128,6 +131,7 @@ describe('config/presets/local/index', () => {
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to custom github', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -140,6 +144,7 @@ describe('config/presets/local/index', () => {
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to github with a tag', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -151,6 +156,7 @@ describe('config/presets/local/index', () => {
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to custom github with a tag', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -176,6 +182,7 @@ describe('config/presets/local/index', () => {
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to custom gitlab', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -188,6 +195,7 @@ describe('config/presets/local/index', () => {
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to gitlab with a tag', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -200,6 +208,7 @@ describe('config/presets/local/index', () => {
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
+
     it('forwards to custom gitlab with a tag', async () => {
       const content = await local.getPreset({
         repo: 'some/repo',

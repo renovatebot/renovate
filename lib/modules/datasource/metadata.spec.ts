@@ -113,6 +113,7 @@ describe('modules/datasource/metadata', () => {
       sourceUrl: 'https://gitlab.com/meno/dropzone',
     });
   });
+
   it('Should handle failed parsing of sourceUrls for GitLab', () => {
     const dep = {
       sourceUrl: 'https://gitlab-nope',
@@ -132,6 +133,7 @@ describe('modules/datasource/metadata', () => {
       sourceUrl: 'https://gitlab-nope',
     });
   });
+
   it('Should handle failed parsing of sourceUrls for other', () => {
     const dep = {
       sourceUrl: 'https://nope-nope-nope',
@@ -151,6 +153,7 @@ describe('modules/datasource/metadata', () => {
       sourceUrl: 'https://nope-nope-nope',
     });
   });
+
   it('Should handle non-url', () => {
     const dep = {
       sourceUrl: 'not-a-url',
@@ -229,21 +232,25 @@ describe('modules/datasource/metadata', () => {
       'https://example.com/foo/bar'
     );
   });
+
   it('Should massage github http url to valid https url', () => {
     expect(massageGithubUrl('http://example.com/foo/bar')).toMatch(
       'https://example.com/foo/bar'
     );
   });
+
   it('Should massage github http and git url to valid https url', () => {
     expect(massageGithubUrl('http+git://example.com/foo/bar')).toMatch(
       'https://example.com/foo/bar'
     );
   });
+
   it('Should massage github ssh git@ url to valid https url', () => {
     expect(massageGithubUrl('ssh://git@example.com/foo/bar')).toMatch(
       'https://example.com/foo/bar'
     );
   });
+
   it('Should massage github git url to valid https url', () => {
     expect(massageGithubUrl('git://example.com/foo/bar')).toMatch(
       'https://example.com/foo/bar'

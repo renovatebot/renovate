@@ -13,16 +13,19 @@ describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {
     let config: RenovateConfig;
     const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
+
     beforeEach(() => {
       jest.resetAllMocks();
       git.getFileList.mockResolvedValue(fileList);
       config = { ...defaultConfig };
     });
+
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       const res = await extractAllDependencies(config);
       expect(Object.keys(res)).toContain('ansible');
     });
+
     it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
