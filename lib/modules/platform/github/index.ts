@@ -180,13 +180,15 @@ export async function getRepos(): Promise<string[]> {
         paginationField: 'repositories',
         paginate: 'all',
       });
-      return res.body.repositories.map((repo) => repo.full_name);
+      return res.body.repositories
+        .filter(is.nonEmptyObject)
+        .map((repo) => repo.full_name);
     } else {
       const res = await githubApi.getJson<{ full_name: string }[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' }
       );
-      return res.body.map((repo) => repo.full_name);
+      return res.body.filter(is.nonEmptyObject).map((repo) => repo.full_name);
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
