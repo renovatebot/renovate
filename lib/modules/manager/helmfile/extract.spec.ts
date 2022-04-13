@@ -226,7 +226,7 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
           {
@@ -263,7 +263,7 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
           {
