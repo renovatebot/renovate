@@ -85,9 +85,11 @@ function getDeprecationMessage(option: string): string {
   };
   return deprecatedOptions[option];
 }
+
 function validGitTimeout(gitTimeout: number): boolean {
   return gitTimeout >= 2000 && gitTimeout <= 60000;
 }
+
 export function getParentName(parentPath: string): string {
   return parentPath
     ? parentPath
