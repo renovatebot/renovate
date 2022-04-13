@@ -176,6 +176,7 @@ describe('modules/platform/github/index', () => {
           {
             full_name: 'c/d',
           },
+          null,
         ]);
       const repos = await github.getRepos();
       expect(repos).toMatchSnapshot();
@@ -200,6 +201,7 @@ describe('modules/platform/github/index', () => {
             {
               full_name: 'c/d',
             },
+            null,
           ],
         });
 
