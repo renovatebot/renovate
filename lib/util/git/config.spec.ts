@@ -6,7 +6,6 @@ jest.mock('../../config/global');
 const globalConfig = mocked(GlobalConfig);
 
 describe('util/git/config', () => {
-  
   beforeEach(() => {
     jest.resetAllMocks();
   });
