@@ -107,10 +107,12 @@ export async function downloadS3Protocol(
   pkgUrl: URL | string
 ): Promise<string> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
-  // let raw: GetObjectCommandOutput;
   let body: string;
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
+    if (s3Url === null) {
+      return '';
+    }
     const response = await getS3Client().getObject(s3Url);
     const stream = response.Body as Readable;
     const buffers = await new Promise<Buffer>((resolve, reject) => {
@@ -184,6 +186,9 @@ async function checkS3Resource(
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
+    if (s3Url === null) {
+      return 'error';
+    }
     const response = await getS3Client().headObject(s3Url);
     // istanbul ignore next
     if (response.DeleteMarker) {
@@ -213,6 +218,9 @@ export async function checkResource(
   pkgUrl: url.URL | string
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
+  if (parsedUrl === null) {
+    return 'error';
+  }
   switch (parsedUrl.protocol) {
     case 'http:':
     case 'https:':
