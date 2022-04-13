@@ -18,6 +18,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(upgrade.newValue);
     });
+
     it('replaces two values in one file', () => {
       const upgrade1 = {
         depName: 'github.com/pkg/errors',
@@ -44,6 +45,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res2).not.toEqual(res1);
       expect(res2).toMatchSnapshot();
     });
+
     it('returns same', () => {
       const upgrade = {
         depName: 'github.com/pkg/errors',
@@ -53,6 +55,7 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).toEqual(gomod1);
     });
+
     it('bumps major v0 > v1', () => {
       const upgrade = {
         depName: 'github.com/pkg/errors',
@@ -67,6 +70,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pkg/errors v1.0.0');
     });
+
     it('replaces major updates > 1', () => {
       const upgrade = {
         depName: 'github.com/pkg/errors',
@@ -81,6 +85,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/pkg/errors/v2 v2.0.0');
     });
+
     it('replaces major gopkg.in updates', () => {
       const upgrade = {
         depName: 'gopkg.in/russross/blackfriday.v1',
@@ -96,6 +101,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('gopkg.in/russross/blackfriday.v2 v2.0.0');
     });
+
     it('returns null if mismatch', () => {
       const upgrade = {
         depName: 'github.com/aws/aws-sdk-go',
@@ -105,10 +111,12 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).toBeNull();
     });
+
     it('returns null if error', () => {
       const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
+
     it('replaces multiline', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',
@@ -120,6 +128,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/fatih/color v1.8.0');
     });
+
     it('replaces quoted multiline', () => {
       const upgrade = {
         depName: 'gopkg.in/src-d/go-billy.v4',
@@ -132,6 +141,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain(upgrade.newValue);
     });
+
     it('replaces major multiline', () => {
       const upgrade = {
         depName: 'github.com/emirpasic/gods',
@@ -146,6 +156,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/emirpasic/gods/v2 v2.0.0');
     });
+
     it('bumps major multiline', () => {
       const upgrade = {
         depName: 'github.com/src-d/gcfg/v2',
@@ -160,6 +171,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/src-d/gcfg/v3 v3.0.0');
     });
+
     it('bumps major v0 > v1 multiline', () => {
       const upgrade = {
         depName: 'golang.org/x/text',
@@ -174,6 +186,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('golang.org/x/text v1.0.0');
     });
+
     it('update multiline digest', () => {
       const upgrade = {
         depName: 'github.com/spf13/jwalterweatherman',
@@ -188,6 +201,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain('github.com/spf13/jwalterweatherman 123456123456');
       expect(res).toContain(upgrade.newDigest.substring(0, 12));
     });
+
     it('skips already-updated multiline digest', () => {
       const upgrade = {
         depName: 'github.com/spf13/jwalterweatherman',
@@ -200,6 +214,7 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).toEqual(gomod2);
     });
+
     it('handles multiline mismatch', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',
@@ -210,6 +225,7 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).toBeNull();
     });
+
     it('handles +incompatible tag', () => {
       const upgrade = {
         depName: 'github.com/Azure/azure-sdk-for-go',
@@ -224,6 +240,7 @@ describe('modules/manager/gomod/update', () => {
         'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
       );
     });
+
     it('handles replace line with minor version update', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
@@ -235,6 +252,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pravesht/gocql v0.0.1');
     });
+
     it('handles replace line with major version update', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
@@ -249,6 +267,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pravesht/gocql/v2 v2.0.0');
     });
+
     it('handles replace line with digest', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
@@ -265,6 +284,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(upgrade.newDigest.substring(0, 12));
     });
+
     it('handles no pinned version to latest available version', () => {
       const upgrade = {
         depName: 'github.com/caarlos0/env',
@@ -279,6 +299,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
+
     it('should return null for replacement', () => {
       const res = updateDependency({
         fileContent: undefined,

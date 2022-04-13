@@ -742,6 +742,17 @@ A similar one could strip leading `v` prefixes:
 
 Set this to `false` if you want to disable release notes fetching.
 
+Renovate can fetch release notes when they are hosted on one of these platforms:
+
+- GitHub (.com and Enterprise)
+- GitLab (.com and CE/EE)
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate can only show release notes from some platforms and some package managers.
+    We're planning improvements so that Renovate can show more release notes.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.

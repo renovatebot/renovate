@@ -329,10 +329,6 @@ Object {
 }
 `;
 
-exports[`modules/manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
-
-exports[`modules/manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;
-
 exports[`modules/manager/regex/index extracts with recursive strategy and merged groups 1`] = `
 Object {
   "depNameTemplate": "{{{ first }}}/{{{ second }}}/{{{ depName }}}",

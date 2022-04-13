@@ -131,7 +131,7 @@ async function generateData() {
   await updateFile(
     `lib/data-files.generated.ts`,
     [
-      `type DataFile =\n${importDataFileType};`,
+      `export type DataFile =\n${importDataFileType};`,
       contentMapDecl,
       contentMapAssignments.join('\n'),
       `export default data;\n`,

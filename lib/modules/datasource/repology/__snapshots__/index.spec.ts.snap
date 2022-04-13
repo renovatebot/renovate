@@ -11,31 +11,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for api package 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=gcc-defaults",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/api/v1/project/gcc-defaults",
-  },
-]
-`;
-
 exports[`modules/datasource/repology/index getReleases returns correct version for binary package 1`] = `
 Object {
   "registryUrl": "https://repology.org",
@@ -45,21 +20,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/repology/index getReleases returns correct version for binary package 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-]
 `;
 
 exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with different name 1`] = `
@@ -73,21 +33,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with different name 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=pulseaudio-utils",
-  },
-]
-`;
-
 exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with same name 1`] = `
 Object {
   "registryUrl": "https://repology.org",
@@ -99,21 +44,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with same name 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=alpine_3_12&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=gcc",
-  },
-]
-`;
-
 exports[`modules/datasource/repology/index getReleases returns correct version for source package 1`] = `
 Object {
   "registryUrl": "https://repology.org",
@@ -123,31 +53,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/repology/index getReleases returns correct version for source package 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=gcc-defaults",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=gcc-defaults",
-  },
-]
 `;
 
 exports[`modules/datasource/repology/index getReleases returns multiple versions if they are present in repository 1`] = `
@@ -175,245 +80,3 @@ Object {
   ],
 }
 `;
-
-exports[`modules/datasource/repology/index getReleases returns multiple versions if they are present in repository 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=centos_8&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=java-11-openjdk",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=centos_8&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=java-11-openjdk",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases returns null for empty result 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases returns null for missing repository or package 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=this_should&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=never-exist",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=this_should&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=never-exist",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases returns null for scenario when repo is not in package results 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=dummy&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=example",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=dummy&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=example",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases returns null on Resolver ambiguous binary package 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=ubuntu_20_04&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=git",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases throws error on API request timeout 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/api/v1/project/nginx",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases throws error on Resolver request timeout 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases throws error on unexpected API response 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/api/v1/project/nginx",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases throws error on unexpected Resolver response with binary package 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases throws error on unexpected Resolver response with source package 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "repology.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://repology.org/tools/project-by?repo=debian_stable&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=nginx",
-  },
-]
-`;
-
-exports[`modules/datasource/repology/index getReleases throws without repository and package name 1`] = `Array []`;

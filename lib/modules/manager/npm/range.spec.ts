@@ -6,6 +6,7 @@ describe('modules/manager/npm/range', () => {
     const config: RangeConfig = { rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('pins devDependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -13,6 +14,7 @@ describe('modules/manager/npm/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('pin');
   });
+
   it('pins app dependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -21,6 +23,7 @@ describe('modules/manager/npm/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('pin');
   });
+
   it('widens peerDependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -28,6 +31,7 @@ describe('modules/manager/npm/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('widens complex ranges', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -36,6 +40,7 @@ describe('modules/manager/npm/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('widens complex bump', () => {
     const config: RangeConfig = {
       rangeStrategy: 'bump',
@@ -44,6 +49,7 @@ describe('modules/manager/npm/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('defaults to replace', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
