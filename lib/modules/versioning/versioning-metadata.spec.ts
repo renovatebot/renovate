@@ -21,6 +21,7 @@ describe('modules/versioning/versioning-metadata', () => {
       }
     }
   });
+
   it('contains mandatory fields', async () => {
     const allVersioning = (await readdir('lib/modules/versioning')).filter(
       (item) => !item.includes('.') && !item.startsWith('_')

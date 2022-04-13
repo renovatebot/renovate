@@ -16,6 +16,7 @@ describe('modules/platform/util', () => {
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
     });
+
     it('uses host rules', () => {
       hostRules.add({
         hostType: 'gitlab-changelog',

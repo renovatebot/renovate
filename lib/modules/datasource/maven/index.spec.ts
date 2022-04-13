@@ -231,7 +231,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns releases', async () => {
@@ -240,7 +239,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns html-based releases', async () => {
@@ -269,7 +267,6 @@ describe('modules/datasource/maven/index', () => {
         { version: '2.0.0', releaseTimestamp: '2021-06-18T16:24:00.000Z' },
       ],
     });
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns releases from custom repository', async () => {
@@ -278,7 +275,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', baseUrlCustom);
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns releases from an S3 repository', async () => {
@@ -325,7 +321,6 @@ describe('modules/datasource/maven/index', () => {
       { version: '2.0.0' },
       { version: '3.0.0' },
     ]);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('falls back to next registry url', async () => {
@@ -357,7 +352,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('throws EXTERNAL_HOST_ERROR for 50x', async () => {
@@ -367,8 +361,6 @@ describe('modules/datasource/maven/index', () => {
       .reply(503);
 
     await expect(get()).rejects.toThrow(EXTERNAL_HOST_ERROR);
-
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('ignores unsupported protocols', async () => {
@@ -382,7 +374,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(releases).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips registry with invalid metadata structure', async () => {
@@ -399,7 +390,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips registry with invalid XML', async () => {
@@ -416,7 +406,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('handles optional slash at the end of registry url', async () => {
@@ -427,7 +416,6 @@ describe('modules/datasource/maven/index', () => {
     expect(resA).not.toBeNull();
     expect(resB).not.toBeNull();
     expect(resA.releases).toEqual(resB.releases);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns null for invalid registryUrls', async () => {
@@ -488,7 +476,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', frontendUrl);
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   describe('fetching parent info', () => {
@@ -518,7 +505,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/parent-scm/parent',
         homepage: 'https://parent-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should deal with missing parent fields', async () => {
@@ -540,7 +526,6 @@ describe('modules/datasource/maven/index', () => {
       });
       expect(res).not.toHaveProperty('homepage');
       expect(res).not.toHaveProperty('sourceUrl');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should deal with circular hierarchy', async () => {
@@ -583,7 +568,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         homepage: 'https://parent-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should get source from own pom and homepage from parent', async () => {
@@ -603,7 +587,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/child-scm/child',
         homepage: 'https://parent-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should get homepage from own pom and source from parent', async () => {
@@ -623,7 +606,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/parent-scm/parent',
         homepage: 'https://child-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should get homepage and source from own pom', async () => {
@@ -642,7 +624,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/child-scm/child',
         homepage: 'https://child-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should be able to detect git@github.com:child-scm as valid sourceUrl', async () => {
@@ -660,7 +641,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should be able to detect git@github.com/child-scm as valid sourceUrl', async () => {
@@ -678,8 +658,8 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should be able to detect git://@github.com/child-scm as valid sourceUrl', async () => {
       mockGenericPackage({
         meta: loadFixture('child-scm-gitprotocol/meta.xml'),
@@ -695,7 +675,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

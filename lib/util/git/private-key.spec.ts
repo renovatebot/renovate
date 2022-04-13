@@ -17,6 +17,7 @@ describe('util/git/private-key', () => {
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
+
     it('throws error if failing', async () => {
       setPrivateKey('some-key');
       exec.exec.mockResolvedValueOnce({
@@ -25,6 +26,7 @@ describe('util/git/private-key', () => {
       });
       await expect(writePrivateKey()).rejects.toThrow();
     });
+
     it('imports the private key', async () => {
       setPrivateKey('some-key');
       exec.exec.mockResolvedValueOnce({
@@ -34,6 +36,7 @@ describe('util/git/private-key', () => {
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
+
     it('does not import the key again', async () => {
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();

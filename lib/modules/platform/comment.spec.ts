@@ -10,6 +10,7 @@ const cache = mocked(_cache);
 
 describe('modules/platform/comment', () => {
   let repoCache: Cache = {};
+
   beforeEach(() => {
     repoCache = {};
     jest.resetAllMocks();

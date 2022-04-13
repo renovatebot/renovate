@@ -400,6 +400,7 @@
     "lib/workers/repository/process/lookup/update-type.ts",
     "lib/workers/repository/process/sort.ts",
     "lib/workers/repository/process/write.ts",
+    "lib/workers/repository/process/vulnerabilities.ts",
     "lib/workers/repository/updates/branch-name.ts",
     "lib/workers/repository/updates/branchify.ts",
     "lib/workers/repository/updates/flatten.ts",
