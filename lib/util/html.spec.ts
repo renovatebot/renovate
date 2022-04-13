@@ -10,6 +10,7 @@ describe('util/html', () => {
     expect(div.textContent).toBe('Hello, world!');
     expect(div instanceof parser.HTMLElement).toBeTrue();
   });
+
   it('returns empty', () => {
     const body = parse('');
     expect(body.childNodes).toHaveLength(0);

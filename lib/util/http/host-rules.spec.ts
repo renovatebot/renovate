@@ -11,6 +11,7 @@ describe('util/http/host-rules', () => {
   const options = {
     hostType: PlatformId.Github,
   };
+
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();

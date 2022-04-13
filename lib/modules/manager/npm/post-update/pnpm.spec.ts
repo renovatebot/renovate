@@ -20,10 +20,12 @@ delete process.env.NPM_CONFIG_CACHE;
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
+
   beforeEach(() => {
     config = { cacheDir: 'some-cache-dir', constraints: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
+
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -32,6 +34,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => {
@@ -43,6 +46,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('finds pnpm globally', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -51,6 +55,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;

@@ -13,6 +13,7 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions } from '../../../../util/exec/types';
 import { exists, readFile, remove, writeFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -178,6 +179,7 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
+            .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
         );
       } else {
@@ -185,6 +187,7 @@ export async function generateLockFile(
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
+            .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
         );
       }
