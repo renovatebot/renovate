@@ -353,7 +353,7 @@ export async function initRepo({
   }
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.issueList = null;
-  config.prCache = null;
+  config.prList = null;
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -549,9 +549,16 @@ export async function getRepoForceRebase(): Promise<boolean> {
 }
 
 function cachePr(pr?: Pr): void {
-  config.prCache ??= {};
+  config.prList ??= [];
   if (pr) {
-    config.prCache[pr.number] = pr;
+    for (let idx = 0; idx < config.prList.length; idx += 1) {
+      const cachedPr = config.prList[idx];
+      if (cachedPr.number === pr.number) {
+        config.prList[idx] = pr;
+        return;
+      }
+    }
+    config.prList.push(pr);
   }
 }
 
@@ -590,16 +597,17 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  if (!config.prCache) {
+  if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
       !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
-    config.prCache = await getPrCache(githubApi, repo, username);
+    const prCache = await getPrCache(githubApi, repo, username);
+    config.prList = Object.values(prCache);
   }
 
-  return Object.values(config.prCache);
+  return config.prList;
 }
 
 export async function findPr({
@@ -1507,7 +1515,7 @@ export async function mergePr({
     { automergeResult: automergeResult.body, pr: prNo },
     'PR merged'
   );
-  const cachedPr = config.prCache?.[prNo];
+  const cachedPr = config.prList?.find(({ number }) => number === prNo);
   if (cachedPr) {
     cachePr({ ...cachedPr, state: PrState.Merged });
   }
