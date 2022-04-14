@@ -56,9 +56,11 @@ describe('modules/manager/bundler/artifacts', () => {
     GlobalConfig.set(adminConfig);
     fs.ensureCacheDir.mockResolvedValue('/tmp/cache/others/gem');
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });
+
   it('returns null by default', async () => {
     expect(
       await updateArtifacts({
@@ -69,6 +71,7 @@ describe('modules/manager/bundler/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if Gemfile.lock was not changed', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -87,6 +90,7 @@ describe('modules/manager/bundler/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('works for default binarySource', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -106,6 +110,7 @@ describe('modules/manager/bundler/artifacts', () => {
     ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('works explicit global binarySource', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -126,6 +131,7 @@ describe('modules/manager/bundler/artifacts', () => {
     ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   describe('Docker', () => {
     beforeEach(() => {
       GlobalConfig.set({
@@ -133,6 +139,7 @@ describe('modules/manager/bundler/artifacts', () => {
         binarySource: 'docker',
       });
     });
+
     it('.ruby-version', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -162,6 +169,7 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
+
     it('constraints options', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -197,6 +205,7 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
+
     it('invalid constraints options', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -439,6 +448,7 @@ describe('modules/manager/bundler/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);

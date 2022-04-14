@@ -5,6 +5,7 @@ import { detectSemanticCommits } from './semantic';
 jest.mock('../../../util/git');
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -17,6 +18,7 @@ describe('workers/repository/init/semantic', () => {
     beforeEach(async () => {
       await initialize({});
     });
+
     it('detects false if unknown', async () => {
       config.semanticCommits = null;
       git.getCommitMessages.mockResolvedValueOnce(['foo', 'bar']);
@@ -29,6 +31,7 @@ describe('workers/repository/init/semantic', () => {
       const res2 = await detectSemanticCommits();
       expect(res2).toBe('disabled');
     });
+
     it('detects true if known', async () => {
       config.semanticCommits = null;
       git.getCommitMessages.mockResolvedValue(['fix: foo', 'refactor: bar']);

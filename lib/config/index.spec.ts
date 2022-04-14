@@ -27,6 +27,7 @@ describe('config/index', () => {
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
+
     it('merges packageRules', async () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
@@ -41,6 +42,7 @@ describe('config/index', () => {
         1, 2, 3, 4,
       ]);
     });
+
     it('merges constraints', async () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
@@ -59,6 +61,7 @@ describe('config/index', () => {
       expect(config.constraints).toMatchSnapshot();
       expect(config.constraints.node).toBe('<15');
     });
+
     it('handles null parent packageRules', async () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
@@ -71,6 +74,7 @@ describe('config/index', () => {
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules).toHaveLength(2);
     });
+
     it('handles null child packageRules', async () => {
       const parentConfig = { ...defaultConfig };
       parentConfig.packageRules = [{ a: 3 }, { a: 4 }];
@@ -78,6 +82,7 @@ describe('config/index', () => {
       const config = configParser.mergeChildConfig(parentConfig, {});
       expect(config.packageRules).toHaveLength(2);
     });
+
     it('handles undefined childConfig', async () => {
       const parentConfig = { ...defaultConfig };
       const configParser = await import('./index');

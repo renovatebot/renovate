@@ -67,6 +67,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('releaseNotesCacheMinutes', () => {
     const now = DateTime.local();
+
     it.each([
       [now, 55],
       [now.minus({ weeks: 2 }), 1435],
@@ -188,7 +189,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           tag: 'v1.0.1',
         },
       ]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return release list for gitlab.com project', async () => {
@@ -222,7 +222,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           url: 'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1',
         },
       ]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return release list for self hosted gitlab project', async () => {
@@ -259,7 +258,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           url: 'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1',
         },
       ]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -278,7 +276,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         '1.0.0'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('gets release notes with body ""', async () => {
@@ -310,8 +307,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: '1.0.1',
         url: 'https://github.com/some/other-repository/releases/1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('gets release notes with body "v"', async () => {
       const prefix = 'v';
       httpMock
@@ -341,8 +338,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'v1.0.1',
         url: 'https://github.com/some/other-repository/releases/v1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('gets release notes with body "other-"', async () => {
       const prefix = 'other-';
       httpMock
@@ -372,8 +369,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'other-1.0.1',
         url: 'https://github.com/some/other-repository/releases/other-1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('gets release notes with body "other_v"', async () => {
       const prefix = 'other_v';
       httpMock
@@ -403,8 +400,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'other_v1.0.1',
         url: 'https://github.com/some/other-repository/releases/other_v1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('gets release notes with body "other@"', async () => {
       const prefix = 'other@';
       httpMock
@@ -434,7 +431,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'other@1.0.1',
         url: 'https://github.com/some/other-repository/releases/other@1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('gets release notes with body from gitlab repo ""', async () => {
@@ -468,8 +464,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: '1.0.1',
         url: 'https://gitlab.com/some/other-repository/tags/1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('gets release notes with body from gitlab repo "v"', async () => {
       const prefix = 'v';
       httpMock
@@ -501,8 +497,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'v1.0.1',
         url: 'https://gitlab.com/some/other-repository/tags/v1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('gets release notes with body from gitlab repo "other-"', async () => {
       const prefix = 'other-';
       httpMock
@@ -534,7 +530,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'other-1.0.1',
         url: 'https://gitlab.com/some/other-repository/tags/other-1.0.1',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('gets null from repository without gitlab/github in domain', async () => {
@@ -584,7 +579,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         '2.0.0'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles wrong format', async () => {
@@ -606,7 +600,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         '1.0.0'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles bad markdown', async () => {
@@ -628,7 +621,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         '1.0.0'
       );
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('parses angular.js', async () => {
@@ -654,7 +646,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md',
         url: 'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
@@ -675,7 +666,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         '20.26.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toMatchSnapshot({
         notesSourceUrl:
           'https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
@@ -703,7 +694,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         '20.26.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toMatchSnapshot({
         notesSourceUrl:
           'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
@@ -729,7 +720,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         '22.0.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toMatchSnapshot({
         notesSourceUrl:
           'https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md',
@@ -761,7 +752,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         '3.10.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toMatchSnapshot({
         notesSourceUrl:
           'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md',
@@ -787,7 +778,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         '3.10.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toMatchSnapshot({
         notesSourceUrl:
           'https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md',
@@ -808,6 +799,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     describe('ReleaseNotes Correctness', () => {
       let versionOneNotes: ChangeLogNotes;
       let versionTwoNotes: ChangeLogNotes;
+
       it('parses yargs 15.3.0', async () => {
         httpMock
           .scope('https://api.github.com')
@@ -827,7 +819,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           '15.3.0'
         );
         versionOneNotes = res;
-        expect(httpMock.getTrace()).toMatchSnapshot();
+
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
@@ -854,7 +846,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           '15.2.0'
         );
         versionTwoNotes = res;
-        expect(httpMock.getTrace()).toMatchSnapshot();
+
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
@@ -881,7 +873,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           '4.33.0'
         );
         versionTwoNotes = res;
-        expect(httpMock.getTrace()).toMatchSnapshot();
+
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md',
@@ -914,7 +906,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           '4.33.0'
         );
         versionTwoNotes = res;
-        expect(httpMock.getTrace()).toMatchSnapshot();
+
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/packages/foo/CHANGELOG.md',
