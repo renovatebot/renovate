@@ -17,8 +17,8 @@ import type {
   MavenXml,
 } from './types';
 
-function getHost(x: string): string | null {
-  return parseUrl(x)?.host ?? null;
+function getHost(url: string): string | null {
+  return parseUrl(url)?.host ?? null;
 }
 
 function isMavenCentral(pkgUrl: URL | string): boolean {
