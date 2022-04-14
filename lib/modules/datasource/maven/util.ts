@@ -140,7 +140,7 @@ export async function downloadS3Protocol(
       );
     } else if (isS3NotFound(err)) {
       logger.trace({ failedUrl }, `S3 url not found`);
-    } else {
+    } /* istanbul ignore next */ else {
       // istanbul ignore next
       logger.info(
         { failedUrl, message: err.message },
@@ -203,7 +203,7 @@ async function checkS3Resource(
   } catch (err) {
     if (isS3NotFound(err)) {
       return 'not-found';
-    } else {
+    } /* istanbul ignore next */ else {
       // istanbul ignore next
       logger.debug(
         { pkgUrl, name: err.name, message: err.message },
@@ -230,13 +230,12 @@ export async function checkResource(
       return await checkHttpResource(http, parsedUrl);
     case 's3:':
       return await checkS3Resource(pkgUrl as url.URL);
+    /* istanbul ignore next */
     default:
-      // istanbul ignore next
       logger.debug(
         { url: pkgUrl.toString() },
         `Unsupported Maven protocol in check resource`
       );
-      // istanbul ignore next
       return 'not-found';
   }
 }
