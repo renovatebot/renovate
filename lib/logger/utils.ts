@@ -103,10 +103,7 @@ export function sanitizeValue(
   seen = new WeakMap<NestedValue, unknown>()
 ): any {
   if (is.string(value)) {
-    return sanitize(value)
-      .split(/\r?\n/)
-      .map((line) => line.split(' ').map(sanitizeUrl).join(' '))
-      .join('\n');
+    return sanitize(sanitizeUrls(value));
   }
 
   if (is.date(value)) {
@@ -247,21 +244,12 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
   process.exit(1);
 }
 
-export function sanitizeUrl(text: string): string {
-  if (!is.urlString(text)) {
-    return text;
-  }
-  try {
-    const url = text.trim();
-    const parsed = new URL(url);
-    if (parsed.password) {
-      parsed.password = '**redacted**';
-    }
-    if (parsed.username) {
-      parsed.username = '**redacted**';
-    }
-    return text.replace(url, parsed.toString().replace(/\/$/, ''));
-  } catch /* istanbul ignore next */ {
-    return '**redacted-url**';
-  }
+// Can't use `util/regex` because of circular reference to logger
+const urlRe = /[a-z]{3,9}:\/\/(?:[\-;:&=\+\$,\w]+@)[a-z0-9\.\-]+/gi;
+const urlCredRe = /\/\/[^@]+@/g;
+
+export function sanitizeUrls(text: string): string {
+  return text.replace(urlRe, (url) => {
+    return url.replace(urlCredRe, '//**redacted**@');
+  });
 }
