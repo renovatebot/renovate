@@ -700,6 +700,7 @@ describe('modules/platform/github/index', () => {
       const pr = await github.getBranchPr('somebranch');
       expect(pr).toBeNull();
     });
+
     it('should cache and return the PR object', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
