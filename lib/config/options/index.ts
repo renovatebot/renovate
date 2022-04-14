@@ -124,6 +124,40 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configMigration',
+    description: 'Require a Configuration PR first.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'configMigrationBranch',
+    description:
+      'Change this value in order to override the default config migration branch name.',
+    type: 'string',
+    default: '{{{branchPrefix}}}migrate-config',
+    globalOnly: true,
+    cli: false,
+  },
+  {
+    name: 'configMigrationCommitMessage',
+    description:
+      'Change this value in order to override the default config migration commit message.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    cli: false,
+  },
+  {
+    name: 'configMigrationPrTitle',
+    description:
+      'Change this value in order to override the default config migration PR title.',
+    type: 'string',
+    default: 'Config Migration',
+    globalOnly: true,
+    cli: false,
+  },
+  {
     name: 'productLinks',
     description: 'Links which are embedded within PRs, issues, etc.',
     type: 'object',

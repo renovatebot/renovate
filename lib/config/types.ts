@@ -132,6 +132,7 @@ export interface LegacyAdminConfig {
   platform?: string;
   requireConfig?: boolean;
 }
+
 export type ExecutionMode = 'branch' | 'update';
 
 export type PostUpgradeTasks = {
@@ -169,6 +170,7 @@ export interface RenovateConfig
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
+    ConfigMigrationPr,
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
@@ -407,9 +409,17 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
 
+export interface ConfigMigrationPr {
+  configMigration?: boolean;
+  configMigrationBranch?: string;
+  configMigrationCommitMessage?: string;
+  configMigrationPrTitle?: string;
+  configMigrationIndent?: string;
+}
+
 export interface MigratedConfig {
-  isMigrated: boolean;
-  migratedConfig: RenovateConfig;
+  isMigrated?: boolean;
+  migratedConfig?: RenovateConfig;
 }
 
 export interface MigratedRenovateConfig extends RenovateConfig {

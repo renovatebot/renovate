@@ -9,6 +9,7 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { ensureConfigMigrationPr } from './config-migration/pr';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
@@ -42,6 +43,8 @@ export async function renovateRepository(
     const { branches, branchList, packageFiles } = await extractDependencies(
       config
     );
+
+    await ensureConfigMigrationPr(config);
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches);
     setMeta({ repository: config.repository });

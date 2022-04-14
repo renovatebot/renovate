@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../../config/types';
+import { checkConfigMigrationBranch } from '../config-migration/branch';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { mergeRenovateConfig } from './merge';
 import { detectSemanticCommits } from './semantic';
@@ -14,5 +15,8 @@ export async function getRepoConfig(
   }
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
+  if (config.configMigration) {
+    config = await checkConfigMigrationBranch(config);
+  }
   return config;
 }

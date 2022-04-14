@@ -93,7 +93,7 @@ export async function pruneStaleBranches(
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
-  if (!branchList) {
+  if (!branchList || branchList.length === 0) {
     logger.debug('No branchList');
     return;
   }
