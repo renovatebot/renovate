@@ -25,7 +25,7 @@ export class DistroInfo {
     DistroInfoRecordWithVersion
   >();
 
-  private readonly _sortedInfo = new Array<DistroInfoRecordWithVersion>();
+  private readonly _sortedInfo: DistroInfoRecordWithVersion[] = [];
 
   private readonly _distroInfo: DistroInfoRecord;
 
