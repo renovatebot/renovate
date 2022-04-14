@@ -1,6 +1,8 @@
 import * as _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import type { RenovateConfig } from '../../../config/types';
+import type { RepoCache } from './types';
 import * as repositoryCache from '.';
 
 jest.mock('fs-extra');
@@ -13,14 +15,21 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({ cacheDir: '/tmp/renovate/cache/' });
   });
 
-  const config = {
+  const config: RenovateConfig = {
     platform: 'github',
     repository: 'abc/def',
   };
 
-  it('catches and returns', async () => {
-    await repositoryCache.initialize({});
-    expect(fs.readFile.mock.calls).toHaveLength(0);
+  const repoCache: RepoCache = {
+    revision: 11,
+    repository: 'abc/def',
+    data: {},
+  };
+
+  it('catches and silently returns', async () => {
+    fs.readFile.mockRejectedValueOnce(new Error('unknown error'));
+    await repositoryCache.initialize(config);
+    expect(fs.readFile).not.toHaveBeenCalled();
   });
 
   it('returns if cache not enabled', async () => {
@@ -28,32 +37,71 @@ describe('util/cache/repository/index', () => {
       ...config,
       repositoryCache: 'disabled',
     });
-    expect(fs.readFile.mock.calls).toHaveLength(0);
+    expect(fs.readFile).not.toHaveBeenCalled();
   });
 
-  it('resets if invalid', async () => {
-    fs.readFile.mockResolvedValueOnce('{}' as any);
+  it('resets if repository does not match', async () => {
+    fs.readFile.mockResolvedValueOnce(
+      JSON.stringify({
+        ...repoCache,
+        repository: 'foo/bar',
+        data: { semanticCommits: 'enabled' },
+      }) as never
+    );
+
     await repositoryCache.initialize({
       ...config,
       repositoryCache: 'enabled',
     });
-    expect(repositoryCache.getCache()).toEqual({
-      repository: 'abc/def',
-      revision: repositoryCache.CACHE_REVISION,
+
+    expect(repositoryCache.getCache()).toEqual({});
+  });
+
+  it('resets if revision does not match', async () => {
+    fs.readFile.mockResolvedValueOnce(
+      JSON.stringify({
+        ...repoCache,
+        revision: repoCache.revision - 1,
+        data: { semanticCommits: 'enabled' },
+      }) as never
+    );
+
+    await repositoryCache.initialize({
+      ...config,
+      repositoryCache: 'enabled',
     });
+
+    expect(repositoryCache.getCache()).toEqual({});
   });
 
   it('reads from cache and finalizes', async () => {
     fs.readFile.mockResolvedValueOnce(
-      `{"repository":"abc/def","revision":${repositoryCache.CACHE_REVISION}}` as any
+      JSON.stringify({
+        ...repoCache,
+        data: { semanticCommits: 'enabled' },
+      }) as never
     );
+
     await repositoryCache.initialize({
       ...config,
       repositoryCache: 'enabled',
     });
+
+    expect(fs.readFile).toHaveBeenCalled();
+
+    const cache = repositoryCache.getCache();
+    expect(cache).toEqual({ semanticCommits: 'enabled' });
+
+    cache.semanticCommits = 'disabled';
     await repositoryCache.finalize();
-    expect(fs.readFile.mock.calls).toHaveLength(1);
-    expect(fs.outputFile.mock.calls).toHaveLength(1);
+    expect(fs.outputFile).toHaveBeenCalledWith(
+      '/tmp/renovate/cache/renovate/repository/github/abc/def.json',
+      JSON.stringify({
+        revision: 11,
+        repository: 'abc/def',
+        data: { semanticCommits: 'disabled' },
+      })
+    );
   });
 
   it('gets', () => {

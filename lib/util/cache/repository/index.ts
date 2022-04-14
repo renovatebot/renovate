@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -6,70 +7,84 @@ import type {
   RepositoryCacheConfig,
 } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { Cache } from './types';
+import type { RepoCache, RepoCacheData } from './types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
-export const CACHE_REVISION = 10;
+const CACHE_REVISION = 11;
 
 let repositoryCache: RepositoryCacheConfig | undefined = 'disabled';
 let cacheFileName: string | null = null;
-let cache: Cache | null = Object.create({});
+
+let repository: string | null | undefined = null;
+let data: RepoCacheData | null = null;
 
 export function getCacheFileName(config: RenovateConfig): string {
-  return upath.join(
-    GlobalConfig.get('cacheDir'),
-    '/renovate/repository/',
-    config.platform,
-    `${config.repository}.json`
-  );
+  const cacheDir = GlobalConfig.get('cacheDir');
+  const repoCachePath = '/renovate/repository/';
+  const platform = config.platform;
+  const fileName = `${config.repository}.json`;
+  return upath.join(cacheDir, repoCachePath, platform, fileName);
 }
 
-function validate(config: RenovateConfig, input: any): Cache | null {
+function isCacheValid(
+  config: RenovateConfig,
+  input: unknown
+): input is RepoCache {
   if (
-    input &&
+    is.plainObject(input) &&
     input.repository === config.repository &&
     input.revision === CACHE_REVISION
   ) {
     logger.debug('Repository cache is valid');
-    return input as Cache;
+    return true;
   }
   logger.info('Repository cache invalidated');
-  // reset
-  return null;
+  return false;
 }
 
-function createCache(repository?: string): Cache {
-  const res: Cache = Object.create({});
-  res.repository = repository;
-  res.revision = CACHE_REVISION;
-  return res;
+export function reset(): void {
+  repository = null;
+  data = null;
 }
 
 export async function initialize(config: RenovateConfig): Promise<void> {
-  cache = null;
+  reset();
+
   try {
     cacheFileName = getCacheFileName(config);
     repositoryCache = config.repositoryCache;
     if (repositoryCache === 'enabled') {
-      cache = validate(
-        config,
-        JSON.parse(await fs.readFile(cacheFileName, 'utf8'))
-      );
+      const rawCache = await fs.readFile(cacheFileName, 'utf8');
+      const oldCache = JSON.parse(rawCache);
+      if (isCacheValid(config, oldCache)) {
+        data = oldCache.data;
+      }
     }
   } catch (err) {
     logger.debug({ cacheFileName }, 'Repository cache not found');
   }
-  cache ||= createCache(config.repository);
+
+  repository = config.repository;
+  data ??= {};
 }
 
-export function getCache(): Cache {
-  return cache ?? createCache();
+export function getCache(): RepoCacheData {
+  data ??= {};
+  return data;
 }
 
 export async function finalize(): Promise<void> {
-  if (cacheFileName && cache && repositoryCache !== 'disabled') {
-    await fs.outputFile(cacheFileName, JSON.stringify(cache));
+  if (cacheFileName && repository && data && repositoryCache !== 'disabled') {
+    await fs.outputFile(
+      cacheFileName,
+      JSON.stringify({
+        revision: CACHE_REVISION,
+        repository,
+        data,
+      })
+    );
   }
   cacheFileName = null;
-  cache = Object.create({});
+
+  reset();
 }
