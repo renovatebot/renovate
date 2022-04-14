@@ -17,7 +17,7 @@ import type {
   MavenXml,
 } from './types';
 
-const getHost = (x: string): string => parseUrl(x).host;
+const getHost = (x: string): string => parseUrl(x)?.host;
 
 function isMavenCentral(pkgUrl: URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
