@@ -1,6 +1,6 @@
 // Singleton S3 instance initialized on-demand.
 import { S3 } from '@aws-sdk/client-s3';
-import { parseUrl } from '../../../util/url';
+import { parseUrl } from './url';
 
 let s3Instance: S3;
 export function getS3Client(): S3 {

@@ -11,7 +11,7 @@ import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import { getS3Client, parseS3Url } from './s3';
+import { getS3Client, parseS3Url } from '../../../util/s3';
 import type {
   HttpResourceCheckResult,
   MavenDependency,
