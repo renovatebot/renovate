@@ -18,7 +18,7 @@ export function extractPackageFile(
   let docs: Doc[];
   const aliases: Record<string, string> = {};
   try {
-    docs = loadAll(content.replace(/\s*({{.+}})\s*(\n)/gi, '$2'), null, {
+    docs = loadAll(content.replace(/(^|:)\s*{{.+}}\s*$/gm, '$1'), null, {
       json: true,
     });
   } catch (err) {

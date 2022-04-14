@@ -279,5 +279,51 @@ describe('modules/manager/helmfile/extract', () => {
         ],
       });
     });
+
+    it('parses and replaces templating strings', () => {
+      const filename = 'helmfile.yaml';
+      const result = extractPackageFile(
+        Fixtures.get('go-template.yaml'),
+        filename,
+        {
+          aliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        }
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: '{{ requiredEnv "RELEASE_NAME" }}',
+            skipReason: 'local-chart',
+          },
+          { depName: null, skipReason: 'local-chart' },
+          {
+            depName: 'ingress-nginx',
+            currentValue: '3.37.0',
+            registryUrls: [],
+            skipReason: 'unknown-registry',
+          },
+          {
+            depName: 'memcached',
+            currentValue: '6.0.0',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+          {
+            depName: 'example',
+            currentValue: '1.30.0',
+            registryUrls: ['https://charts.helm.sh/stable'],
+          },
+          { depName: 'kube-prometheus-stack', skipReason: 'invalid-version' },
+          { depName: 'example-external', skipReason: 'invalid-name' },
+          {
+            depName: 'external-dns',
+            currentValue: '2.0.0',
+            registryUrls: ['https://charts.helm.sh/stable'],
+          },
+        ],
+      });
+    });
   });
 });
