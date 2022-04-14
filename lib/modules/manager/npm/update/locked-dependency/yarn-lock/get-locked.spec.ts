@@ -24,6 +24,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/get-locked', ()
         ]
       `);
     });
+
     it('finds scoped', () => {
       expect(getLockedDependencies(yarnLock3, '@actions/core', '1.6.0'))
         .toMatchInlineSnapshot(`

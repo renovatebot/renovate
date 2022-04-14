@@ -14,6 +14,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       },
     ]);
   });
+
   it('supports password-only', () => {
     const envParam: NodeJS.ProcessEnv = {
       NPM_PASSWORD: 'some-password',
@@ -22,6 +23,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       { hostType: 'npm', password: 'some-password' },
     ]);
   });
+
   it('supports domain and host names with case insensitivity', () => {
     const envParam: NodeJS.ProcessEnv = {
       GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
@@ -33,6 +35,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       { matchHost: 'my.custom.host', password: 'some-password' },
     ]);
   });
+
   it('regression test for #10937', () => {
     const envParam: NodeJS.ProcessEnv = {
       GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME: 'some-user',
@@ -47,6 +50,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       },
     ]);
   });
+
   it('supports datasource env token', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_TOKEN: 'some-token',
@@ -55,12 +59,14 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       { hostType: 'pypi', token: 'some-token' },
     ]);
   });
+
   it('rejects incomplete datasource env token', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_FOO_TOKEN: 'some-token',
     };
     expect(hostRulesFromEnv(envParam)).toHaveLength(0);
   });
+
   it('rejects npm env', () => {
     const envParam: NodeJS.ProcessEnv = {
       npm_package_devDependencies__types_registry_auth_token: '4.2.0',

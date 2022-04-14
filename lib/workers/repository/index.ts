@@ -43,25 +43,29 @@ export async function renovateRepository(
     const { branches, branchList, packageFiles } = await extractDependencies(
       config
     );
-
-    await ensureConfigMigrationPr(config);
-    await ensureOnboardingPr(config, packageFiles, branches);
-    const res = await updateRepo(config, branches);
-    setMeta({ repository: config.repository });
-    addSplit('update');
-    await setBranchCache(branches);
-    if (res === 'automerged') {
-      if (canRetry) {
-        logger.info('Renovating repository again after automerge result');
-        const recursiveRes = await renovateRepository(repoConfig, false);
-        return recursiveRes;
+    if (
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
+    ) {
+      await ensureConfigMigrationPr(config);
+      await ensureOnboardingPr(config, packageFiles, branches);
+      const res = await updateRepo(config, branches);
+      setMeta({ repository: config.repository });
+      addSplit('update');
+      await setBranchCache(branches);
+      if (res === 'automerged') {
+        if (canRetry) {
+          logger.info('Renovating repository again after automerge result');
+          const recursiveRes = await renovateRepository(repoConfig, false);
+          return recursiveRes;
+        }
+        logger.debug(`Automerged but already retried once`);
+      } else {
+        await ensureDependencyDashboard(config, branches);
       }
-      logger.debug(`Automerged but already retried once`);
-    } else {
-      await ensureDependencyDashboard(config, branches);
+      await finaliseRepo(config, branchList);
+      repoResult = processResult(config, res);
     }
-    await finaliseRepo(config, branchList);
-    repoResult = processResult(config, res);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);

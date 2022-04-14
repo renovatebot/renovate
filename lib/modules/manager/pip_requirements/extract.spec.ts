@@ -18,32 +18,39 @@ describe('modules/manager/pip_requirements/extract', () => {
     delete process.env.PIP_TEST_TOKEN;
     GlobalConfig.reset();
   });
+
   afterEach(() => {
     delete process.env.PIP_TEST_TOKEN;
     GlobalConfig.reset();
   });
+
   describe('extractPackageFile()', () => {
     let config;
     const OLD_ENV = process.env;
+
     beforeEach(() => {
       config = { registryUrls: ['AnExistingDefaultUrl'] };
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
     });
+
     afterEach(() => {
       process.env = OLD_ENV;
     });
+
     it('returns null for empty', () => {
       expect(
         extractPackageFile('nothing here', 'requirements.txt', config)
       ).toBeNull();
     });
+
     it('extracts dependencies', () => {
       const res = extractPackageFile(requirements1, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
       expect(res.deps).toHaveLength(4);
     });
+
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(
         requirements2,
@@ -53,6 +60,7 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
+
     it('handles comments and commands', () => {
       const res = extractPackageFile(
         requirements3,
@@ -62,6 +70,7 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
+
     it('handles extras and complex index url', () => {
       const res = extractPackageFile(requirements4, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
@@ -70,6 +79,7 @@ describe('modules/manager/pip_requirements/extract', () => {
       ]);
       expect(res.deps).toHaveLength(3);
     });
+
     it('handles extra index url', () => {
       const res = extractPackageFile(requirements5, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
@@ -79,6 +89,7 @@ describe('modules/manager/pip_requirements/extract', () => {
       ]);
       expect(res.deps).toHaveLength(6);
     });
+
     it('handles extra index url and defaults without index to config', () => {
       const res = extractPackageFile(requirements6, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
@@ -88,6 +99,7 @@ describe('modules/manager/pip_requirements/extract', () => {
       ]);
       expect(res.deps).toHaveLength(6);
     });
+
     it('handles extra index url and defaults without index to pypi', () => {
       const res = extractPackageFile(requirements6, 'unused_file_name', {});
       expect(res).toMatchSnapshot();
@@ -111,6 +123,7 @@ describe('modules/manager/pip_requirements/extract', () => {
 
       expect(res.deps).toHaveLength(3);
     });
+
     it('should not replace env vars in low trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
@@ -124,6 +137,7 @@ describe('modules/manager/pip_requirements/extract', () => {
         'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
       ]);
     });
+
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
       GlobalConfig.set({ exposeAllEnv: true });
@@ -160,6 +174,7 @@ describe('modules/manager/pip_requirements/extract', () => {
         ],
       });
     });
+
     it('should handle git packages', () => {
       const res = extractPackageFile(
         requirementsGitPackages,

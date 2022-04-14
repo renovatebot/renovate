@@ -35,6 +35,6 @@ export function replaceConstraintVersion(
   }
   return lockFileContent.replace(
     regEx(matchString),
-    `${constraintLine}  version: "${newVersion}"\n$5`
+    `${constraintLine}  version "${newVersion}"\n$5`
   );
 }

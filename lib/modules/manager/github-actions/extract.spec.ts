@@ -6,11 +6,13 @@ describe('modules/manager/github-actions/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts multiple docker image lines from yaml configuration file', () => {
       const res = extractPackageFile(Fixtures.get('workflow_1.yml'));
       expect(res.deps).toMatchSnapshot();
       expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(2);
     });
+
     it('extracts multiple action tag lines from yaml configuration file', () => {
       const res = extractPackageFile(Fixtures.get('workflow_2.yml'));
       expect(res.deps).toMatchSnapshot();
@@ -18,6 +20,7 @@ describe('modules/manager/github-actions/extract', () => {
         res.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(8);
     });
+
     it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(Fixtures.get('workflow_3.yml'));
       expect(res.deps).toMatchSnapshot([
