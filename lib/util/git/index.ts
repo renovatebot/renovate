@@ -25,6 +25,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import type { Cache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -44,7 +45,6 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
-import type { Cache } from '../cache/repository/types';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
@@ -1053,6 +1053,19 @@ export async function pushCommitToRenovateRef(
   }
 }
 
+function findLatestRepoCacheKey(
+  repoCacheKeys: RepoCacheKey[]
+): RepoCacheKey | null {
+  let result: RepoCacheKey | null = null;
+  for (let idx = 0; idx < repoCacheKeys.length; idx += 1) {
+    const cacheKey = repoCacheKeys[idx];
+    if (!result || cacheKey.cacheRevision > result.cacheRevision) {
+      result = cacheKey;
+    }
+  }
+  return result;
+}
+
 /**
  *
  * Removes all remote "refs/renovate/*" refs in two steps:
@@ -1072,19 +1085,18 @@ export async function pushCommitToRenovateRef(
  *
  */
 export async function clearRenovateRefs(): Promise<void> {
+  const obsoleteRefs: string[] = [];
+
   if (gitInitialized) {
     if (remoteRefsExist) {
       logger.debug(`Clear Renovate refs: refs/renovate/*`);
       try {
         const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
-
         const remoteRenovateRefs = rawOutput
           .split(newlineRegex)
           .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
           .filter((line) => line.startsWith('refs/renovate/'));
-
-        const pushOpts = ['--delete', 'origin', ...remoteRenovateRefs];
-        await git.push(pushOpts);
+        obsoleteRefs.push(...remoteRenovateRefs);
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ err }, `Clear Renovate refs: error`);
       } finally {
@@ -1093,27 +1105,26 @@ export async function clearRenovateRefs(): Promise<void> {
     }
 
     if (config.repoCacheKeys) {
-      const indices = Object.keys(config.repoCacheKeys).map((x) =>
-        parseInt(x, 10)
-      );
-      if (indices.length) {
-        const maxIndex = Math.max(...indices);
-        const obsoleteRefs = indices
-          .filter((index) => index !== maxIndex)
-          .map((index) => {
-            const { commit, blob } = config.repoCacheKeys[index];
-            let result = '';
-            if (index && commit && blob) {
-              result = `refs/renovate-cache/${index}/${commit}/${blob}`;
-            }
-            return result;
-          })
-          .filter(Boolean);
-        if (obsoleteRefs.length) {
-          await git.push(['--delete', 'origin', ...obsoleteRefs]);
+      const latestRepoCacheKey = findLatestRepoCacheKey(config.repoCacheKeys);
+      if (latestRepoCacheKey) {
+        const obsoleteCacheRefs = config.repoCacheKeys
+          .filter(
+            ({ cacheRevision }) =>
+              cacheRevision !== latestRepoCacheKey.cacheRevision
+          )
+          .map(
+            ({ cacheRevision, commit, blob }) =>
+              `refs/renovate-cache/${cacheRevision}/${commit}/${blob}`
+          );
+        if (obsoleteCacheRefs.length) {
+          obsoleteRefs.push(...obsoleteCacheRefs);
         }
       }
     }
+  }
+
+  if (obsoleteRefs.length) {
+    await git.push(['--delete', 'origin', ...obsoleteRefs]);
   }
 }
 
@@ -1182,23 +1193,42 @@ export async function pushRepoCache(cache: Cache): Promise<void> {
   await git.commit('Renovate cache');
   const commit = (await git.revparse([cacheBranch])).trim();
 
-  const indices = Object.keys(config.repoCacheKeys).map((idx) =>
-    parseInt(idx, 10)
-  );
-  const cacheIndex = indices.length ? Math.max(...indices) + 1 : 1;
-  const refName = `${cacheIndex}/${commit}/${blob}`;
+  const prevRepoCacheKey = findLatestRepoCacheKey(config.repoCacheKeys);
+  const nextCacheRevision = prevRepoCacheKey
+    ? prevRepoCacheKey.cacheRevision + 1
+    : 1;
+  const refName = `${nextCacheRevision}/${commit}/${blob}`;
   await pushCommitToRenovateRef(commit, refName, 'refs/renovate-cache');
-  config.repoCacheKeys[cacheIndex] = { commit, blob };
+
+  const newCacheKey = {
+    cacheRevision: nextCacheRevision,
+    commit,
+    blob,
+  };
+  config.repoCacheKeys.push(newCacheKey);
 
   await git.checkout(origBranch);
   await deleteLocalBranch(cacheBranch);
   return;
 }
 
-export async function fetchRepoCacheKey(): Promise<RepoCacheKey | null> {
-  let result: RepoCacheKey = null;
+function parseRemoteCacheKey(line: string): void {
+  const [, ref] = line.replace('refs/renovate-cache/', '').split(/\s+/);
+  if (ref) {
+    const [idx, commit, blob] = ref.split('/');
+    if (idx && commit && blob) {
+      const cacheRevision = parseInt(idx, 10);
+      if (is.safeInteger(cacheRevision)) {
+        config.repoCacheKeys[cacheRevision] = { cacheRevision, commit, blob };
+      }
+    }
+  }
+}
 
-  config.repoCacheKeys = {};
+export async function fetchRepoCacheKey(): Promise<RepoCacheKey | null> {
+  let result: RepoCacheKey | null = null;
+
+  config.repoCacheKeys = [];
   try {
     const remoteResults = await git.listRemote([
       config.url,
@@ -1209,26 +1239,9 @@ export async function fetchRepoCacheKey(): Promise<RepoCacheKey | null> {
       .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim())
-      .forEach((line) => {
-        const [, ref] = line.replace('refs/renovate-cache/', '').split(/\s+/);
-        if (ref) {
-          const [index, commit, blob] = ref.split('/');
-          if (index && commit && blob) {
-            config.repoCacheKeys[index] = { commit, blob };
-          }
-        }
-      });
+      .forEach(parseRemoteCacheKey);
 
-    const indices = Object.keys(config.repoCacheKeys).map((x) =>
-      parseInt(x, 10)
-    );
-    if (indices.length) {
-      const maxIndex = Math.max(...indices);
-      const latestResult = config.repoCacheKeys[maxIndex];
-      if (latestResult) {
-        result = latestResult;
-      }
-    }
+    result = findLatestRepoCacheKey(config.repoCacheKeys);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, `Git: cache fetching error`);
   }

@@ -20,6 +20,7 @@ export interface StorageConfig {
 }
 
 export interface RepoCacheKey {
+  cacheRevision: number;
   commit: string;
   blob: string;
 }
@@ -36,7 +37,7 @@ export interface LocalConfig extends StorageConfig {
 
   writeGitDone?: boolean;
 
-  repoCacheKeys: Record<number, RepoCacheKey>;
+  repoCacheKeys: RepoCacheKey[];
 }
 
 export interface FileAddition {
