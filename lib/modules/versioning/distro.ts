@@ -105,9 +105,9 @@ export class DistroInfo {
    * @param input A codename/semVer
    * @returns A schedule if available, otherwise undefined
    */
-  public getSchedule(input: string): DistroSchedule {
+  public getSchedule(input: string): DistroSchedule | null {
     const ver = this.getVersionByCodename(input);
-    return this._distroInfo[ver];
+    return this._distroInfo[ver] ?? null;
   }
 
   /**

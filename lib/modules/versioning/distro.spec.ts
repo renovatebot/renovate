@@ -141,6 +141,6 @@ describe('modules/versioning/distro', () => {
   });
 
   it('retrieves non-existent release schedule', () => {
-    expect(di.getSchedule('20.06')).toBeUndefined();
+    expect(di.getSchedule('20.06')).toBeNull();
   });
 });
