@@ -226,7 +226,7 @@ export async function checkResource(
     case 'https:':
       return await checkHttpResource(http, parsedUrl);
     case 's3:':
-      return await checkS3Resource(pkgUrl as url.URL);
+      return await checkS3Resource(parsedUrl);
     /* istanbul ignore next */
     default:
       logger.debug(
