@@ -35,9 +35,11 @@ flowchart TB
     subgraph extractDependencies
     Z[repository/process/index.ts]
     Z --> AA[read dashboard body, put it into config]
-    Z --> AB[ for each config.basebranches]
-    AB --> |if exists| AC[getBaseBranch and extract all dependencies from managers]
-    AB --> |if exists| AD[getBaseBranch and lookup new dependency versions]
+    Z --> QM{if config.basebranches exists}
+    QM --> |yes| AB[for each config.basebranches]
+    AB --> AC[getBaseBranch and extract all dependencies from managers]
+    AB --> AD[getBaseBranch and lookup new dependency versions]
+    QM --> |no| AE[extract and lookup]
     end
 
     subgraph updateRepository

@@ -36,6 +36,7 @@ describe('modules/manager/bundler/extract', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
     });
+
     it('parses rails Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(railsGemfileLock);
       const res = await extractPackageFile(railsGemfile, 'Gemfile');
@@ -54,11 +55,13 @@ describe('modules/manager/bundler/extract', () => {
       ).toBeTrue();
       validateGems(railsGemfile, res);
     });
+
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       validateGems(sourceGroupGemfile, res);
     });
+
     it('parse webpacker Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(webPackerGemfileLock);
       const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
@@ -72,6 +75,7 @@ describe('modules/manager/bundler/extract', () => {
       ).toBeTrue();
       validateGems(webPackerGemfile, res);
     });
+
     it('parse mastodon Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(mastodonGemfileLock);
       const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
@@ -89,6 +93,7 @@ describe('modules/manager/bundler/extract', () => {
       ).toBeTrue();
       validateGems(mastodonGemfile, res);
     });
+
     it('parse Ruby CI Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(rubyCIGemfileLock);
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
@@ -103,6 +108,7 @@ describe('modules/manager/bundler/extract', () => {
       validateGems(rubyCIGemfile, res);
     });
   });
+
   it('parse Gitlab Foss Gemfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(gitlabFossGemfileLock);
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
@@ -122,6 +128,7 @@ describe('modules/manager/bundler/extract', () => {
     const res = await extractPackageFile(sourceBlockGemfile, 'Gemfile');
     expect(res).toMatchSnapshot();
   });
+
   it('parse source blocks with spaces in Gemfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(

@@ -11,10 +11,12 @@ jest.mock('./lookup');
 describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
     });
+
     it('handles empty deps', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [{ packageFile: 'package.json', deps: [] }],
@@ -24,6 +26,7 @@ describe('workers/repository/process/fetch', () => {
         npm: [{ deps: [], packageFile: 'package.json' }],
       });
     });
+
     it('handles ignored, skipped and disabled', async () => {
       config.ignoreDeps = ['abcd'];
       config.packageRules = [
@@ -51,6 +54,7 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].skipReason).toBe('disabled');
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       const packageFiles: any = {
@@ -65,6 +69,7 @@ describe('workers/repository/process/fetch', () => {
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
     });
+
     it('skips deps with empty names', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         docker: [
