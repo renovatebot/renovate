@@ -7,11 +7,11 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { getS3Client, parseS3Url } from '../../../util/s3';
 import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import { getS3Client, parseS3Url } from '../../../util/s3';
 import type {
   HttpResourceCheckResult,
   MavenDependency,
@@ -106,14 +106,14 @@ function isS3NotFound(err: { name: string; message: string }): boolean {
 
 export async function downloadS3Protocol(
   pkgUrl: URL | string
-): Promise<string> {
+): Promise<string | null> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   let body: string;
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     if (s3Url === null) {
       // istanbul ignore next
-      return '';
+      return null;
     }
     const response = await getS3Client().getObject(s3Url);
     const stream = response.Body as Readable;
@@ -149,7 +149,7 @@ export async function downloadS3Protocol(
       );
     }
   }
-  return '';
+  return null;
 }
 
 async function checkHttpResource(
@@ -218,7 +218,7 @@ async function checkS3Resource(
 
 export async function checkResource(
   http: Http,
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
   // istanbul ignore next
@@ -230,7 +230,7 @@ export async function checkResource(
     case 'https:':
       return await checkHttpResource(http, parsedUrl);
     case 's3:':
-      return await checkS3Resource(pkgUrl as url.URL);
+      return await checkS3Resource(pkgUrl);
     /* istanbul ignore next */
     default:
       logger.debug(
@@ -261,7 +261,7 @@ export async function downloadMavenXml(
   if (!pkgUrl) {
     return {};
   }
-  let rawContent: string | undefined;
+  let rawContent: string | undefined | null;
   let authorization: boolean | undefined;
   let statusCode: number | undefined;
   switch (pkgUrl.protocol) {
