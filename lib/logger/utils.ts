@@ -245,7 +245,7 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
 }
 
 // Can't use `util/regex` because of circular reference to logger
-const urlRe = /[a-z]{3,9}:\/\/(?:[\-;:&=\+\$,\w]+@)[a-z0-9\.\-]+/gi;
+const urlRe = /[a-z]{3,9}:\/\/[-;:&=+$,\w]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
 
 export function sanitizeUrls(text: string): string {
