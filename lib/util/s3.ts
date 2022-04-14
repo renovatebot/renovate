@@ -10,12 +10,12 @@ export function getS3Client(): S3 {
   return s3Instance;
 }
 
-export interface S3Url {
+export interface S3UrlParts {
   Bucket: string;
   Key: string;
 }
 
-export function parseS3Url(rawUrl: string): S3Url | null {
+export function parseS3Url(rawUrl: string): S3UrlParts | null {
   const parsedUrl = parseUrl(rawUrl);
   if (parsedUrl === null) {
     return null;

@@ -1,16 +1,16 @@
 import { Readable } from 'stream';
 import type { S3 } from '@aws-sdk/client-s3';
 import { afterEach } from '@jest/globals';
-import type { S3Url } from '../lib/util/s3';
+import type { S3UrlParts } from '../lib/util/s3';
 
 let mockedObjects: Record<string, string> = {};
 let mockedTimestamps: Record<string, string> = {};
 
-function objectKey(url: S3Url) {
+function objectKey(url: S3UrlParts) {
   return `s3://${url.Bucket}/${url.Key}`;
 }
 
-function headObject(url: S3Url) {
+function headObject(url: S3UrlParts) {
   const k = objectKey(url);
   if (mockedObjects[k] === undefined) {
     return Promise.reject({ message: 'NotFound' });
@@ -19,7 +19,7 @@ function headObject(url: S3Url) {
   return Promise.resolve({ LastModified });
 }
 
-function getObject(url: S3Url) {
+function getObject(url: S3UrlParts) {
   const k = objectKey(url);
   if (!mockedObjects[k]) {
     return Promise.reject({ message: 'NotFound' });
