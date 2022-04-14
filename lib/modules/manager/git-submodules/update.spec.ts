@@ -14,6 +14,7 @@ describe('modules/manager/git-submodules/update', () => {
     let upgrade: Upgrade;
     let adminConfig: RepoGlobalConfig;
     let tmpDir: DirectoryResult;
+
     beforeAll(async () => {
       upgrade = { depName: 'renovate' };
 
@@ -21,10 +22,12 @@ describe('modules/manager/git-submodules/update', () => {
       adminConfig = { localDir: join(tmpDir.path) };
       GlobalConfig.set(adminConfig);
     });
+
     afterAll(async () => {
       await tmpDir.cleanup();
       GlobalConfig.reset();
     });
+
     it('returns null on error', async () => {
       simpleGit.mockReturnValue({
         submoduleUpdate() {
@@ -37,6 +40,7 @@ describe('modules/manager/git-submodules/update', () => {
       });
       expect(update).toBeNull();
     });
+
     it('returns content on update', async () => {
       simpleGit.mockReturnValue({
         submoduleUpdate() {

@@ -17,6 +17,7 @@ export class GlobalConfig {
     'dryRun',
     'exposeAllEnv',
     'executionTimeout',
+    'githubTokenWarn',
     'localDir',
     'migratePresets',
     'privateKey',
