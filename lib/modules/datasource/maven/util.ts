@@ -17,7 +17,7 @@ import type {
   MavenXml,
 } from './types';
 
-function getHost (x: string): string | null {
+function getHost(x: string): string | null {
   return parseUrl(x)?.host ?? null;
 }
 
