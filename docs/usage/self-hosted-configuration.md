@@ -365,7 +365,7 @@ This reduces the chance of unintended consequences with global Git configs on sh
 
 ## gitTimeout
 
-To handle the case where the underlying git processes appear to hang, configure the timeout with a number of milliseconds to wait after last received content on either stdOut or stdErr streams before sending a SIGINT kill message.
+To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
 
 ## gitUrl
 
