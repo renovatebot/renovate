@@ -127,21 +127,18 @@ export async function downloadS3Protocol(
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {
-      // istanbul ignore next
       logger.debug(
         { failedUrl },
         'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
       );
     } else if (err.message === 'Region is missing') {
-      // istanbul ignore next
       logger.debug(
         { failedUrl },
         'Dependency lookup failed. Please a correct AWS_REGION env var'
       );
     } else if (isS3NotFound(err)) {
       logger.trace({ failedUrl }, `S3 url not found`);
-    } /* istanbul ignore next */ else {
-      // istanbul ignore next
+    } /* istanbul ignore else */ else {
       logger.info(
         { failedUrl, message: err.message },
         'Unknown S3 download error'
@@ -203,7 +200,7 @@ async function checkS3Resource(
   } catch (err) {
     if (isS3NotFound(err)) {
       return 'not-found';
-    } /* istanbul ignore next */ else {
+    } /* istanbul ignore else */ else {
       // istanbul ignore next
       logger.debug(
         { pkgUrl, name: err.name, message: err.message },
