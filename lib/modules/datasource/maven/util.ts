@@ -185,7 +185,7 @@ export async function downloadMavenXml(
     isCacheable = true;
   }
 
-  return { isCacheable: isCacheable, xml: new XmlDocument(rawContent) };
+  return { isCacheable, xml: new XmlDocument(rawContent) };
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {
