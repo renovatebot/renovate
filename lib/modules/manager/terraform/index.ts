@@ -24,4 +24,5 @@ export const defaultConfig = {
     'Terraform {{managerData.terraformDependencyType}} {{depName}}',
   fileMatch: ['\\.tf$'],
   versioning: hashicorpVersioning.id,
+  pinDigests: false,
 };
