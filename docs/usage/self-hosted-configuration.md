@@ -378,6 +378,12 @@ Possible values:
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
+## githubTokenWarn
+
+By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
+Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
+
 ## globalExtends
 
 Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.

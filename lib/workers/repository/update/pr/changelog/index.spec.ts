@@ -1,5 +1,6 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { partial } from '../../../../../../test/util';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
@@ -230,6 +231,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('handles missing Github token', async () => {
+      GlobalConfig.set({ githubTokenWarn: true });
       expect(
         await getChangeLogJSON({
           ...upgrade,
