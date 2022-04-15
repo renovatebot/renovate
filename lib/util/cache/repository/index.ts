@@ -47,6 +47,17 @@ export function reset(): void {
   data = null;
 }
 
+function canBeMigratedToV11(
+  config: RenovateConfig,
+  input: unknown
+): input is RepoCacheData & { repository: string; revision: number } {
+  return (
+    is.plainObject(input) &&
+    input.repository === config.repository &&
+    input.revision < 11
+  );
+}
+
 export async function initialize(config: RenovateConfig): Promise<void> {
   reset();
 
@@ -58,6 +69,10 @@ export async function initialize(config: RenovateConfig): Promise<void> {
       const oldCache = JSON.parse(rawCache);
       if (isCacheValid(config, oldCache)) {
         data = oldCache.data;
+      } else if (canBeMigratedToV11(config, oldCache)) {
+        delete oldCache.repository;
+        delete oldCache.revision;
+        data = oldCache;
       }
     }
   } catch (err) {
