@@ -225,7 +225,7 @@ export async function checkResource(
       return await checkHttpResource(http, parsedUrl);
     case 's3:':
       return await checkS3Resource(parsedUrl);
-    /* istanbul ignore next */
+    // istanbul ignore next: if downloadMavenXml falls through to default, then this will logically never happen.
     default:
       logger.debug(
         { url: pkgUrl.toString() },
