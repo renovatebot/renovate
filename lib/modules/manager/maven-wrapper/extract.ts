@@ -40,7 +40,7 @@ function extractLineInfo(lines: string[], regex: RegExp): any {
 }
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
-  logger.trace('gradle-wrapper.extractPackageFile()');
+  logger.trace('maven-wrapper.extractPackageFile()');
   const extractResult = extractVersions(fileContent);
   const deps = [];
   if (extractResult) {
