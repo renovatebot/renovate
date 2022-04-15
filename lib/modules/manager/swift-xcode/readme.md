@@ -1,0 +1,1 @@
+The `swift-xcode` manager works to update remote (Git) Swift package dependencies specified within your Xcode project. Notably, this is not the same as dependencies added to your Swift Package (`Package.swift` file) which is handled by the `swift` manager.

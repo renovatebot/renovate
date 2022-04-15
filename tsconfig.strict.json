@@ -279,6 +279,8 @@
     "lib/modules/manager/setup-cfg/range.ts",
     "lib/modules/manager/swift/extract.ts",
     "lib/modules/manager/swift/index.ts",
+    "lib/modules/manager/swift-xcode/extract.ts",
+    "lib/modules/manager/swift-xcode/index.ts",
     "lib/modules/manager/terraform-version/extract.ts",
     "lib/modules/manager/terraform-version/index.ts",
     "lib/modules/manager/terraform/extract.ts",

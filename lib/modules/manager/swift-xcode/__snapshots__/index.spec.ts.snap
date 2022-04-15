@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/swift-xcode/index extractPackageFile() parses multiple packages 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "\\"1.0.0\\"..<\\"2.0.0\\"",
+      "datasource": "git-tags",
+      "packageName": "swift-snapshot-testing",
+      "sourceUrl": "https://github.com/pointfreeco/swift-snapshot-testing",
+    },
+    Object {
+      "currentValue": "\\"5.6.0\\"..<\\"5.7.0\\"",
+      "datasource": "git-tags",
+      "packageName": "Alamofire",
+      "sourceUrl": "https://github.com/Alamofire/Alamofire",
+    },
+    Object {
+      "currentValue": "3.7.2",
+      "datasource": "git-tags",
+      "packageName": "CocoaLumberjack",
+      "sourceUrl": "https://github.com/CocoaLumberjack/CocoaLumberjack",
+    },
+    Object {
+      "currentValue": "master",
+      "datasource": "git-tags",
+      "packageName": "Kingfisher",
+      "sourceUrl": "https://github.com/onevcat/Kingfisher",
+    },
+    Object {
+      "currentValue": "6b0cda4ac8a5a8289afbacdb0cf428af2f3b9e30",
+      "datasource": "git-tags",
+      "packageName": "Nuke",
+      "sourceUrl": "https://github.com/kean/Nuke",
+    },
+    Object {
+      "currentValue": "\\"1.20.0\\"..<\\"1.25.0\\"",
+      "datasource": "git-tags",
+      "packageName": "SkeletonView",
+      "sourceUrl": "https://github.com/Juanpe/SkeletonView",
+    },
+  ],
+  "packageFile": null,
+}
+`;

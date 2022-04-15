@@ -1,0 +1,143 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXNativeTarget section */
+		1671F08228099DAC001CAE81 /* SwiftXcode */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1671F0A728099DAD001CAE81 /* Build configuration list for PBXNativeTarget "SwiftXcode" */;
+			buildPhases = (
+				1671F07F28099DAC001CAE81 /* Sources */,
+				1671F08028099DAC001CAE81 /* Frameworks */,
+				1671F08128099DAC001CAE81 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SwiftXcode;
+			packageProductDependencies = (
+				1671F0B42809A000001CAE81 /* Alamofire */,
+				1671F0B72809A0BD001CAE81 /* CocoaLumberjack */,
+				1671F0BA2809A119001CAE81 /* Kingfisher */,
+				1671F0BE2809A1AC001CAE81 /* Nuke */,
+				1671F0C12809A20E001CAE81 /* SkeletonView */,
+			);
+			productName = SwiftXcode;
+			productReference = 1671F08328099DAC001CAE81 /* SwiftXcode.app */;
+			productType = "com.apple.product-type.application";
+		};
+		1671F09228099DAD001CAE81 /* SwiftXcodeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1671F0AA28099DAD001CAE81 /* Build configuration list for PBXNativeTarget "SwiftXcodeTests" */;
+			buildPhases = (
+				1671F08F28099DAD001CAE81 /* Sources */,
+				1671F09028099DAD001CAE81 /* Frameworks */,
+				1671F09128099DAD001CAE81 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1671F09528099DAD001CAE81 /* PBXTargetDependency */,
+			);
+			name = SwiftXcodeTests;
+			packageProductDependencies = (
+				1671F0B128099F69001CAE81 /* SnapshotTesting */,
+			);
+			productName = SwiftXcodeTests;
+			productReference = 1671F09328099DAD001CAE81 /* SwiftXcodeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1671F0B028099F69001CAE81 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		1671F0B32809A000001CAE81 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 5.6.0;
+			};
+		};
+		1671F0B62809A0BD001CAE81 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
+			requirement = {
+				kind = exactVersion;
+				version = 3.7.2;
+			};
+		};
+		1671F0B92809A119001CAE81 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		1671F0BD2809A1AC001CAE81 /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke";
+			requirement = {
+				kind = revision;
+				revision = 6b0cda4ac8a5a8289afbacdb0cf428af2f3b9e30;
+			};
+		};
+		1671F0C02809A20E001CAE81 /* XCRemoteSwiftPackageReference "SkeletonView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Juanpe/SkeletonView.git";
+			requirement = {
+				kind = versionRange;
+				maximumVersion = 1.25.0;
+				minimumVersion = 1.20.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1671F0B128099F69001CAE81 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1671F0B028099F69001CAE81 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		1671F0B42809A000001CAE81 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1671F0B32809A000001CAE81 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		1671F0B72809A0BD001CAE81 /* CocoaLumberjack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1671F0B62809A0BD001CAE81 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjack;
+		};
+		1671F0BA2809A119001CAE81 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1671F0B92809A119001CAE81 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		1671F0BE2809A1AC001CAE81 /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1671F0BD2809A1AC001CAE81 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		1671F0C12809A20E001CAE81 /* SkeletonView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1671F0C02809A20E001CAE81 /* XCRemoteSwiftPackageReference "SkeletonView" */;
+			productName = SkeletonView;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1671F07B28099DAC001CAE81 /* Project object */;
+}
