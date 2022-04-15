@@ -93,6 +93,7 @@ export async function updateArtifacts(
     const bundlerHostRulesAuthCommands: string[] = bundlerHostRules.reduce(
       (authCommands: string[], hostRule) => {
         if (hostRule.resolvedHost?.includes('-')) {
+          // TODO: fix me, hostrules can missing all auth
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
           // sanitize the authentication
