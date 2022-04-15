@@ -112,7 +112,7 @@ export class MavenDatasource extends Datasource {
       return cachedVersions;
     }
 
-    const { authorization, xml: mavenMetadata } = await downloadMavenXml(
+    const { isCacheable, xml: mavenMetadata } = await downloadMavenXml(
       this.http,
       metadataUrl
     );
@@ -125,7 +125,7 @@ export class MavenDatasource extends Datasource {
       (acc, version) => ({ ...acc, [version]: null }),
       {}
     );
-    if (!authorization) {
+    if (isCacheable) {
       await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
     }
     return releaseMap;

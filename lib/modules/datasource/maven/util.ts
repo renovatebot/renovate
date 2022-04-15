@@ -255,6 +255,9 @@ export async function downloadMavenXml(
   if (!pkgUrl) {
     return {};
   }
+
+  let isCacheable = false;
+
   let rawContent: string | undefined | null;
   let authorization: boolean | undefined;
   let statusCode: number | undefined;
@@ -283,7 +286,11 @@ export async function downloadMavenXml(
     return {};
   }
 
-  return { authorization, xml: new XmlDocument(rawContent) };
+  if (!authorization) {
+    isCacheable = true;
+  }
+
+  return { isCacheable, xml: new XmlDocument(rawContent) };
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {
