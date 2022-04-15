@@ -151,9 +151,6 @@ Object {
 
 exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "ruby": ">= 2.4.0",
-  },
   "deps": Array [
     Object {
       "currentValue": "~> 1.4",
@@ -2149,9 +2146,6 @@ Object {
 
 exports[`modules/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
 Object {
-  "constraints": Object {
-    "ruby": "~> 1.5.3",
-  },
   "deps": Array [
     Object {
       "datasource": "rubygems",
