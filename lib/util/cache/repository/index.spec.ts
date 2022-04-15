@@ -77,7 +77,7 @@ describe('util/cache/repository/index', () => {
     );
   });
 
-  it('migrates to 11 revision', async () => {
+  it('migrates from 10 to 11 revision', async () => {
     fs.readFile.mockResolvedValueOnce(
       JSON.stringify({
         revision: 10,
@@ -101,6 +101,21 @@ describe('util/cache/repository/index', () => {
         data: { semanticCommits: 'disabled' },
       })
     );
+  });
+
+  it('does not migrate from older revisions to 11', async () => {
+    fs.readFile.mockResolvedValueOnce(
+      JSON.stringify({
+        revision: 9,
+        repository: 'abc/def',
+        semanticCommits: 'enabled',
+      }) as never
+    );
+
+    await repositoryCache.initialize(config);
+
+    const cache = repositoryCache.getCache();
+    expect(cache).toEqual({});
   });
 
   it('returns empty cache for non-initialized cache', () => {

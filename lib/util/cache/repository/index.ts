@@ -53,7 +53,7 @@ function canBeMigratedToV11(
     is.string(input.repository) &&
     is.safeInteger(input.revision) &&
     input.repository === config.repository &&
-    input.revision < 11
+    input.revision === 10
   );
 }
 
