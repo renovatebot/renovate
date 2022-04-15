@@ -2,9 +2,6 @@
 
 exports[`modules/manager/bundler/extract extractPackageFile() parse Ruby CI Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "bundler": "2.0.2",
-  },
   "deps": Array [
     Object {
       "currentValue": "~> 5.2.1",
@@ -154,9 +151,6 @@ Object {
 
 exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "ruby": ">= 2.4.0",
-  },
   "deps": Array [
     Object {
       "currentValue": "~> 1.4",
@@ -1393,9 +1387,6 @@ Object {
 
 exports[`modules/manager/bundler/extract extractPackageFile() parse webpacker Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "bundler": "1.17.3",
-  },
   "deps": Array [
     Object {
       "datasource": "rubygems",
@@ -1457,9 +1448,6 @@ Object {
 
 exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "bundler": "1.17.2",
-  },
   "deps": Array [
     Object {
       "currentValue": ">= 11.1",
@@ -2158,9 +2146,6 @@ Object {
 
 exports[`modules/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
 Object {
-  "constraints": Object {
-    "ruby": "~> 1.5.3",
-  },
   "deps": Array [
     Object {
       "datasource": "rubygems",
@@ -2228,9 +2213,6 @@ Object {
 
 exports[`modules/manager/bundler/extract parse Gitlab Foss Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "bundler": "1.17.3",
-  },
   "deps": Array [
     Object {
       "currentValue": "5.2.3",
@@ -4740,9 +4722,6 @@ Object {
 
 exports[`modules/manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
 Object {
-  "constraints": Object {
-    "bundler": "1.16.6",
-  },
   "deps": Array [
     Object {
       "datasource": "rubygems",
