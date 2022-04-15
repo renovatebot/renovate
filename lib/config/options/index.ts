@@ -1491,6 +1491,12 @@ const options: RenovateOptions[] = [
     env: false,
     supportedPlatforms: ['github'],
   },
+  {
+    name: 'pruneBranchAfterAutomerge',
+    description: 'Set to true to enable branch pruning after automerging.',
+    type: 'boolean',
+    default: true,
+  },
   // Default templates
   {
     name: 'branchName',
