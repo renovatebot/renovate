@@ -327,10 +327,6 @@ export const presets: Record<string, Preset> = {
     description: 'Raise a PR first before any automerging',
     automergeType: 'pr',
   },
-  pruneBranchAfterAutomerge: {
-    description: 'Prune branch after automerging',
-    enabled: true,
-  },
   automergeRequireAllStatusChecks: {
     description: 'Require all status checks to pass before any automerging',
     ignoreTests: false,

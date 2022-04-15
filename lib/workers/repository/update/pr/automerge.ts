@@ -131,7 +131,7 @@ export async function checkAutoMerge(
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     if (!pruneBranchAfterAutomerge) {
-      logger.warn('Skipping pruning of merged branch');
+      logger.info('Skipping pruning of merged branch');
       return { automerged: true, branchRemoved: false };
     }
     let branchRemoved = false;
