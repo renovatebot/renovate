@@ -112,7 +112,7 @@ export async function downloadS3Protocol(
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     if (s3Url === null) {
-      // istanbul ignore next
+      // istanbul ignore next: null guard
       return null;
     }
     const response = await getS3Client().getObject(s3Url);
@@ -139,7 +139,7 @@ export async function downloadS3Protocol(
       );
     } else if (isS3NotFound(err)) {
       logger.trace({ failedUrl }, `S3 url not found`);
-    } /* istanbul ignore else */ else {
+    } else {
       logger.info(
         { failedUrl, message: err.message },
         'Unknown S3 download error'
@@ -185,12 +185,11 @@ async function checkS3Resource(
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
-    // istanbul ignore next
+    // istanbul ignore next: null guard
     if (s3Url === null) {
       return 'error';
     }
     const response = await getS3Client().headObject(s3Url);
-    // istanbul ignore next
     if (response.DeleteMarker) {
       return 'not-found';
     }
@@ -201,14 +200,12 @@ async function checkS3Resource(
   } catch (err) {
     if (isS3NotFound(err)) {
       return 'not-found';
-    } /* istanbul ignore else */ else {
-      // istanbul ignore next
+    } else {
       logger.debug(
         { pkgUrl, name: err.name, message: err.message },
         `Can't check S3 resource existence`
       );
     }
-    // istanbul ignore next
     return 'error';
   }
 }
@@ -218,7 +215,7 @@ export async function checkResource(
   pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
-  // istanbul ignore next
+  // istanbul ignore next: null guard
   if (parsedUrl === null) {
     return 'error';
   }

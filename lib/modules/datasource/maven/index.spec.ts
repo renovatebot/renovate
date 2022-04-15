@@ -198,6 +198,31 @@ function mockGenericPackage(opts: MockOpts = {}) {
   }
 }
 
+const basicReleaseResult: ReleaseResult = {
+  display: 'org.example:package',
+  group: 'org.example',
+  homepage: 'https://package.example.org/about',
+  name: 'package',
+  registryUrl: 'https://repo.maven.apache.org/maven2',
+  releases: [
+    {
+      version: '0.0.1',
+    },
+    {
+      releaseTimestamp: '2020-01-01T01:00:00.000Z',
+      version: '1.0.0',
+    },
+    {
+      releaseTimestamp: '2020-01-01T01:00:03.000Z',
+      version: '1.0.3-SNAPSHOT',
+    },
+    {
+      releaseTimestamp: '2020-01-01T02:00:00.000Z',
+      version: '2.0.0',
+    },
+  ],
+} as ReleaseResult;
+
 function get(
   depName = 'org.example:package',
   ...registryUrls: string[]
@@ -276,73 +301,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', baseUrlCustom);
 
     expect(res).toMatchSnapshot();
-  });
-
-  it('returns releases from an S3 repository', async () => {
-    mockGenericPackage({
-      base: baseUrlS3,
-      html: null,
-    });
-
-    const res = await get('org.example:package', baseUrlS3);
-
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      name: 'package',
-      registryUrl: 's3://repobucket',
-      releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
-      ],
-    });
-  });
-
-  it('falls back to HTTP when checking an S3 repository', async () => {
-    mockGenericPackage({ html: null });
-
-    const res = await get('org.example:package', baseUrlS3, baseUrl);
-
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      name: 'package',
-      registryUrl: 'https://repo.maven.apache.org/maven2',
-      releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          releaseTimestamp: '2020-01-01T01:00:00.000Z',
-          version: '1.0.0',
-        },
-        {
-          releaseTimestamp: '2020-01-01T01:00:03.000Z',
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          releaseTimestamp: '2020-01-01T02:00:00.000Z',
-          version: '2.0.0',
-        },
-      ],
-    });
   });
 
   it('collects releases from all registry urls', async () => {
@@ -722,6 +680,135 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
+    });
+  });
+
+  describe('S3', () => {
+    it('returns releases', async () => {
+      mockGenericPackage({
+        base: baseUrlS3,
+        html: null,
+      });
+
+      const res = await get('org.example:package', baseUrlS3);
+
+      expect(res).toEqual({
+        display: 'org.example:package',
+        group: 'org.example',
+        name: 'package',
+        registryUrl: 's3://repobucket',
+        releases: [
+          {
+            version: '0.0.1',
+          },
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.0.1',
+          },
+          {
+            version: '1.0.2',
+          },
+          {
+            version: '1.0.3-SNAPSHOT',
+          },
+          {
+            version: '2.0.0',
+          },
+        ],
+      });
+    });
+
+    const missingReleaseReleaseResult = {
+      display: 'org.example:package',
+      group: 'org.example',
+      name: 'package',
+      registryUrl: 's3://repobucket',
+      releases: [
+        {
+          version: '1.0.0',
+        },
+        {
+          version: '1.0.1',
+        },
+        {
+          version: '1.0.2',
+        },
+        {
+          version: '1.0.3-SNAPSHOT',
+        },
+        {
+          version: '2.0.0',
+        },
+      ],
+    };
+
+    it('does not return deleted releases', async () => {
+      mockGenericPackage({
+        base: baseUrlS3,
+        html: null,
+      });
+      s3mock.mockDelete(
+        's3://repobucket/org/example/package/0.0.1/package-0.0.1.pom'
+      );
+
+      const res = await get('org.example:package', baseUrlS3);
+
+      expect(res).toEqual(missingReleaseReleaseResult);
+    });
+
+    it('does not return releases with fetch errors', async () => {
+      mockGenericPackage({
+        base: baseUrlS3,
+        html: null,
+      });
+      s3mock.mockError(
+        new Error('Unknown error'),
+        's3://repobucket/org/example/package/0.0.1/package-0.0.1.pom'
+      );
+
+      const res = await get('org.example:package', baseUrlS3);
+
+      expect(res).toEqual(missingReleaseReleaseResult);
+    });
+
+    it('falls back to HTTP when package is not in S3', async () => {
+      mockGenericPackage({ html: null });
+
+      const res = await get('org.example:package', baseUrlS3, baseUrl);
+
+      expect(res).toEqual(basicReleaseResult);
+    });
+
+    it('falls back to HTTP when missing a region', async () => {
+      mockGenericPackage({ html: null });
+      mockGenericPackage({ html: null, base: baseUrlS3 });
+      s3mock.mockError(new Error('Region is missing'));
+
+      const res = await get('org.example:package', baseUrlS3, baseUrl);
+
+      expect(res).toEqual(basicReleaseResult);
+    });
+
+    it('falls back to HTTP when missing credentials', async () => {
+      mockGenericPackage({ html: null });
+      mockGenericPackage({ html: null, base: baseUrlS3 });
+      s3mock.mockError({ name: 'CredentialsProviderError' } as Error);
+
+      const res = await get('org.example:package', baseUrlS3, baseUrl);
+
+      expect(res).toEqual(basicReleaseResult);
+    });
+
+    it('falls back to HTTP when S3 errors', async () => {
+      mockGenericPackage({ html: null });
+      mockGenericPackage({ html: null, base: baseUrlS3 });
+      s3mock.mockError({ name: 'UnknownError' } as Error);
+
+      const res = await get('org.example:package', baseUrlS3, baseUrl);
+
+      expect(res).toEqual(basicReleaseResult);
     });
   });
 });
