@@ -2082,8 +2082,8 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 ## pruneBranchAfterAutomerge
 
-Configure to `false` to disable puring of merged branches after automerge.
-Defaults to `true`.
+By default Renovate deletes, or "prunes", the branch after automerging.
+Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 ## pruneStaleBranches
 
