@@ -11,7 +11,6 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
-  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -20,6 +19,7 @@ import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { getBundlerConstraint, getRubyConstraint } from './common';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
@@ -27,36 +27,8 @@ import {
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
-async function getRubyConstraint(
-  updateArtifact: UpdateArtifact
-): Promise<string> {
-  const { packageFileName, config } = updateArtifact;
-  const { constraints = {} } = config;
-  const { ruby } = constraints;
-
-  let rubyConstraint: string;
-  if (ruby) {
-    logger.debug('Using rubyConstraint from config');
-    rubyConstraint = ruby;
-  } else {
-    const rubyVersionFile = getSiblingFileName(
-      packageFileName,
-      '.ruby-version'
-    );
-    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
-    if (rubyVersionFileContent) {
-      logger.debug('Using ruby version specified in .ruby-version');
-      rubyConstraint = rubyVersionFileContent
-        .replace(regEx(/^ruby-/), '')
-        .replace(regEx(/\n/g), '')
-        .trim();
-    }
-  }
-  return rubyConstraint;
-}
-
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
-  if (hostRule.resolvedHost.includes('-')) {
+  if (!hostRule.resolvedHost || hostRule.resolvedHost.includes('-')) {
     return {};
   }
   const varName = hostConfigVariablePrefix.concat(
@@ -75,7 +47,6 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
-  const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
@@ -93,13 +64,13 @@ export async function updateArtifacts(
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let cmd;
+    let cmd: string;
 
     if (config.isLockFileMaintenance) {
       cmd = 'bundler lock --update';
     } else {
       cmd = `bundler lock --update ${updatedDeps
-        .map((dep) => dep.depName)
+        .map((dep) => `${dep.depName}`)
         .map(quote)
         .join(' ')}`;
     }
@@ -121,7 +92,7 @@ export async function updateArtifacts(
     // with the bundler config
     const bundlerHostRulesAuthCommands: string[] = bundlerHostRules.reduce(
       (authCommands: string[], hostRule) => {
-        if (hostRule.resolvedHost.includes('-')) {
+        if (hostRule.resolvedHost?.includes('-')) {
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
           // sanitize the authentication
@@ -132,7 +103,10 @@ export async function updateArtifacts(
       []
     );
 
-    const { bundler } = constraints || {};
+    const bundler = getBundlerConstraint(
+      updateArtifact,
+      existingLockFileContent
+    );
     const preCommands = ['ruby --version'];
 
     // Bundler < 2 has a different config option syntax than >= 2
@@ -227,14 +201,16 @@ export async function updateArtifacts(
     const resolveMatchRe = regEx('\\s+(.*) was resolved to', 'g');
     if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
       logger.debug({ err }, 'Bundler has a resolve error');
-      const resolveMatches = [];
-      let resolveMatch;
+      // TODO: see below
+      const resolveMatches: any[] = [];
+      let resolveMatch: RegExpExecArray | null;
       do {
         resolveMatch = resolveMatchRe.exec(output);
         if (resolveMatch) {
           resolveMatches.push(resolveMatch[1].split(' ').shift());
         }
       } while (resolveMatch);
+      // TODO: fixme `updatedDeps.includes(match)` is never true, as updatedDeps is `PackageDependency[]`
       if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
         logger.debug(
           { resolveMatches, updatedDeps },
