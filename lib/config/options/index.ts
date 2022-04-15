@@ -1493,7 +1493,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'pruneBranchAfterAutomerge',
-    description: 'Set to true to enable branch pruning after automerging.',
+    description: 'Set to `true` to enable branch pruning after automerging.',
     type: 'boolean',
     default: true,
   },
