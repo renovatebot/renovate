@@ -18,6 +18,11 @@ let cacheFileName: string | null = null;
 let repository: string | null | undefined = null;
 let data: RepoCacheData | null = null;
 
+export function reset(): void {
+  repository = null;
+  data = null;
+}
+
 export function getCacheFileName(config: RenovateConfig): string {
   const cacheDir = GlobalConfig.get('cacheDir');
   const repoCachePath = '/renovate/repository/';
@@ -30,29 +35,23 @@ function isCacheValid(
   config: RenovateConfig,
   input: unknown
 ): input is RepoCache {
-  if (
+  return (
     is.plainObject(input) &&
+    is.string(input.repository) &&
+    is.safeInteger(input.revision) &&
     input.repository === config.repository &&
     input.revision === CACHE_REVISION
-  ) {
-    logger.debug('Repository cache is valid');
-    return true;
-  }
-  logger.info('Repository cache invalidated');
-  return false;
-}
-
-export function reset(): void {
-  repository = null;
-  data = null;
+  );
 }
 
 function canBeMigratedToV11(
   config: RenovateConfig,
   input: unknown
-): input is RepoCacheData & { repository: string; revision: number } {
+): input is RepoCacheData & { repository?: string; revision?: number } {
   return (
     is.plainObject(input) &&
+    is.string(input.repository) &&
+    is.safeInteger(input.revision) &&
     input.repository === config.repository &&
     input.revision < 11
   );
@@ -69,10 +68,14 @@ export async function initialize(config: RenovateConfig): Promise<void> {
       const oldCache = JSON.parse(rawCache);
       if (isCacheValid(config, oldCache)) {
         data = oldCache.data;
+        logger.debug('Repository cache is valid');
       } else if (canBeMigratedToV11(config, oldCache)) {
         delete oldCache.repository;
         delete oldCache.revision;
         data = oldCache;
+        logger.debug('Repository cache is migrated');
+      } else {
+        logger.debug('Repository cache is invalid');
       }
     }
   } catch (err) {
