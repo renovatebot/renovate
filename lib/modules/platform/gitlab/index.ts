@@ -44,6 +44,7 @@ import type {
   PlatformPrOptions,
   PlatformResult,
   Pr,
+  RepoCacheConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -235,6 +236,20 @@ function getRepoUrl(
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   repoUrl.auth = 'oauth2:' + opts.token;
   return URL.format(repoUrl);
+}
+
+export async function fetchRepoCache({
+  blob,
+}: RepoCacheConfig): Promise<Record<string, unknown> | null> {
+  try {
+    const { body } = await gitlabApi.get(
+      `projects/${config.repository}/repository/blobs/${blob}/raw`
+    );
+    return JSON.parse(body);
+  } catch (err) {
+    logger.debug({ err }, 'Failed to fetch repo cache blob');
+    return null;
+  }
 }
 
 // Initialize GitLab by getting base branch

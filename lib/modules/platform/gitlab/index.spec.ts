@@ -2138,4 +2138,28 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(filteredUsers).toMatchSnapshot();
     });
   });
+
+  describe('fetchRepoCache', () => {
+    it('fetches repo cache blob', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`/api/v4/projects/undefined/repository/blobs/111/raw`)
+        .reply(200, JSON.stringify({ foo: 'bar' }));
+
+      const res = await gitlab.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null on error', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`/api/v4/projects/undefined/repository/blobs/111/raw`)
+        .replyWithError('unknown error');
+
+      const res = await gitlab.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toBeNull();
+    });
+  });
 });
