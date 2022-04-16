@@ -47,15 +47,19 @@ describe('website-docs', () => {
   it('has doc headers sorted alphabetically', () => {
     expect(headers).toEqual([...headers].sort());
   });
+
   it('has headers for every required option', () => {
     expect(headers).toEqual(expectedOptions);
   });
+
   it('has self hosted doc headers sorted alphabetically', () => {
     expect(selfHostHeaders).toEqual([...selfHostHeaders].sort());
   });
+
   it('has headers (self hosted) for every required option', () => {
     expect(selfHostHeaders).toEqual(selfHostExpectedOptions);
   });
+
   const headers3 = doc
     .match(/\n### (.*?)\n/g)
     .map((match) => match.substring(5, match.length - 1));
@@ -67,6 +71,7 @@ describe('website-docs', () => {
     .map((option) => option.name)
     .sort();
   expectedOptions3.sort();
+
   it('has headers for every required sub-option', () => {
     expect(headers3).toEqual(expectedOptions3);
   });

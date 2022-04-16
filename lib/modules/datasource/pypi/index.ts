@@ -34,8 +34,8 @@ export class PypiDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let dependency: ReleaseResult = null;
-    const hostUrl = ensureTrailingSlash(registryUrl);
+    let dependency: ReleaseResult | null = null;
+    const hostUrl = ensureTrailingSlash(`${registryUrl}`);
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
     // not all simple indexes use this identifier, but most do
@@ -88,7 +88,7 @@ export class PypiDatasource extends Datasource {
       hostUrl,
       `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`
     );
-    const dependency: ReleaseResult = { releases: null };
+    const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await this.http.getJson<PypiJSON>(lookupUrl);
     const dep = rep?.body;
@@ -143,11 +143,10 @@ export class PypiDatasource extends Datasource {
       }
     }
 
-    dependency.releases = [];
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
-        const releases = dep.releases[version] || [];
+        const releases = dep.releases?.[version] || [];
         const { upload_time: releaseTimestamp } = releases[0] || {};
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
@@ -159,7 +158,8 @@ export class PypiDatasource extends Datasource {
         }
         // There may be multiple releases with different requires_python, so we return all in an array
         result.constraints = {
-          python: releases.map(({ requires_python }) => requires_python),
+          // TODO: string[] isn't allowed here
+          python: releases.map(({ requires_python }) => requires_python) as any,
         };
         return result;
       });
@@ -219,7 +219,7 @@ export class PypiDatasource extends Datasource {
       hostUrl,
       ensureTrailingSlash(PypiDatasource.normalizeNameForUrlLookup(packageName))
     );
-    const dependency: ReleaseResult = { releases: null };
+    const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);
     const dep = response?.body;
     if (!dep) {
@@ -261,7 +261,10 @@ export class PypiDatasource extends Datasource {
       }
       // There may be multiple releases with different requires_python, so we return all in an array
       result.constraints = {
-        python: versionReleases.map(({ requires_python }) => requires_python),
+        // TODO: string[] isn't allowed here
+        python: versionReleases.map(
+          ({ requires_python }) => requires_python
+        ) as any,
       };
       return result;
     });

@@ -123,7 +123,8 @@ export class BaseGoDatasource {
         // get server base url from import url
         const parsedUrl = URL.parse(goSourceUrl);
 
-        const packageName = trimLeadingSlash(parsedUrl.pathname);
+        // TODO: `parsedUrl.pathname` can be undefined
+        const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
         const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
@@ -150,7 +151,8 @@ export class BaseGoDatasource {
         const parsedUrl = URL.parse(goImportURL);
 
         // split the go module from the URL: host/go/module -> go/module
-        const packageName = trimTrailingSlash(parsedUrl.pathname)
+        // TODO: `parsedUrl.pathname` can be undefined
+        const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
           .replace(regEx(/\.git$/), '')
           .split('/')
           .slice(-2)

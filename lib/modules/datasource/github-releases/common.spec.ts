@@ -6,6 +6,7 @@ describe('modules/datasource/github-releases/common', () => {
       const sourceUrl = getSourceUrlBase('https://gh.my-company.com');
       expect(sourceUrl).toBe('https://gh.my-company.com/');
     });
+
     it('defaults to github.com', () => {
       const sourceUrl = getSourceUrlBase(null);
       expect(sourceUrl).toBe('https://github.com/');

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -71,9 +72,9 @@ export class GalaxyCollectionDatasource extends Datasource {
       return release;
     });
 
-    let newestVersionDetails: VersionsDetailResult;
+    let newestVersionDetails: VersionsDetailResult | undefined;
     // asynchronously get release details
-    const enrichedReleases: Release[] = await pMap(
+    const enrichedReleases: (Release | null)[] = await pMap(
       releases,
       (basicRelease) =>
         this.http
@@ -109,7 +110,7 @@ export class GalaxyCollectionDatasource extends Datasource {
       { concurrency: 5 } // allow 5 requests at maximum in parallel
     );
     // filter failed versions
-    const filteredReleases = enrichedReleases.filter(Boolean);
+    const filteredReleases = enrichedReleases.filter(is.truthy);
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
       releases: filteredReleases,

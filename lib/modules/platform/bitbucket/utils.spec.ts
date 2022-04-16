@@ -31,7 +31,5 @@ describe('modules/platform/bitbucket/utils', () => {
 
     const res = await utils.accumulateValues('some-url', 'get', null, 10);
     expect(res).toHaveLength(25);
-    expect(httpMock.getTrace()).toHaveLength(3);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });
