@@ -2994,4 +2994,32 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe('0abcdef');
     });
   });
+
+  describe('fetchRepoCache', () => {
+    it('fetches repo cache blob', async () => {
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/repo/git/blobs/111')
+        .reply(200, { content: toBase64(JSON.stringify({ foo: 'bar' })) });
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      const res = await github.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null on error', async () => {
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/repo/git/blobs/111')
+        .replyWithError('unknown error');
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      const res = await github.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toBeNull();
+    });
+  });
 });

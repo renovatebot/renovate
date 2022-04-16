@@ -49,6 +49,7 @@ import type {
   PlatformPrOptions,
   PlatformResult,
   Pr,
+  RepoCacheConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -232,6 +233,20 @@ export async function getJsonFile(
     return JSON5.parse(raw);
   }
   return JSON.parse(raw);
+}
+
+export async function fetchRepoCache({
+  blob,
+}: RepoCacheConfig): Promise<Record<string, unknown> | null> {
+  try {
+    const { body } = await githubApi.getJson<{ content: string }>(
+      `repos/${config.repository}/git/blobs/${blob}`
+    );
+    return JSON.parse(fromBase64(body.content));
+  } catch (err) {
+    logger.debug({ err }, 'Failed to fetch repo cache blob');
+    return null;
+  }
 }
 
 // Initialize GitHub by getting base branch and SHA
