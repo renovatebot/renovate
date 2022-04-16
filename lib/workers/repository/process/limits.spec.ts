@@ -12,6 +12,7 @@ import * as limits from './limits';
 jest.mock('../../../util/git');
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -41,17 +42,20 @@ describe('workers/repository/process/limits', () => {
       });
       expect(res).toBe(7);
     });
+
     it('returns prHourlyLimit if errored', async () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockRejectedValue('Unknown error');
       const res = await limits.getPrHourlyRemaining(config);
       expect(res).toBe(2);
     });
+
     it('returns 99 if no hourly limit', async () => {
       const res = await limits.getPrHourlyRemaining(config);
       expect(res).toBe(99);
     });
   });
+
   describe('getConcurrentPrsRemaining()', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
@@ -70,6 +74,7 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toBe(19);
     });
+
     it('returns 99 if no concurrent limit', async () => {
       const res = await limits.getConcurrentPrsRemaining(config, []);
       expect(res).toBe(99);
@@ -83,6 +88,7 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getPrsRemaining(config, []);
       expect(res).toBe(5);
     });
+
     it('returns concurrent limit', async () => {
       config.prConcurrentLimit = 5;
       const res = await limits.getPrsRemaining(config, []);
@@ -99,6 +105,7 @@ describe('workers/repository/process/limits', () => {
       ] as never);
       expect(res).toBe(19);
     });
+
     it('defaults to prConcurrentLimit', () => {
       config.branchConcurrentLimit = null;
       config.prConcurrentLimit = 20;
@@ -108,16 +115,19 @@ describe('workers/repository/process/limits', () => {
       ] as never);
       expect(res).toBe(19);
     });
+
     it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
       const res = limits.getConcurrentBranchesRemaining(config, []);
       expect(res).toBe(99);
     });
+
     it('returns 99 if no limits are set', () => {
       const res = limits.getConcurrentBranchesRemaining(config, []);
       expect(res).toBe(99);
     });
+
     it('returns prConcurrentLimit if errored', () => {
       config.branchConcurrentLimit = 2;
       const res = limits.getConcurrentBranchesRemaining(config, null);

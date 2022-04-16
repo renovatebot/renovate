@@ -4,6 +4,7 @@ import { ProgrammingLanguage } from '../../../constants';
 import { flattenUpdates } from './flatten';
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();

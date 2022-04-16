@@ -58,19 +58,19 @@ jobs:
       SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
 
     steps:
-      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+      - uses: actions/checkout@dcd71f646680f2efd8db4afa5ad64fdcba30e748 # tag=v3.0.1
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # tag=v3.1.0
+        uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.SKIP_JAVA_TESTS == 'false'
-        uses: actions/setup-java@0aa6f2a84f8634ac1a1bd81dfdf6d5aab98c70f1 # tag=v3.1.0
+        uses: actions/setup-java@9519cf1382ac8dc61ad461f7f7cb45f033220189 # tag=v3.1.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
@@ -97,10 +97,10 @@ jobs:
         run: yarn build
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        run: yarn jest:${{ env.NODE_VERSION }} --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
+        uses: codecov/codecov-action@e3c560433a6cc60aec8812599b7844a7b4fa0d71 # tag=v3.0.0
         if: always() && env.coverage == 'true'
 
       - name: E2E Test
@@ -113,12 +113,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+      - uses: actions/checkout@dcd71f646680f2efd8db4afa5ad64fdcba30e748 # tag=v3.0.1
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # tag=v3.1.0
+        uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -163,12 +163,12 @@ jobs:
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+      - uses: actions/checkout@dcd71f646680f2efd8db4afa5ad64fdcba30e748 # tag=v3.0.1
         with:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # tag=v3.1.0
+        uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

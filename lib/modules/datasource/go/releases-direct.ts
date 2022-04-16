@@ -41,7 +41,7 @@ export class GoDirectDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
 
-    let res: ReleaseResult = null;
+    let res: ReleaseResult | null = null;
 
     logger.trace(`go.getReleases(${packageName})`);
     const source = await BaseGoDatasource.getDatasource(packageName);

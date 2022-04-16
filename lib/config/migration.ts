@@ -182,11 +182,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
-        if (migratedConfig[key] !== undefined) {
-          migratedConfig.platformAutomerge = migratedConfig[key];
-        }
-        delete migratedConfig[key];
       }
 
       const migratedTemplates = {

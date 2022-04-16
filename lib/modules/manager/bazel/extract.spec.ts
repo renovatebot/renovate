@@ -7,15 +7,18 @@ describe('modules/manager/bazel/extract', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');
       expect(res).toBeNull();
     });
+
     it('returns empty if cannot parse dependency', () => {
       const res = extractPackageFile('git_repository(\n  nothing\n)\n');
       expect(res).toBeNull();
     });
+
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
       expect(res.deps).toHaveLength(14);
       expect(res.deps).toMatchSnapshot();
     });
+
     it('extracts github tags', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE2'));
       expect(res.deps).toMatchSnapshot([
@@ -25,12 +28,14 @@ describe('modules/manager/bazel/extract', () => {
         { packageName: 'nelhage/rules_boost' },
       ]);
     });
+
     it('handle comments and strings', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE3'));
       expect(res.deps).toMatchSnapshot([
         { packageName: 'nelhage/rules_boost' },
       ]);
     });
+
     it('extracts dependencies from *.bzl files', () => {
       const res = extractPackageFile(Fixtures.get('repositories.bzl'));
       expect(res.deps).toMatchSnapshot([

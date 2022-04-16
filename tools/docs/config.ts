@@ -2,7 +2,7 @@ import table from 'markdown-table';
 import { getOptions } from '../../lib/config/options';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
-import { readFile, updateFile } from '../utils/index';
+import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
 

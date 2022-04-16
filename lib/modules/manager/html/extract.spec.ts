@@ -25,6 +25,7 @@ describe('modules/manager/html/extract', () => {
       ],
     });
   });
+
   it('returns null', () => {
     expect(extractPackageFile(nothing)).toBeNull();
   });
