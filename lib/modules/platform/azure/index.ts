@@ -35,6 +35,7 @@ import type {
   PlatformParams,
   PlatformResult,
   Pr,
+  RepoCacheConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -162,6 +163,25 @@ export async function getJsonFile(
     return JSON5.parse(raw);
   }
   return JSON.parse(raw);
+}
+
+export async function fetchRepoCache({
+  blob,
+}: RepoCacheConfig): Promise<Record<string, unknown> | null> {
+  try {
+    const azureApiGit = await azureApi.gitApi();
+    const stream = await azureApiGit.getBlobContent(config.repoId, blob);
+    const string = await streamToString(stream);
+    const json = JSON.parse(string);
+    if (json.$id) {
+      logger.debug(json, 'Failed to fetch repo cache blob');
+      return null;
+    }
+    return json;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to fetch repo cache blob');
+    return null;
+  }
 }
 
 export async function initRepo({

@@ -1396,4 +1396,72 @@ describe('modules/platform/azure/index', () => {
       expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
     });
   });
+
+  describe('fetchRepoCache', () => {
+    it('fetches repo cache', async () => {
+      const data = { foo: 'bar' };
+      const gitApiMock = {
+        getBlobContent: jest.fn(() =>
+          Promise.resolve(Readable.from(JSON.stringify(data)))
+        ),
+        getRepositories: jest.fn(() =>
+          Promise.resolve([
+            { id: '123456', name: 'bar', project: { name: 'foo' } },
+          ])
+        ),
+      };
+      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+
+      const res = await azure.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toEqual(data);
+      expect(gitApiMock.getBlobContent).toHaveBeenCalledWith(undefined, '111');
+    });
+
+    it('returns null if blob is not found', async () => {
+      const gitApiMock = {
+        getBlobContent: jest.fn((_, blob: string) =>
+          Promise.resolve(
+            Readable.from(
+              JSON.stringify({
+                $id: '1',
+                innerException: null,
+                message: `TF401035: The object '${blob}' does not exist.`,
+                typeName: 'System.ArgumentException, mscorlib',
+                typeKey: 'ArgumentException',
+                errorCode: 0,
+                eventId: 0,
+              })
+            )
+          )
+        ),
+        getRepositories: jest.fn(() =>
+          Promise.resolve([
+            { id: '123456', name: 'bar', project: { name: 'foo' } },
+          ])
+        ),
+      };
+      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+
+      const res = await azure.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toBeNull();
+    });
+  });
+
+  it('returns null on unknown fetch errors', async () => {
+    const gitApiMock = {
+      getBlobContent: jest.fn(() => Promise.reject(new Error('unknown'))),
+      getRepositories: jest.fn(() =>
+        Promise.resolve([
+          { id: '123456', name: 'bar', project: { name: 'foo' } },
+        ])
+      ),
+    };
+    azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+
+    const res = await azure.fetchRepoCache({ blob: '111', commit: '222' });
+
+    expect(res).toBeNull();
+  });
 });
