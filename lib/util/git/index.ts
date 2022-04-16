@@ -117,7 +117,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
       res = (await git.raw(['remote', 'show', 'origin']))
         .split('\n')
         .map((line) => line.trim())
-        .find((line) => line.startsWith(headPrefix))
+        .find((line) => line.startsWith(headPrefix))!
         .replace(headPrefix, '');
     }
     return res.replace('origin/', '').trim();
@@ -144,7 +144,8 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
 
 let config: LocalConfig = {} as any;
 
-let git: SimpleGit | undefined;
+// TODO: can be undefined
+let git: SimpleGit;
 let gitInitialized: boolean;
 
 let privateKeySet = false;
@@ -152,7 +153,7 @@ let privateKeySet = false;
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
-  let version: string;
+  let version: string | undefined;
   const globalGit = simpleGit();
   try {
     const raw = await globalGit.raw(['--version']);
@@ -248,7 +249,7 @@ async function cleanLocalBranches(): Promise<void> {
   }
 }
 
-export function setGitAuthor(gitAuthor: string): void {
+export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
     gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
   );
@@ -325,8 +326,8 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { localDir } = GlobalConfig.get();
-  logger.debug('Initializing git repository into ' + localDir);
+  const localDir = GlobalConfig.get('localDir')!;
+  logger.debug(`Initializing git repository into ${localDir}`);
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
@@ -355,7 +356,7 @@ export async function syncGit(): Promise<void> {
   if (clone) {
     const cloneStart = Date.now();
     try {
-      const opts = [];
+      const opts: string[] = [];
       if (config.fullClone) {
         logger.debug('Performing full clone');
       } else {
@@ -506,10 +507,10 @@ export async function getFileList(): Promise<string[]> {
   }
   return files
     .split(newlineRegex)
-    .filter(Boolean)
+    .filter(is.string)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop())
-    .filter((file: string) =>
+    .map((line) => line.split(regEx(/\t/)).pop()!)
+    .filter((file) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );
 }
@@ -557,7 +558,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return false;
   }
   // Retrieve the author of the most recent commit
-  let lastAuthor: string;
+  let lastAuthor: string | undefined;
   try {
     lastAuthor = (
       await git.raw([
@@ -691,7 +692,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  let status: StatusResult;
+  let status: StatusResult | undefined;
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
@@ -742,7 +743,9 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(branchName: string): Promise<string[]> {
+export async function getBranchFiles(
+  branchName: string
+): Promise<string[] | null> {
   await syncGit();
   try {
     const diff = await gitRetry(() =>
@@ -815,7 +818,7 @@ export async function prepareCommit({
   message,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir')!;
   await syncGit();
   logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);

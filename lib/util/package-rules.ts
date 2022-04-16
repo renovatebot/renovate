@@ -73,7 +73,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchPaths.length) {
+  if (matchPaths.length && packageFile) {
     const isMatch = matchPaths.some(
       (rulePath) =>
         packageFile.includes(rulePath) ||
@@ -84,7 +84,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchDepTypes.length) {
+  if (matchDepTypes.length && depType) {
     const isMatch =
       matchDepTypes.includes(depType) ||
       depTypes?.some((dt) => matchDepTypes.includes(dt));
@@ -93,14 +93,14 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchLanguages.length) {
+  if (matchLanguages.length && language) {
     const isMatch = matchLanguages.includes(language);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (matchBaseBranches.length) {
+  if (matchBaseBranches.length && baseBranch) {
     const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
       const isAllowedPred = configRegexPredicate(matchBaseBranch);
       if (isAllowedPred) {
@@ -114,21 +114,21 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchManagers.length) {
+  if (matchManagers.length && manager) {
     const isMatch = matchManagers.includes(manager);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (matchDatasources.length) {
+  if (matchDatasources.length && datasource) {
     const isMatch = matchDatasources.includes(datasource);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (matchUpdateTypes.length) {
+  if (matchUpdateTypes.length && updateType) {
     const isMatch =
       matchUpdateTypes.includes(updateType) ||
       (isBump && matchUpdateTypes.includes('bump'));
@@ -169,7 +169,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (excludePackageNames.length) {
+  if (excludePackageNames.length && depName) {
     const isMatch = excludePackageNames.includes(depName);
     if (isMatch) {
       return false;
@@ -221,7 +221,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchCurrentVersion) {
+  if (matchCurrentVersion && versioning && currentValue) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
