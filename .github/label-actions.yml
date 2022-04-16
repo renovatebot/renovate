@@ -125,3 +125,25 @@
 
 
     The Renovate team
+
+'test:no-coverage-ignore'
+  comment: >
+    Hi there,
+
+
+    You're skipping code tests via `istanbul ignore`.
+    Please only do this if it's not possible to test that or it's very difficult to test and won't usually happen at runtime.
+    If you use it, always add a comment to the code, why it was needed, like:
+    ```ts
+    // istanbul ingore next: typescript strict null check
+    if (!url) {
+      return null;
+    }
+    ```
+
+
+    Good luck,
+
+
+    The Renovate team
+
