@@ -81,7 +81,8 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/no-explicit-any': 0,
-    '@typescript-eslint/no-non-null-assertion': 2,
+    // TODO: https://github.com/renovatebot/renovate/issues/7154
+    '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,
       {
