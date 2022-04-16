@@ -17,7 +17,7 @@
     If you need more time, or are stuck, please ask for help or more time in a comment.
 
 
-    Good luck,
+    3Good luck,
 
 
     The Renovate team
@@ -126,7 +126,7 @@
 
     The Renovate team
 
-'pr:no-coverage-ignore'
+'pr:no-coverage-ignore':
   comment: >
     Hi there,
 
@@ -147,7 +147,7 @@
 
     The Renovate team
 
-'pr:no-done-comments'
+'pr:no-done-comments':
   comment: >
     Hi there,
 
@@ -160,4 +160,3 @@
 
 
     The Renovate team
-
