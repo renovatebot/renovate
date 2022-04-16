@@ -25,6 +25,11 @@ export class GitlabReleasesDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const urlEncodedRepo = encodeURIComponent(packageName);
     const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
 
