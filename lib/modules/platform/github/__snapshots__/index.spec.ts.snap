@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/platform/github/index getBranchPr(branchName) should reopen an autoclosed PR 1`] = `
+exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #91",
   "number": 91,
   "sourceBranch": "somebranch",
@@ -11,19 +12,9 @@ Object {
 }
 `;
 
-exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object 1`] = `
+exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object in fork mode 1`] = `
 Object {
-  "displayNumber": "Pull Request #91",
-  "number": 91,
-  "sourceBranch": "somebranch",
-  "sourceRepo": "some/repo",
-  "state": "open",
-  "title": "Some title",
-}
-`;
-
-exports[`modules/platform/github/index getBranchPr(branchName) should return the PR object in fork mode 1`] = `
-Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #90",
   "number": 90,
   "sourceBranch": "somebranch",
@@ -33,33 +24,33 @@ Object {
 }
 `;
 
-exports[`modules/platform/github/index getPr(prNo) should return PR from closed graphql result 1`] = `
+exports[`modules/platform/github/index getBranchPr(branchName) should reopen and cache autoclosed PR 1`] = `
 Object {
   "body": "dummy body",
-  "displayNumber": "Pull Request #2499",
-  "number": 2499,
-  "sourceBranch": "renovate/delay-4.x",
-  "state": "merged",
-  "title": "build(deps): update dependency delay to v4.0.1",
+  "displayNumber": "Pull Request #91",
+  "number": 91,
+  "sourceBranch": "somebranch",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "title": "old title",
 }
 `;
 
-exports[`modules/platform/github/index getPr(prNo) should return PR from graphql result 1`] = `
+exports[`modules/platform/github/index getPr(prNo) should return PR 1`] = `
 Object {
-  "body": "Some body",
+  "body": "dummy body",
   "displayNumber": "Pull Request #2500",
-  "hasAssignees": true,
-  "hasReviewers": true,
   "number": 2500,
   "sourceBranch": "renovate/jest-monorepo",
+  "sourceRepo": "some/repo",
   "state": "open",
-  "targetBranch": "master",
   "title": "chore(deps): update dependency jest to v23.6.0",
 }
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
 Object {
+  "body": "dummy body",
   "createdAt": "01-01-2022",
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
@@ -77,6 +68,7 @@ Object {
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
   "hasReviewers": true,
@@ -89,6 +81,7 @@ Object {
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
 Object {
+  "body": "dummy body",
   "displayNumber": "Pull Request #1234",
   "number": 1234,
   "sourceBranch": "some/branch",
