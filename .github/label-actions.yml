@@ -126,7 +126,7 @@
 
     The Renovate team
 
-'test:no-coverage-ignore'
+'pr:no-coverage-ignore'
   comment: >
     Hi there,
 
@@ -140,6 +140,20 @@
       return null;
     }
     ```
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'pr:no-done-comments'
+  comment: >
+    Hi there,
+
+
+    You are using simple `done` comments which cause a lot of noise.
+    Please read our [contribution guide](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduse noise.
 
 
     Good luck,
