@@ -20,6 +20,7 @@ Object {
       expect(res.npmrc).toBeDefined();
       expect(res.npmrcMerge).toBe(true);
     });
+
     it('handles no .npmrc', async () => {
       fs.readFile.mockImplementationOnce(() => Promise.reject());
       const res = await detectGlobalConfig();

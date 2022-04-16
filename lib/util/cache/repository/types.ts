@@ -32,25 +32,22 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface GithubGraphqlPageCache {
-  pageLastResizedAt: string;
-  pageSize: number;
-}
-
-export interface Cache {
+export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
-  repository?: string;
-  revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    github?: {
-      graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
-    };
+    github?: Record<string, unknown>;
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
+}
+
+export interface RepoCache {
+  repository: string;
+  revision: number;
+  data: RepoCacheData;
 }

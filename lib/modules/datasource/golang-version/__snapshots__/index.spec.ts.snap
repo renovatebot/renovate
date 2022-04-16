@@ -482,6 +482,18 @@ Object {
       "version": "1.16.12",
     },
     Object {
+      "releaseTimestamp": "2022-01-06T00:00:00.000Z",
+      "version": "1.16.13",
+    },
+    Object {
+      "releaseTimestamp": "2022-02-10T00:00:00.000Z",
+      "version": "1.16.14",
+    },
+    Object {
+      "releaseTimestamp": "2022-03-03T00:00:00.000Z",
+      "version": "1.16.15",
+    },
+    Object {
       "releaseTimestamp": "2021-08-16T00:00:00.000Z",
       "version": "1.17.0",
     },
@@ -504,6 +516,22 @@ Object {
     Object {
       "releaseTimestamp": "2021-12-09T00:00:00.000Z",
       "version": "1.17.5",
+    },
+    Object {
+      "releaseTimestamp": "2022-01-06T00:00:00.000Z",
+      "version": "1.17.6",
+    },
+    Object {
+      "releaseTimestamp": "2022-02-10T00:00:00.000Z",
+      "version": "1.17.7",
+    },
+    Object {
+      "releaseTimestamp": "2022-03-03T00:00:00.000Z",
+      "version": "1.17.8",
+    },
+    Object {
+      "releaseTimestamp": "2022-03-15T00:00:00.000Z",
+      "version": "1.18.0",
     },
   ],
   "sourceUrl": "https://github.com/golang/go",

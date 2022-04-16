@@ -17,6 +17,7 @@ describe('modules/manager/terragrunt/modules', () => {
       expect(project).toBe('hashicorp/example.repo-123');
     });
   });
+
   describe('gitTagsRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(

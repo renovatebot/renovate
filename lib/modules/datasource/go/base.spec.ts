@@ -201,6 +201,60 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('supports GitLab EE deps in subgroup', async () => {
+        hostRules.find.mockReturnValue({ token: 'some-token' });
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/subgroup/myrepo?go-get=1')
+          .reply(200, loadFixture('go-get-gitlab-ee-subgroup.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/subgroup/myrepo'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'golang/subgroup/myrepo',
+          registryUrl: 'https://my.custom.domain',
+        });
+      });
+
+      it('supports GitLab EE deps in subgroup with version', async () => {
+        hostRules.find.mockReturnValue({ token: 'some-token' });
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/subgroup/myrepo/v2?go-get=1')
+          .reply(200, loadFixture('go-get-gitlab-ee-subgroup.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/subgroup/myrepo/v2'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'golang/subgroup/myrepo',
+          registryUrl: 'https://my.custom.domain',
+        });
+      });
+
+      it('supports GitLab EE monorepo deps in subgroup', async () => {
+        hostRules.find.mockReturnValue({ token: 'some-token' });
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/subgroup/myrepo/monorepo?go-get=1')
+          .reply(200, loadFixture('go-get-gitlab-ee-subgroup.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/subgroup/myrepo/monorepo'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'golang/subgroup/myrepo',
+          registryUrl: 'https://my.custom.domain',
+        });
+      });
+
       it('handles fyne.io', async () => {
         const meta =
           '<meta name="go-import" content="fyne.io/fyne git https://github.com/fyne-io/fyne">';

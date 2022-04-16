@@ -9,6 +9,8 @@ const golangReleasesInvalidContent = loadFixture('releases-invalid.go');
 const golangReleasesInvalidContent2 = loadFixture('releases-invalid2.go');
 const golangReleasesInvalidContent3 = loadFixture('releases-invalid3.go');
 const golangReleasesInvalidContent4 = loadFixture('releases-invalid4.go');
+const golangReleasesInvalidContent5 = loadFixture('releases-invalid5.go');
+const golangReleasesInvalidContent6 = loadFixture('releases-invalid6.go');
 
 const datasource = GolangVersionDatasource.id;
 
@@ -23,7 +25,7 @@ describe('modules/datasource/golang-version/index', () => {
         datasource,
         depName: 'golang',
       });
-      expect(res.releases).toHaveLength(125);
+      expect(res.releases).toHaveLength(132);
       expect(res.releases[0]).toEqual({
         releaseTimestamp: '2012-03-28T00:00:00.000Z',
         version: '1.0.0',
@@ -95,6 +97,26 @@ describe('modules/datasource/golang-version/index', () => {
       expect(
         await getPkgReleases({ datasource, depName: 'golang' })
       ).toBeNull();
+    });
+
+    it('throws ExternalHostError for invalid release format beginning ', async () => {
+      httpMock
+        .scope('https://raw.githubusercontent.com')
+        .get('/golang/website/master/internal/history/release.go')
+        .reply(200, golangReleasesInvalidContent5);
+      await expect(
+        getPkgReleases({ datasource, depName: 'golang' })
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws ExternalHostError for invalid release format', async () => {
+      httpMock
+        .scope('https://raw.githubusercontent.com')
+        .get('/golang/website/master/internal/history/release.go')
+        .reply(200, golangReleasesInvalidContent6);
+      await expect(
+        getPkgReleases({ datasource, depName: 'golang' })
+      ).rejects.toThrow(ExternalHostError);
     });
   });
 });

@@ -69,6 +69,7 @@ describe('modules/datasource/docker/index', () => {
         registryHost: 'https://registry:5000',
       });
     });
+
     it('supports registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
@@ -79,6 +80,7 @@ describe('modules/datasource/docker/index', () => {
         registryHost: 'https://my.local.registry',
       });
     });
+
     it('supports http registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
@@ -89,6 +91,7 @@ describe('modules/datasource/docker/index', () => {
         registryHost: 'http://my.local.registry',
       });
     });
+
     it('supports schemeless registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
@@ -100,6 +103,7 @@ describe('modules/datasource/docker/index', () => {
       });
     });
   });
+
   describe('getAuthHeaders', () => {
     beforeEach(() => {
       httpMock

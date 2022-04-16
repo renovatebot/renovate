@@ -2,7 +2,7 @@ import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 
 export interface ToolConstraint {
   toolName: string;
-  constraint?: string;
+  constraint?: string | null;
 }
 
 export interface ToolConfig {

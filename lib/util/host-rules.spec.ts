@@ -1,11 +1,21 @@
 import { PlatformId } from '../constants';
 import { NugetDatasource } from '../modules/datasource/nuget';
-import { add, clear, find, findAll, getAll, hosts } from './host-rules';
+import type { HostRule } from '../types';
+import {
+  add,
+  clear,
+  find,
+  findAll,
+  getAll,
+  hostType,
+  hosts,
+} from './host-rules';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });
+
   describe('add()', () => {
     it('throws if both domainName and hostName', () => {
       expect(() =>
@@ -13,46 +23,52 @@ describe('util/host-rules', () => {
           hostType: PlatformId.Azure,
           domainName: 'github.com',
           hostName: 'api.github.com',
-        } as any)
+        } as HostRule)
       ).toThrow();
     });
+
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
         add({
           hostType: PlatformId.Azure,
           domainName: 'github.com',
           matchHost: 'https://api.github.com',
-        } as any)
+        } as HostRule)
       ).toThrow();
     });
+
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
         add({
           hostType: PlatformId.Azure,
           hostName: 'api.github.com',
           matchHost: 'https://api.github.com',
-        } as any)
+        } as HostRule)
       ).toThrow();
     });
+
     it('supports baseUrl-only', () => {
       add({
         matchHost: 'https://some.endpoint',
         username: 'user1',
         password: 'pass1',
-      } as any);
+      });
       expect(find({ url: 'https://some.endpoint/v3/' })).toEqual({
         password: 'pass1',
         username: 'user1',
       });
     });
   });
+
   describe('find()', () => {
     beforeEach(() => {
       clear();
     });
+
     it('warns and returns empty for bad search', () => {
       expect(find({ abc: 'def' } as any)).toEqual({});
     });
+
     it('needs exact host matches', () => {
       add({
         hostType: NugetDatasource.id,
@@ -60,7 +76,7 @@ describe('util/host-rules', () => {
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
-      } as any);
+      } as HostRule);
       expect(find({ hostType: NugetDatasource.id })).toEqual({});
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.org' })
@@ -72,6 +88,7 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://not-nuget.org' })
       ).toEqual({});
     });
+
     it('matches on empty rules', () => {
       add({
         enabled: true,
@@ -80,6 +97,7 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
       ).toEqual({ enabled: true });
     });
+
     it('matches on hostType', () => {
       add({
         hostType: NugetDatasource.id,
@@ -89,11 +107,12 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
       ).toEqual({ token: 'abc' });
     });
+
     it('matches on domainName', () => {
       add({
         domainName: 'github.com',
         token: 'def',
-      } as any);
+      } as HostRule);
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
           .token
@@ -176,11 +195,12 @@ describe('util/host-rules', () => {
       add({
         hostName: 'nuget.local',
         token: 'abc',
-      } as any);
+      } as HostRule);
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
       ).toEqual({ token: 'abc' });
     });
+
     it('matches on matchHost with protocol', () => {
       add({
         matchHost: 'https://domain.com',
@@ -195,6 +215,7 @@ describe('util/host-rules', () => {
         }).token
       ).toBe('def');
     });
+
     it('matches on matchHost without protocol', () => {
       add({
         matchHost: 'domain.com',
@@ -204,6 +225,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://domain.com' }).token).toBe('def');
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
+
     it('matches on matchHost with dot prefix', () => {
       add({
         matchHost: '.domain.com',
@@ -213,23 +235,25 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
         matchHost: 'https://nuget.local/api',
         token: 'abc',
-      } as any);
+      });
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
           .token
       ).toBe('abc');
     });
+
     it('matches on endpoint subresource', () => {
       add({
         hostType: NugetDatasource.id,
         matchHost: 'https://nuget.local/api',
         token: 'abc',
-      } as any);
+      });
       expect(
         find({
           hostType: NugetDatasource.id,
@@ -237,21 +261,25 @@ describe('util/host-rules', () => {
         })
       ).toEqual({ token: 'abc' });
     });
+
     it('matches shortest matchHost first', () => {
       add({
         matchHost: 'https://nuget.local/api',
         token: 'longest',
-      } as any);
+      });
       add({
         matchHost: 'https://nuget.local/',
         token: 'shortest',
-      } as any);
+      });
       expect(
         find({
           url: 'https://nuget.local/api/sub-resource',
         })
       ).toEqual({ token: 'longest' });
     });
+  });
+
+  describe('hosts()', () => {
     it('returns hosts', () => {
       add({
         hostType: NugetDatasource.id,
@@ -261,12 +289,12 @@ describe('util/host-rules', () => {
         hostType: NugetDatasource.id,
         matchHost: 'https://nuget.local/api',
         token: 'abc',
-      } as any);
+      });
       add({
         hostType: NugetDatasource.id,
         hostName: 'my.local.registry',
         token: 'def',
-      } as any);
+      } as HostRule);
       add({
         hostType: NugetDatasource.id,
         matchHost: 'another.local.registry',
@@ -288,10 +316,12 @@ describe('util/host-rules', () => {
       ]);
     });
   });
+
   describe('findAll()', () => {
     it('warns and returns empty for bad search', () => {
       expect(findAll({ abc: 'def' } as any)).toEqual([]);
     });
+
     it('needs exact host matches', () => {
       const hostRule = {
         hostType: 'nuget',
@@ -311,6 +341,7 @@ describe('util/host-rules', () => {
       ]);
     });
   });
+
   describe('getAll()', () => {
     it('returns all host rules', () => {
       const hostRule1 = {
@@ -327,6 +358,57 @@ describe('util/host-rules', () => {
       add(hostRule1);
       add(hostRule2);
       expect(getAll()).toMatchObject([hostRule1, hostRule2]);
+    });
+  });
+
+  describe('hostType()', () => {
+    it('return hostType', () => {
+      add({
+        hostType: PlatformId.Github,
+        token: 'aaaaaa',
+      });
+      add({
+        hostType: PlatformId.Github,
+        matchHost: 'github.example.com',
+        token: 'abc',
+      });
+      add({
+        hostType: 'github-changelog',
+        matchHost: 'https://github.example.com/chalk/chalk',
+        token: 'def',
+      });
+      expect(
+        hostType({
+          url: 'https://github.example.com/chalk/chalk',
+        })
+      ).toBe('github-changelog');
+    });
+
+    it('returns null', () => {
+      add({
+        hostType: PlatformId.Github,
+        token: 'aaaaaa',
+      });
+      add({
+        hostType: PlatformId.Github,
+        matchHost: 'github.example.com',
+        token: 'abc',
+      });
+      add({
+        hostType: 'github-changelog',
+        matchHost: 'https://github.example.com/chalk/chalk',
+        token: 'def',
+      });
+      expect(
+        hostType({
+          url: 'https://github.example.com/chalk/chalk',
+        })
+      ).toBe('github-changelog');
+      expect(
+        hostType({
+          url: 'https://gitlab.example.com/chalk/chalk',
+        })
+      ).toBeNull();
     });
   });
 });

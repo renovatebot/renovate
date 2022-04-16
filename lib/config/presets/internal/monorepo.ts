@@ -87,6 +87,8 @@ const repoGroups = {
     'https://github.com/dotnet/runtime',
   ],
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
+  'dotnet-azure-ad-identitymodel-extensions':
+    'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',

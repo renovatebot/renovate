@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
@@ -7,12 +8,14 @@ import { AutomergeMigration } from './custom/automerge-migration';
 import { AutomergeMinorMigration } from './custom/automerge-minor-migration';
 import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
+import { AzureGitLabAutomergeMigration } from './custom/azure-gitlab-automerge-migration';
 import { BaseBranchMigration } from './custom/base-branch-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
@@ -77,6 +80,7 @@ export class MigrationsService {
     AutomergeMinorMigration,
     AutomergePatchMigration,
     AutomergeTypeMigration,
+    AzureGitLabAutomergeMigration,
     BaseBranchMigration,
     BinarySourceMigration,
     BranchNameMigration,
@@ -109,6 +113,7 @@ export class MigrationsService {
     UnpublishSafeMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,
+    DryRunMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
@@ -117,10 +122,10 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = migrations.find((item) => item.propertyName === key);
+      const migration = MigrationsService.#getMigration(migrations, key);
 
       if (migration) {
-        migration.run(value);
+        migration.run(value, key);
 
         if (migration.deprecated) {
           delete migratedConfig[key];
@@ -173,5 +178,18 @@ export class MigrationsService {
     }
 
     return migrations;
+  }
+
+  static #getMigration(
+    migrations: ReadonlyArray<Migration>,
+    key: string
+  ): Migration | undefined {
+    return migrations.find((migration) => {
+      if (is.regExp(migration.propertyName)) {
+        return migration.propertyName.test(key);
+      }
+
+      return migration.propertyName === key;
+    });
   }
 }
