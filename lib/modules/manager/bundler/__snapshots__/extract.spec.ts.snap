@@ -2148,6 +2148,12 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses sourceGroup
 Object {
   "deps": Array [
     Object {
+      "currentValue": "~> 1.5.3",
+      "datasource": "ruby-version",
+      "depName": "ruby",
+      "registryUrls": null,
+    },
+    Object {
       "datasource": "rubygems",
       "depName": "some_internal_gem",
       "managerData": Object {
