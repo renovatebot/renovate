@@ -1,12 +1,13 @@
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import type { Http } from '../../../util/http';
+import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import type { ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
 
-function getPkgProp(pkgInfo: XmlElement, propName: string): string {
-  return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`)?.val;
+function getPkgProp(pkgInfo: XmlElement, propName: string): string | undefined {
+  return pkgInfo.childNamed('m:properties')?.childNamed(`d:${propName}`)?.val;
 }
 
 export async function getReleases(
@@ -17,12 +18,13 @@ export async function getReleases(
   const dep: ReleaseResult = {
     releases: [],
   };
-  let pkgUrlList = `${feedUrl.replace(
+  let pkgUrlList: string | null = `${feedUrl.replace(
     regEx(/\/+$/),
     ''
   )}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl,Published`;
-  do {
-    const pkgVersionsListRaw = await http.get(pkgUrlList);
+  while (pkgUrlList !== null) {
+    // typescript issue
+    const pkgVersionsListRaw: HttpResponse<string> = await http.get(pkgUrlList);
     const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
 
     const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
@@ -31,7 +33,7 @@ export async function getReleases(
       const version = getPkgProp(pkgInfo, 'Version');
       const releaseTimestamp = getPkgProp(pkgInfo, 'Published');
       dep.releases.push({
-        version: removeBuildMeta(version),
+        version: removeBuildMeta(`${version}`),
         releaseTimestamp,
       });
       try {
@@ -55,7 +57,7 @@ export async function getReleases(
       .find((node) => node.attr.rel === 'next');
 
     pkgUrlList = nextPkgUrlListLink ? nextPkgUrlListLink.attr.href : null;
-  } while (pkgUrlList !== null);
+  }
 
   // dep not found if no release, so we can try next registry
   if (dep.releases.length === 0) {
