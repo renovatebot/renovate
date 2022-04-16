@@ -1,9 +1,10 @@
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFile } from '../types';
-import { delimiters } from './common';
+import { delimiters, extractRubyVersion } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
@@ -32,16 +33,17 @@ export async function extractPackageFile(
     if (sourceMatch) {
       res.registryUrls?.push(sourceMatch[1]);
     }
-    // TODO: will be used in next PR for #15114
-    // let rubyMatch: RegExpMatchArray | null = null;
-    // for (const delimiter of delimiters) {
-    //   rubyMatch =
-    //     rubyMatch ??
-    //     regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
-    // }
-    // if (rubyMatch) {
-    //   res.constraints = { ruby: rubyMatch[1] };
-    // }
+
+    const rubyMatch = extractRubyVersion(line);
+    if (rubyMatch) {
+      res.deps.push({
+        depName: 'ruby',
+        currentValue: rubyMatch,
+        datasource: RubyVersionDatasource.id,
+        registryUrls: null,
+      });
+    }
+
     const gemMatchRegex = regEx(
       `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
     );

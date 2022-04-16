@@ -24,6 +24,11 @@ export class NpmDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const res = await getDependency(this.http, registryUrl, packageName);
     if (res) {
       res.tags = res['dist-tags'];

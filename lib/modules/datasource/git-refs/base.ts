@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import simpleGit from 'simple-git';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -38,7 +39,7 @@ export class GitDatasource {
       .map((line) => line.trim())
       .map((line) => {
         let match = refMatch.exec(line);
-        if (match) {
+        if (match?.groups) {
           return {
             type: match.groups.type,
             value: match.groups.value,
@@ -46,7 +47,7 @@ export class GitDatasource {
           };
         }
         match = headMatch.exec(line);
-        if (match) {
+        if (match?.groups) {
           return {
             type: '',
             value: 'HEAD',
@@ -56,7 +57,7 @@ export class GitDatasource {
         logger.trace(`malformed ref: ${line}`);
         return null;
       })
-      .filter(Boolean)
+      .filter(is.truthy)
       .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
 
     return refs;
