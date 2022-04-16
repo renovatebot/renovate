@@ -5,6 +5,15 @@ import type { UpdateArtifact } from '../types';
 
 export const delimiters = ['"', "'"];
 
+export function extractRubyVersion(txt: string): string | null {
+  const rubyMatch = regEx(/^ruby\s+("[^"]+"|'[^']+')\s*$/gm).exec(txt);
+  if (rubyMatch?.length !== 2) {
+    return null;
+  }
+  const quotedVersion = rubyMatch[1];
+  return quotedVersion.substring(1, quotedVersion.length - 1);
+}
+
 export async function getRubyConstraint(
   updateArtifact: UpdateArtifact
 ): Promise<string | null> {
@@ -16,13 +25,10 @@ export async function getRubyConstraint(
     logger.debug('Using ruby constraint from config');
     return ruby;
   } else {
-    const rubyMatch = regEx(/^ruby\s+("[^"]+"|'[^']+')\s*$/gm).exec(
-      newPackageFileContent
-    );
-    if (rubyMatch?.length === 2) {
+    const rubyMatch = extractRubyVersion(newPackageFileContent);
+    if (rubyMatch) {
       logger.debug('Using ruby version from gemfile');
-      const quotedVersion = rubyMatch[1];
-      return quotedVersion.substring(1, quotedVersion.length - 1);
+      return rubyMatch;
     }
     const rubyVersionFile = getSiblingFileName(
       packageFileName,

@@ -71,6 +71,7 @@ export async function updateArtifacts(
     } else {
       cmd = `bundler lock --update ${updatedDeps
         .map((dep) => `${dep.depName}`)
+        .filter((dep) => dep !== 'ruby')
         .map(quote)
         .join(' ')}`;
     }
