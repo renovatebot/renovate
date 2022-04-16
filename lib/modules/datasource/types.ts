@@ -1,7 +1,7 @@
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
-  datasource?: string;
+  datasource: string;
   packageName?: string;
   depName: string;
   defaultRegistryUrls?: string[];
