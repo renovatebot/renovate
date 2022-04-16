@@ -63,7 +63,7 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
   replacementName?: string;
