@@ -242,7 +242,7 @@ async function fetchReleases(
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
   let { registryUrls } = config;
-  // TODO: needs test
+  // istanbul ignore if: need test
   if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
@@ -426,10 +426,8 @@ export function getDigest(
   config: GetDigestInputConfig,
   value?: string
 ): Promise<string | null> {
-  const datasource = config.datasource
-    ? getDatasourceFor(config.datasource)
-    : null;
-  // istanbul ignore if
+  const datasource = getDatasourceFor(config.datasource);
+  // istanbul ignore if: need test
   if (!datasource || !('getDigest' in datasource)) {
     return Promise.resolve(null);
   }
