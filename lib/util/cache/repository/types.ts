@@ -32,11 +32,6 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface GithubGraphqlPageCache {
-  pageLastResizedAt: string;
-  pageSize: number;
-}
-
 export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
