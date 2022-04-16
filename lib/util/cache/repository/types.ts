@@ -32,12 +32,10 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface Cache {
+export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
-  repository?: string;
-  revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
@@ -46,4 +44,10 @@ export interface Cache {
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
+}
+
+export interface RepoCache {
+  repository: string;
+  revision: number;
+  data: RepoCacheData;
 }
