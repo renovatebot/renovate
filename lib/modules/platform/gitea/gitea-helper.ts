@@ -605,11 +605,7 @@ export async function fetchRepoCache(
   try {
     const url = `repos/${repoPath}/git/blobs/${blob}`;
     const { body } = await giteaHttp.getJson<{ content: string }>(url);
-    const rawContent = body?.content;
-    if (rawContent) {
-      return JSON.parse(fromBase64(rawContent));
-    }
-    logger.debug('Failed to obtain repo cache blob content');
+    return JSON.parse(fromBase64(body.content));
   } catch (err) {
     logger.debug({ err }, 'Failed to fetch repo cache blob');
   }
