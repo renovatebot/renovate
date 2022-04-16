@@ -872,13 +872,22 @@ describe('util/git/index', () => {
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
 
-    it('creates renovate ref', async () => {
+    it('creates renovate ref in default section', async () => {
       const commit = git.getBranchCommit('develop');
 
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
-      const funnyRefs = await lsRenovateRefs();
-      expect(funnyRefs).toContain('refs/renovate/foo/bar');
+      const renovateRefs = await lsRenovateRefs();
+      expect(renovateRefs).toContain('refs/renovate/branches/foo/bar');
+    });
+
+    it('creates custom section for renovate ref', async () => {
+      const commit = git.getBranchCommit('develop');
+
+      await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
+
+      const renovateRefs = await lsRenovateRefs();
+      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
@@ -899,8 +908,18 @@ describe('util/git/index', () => {
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
+      await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
+    });
+
+    it('preserves unknown sections by default', async () => {
+      const commit = git.getBranchCommit('develop');
+      const tmpGit = Git(tmpDir.path);
+      await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
+      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
     });
   });
 
