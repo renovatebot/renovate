@@ -18,6 +18,7 @@ import type { logger as _logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
+import { toBase64 } from '../../../util/string';
 import type { PlatformResult } from '../types';
 import type * as ght from './gitea-helper';
 
@@ -1597,6 +1598,21 @@ describe('modules/platform/gitea/index', () => {
       helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
+    });
+  });
+
+  describe('fetchRepoCache', () => {
+    it('fetches blob content', async () => {
+      helper.fetchRepoCache.mockResolvedValueOnce({ foo: 'bar' });
+      await initFakeRepo({ full_name: 'some/repo' });
+
+      const res = await gitea.fetchRepoCache({ blob: '111', commit: '222' });
+
+      expect(res).toEqual({ foo: 'bar' });
+      expect(helper.fetchRepoCache).toHaveBeenCalledWith('some/repo', {
+        blob: '111',
+        commit: '222',
+      });
     });
   });
 });

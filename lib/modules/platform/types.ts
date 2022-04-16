@@ -147,6 +147,11 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export interface RepoCacheConfig {
+  commit: string;
+  blob: string;
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
@@ -196,4 +201,7 @@ export interface Platform {
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  fetchRepoCache?(
+    config: RepoCacheConfig
+  ): Promise<Record<string, unknown> | null>;
 }

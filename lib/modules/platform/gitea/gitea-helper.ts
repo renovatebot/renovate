@@ -1,6 +1,9 @@
+import { logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea';
+import { fromBase64 } from '../../../util/string';
 import { getQueryString } from '../../../util/url';
+import type { RepoCacheConfig } from '../types';
 import type { PrReviewersParams } from './types';
 
 const giteaHttp = new GiteaHttp();
@@ -593,4 +596,22 @@ export async function getBranch(
   const res = await giteaHttp.getJson<Branch>(url, options);
 
   return res.body;
+}
+
+export async function fetchRepoCache(
+  repoPath: string,
+  { blob }: RepoCacheConfig
+): Promise<Record<string, unknown> | null> {
+  try {
+    const url = `repos/${repoPath}/git/blobs/${blob}`;
+    const { body } = await giteaHttp.getJson<{ content: string }>(url);
+    const rawContent = body?.content;
+    if (rawContent) {
+      return JSON.parse(fromBase64(rawContent));
+    }
+    logger.debug('Failed to obtain repo cache blob content');
+  } catch (err) {
+    logger.debug({ err }, 'Failed to fetch repo cache blob');
+  }
+  return null;
 }

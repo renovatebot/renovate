@@ -759,4 +759,42 @@ describe('modules/platform/gitea/gitea-helper', () => {
       expect(res).toEqual(otherMockBranch);
     });
   });
+
+  describe('fetchRepoCache', () => {
+    it('fetches blob content', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/repos/${mockRepo.full_name}/git/blobs/111`)
+        .reply(200, { content: toBase64(JSON.stringify({ foo: 'bar' })) });
+      const res = await ght.fetchRepoCache(mockRepo.full_name, {
+        blob: '111',
+        commit: '222',
+      });
+      expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null for invalid content', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/repos/${mockRepo.full_name}/git/blobs/111`)
+        .reply(200, { content: toBase64('foo=bar') });
+      const res = await ght.fetchRepoCache(mockRepo.full_name, {
+        blob: '111',
+        commit: '222',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null for errors', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/repos/${mockRepo.full_name}/git/blobs/111`)
+        .replyWithError('unknown');
+      const res = await ght.fetchRepoCache(mockRepo.full_name, {
+        blob: '111',
+        commit: '222',
+      });
+      expect(res).toBeNull();
+    });
+  });
 });

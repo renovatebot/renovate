@@ -31,6 +31,7 @@ import type {
   PlatformParams,
   PlatformResult,
   Pr,
+  RepoCacheConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -230,6 +231,13 @@ const platform: Platform = {
       return JSON5.parse(raw);
     }
     return JSON.parse(raw);
+  },
+
+  async fetchRepoCache(
+    cacheConfig: RepoCacheConfig
+  ): Promise<Record<string, unknown> | null> {
+    const result = await helper.fetchRepoCache(config.repository, cacheConfig);
+    return result;
   },
 
   async initRepo({
@@ -879,6 +887,7 @@ export const {
   ensureCommentRemoval,
   ensureIssue,
   ensureIssueClosing,
+  fetchRepoCache,
   findIssue,
   findPr,
   getBranchPr,
