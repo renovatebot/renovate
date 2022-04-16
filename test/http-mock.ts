@@ -82,7 +82,7 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
 }
 
 export function getTrace(): RequestLogItem[] /* istanbul ignore next */ {
-  const errorLines = [];
+  const errorLines: string[] = [];
   if (missingLog.length) {
     errorLines.push('Missing mocks:');
     errorLines.push(...missingLog);
