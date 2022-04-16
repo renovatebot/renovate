@@ -29,10 +29,12 @@ export interface GhRestPr {
   mergeable_state: string;
   number: number;
   title: string;
+  body: string;
   state: string;
   merged_at: string;
   created_at: string;
   closed_at: string;
+  updated_at: string;
   user?: { login?: string };
   node_id: string;
   assignee?: { login?: string };
@@ -83,10 +85,7 @@ export interface LocalRepoConfig {
   parentRepo: string;
   forkMode?: boolean;
   forkToken?: string;
-  closedPrList: PrList | null;
-  openPrList: PrList | null;
-  prList: Pr[] | null;
-  prComments: Record<number, Comment[]>;
+  prList?: Pr[];
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
@@ -95,13 +94,11 @@ export interface LocalRepoConfig {
   renovateUsername: string;
   productLinks: any;
   ignorePrAuthor: boolean;
-  branchPrs: Pr[];
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
 }
 
 export type BranchProtection = any;
-export type PrList = Record<number, Pr>;
 
 export interface GhRepo {
   isFork: boolean;

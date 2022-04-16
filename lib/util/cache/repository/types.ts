@@ -45,9 +45,7 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    github?: {
-      graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
-    };
+    github?: Record<string, unknown>;
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;

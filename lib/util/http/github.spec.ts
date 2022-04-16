@@ -528,7 +528,7 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(3);
 
       expect(
-        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
       ).toBe(25);
     });
 
@@ -556,7 +556,7 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
       expect(
-        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
       ).toBe(84);
     });
 
@@ -601,7 +601,7 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(3);
 
       expect(
-        repoCache?.platform?.github?.graphqlPageCache?.testItem
+        repoCache?.platform?.github?.graphqlPageCache?.['testItem']
       ).toBeUndefined();
     });
 
