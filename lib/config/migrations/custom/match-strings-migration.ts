@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { regEx } from '../../../util/regex';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class MatchStringsMigration extends AbstractMigration {
@@ -9,12 +10,10 @@ export class MatchStringsMigration extends AbstractMigration {
       const newValue = value
         .filter(is.nonEmptyString)
         .map((matchString) =>
-          matchString.replace(this.#lookupName, '(?<packageName>')
+          matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
         );
 
       this.rewrite(newValue);
     }
   }
-
-  #lookupName = /\(\?<lookupName>/g;
 }
