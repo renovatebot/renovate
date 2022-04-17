@@ -293,7 +293,7 @@ describe('util/git/index', () => {
       };
       await git.commitFiles({
         branchName: 'renovate/branch_with_changes',
-        files: [file],
+        files: [file, { type: 'addition', path: 'dummy', contents: null }],
         message: 'Create something',
       });
       const branchFiles = await git.getBranchFiles(

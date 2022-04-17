@@ -851,7 +851,6 @@ export async function prepareCommit({
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
         } else if (file.contents === null) {
-          // istanbul ignore next
           continue;
         } else {
           let contents: Buffer;
@@ -1138,7 +1137,9 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
  */
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const { treeSha } =
+    treeShaRegex.exec(commitOutput)?.groups ??
+    /* istanbul ignore next: will never happen */ {};
   const contents = await git.catFile(['-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
