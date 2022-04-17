@@ -165,8 +165,37 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.8.yaml',
       ]);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res[0].deps).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "31.65.1-slim",
+            "datasource": "docker",
+            "depName": "renovate/renovate",
+            "depType": "image-name",
+            "replaceString": "renovate/renovate:31.65.1-slim",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "10.4.11",
+            "datasource": "docker",
+            "depName": "mariadb",
+            "depType": "service-image",
+            "replaceString": "mariadb:10.4.11",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.0.0",
+            "datasource": "docker",
+            "depName": "other/image1",
+            "depType": "service-image",
+            "replaceString": "other/image1:1.0.0",
+          },
+        ]
+      `);
     });
 
     it('extracts from image', () => {

@@ -1,42 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extract images from dependency proxy 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
-        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-        "currentDigest": undefined,
-        "currentValue": "31.65.1-slim",
-        "datasource": "docker",
-        "depName": "renovate/renovate",
-        "depType": "image-name",
-        "replaceString": "renovate/renovate:31.65.1-slim",
-      },
-      Object {
-        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-        "currentDigest": undefined,
-        "currentValue": "10.4.11",
-        "datasource": "docker",
-        "depName": "mariadb",
-        "depType": "service-image",
-        "replaceString": "mariadb:10.4.11",
-      },
-      Object {
-        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-        "currentDigest": undefined,
-        "currentValue": "1.0.0",
-        "datasource": "docker",
-        "depName": "other/image1",
-        "depType": "service-image",
-        "replaceString": "other/image1:1.0.0",
-      },
-    ],
-    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.8.yaml",
-  },
-]
-`;
-
 exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines 1`] = `
 Array [
   Object {
