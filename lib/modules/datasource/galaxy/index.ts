@@ -37,7 +37,7 @@ export class GalaxyDatasource extends Datasource {
       projectName;
     const galaxyProjectUrl = registryUrl + userName + '/' + projectName;
 
-    let raw: HttpResponse<GalaxyResult> = null;
+    let raw: HttpResponse<GalaxyResult> | null = null;
     try {
       raw = await this.http.getJson<GalaxyResult>(galaxyAPIUrl);
     } catch (err) {

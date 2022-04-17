@@ -7,7 +7,7 @@ import { id as composerVersioningId } from '../../modules/versioning/composer';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
-import type { ToolConfig, ToolConstraint } from './types';
+import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
   bundler: {
@@ -61,7 +61,9 @@ export function isBuildpack(): boolean {
   return !!process.env.BUILDPACK;
 }
 
-export function isDynamicInstall(toolConstraints?: ToolConstraint[]): boolean {
+export function isDynamicInstall(
+  toolConstraints?: Opt<ToolConstraint[]>
+): boolean {
   const { binarySource } = GlobalConfig.get();
   if (binarySource !== 'install') {
     return false;
@@ -125,9 +127,9 @@ export async function resolveConstraint(
 }
 
 export async function generateInstallCommands(
-  toolConstraints: ToolConstraint[]
+  toolConstraints: Opt<ToolConstraint[]>
 ): Promise<string[]> {
-  const installCommands = [];
+  const installCommands: string[] = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);

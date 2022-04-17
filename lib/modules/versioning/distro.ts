@@ -31,7 +31,6 @@ export class DistroInfo {
 
   constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       dataFiles.get(distroJsonKey as DataFile)!.replace(/v([\d.]+)\b/gm, '$1')
     );
 
