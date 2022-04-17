@@ -607,7 +607,7 @@ export async function fetchRepoCache(
     const { body } = await giteaHttp.getJson<{ content: string }>(url);
     return JSON.parse(fromBase64(body.content));
   } catch (err) {
-    logger.debug({ err }, 'Failed to fetch repo cache blob');
+    logger.warn({ err }, 'Failed to fetch repo cache blob');
   }
   return null;
 }
