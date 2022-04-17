@@ -45,7 +45,7 @@ export interface ExecOptions {
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
-  preCommands?: Opt<string>;
+  preCommands?: Opt<string[]>;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;
