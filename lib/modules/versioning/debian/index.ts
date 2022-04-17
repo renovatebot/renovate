@@ -28,8 +28,8 @@ class DebianVersioningApi extends GenericVersioningApi {
 
   private _buildLtsMaps(release: string, n: number): void {
     const di = this._distroInfo.getNLatest(n);
+    // istanbul ignore if: should never happen
     if (!di) {
-      // istanbul ignore next
       return;
     }
     di.series = release;
@@ -50,7 +50,6 @@ class DebianVersioningApi extends GenericVersioningApi {
     if (di) {
       return di.series;
     }
-    // istanbul ignore next
     return input;
   }
 
@@ -62,28 +61,6 @@ class DebianVersioningApi extends GenericVersioningApi {
       return null;
     }
     return { release: ver.split('.').map(Number) };
-  }
-
-  protected override _compare(version: string, other: string): number {
-    let ver: string;
-    let otherVer: string;
-
-    ver = this._getVersionByLts(version);
-    ver = this._distroInfo.getVersionByCodename(ver);
-
-    otherVer = this._getVersionByLts(other);
-    otherVer = this._distroInfo.getVersionByCodename(otherVer);
-
-    const f1 = parseFloat(ver);
-    const f2 = parseFloat(otherVer);
-
-    if (f1 > f2) {
-      return 1;
-    }
-    if (f1 === f2) {
-      return 0;
-    }
-    return -1;
   }
 
   override isValid(version: string): boolean {

@@ -1,7 +1,7 @@
 import { api as debian } from '.';
 
 describe('modules/versioning/debian/index', () => {
-  test.each`
+  it.each`
     version           | expected
     ${undefined}      | ${false}
     ${null}           | ${false}
@@ -52,7 +52,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version           | range        | expected
     ${undefined}      | ${undefined} | ${false}
     ${null}           | ${undefined} | ${false}
@@ -74,7 +74,7 @@ describe('modules/versioning/debian/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version      | expected
     ${undefined} | ${false}
     ${null}      | ${false}
@@ -85,7 +85,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version           | expected
     ${undefined}      | ${false}
     ${null}           | ${false}
@@ -135,7 +135,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.isStable(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version           | expected
     ${undefined}      | ${false}
     ${null}           | ${false}
@@ -195,7 +195,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version           | major   | minor   | patch
     ${undefined}      | ${null} | ${null} | ${null}
     ${null}           | ${null} | ${null} | ${null}
@@ -220,7 +220,7 @@ describe('modules/versioning/debian/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a                 | b                 | expected
     ${'woody'}        | ${'sarge'}        | ${false}
     ${'lenny'}        | ${'3'}            | ${false}
@@ -239,7 +239,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                 | b                 | expected
     ${'5'}            | ${'6'}            | ${false}
     ${'6'}            | ${'5'}            | ${true}
@@ -247,8 +247,8 @@ describe('modules/versioning/debian/index', () => {
     ${'11'}           | ${'10'}           | ${true}
     ${'5'}            | ${'6'}            | ${false}
     ${'11'}           | ${'1.1'}          | ${true}
-    ${'xxx'}          | ${'yyy'}          | ${false}
-    ${'yyy'}          | ${'xxx'}          | ${false}
+    ${'xxx'}          | ${'yyy'}          | ${true}
+    ${'yyy'}          | ${'xxx'}          | ${true}
     ${'lenny'}        | ${'squeeze'}      | ${false}
     ${'squeeze'}      | ${'lenny'}        | ${true}
     ${'lenny'}        | ${'buster'}       | ${false}
@@ -266,7 +266,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                                            | range         | expected
     ${['8', '9', '10', '11']}                           | ${'2020.04'}  | ${null}
     ${['8', '9', '10', '11']}                           | ${'foobar'}   | ${null}
@@ -287,7 +287,7 @@ describe('modules/versioning/debian/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                            | range         | expected
     ${['8', '9', '10', '11']}                           | ${'2020.04'}  | ${null}
     ${['8', '9', '10', '11']}                           | ${'foobar'}   | ${null}
@@ -309,7 +309,7 @@ describe('modules/versioning/debian/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue      | rangeStrategy | currentVersion | newVersion    | expected
     ${undefined}      | ${undefined}  | ${undefined}   | ${'foobar'}   | ${'foobar'}
     ${'stretch'}      | ${undefined}  | ${undefined}   | ${'11'}       | ${'bullseye'}
@@ -319,6 +319,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
     ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -333,11 +334,11 @@ describe('modules/versioning/debian/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a                 | b                 | expected
     ${'woody'}        | ${'sarge'}        | ${-1}
-    ${'lenny'}        | ${'3'}            | ${1}
-    ${'3'}            | ${'lenny'}        | ${-1}
+    ${'lenny'}        | ${'3'}            | ${2}
+    ${'3'}            | ${'lenny'}        | ${-2}
     ${'lenny'}        | ${'5'}            | ${0}
     ${'squeeze'}      | ${'6'}            | ${0}
     ${'10'}           | ${'buster'}       | ${0}
@@ -346,18 +347,18 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${'8'}            | ${1}
     ${'oldstable'}    | ${'oldoldstable'} | ${1}
     ${'stable'}       | ${'oldstable'}    | ${1}
-    ${'11'}           | ${'oldoldstable'} | ${1}
+    ${'11'}           | ${'oldoldstable'} | ${2}
     ${'10'}           | ${'oldstable'}    | ${0}
-    ${'9'}            | ${'stable'}       | ${-1}
+    ${'9'}            | ${'stable'}       | ${-2}
   `('debian.sortVersions($a, $b) === $expected ', ({ a, b, expected }) => {
     expect(debian.sortVersions(a, b)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     version | range        | expected
-    ${'10'} | ${'10-slim'} | ${true}
+    ${'10'} | ${'10-slim'} | ${false}
     ${'11'} | ${'11'}      | ${true}
-    ${'11'} | ${'11.0'}    | ${true}
+    ${'11'} | ${'11.0'}    | ${false}
   `(
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {

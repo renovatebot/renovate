@@ -77,4 +77,4 @@ async function update(url, file) {
 (async () => {
   await update(ubuntuUrl, `./data/ubuntu-distro-info.json`);
   await update(debianUrl, `./data/debian-distro-info.json`);
-})();
+})().catch(() => 'obligatory catch');
