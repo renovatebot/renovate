@@ -2,7 +2,8 @@ import * as _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
-import type { RepoCache } from './types';
+import { initRepoCache } from './init';
+import type { RepoCacheRecord } from './types';
 import * as repositoryCache from '.';
 
 jest.mock('fs-extra');
@@ -22,14 +23,14 @@ describe('util/cache/repository/index', () => {
     repositoryCache: 'enabled',
   };
 
-  const repoCache: RepoCache = {
+  const repoCache: RepoCacheRecord = {
     revision: 11,
     repository: 'abc/def',
     data: {},
   };
 
   it('returns if cache not enabled', async () => {
-    await repositoryCache.initialize({
+    await initRepoCache({
       ...config,
       repositoryCache: 'disabled',
     });
@@ -45,7 +46,7 @@ describe('util/cache/repository/index', () => {
       }) as never
     );
 
-    await repositoryCache.initialize(config);
+    await initRepoCache(config);
 
     expect(repositoryCache.getCache()).toEqual({});
   });
@@ -58,7 +59,7 @@ describe('util/cache/repository/index', () => {
       }) as never
     );
 
-    await repositoryCache.initialize(config);
+    await initRepoCache(config);
 
     expect(fs.readFile).toHaveBeenCalled();
 
@@ -66,7 +67,7 @@ describe('util/cache/repository/index', () => {
     expect(cache).toEqual({ semanticCommits: 'enabled' });
 
     cache.semanticCommits = 'disabled';
-    await repositoryCache.finalize();
+    await repositoryCache.saveCache();
     expect(fs.outputFile).toHaveBeenCalledWith(
       '/tmp/renovate/cache/renovate/repository/github/abc/def.json',
       JSON.stringify({
@@ -86,13 +87,13 @@ describe('util/cache/repository/index', () => {
       }) as never
     );
 
-    await repositoryCache.initialize(config);
+    await initRepoCache(config);
 
     const cache = repositoryCache.getCache();
     expect(cache).toEqual({ semanticCommits: 'enabled' });
 
     cache.semanticCommits = 'disabled';
-    await repositoryCache.finalize();
+    await repositoryCache.saveCache();
     expect(fs.outputFile).toHaveBeenCalledWith(
       '/tmp/renovate/cache/renovate/repository/github/abc/def.json',
       JSON.stringify({
@@ -112,7 +113,7 @@ describe('util/cache/repository/index', () => {
       }) as never
     );
 
-    await repositoryCache.initialize(config);
+    await initRepoCache(config);
 
     const cache = repositoryCache.getCache();
     expect(cache).toEqual({});
@@ -124,7 +125,7 @@ describe('util/cache/repository/index', () => {
 
   it('returns empty cache after initialization error', async () => {
     fs.readFile.mockRejectedValueOnce(new Error('unknown error'));
-    await repositoryCache.initialize(config);
+    await initRepoCache(config);
     const cache = repositoryCache.getCache();
     expect(cache).toEqual({});
   });
