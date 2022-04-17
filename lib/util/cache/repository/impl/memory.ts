@@ -5,12 +5,12 @@ export class MemoryRepoCache implements RepoCache {
 
   load(): Promise<void> {
     // istanbul ignore next
-    return;
+    return Promise.resolve();
   }
 
   save(): Promise<void> {
     // istanbul ignore next
-    return;
+    return Promise.resolve();
   }
 
   getData(): RepoCacheData {
