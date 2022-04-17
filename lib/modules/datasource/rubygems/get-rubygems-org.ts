@@ -64,7 +64,7 @@ export class RubyGemsOrgDatasource extends Datasource {
         contentLength = 0;
         packageReleases = Object.create(null); // Because we might need a "constructor" key
         throw new ExternalHostError(
-          new Error('Rubygems fetch error - need to reset cache')
+          new Error('Rubygems fetch error - '.concat(err.message))
         );
       }
       logger.debug('Rubygems: No update');
