@@ -8,7 +8,7 @@ import { privateCacheDir } from '../../../util/fs';
 
 export async function resetCaches(): Promise<void> {
   memCache.reset();
-  repositoryCache.reset();
+  repositoryCache.resetCache();
   await fs.remove(privateCacheDir());
   npmApi.resetMemCache();
 }

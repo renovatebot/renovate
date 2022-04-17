@@ -12,7 +12,7 @@ const fs = mocked(_fs);
 
 describe('util/cache/repository/index', () => {
   beforeEach(() => {
-    repositoryCache.reset();
+    repositoryCache.resetCache();
     jest.resetAllMocks();
     GlobalConfig.set({ cacheDir: '/tmp/renovate/cache/' });
   });

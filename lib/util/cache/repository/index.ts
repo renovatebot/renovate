@@ -3,7 +3,7 @@ import type { RepoCache, RepoCacheData } from './types';
 
 let repoCache: RepoCache = new MemoryRepoCache();
 
-export function reset(): void {
+export function resetCache(): void {
   setCache(new MemoryRepoCache());
 }
 
