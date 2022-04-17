@@ -8715,10 +8715,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.5.0.tgz#3c3538f4d7a1b3c8f3904412b12740bdcad9c8b1"
-  integrity sha512-fZsaq5nzdxQRhMNs6ESGLpMUHoL5GRP+boWPhq9pMYMKwOGZV2jHOxi8AbFFA2Y/6u4kR99HoULizSbpzaODkA==
+simple-git@3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.6.0.tgz#28a9ebb7ca55495bb4e6cc5d367b4543e2d857a4"
+  integrity sha512-2e+4QhOVO59GeLsHgwSMKNrSKCnuACeA/gMNrLCYR8ID9qwm4hViVt4WsODcUGjx//KDv6GMLC6Hs/MeosgXxg==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
