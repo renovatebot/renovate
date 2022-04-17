@@ -221,7 +221,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchCurrentVersion && versioning && currentValue) {
+  if (matchCurrentVersion && currentValue) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
