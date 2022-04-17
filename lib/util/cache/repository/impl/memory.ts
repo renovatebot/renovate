@@ -4,11 +4,13 @@ export class MemoryRepoCache implements RepoCache {
   private data: RepoCacheData = {};
 
   load(): Promise<void> {
-    return Promise.resolve();
+    // istanbul ignore next
+    return;
   }
 
   save(): Promise<void> {
-    return Promise.resolve();
+    // istanbul ignore next
+    return;
   }
 
   getData(): RepoCacheData {
