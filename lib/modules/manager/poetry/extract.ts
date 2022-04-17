@@ -20,7 +20,7 @@ function extractFromSection(
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const sectionContent = parsedFile.tool?.poetry[section] ?? null;
+  const sectionContent = parsedFile.tool?.poetry[section];
   if (!sectionContent) {
     return [];
   }
