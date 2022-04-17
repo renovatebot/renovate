@@ -46,7 +46,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
   const depTagSplit = currentDepTag.split(':');
   let depName: string;
-  let currentValue: string;
+  let currentValue: string | undefined;
   if (
     depTagSplit.length === 1 ||
     depTagSplit[depTagSplit.length - 1].includes('/')
@@ -75,7 +75,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     // If we have the variable and it contains the default value, we need to return
     // it as a valid dependency.
 
-    const dep = {
+    const dep: PackageDependency = {
       depName,
       currentValue,
       currentDigest,
@@ -104,7 +104,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
 export function getDep(
-  currentFrom: string,
+  currentFrom: string | null | undefined,
   specifyReplaceString = true
 ): PackageDependency {
   if (!is.string(currentFrom)) {
@@ -146,7 +146,7 @@ export function getDep(
   }
 
   // Don't display quay.io ports
-  if (quayRegex.test(dep.depName)) {
+  if (dep.depName && quayRegex.test(dep.depName)) {
     const depName = dep.depName.replace(quayRegex, 'quay.io');
     if (depName !== dep.depName) {
       dep.packageName = dep.depName;
@@ -168,16 +168,19 @@ export function extractPackageFile(content: string): PackageFile | null {
   );
 
   for (const fromMatch of fromMatches) {
-    if (fromMatch.groups.name) {
+    if (fromMatch.groups?.name) {
       logger.debug('Found a multistage build stage name');
       stageNames.push(fromMatch.groups.name);
     }
-    if (fromMatch.groups.image === 'scratch') {
+    if (fromMatch.groups?.image === 'scratch') {
       logger.debug('Skipping scratch');
-    } else if (stageNames.includes(fromMatch.groups.image)) {
+    } else if (
+      fromMatch.groups?.image &&
+      stageNames.includes(fromMatch.groups.image)
+    ) {
       logger.debug({ image: fromMatch.groups.image }, 'Skipping alias FROM');
     } else {
-      const dep = getDep(fromMatch.groups.image);
+      const dep = getDep(fromMatch.groups?.image);
       logger.trace(
         {
           depName: dep.depName,
@@ -195,6 +198,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   );
 
   for (const copyFromMatch of copyFromMatches) {
+    // istanbul ignore if: will never happen
+    if (!copyFromMatch.groups?.image) {
+      continue;
+    }
     if (stageNames.includes(copyFromMatch.groups.image)) {
       logger.debug(
         { image: copyFromMatch.groups.image },
