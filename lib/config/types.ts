@@ -416,7 +416,6 @@ export interface ConfigMigrationPr {
   configMigrationBranch?: string;
   configMigrationCommitMessage?: string;
   configMigrationPrTitle?: string;
-  configMigrationIndent?: string;
 }
 
 export interface MigratedConfig {

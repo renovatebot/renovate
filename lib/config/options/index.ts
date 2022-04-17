@@ -125,10 +125,9 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'configMigration',
-    description: 'Require a Configuration PR first.',
+    description: 'Enable this to get Config migration PRs when needed.',
     type: 'boolean',
     default: false,
-    globalOnly: true,
   },
   {
     name: 'configMigrationBranch',

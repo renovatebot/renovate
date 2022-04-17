@@ -2,8 +2,8 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import migratedConfigData from '../../../global/config/migrated-config-data';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { migratedConfigData } from './migrated-config-data';
 
 export function createConfigMigrationBranch(
   config: Partial<RenovateConfig>

@@ -3,8 +3,8 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
-import migratedConfigData from '../../../global/config/migrated-config-data';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { migratedConfigData } from './migrated-config-data';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig

@@ -5,6 +5,7 @@ import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import { createConfigMigrationBranch } from './create';
+import { migratedConfigData } from './migrated-config-data';
 import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
@@ -12,7 +13,7 @@ export async function checkConfigMigrationBranch(
 ): Promise<RenovateConfig> {
   logger.debug('checkConfigMigrationBranch()');
   logger.trace({ config });
-  // config.configMigrationBranch = config.baseBranch + "/" + config.configMigrationBranch;
+  await migratedConfigData.init(config);
   config.configMigrationBranch = template.compile(
     config.configMigrationBranch,
     config

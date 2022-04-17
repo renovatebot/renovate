@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import detectIndent from 'detect-indent';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -22,7 +21,6 @@ import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import migratedConfigData from '../../global/config/migrated-config-data';
 import type { RepoFileConfig } from './types';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
@@ -39,7 +37,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     logger.debug('Existing config file no longer exists');
   }
   const fileList = await getFileList();
-
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
@@ -58,7 +55,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
-
   configFileName = await detectConfigFile();
   if (!configFileName) {
     logger.debug('No renovate config file found');
@@ -79,7 +75,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
-    migratedConfigData.setIndent(detectIndent(rawFileContents).indent);
     // istanbul ignore if
     if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
@@ -184,7 +179,6 @@ export async function mergeRenovateConfig(
   }
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
-  config.migratedConfigFileName = repoConfig.configFileName;
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = repoConfig.configFileName;
@@ -204,7 +198,6 @@ export async function mergeRenovateConfig(
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
-  migratedConfigData.set(repoConfig.configFileName, migratedConfig);
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(
     migratedConfig,
