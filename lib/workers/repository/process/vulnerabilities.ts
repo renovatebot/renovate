@@ -112,6 +112,7 @@ export class Vulnerabilities {
       packageDependency.depName!
     );
     return this.convertToPackageRule(
+      packageFileConfig,
       vulnerabilities ?? [],
       packageDependency.depName!,
       ecosystem!
@@ -119,6 +120,7 @@ export class Vulnerabilities {
   }
 
   private convertToPackageRule(
+    packageFileConfig: RenovateConfig & PackageFile,
     vulnerabilities: Osv.Vulnerability[],
     dependencyName: string,
     ecosystem: Ecosystem
@@ -137,6 +139,9 @@ export class Vulnerabilities {
             (event) => event.fixed !== undefined
           )!.fixed,
           isVulnerabilityAlert: true,
+          force: {
+            ...packageFileConfig.vulnerabilityAlerts,
+          },
         })
       );
   }
