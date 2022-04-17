@@ -16,6 +16,7 @@ import * as dependencyDashboard from './dependency-dashboard';
 type PrUpgrade = BranchUpgradeConfig;
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.clearAllMocks();
   config = getConfig();
@@ -32,7 +33,7 @@ async function dryRun(
   ensureIssueCalls = 0
 ) {
   jest.clearAllMocks();
-  GlobalConfig.set({ dryRun: true });
+  GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -69,6 +70,7 @@ describe('workers/repository/dependency-dashboard', () => {
     beforeEach(() => {
       GlobalConfig.reset();
     });
+
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
@@ -486,6 +488,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
+
     it('rechecks branches', async () => {
       const branches: BranchConfig[] = [
         {

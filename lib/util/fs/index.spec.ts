@@ -32,6 +32,7 @@ describe('util/fs/index', () => {
     it('reads buffer', async () => {
       expect(await readLocalFile(__filename)).toBeInstanceOf(Buffer);
     });
+
     it('reads string', async () => {
       expect(typeof (await readLocalFile(__filename, 'utf8'))).toBe('string');
     });
@@ -46,9 +47,11 @@ describe('util/fs/index', () => {
     it('returns true for file', async () => {
       expect(await localPathExists(__filename)).toBeTrue();
     });
+
     it('returns true for directory', async () => {
       expect(await localPathExists(getSubDirectory(__filename))).toBeTrue();
     });
+
     it('returns false', async () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
         false

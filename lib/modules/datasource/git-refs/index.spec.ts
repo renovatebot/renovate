@@ -26,6 +26,7 @@ describe('modules/datasource/git-refs/index', () => {
       });
       expect(versions).toBeNull();
     });
+
     it('returns nil if response is malformed', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -38,6 +39,7 @@ describe('modules/datasource/git-refs/index', () => {
       });
       expect(releases).toBeEmpty();
     });
+
     it('returns nil if remote call throws exception', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -50,6 +52,7 @@ describe('modules/datasource/git-refs/index', () => {
       });
       expect(versions).toBeNull();
     });
+
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -66,6 +69,7 @@ describe('modules/datasource/git-refs/index', () => {
       expect(result).toHaveLength(6);
     });
   });
+
   describe('getDigest()', () => {
     it('returns null if not found', async () => {
       simpleGit.mockReturnValue({
@@ -79,6 +83,7 @@ describe('modules/datasource/git-refs/index', () => {
       );
       expect(digest).toBeNull();
     });
+
     it('returns digest for tag', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -91,6 +96,7 @@ describe('modules/datasource/git-refs/index', () => {
       );
       expect(digest).toMatchSnapshot();
     });
+
     it('ignores refs/for/', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
@@ -103,6 +109,7 @@ describe('modules/datasource/git-refs/index', () => {
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
+
     it('returns digest for HEAD', async () => {
       simpleGit.mockReturnValue({
         listRemote() {

@@ -255,7 +255,7 @@ export async function writeUpdatedPackageFiles(
     return;
   }
   const { localDir } = GlobalConfig.get();
-  const supportedLockFiles = ['package-lock.json'];
+  const supportedLockFiles = ['package-lock.json', 'yarn.lock'];
   for (const packageFile of config.updatedPackageFiles) {
     if (packageFile.type !== 'addition') {
       continue;

@@ -7,6 +7,7 @@ jest.mock('../../../../../util/git');
 describe('workers/repository/update/pr/body/config-description', () => {
   describe('getPrConfigDescription', () => {
     let branchConfig: BranchConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       branchConfig = mock<BranchConfig>();

@@ -17,21 +17,25 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
         extractPackageFile('this is not a jsonnetfile', 'jsonnetfile.json')
       ).toBeNull();
     });
+
     it('returns null for jsonnetfile with no dependencies', () => {
       expect(
         extractPackageFile(jsonnetfileNoDependencies, 'jsonnetfile.json')
       ).toBeNull();
     });
+
     it('returns null for local dependencies', () => {
       expect(
         extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json')
       ).toBeNull();
     });
+
     it('returns null for vendored dependencies', () => {
       expect(
         extractPackageFile(jsonnetfile, 'vendor/jsonnetfile.json')
       ).toBeNull();
     });
+
     it('extracts dependency', () => {
       const res = extractPackageFile(jsonnetfile, 'jsonnetfile.json');
       expect(res).toMatchSnapshot({
@@ -51,6 +55,7 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
         ],
       });
     });
+
     it('extracts dependency with custom name', () => {
       const res = extractPackageFile(jsonnetfileWithName, 'jsonnetfile.json');
       expect(res).toMatchSnapshot({

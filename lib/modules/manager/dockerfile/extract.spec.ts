@@ -648,6 +648,7 @@ describe('modules/manager/dockerfile/extract', () => {
       `);
     });
   });
+
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toEqual({ skipReason: 'invalid-value' });
