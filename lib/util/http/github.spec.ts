@@ -10,7 +10,7 @@ import {
 } from '../../constants/error-messages';
 import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
 import * as _repositoryCache from '../cache/repository';
-import type { Cache } from '../cache/repository/types';
+import type { RepoCacheData } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
@@ -47,7 +47,7 @@ query(
 
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
-  let repoCache: Cache = {};
+  let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
     githubApi = new GithubHttp();
@@ -528,7 +528,7 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(3);
 
       expect(
-        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
       ).toBe(25);
     });
 
@@ -556,7 +556,7 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
       expect(
-        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
       ).toBe(84);
     });
 
@@ -601,7 +601,7 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(3);
 
       expect(
-        repoCache?.platform?.github?.graphqlPageCache?.testItem
+        repoCache?.platform?.github?.graphqlPageCache?.['testItem']
       ).toBeUndefined();
     });
 

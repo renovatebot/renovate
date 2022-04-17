@@ -33,7 +33,8 @@ export class RubyVersionDatasource extends Datasource {
       const response = await this.http.get(rubyVersionsUrl);
 
       const root = parse(response.body);
-      const rows = root.querySelector('.release-list').querySelectorAll('tr');
+      const rows =
+        root.querySelector('.release-list')?.querySelectorAll('tr') ?? [];
       rows.forEach((row) => {
         const tds = row.querySelectorAll('td');
         const columns: string[] = [];
@@ -49,6 +50,9 @@ export class RubyVersionDatasource extends Datasource {
           }
         }
       });
+      if (!res.releases.length) {
+        throw new Error('Missing ruby releases');
+      }
     } catch (err) {
       this.handleGenericErrors(err);
     }

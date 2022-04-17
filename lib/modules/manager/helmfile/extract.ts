@@ -6,19 +6,19 @@ import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { Doc } from './types';
 
-const isValidChartName = (name: string): boolean =>
-  !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
+const isValidChartName = (name: string | undefined): boolean =>
+  !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 
 export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile {
-  let deps = [];
+): PackageFile | null {
+  let deps: PackageDependency[] = [];
   let docs: Doc[];
   const aliases: Record<string, string> = {};
   try {
-    docs = loadAll(content, null, { json: true });
+    docs = loadAll(content, null, { json: true }) as Doc[];
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;
@@ -60,7 +60,7 @@ export function extractPackageFile(
 
       if (dep.chart.includes('/')) {
         const v = dep.chart.split('/');
-        repoName = v.shift();
+        repoName = v.shift()!;
         depName = v.join('/');
       } else {
         repoName = dep.chart;
@@ -77,7 +77,7 @@ export function extractPackageFile(
         depName,
         currentValue: dep.version,
         registryUrls: [aliases[repoName]]
-          .concat([config.aliases[repoName]])
+          .concat([config.aliases?.[repoName]] as string[])
           .filter(is.string),
       };
 
