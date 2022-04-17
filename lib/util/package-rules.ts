@@ -128,9 +128,9 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchUpdateTypes.length && updateType) {
+  if (matchUpdateTypes.length) {
     const isMatch =
-      matchUpdateTypes.includes(updateType) ||
+      (updateType && matchUpdateTypes.includes(updateType)) ||
       (isBump && matchUpdateTypes.includes('bump'));
     if (!isMatch) {
       return false;
