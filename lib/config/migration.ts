@@ -38,15 +38,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'matchStrings' && is.array(val)) {
-        migratedConfig.matchStrings = val
-          .map(
-            (matchString) =>
-              is.string(matchString) &&
-              matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
-          )
-          .filter(Boolean);
-      } else if (key.startsWith('masterIssue')) {
+      if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
         if (optionTypes[newKey] === 'boolean' && val === 'true') {
@@ -189,11 +181,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
-        if (migratedConfig[key] !== undefined) {
-          migratedConfig.platformAutomerge = migratedConfig[key];
-        }
-        delete migratedConfig[key];
       }
 
       const migratedTemplates = {

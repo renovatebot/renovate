@@ -15,7 +15,7 @@ describe('modules/platform/bitbucket/comments', () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/3/comments?pagelen=100')
@@ -28,11 +28,10 @@ describe('modules/platform/bitbucket/comments', () => {
           content: 'content',
         })
       ).toBeFalse();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('add comment if not found', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
@@ -48,11 +47,10 @@ describe('modules/platform/bitbucket/comments', () => {
           content: 'content',
         })
       ).toBeTrue();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('add updates comment if necessary', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
@@ -73,11 +71,10 @@ describe('modules/platform/bitbucket/comments', () => {
         content: 'some\ncontent',
       });
       expect(res).toBeTrue();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('skips comment', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
@@ -97,7 +94,6 @@ describe('modules/platform/bitbucket/comments', () => {
           content: 'blablabla',
         })
       ).toBeTrue();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -108,12 +104,13 @@ describe('modules/platform/bitbucket/comments', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [] });
-      await comments.ensureCommentRemoval(config, {
-        type: 'by-topic',
-        number: 5,
-        topic: 'topic',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        comments.ensureCommentRemoval(config, {
+          type: 'by-topic',
+          number: 5,
+          topic: 'topic',
+        })
+      ).toResolve();
     });
 
     it('deletes comment by topic if found', async () => {
@@ -132,12 +129,13 @@ describe('modules/platform/bitbucket/comments', () => {
         .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
         .reply(200);
 
-      await comments.ensureCommentRemoval(config, {
-        type: 'by-topic',
-        number: 5,
-        topic: 'some-subject',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        comments.ensureCommentRemoval(config, {
+          type: 'by-topic',
+          number: 5,
+          topic: 'some-subject',
+        })
+      ).toResolve();
     });
 
     it('deletes comment by content if found', async () => {
@@ -156,12 +154,13 @@ describe('modules/platform/bitbucket/comments', () => {
         .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
         .reply(200);
 
-      await comments.ensureCommentRemoval(config, {
-        type: 'by-content',
-        number: 5,
-        content: 'some-content',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        comments.ensureCommentRemoval(config, {
+          type: 'by-content',
+          number: 5,
+          content: 'some-content',
+        })
+      ).toResolve();
     });
 
     it('deletes nothing', async () => {
@@ -170,12 +169,14 @@ describe('modules/platform/bitbucket/comments', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [] });
-      await comments.ensureCommentRemoval(config, {
-        type: 'by-topic',
-        number: 5,
-        topic: 'topic',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
+      await expect(
+        comments.ensureCommentRemoval(config, {
+          type: 'by-content',
+          number: 5,
+          content: 'topic',
+        })
+      ).toResolve();
     });
   });
 });

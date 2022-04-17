@@ -35,6 +35,7 @@ describe('util/package-rules', () => {
       },
     ],
   };
+
   it('applies', () => {
     const config: PackageRuleInputConfig = {
       depName: 'a',
@@ -70,6 +71,7 @@ describe('util/package-rules', () => {
       matchUpdateTypes: ['bump'],
     });
   });
+
   it('applies both rules for a', () => {
     const dep = {
       depName: 'a',
@@ -79,6 +81,7 @@ describe('util/package-rules', () => {
     expect(res.y).toBe(2);
     expect(res.groupName).toBeUndefined();
   });
+
   it('applies both rules for b', () => {
     const dep = {
       depName: 'b',
@@ -88,6 +91,7 @@ describe('util/package-rules', () => {
     expect(res.y).toBe(2);
     expect(res.groupName).toBeUndefined();
   });
+
   it('applies the second rule', () => {
     const dep = {
       depName: 'abc',
@@ -97,6 +101,7 @@ describe('util/package-rules', () => {
     expect(res.y).toBe(2);
     expect(res.groupName).toBeUndefined();
   });
+
   it('applies matchPackagePrefixes', () => {
     const dep = {
       depName: 'xyz/abc',
@@ -123,6 +128,7 @@ describe('util/package-rules', () => {
     expect(res.x).toBeUndefined();
     expect(res.groupName).toBe('xyz');
   });
+
   it('applies the second second rule', () => {
     const dep = {
       depName: 'bc',
@@ -131,6 +137,7 @@ describe('util/package-rules', () => {
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
   });
+
   it('excludes package name', () => {
     const dep = {
       depName: 'aa',
@@ -139,6 +146,7 @@ describe('util/package-rules', () => {
     expect(res.x).toBeUndefined();
     expect(res.y).toBeUndefined();
   });
+
   it('excludes package pattern', () => {
     const dep = {
       depName: 'bcd',
@@ -147,6 +155,7 @@ describe('util/package-rules', () => {
     expect(res.x).toBeUndefined();
     expect(res.y).toBeUndefined();
   });
+
   it('ignores patterns if lock file maintenance', () => {
     const dep = {
       enabled: true,
@@ -164,6 +173,7 @@ describe('util/package-rules', () => {
     const res2 = applyPackageRules({ ...dep, depName: 'anything' });
     expect(res2.enabled).toBeFalse();
   });
+
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
       packageRules: [
@@ -184,6 +194,7 @@ describe('util/package-rules', () => {
     });
     expect(res2.x).toBeDefined();
   });
+
   it('supports inclusive or', () => {
     const config: TestConfig = {
       packageRules: [
@@ -202,6 +213,7 @@ describe('util/package-rules', () => {
     });
     expect(res2.x).toBeDefined();
   });
+
   it('filters requested depType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -219,6 +231,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters from list of requested depTypes', () => {
     const config: TestConfig = {
       packageRules: [
@@ -236,6 +249,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters managers with matching manager', () => {
     const config: TestConfig = {
       packageRules: [
@@ -255,6 +269,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters managers with non-matching manager', () => {
     const config: TestConfig = {
       packageRules: [
@@ -274,6 +289,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('filters languages with matching language', () => {
     const config: TestConfig = {
       packageRules: [
@@ -296,6 +312,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters languages with non-matching language', () => {
     const config: TestConfig = {
       packageRules: [
@@ -315,6 +332,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('filters datasources with matching datasource', () => {
     const config: TestConfig = {
       packageRules: [
@@ -332,6 +350,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters branches with matching branch', () => {
     const config: TestConfig = {
       packageRules: [
@@ -349,6 +368,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters datasources with non-matching datasource', () => {
     const config: TestConfig = {
       packageRules: [
@@ -365,6 +385,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('filters branches with non-matching branch', () => {
     const config: TestConfig = {
       packageRules: [
@@ -381,6 +402,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('filters branches with matching branch regex', () => {
     const config: TestConfig = {
       packageRules: [
@@ -416,6 +438,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('filters updateType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -433,6 +456,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('matches matchSourceUrlPrefixes', () => {
     const config: TestConfig = {
       packageRules: [
@@ -454,6 +478,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('non-matches matchSourceUrlPrefixes', () => {
     const config: TestConfig = {
       packageRules: [
@@ -475,6 +500,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('handles matchSourceUrlPrefixes when missing sourceUrl', () => {
     const config: TestConfig = {
       packageRules: [
@@ -495,6 +521,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('matches matchSourceUrls', () => {
     const config: TestConfig = {
       packageRules: [
@@ -516,6 +543,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('non-matches matchSourceUrls', () => {
     const config: TestConfig = {
       packageRules: [
@@ -537,6 +565,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('handles matchSourceUrls when missing sourceUrl', () => {
     const config: TestConfig = {
       packageRules: [
@@ -557,6 +586,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('filters naked depType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -573,6 +603,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('filters out unrequested depType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -590,6 +621,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
     const config: TestConfig = {
       packageRules: [
@@ -618,6 +650,7 @@ describe('util/package-rules', () => {
     });
     expect(res2.x).toBeUndefined();
   });
+
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
     const config: TestConfig = {
       packageRules: [
@@ -638,6 +671,7 @@ describe('util/package-rules', () => {
     });
     expect(res1.x).toBeDefined();
   });
+
   it('checks if matchCurrentVersion selector is a version and matches if currentValue is a range', () => {
     const config: TestConfig = {
       packageRules: [
@@ -665,6 +699,7 @@ describe('util/package-rules', () => {
     });
     expect(res2.x).toBeUndefined();
   });
+
   it('checks if matchCurrentVersion selector works with static values', () => {
     const config: TestConfig = {
       packageRules: [
@@ -685,6 +720,7 @@ describe('util/package-rules', () => {
     });
     expect(res1.x).toBeDefined();
   });
+
   it('checks if matchCurrentVersion selector works with regular expressions', () => {
     const config: TestConfig = {
       packageRules: [
@@ -714,6 +750,7 @@ describe('util/package-rules', () => {
     expect(res1.x).toBeDefined();
     expect(res2.x).toBeUndefined();
   });
+
   it('checks if matchCurrentVersion selector works with negated regular expressions', () => {
     const config: TestConfig = {
       packageRules: [
@@ -743,6 +780,7 @@ describe('util/package-rules', () => {
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();
   });
+
   it('matches packageFiles', () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
@@ -765,6 +803,7 @@ describe('util/package-rules', () => {
     });
     expect(res2.x).toBeDefined();
   });
+
   it('matches lock files', () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
@@ -779,6 +818,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules(config);
     expect(res.x).toBeDefined();
   });
+
   it('matches paths', () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
@@ -807,6 +847,7 @@ describe('util/package-rules', () => {
     });
     expect(res3.x).toBeDefined();
   });
+
   it('empty rules', () => {
     expect(applyPackageRules({ ...config1, packageRules: null })).toEqual({
       foo: 'bar',
@@ -832,6 +873,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules(config);
     expect(res.groupSlug).toBe('b');
   });
+
   it('matches matchSourceUrlPrefixes(case-insensitive)', () => {
     const config: TestConfig = {
       packageRules: [
@@ -853,6 +895,7 @@ describe('util/package-rules', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+
   it('matches matchSourceUrls(case-insensitive)', () => {
     const config: TestConfig = {
       packageRules: [

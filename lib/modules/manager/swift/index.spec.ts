@@ -9,6 +9,7 @@ describe('modules/manager/swift/index', () => {
       expect(extractPackageFile(`dependencies:[]`)).toBeNull();
       expect(extractPackageFile(`dependencies:["foobar"]`)).toBeNull();
     });
+
     it('returns null for invalid content', () => {
       expect(extractPackageFile(`dependen`)).toBeNull();
       expect(extractPackageFile(`dependencies!: `)).toBeNull();
@@ -67,6 +68,7 @@ describe('modules/manager/swift/index', () => {
         )
       ).toBeNull();
     });
+
     it('parses packages with invalid versions', () => {
       expect(
         extractPackageFile(
@@ -94,6 +96,7 @@ describe('modules/manager/swift/index', () => {
         )
       ).not.toBeNull();
     });
+
     it('parses package descriptions', () => {
       expect(
         extractPackageFile(
@@ -126,6 +129,7 @@ describe('modules/manager/swift/index', () => {
         )
       ).toMatchSnapshot({ deps: [{ currentValue: '..<"1.2.3"' }] });
     });
+
     it('parses multiple packages', () => {
       expect(
         extractPackageFile(Fixtures.get(`SamplePackage.swift`))

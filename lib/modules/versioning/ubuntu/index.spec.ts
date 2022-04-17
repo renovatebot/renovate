@@ -79,7 +79,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish'}    | ${true}
     ${'jammy'}     | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    expect(!!ubuntu.isValid(version)).toBe(expected);
+    expect(ubuntu.isValid(version)).toBe(expected);
   });
 
   test.each`
@@ -94,8 +94,7 @@ describe('modules/versioning/ubuntu/index', () => {
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
-      const res = ubuntu.isCompatible(version, range);
-      expect(!!res).toBe(expected);
+      expect(ubuntu.isCompatible(version, range)).toBe(expected);
     }
   );
 
@@ -107,7 +106,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'20.04'}   | ${true}
     ${'>=20.04'} | ${false}
   `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!ubuntu.isSingleVersion(version)).toBe(expected);
+    expect(ubuntu.isSingleVersion(version)).toBe(expected);
   });
 
   test.each`
@@ -198,8 +197,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish'}   | ${false}
     ${'jammy'}    | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    const res = !!ubuntu.isStable(version);
-    expect(res).toBe(expected);
+    expect(ubuntu.isStable(version)).toBe(expected);
   });
 
   test.each`
@@ -252,7 +250,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish-'} | ${false}
     ${'JAMMY'}   | ${false}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!ubuntu.isVersion(version)).toBe(expected);
+    expect(ubuntu.isVersion(version)).toBe(expected);
   });
 
   test.each`

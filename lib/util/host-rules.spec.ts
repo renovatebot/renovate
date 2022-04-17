@@ -15,6 +15,7 @@ describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });
+
   describe('add()', () => {
     it('throws if both domainName and hostName', () => {
       expect(() =>
@@ -25,6 +26,7 @@ describe('util/host-rules', () => {
         } as HostRule)
       ).toThrow();
     });
+
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
         add({
@@ -34,6 +36,7 @@ describe('util/host-rules', () => {
         } as HostRule)
       ).toThrow();
     });
+
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
         add({
@@ -43,6 +46,7 @@ describe('util/host-rules', () => {
         } as HostRule)
       ).toThrow();
     });
+
     it('supports baseUrl-only', () => {
       add({
         matchHost: 'https://some.endpoint',
@@ -55,13 +59,16 @@ describe('util/host-rules', () => {
       });
     });
   });
+
   describe('find()', () => {
     beforeEach(() => {
       clear();
     });
+
     it('warns and returns empty for bad search', () => {
       expect(find({ abc: 'def' } as any)).toEqual({});
     });
+
     it('needs exact host matches', () => {
       add({
         hostType: NugetDatasource.id,
@@ -81,6 +88,7 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://not-nuget.org' })
       ).toEqual({});
     });
+
     it('matches on empty rules', () => {
       add({
         enabled: true,
@@ -89,6 +97,7 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
       ).toEqual({ enabled: true });
     });
+
     it('matches on hostType', () => {
       add({
         hostType: NugetDatasource.id,
@@ -98,6 +107,7 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
       ).toEqual({ token: 'abc' });
     });
+
     it('matches on domainName', () => {
       add({
         domainName: 'github.com',
@@ -190,6 +200,7 @@ describe('util/host-rules', () => {
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
       ).toEqual({ token: 'abc' });
     });
+
     it('matches on matchHost with protocol', () => {
       add({
         matchHost: 'https://domain.com',
@@ -204,6 +215,7 @@ describe('util/host-rules', () => {
         }).token
       ).toBe('def');
     });
+
     it('matches on matchHost without protocol', () => {
       add({
         matchHost: 'domain.com',
@@ -213,6 +225,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://domain.com' }).token).toBe('def');
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
+
     it('matches on matchHost with dot prefix', () => {
       add({
         matchHost: '.domain.com',
@@ -222,6 +235,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
@@ -233,6 +247,7 @@ describe('util/host-rules', () => {
           .token
       ).toBe('abc');
     });
+
     it('matches on endpoint subresource', () => {
       add({
         hostType: NugetDatasource.id,
@@ -246,6 +261,7 @@ describe('util/host-rules', () => {
         })
       ).toEqual({ token: 'abc' });
     });
+
     it('matches shortest matchHost first', () => {
       add({
         matchHost: 'https://nuget.local/api',
@@ -305,6 +321,7 @@ describe('util/host-rules', () => {
     it('warns and returns empty for bad search', () => {
       expect(findAll({ abc: 'def' } as any)).toEqual([]);
     });
+
     it('needs exact host matches', () => {
       const hostRule = {
         hostType: 'nuget',
@@ -324,6 +341,7 @@ describe('util/host-rules', () => {
       ]);
     });
   });
+
   describe('getAll()', () => {
     it('returns all host rules', () => {
       const hostRule1 = {

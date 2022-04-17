@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { fs, mocked } from '../../../../test/util';
+import { fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -19,6 +19,7 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules');
+jest.mock('../../../util/git');
 jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -48,6 +49,7 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
       Promise.resolve(`others/${dirName}`)
     );
+    git.getFileList.mockResolvedValueOnce([]);
     getRandomString.mockReturnValue('not-so-random' as any);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
@@ -70,6 +72,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('aborts if lock file is unchanged', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -85,6 +88,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates lock file', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -100,6 +104,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('does not update lock file when non-proj file is changed', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -115,6 +120,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('does not update lock file when no deps changed', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -130,6 +136,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -165,6 +172,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports global mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll(exec);
@@ -181,6 +189,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -203,6 +212,7 @@ describe('modules/manager/nuget/artifacts', () => {
       },
     ]);
   });
+
   it('authenticates at registries', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -236,6 +246,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('strips protocol version from feed url', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');

@@ -40,10 +40,12 @@ describe('modules/platform/index', () => {
       PLATFORM_NOT_FOUND
     );
   });
+
   it('throws if wrong platform', async () => {
     const config = { platform: 'wrong', username: 'abc', password: '123' };
     await expect(platform.initPlatform(config)).rejects.toThrow();
   });
+
   it('initializes', async () => {
     httpMock
       .scope('https://api.bitbucket.org')
