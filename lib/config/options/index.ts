@@ -120,7 +120,6 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding PR title.',
     type: 'string',
     default: 'Configure Renovate',
-    globalOnly: true,
     cli: false,
   },
   {
@@ -143,7 +142,6 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default config migration commit message.',
     type: 'string',
     default: null,
-    globalOnly: true,
     cli: false,
   },
   {
