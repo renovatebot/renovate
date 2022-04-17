@@ -84,9 +84,9 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchDepTypes.length && depType) {
+  if (matchDepTypes.length) {
     const isMatch =
-      matchDepTypes.includes(depType) ||
+      (depType && matchDepTypes.includes(depType)) ||
       depTypes?.some((dt) => matchDepTypes.includes(dt));
     if (!isMatch) {
       return false;
