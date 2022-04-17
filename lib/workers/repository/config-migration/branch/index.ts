@@ -45,6 +45,7 @@ export async function checkConfigMigrationBranch(
   if (!GlobalConfig.get('dryRun')) {
     await checkoutBranch(configMigrationBranch);
   }
+  migratedConfigData.finalize();
   const branchList = [configMigrationBranch];
   return { ...config, configMigrationBranch, branchList };
 }

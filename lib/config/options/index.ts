@@ -135,7 +135,6 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default config migration branch name.',
     type: 'string',
     default: '{{{branchPrefix}}}migrate-config',
-    globalOnly: true,
     cli: false,
   },
   {
