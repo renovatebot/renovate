@@ -247,7 +247,7 @@ export async function fetchRepoCache({
     );
     return JSON.parse(body);
   } catch (err) {
-    logger.debug({ err }, 'Failed to fetch repo cache blob');
+    logger.warn({ err }, 'Failed to fetch repo cache blob');
     return null;
   }
 }
