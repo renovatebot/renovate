@@ -32,7 +32,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version: \\"0.2.5\\"
+        "  version \\"0.2.5\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -57,7 +57,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-              "  version: \\"4.4.0\\"
+              "  version \\"4.4.0\\"
               "
           `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -84,7 +84,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
                   "express@4.4.0:
-                    version: \\"4.4.0\\"
+                    version \\"4.4.0\\"
                   "
               `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -110,7 +110,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version: \\"2.2.0\\"
+        "  version \\"2.2.0\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -136,7 +136,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version: \\"0.48.1\\"
+        "  version \\"0.48.1\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`

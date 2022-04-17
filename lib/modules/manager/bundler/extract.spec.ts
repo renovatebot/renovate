@@ -1,6 +1,6 @@
 import { fs, loadFixture } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
@@ -25,12 +25,6 @@ const sourceBlockWithNewLinesGemfile = loadFixture(
   'Gemfile.sourceBlockWithNewLines'
 );
 
-function validateGems(raw, parsed) {
-  const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
-  const parsedGemCount = parsed.deps.length;
-  expect(gemfileGemCount).toEqual(parsedGemCount);
-}
-
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
@@ -53,13 +47,13 @@ describe('modules/manager/bundler/extract', () => {
               isValid(dep.lockedVersion)
           )
       ).toBeTrue();
-      validateGems(railsGemfile, res);
+      expect(res.deps).toHaveLength(68);
     });
 
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
-      validateGems(sourceGroupGemfile, res);
+      expect(res.deps).toHaveLength(7);
     });
 
     it('parse webpacker Gemfile', async () => {
@@ -73,7 +67,7 @@ describe('modules/manager/bundler/extract', () => {
             isValid(dep.lockedVersion)
         )
       ).toBeTrue();
-      validateGems(webPackerGemfile, res);
+      expect(res.deps).toHaveLength(5);
     });
 
     it('parse mastodon Gemfile', async () => {
@@ -91,7 +85,7 @@ describe('modules/manager/bundler/extract', () => {
               isValid(dep.lockedVersion)
           )
       ).toBeTrue();
-      validateGems(mastodonGemfile, res);
+      expect(res.deps).toHaveLength(125);
     });
 
     it('parse Ruby CI Gemfile', async () => {
@@ -105,7 +99,7 @@ describe('modules/manager/bundler/extract', () => {
             isValid(dep.lockedVersion)
         )
       ).toBeTrue();
-      validateGems(rubyCIGemfile, res);
+      expect(res.deps).toHaveLength(14);
     });
   });
 
@@ -120,7 +114,7 @@ describe('modules/manager/bundler/extract', () => {
           isValid(dep.lockedVersion)
       )
     ).toBeTrue();
-    validateGems(gitlabFossGemfile, res);
+    expect(res.deps).toHaveLength(252);
   });
 
   it('parse source blocks in Gemfile', async () => {
@@ -136,6 +130,6 @@ describe('modules/manager/bundler/extract', () => {
       'Gemfile'
     );
     expect(res).toMatchSnapshot();
-    validateGems(sourceBlockWithNewLinesGemfile, res);
+    expect(res.deps).toHaveLength(2);
   });
 });
