@@ -174,12 +174,12 @@ export async function fetchRepoCache({
     const string = await streamToString(stream);
     const json = JSON.parse(string);
     if (json.$id) {
-      logger.debug(json, 'Failed to fetch repo cache blob');
+      logger.warn(json, 'Failed to fetch repo cache blob');
       return null;
     }
     return json;
   } catch (err) {
-    logger.debug({ err }, 'Failed to fetch repo cache blob');
+    logger.warn({ err }, 'Failed to fetch repo cache blob');
     return null;
   }
 }
