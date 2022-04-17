@@ -13,7 +13,9 @@ interface DistroSchedule {
   eol_elts?: string;
 }
 
-export type DistroDataFile = 'data/ubuntu-distro-info.json';
+export type DistroDataFile =
+  | 'data/ubuntu-distro-info.json'
+  | 'data/debian-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 
