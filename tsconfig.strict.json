@@ -266,7 +266,7 @@
     "lib/modules/platform/gitlab/index.ts",
     "lib/modules/platform/index.ts",
     "lib/renovate.ts",
-    "lib/util/package-rules.ts", // depends on versionings
+    "lib/util/package-rules.ts", // depends on config -> manager
     "lib/workers/repository/update/branch/artifacts.ts",
     "lib/workers/repository/update/branch/auto-replace.ts",
     "lib/workers/repository/update/branch/automerge.ts",
