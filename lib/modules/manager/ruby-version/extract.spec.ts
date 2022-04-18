@@ -12,6 +12,7 @@ describe('modules/manager/ruby-version/extract', () => {
         },
       ]);
     });
+
     it('supports ranges', () => {
       const res = extractPackageFile('8.4\n');
       expect(res.deps).toEqual([
@@ -22,6 +23,7 @@ describe('modules/manager/ruby-version/extract', () => {
         },
       ]);
     });
+
     it('skips non ranges', () => {
       const res = extractPackageFile('latestn');
       expect(res.deps).toEqual([

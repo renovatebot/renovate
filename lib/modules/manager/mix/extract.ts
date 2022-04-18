@@ -6,7 +6,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm
+  /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
 );
 
 export async function extractPackageFile(
@@ -25,46 +25,34 @@ export async function extractPackageFile(
         depBuffer += contentArr[lineNumber] + '\n';
         lineNumber += 1;
       } while (!contentArr[lineNumber].includes('end'));
-      let depMatch: RegExpMatchArray;
-      do {
-        depMatch = depMatchRegExp.exec(depBuffer);
-        if (depMatch) {
-          const depName = depMatch[1];
-          const datasource = depMatch[2];
-          const currentValue = depMatch[3];
-          const organization = depMatch[5];
+      let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
+      while (depMatchGroups) {
+        const { depName, datasource, currentValue, organization } =
+          depMatchGroups;
 
-          const dep: PackageDependency = {
-            depName,
-            currentValue,
-            managerData: {},
-          };
+        const dep: PackageDependency = {
+          depName,
+          currentValue,
+        };
 
-          dep.datasource = datasource || HexDatasource.id;
+        dep.datasource = datasource || HexDatasource.id;
 
-          if (dep.datasource === HexDatasource.id) {
-            dep.currentValue = currentValue;
-            dep.packageName = depName;
-          }
-
-          if (organization) {
-            dep.packageName += ':' + organization;
-          }
-
-          if (dep.datasource !== HexDatasource.id) {
-            dep.skipReason = 'non-hex-dep-types';
-          }
-
-          // Find dep's line number
-          for (let i = 0; i < contentArr.length; i += 1) {
-            if (contentArr[i].includes(`:${depName},`)) {
-              dep.managerData.lineNumber = i;
-            }
-          }
-
-          deps.push(dep);
+        if (dep.datasource === HexDatasource.id) {
+          dep.currentValue = currentValue;
+          dep.packageName = depName;
         }
-      } while (depMatch);
+
+        if (organization) {
+          dep.packageName += ':' + organization;
+        }
+
+        if (dep.datasource !== HexDatasource.id) {
+          dep.skipReason = 'non-hex-dep-types';
+        }
+
+        deps.push(dep);
+        depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
+      }
     }
   }
   const res: PackageFile = { deps };

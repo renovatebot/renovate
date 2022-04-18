@@ -79,9 +79,9 @@ export class RubyGemsOrgDatasource extends Datasource {
   }
 
   private static processLine(line: string): void {
-    let split: string[];
-    let pkg: string;
-    let versions: string;
+    let split: string[] | undefined;
+    let pkg: string | undefined;
+    let versions: string | undefined;
     try {
       const l = line.trim();
       if (!l.length || l.startsWith('created_at:') || l === '---') {
@@ -115,7 +115,7 @@ export class RubyGemsOrgDatasource extends Datasource {
     return getElapsedMinutes(lastSync) >= 5;
   }
 
-  updateRubyGemsVersionsPromise: Promise<void> | undefined;
+  private updateRubyGemsVersionsPromise: Promise<void> | null = null;
 
   async syncVersions(): Promise<void> {
     if (RubyGemsOrgDatasource.isDataStale()) {

@@ -246,9 +246,10 @@ const options: RenovateOptions[] = [
     name: 'dryRun',
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.',
-    type: 'boolean',
+    type: 'string',
     globalOnly: true,
-    default: false,
+    allowedValues: ['extract', 'lookup', 'full'],
+    default: null,
   },
   {
     name: 'printConfig',
@@ -389,6 +390,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     default: '',
+    globalOnly: true,
+  },
+  {
+    name: 'githubTokenWarn',
+    description: 'Display warnings about GitHub token not being set.',
+    type: 'boolean',
+    default: true,
     globalOnly: true,
   },
   {
@@ -723,6 +731,14 @@ const options: RenovateOptions[] = [
     stage: 'repository',
   },
   {
+    name: 'gitTimeout',
+    description:
+      'Configure the timeout with a number of milliseconds to wait for a git task',
+    type: 'integer',
+    globalOnly: true,
+    default: 10000,
+  },
+  {
     name: 'enabledManagers',
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
@@ -742,6 +758,7 @@ const options: RenovateOptions[] = [
     description:
       'Skip any package file whose path matches one of these. Can be a string or glob pattern.',
     type: 'array',
+    mergeable: false,
     subType: 'string',
     stage: 'repository',
     default: ['**/node_modules/**', '**/bower_components/**'],

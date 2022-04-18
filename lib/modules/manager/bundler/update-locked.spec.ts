@@ -13,6 +13,7 @@ describe('modules/manager/bundler/update-locked', () => {
     };
     expect(updateLockedDependency(config).status).toBe('already-updated');
   });
+
   it('returns unsupported', () => {
     const config: UpdateLockedConfig = {
       lockFileContent,

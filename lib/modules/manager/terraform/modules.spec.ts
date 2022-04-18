@@ -21,6 +21,7 @@ describe('modules/manager/terraform/modules', () => {
       expect(project).toBe('hashicorp/example.repo-123');
     });
   });
+
   describe('gitTagsRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(
@@ -64,6 +65,7 @@ describe('modules/manager/terraform/modules', () => {
       expect(ssh.tag).toBe('v1.0.0');
     });
   });
+
   describe('bitbucketRefMatchRegex', () => {
     it('should split workspace, project and tag from source', () => {
       const ssh = bitbucketRefMatchRegex.exec(

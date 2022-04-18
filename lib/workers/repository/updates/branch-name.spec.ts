@@ -14,6 +14,7 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('some-group-name-grouptopic');
     });
+
     it('uses groupSlug if defined', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
@@ -26,6 +27,7 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('some-group-slug-grouptopic');
     });
+
     it('separates major with groups', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
@@ -42,6 +44,7 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
     });
+
     it('uses single major with groups', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
@@ -58,6 +61,7 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('major-some-group-slug-grouptopic');
     });
+
     it('separates patch groups and uses update topic', () => {
       const upgrade: RenovateConfig = {
         branchName: 'update-branch-{{groupSlug}}-{{branchTopic}}',
@@ -75,6 +79,7 @@ describe('workers/repository/updates/branch-name', () => {
         'update-branch-patch-some-group-slug-update-topic'
       );
     });
+
     it('compiles multiple times', () => {
       const upgrade: RenovateConfig = {
         branchName: '{{branchTopic}}',
@@ -85,6 +90,7 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('dep');
     });
+
     it('separates patches when separateMinorPatch=true', () => {
       const upgrade: RenovateConfig = {
         branchName:
@@ -104,6 +110,7 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
     });
+
     it('does not separate patches when separateMinorPatch=false', () => {
       const upgrade: RenovateConfig = {
         branchName:

@@ -4,7 +4,6 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
-import * as npmApi from '../../../modules/datasource/npm';
 import { RepoParams, RepoResult, platform } from '../../../modules/platform';
 
 // TODO: fix types
@@ -64,7 +63,5 @@ export async function initApis(
   config = await getPlatformConfig(config as never);
   await validateOptimizeForDisabled(config);
   await validateIncludeForks(config);
-  npmApi.resetMemCache();
-  npmApi.setNpmrc(config.npmrc);
   return config;
 }
