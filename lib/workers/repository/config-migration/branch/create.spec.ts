@@ -1,8 +1,8 @@
 import {
+  RenovateConfig,
   getConfig,
   loadJsonFixture,
   platform,
-  RenovateConfig,
 } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';

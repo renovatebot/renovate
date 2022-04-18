@@ -42,7 +42,7 @@ export async function checkConfigMigrationBranch(
       config,
       migratedConfigData
     );
-    // istanbul ignore if
+
     if (commit) {
       logger.info({ branch: configMigrationBranch, commit }, 'Branch created');
     }

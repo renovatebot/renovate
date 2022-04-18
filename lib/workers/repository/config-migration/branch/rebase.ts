@@ -16,8 +16,8 @@ export async function rebaseMigrationBranch(
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
-  const configFileName = migratedConfigData.getConfigFileName();
-  const contents = migratedConfigData.getConfigContent();
+  const configFileName = migratedConfigData.fileName;
+  const contents = migratedConfigData.content;
   const existingContents = await getFile(
     configFileName,
     config.configMigrationBranch

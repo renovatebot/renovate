@@ -7,47 +7,41 @@ import { detectRepoFileConfig } from '../../init/merge';
 
 export class MigratedData {
   constructor(
-    private readonly _content: string,
-    private readonly _fileName: string
+    private readonly migratedContent: string,
+    private readonly configFileName: string
   ) {}
 
-  getConfigContent(): string {
-    return this._content;
+  get content(): string {
+    return this.migratedContent;
   }
 
-  getConfigFileName(): string {
-    return this._fileName;
+  get fileName(): string {
+    return this.configFileName;
   }
 }
 
 export class MigratedDataFactory {
   // singleton
-  private static _data: MigratedData;
+  private static data: MigratedData;
 
-  public static async getAsync(config_: RenovateConfig): Promise<MigratedData> {
-    if (this._data) {
-      return this._data;
+  public static async getAsync(config: RenovateConfig): Promise<MigratedData> {
+    if (this.data) {
+      return this.data;
     }
-    const d = await this.build(config_);
-    this._data = new MigratedData(d?.content, d?.fileName);
-    return this._data;
+    const migrated = await this.build(config);
+    this.data = new MigratedData(migrated?.content, migrated?.fileName);
+    return this.data;
   }
 
   public static reset(): void {
-    this._data = null;
-  }
-
-  // istanbul ignore next: unused constructor for a static factory class
-  private constructor() {
-    return;
+    this.data = null;
   }
 
   private static async build(
-    config_: RenovateConfig
+    config: RenovateConfig
   ): Promise<IMigratedData | null> {
     let res: IMigratedData;
     try {
-      const config = { ...config_ };
       const rc = await detectRepoFileConfig();
       const configFileParsed = rc?.configFileParsed || {};
 

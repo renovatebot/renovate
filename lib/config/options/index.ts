@@ -125,6 +125,7 @@ const options: RenovateOptions[] = [
   {
     name: 'configMigration',
     description: 'Enable this to get Config migration PRs when needed.',
+    stage: 'repository',
     type: 'boolean',
     default: false,
   },
