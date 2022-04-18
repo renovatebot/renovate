@@ -12,38 +12,36 @@ import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type { PoetryFile, PoetrySection } from './types';
+import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
   section: keyof PoetrySection,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
-  const deps = [];
-  const sectionContent = parsedFile.tool.poetry[section];
+  const deps: PackageDependency[] = [];
+  const sectionContent = parsedFile.tool?.poetry[section];
   if (!sectionContent) {
     return [];
   }
 
-  Object.keys(sectionContent).forEach((depName) => {
+  for (const depName of Object.keys(sectionContent)) {
     if (depName === 'python') {
-      return;
+      continue;
     }
-    let skipReason: SkipReason;
-    let currentValue = sectionContent[depName];
+
+    let skipReason: SkipReason = null;
+    let currentValue: string | PoetryDependency = sectionContent[depName];
     let nestedVersion = false;
-    if (typeof currentValue !== 'string') {
+    if (!is.string(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
       const git = currentValue.git;
       if (version) {
         currentValue = version;
         nestedVersion = true;
-        if (path) {
-          skipReason = 'path-dependency';
-        }
-        if (git) {
-          skipReason = 'git-dependency';
+        if (path || git) {
+          skipReason = path ? 'path-dependency' : 'git-dependency';
         }
       } else if (path) {
         currentValue = '';
@@ -59,7 +57,7 @@ function extractFromSection(
     const dep: PackageDependency = {
       depName,
       depType: section,
-      currentValue: currentValue as string,
+      currentValue: currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
@@ -76,7 +74,7 @@ function extractFromSection(
       dep.skipReason = 'unknown-version';
     }
     deps.push(dep);
-  });
+  }
   return deps;
 }
 
