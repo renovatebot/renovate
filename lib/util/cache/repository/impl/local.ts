@@ -7,12 +7,13 @@ import {
   canBeMigratedToV11,
   isValidCacheRecord,
 } from '../common';
-import type { RepoCache, RepoCacheData, RepoCacheRecord } from '../types';
+import type { RepoCacheData, RepoCacheRecord } from '../types';
+import { RepoCacheBase } from './base';
 
-export class LocalRepoCache implements RepoCache {
-  private data: RepoCacheData = {};
-
-  constructor(private platform: string, private repository: string) {}
+export class LocalRepoCache extends RepoCacheBase {
+  constructor(private platform: string, private repository: string) {
+    super();
+  }
 
   private getCacheFileName(): string {
     const cacheDir = GlobalConfig.get('cacheDir');
@@ -22,7 +23,7 @@ export class LocalRepoCache implements RepoCache {
     return upath.join(cacheDir, repoCachePath, platform, fileName);
   }
 
-  async load(): Promise<void> {
+  override async load(): Promise<void> {
     const cacheFileName = this.getCacheFileName();
     try {
       const cacheFileName = this.getCacheFileName();
@@ -44,7 +45,7 @@ export class LocalRepoCache implements RepoCache {
     }
   }
 
-  async save(): Promise<void> {
+  override async save(): Promise<void> {
     const cacheFileName = this.getCacheFileName();
     const revision = CACHE_REVISION;
     const repository = this.repository;
