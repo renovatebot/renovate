@@ -15,10 +15,8 @@ export async function checkConfigMigrationBranch(
   logger.trace({ config });
   const migratedConfigData = await MigratedDataFactory.getAsync(config);
   if (!migratedConfigData) {
-    logger.debug(
-      'Aborting - checkConfigMigrationBranch() Error fetching migrated data'
-    );
-    return;
+    logger.debug('checkConfigMigrationBranch() Error fetching migrated data');
+    return config;
   }
   config.configMigrationBranch = template.compile(
     config.configMigrationBranch,

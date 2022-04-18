@@ -14,7 +14,7 @@ export class ConfigMigrationCommitMessageFactory {
   create(): string {
     const { commitMessagePrefix, commitMessage, semanticCommitType } =
       this.config;
-    let prefix: string;
+    let prefix: string | null = null;
 
     if (commitMessagePrefix) {
       prefix = (commitMessagePrefix ?? '').trim();
@@ -22,13 +22,16 @@ export class ConfigMigrationCommitMessageFactory {
       prefix = (semanticCommitType ?? '').trim() + '(config)';
     }
 
-    return template.compile(commitMessage, {
-      ...this.config,
-      commitMessagePrefix: prefix,
-      commitMessageAction: 'Migrate',
-      commitMessageTopic: `config ${this.configFile}`,
-      commitMessageExtra: '',
-    });
+    return template.compile(
+      commitMessage ?? `Migrate config ${this.configFile}`,
+      {
+        ...this.config,
+        commitMessagePrefix: prefix ?? '',
+        commitMessageAction: 'Migrate',
+        commitMessageTopic: `config ${this.configFile}`,
+        commitMessageExtra: '',
+      }
+    );
   }
 
   private areSemanticCommitsEnabled(): boolean {
