@@ -3,11 +3,11 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
 import {
-  extractAllPackageFiles,
   extractFromImage,
   extractFromJob,
   extractFromServices,
 } from './extract';
+import { extractAllPackageFiles, extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 
@@ -20,6 +20,12 @@ describe('modules/manager/gitlabci/extract', () => {
 
   afterEach(() => {
     GlobalConfig.reset();
+  });
+
+  describe('extractAllPackageFile()', () => {
+    it('extracts from empty file', () => {
+      expect(extractPackageFile('')).toBeNull();
+    });
   });
 
   describe('extractAllPackageFiles()', () => {

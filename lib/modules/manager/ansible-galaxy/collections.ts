@@ -3,6 +3,7 @@ import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
+import type { AnsibleGalaxyPackageDependency } from './types';
 import {
   blockLineRegEx,
   galaxyDepRegex,
@@ -12,8 +13,7 @@ import {
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
-  lineNumber: number,
-  dependency: PackageDependency
+  dependency: AnsibleGalaxyPackageDependency
 ): void {
   const localDependency = dependency;
   const key = lineMatch[2];
@@ -45,12 +45,12 @@ function interpretLine(
 }
 
 function handleGitDep(
-  dep: PackageDependency,
-  nameMatch: RegExpExecArray
+  dep: AnsibleGalaxyPackageDependency,
+  nameMatch: RegExpExecArray | null
 ): void {
   dep.datasource = GitTagsDatasource.id;
 
-  if (nameMatch) {
+  if (nameMatch?.groups) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
       dep.datasource = GithubTagsDatasource.id;
@@ -76,14 +76,14 @@ function handleGitDep(
   }
 }
 
-function handleGalaxyDep(dep: PackageDependency): void {
+function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
 }
 
-function finalize(dependency: PackageDependency): boolean {
+function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   const dep = dependency;
   dep.depName = dep.managerData.name;
 
@@ -131,7 +131,7 @@ export function extractCollections(lines: string[]): PackageDependency[] {
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     let lineMatch = newBlockRegEx.exec(lines[lineNumber]);
     if (lineMatch) {
-      const dep: PackageDependency = {
+      const dep: AnsibleGalaxyPackageDependency = {
         depType: 'galaxy-collection',
         managerData: {
           name: null,
@@ -141,7 +141,7 @@ export function extractCollections(lines: string[]): PackageDependency[] {
         },
       };
       do {
-        interpretLine(lineMatch, lineNumber, dep);
+        interpretLine(lineMatch, dep);
         const line = lines[lineNumber + 1];
 
         if (!line) {
@@ -153,7 +153,7 @@ export function extractCollections(lines: string[]): PackageDependency[] {
         }
       } while (lineMatch);
       if (finalize(dep)) {
-        delete dep.managerData;
+        delete (dep as PackageDependency).managerData;
         deps.push(dep);
       }
     }

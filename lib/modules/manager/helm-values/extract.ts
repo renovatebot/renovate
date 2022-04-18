@@ -39,26 +39,25 @@ function findDependencies(
     return packageDependencies;
   }
 
-  Object.keys(parsedContent).forEach((key) => {
-    if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
-      const currentItem = parsedContent[key];
+  Object.entries(parsedContent).forEach(([key, value]) => {
+    if (matchesHelmValuesDockerHeuristic(key, value)) {
+      const currentItem = value;
 
-      let registry: string = currentItem.registry;
+      let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
       const tag = String(currentItem.tag);
       packageDependencies.push(getHelmDep({ repository, tag, registry }));
-    } else if (matchesHelmValuesInlineImage(key, parsedContent[key])) {
-      const currentItem = parsedContent[key];
-      packageDependencies.push(getDep(currentItem));
+    } else if (matchesHelmValuesInlineImage(key, value)) {
+      packageDependencies.push(getDep(value));
     } else {
-      findDependencies(parsedContent[key], packageDependencies);
+      findDependencies(value as Record<string, unknown>, packageDependencies);
     }
   });
   return packageDependencies;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
     // a parser that allows extracting line numbers would be preferable, with
