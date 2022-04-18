@@ -22,16 +22,25 @@ export class ConfigMigrationCommitMessageFactory {
       prefix = (semanticCommitType ?? '').trim() + '(config)';
     }
 
-    return template.compile(
-      commitMessage ?? `Migrate config ${this.configFile}`,
-      {
+    const action =
+      this.config.commitMessageAction === 'Update'
+        ? ''
+        : this.config.commitMessageAction;
+    const topic =
+      this.config.commitMessageTopic === 'dependency {{depName}}'
+        ? `Migrate config ${this.configFile}`
+        : this.config.commitMessageTopic;
+
+    return template
+      .compile(commitMessage ?? `Migrate config ${this.configFile}`, {
         ...this.config,
         commitMessagePrefix: prefix ?? '',
-        commitMessageAction: 'Migrate',
-        commitMessageTopic: `config ${this.configFile}`,
+        commitMessageAction: action,
+        commitMessageTopic: topic,
         commitMessageExtra: '',
-      }
-    );
+      })
+      .trim()
+      .replaceAll('  ', ' ');
   }
 
   private areSemanticCommitsEnabled(): boolean {

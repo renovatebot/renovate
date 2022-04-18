@@ -8,8 +8,7 @@ import { detectRepoFileConfig } from '../../init/merge';
 export class MigratedData {
   constructor(
     private readonly _content: string,
-    private readonly _fileName: string,
-    private readonly _indent: string
+    private readonly _fileName: string
   ) {}
 
   getConfigContent(): string {
@@ -18,10 +17,6 @@ export class MigratedData {
 
   getConfigFileName(): string {
     return this._fileName;
-  }
-
-  getIndent(): string {
-    return this._indent;
   }
 }
 
@@ -34,7 +29,7 @@ export class MigratedDataFactory {
       return this._data;
     }
     const d = await this.build(config_);
-    this._data = new MigratedData(d?.content, d?.fileName, d?.indent);
+    this._data = new MigratedData(d?.content, d?.fileName);
     return this._data;
   }
 
@@ -71,7 +66,7 @@ export class MigratedDataFactory {
         content += '\n';
       }
 
-      res = { content, fileName, indent };
+      res = { content, fileName };
     } catch (err) {
       logger.debug(
         err,
@@ -85,5 +80,4 @@ export class MigratedDataFactory {
 interface IMigratedData {
   content: string;
   fileName: string;
-  indent: string;
 }

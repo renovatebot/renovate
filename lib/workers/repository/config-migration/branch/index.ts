@@ -18,11 +18,10 @@ export async function checkConfigMigrationBranch(
     logger.debug('checkConfigMigrationBranch() Error fetching migrated data');
     return config;
   }
-  config.configMigrationBranch = template.compile(
+  const configMigrationBranch = template.compile(
     config.configMigrationBranch,
     config
   );
-  const configMigrationBranch = config.configMigrationBranch;
   if (await migrationPrExists(config)) {
     logger.debug('Config Migration PR already exists');
     const commit = await rebaseMigrationBranch(config, migratedConfigData);

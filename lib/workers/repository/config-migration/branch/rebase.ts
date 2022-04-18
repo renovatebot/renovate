@@ -2,12 +2,8 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  getFile,
-  isBranchModified,
-  isBranchStale,
-  setGitAuthor,
-} from '../../../../util/git';
+import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
+import * as template from '../../../../util/template';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
@@ -46,9 +42,10 @@ export async function rebaseMigrationBranch(
     return null;
   }
 
-  setGitAuthor(config.gitAuthor);
+  const branchName = template.compile(config.configMigrationBranch, config);
+
   return commitAndPush({
-    branchName: config.configMigrationBranch,
+    branchName: branchName,
     files: [
       {
         type: 'addition',
