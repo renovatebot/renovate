@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '../../../../config/types';
-import { CommitMessage } from '../../model/commit-message';
+import * as template from '../../../../util/template';
 
 export class ConfigMigrationCommitMessageFactory {
   private readonly config: RenovateConfig;
@@ -11,27 +11,24 @@ export class ConfigMigrationCommitMessageFactory {
     this.configFile = configFile;
   }
 
-  create(): CommitMessage {
-    const {
-      commitMessagePrefix,
-      configMigrationCommitMessage,
-      semanticCommitType,
-    } = this.config;
-    const commitMessage = new CommitMessage();
+  create(): string {
+    const { commitMessagePrefix, commitMessage, semanticCommitType } =
+      this.config;
+    let prefix: string;
 
     if (commitMessagePrefix) {
-      commitMessage.setCustomPrefix(commitMessagePrefix);
+      prefix = (commitMessagePrefix ?? '').trim();
     } else if (this.areSemanticCommitsEnabled()) {
-      commitMessage.setSemanticPrefix(semanticCommitType, 'config');
+      prefix = (semanticCommitType ?? '').trim() + '(config)';
     }
 
-    if (configMigrationCommitMessage) {
-      commitMessage.setMessage(configMigrationCommitMessage);
-    } else {
-      commitMessage.setMessage(`Migrated config ${this.configFile}`);
-    }
-
-    return commitMessage;
+    return template.compile(commitMessage, {
+      ...this.config,
+      commitMessagePrefix: prefix,
+      commitMessageAction: 'Migrate',
+      commitMessageTopic: `config ${this.configFile}`,
+      commitMessageExtra: '',
+    });
   }
 
   private areSemanticCommitsEnabled(): boolean {

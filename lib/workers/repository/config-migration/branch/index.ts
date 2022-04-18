@@ -2,10 +2,10 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { checkoutBranch, setGitAuthor } from '../../../../util/git';
+import { checkoutBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import { createConfigMigrationBranch } from './create';
-import { migratedConfigData } from './migrated-config-data';
+import { MigratedDataFactory } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
@@ -13,16 +13,21 @@ export async function checkConfigMigrationBranch(
 ): Promise<RenovateConfig> {
   logger.debug('checkConfigMigrationBranch()');
   logger.trace({ config });
-  await migratedConfigData.init(config);
+  const migratedConfigData = await MigratedDataFactory.getAsync(config);
+  if (!migratedConfigData) {
+    logger.debug(
+      'Aborting - checkConfigMigrationBranch() Error fetching migrated data'
+    );
+    return;
+  }
   config.configMigrationBranch = template.compile(
     config.configMigrationBranch,
     config
   );
   const configMigrationBranch = config.configMigrationBranch;
-  setGitAuthor(config.gitAuthor);
   if (await migrationPrExists(config)) {
     logger.debug('Config Migration PR already exists');
-    const commit = await rebaseMigrationBranch(config);
+    const commit = await rebaseMigrationBranch(config, migratedConfigData);
     if (commit) {
       logger.info({ branch: configMigrationBranch, commit }, 'Branch updated');
     }
@@ -36,7 +41,10 @@ export async function checkConfigMigrationBranch(
   } else {
     logger.debug('Config Migration PR does not exist');
     logger.debug('Need to create migration PR');
-    const commit = await createConfigMigrationBranch(config);
+    const commit = await createConfigMigrationBranch(
+      config,
+      migratedConfigData
+    );
     // istanbul ignore if
     if (commit) {
       logger.info({ branch: configMigrationBranch, commit }, 'Branch created');
@@ -45,7 +53,7 @@ export async function checkConfigMigrationBranch(
   if (!GlobalConfig.get('dryRun')) {
     await checkoutBranch(configMigrationBranch);
   }
-  migratedConfigData.finalize();
+  MigratedDataFactory.reset();
   const branchList = [configMigrationBranch];
   return { ...config, configMigrationBranch, branchList };
 }

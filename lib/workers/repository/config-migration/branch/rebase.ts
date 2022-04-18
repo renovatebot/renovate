@@ -2,12 +2,18 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
+import {
+  getFile,
+  isBranchModified,
+  isBranchStale,
+  setGitAuthor,
+} from '../../../../util/git';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { migratedConfigData } from './migrated-config-data';
+import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
-  config: RenovateConfig
+  config: RenovateConfig,
+  migratedConfigData: MigratedData
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
   if (await isBranchModified(config.configMigrationBranch)) {
@@ -28,19 +34,19 @@ export async function rebaseMigrationBranch(
     return null;
   }
   logger.debug('Rebasing migration branch');
-  // istanbul ignore next
+
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName
   );
   const commitMessage = commitMessageFactory.create();
 
-  // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in migration branch');
     return null;
   }
 
+  setGitAuthor(config.gitAuthor);
   return commitAndPush({
     branchName: config.configMigrationBranch,
     files: [

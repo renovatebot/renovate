@@ -27,9 +27,10 @@ export async function ensureConfigMigrationPr(
   prTemplate += emojify(
     `
 
+
 ---
-{{WARNINGS}}
-{{ERRORS}}
+{{{warnings}}}
+{{{errors}}}
 ---
 
 :question: Got questions? Check out Renovate's [Docs](${config.productLinks.documentation}), particularly the Getting Started section.
@@ -37,8 +38,10 @@ If you need any further assistance then you can also [request help here](${confi
 `
   );
   let prBody = prTemplate;
-  prBody = prBody.replace('{{WARNINGS}}\n', getWarnings(config));
-  prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
+  prBody = template.compile(prBody, {
+    warnings: getWarnings(config),
+    errors: getErrors(config),
+  });
   if (is.string(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
@@ -79,7 +82,7 @@ If you need any further assistance then you can also [request help here](${confi
       const pr = await platform.createPr({
         sourceBranch: config.configMigrationBranch,
         targetBranch: config.defaultBranch,
-        prTitle: config.configMigrationPrTitle,
+        prTitle: config.onboardingPrTitle,
         prBody,
         labels,
         platformOptions: getPlatformPrOptions({ ...config, automerge: false }),

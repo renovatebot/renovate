@@ -136,6 +136,8 @@ const prBodyFields = [
   'table',
   'notes',
   'changelogs',
+  'errors',
+  'warnings',
   'configDescription',
   'controls',
   'footer',

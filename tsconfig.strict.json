@@ -251,7 +251,7 @@
     "lib/workers/repository/config-migration/branch/create.ts",
     "lib/workers/repository/config-migration/branch/rebase.ts",
     "lib/workers/repository/config-migration/branch/index.ts",
-    "lib/workers/repository/config-migration/branch/migrated-config-data.ts",
+    "lib/workers/repository/config-migration/branch/migrated-data.ts",
     "lib/workers/repository/config-migration/pr/errors-warnings.ts",
     "lib/workers/repository/config-migration/pr/index.ts",
     "lib/workers/repository/process/deprecated.ts",

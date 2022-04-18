@@ -2,11 +2,13 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
+import { setGitAuthor } from '../../../../util/git';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { migratedConfigData } from './migrated-config-data';
+import type { MigratedData } from './migrated-data';
 
 export function createConfigMigrationBranch(
-  config: Partial<RenovateConfig>
+  config: Partial<RenovateConfig>,
+  migratedConfigData: MigratedData
 ): Promise<string | null> {
   logger.debug('createConfigMigrationBranch()');
   const contents = migratedConfigData.getConfigContent();
@@ -26,6 +28,7 @@ export function createConfigMigrationBranch(
     return null;
   }
 
+  setGitAuthor(config.gitAuthor);
   return commitAndPush({
     branchName: config.configMigrationBranch,
     files: [
