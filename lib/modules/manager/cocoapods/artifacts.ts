@@ -21,7 +21,7 @@ function getPluginCommands(content: string): string[] {
   const lines: string[] = content.split(newlineRegex);
   lines.forEach((line) => {
     const match = pluginRegex.exec(line);
-    if (match) {
+    if (match?.groups) {
       const { plugin } = match.groups;
       result.add(`gem install ${quote(plugin)}`);
     }
