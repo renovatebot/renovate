@@ -74,12 +74,12 @@ describe('modules/manager/poetry/extract', () => {
 
     it('can parse empty registries', async () => {
       const res = await extractPackageFile(pyproject7toml, filename);
-      expect(res.registryUrls).toBeNull();
+      expect(res.registryUrls).toBeUndefined();
     });
 
     it('can parse missing registries', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
-      expect(res.registryUrls).toBeNull();
+      expect(res.registryUrls).toBeUndefined();
     });
 
     it('dedupes registries', async () => {

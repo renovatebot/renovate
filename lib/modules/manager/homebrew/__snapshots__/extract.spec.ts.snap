@@ -59,7 +59,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": null,
-      "datasource": null,
+      "datasource": undefined,
       "depName": "Acmetool",
       "managerData": Object {
         "ownerName": null,
@@ -78,7 +78,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": null,
-      "datasource": null,
+      "datasource": undefined,
       "depName": "Ibazel",
       "managerData": Object {
         "ownerName": null,
@@ -97,7 +97,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": null,
-      "datasource": null,
+      "datasource": undefined,
       "depName": "Ibazel",
       "managerData": Object {
         "ownerName": null,
@@ -154,7 +154,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": null,
-      "datasource": null,
+      "datasource": undefined,
       "depName": "Ibazel",
       "managerData": Object {
         "ownerName": null,
@@ -173,7 +173,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": null,
-      "datasource": null,
+      "datasource": undefined,
       "depName": "Aalib",
       "managerData": Object {
         "ownerName": null,
@@ -192,7 +192,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": null,
-      "datasource": null,
+      "datasource": undefined,
       "depName": "Aap",
       "managerData": Object {
         "ownerName": null,

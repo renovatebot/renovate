@@ -15,7 +15,7 @@ Object {
     "http2": false,
     "method": "POST",
     "password": "***********",
-    "url": "https://:**redacted**@github.com/api",
+    "url": "https://**redacted**@github.com/api",
     "username": "",
   },
   "response": Object {

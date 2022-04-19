@@ -3,3 +3,7 @@ export interface UrlParsedResult {
   repo: string;
   currentValue: string;
 }
+
+export interface BazelManagerData {
+  def: string;
+}
