@@ -9,6 +9,11 @@ import type { Doc } from './types';
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 
+function extractYaml(content: string): string {
+  // regex remove go templated ({{ . }}) values
+  return content.replace(/(^|:)\s*{{.+}}\s*$/gm, '$1');
+}
+
 export function extractPackageFile(
   content: string,
   fileName: string,
@@ -18,9 +23,7 @@ export function extractPackageFile(
   let docs: Doc[];
   const aliases: Record<string, string> = {};
   try {
-    docs = loadAll(content.replace(/(^|:)\s*{{.+}}\s*$/gm, '$1'), null, {
-      json: true,
-    }) as Doc[];
+    docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;
