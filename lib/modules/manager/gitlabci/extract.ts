@@ -13,7 +13,7 @@ export function extractFromImage(
   if (is.undefined(image)) {
     return null;
   }
-  let dep: PackageDependency = null;
+  let dep: PackageDependency | null = null;
   if (is.string(image)) {
     dep = getGitlabDep(image);
     dep.depType = 'image';
@@ -53,7 +53,10 @@ export function extractFromJob(job: Job | undefined): PackageDependency[] {
   if (is.object(job)) {
     const { image, services } = { ...job };
     if (is.object(image) || is.string(image)) {
-      deps.push(extractFromImage(image));
+      const dep = extractFromImage(image);
+      if (dep) {
+        deps.push(dep);
+      }
     }
     if (is.array(services)) {
       deps.push(...extractFromServices(services));
@@ -72,7 +75,12 @@ export function extractPackageFile(content: string): PackageFile | null {
       for (const [property, value] of Object.entries(doc)) {
         switch (property) {
           case 'image':
-            deps.push(extractFromImage(value as Image));
+            {
+              const dep = extractFromImage(value as Image);
+              if (dep) {
+                deps.push(dep);
+              }
+            }
             break;
 
           case 'services':
@@ -89,10 +97,8 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting GitLab CI dependencies');
   }
-  if (!deps.length) {
-    return null;
-  }
-  return { deps };
+
+  return deps.length ? { deps } : null;
 }
 
 export async function extractAllPackageFiles(
@@ -105,7 +111,7 @@ export async function extractAllPackageFiles(
 
   // extract all includes from the files
   while (filesToExamine.length > 0) {
-    const file = filesToExamine.pop();
+    const file = filesToExamine.pop()!;
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
@@ -120,6 +126,7 @@ export async function extractAllPackageFiles(
       }) as GitlabPipeline;
     } catch (err) {
       logger.warn({ err, file }, 'Error extracting GitLab CI dependencies');
+      continue;
     }
 
     if (is.array(doc?.include)) {
