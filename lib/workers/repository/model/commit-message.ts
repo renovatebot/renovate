@@ -81,7 +81,7 @@ export abstract class CommitMessage {
 
   protected abstract get prefix(): string;
 
-  protected normalizeInput(value?: string | null): string {
+  protected normalizeInput(value: string | null | undefined): string {
     return value?.trim() ?? '';
   }
 }
