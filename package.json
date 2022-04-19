@@ -197,7 +197,7 @@
     "redis": "4.0.6",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
-    "semver": "7.3.6",
+    "semver": "7.3.7",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.0",
