@@ -40,5 +40,13 @@ describe('modules/manager/gitlabci/utils', () => {
         currentValue: 'v1.3.1',
       });
     });
+
+    it('empty', () => {
+      expect(getGitlabDep('')).toMatchObject({
+        replaceString: '',
+        depName: '',
+        currentValue: undefined,
+      });
+    });
   });
 });
