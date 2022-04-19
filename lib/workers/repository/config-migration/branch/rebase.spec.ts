@@ -47,8 +47,8 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
     it('does nothing if branch is up to date', async () => {
       git.getFile
-        .mockResolvedValueOnce(renovateConfig) // package.json
-        .mockResolvedValueOnce(renovateConfig); // renovate.json
+        .mockResolvedValueOnce(renovateConfig)
+        .mockResolvedValueOnce(renovateConfig);
       await rebaseMigrationBranch(config, migratedConfigData);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });

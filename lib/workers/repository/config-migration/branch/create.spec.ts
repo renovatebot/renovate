@@ -43,7 +43,7 @@ describe('workers/repository/config-migration/branch/create', () => {
     });
 
     it('commits via platform', async () => {
-      platform.commitFiles = jest.fn();
+      platform.commitFiles = jest.fn().mockName('commitFiles()');
 
       config.platformCommit = true;
 
