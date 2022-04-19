@@ -1,12 +1,12 @@
-import * as _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
+import * as _fs from '../../fs';
 import { initRepoCache } from './init';
 import type { RepoCacheRecord } from './types';
 import * as repositoryCache from '.';
 
-jest.mock('fs-extra');
+jest.mock('../../fs');
 
 const fs = mocked(_fs);
 

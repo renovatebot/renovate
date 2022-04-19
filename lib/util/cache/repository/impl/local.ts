@@ -1,7 +1,7 @@
-import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { outputFile, readFile } from '../../../fs';
 import {
   CACHE_REVISION,
   canBeMigratedToV11,
@@ -27,7 +27,7 @@ export class LocalRepoCache extends RepoCacheBase {
     const cacheFileName = this.getCacheFileName();
     try {
       const cacheFileName = this.getCacheFileName();
-      const rawCache = await fs.readFile(cacheFileName, 'utf8');
+      const rawCache = await readFile(cacheFileName, 'utf8');
       const oldCache = JSON.parse(rawCache);
       if (isValidCacheRecord(oldCache, this.repository)) {
         this.data = oldCache.data;
@@ -51,7 +51,7 @@ export class LocalRepoCache extends RepoCacheBase {
     const repository = this.repository;
     const data = this.getData();
     const record: RepoCacheRecord = { revision, repository, data };
-    await fs.outputFile(cacheFileName, JSON.stringify(record));
+    await outputFile(cacheFileName, JSON.stringify(record));
   }
 
   getData(): RepoCacheData {
