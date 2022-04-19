@@ -59,9 +59,9 @@ function extractFromSection(
           );
           skipReason = 'invalid-name';
         }
-        const specifierMatches = currentValue
-          ? specifierRegex.exec(currentValue)
-          : null;
+        // validated above
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const specifierMatches = specifierRegex.exec(currentValue!);
         if (!specifierMatches) {
           logger.debug(
             `Skipping dependency with malformed version specifier "${currentValue}".`
