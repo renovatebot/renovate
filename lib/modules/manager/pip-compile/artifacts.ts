@@ -55,7 +55,7 @@ export function constructPipCompileCmd(
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
-  if (headers) {
+  if (headers?.groups) {
     logger.debug({ header: headers[0] }, 'Found pip-compile header');
     for (const argument of split(headers.groups.arguments)) {
       if (['--allow-unsafe', '--generate-hashes'].includes(argument)) {
