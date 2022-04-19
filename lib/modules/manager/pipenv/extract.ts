@@ -23,18 +23,17 @@ function extractFromSection(
   pipfile: PipFile,
   section: 'packages' | 'dev-packages'
 ): PackageDependency[] {
-  if (!(section in pipfile)) {
+  const pipfileSection = pipfile[section];
+  if (!pipfileSection) {
     return [];
   }
-
-  const pipfileSection = pipfile[section];
 
   const deps = Object.entries(pipfileSection)
     .map((x) => {
       const [depName, requirements] = x;
-      let currentValue: string;
-      let nestedVersion: boolean;
-      let skipReason: SkipReason;
+      let currentValue: string | undefined;
+      let nestedVersion = false;
+      let skipReason: SkipReason | undefined;
       if (requirements.git) {
         skipReason = 'git-dependency';
       } else if (requirements.file) {
@@ -60,7 +59,9 @@ function extractFromSection(
           );
           skipReason = 'invalid-name';
         }
-        const specifierMatches = specifierRegex.exec(currentValue);
+        const specifierMatches = currentValue
+          ? specifierRegex.exec(currentValue)
+          : null;
         if (!specifierMatches) {
           logger.debug(
             `Skipping dependency with malformed version specifier "${currentValue}".`
@@ -82,7 +83,8 @@ function extractFromSection(
         dep.datasource = PypiDatasource.id;
       }
       if (nestedVersion) {
-        dep.managerData.nestedVersion = nestedVersion;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        dep.managerData!.nestedVersion = nestedVersion;
       }
       if (requirements.index) {
         if (is.array(pipfile.source)) {
@@ -130,15 +132,18 @@ export async function extractPackageFile(
   const constraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    constraints.python = `== ${pipfile.requires.python_version}.*`;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    constraints.python = `== ${pipfile.requires!.python_version}.*`;
   } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    constraints.python = `== ${pipfile.requires.python_full_version}`;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    constraints.python = `== ${pipfile.requires!.python_full_version}`;
   }
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    constraints.pipenv = pipfile.packages.pipenv;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    constraints.pipenv = pipfile.packages!.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    constraints.pipenv = pipfile['dev-packages'].pipenv;
+    constraints.pipenv = pipfile['dev-packages']!.pipenv;
   }
 
   const lockFileName = fileName + '.lock';

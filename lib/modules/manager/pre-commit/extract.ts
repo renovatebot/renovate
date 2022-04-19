@@ -93,7 +93,7 @@ function extractDependency(
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
-    if (match) {
+    if (match?.groups) {
       const hostname = match.groups.hostname;
       const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
       const sourceDef = determineDatasource(repository, hostname);
@@ -125,14 +125,12 @@ function extractDependency(
  *
  * @param precommitFile the parsed yaml config file
  */
-function findDependencies(
-  precommitFile: PreCommitConfig
-): Array<PackageDependency> {
+function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
   if (!precommitFile.repos) {
     logger.debug(`No repos section found, skipping file`);
     return [];
   }
-  const packageDependencies = [];
+  const packageDependencies: PackageDependency[] = [];
   precommitFile.repos.forEach((item) => {
     if (matchesPrecommitDependencyHeuristic(item)) {
       logger.trace(item, 'Matched pre-commit dependency spec');
