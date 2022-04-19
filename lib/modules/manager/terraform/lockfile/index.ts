@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../../logger';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
@@ -26,7 +27,11 @@ async function updateAllLocks(
         datasource: 'terraform-provider',
         depName: lock.packageName,
       };
-      const { releases } = await getPkgReleases(updateConfig);
+      const { releases } = (await getPkgReleases(updateConfig)) ?? {};
+      // istanbul ignore if: needs test
+      if (!releases) {
+        return null;
+      }
       const versioning = getVersioning(updateConfig.versioning);
       const versionsList = releases.map((release) => release.version);
       const newVersion = versioning.getSatisfyingVersion(
@@ -35,17 +40,18 @@ async function updateAllLocks(
       );
 
       // if the new version is the same as the last, signal that no update is needed
-      if (newVersion === lock.version) {
+      if (!newVersion || newVersion === lock.version) {
         return null;
       }
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes: await TerraformProviderHash.createHashes(
-          lock.registryUrl,
-          lock.packageName,
-          newVersion
-        ),
+        newHashes:
+          (await TerraformProviderHash.createHashes(
+            lock.registryUrl,
+            lock.packageName,
+            newVersion
+          )) ?? [],
         ...lock,
       };
       return update;
@@ -53,7 +59,7 @@ async function updateAllLocks(
     { concurrency: 4 } // allow to look up 4 lock in parallel
   );
 
-  return updates.filter(Boolean);
+  return updates.filter(is.truthy);
 }
 
 export async function updateArtifacts({
@@ -83,7 +89,8 @@ export async function updateArtifacts({
       updates.push(...maintenanceUpdates);
     } else {
       const providerDeps = updatedDeps.filter((dep) =>
-        ['provider', 'required_provider'].includes(dep.depType)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        ['provider', 'required_provider'].includes(dep.depType!)
       );
       for (const dep of providerDeps) {
         massageProviderLookupName(dep);
@@ -96,21 +103,32 @@ export async function updateArtifacts({
         const updateLock = locks.find(
           (value) => value.packageName === packageName
         );
+        // istanbul ignore if: needs test
+        if (!updateLock) {
+          continue;
+        }
         const update: ProviderLockUpdate = {
-          newVersion,
-          newConstraint,
-          newHashes: await TerraformProviderHash.createHashes(
-            registryUrl,
-            packageName,
-            newVersion
-          ),
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          newVersion: newVersion!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          newConstraint: newConstraint!,
+          newHashes:
+            (await TerraformProviderHash.createHashes(
+              registryUrl,
+              updateLock.packageName,
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+              newVersion!
+            )) ?? [],
           ...updateLock,
         };
         updates.push(update);
       }
     }
     // if no updates have been found or there are failed hashes abort
-    if (updates.length === 0 || updates.some((value) => !value.newHashes)) {
+    if (
+      updates.length === 0 ||
+      updates.some((value) => !value.newHashes?.length)
+    ) {
       return null;
     }
 

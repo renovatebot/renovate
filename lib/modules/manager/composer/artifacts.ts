@@ -137,8 +137,9 @@ export async function updateArtifacts({
       args = 'update';
     } else {
       args =
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         (
-          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+          'update ' + updatedDeps.map((dep) => quote(dep.depName!)).join(' ')
         ).trim() + ' --with-dependencies';
     }
     args += getComposerArguments(config, composerToolConstraint);

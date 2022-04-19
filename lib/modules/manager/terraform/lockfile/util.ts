@@ -30,7 +30,7 @@ export function readLockFile(lockFilePath: string): Promise<string> {
   return readLocalFile(lockFilePath, 'utf8');
 }
 
-export function extractLocks(lockFileContent: string): ProviderLock[] {
+export function extractLocks(lockFileContent: string): ProviderLock[] | null {
   const lines = lockFileContent.split(newlineRegex);
   const blockStarts: number[] = [];
   // get first lines of blocks
@@ -72,11 +72,11 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
         end: -1,
       },
     };
-    const hashes = [];
+    const hashes: string[] = [];
 
     slice.lines.forEach((line, index) => {
       const hashLineResult = hashLineRegex.exec(line);
-      if (hashLineResult) {
+      if (hashLineResult?.groups) {
         hashes.push(hashLineResult.groups.hash);
         relativeLineNumbers.hashes.start =
           relativeLineNumbers.hashes.start === -1
@@ -87,21 +87,21 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
       }
 
       const providerStartLineResult = providerStartLineRegex.exec(line);
-      if (providerStartLineResult) {
+      if (providerStartLineResult?.groups) {
         packageName = `${providerStartLineResult.groups.namespace}/${providerStartLineResult.groups.depName}`;
         registryUrl = providerStartLineResult.groups.registryUrl;
         return;
       }
 
       const versionLineResult = versionLineRegex.exec(line);
-      if (versionLineResult) {
+      if (versionLineResult?.groups) {
         version = versionLineResult.groups.version;
         relativeLineNumbers.version = index;
         return;
       }
 
       const constraintLineResult = constraintLineRegex.exec(line);
-      if (constraintLineResult) {
+      if (constraintLineResult?.groups) {
         constraints = constraintLineResult.groups.constraint;
         relativeLineNumbers.constraint = index;
       }
@@ -124,9 +124,9 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
   return locks;
 }
 
-export function isPinnedVersion(value: string): boolean {
+export function isPinnedVersion(value: string | undefined): boolean {
   const versioning = getVersioning('hashicorp');
-  return !!versioning.isSingleVersion(value);
+  return !!value && !!versioning.isSingleVersion(value);
 }
 
 export function writeLockUpdates(
@@ -139,23 +139,30 @@ export function writeLockUpdates(
   const sections: string[][] = [];
 
   // sort updates in order of appearance in the lockfile
-  updates.sort((a, b) => a.lineNumbers.block.start - b.lineNumbers.block.start);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  updates.sort(
+    (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
+  );
   updates.forEach((update, index, array) => {
     // re add leading whitespace
-    let startWhitespace;
+    let startWhitespace: number | undefined;
     if (index > 0) {
       // get end of the
-      startWhitespace = array[index - 1].lineNumbers.block.end;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      startWhitespace = array[index - 1].lineNumbers.block!.end;
     }
     const leadingNonRelevantLines = lines.slice(
       startWhitespace,
-      update.lineNumbers.block.start
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      update.lineNumbers.block!.start
     );
     sections.push(leadingNonRelevantLines);
 
     const providerBlockLines = lines.slice(
-      update.lineNumbers.block.start,
-      update.lineNumbers.block.end
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      update.lineNumbers.block!.start,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      update.lineNumbers.block!.end
     );
     const newProviderBlockLines: string[] = [];
     let hashLinePrefix = '';
@@ -180,7 +187,7 @@ export function writeLockUpdates(
       }
 
       const hashLineRegexResult = hashLineRegex.exec(providerBlockLine);
-      if (hashLineRegexResult) {
+      if (hashLineRegexResult?.groups) {
         // skip hash line but safe the whitespace
         hashLinePrefix = hashLineRegexResult.groups.prefix;
         hashLineSuffix = hashLineRegexResult.groups.suffix;
@@ -188,11 +195,13 @@ export function writeLockUpdates(
       }
       newProviderBlockLines.push(providerBlockLine);
     });
+
     const hashesWithWhitespace = update.newHashes.map(
       (value) => `${hashLinePrefix}${value}${hashLineSuffix}`
     );
     newProviderBlockLines.splice(
-      update.lineNumbers.hashes.start,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      update.lineNumbers.hashes.start!,
       0,
       ...hashesWithWhitespace
     );
@@ -200,7 +209,7 @@ export function writeLockUpdates(
   });
 
   const trailingNotUpdatedLines = lines.slice(
-    updates[updates.length - 1].lineNumbers.block.end
+    updates[updates.length - 1].lineNumbers.block?.end
   );
   sections.push(trailingNotUpdatedLines);
 
