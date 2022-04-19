@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
-import * as template from '../../../../util/template';
+import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
@@ -12,20 +12,15 @@ export async function rebaseMigrationBranch(
   migratedConfigData: MigratedData
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
-  if (await isBranchModified(config.configMigrationBranch)) {
+  const branchName = getMigrationBranchName(config);
+  if (await isBranchModified(branchName)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
   const configFileName = migratedConfigData.fileName;
   const contents = migratedConfigData.content;
-  const existingContents = await getFile(
-    configFileName,
-    config.configMigrationBranch
-  );
-  if (
-    contents === existingContents &&
-    !(await isBranchStale(config.configMigrationBranch))
-  ) {
+  const existingContents = await getFile(configFileName, branchName);
+  if (contents === existingContents && !(await isBranchStale(branchName))) {
     logger.debug('Migration branch is up to date');
     return null;
   }
@@ -42,10 +37,8 @@ export async function rebaseMigrationBranch(
     return null;
   }
 
-  const branchName = template.compile(config.configMigrationBranch, config);
-
   return commitAndPush({
-    branchName: branchName,
+    branchName,
     files: [
       {
         type: 'addition',

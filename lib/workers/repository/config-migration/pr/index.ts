@@ -11,6 +11,7 @@ import {
   getPlatformPrOptions,
   prepareLabels,
 } from '../../update/pr';
+import { getMigrationBranchName } from '../common';
 import { getErrors, getWarnings } from './errors-warnings';
 
 export async function ensureConfigMigrationPr(
@@ -21,7 +22,8 @@ export async function ensureConfigMigrationPr(
   }
   logger.debug('ensureConfigMigrationPr()');
   logger.trace({ config });
-  const existingPr = await platform.getBranchPr(config.configMigrationBranch);
+  const branchName = getMigrationBranchName(config);
+  const existingPr = await platform.getBranchPr(branchName);
   logger.debug('Filling in config migration PR template');
   let prTemplate = `Config migration needed, merge this PR to update your Renovate configuration file.\n\n`;
   prTemplate += emojify(
@@ -80,7 +82,7 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info('DRY-RUN: Would create migration PR');
     } else {
       const pr = await platform.createPr({
-        sourceBranch: config.configMigrationBranch,
+        sourceBranch: branchName,
         targetBranch: config.defaultBranch,
         prTitle: config.onboardingPrTitle,
         prBody,
@@ -98,7 +100,7 @@ If you need any further assistance then you can also [request help here](${confi
       )
     ) {
       logger.debug('Migration PR already exists but cannot find it');
-      await deleteBranch(config.configMigrationBranch);
+      await deleteBranch(branchName);
       return;
     }
     throw err;

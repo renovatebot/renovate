@@ -120,6 +120,7 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding PR title.',
     type: 'string',
     default: 'Configure Renovate',
+    globalOnly: true,
     cli: false,
   },
   {
@@ -128,14 +129,6 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
-  },
-  {
-    name: 'configMigrationBranch',
-    description:
-      'Change this value in order to override the default config migration branch name.',
-    type: 'string',
-    default: '{{{branchPrefix}}}migrate-config',
-    cli: false,
   },
   {
     name: 'productLinks',

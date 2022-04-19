@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import * as template from '../../../../util/template';
+import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
@@ -28,10 +28,8 @@ export function createConfigMigrationBranch(
     return null;
   }
 
-  const branchName = template.compile(config.configMigrationBranch, config);
-
   return commitAndPush({
-    branchName: branchName,
+    branchName: getMigrationBranchName(config),
     files: [
       {
         type: 'addition',

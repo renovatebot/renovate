@@ -413,7 +413,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
 
 export interface ConfigMigration {
   configMigration?: boolean;
-  configMigrationBranch?: string;
 }
 
 export interface MigratedConfig {

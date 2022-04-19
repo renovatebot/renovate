@@ -3,26 +3,23 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { checkoutBranch } from '../../../../util/git';
-import * as template from '../../../../util/template';
+import { getMigrationBranchName } from '../common';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
   config: RenovateConfig
-): Promise<RenovateConfig> {
+): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
   logger.trace({ config });
   const migratedConfigData = await MigratedDataFactory.getAsync(config);
   if (!migratedConfigData) {
     logger.debug('checkConfigMigrationBranch() Error fetching migrated data');
-    return config;
+    return null;
   }
-  const configMigrationBranch = template.compile(
-    config.configMigrationBranch,
-    config
-  );
-  if (await migrationPrExists(config)) {
+  const configMigrationBranch = getMigrationBranchName(config);
+  if (await migrationPrExists(configMigrationBranch)) {
     logger.debug('Config Migration PR already exists');
     const commit = await rebaseMigrationBranch(config, migratedConfigData);
     if (commit) {
@@ -51,11 +48,8 @@ export async function checkConfigMigrationBranch(
     await checkoutBranch(configMigrationBranch);
   }
   MigratedDataFactory.reset();
-  const branchList = [configMigrationBranch];
-  return { ...config, configMigrationBranch, branchList };
+  return configMigrationBranch;
 }
 
-export const migrationPrExists = async (
-  config: RenovateConfig
-): Promise<boolean> =>
-  !!(await platform.getBranchPr(config.configMigrationBranch));
+export const migrationPrExists = async (branchName: string): Promise<boolean> =>
+  !!(await platform.getBranchPr(branchName));
