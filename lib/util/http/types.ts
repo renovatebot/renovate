@@ -29,6 +29,7 @@ export interface RequestStats {
   url: string;
   duration: number;
   queueDuration: number;
+  statusCode: number;
 }
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;

@@ -31,8 +31,8 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function getDatasourceFor(datasource: string): DatasourceApi {
-  return datasources.get(datasource);
+function getDatasourceFor(datasource: string): DatasourceApi | null {
+  return datasources.get(datasource) ?? null;
 }
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
@@ -58,7 +58,7 @@ async function getRegistryReleases(
   datasource: DatasourceApi,
   config: GetReleasesConfig,
   registryUrl: string
-): Promise<ReleaseResult> {
+): Promise<ReleaseResult | null> {
   const cacheKey = `${datasource.id} ${registryUrl} ${config.packageName}`;
   if (datasource.caching) {
     const cachedResult = await packageCache.get<ReleaseResult>(
@@ -88,7 +88,7 @@ function firstRegistry(
   config: GetReleasesInternalConfig,
   datasource: DatasourceApi,
   registryUrls: string[]
-): Promise<ReleaseResult> {
+): Promise<ReleaseResult | null> {
   if (registryUrls.length > 1) {
     logger.warn(
       { datasource: datasource.id, depName: config.depName, registryUrls },
@@ -103,9 +103,9 @@ async function huntRegistries(
   config: GetReleasesInternalConfig,
   datasource: DatasourceApi,
   registryUrls: string[]
-): Promise<ReleaseResult> {
-  let res: ReleaseResult;
-  let caughtError: Error;
+): Promise<ReleaseResult | null> {
+  let res: ReleaseResult | null = null;
+  let caughtError: Error | undefined;
   for (const registryUrl of registryUrls) {
     try {
       res = await getRegistryReleases(datasource, config, registryUrl);
@@ -134,9 +134,9 @@ async function mergeRegistries(
   config: GetReleasesInternalConfig,
   datasource: DatasourceApi,
   registryUrls: string[]
-): Promise<ReleaseResult> {
-  let combinedRes: ReleaseResult;
-  let caughtError: Error;
+): Promise<ReleaseResult | null> {
+  let combinedRes: ReleaseResult | undefined;
+  let caughtError: Error | undefined;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -190,8 +190,8 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
-  defaultRegistryUrls: string[],
-  registryUrls: string[]
+  defaultRegistryUrls: string[] | undefined,
+  registryUrls: string[] | undefined
 ): string[] {
   if (!datasource.customRegistrySupport) {
     if (
@@ -243,6 +243,7 @@ async function fetchReleases(
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
   let { registryUrls } = config;
+  // istanbul ignore if: need test
   if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
@@ -256,12 +257,16 @@ async function fetchReleases(
     }
   }
   const datasource = getDatasourceFor(datasourceName);
+  // istanbul ignore if: needs test
+  if (!datasource) {
+    return null;
+  }
   registryUrls = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
     registryUrls
   );
-  let dep: ReleaseResult = null;
+  let dep: ReleaseResult | null = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
   try {
     if (is.nonEmptyArray(registryUrls)) {
@@ -351,7 +356,7 @@ export async function getPkgReleases(
         }
         return null; // filter out any we can't extract
       })
-      .filter(Boolean);
+      .filter(is.truthy);
   }
   // Use the datasource's default versioning if none is configured
   const versioning =
@@ -378,11 +383,12 @@ export async function getPkgReleases(
     // TODO: Support range/range compatibility filtering #8476
     if (version.isVersion(constraintValue)) {
       res.releases = res.releases.filter((release) => {
-        if (!is.nonEmptyArray(release.constraints?.[constraintName])) {
+        const constraint = release.constraints?.[constraintName];
+        if (!is.nonEmptyArray(constraint)) {
           // A release with no constraints is OK
           return true;
         }
-        return release.constraints[constraintName].some(
+        return constraint.some(
           // If any of the release's constraints match, then it's OK
           (releaseConstraint) =>
             !releaseConstraint ||
@@ -399,7 +405,8 @@ export async function getPkgReleases(
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {
-  return !!datasource && 'getDigest' in getDatasourceFor(datasource);
+  const ds = !!datasource && getDatasourceFor(datasource);
+  return !!ds && 'getDigest' in ds;
 }
 
 function getDigestConfig(
@@ -421,8 +428,13 @@ export function getDigest(
   value?: string
 ): Promise<string | null> {
   const datasource = getDatasourceFor(config.datasource);
+  // istanbul ignore if: need test
+  if (!datasource || !('getDigest' in datasource)) {
+    return Promise.resolve(null);
+  }
   const digestConfig = getDigestConfig(datasource, config);
-  return datasource.getDigest(digestConfig, value);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return datasource.getDigest!(digestConfig, value);
 }
 
 export function getDefaultConfig(

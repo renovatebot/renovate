@@ -156,7 +156,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   currentVersion?: string;
   lockedVersion?: string;
   propSource?: string;
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
   sourceLine?: number;

@@ -105,7 +105,7 @@ export class GithubReleasesDatasource extends Datasource {
   async findDigestAsset(
     release: GithubRelease,
     digest: string
-  ): Promise<DigestAsset> {
+  ): Promise<DigestAsset | null> {
     const digestFile = await this.findDigestFile(release, digest);
     if (digestFile) {
       return digestFile;
@@ -206,7 +206,7 @@ export class GithubReleasesDatasource extends Datasource {
       currentRelease,
       currentDigest
     );
-    let newDigest: string;
+    let newDigest: string | null;
     if (!digestAsset || newValue === currentValue) {
       newDigest = currentDigest;
     } else {

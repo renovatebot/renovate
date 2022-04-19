@@ -1,4 +1,3 @@
-import url from 'url';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -7,6 +6,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
@@ -17,9 +17,11 @@ import type {
   MavenXml,
 } from './types';
 
-const getHost = (x: string): string => new url.URL(x).host;
+function getHost(url: string): string | null {
+  return parseUrl(url)?.host ?? null;
+}
 
-function isMavenCentral(pkgUrl: url.URL | string): boolean {
+function isMavenCentral(pkgUrl: URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
   return getHost(MAVEN_REPO) === host;
 }
@@ -58,7 +60,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 
 export async function downloadHttpProtocol(
   http: Http,
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
@@ -99,7 +101,7 @@ export async function downloadHttpProtocol(
 
 export async function checkHttpResource(
   http: Http,
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());
@@ -136,18 +138,21 @@ export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): url.URL {
-  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+): URL {
+  return new URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
   http: Http,
-  pkgUrl: url.URL | null
+  pkgUrl: URL | null
 ): Promise<MavenXml> {
   /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
+
+  let isCacheable = false;
+
   let rawContent: string | undefined;
   let authorization: boolean | undefined;
   let statusCode: number | undefined;
@@ -176,7 +181,11 @@ export async function downloadMavenXml(
     return {};
   }
 
-  return { authorization, xml: new XmlDocument(rawContent) };
+  if (!authorization) {
+    isCacheable = true;
+  }
+
+  return { isCacheable, xml: new XmlDocument(rawContent) };
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {

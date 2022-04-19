@@ -117,7 +117,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
       res = (await git.raw(['remote', 'show', 'origin']))
         .split('\n')
         .map((line) => line.trim())
-        .find((line) => line.startsWith(headPrefix))
+        .find((line) => line.startsWith(headPrefix))!
         .replace(headPrefix, '');
     }
     return res.replace('origin/', '').trim();
@@ -144,7 +144,8 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
 
 let config: LocalConfig = {} as any;
 
-let git: SimpleGit | undefined;
+// TODO: can be undefined
+let git: SimpleGit;
 let gitInitialized: boolean;
 
 let privateKeySet = false;
@@ -152,7 +153,7 @@ let privateKeySet = false;
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
-  let version: string;
+  let version: string | undefined;
   const globalGit = simpleGit();
   try {
     const raw = await globalGit.raw(['--version']);
@@ -248,7 +249,7 @@ async function cleanLocalBranches(): Promise<void> {
   }
 }
 
-export function setGitAuthor(gitAuthor: string): void {
+export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
     gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
   );
@@ -325,8 +326,8 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { localDir } = GlobalConfig.get();
-  logger.debug('Initializing git repository into ' + localDir);
+  const localDir = GlobalConfig.get('localDir')!;
+  logger.debug(`Initializing git repository into ${localDir}`);
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
@@ -355,7 +356,7 @@ export async function syncGit(): Promise<void> {
   if (clone) {
     const cloneStart = Date.now();
     try {
-      const opts = [];
+      const opts: string[] = [];
       if (config.fullClone) {
         logger.debug('Performing full clone');
       } else {
@@ -506,10 +507,10 @@ export async function getFileList(): Promise<string[]> {
   }
   return files
     .split(newlineRegex)
-    .filter(Boolean)
+    .filter(is.string)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop())
-    .filter((file: string) =>
+    .map((line) => line.split(regEx(/\t/)).pop()!)
+    .filter((file) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );
 }
@@ -557,7 +558,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return false;
   }
   // Retrieve the author of the most recent commit
-  let lastAuthor: string;
+  let lastAuthor: string | undefined;
   try {
     lastAuthor = (
       await git.raw([
@@ -691,7 +692,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  let status: StatusResult;
+  let status: StatusResult | undefined;
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
@@ -742,7 +743,9 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(branchName: string): Promise<string[]> {
+export async function getBranchFiles(
+  branchName: string
+): Promise<string[] | null> {
   await syncGit();
   try {
     const diff = await gitRetry(() =>
@@ -815,7 +818,7 @@ export async function prepareCommit({
   message,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir')!;
   await syncGit();
   logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);
@@ -847,7 +850,7 @@ export async function prepareCommit({
         if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
-        } /* istanbul ignore if */ else if (file.contents === null) {
+        } else if (file.contents === null) {
           continue;
         } else {
           let contents: Buffer;
@@ -1039,9 +1042,10 @@ let remoteRefsExist = false;
  */
 export async function pushCommitToRenovateRef(
   commitSha: string,
-  refName: string
+  refName: string,
+  section = 'branches'
 ): Promise<void> {
-  const fullRefName = `refs/renovate/${refName}`;
+  const fullRefName = `refs/renovate/${section}/${refName}`;
   await git.raw(['update-ref', fullRefName, commitSha]);
   await git.push(['--force', 'origin', fullRefName]);
   remoteRefsExist = true;
@@ -1066,24 +1070,41 @@ export async function pushCommitToRenovateRef(
  *
  */
 export async function clearRenovateRefs(): Promise<void> {
-  if (gitInitialized && remoteRefsExist) {
-    logger.debug(`Clear Renovate refs: refs/renovate/*`);
-    try {
-      const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
-
-      const remoteRenovateRefs = rawOutput
-        .split(newlineRegex)
-        .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
-        .filter((line) => line.startsWith('refs/renovate/'));
-
-      const pushOpts = ['--delete', 'origin', ...remoteRenovateRefs];
-      await git.push(pushOpts);
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, `Clear Renovate refs: error`);
-    } finally {
-      remoteRefsExist = false;
-    }
+  if (!gitInitialized || !remoteRefsExist) {
+    return;
   }
+
+  logger.debug(`Cleaning up Renovate refs: refs/renovate/*`);
+  const renovateRefs: string[] = [];
+  const obsoleteRefs: string[] = [];
+
+  try {
+    const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
+    const refs = rawOutput
+      .split(newlineRegex)
+      .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
+      .filter((line) => line.startsWith('refs/renovate/'));
+    renovateRefs.push(...refs);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, `Renovate refs cleanup error`);
+  }
+
+  const nonSectionedRefs = renovateRefs.filter((ref) => {
+    return ref.split('/').length === 3;
+  });
+  obsoleteRefs.push(...nonSectionedRefs);
+
+  const renovateBranchRefs = renovateRefs.filter((ref) =>
+    ref.startsWith('refs/renovate/branches/')
+  );
+  obsoleteRefs.push(...renovateBranchRefs);
+
+  if (obsoleteRefs.length) {
+    const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
+    await git.push(pushOpts);
+  }
+
+  remoteRefsExist = false;
 }
 
 const treeItemRegex = regEx(
@@ -1116,7 +1137,9 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
  */
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const { treeSha } =
+    treeShaRegex.exec(commitOutput)?.groups ??
+    /* istanbul ignore next: will never happen */ {};
   const contents = await git.catFile(['-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];

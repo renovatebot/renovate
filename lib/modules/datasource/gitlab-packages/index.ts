@@ -49,6 +49,11 @@ export class GitlabPackagesDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const [projectPart, packagePart] = packageName.split(':', 2);
 
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
@@ -58,7 +63,7 @@ export class GitlabPackagesDatasource extends Datasource {
     );
 
     const result: ReleaseResult = {
-      releases: null,
+      releases: [],
     };
 
     let response: GitlabPackage[];
