@@ -123,7 +123,7 @@ export interface Package<T> extends ManagerData<T> {
   pinDigests?: boolean;
   currentRawValue?: string;
   major?: { enabled?: boolean };
-  prettyDepType?: any;
+  prettyDepType?: string;
 }
 
 export interface LookupUpdate {
@@ -159,7 +159,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
-  lockedVersion?: string;
+  lockedVersion?: string | null;
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
@@ -224,13 +224,13 @@ export interface BumpPackageVersionResult {
 }
 
 export interface UpdateLockedConfig {
-  packageFile?: string;
+  packageFile: string;
   packageFileContent?: string;
-  lockFile?: string;
+  lockFile: string;
   lockFileContent?: string;
-  depName?: string;
+  depName: string;
   currentVersion?: string;
-  newVersion?: string;
+  newVersion: string;
   allowParentUpdates?: boolean;
   allowHigherOrRemoved?: boolean;
 }
@@ -296,9 +296,9 @@ export interface PostUpdateConfig<T = Record<string, any>>
   ignoreScripts?: boolean;
 
   platform?: string;
-  upgrades?: Upgrade[];
+  upgrades: Upgrade[];
   npmLock?: string;
   yarnLock?: string;
-  branchName?: string;
+  branchName: string;
   reuseExistingBranch?: boolean;
 }
