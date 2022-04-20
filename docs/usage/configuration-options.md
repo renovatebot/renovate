@@ -417,6 +417,10 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 !!! note
     This option is applicable to GitLab only.
 
+## configMigration
+
+If enabled, renovate will raise a pull request if config file migration is needed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
