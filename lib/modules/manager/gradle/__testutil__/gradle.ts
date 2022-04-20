@@ -10,7 +10,12 @@ const gradleJavaVersionSupport = {
 const skipJava = process.env.SKIP_JAVA_TESTS === 'true';
 const enforceJava = process.env[failIfNoJavaEnv] === 'true' && !skipJava;
 
-function parseJavaVersion(javaVersionOutput: string): number {
+function parseJavaVersion(
+  javaVersionOutput: string | undefined
+): number | null {
+  if (!javaVersionOutput) {
+    return null;
+  }
   const versionMatch = /version "(?:1\.)?(\d+)[\d._-]*"/.exec(
     javaVersionOutput
   );
@@ -25,12 +30,12 @@ ${javaVersionOutput}`);
   return 0;
 }
 
-let cachedJavaVersion: number | null = null;
+let cachedJavaVersion: number | null | undefined = undefined;
 
-function determineJavaVersion(): number {
-  if (!cachedJavaVersion) {
-    let javaVersionCommand: SpawnSyncReturns<string>;
-    let error: Error;
+function determineJavaVersion(): number | null {
+  if (cachedJavaVersion === undefined) {
+    let javaVersionCommand: SpawnSyncReturns<string> | undefined;
+    let error: Error | undefined;
     try {
       javaVersionCommand = spawnSync('java', ['-version'], {
         encoding: 'utf8',
@@ -52,7 +57,7 @@ Result of java -version:
 ${error.toString()}`
       );
     }
-    cachedJavaVersion = parseJavaVersion(javaVersionCommand.stderr);
+    cachedJavaVersion = parseJavaVersion(javaVersionCommand?.stderr);
   }
   return cachedJavaVersion;
 }
@@ -60,8 +65,11 @@ ${error.toString()}`
 class WithGradle {
   private gradleSupportsThisJavaVersion: boolean;
 
-  constructor(gradleVersion: number) {
+  constructor(gradleVersion: keyof typeof gradleJavaVersionSupport) {
     const javaVersion = determineJavaVersion();
+    if (!javaVersion) {
+      throw Error(`Unknown java version!`);
+    }
     if (gradleJavaVersionSupport[gradleVersion] === undefined) {
       throw Error(`Unknown gradle version '${gradleVersion}'!`);
     }
@@ -91,6 +99,8 @@ class WithGradle {
   }
 }
 
-export function ifSystemSupportsGradle(gradleVersion: number): WithGradle {
+export function ifSystemSupportsGradle(
+  gradleVersion: keyof typeof gradleJavaVersionSupport
+): WithGradle {
   return new WithGradle(gradleVersion);
 }

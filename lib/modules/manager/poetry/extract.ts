@@ -12,26 +12,26 @@ import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
+import type { PoetryFile, PoetrySection } from './types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
-  section: keyof PoetrySection,
+  section: keyof Omit<PoetrySection, 'source'>,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const sectionContent = parsedFile.tool?.poetry[section];
+  const sectionContent = parsedFile.tool?.poetry?.[section];
   if (!sectionContent) {
     return [];
   }
 
   for (const depName of Object.keys(sectionContent)) {
-    if (depName === 'python') {
+    if (depName === 'python' || depName === 'source') {
       continue;
     }
 
-    let skipReason: SkipReason = null;
-    let currentValue: string | PoetryDependency = sectionContent[depName];
+    let skipReason: SkipReason | null = null;
+    let currentValue = sectionContent[depName];
     let nestedVersion = false;
     if (!is.string(currentValue)) {
       const version = currentValue.version;
@@ -61,14 +61,14 @@ function extractFromSection(
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
-    if (dep.depName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[dep.depName];
+    if (depName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[depName];
     }
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (pep440Versioning.isValid(dep.currentValue)) {
+    } else if (pep440Versioning.isValid(currentValue)) {
       dep.versioning = pep440Versioning.id;
-    } else if (poetryVersioning.isValid(dep.currentValue)) {
+    } else if (poetryVersioning.isValid(currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
       dep.skipReason = 'unknown-version';
@@ -78,11 +78,11 @@ function extractFromSection(
   return deps;
 }
 
-function extractRegistries(pyprojectfile: PoetryFile): string[] {
+function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
   const sources = pyprojectfile.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
-    return null;
+    return undefined;
   }
 
   const registryUrls = new Set<string>();
