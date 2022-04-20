@@ -30,26 +30,28 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(migrateAndValidate).mockResolvedValue(migratedConfigObj);
     });
 
-    it('Calls getAsync first time to initialize the factory', async () => {
+    it('Calls getAsync a first time to initialize the factory', async () => {
       await expect(MigratedDataFactory.getAsync({})).resolves.toEqual(
         migratedData
       );
+      expect(detectRepoFileConfig).toHaveBeenCalledTimes(1);
     });
 
     it('Calls getAsync a second time to get the saved data from before', async () => {
       await expect(MigratedDataFactory.getAsync({})).resolves.toEqual(
         migratedData
       );
+      expect(detectRepoFileConfig).toHaveBeenCalledTimes(0);
     });
 
     it('gets the filename from the MigratedData object', async () => {
-      const asd = await MigratedDataFactory.getAsync({});
-      expect(asd.fileName).toBe('renovate.json');
+      const data = await MigratedDataFactory.getAsync({});
+      expect(data.fileName).toBe('renovate.json');
     });
 
     it('gets the content from the MigratedData object', async () => {
-      const asd = await MigratedDataFactory.getAsync({});
-      expect(asd.content).toBe(migratedData.migratedContent);
+      const data = await MigratedDataFactory.getAsync({});
+      expect(data.content).toBe(migratedData.migratedContent);
     });
 
     it('Resets the factory and gets a new value', async () => {
