@@ -44,7 +44,10 @@ function isStable(version: string): boolean {
   }
 
   const schedule = di.getSchedule(ver);
-  if (schedule && DateTime.fromISO(schedule.release) > DateTime.now()) {
+  if (
+    schedule &&
+    DateTime.fromISO(schedule.release) > DateTime.now().minus({ days: 7 })
+  ) {
     return false;
   }
 
