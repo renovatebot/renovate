@@ -731,14 +731,6 @@ const options: RenovateOptions[] = [
     stage: 'repository',
   },
   {
-    name: 'gitTimeout',
-    description:
-      'Configure the timeout with a number of milliseconds to wait for a git task',
-    type: 'integer',
-    globalOnly: true,
-    default: 10000,
-  },
-  {
     name: 'enabledManagers',
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',

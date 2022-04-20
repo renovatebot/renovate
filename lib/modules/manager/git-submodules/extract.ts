@@ -36,11 +36,7 @@ async function getUrl(
 const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const val = await Git(simpleGitConfig()).listRemote([
-    '--symref',
-    subModuleUrl,
-    'HEAD',
-  ]);
+  const val = await Git().listRemote(['--symref', subModuleUrl, 'HEAD']);
   return headRefRe.exec(val)?.groups?.branch ?? 'master';
 }
 
@@ -50,7 +46,7 @@ async function getBranch(
   subModuleUrl: string
 ): Promise<string> {
   return (
-    (await Git(simpleGitConfig()).raw([
+    (await Git().raw([
       'config',
       '--file',
       gitModulesPath,
@@ -95,7 +91,7 @@ export default async function extractPackageFile(
   config: ExtractConfig
 ): Promise<PackageFile | null> {
   const { localDir } = GlobalConfig.get();
-  const git = Git(localDir, simpleGitConfig());
+  const git = Git(localDir);
   const gitModulesPath = upath.join(localDir, fileName);
 
   const depNames = await getModules(git, gitModulesPath);
