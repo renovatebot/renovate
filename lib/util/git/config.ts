@@ -18,13 +18,16 @@ export function getNoVerify(): GitNoVerifyOption[] {
 }
 
 export function simpleGitConfig(): Partial<SimpleGitOptions> {
-  return {
+  const config: Partial<SimpleGitOptions> = {
     completion: {
       onClose: true,
       onExit: false,
     },
-    timeout: {
-      block: GlobalConfig.get('gitTimeout') ?? 10000,
-    },
   };
+  // https://github.com/steveukx/git-js/pull/591
+  const gitTimeout = GlobalConfig.get('gitTimeout');
+  if (is.number(gitTimeout) && gitTimeout > 0) {
+    config.timeout = { block: gitTimeout };
+  }
+  return config;
 }
