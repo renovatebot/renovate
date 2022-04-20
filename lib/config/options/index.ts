@@ -733,7 +733,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitTimeout',
     description:
-      'Configure the timeout with a number of milliseconds to wait for a Git task.',
+      'Configure the timeout with a number of milliseconds to wait for a git task',
     type: 'integer',
     globalOnly: true,
     default: 10000,
