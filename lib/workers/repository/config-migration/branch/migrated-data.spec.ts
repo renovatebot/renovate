@@ -44,14 +44,16 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       expect(detectRepoFileConfig).toHaveBeenCalledTimes(0);
     });
 
-    it('gets the filename from the MigratedData object', async () => {
-      const data = await MigratedDataFactory.getAsync({});
-      expect(data.fileName).toBe('renovate.json');
-    });
+    describe('MigratedData class', () => {
+      it('gets the filename from the class instance', async () => {
+        const data = await MigratedDataFactory.getAsync({});
+        expect(data.fileName).toBe('renovate.json');
+      });
 
-    it('gets the content from the MigratedData object', async () => {
-      const data = await MigratedDataFactory.getAsync({});
-      expect(data.content).toBe(migratedData.migratedContent);
+      it('gets the content from the class instance', async () => {
+        const data = await MigratedDataFactory.getAsync({});
+        expect(data.content).toBe(migratedData.migratedContent);
+      });
     });
 
     it('Resets the factory and gets a new value', async () => {
@@ -62,7 +64,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('Returns nothing due to fs error', async () => {
-      mockedFunction(readLocalFile).mockResolvedValue(null);
+      mockedFunction(readLocalFile).mockResolvedValueOnce(null);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync({})).resolves.toEqual({});
     });

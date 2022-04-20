@@ -37,9 +37,7 @@ export class MigratedDataFactory {
     this.data = null;
   }
 
-  private static async build(
-    config: RenovateConfig
-  ): Promise<IMigratedData | null> {
+  private static async build(config: RenovateConfig): Promise<IMigratedData> {
     let res: IMigratedData;
     try {
       const rc = await detectRepoFileConfig();
