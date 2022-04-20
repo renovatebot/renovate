@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() creates PR with empty footer and header 1`] = `
+"
+
+Config migration needed, merge this PR to update your Renovate configuration file.
+
+
+
+
+---
+
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+---
+
+
+"
+`;
+
+exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() creates PR with empty footer and header: as 1`] = `
+"
+
+Config migration needed, merge this PR to update your Renovate configuration file.
+
+
+
+
+---
+
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+---
+
+
+"
+`;
+
+exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() creates PR with footer and header using templating 1`] = `
+"This is a header for platform:github
+
+Config migration needed, merge this PR to update your Renovate configuration file.
+
+
+
+
+---
+
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+---
+
+And this is a footer for repository:test baseBranch:some-branch
+"
+`;
+
+exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() creates PR with footer and header with trailing and leading newlines 1`] = `
+"
+
+This should not be the first line of the PR
+
+Config migration needed, merge this PR to update your Renovate configuration file.
+
+
+
+
+---
+
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+---
+
+There should be several empty lines at the end of the PR
+
+
+
+"
+`;
