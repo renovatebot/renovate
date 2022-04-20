@@ -15,13 +15,14 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
 
   beforeEach(() => {
+    jest.resetAllMocks();
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
 
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -30,9 +31,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => {
+    fs.readFile.mockImplementation(() => {
       throw new Error('not found');
-    }) as never;
+    });
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
@@ -42,7 +43,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('finds pnpm globally', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -51,7 +52,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       { isLockFileMaintenance: true },
     ]);
@@ -63,7 +64,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses the new version if packageManager is updated', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    fs.readFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       {
         depType: 'packageManager',
@@ -81,10 +82,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     const execSnapshots = mockExecAll(exec);
     const configTemp = partial<PostUpdateConfig>({});
     const fileContent = Fixtures.get('parent/package.json');
-    fs.readFile = jest
-      .fn()
-      .mockReturnValueOnce(fileContent)
-      .mockReturnValue('package-lock-contents');
+    fs.readFile
+      .mockResolvedValueOnce(fileContent)
+      .mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile(
       'some-folder',
       {},
@@ -124,10 +124,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     const execSnapshots = mockExecAll(exec);
     const configTemp = partial<PostUpdateConfig>({});
     const fileContent = Fixtures.get('manager-field/package.json');
-    fs.readFile = jest
-      .fn()
-      .mockReturnValueOnce(fileContent)
-      .mockReturnValue('package-lock-contents');
+    fs.readFile
+      .mockResolvedValueOnce(fileContent)
+      .mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile(
       'some-folder',
       {},
