@@ -232,12 +232,16 @@ describe('modules/platform/gitea/index', () => {
     it('should support custom endpoint including api path', async () => {
       helper.getCurrentUser.mockResolvedValueOnce(mockUser);
 
-      expect(
-        await gitea.initPlatform({
+      await expect(
+        gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com/api/v1',
         })
-      ).toMatchSnapshot();
+      ).resolves.toEqual(
+        expect.objectContaining({
+          endpoint: 'https://gitea.renovatebot.com/',
+        })
+      );
     });
 
     it('should use username as author name if full name is missing', async () => {

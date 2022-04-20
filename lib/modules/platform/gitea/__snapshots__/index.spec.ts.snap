@@ -155,13 +155,6 @@ Object {
 }
 `;
 
-exports[`modules/platform/gitea/index initPlatform() should support custom endpoint including api path 1`] = `
-Object {
-  "endpoint": "https://gitea.renovatebot.com/",
-  "gitAuthor": "Renovate Bot <renovate@example.com>",
-}
-`;
-
 exports[`modules/platform/gitea/index initPlatform() should support default endpoint 1`] = `
 Object {
   "endpoint": "https://gitea.com/api/v1/",
