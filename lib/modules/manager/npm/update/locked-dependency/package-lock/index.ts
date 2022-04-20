@@ -31,7 +31,7 @@ export async function updateLockedDependency(
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
     const detectedIndent = detectIndent(lockFileContent).indent || '  ';
-    let newPackageJsonContent: string;
+    let newPackageJsonContent: string | null | undefined;
     try {
       packageJson = JSON.parse(packageFileContent);
       packageLockJson = JSON.parse(lockFileContent);
@@ -109,10 +109,10 @@ export async function updateLockedDependency(
       // Don't return {} if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        const res: UpdateLockedResult = { status, files: {} };
-        res.files[packageFile] = packageFileContent;
-        res.files[lockFile] = lockFileContent;
-        return res;
+        const files: Record<string, string> = {};
+        files[packageFile] = packageFileContent;
+        files[lockFile] = lockFileContent;
+        return { status, files: files };
       }
       return { status };
     }
@@ -134,7 +134,7 @@ export async function updateLockedDependency(
       );
       return { status: 'update-failed' };
     }
-    const parentUpdates: UpdateLockedConfig[] = [];
+    const parentUpdates: Partial<UpdateLockedConfig>[] = [];
     for (const {
       parentDepName,
       parentVersion,
@@ -172,7 +172,7 @@ export async function updateLockedDependency(
             logger.debug(
               `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`
             );
-            const parentUpdate: UpdateLockedConfig = {
+            const parentUpdate: Partial<UpdateLockedConfig> = {
               depName: parentDepName,
               currentVersion: parentVersion,
               newVersion: parentNewVersion,
@@ -187,13 +187,14 @@ export async function updateLockedDependency(
           return { status: 'update-failed' };
         }
       } else if (depType) {
+        // TODO: `newValue` can probably null
         // The constaint comes from the package.json file, so we need to update it
         const newValue = semver.getNewValue({
           currentValue: constraint,
           rangeStrategy: 'replace',
           currentVersion,
           newVersion,
-        });
+        })!;
         newPackageJsonContent = updateDependency({
           fileContent: packageFileContent,
           upgrade: { depName, depType, newValue },
@@ -215,9 +216,9 @@ export async function updateLockedDependency(
     for (const parentUpdate of parentUpdates) {
       const parentUpdateConfig = {
         ...config,
+        ...parentUpdate,
         lockFileContent: newLockFileContent,
         packageFileContent: newPackageJsonContent || packageFileContent,
-        ...parentUpdate,
       };
       const parentUpdateResult = await updateLockedDependency(
         parentUpdateConfig,
@@ -235,7 +236,7 @@ export async function updateLockedDependency(
       newLockFileContent =
         parentUpdateResult.files[lockFile] || newLockFileContent;
     }
-    const files = {};
+    const files: Record<string, string> = {};
     if (newLockFileContent) {
       files[lockFile] = newLockFileContent;
     }
