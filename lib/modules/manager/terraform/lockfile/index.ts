@@ -118,7 +118,7 @@ export async function updateArtifacts({
               updateLock.packageName,
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
               newVersion!
-            )) ?? [],
+            )) ?? /* istanbul ignore next: needs test */ [],
           ...updateLock,
         };
         updates.push(update);
