@@ -120,7 +120,8 @@ function handleAssignment({
   if (dep) {
     dep.groupName = key;
     dep.managerData = {
-      fileReplacePosition: valToken.offset + dep.depName.length + 1,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      fileReplacePosition: valToken.offset + dep.depName!.length + 1,
       packageFile,
     };
   }
@@ -148,7 +149,8 @@ function processDepString({
   const dep = parseDependencyString(token.value);
   if (dep) {
     dep.managerData = {
-      fileReplacePosition: token.offset + dep.depName.length + 1,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      fileReplacePosition: token.offset + dep.depName!.length + 1,
       packageFile,
     };
     return { deps: [dep] };
@@ -166,8 +168,8 @@ function processDepInterpolation({
   if (interpolationResult && isDependencyString(interpolationResult)) {
     const dep = parseDependencyString(interpolationResult);
     if (dep) {
-      let packageFile: string;
-      let fileReplacePosition: number;
+      let packageFile: string | undefined;
+      let fileReplacePosition: number | undefined;
       token.children.forEach((child) => {
         const variable = variables[child.value];
         if (child?.type === TokenType.Variable && variable) {
@@ -298,7 +300,8 @@ function processPredefinedRegistryUrl({
     google: GOOGLE_REPO,
     gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
-  return { urls: [registryUrl] };
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return { urls: [registryUrl!] };
 }
 
 const annoyingMethods = new Set([
@@ -696,7 +699,7 @@ export function parseGradle(
 ): ParseGradleResult {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
-  const urls = [];
+  const urls: string[] = [];
 
   const tokens = tokenize(input);
   let prevTokensLength = tokens.length;
@@ -737,22 +740,25 @@ export function parseProps(
   packageFile?: string
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   let offset = 0;
-  const vars = {};
-  const deps = [];
+  const vars: PackageVariables = {};
+  const deps: PackageDependency[] = [];
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propRegex.exec(line);
-    if (lineMatch) {
+    if (lineMatch?.groups) {
       const { key, value, leftPart } = lineMatch.groups;
       if (isDependencyString(value)) {
         const dep = parseDependencyString(value);
-        deps.push({
-          ...dep,
-          managerData: {
-            fileReplacePosition:
-              offset + leftPart.length + dep.depName.length + 1,
-            packageFile,
-          },
-        });
+        if (dep) {
+          deps.push({
+            ...dep,
+            managerData: {
+              fileReplacePosition:
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                offset + leftPart.length + dep.depName!.length + 1,
+              packageFile,
+            },
+          });
+        }
       } else {
         vars[key] = {
           key,

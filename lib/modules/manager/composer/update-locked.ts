@@ -12,12 +12,14 @@ export function updateLockedDependency(
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = JSON.parse(lockFileContent) as ComposerLock;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const locked = JSON.parse(lockFileContent!) as ComposerLock;
     if (
       locked.packages?.find(
         (entry) =>
           entry.name === depName &&
-          composer.equals(entry.version || '', newVersion)
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          composer.equals(entry.version || '', newVersion!)
       )
     ) {
       return { status: 'already-updated' };
