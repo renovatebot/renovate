@@ -17,10 +17,16 @@ export const redactedFields = [
   'password',
 ];
 
-export function sanitize(input: string | null | undefined): string {
+// TODO: returns null or undefined only when input is null or undefined.
+export function sanitize(input: string): string;
+export function sanitize(
+  input: string | null | undefined
+): string | null | undefined;
+export function sanitize(
+  input: string | null | undefined
+): string | null | undefined {
   if (!input) {
-    // TODO: is that right? Changing return type causes a lot of changes
-    return '';
+    return input;
   }
   let output: string = input;
   [globalSecrets, repoSecrets].forEach((secrets) => {
