@@ -226,8 +226,8 @@ function parseSbtLine(
   line: string,
   lineIndex: number,
   lines: string[]
-): (PackageFile & ParseOptions) | null {
-  const { deps, registryUrls, variables } = acc;
+): PackageFile & ParseOptions {
+  const { deps, registryUrls = [], variables = {} } = acc;
 
   let { isMultiDeps, scalaVersion, packageFileVersion } = acc;
 
@@ -236,8 +236,8 @@ function parseSbtLine(
     variables,
   };
 
-  let dep: PackageDependency = null;
-  let scalaVersionVariable: string = null;
+  let dep: PackageDependency | null = null;
+  let scalaVersionVariable: string | null = null;
   if (line !== '') {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
@@ -336,25 +336,28 @@ function parseSbtLine(
       packageFileVersion,
     };
   }
-  if (deps.length) {
-    return {
-      deps,
-      packageFileVersion,
-    };
-  }
-  return null;
+
+  return {
+    deps,
+    packageFileVersion,
+  };
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   if (!content) {
     return null;
   }
   const lines = content.split(regEx(/\n/)).map(stripComment);
-  return lines.reduce(parseSbtLine, {
+
+  const acc: PackageFile & ParseOptions = {
     registryUrls: [MAVEN_REPO],
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,
     variables: {},
-  });
+  };
+
+  // TODO: needs major refactoring?
+  const res = lines.reduce(parseSbtLine, acc);
+  return res.deps.length ? res : null;
 }

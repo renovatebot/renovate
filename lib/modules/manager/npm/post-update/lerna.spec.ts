@@ -1,30 +1,29 @@
-import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { mocked } from '../../../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../../../test/exec-util';
+import { env, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import * as _env from '../../../../util/exec/env';
-import * as _lernaHelper from './lerna';
+import type { PackageFile, PostUpdateConfig } from '../../types';
+import * as lernaHelper from './lerna';
 
 jest.mock('child_process');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../npm/post-update/node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
-const lernaHelper = mocked(_lernaHelper);
-
-function lernaPkgFile(lernaClient: string) {
+function lernaPkgFile(lernaClient: string): Partial<PackageFile> {
   return {
     lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
   };
 }
 
-function lernaPkgFileWithoutLernaDep(lernaClient: string) {
+function lernaPkgFileWithoutLernaDep(
+  lernaClient: string
+): Partial<PackageFile> {
   return {
     lernaClient,
   };
 }
+
+const config = partial<PostUpdateConfig>({});
 
 describe('modules/manager/npm/post-update/lerna', () => {
   describe('generateLockFiles()', () => {
@@ -35,7 +34,12 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('returns if no lernaClient', async () => {
-      const res = await lernaHelper.generateLockFiles({}, 'some-dir', {}, {});
+      const res = await lernaHelper.generateLockFiles(
+        {},
+        'some-dir',
+        config,
+        {}
+      );
       expect(res.error).toBeFalse();
     });
 
@@ -43,7 +47,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('foo'),
         'some-dir',
-        {},
+        config,
         {}
       );
       expect(res.error).toBeFalse();
@@ -55,7 +59,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
+        config,
         {},
         skipInstalls
       );
@@ -69,7 +73,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
+        config,
         {},
         skipInstalls
       );
@@ -82,7 +86,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { constraints: { yarn: '^1.10.0' } },
+        { ...config, constraints: { yarn: '^1.10.0' } },
         {}
       );
       expect(execSnapshots).toMatchSnapshot();
@@ -94,7 +98,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
         'some-dir',
-        {},
+        config,
         {}
       );
       expect(res.error).toBeFalse();
@@ -107,7 +111,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        { constraints: { npm: '^6.0.0' } },
+        { ...config, constraints: { npm: '^6.0.0' } },
         {}
       );
       expect(res.error).toBeFalse();
