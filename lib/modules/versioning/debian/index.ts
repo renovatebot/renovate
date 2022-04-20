@@ -1,3 +1,4 @@
+import type { RangeStrategy } from '../../../types';
 import { DistroInfo, DistroInfoRecordWithVersion } from '../distro';
 import { GenericVersioningApi } from '../generic';
 import type { GenericVersion } from '../generic';
@@ -8,7 +9,7 @@ export const displayName = 'Debian';
 export const urls = [
   'https://debian.pages.debian.net/distro-info-data/debian.csv',
 ];
-export const supportsRanges = false;
+export const supportedRangeStrategies: RangeStrategy[] = ['pin'];
 
 const RELEASE_PROP = 'release';
 
@@ -64,16 +65,11 @@ class DebianVersioningApi extends GenericVersioningApi {
   }
 
   override isValid(version: string): boolean {
-    let ver: string;
-    ver = this._getVersionByLts(version);
-    ver = this._distroInfo.getVersionByCodename(ver);
-    const isValid = super.isValid(ver);
-    const schedule = this._distroInfo.getSchedule(ver);
+    const isValid = super.isValid(version);
+    const schedule = this._distroInfo.getSchedule(
+      this._getVersionByLts(version)
+    );
     return (isValid && schedule && RELEASE_PROP in schedule) ?? false;
-  }
-
-  override isCompatible(version: string, _current?: string): boolean {
-    return this.isValid(version);
   }
 
   override isStable(version: string): boolean {
@@ -89,6 +85,26 @@ class DebianVersioningApi extends GenericVersioningApi {
     currentVersion,
     newVersion,
   }: NewValueConfig): string {
+    if (rangeStrategy === 'pin') {
+      let newVer = newVersion;
+
+      // convert newVersion to semVer
+      if (this._distroInfo.isCodename(newVersion)) {
+        newVer = this._distroInfo.getVersionByCodename(newVersion);
+      }
+      if (this._ltsToVer.has(newVersion)) {
+        newVer = this._getVersionByLts(newVersion);
+      }
+
+      // current value is codename or [oldold|old|]stable
+      if (
+        this._distroInfo.isCodename(currentValue) ||
+        this._ltsToVer.has(currentValue)
+      ) {
+        return newVer;
+      }
+    }
+
     // current value is [oldold|old|]stable
     if (this._ltsToVer.has(currentValue)) {
       return this._getLtsByVersion(newVersion);

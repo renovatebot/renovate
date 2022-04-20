@@ -69,8 +69,7 @@ describe('modules/versioning/debian/index', () => {
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
-      const res = debian.isCompatible(version, range);
-      expect(res).toBe(expected);
+      expect(debian.isCompatible(version, range)).toBe(expected);
     }
   );
 
@@ -320,6 +319,15 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
     ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'11'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
+    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
+    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
+    ${'Buster'}       | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
+    ${'Buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'Buster'}       | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
+    ${'10'}           | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
+    ${'10'}           | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'10'}           | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
