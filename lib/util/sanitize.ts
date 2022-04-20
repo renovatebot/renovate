@@ -17,9 +17,10 @@ export const redactedFields = [
   'password',
 ];
 
-export function sanitize(input: string): string {
+export function sanitize(input: string | null | undefined): string {
   if (!input) {
-    return input;
+    // TODO: is that right? Changing return type causes a lot of changes
+    return '';
   }
   let output: string = input;
   [globalSecrets, repoSecrets].forEach((secrets) => {
