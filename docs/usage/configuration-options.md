@@ -419,7 +419,7 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 
 ## configMigration
 
-If enabled, renovate will raise a pull request if config file migration is needed.
+If enabled, Renovate will raise a pull request if config file migration is needed.
 
 ## configWarningReuseIssue
 

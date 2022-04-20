@@ -14,7 +14,7 @@ describe('workers/repository/config-migration/pr/errors-warnings', () => {
       config.warnings = [
         {
           topic: 'WARNING',
-          message: 'Something wend wrong',
+          message: 'Something went wrong',
         },
       ];
       const res = getWarnings(config);
@@ -24,7 +24,7 @@ describe('workers/repository/config-migration/pr/errors-warnings', () => {
 
         Please correct - or verify that you can safely ignore - these warnings before you merge this PR.
 
-        -   \`WARNING\`: Something wend wrong
+        -   \`WARNING\`: Something went wrong
 
         ---
         "
