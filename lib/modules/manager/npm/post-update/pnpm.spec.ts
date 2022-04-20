@@ -1,28 +1,21 @@
-import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
-import { mocked } from '../../../../../test/util';
-import * as _env from '../../../../util/exec/env';
-import * as _fs from '../../../../util/fs/proxies';
+import { env, fs, partial } from '../../../../../test/util';
 import type { PostUpdateConfig } from '../../types';
-import * as _pnpmHelper from './pnpm';
+import * as pnpmHelper from './pnpm';
 
 jest.mock('child_process');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs/proxies');
 jest.mock('./node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
-const fs = mocked(_fs);
-const pnpmHelper = mocked(_pnpmHelper);
 delete process.env.NPM_CONFIG_CACHE;
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
 
   beforeEach(() => {
-    config = { cacheDir: 'some-cache-dir', constraints: { pnpm: '^2.0.0' } };
+    config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
 
@@ -86,7 +79,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses constraint version if parent json has constraints', async () => {
     const execSnapshots = mockExecAll(exec);
-    const configTemp = { cacheDir: 'some-cache-dir' };
+    const configTemp = partial<PostUpdateConfig>({});
     const fileContent = Fixtures.get('parent/package.json');
     fs.readFile = jest
       .fn()
@@ -129,7 +122,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses packageManager version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll(exec);
-    const configTemp = { cacheDir: 'some-cache-dir' };
+    const configTemp = partial<PostUpdateConfig>({});
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readFile = jest
       .fn()

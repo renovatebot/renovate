@@ -103,7 +103,8 @@ export function determineLockFileDirs(
     return {};
   }
 
-  for (const p of config.updatedPackageFiles) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
     // lerna first

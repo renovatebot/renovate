@@ -30,11 +30,14 @@ export async function updateLockedDependency(
   try {
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
-    const detectedIndent = detectIndent(lockFileContent).indent || '  ';
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const detectedIndent = detectIndent(lockFileContent!).indent || '  ';
     let newPackageJsonContent: string | null | undefined;
     try {
-      packageJson = JSON.parse(packageFileContent);
-      packageLockJson = JSON.parse(lockFileContent);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      packageJson = JSON.parse(packageFileContent!);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      packageLockJson = JSON.parse(lockFileContent!);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
       return { status: 'update-failed' };
@@ -43,7 +46,8 @@ export async function updateLockedDependency(
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
-      currentVersion
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      currentVersion!
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
       logger.info(
@@ -110,8 +114,10 @@ export async function updateLockedDependency(
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
         const files: Record<string, string> = {};
-        files[packageFile] = packageFileContent;
-        files[lockFile] = lockFileContent;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        files[packageFile!] = packageFileContent!;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        files[lockFile!] = lockFileContent!;
         return { status, files: files };
       }
       return { status };
@@ -123,7 +129,8 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      currentVersion,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      currentVersion!,
       newVersion
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
@@ -196,7 +203,8 @@ export async function updateLockedDependency(
           newVersion,
         })!;
         newPackageJsonContent = updateDependency({
-          fileContent: packageFileContent,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          fileContent: packageFileContent!,
           upgrade: { depName, depType, newValue },
         });
       }

@@ -58,7 +58,7 @@ export interface UpdateArtifactsConfig {
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
-  currentValue: string;
+  currentValue?: string;
   depName?: string;
   depType?: string;
   manager?: string;
@@ -225,11 +225,11 @@ export interface BumpPackageVersionResult {
 
 export interface UpdateLockedConfig {
   packageFile: string;
-  packageFileContent: string;
+  packageFileContent?: string;
   lockFile: string;
-  lockFileContent: string;
+  lockFileContent?: string;
   depName: string;
-  currentVersion: string;
+  currentVersion?: string;
   newVersion: string;
   allowParentUpdates?: boolean;
   allowHigherOrRemoved?: boolean;
@@ -290,7 +290,7 @@ export interface ManagerApi extends ModuleApi {
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>,
     ManagerData<T> {
-  updatedPackageFiles: FileChange[];
+  updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
