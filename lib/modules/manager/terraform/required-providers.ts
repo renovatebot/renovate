@@ -3,7 +3,7 @@ import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
 import { analyzeTerraformProvider } from './providers';
-import type { ExtractionResult } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
 export const providerBlockExtractionRegex = regEx(/^\s*(?<key>[^\s]+)\s+=\s+{/);
@@ -19,10 +19,11 @@ function extractBlock(
     lineNumber += 1;
     line = lines[lineNumber];
     const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
+    if (kvMatch?.groups) {
       switch (kvMatch.groups.key) {
         case 'source':
-          dep.managerData.source = kvMatch.groups.value;
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          dep.managerData!.source = kvMatch.groups.value;
           break;
 
         case 'version':
@@ -44,9 +45,9 @@ export function extractTerraformRequiredProviders(
 ): ExtractionResult {
   let lineNumber = startingLine;
   let line: string;
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<TerraformManagerData>[] = [];
   do {
-    const dep: PackageDependency = {
+    const dep: PackageDependency<TerraformManagerData> = {
       managerData: {
         terraformDependencyType: TerraformDependencyTypes.required_providers,
       },
@@ -55,15 +56,17 @@ export function extractTerraformRequiredProviders(
     lineNumber += 1;
     line = lines[lineNumber];
     const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
+    if (kvMatch?.groups) {
       dep.currentValue = kvMatch.groups.value;
-      dep.managerData.moduleName = kvMatch.groups.key;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      dep.managerData!.moduleName = kvMatch.groups.key;
       deps.push(dep);
     } else {
       const nameMatch = providerBlockExtractionRegex.exec(line);
 
       if (nameMatch?.groups) {
-        dep.managerData.moduleName = nameMatch.groups.key;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        dep.managerData!.moduleName = nameMatch.groups.key;
         lineNumber = extractBlock(lineNumber, lines, dep);
         deps.push(dep);
       }
