@@ -226,10 +226,7 @@ const platform: Platform = {
     branchOrTag?: string
   ): Promise<any | null> {
     const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
-    if (fileName.endsWith('.json5')) {
-      return JSON5.parse(raw);
-    }
-    return JSON.parse(raw);
+    return JSON5.parse(raw);
   },
 
   async initRepo({

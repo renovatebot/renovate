@@ -10,6 +10,7 @@ import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID_JSON,
   fetchPreset,
+  parsePreset,
 } from '../util';
 
 const http = new BitbucketServerHttp();
@@ -45,13 +46,7 @@ export async function fetchJSONFile(
     logger.warn({ size: res.body.size }, 'Renovate config to big');
     throw new Error(PRESET_INVALID_JSON);
   }
-  try {
-    const content = res.body.lines.map((l) => l.text).join('');
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error(PRESET_INVALID_JSON);
-  }
+  return parsePreset(res.body.lines.map((l) => l.text).join(''));
 }
 
 export function getPresetFromEndpoint(
