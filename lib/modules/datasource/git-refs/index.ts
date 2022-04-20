@@ -24,10 +24,14 @@ export class GitRefsDatasource extends Datasource {
   override async getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const rawRefs: RawRefs[] = await GitDatasource.getRawRefs(
+    const rawRefs: RawRefs[] | null = await GitDatasource.getRawRefs(
       { packageName },
       this.id
     );
+
+    if (!rawRefs) {
+      return null;
+    }
 
     const refs = rawRefs
       .filter((ref) => ref.type === 'tags' || ref.type === 'heads')
@@ -44,7 +48,7 @@ export class GitRefsDatasource extends Datasource {
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
-        newDigest: rawRefs.find((rawRef) => rawRef.value === ref).hash,
+        newDigest: rawRefs.find((rawRef) => rawRef.value === ref)?.hash,
       })),
     };
 
@@ -55,11 +59,17 @@ export class GitRefsDatasource extends Datasource {
     { packageName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    const rawRefs: RawRefs[] = await GitDatasource.getRawRefs(
+    const rawRefs: RawRefs[] | null = await GitDatasource.getRawRefs(
       { packageName },
       this.id
     );
-    let ref: RawRefs;
+
+    // istanbul ignore if
+    if (!rawRefs) {
+      return null;
+    }
+
+    let ref: RawRefs | undefined;
     if (newValue) {
       ref = rawRefs.find(
         (rawRef) =>

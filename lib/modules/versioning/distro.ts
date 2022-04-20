@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import dataFiles, { DataFile } from '../../data-files.generated';
 
 interface DistroSchedule {
@@ -12,7 +13,7 @@ interface DistroSchedule {
   eol_elts?: string;
 }
 
-type DistroDataFile = 'data/ubuntu-distro-info.json';
+export type DistroDataFile = 'data/ubuntu-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 
@@ -23,11 +24,13 @@ export class DistroInfo {
     string,
     DistroInfoRecordWithVersion
   >();
+
+  private readonly _sortedInfo: DistroInfoRecordWithVersion[] = [];
+
   private readonly _distroInfo: DistroInfoRecord;
 
   constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       dataFiles.get(distroJsonKey as DataFile)!.replace(/v([\d.]+)\b/gm, '$1')
     );
 
@@ -35,12 +38,45 @@ export class DistroInfo {
       const schedule = this._distroInfo[version];
       this._codenameToVersion.set(schedule.series, { version, ...schedule });
     }
+
+    const arr = Object.keys(this._distroInfo).sort(
+      (a, b) => parseFloat(a) - parseFloat(b)
+    );
+
+    for (const v of arr) {
+      const obj = { version: v, ...this._distroInfo[v.toString()] };
+      if (!obj.eol) {
+        // istanbul ignore next
+        continue;
+      }
+      this._sortedInfo.push(obj);
+    }
   }
 
+  /**
+   * Check if input is a valid release codename
+   * @param input A codename
+   * @returns true if input is a codename, false otherwise
+   */
   public isCodename(input: string): boolean {
     return this._codenameToVersion.has(input);
   }
 
+  /**
+   * Checks if given input string is a valid release version
+   * @param input A codename/semVer
+   * @returns true if release exists, false otherwise
+   */
+  public exists(input: string): boolean {
+    const ver = this.getVersionByCodename(input);
+    return !!this._distroInfo[ver];
+  }
+
+  /**
+   * Get semVer representation of a given codename
+   * @param input A codename
+   * @returns A semVer if exists, otherwise input string is returned
+   */
   public getVersionByCodename(input: string): string {
     const schedule = this._codenameToVersion.get(input);
     if (schedule) {
@@ -49,6 +85,11 @@ export class DistroInfo {
     return input;
   }
 
+  /**
+   * Get codename representation of a given semVer
+   * @param input A semVer
+   * @returns A codename if exists, otherwise input string is returned
+   */
   public getCodenameByVersion(input: string): string {
     const di = this._distroInfo[input];
     if (di) {
@@ -58,7 +99,58 @@ export class DistroInfo {
     return input;
   }
 
-  public getSchedule(input: string): DistroSchedule {
-    return this._distroInfo[input];
+  /**
+   * Get schedule of a given release
+   * @param input A codename/semVer
+   * @returns A schedule if available, otherwise undefined
+   */
+  public getSchedule(input: string): DistroSchedule | null {
+    const ver = this.getVersionByCodename(input);
+    return this._distroInfo[ver] ?? null;
+  }
+
+  /**
+   * Check if a given release has passed its EOL
+   * @param input A codename/semVer
+   * @returns false if still supported, true otherwise
+   */
+  public isEolLts(input: string): boolean {
+    const ver = this.getVersionByCodename(input);
+    const schedule = this.getSchedule(ver);
+    const endLts = schedule?.eol ?? null;
+    let end = schedule?.eol_lts ?? null;
+
+    // ubuntu: does not have eol_lts
+    // debian: only "Stable" has no eol_lts, old and oldold has both
+    if (!end) {
+      end = endLts;
+    }
+
+    if (end) {
+      const now = DateTime.now();
+      const eol = DateTime.fromISO(end);
+      return eol < now;
+    }
+
+    // istanbul ignore next
+    return true;
+  }
+
+  /**
+   * Get distro info for the release that has N other newer releases.
+   * Example: n=0 corresponds to the latest available release, n=1 the release before, etc.
+   * In Debian terms: N = 0 -> stable, N = 1 -> oldstable, N = 2 -> oldoldstalbe
+   * @param n
+   * @returns Distro info of the Nth latest release
+   */
+  public getNLatest(n: number): DistroInfoRecordWithVersion | null {
+    const len = this._sortedInfo.length - 1;
+    const i = len - Math.floor(n);
+
+    if (len >= i && i >= 0) {
+      return this._sortedInfo[i];
+    }
+
+    return null;
   }
 }

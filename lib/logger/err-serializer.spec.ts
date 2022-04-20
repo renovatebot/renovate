@@ -106,7 +106,7 @@ describe('logger/err-serializer', () => {
         options: {
           method: 'POST',
           password: '***********',
-          url: 'https://:**redacted**@github.com/api',
+          url: 'https://**redacted**@github.com/api',
           username: '',
         },
       });

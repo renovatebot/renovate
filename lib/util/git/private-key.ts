@@ -6,8 +6,8 @@ import { logger } from '../../logger';
 import { exec } from '../exec';
 import { newlineRegex } from '../regex';
 
-let gitPrivateKey: string;
-let keyId: string;
+let gitPrivateKey: string | undefined;
+let keyId: string | undefined;
 
 export function setPrivateKey(key: string): void {
   gitPrivateKey = key?.trim();
@@ -21,10 +21,10 @@ async function importKey(): Promise<void> {
   await fs.outputFile(keyFileName, gitPrivateKey);
   const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
   logger.debug({ stdout, stderr }, 'Private key import result');
-  keyId = (stdout + stderr)
+  keyId = `${stdout}${stderr}`
     .split(newlineRegex)
     .find((line) => line.includes('secret key imported'))
-    .replace('gpg: key ', '')
+    ?.replace('gpg: key ', '')
     .split(':')
     .shift();
   await fs.remove(keyFileName);
