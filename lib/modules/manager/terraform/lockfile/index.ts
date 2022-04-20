@@ -133,7 +133,7 @@ export async function updateArtifacts({
     }
 
     const res = writeLockUpdates(updates, lockFilePath, lockFileContent);
-    return res ? [res] : null;
+    return [res];
   } catch (err) {
     /* istanbul ignore next */
     return [

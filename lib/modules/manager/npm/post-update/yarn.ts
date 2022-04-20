@@ -10,7 +10,7 @@ import {
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { exec } from '../../../../util/exec';
-import type { ExecOptions } from '../../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
 import { exists, readFile, remove, writeFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
@@ -23,7 +23,7 @@ export async function checkYarnrc(
   cwd: string
 ): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
   let offlineMirror = false;
-  let yarnPath: string = null;
+  let yarnPath: string | null = null;
   try {
     const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
@@ -37,7 +37,7 @@ export async function checkYarnrc(
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
       }
-      const yarnBinaryExists = await exists(yarnPath);
+      const yarnBinaryExists = yarnPath ? await exists(yarnPath) : false;
       if (!yarnBinaryExists) {
         const scrubbedYarnrc = yarnrc.replace(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
@@ -66,12 +66,12 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
-  config: PostUpdateConfig = {},
+  config: Partial<PostUpdateConfig> = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(cwd, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
-  let lockFile = null;
+  let lockFile: string | null = null;
   try {
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
@@ -93,13 +93,13 @@ export async function generateLockFile(
 
     const preCommands = [installYarn];
 
-    const extraEnv: ExecOptions['extraEnv'] = {
+    const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       CI: 'true',
     };
 
-    const commands = [];
+    const commands: string[] = [];
     let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {
@@ -157,8 +157,8 @@ export async function generateLockFile(
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      extraEnv.NPM_AUTH = env.NPM_AUTH;
+      extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
     if (yarnUpdate && !isYarn1) {
@@ -179,6 +179,7 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
+            .filter(is.string)
             .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
         );
