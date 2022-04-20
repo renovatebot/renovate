@@ -40,7 +40,7 @@ export class ConfigMigrationCommitMessageFactory {
         commitMessageExtra: '',
       })
       .trim()
-      .replaceAll('  ', ' ');
+      .replace(/\s\s/g, ' ');
   }
 
   private areSemanticCommitsEnabled(): boolean {
