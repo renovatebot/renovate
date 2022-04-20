@@ -4,6 +4,7 @@ import type * as _hostRules from '../../../util/host-rules';
 describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper');
   let hostRules: typeof _hostRules;
+
   beforeEach(() => {
     // reset module
     jest.resetModules();
@@ -17,6 +18,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(azure.coreApi).toThrow('No config found for azure');
       expect(azure.policyApi).toThrow('No config found for azure');
     });
+
     it('should set personal access token and endpoint', () => {
       hostRules.add({
         hostType: PlatformId.Azure,
@@ -33,6 +35,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       // We will track if the lib azure-devops-node-api change
       expect(res).toMatchSnapshot();
     });
+
     it('should set bearer token and endpoint', () => {
       hostRules.add({
         hostType: PlatformId.Azure,

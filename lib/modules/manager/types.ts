@@ -26,15 +26,20 @@ export interface ExtractConfig {
   updateInternalDeps?: boolean;
 }
 
-export interface CustomExtractConfig extends ExtractConfig {
-  autoReplaceStringTemplate?: string;
-  matchStrings: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
+export interface RegexManagerTemplates {
   depNameTemplate?: string;
   packageNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
   depTypeTemplate?: string;
+}
+
+export interface CustomExtractConfig
+  extends ExtractConfig,
+    RegexManagerTemplates {
+  autoReplaceStringTemplate?: string;
+  matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface UpdateArtifactsConfig {
@@ -83,7 +88,7 @@ export interface PackageFile<T = Record<string, any>>
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
   npmrc?: string;
-  packageFile?: string;
+  packageFile?: string | null;
   packageJsonName?: string;
   packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
@@ -95,14 +100,14 @@ export interface PackageFile<T = Record<string, any>>
 }
 
 export interface Package<T> extends ManagerData<T> {
-  currentValue?: string;
+  currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
   groupName?: string;
   lineNumber?: number;
-  packageName?: string;
+  packageName?: string | null;
   repo?: string;
   target?: string;
   versioning?: string;
@@ -156,7 +161,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   currentVersion?: string;
   lockedVersion?: string;
   propSource?: string;
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
   sourceLine?: number;

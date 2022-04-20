@@ -17,6 +17,7 @@ limits.getPrsRemaining = jest.fn().mockResolvedValue(99);
 limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -54,6 +55,7 @@ describe('workers/repository/process/write', () => {
       expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
+
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
       branchWorker.processBranch.mockResolvedValueOnce({

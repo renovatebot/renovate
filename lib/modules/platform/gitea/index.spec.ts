@@ -462,6 +462,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toBeNull();
     });
+
     it('should return yellow with unknown status', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<ght.CombinedCommitStatus>({
@@ -1497,6 +1498,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.requestPrReviewers).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
     it('should should do nothing if version to old', async () => {
       expect.assertions(3);
       const mockPR = mockPRs[0];
@@ -1507,6 +1509,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.requestPrReviewers).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
     it('catches errors', async () => {
       expect.assertions(2);
       const mockPR = mockPRs[0];
@@ -1520,10 +1523,13 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('massageMarkdown', () => {
-    it('should truncate body to 1000000 characters', () => {
-      const excessiveBody = '*'.repeat(1000001);
+    it('replaces pr links', () => {
+      const body =
+        '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
-      expect(gitea.massageMarkdown(excessiveBody)).toHaveLength(1000000);
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)'
+      );
     });
   });
 
@@ -1578,6 +1584,7 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
     });
+
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
@@ -1585,6 +1592,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
       await initFakeRepo({ full_name: 'some/repo' });

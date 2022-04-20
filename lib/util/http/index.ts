@@ -58,21 +58,38 @@ function applyDefaultHeaders(options: Options): void {
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
-  requestStats: Partial<RequestStats>
+  requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
 ): Promise<Response<T>> {
   logger.trace({ url, options }, 'got request');
 
-  // Cheat the TS compiler using `as` to pick a specific overload.
-  // Otherwise it doesn't typecheck.
-  const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
-  const duration =
-    resp.timings.phases.total ?? /* istanbul ignore next: can't be tested */ 0;
+  let duration = 0;
+  let statusCode = 0;
 
-  const httpRequests = memCache.get('http-requests') || [];
-  httpRequests.push({ ...requestStats, duration });
-  memCache.set('http-requests', httpRequests);
+  try {
+    // Cheat the TS compiler using `as` to pick a specific overload.
+    // Otherwise it doesn't typecheck.
+    const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
+    statusCode = resp.statusCode;
+    duration =
+      resp.timings.phases.total ??
+      /* istanbul ignore next: can't be tested */ 0;
+    return resp;
+  } catch (error) {
+    if (error instanceof RequestError) {
+      statusCode =
+        error.response?.statusCode ??
+        /* istanbul ignore next: can't be tested */ 0;
+      duration =
+        error.timings?.phases.total ??
+        /* istanbul ignore next: can't be tested */ 0;
+    }
 
-  return resp;
+    throw error;
+  } finally {
+    const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
+    httpRequests.push({ ...requestStats, duration, statusCode });
+    memCache.set('http-requests', httpRequests);
+  }
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
@@ -143,7 +160,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       const queueTask = (): Promise<Response<T>> => {
         const queueDuration = Date.now() - startTime;
         return gotRoutine(url, options, {
-          method: options.method,
+          method: options.method ?? 'get',
           url,
           queueDuration,
         });

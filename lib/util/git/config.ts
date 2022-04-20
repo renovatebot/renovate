@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import type { SimpleGitOptions } from 'simple-git';
+import { GlobalConfig } from '../../config/global';
 import type { GitNoVerifyOption } from './types';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
@@ -21,6 +22,9 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
     completion: {
       onClose: true,
       onExit: false,
+    },
+    timeout: {
+      block: GlobalConfig.get('gitTimeout') ?? 10000,
     },
   };
 }

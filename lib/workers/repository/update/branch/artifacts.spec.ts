@@ -6,6 +6,7 @@ import { setArtifactErrorStatus } from './artifacts';
 
 describe('workers/repository/update/branch/artifacts', () => {
   let config: BranchConfig;
+
   beforeEach(() => {
     GlobalConfig.set({});
     jest.resetAllMocks();

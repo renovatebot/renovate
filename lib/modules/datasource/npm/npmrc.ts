@@ -24,12 +24,12 @@ function envReplace(value: any, env = process.env): any {
 
   const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
 
-  return value.replace(ENV_EXPR, (match, esc, envVarName) => {
+  return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
     if (env[envVarName] === undefined) {
       logger.warn('Failed to replace env in config: ' + match);
       throw new Error('env-replace');
     }
-    return env[envVarName];
+    return env[envVarName]!;
   });
 }
 
@@ -82,7 +82,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     if (matchHost) {
       hostRule.matchHost = matchHost;
     }
-    rules.hostRules.push(hostRule);
+    rules.hostRules?.push(hostRule);
   }
   // Generate packageRules
   const matchDataSources = ['npm'];
@@ -91,7 +91,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   if (is.nonEmptyString(registry)) {
     if (validateUrl(registry)) {
       // Default registry
-      rules.packageRules.push({
+      rules.packageRules?.push({
         matchDataSources,
         registryUrls: [registry],
       });
@@ -109,7 +109,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
       const scope = keyParts.join(':');
       if (validateUrl(value)) {
-        rules.packageRules.push({
+        rules.packageRules?.push({
           matchDataSources,
           matchPackagePrefixes: [scope + '/'],
           registryUrls: [value],
@@ -153,7 +153,7 @@ export function setNpmrc(input?: string): void {
       }
     }
     const npmrcRules = convertNpmrcToRules(npmrc);
-    if (npmrcRules.hostRules.length) {
+    if (npmrcRules.hostRules?.length) {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;

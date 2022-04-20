@@ -6,15 +6,18 @@ describe('config/validation', () => {
     it('ignores encrypted in root', () => {
       expect(configValidation.getParentName('encrypted')).toBeEmptyString();
     });
+
     it('handles array types', () => {
       expect(configValidation.getParentName('hostRules[1]')).toBe('hostRules');
     });
+
     it('handles encrypted within array types', () => {
       expect(configValidation.getParentName('hostRules[0].encrypted')).toBe(
         'hostRules'
       );
     });
   });
+
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {
@@ -24,6 +27,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
     });
+
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
@@ -32,6 +36,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
+
     it('catches invalid allowedVersions regex', async () => {
       const config = {
         packageRules: [
@@ -57,6 +62,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
@@ -86,6 +92,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
+
     it('returns nested errors', async () => {
       const config: RenovateConfig = {
         foo: 1,
@@ -110,6 +117,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(3);
       expect(errors).toMatchSnapshot();
     });
+
     it('included unsupported manager', async () => {
       const config = {
         packageRules: [
@@ -126,6 +134,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toContain('ansible');
     });
+
     it('included managers of the wrong type', async () => {
       const config = {
         packageRules: [
@@ -177,6 +186,7 @@ describe('config/validation', () => {
         expect(errors).toMatchSnapshot();
       }
     );
+
     it('errors for all types', async () => {
       const config: RenovateConfig = {
         allowedVersions: 'foo',
@@ -212,6 +222,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(12);
     });
+
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
         matchPackageNames: ['angular'],
@@ -236,6 +247,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(2);
     });
+
     it('ignore packageRule nesting validation for presets', async () => {
       const config = {
         description: ['All angular.js packages'],
@@ -291,6 +303,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
+
     it('errors if no regexManager matchStrings', async () => {
       const config = {
         regexManagers: [
@@ -314,6 +327,7 @@ describe('config/validation', () => {
         ]
       `);
     });
+
     it('errors if empty regexManager matchStrings', async () => {
       const config = {
         regexManagers: [
@@ -345,6 +359,7 @@ describe('config/validation', () => {
         ]
       `);
     });
+
     it('errors if no regexManager fileMatch', async () => {
       const config = {
         regexManagers: [
@@ -362,6 +377,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+
     it('validates regEx for each matchStrings', async () => {
       const config = {
         regexManagers: [
@@ -378,6 +394,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+
     it('passes if regexManager fields are present', async () => {
       const config = {
         regexManagers: [
@@ -399,6 +416,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
+
     it('errors if extra regexManager fields are present', async () => {
       const config = {
         regexManagers: [
@@ -419,6 +437,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+
     it('errors if regexManager fields are missing', async () => {
       const config = {
         regexManagers: [
@@ -438,6 +457,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(1);
     });
+
     it('ignore keys', async () => {
       const config = {
         $schema: 'renovate.json',
@@ -632,6 +652,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
       expect(errors).toHaveLength(0);
     });
+
     it('errors if invalid combinations in packageRules', async () => {
       const config = {
         packageRules: [
@@ -649,6 +670,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
+
     it('warns on nested group packageRules', async () => {
       const config = {
         extends: ['group:fortawesome'],
@@ -680,6 +702,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
+
     it('errors on invalid customEnvVariables objects', async () => {
       const config = {
         customEnvVariables: {
@@ -715,6 +738,19 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    it.each([
+      [
+        'invalid value',
+        {
+          gitTimeout: 'string',
+        },
+      ],
+      ['out of range', { gitTimeout: 1000 }],
+    ])('checks invalid git timeout values', async (_case, config) => {
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(1);
     });
   });
 });

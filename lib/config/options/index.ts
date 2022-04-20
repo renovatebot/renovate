@@ -393,6 +393,13 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'githubTokenWarn',
+    description: 'Display warnings about GitHub token not being set.',
+    type: 'boolean',
+    default: true,
+    globalOnly: true,
+  },
+  {
     name: 'requireConfig',
     description:
       'Set to false if it is optional for repositories to contain a config.',
@@ -722,6 +729,14 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     stage: 'repository',
+  },
+  {
+    name: 'gitTimeout',
+    description:
+      'Configure the timeout with a number of milliseconds to wait for a Git task.',
+    type: 'integer',
+    globalOnly: true,
+    default: 10000,
   },
   {
     name: 'enabledManagers',
