@@ -256,6 +256,15 @@ export async function validateConfig(
               )} (${typeof val})`,
             });
           }
+        } else if (type === 'integer') {
+          if (!is.number(val)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+                val
+              )} (${typeof val})`,
+            });
+          }
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
