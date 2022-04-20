@@ -105,14 +105,16 @@ describe('workers/repository/config-migration/branch/create', () => {
         });
       });
 
-      it('to the supplied commit message prefix & topic', async () => {
+      it('to the supplied commit message prefix, topic & action', async () => {
         const prefix = 'PREFIX:';
         const topic = 'Thats a topic';
+        const action = 'Action';
 
-        const message = `${prefix} ${topic}`;
+        const message = `${prefix} ${action} ${topic}`;
 
         config.commitMessagePrefix = prefix;
         config.commitMessageTopic = topic;
+        config.commitMessageAction = action;
 
         await createConfigMigrationBranch(config, migratedConfigData);
 
