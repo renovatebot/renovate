@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -44,6 +45,7 @@ export async function extractAllPackageFiles(
   const packageFilesByName: Record<string, PackageFile> = {};
   const registryUrls = [];
   const reorderedFiles = reorderFiles(packageFiles);
+  const versionRefs: Set<string> = new Set();
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
@@ -65,7 +67,11 @@ export async function extractAllPackageFiles(
         updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const updatesFromCatalog = parseCatalog(packageFile, content);
+        const [updatesFromCatalog, references] = parseCatalog(
+          packageFile,
+          content
+        );
+        references.forEach((ref) => versionRefs.add(ref));
         extractedDeps.push(...updatesFromCatalog);
       } else {
         const vars = getVars(registry, dir);
@@ -79,6 +85,7 @@ export async function extractAllPackageFiles(
             registryUrls.push(url);
           }
         });
+        Object.keys(gradleVars).forEach((ref) => versionRefs.add(ref));
         registry[dir] = { ...registry[dir], ...gradleVars };
         updateVars(gradleVars);
         extractedDeps.push(...deps);
@@ -101,6 +108,12 @@ export async function extractAllPackageFiles(
     if (key) {
       const pkgFile: PackageFile = packageFilesByName[key];
       const { deps } = pkgFile;
+      if (
+        !is.nullOrUndefined(dep.groupName) &&
+        versionRefs.has(dep.groupName)
+      ) {
+        delete dep.commitMessageTopic;
+      }
       deps.push({
         ...dep,
         registryUrls: [

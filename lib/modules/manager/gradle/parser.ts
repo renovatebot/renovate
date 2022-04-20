@@ -228,6 +228,7 @@ function processPlugin({
       const fileReplacePosition = varData.fileReplacePosition;
       dep.currentValue = currentValue;
       dep.managerData = { fileReplacePosition, packageFile };
+      dep.groupName = varData.key;
     } else {
       const currentValue = pluginVersion.value;
       const fileReplacePosition = pluginVersion.offset;

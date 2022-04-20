@@ -149,7 +149,7 @@ function extractDependency({
   versionStartIndex: number;
   versionSubContent: string;
 }): PackageDependency<GradleManagerData> {
-  if (typeof descriptor === 'string') {
+  if (is.string(descriptor)) {
     const [groupName, name, currentValue] = descriptor.split(':');
     if (!currentValue) {
       return {
@@ -184,19 +184,23 @@ function extractDependency({
       skipReason,
     };
   }
-
+  const versionRef: string = isVersionPointer(descriptor.version)
+    ? descriptor.version.ref
+    : null;
   if (isArtifactDescriptor(descriptor)) {
-    const { group: groupName, name } = descriptor;
+    const { group, name } = descriptor;
+    const groupName = is.nullOrUndefined(versionRef) ? group : versionRef; // usage of common variable should have higher priority than
     return {
-      depName: `${groupName}:${name}`,
+      depName: `${group}:${name}`,
       groupName,
       currentValue,
       managerData: { fileReplacePosition },
     };
   }
-  const [groupName, name] = descriptor.module.split(':');
+  const [depGroupName, name] = descriptor.module.split(':');
+  const groupName = versionRef ?? depGroupName;
   const dependency = {
-    depName: `${groupName}:${name}`,
+    depName: `${depGroupName}:${name}`,
     groupName,
     currentValue,
     managerData: { fileReplacePosition },
@@ -207,7 +211,7 @@ function extractDependency({
 export function parseCatalog(
   packageFile: string,
   content: string
-): PackageDependency<GradleManagerData>[] {
+): [PackageDependency<GradleManagerData>[], string[]] {
   const tomlContent = parse(content) as GradleCatalog;
   const versions = tomlContent.versions || {};
   const libs = tomlContent.libraries || {};
@@ -235,10 +239,9 @@ export function parseCatalog(
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {
     const pluginDescriptor = plugins[pluginName];
-    const [depName, version] =
-      typeof pluginDescriptor === 'string'
-        ? pluginDescriptor.split(':')
-        : [pluginDescriptor.id, pluginDescriptor.version];
+    const [depName, version] = is.string(pluginDescriptor)
+      ? pluginDescriptor.split(':')
+      : [pluginDescriptor.id, pluginDescriptor.version];
     const { currentValue, fileReplacePosition, skipReason } = extractVersion({
       version,
       versions,
@@ -266,16 +269,27 @@ export function parseCatalog(
         skipReason,
       };
     } else {
-      dependency = {
-        ...dependencyBase,
-        currentValue,
-        managerData: { fileReplacePosition },
-      };
+      const groupName = isVersionPointer(version) ? version.ref : null;
+      dependency = is.nullOrUndefined(groupName)
+        ? {
+            ...dependencyBase,
+            currentValue,
+            managerData: { fileReplacePosition },
+          }
+        : {
+            ...dependencyBase,
+            currentValue,
+            managerData: { fileReplacePosition },
+            groupName,
+          };
     }
 
     extractedDeps.push(dependency);
   }
-  return extractedDeps.map((dep) =>
-    deepmerge(dep, { managerData: { packageFile } })
-  );
+  return [
+    extractedDeps.map((dep) =>
+      deepmerge(dep, { managerData: { packageFile } })
+    ),
+    Object.keys(versions),
+  ];
 }
