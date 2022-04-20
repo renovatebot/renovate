@@ -30,7 +30,7 @@ function isArtifactDescriptor(
 }
 
 function isVersionPointer(
-  obj: GradleVersionCatalogVersion
+  obj: GradleVersionCatalogVersion | undefined
 ): obj is VersionPointer {
   return hasKey('ref', obj);
 }
@@ -50,7 +50,7 @@ function extractVersion({
   versionStartIndex,
   versionSubContent,
 }: {
-  version: GradleVersionCatalogVersion;
+  version: GradleVersionCatalogVersion | undefined;
   versions: Record<string, GradleVersionPointerTarget>;
   depStartIndex: number;
   depSubContent: string;
@@ -82,7 +82,7 @@ function extractLiteralVersion({
   depSubContent,
   sectionKey,
 }: {
-  version: GradleVersionPointerTarget;
+  version: GradleVersionPointerTarget | undefined;
   depStartIndex: number;
   depSubContent: string;
   sectionKey: string;
@@ -99,8 +99,8 @@ function extractLiteralVersion({
     // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
     const versionKeys = ['require', 'prefer', 'strictly'];
     let found = false;
-    let currentValue: string;
-    let fileReplacePosition: number;
+    let currentValue: string | undefined;
+    let fileReplacePosition: number | undefined;
 
     if (version.reject || version.rejectAll) {
       return { skipReason: 'unsupported-version' };

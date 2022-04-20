@@ -43,7 +43,7 @@ export async function extractAllPackageFiles(
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
-  const registryUrls = [];
+  const registryUrls: string[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
   const versionRefs: Set<string> = new Set();
   for (const packageFile of reorderedFiles) {

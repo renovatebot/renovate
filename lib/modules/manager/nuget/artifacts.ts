@@ -35,7 +35,7 @@ async function addSourceCmds(
 ): Promise<string[]> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
-  const result = [];
+  const result: string[] = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
       hostType: NugetDatasource.id,
@@ -162,7 +162,7 @@ export async function updateArtifacts({
 
     const newLockFileContentMap = await getLockFileContentMap(lockFileNames);
 
-    const retArray = [];
+    const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {
       if (
         existingLockFileContentMap[lockFileName] ===

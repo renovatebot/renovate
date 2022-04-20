@@ -24,18 +24,19 @@ export function extractTerraformResource(
 ): ExtractionResult {
   let lineNumber = startingLine;
   let line = lines[lineNumber];
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<ResourceManagerData>[] = [];
+  const managerData: ResourceManagerData = {
+    terraformDependencyType: TerraformDependencyTypes.resource,
+  };
   const dep: PackageDependency<ResourceManagerData> = {
-    managerData: {
-      terraformDependencyType: TerraformDependencyTypes.resource,
-    },
+    managerData,
   };
 
   const typeMatch = resourceTypeExtractionRegex.exec(line);
 
   // Sets the resourceType, e.g. "helm_release" 'resource "helm_release" "test_release"'
-  dep.managerData.resourceType =
-    TerraformResourceTypes[typeMatch?.groups?.type] ??
+  managerData.resourceType =
+    TerraformResourceTypes[typeMatch?.groups?.type as TerraformResourceTypes] ??
     TerraformResourceTypes.unknown;
 
   /**
@@ -46,13 +47,13 @@ export function extractTerraformResource(
     lineNumber += 1;
     line = lines[lineNumber];
     const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
+    if (kvMatch?.groups) {
       switch (kvMatch.groups.key) {
         case 'chart':
         case 'image':
         case 'name':
         case 'repository':
-          dep.managerData[kvMatch.groups.key] = kvMatch.groups.value;
+          managerData[kvMatch.groups.key] = kvMatch.groups.value;
           break;
         case 'version':
         case 'terraform_version':
@@ -71,6 +72,10 @@ export function extractTerraformResource(
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
+  // istanbul ignore if: should tested?
+  if (!dep.managerData) {
+    return;
+  }
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
@@ -106,7 +111,8 @@ export function analyseTerraformResource(
         dep.skipReason = 'local-chart';
       }
       dep.depType = 'helm_release';
-      dep.registryUrls = [dep.managerData.repository];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      dep.registryUrls = [dep.managerData.repository!];
       dep.depName = dep.managerData.chart;
       dep.datasource = HelmDatasource.id;
       break;
