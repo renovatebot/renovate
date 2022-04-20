@@ -139,10 +139,11 @@ export function writeLockUpdates(
   const sections: string[][] = [];
 
   // sort updates in order of appearance in the lockfile
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
   updates.sort(
     (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
   );
+  /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
   updates.forEach((update, index, array) => {
     // re add leading whitespace
     let startWhitespace: number | undefined;
