@@ -23,6 +23,14 @@ export interface TerraformProvider {
   published_at: string;
 }
 
+export interface TerraformProviderVersions {
+  versions: TerraformProviderVersionsVersion[];
+}
+
+export interface TerraformProviderVersionsVersion {
+  version: string;
+}
+
 export type TerraformProviderReleaseBackend = Record<
   string,
   {

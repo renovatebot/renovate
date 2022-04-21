@@ -4,6 +4,7 @@ import { loadFixture } from '../../../../test/util';
 import { TerraformModuleDatasource } from '.';
 
 const consulData: any = loadFixture('registry-consul.json');
+const consulVersionsData: any = loadFixture('registry-consul-versions.json');
 const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
 const serviceDiscoveryCustomResult: any = loadFixture(
   'service-custom-discovery.json'
@@ -24,6 +25,8 @@ describe('modules/datasource/terraform-module/index', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(200, {})
+        .get('/v1/modules/hashicorp/consul/aws/versions')
+        .reply(200, {})
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       expect(
@@ -38,6 +41,8 @@ describe('modules/datasource/terraform-module/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
+        .reply(404, {})
+        .get('/v1/modules/hashicorp/consul/aws/versions')
         .reply(404, {})
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
@@ -54,6 +59,8 @@ describe('modules/datasource/terraform-module/index', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .replyWithError('')
+        .get('/v1/modules/hashicorp/consul/aws/versions')
+        .replyWithError('')
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       expect(
@@ -69,6 +76,23 @@ describe('modules/datasource/terraform-module/index', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'hashicorp/consul/aws',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+
+    it('processes real versions data', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .reply(404, {})
+        .get('/v1/modules/hashicorp/consul/aws/versions')
+        .reply(200, consulVersionsData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -99,6 +123,29 @@ describe('modules/datasource/terraform-module/index', () => {
         .scope('https://terraform.company.com')
         .get('/v1/modules/consul/foo')
         .reply(200, consulData)
+        .get('/v1/modules/consul/foo/versions')
+        .reply(200, {
+          modules: [],
+        })
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'consul/foo',
+        registryUrls: ['https://terraform.company.com'],
+      });
+      expect(res).toBeNull();
+    });
+
+    it('rejects missing module data', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/v1/modules/consul/foo')
+        .reply(404, {})
+        .get('/v1/modules/consul/foo/versions')
+        .reply(200, {
+          modules: [],
+        })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({

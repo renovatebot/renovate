@@ -92,3 +92,105 @@ Object {
   "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
 }
 `;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real versions data 1`] = `
+Object {
+  "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
+  "registryUrl": "https://registry.terraform.io",
+  "releases": Array [
+    Object {
+      "version": "0.2.2",
+    },
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.0.1",
+    },
+    Object {
+      "version": "1.2.0",
+    },
+    Object {
+      "version": "1.3.3",
+    },
+    Object {
+      "version": "1.5.0",
+    },
+    Object {
+      "version": "1.26.0",
+    },
+    Object {
+      "version": "1.27.0",
+    },
+    Object {
+      "version": "1.32.0",
+    },
+    Object {
+      "version": "1.33.0",
+    },
+    Object {
+      "version": "1.33.1",
+    },
+    Object {
+      "version": "1.36.1",
+    },
+    Object {
+      "version": "1.40.0",
+    },
+    Object {
+      "version": "2.2.0",
+    },
+    Object {
+      "version": "2.13.0",
+    },
+    Object {
+      "version": "2.17.0",
+    },
+    Object {
+      "version": "2.18.0",
+    },
+    Object {
+      "version": "2.40.0",
+    },
+    Object {
+      "version": "2.46.0",
+    },
+    Object {
+      "version": "2.49.0",
+    },
+    Object {
+      "version": "2.57.0",
+    },
+    Object {
+      "version": "2.59.0",
+    },
+    Object {
+      "version": "2.62.0",
+    },
+    Object {
+      "version": "2.69.0",
+    },
+    Object {
+      "version": "2.71.0",
+    },
+    Object {
+      "version": "2.81.0",
+    },
+    Object {
+      "version": "2.99.0",
+    },
+    Object {
+      "version": "3.0.0",
+    },
+    Object {
+      "version": "3.0.1",
+    },
+    Object {
+      "version": "3.0.2",
+    },
+    Object {
+      "version": "3.1.0",
+    },
+  ],
+}
+`;

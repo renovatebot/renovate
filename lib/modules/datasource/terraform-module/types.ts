@@ -13,6 +13,19 @@ export interface TerraformRelease {
   published_at: string;
 }
 
+export interface TerraformModuleVersions {
+  modules: TerraformModuleVersionsModules[];
+}
+
+export interface TerraformModuleVersionsModules {
+  versions: TerraformModuleVersionsModuleVersion[];
+  source?: string;
+}
+
+export interface TerraformModuleVersionsModuleVersion {
+  version: string;
+}
+
 export interface ServiceDiscoveryResult {
   'modules.v1'?: string;
   'providers.v1'?: string;

@@ -7,11 +7,13 @@ import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
+import type { ServiceDiscoveryResult } from '../terraform-module/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformBuild,
   TerraformProvider,
   TerraformProviderReleaseBackend,
+  TerraformProviderVersions,
   TerraformRegistryBuildResponse,
   TerraformRegistryVersions,
   VersionDetailResponse,
@@ -79,6 +81,26 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryURL
     );
+    try {
+      return await this.queryRegistryExtendedApi(
+        serviceDiscovery,
+        registryURL,
+        repository
+      );
+    } catch (err) {
+      return await this.queryRegistryVersions(
+        serviceDiscovery,
+        registryURL,
+        repository
+      );
+    }
+  }
+
+  private async queryRegistryExtendedApi(
+    serviceDiscovery: ServiceDiscoveryResult,
+    registryURL: string,
+    repository: string
+  ): Promise<ReleaseResult> {
     const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
@@ -97,6 +119,24 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
+    dep.homepage = `${registryURL}/providers/${repository}`;
+    logger.trace({ dep }, 'dep');
+    return dep;
+  }
+
+  private async queryRegistryVersions(
+    serviceDiscovery: ServiceDiscoveryResult,
+    registryURL: string,
+    repository: string
+  ): Promise<ReleaseResult> {
+    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}/versions`;
+    const res = (await this.http.getJson<TerraformProviderVersions>(backendURL))
+      .body;
+    const dep: ReleaseResult = {
+      releases: res.versions.map(({ version }) => ({
+        version,
+      })),
+    };
     dep.homepage = `${registryURL}/providers/${repository}`;
     logger.trace({ dep }, 'dep');
     return dep;

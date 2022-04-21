@@ -159,6 +159,30 @@ Object {
 }
 `;
 
+exports[`modules/datasource/terraform-module/index getReleases processes real versions data 1`] = `
+Object {
+  "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
+  "registryUrl": "https://registry.terraform.io",
+  "releases": Array [
+    Object {
+      "version": "0.0.2",
+    },
+    Object {
+      "version": "0.2.2",
+    },
+    Object {
+      "version": "0.7.1",
+    },
+    Object {
+      "version": "0.7.5",
+    },
+    Object {
+      "version": "0.8.5",
+    },
+  ],
+}
+`;
+
 exports[`modules/datasource/terraform-module/index getReleases processes with registry in name 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",

@@ -3,7 +3,8 @@ import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
 import { TerraformProviderDatasource } from '.';
 
-const consulData: any = loadFixture('azurerm-provider.json');
+const azurermData: any = loadFixture('azurerm-provider.json');
+const azurermVersionsData: any = loadFixture('azurerm-provider-versions.json');
 const hashicorpReleases: any = loadFixture('releaseBackendIndex.json');
 const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
 const telmateProxmocVersions: any = loadFixture(
@@ -21,6 +22,8 @@ describe('modules/datasource/terraform-provider/index', () => {
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
         .reply(200, {})
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, {})
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       httpMock.scope(secondaryUrl).get('/index.json').reply(200, {});
@@ -36,6 +39,8 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
+        .reply(404)
+        .get('/v1/providers/hashicorp/azurerm/versions')
         .reply(404)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
@@ -53,6 +58,8 @@ describe('modules/datasource/terraform-provider/index', () => {
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
         .replyWithError('')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .replyWithError('')
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       httpMock.scope(secondaryUrl).get('/index.json').replyWithError('');
@@ -68,7 +75,24 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, JSON.parse(consulData))
+        .reply(200, JSON.parse(azurermData))
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource: TerraformProviderDatasource.id,
+        depName: 'azurerm',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+
+    it('processes real versions data', async () => {
+      httpMock
+        .scope(primaryUrl)
+        .get('/v1/providers/hashicorp/azurerm')
+        .reply(404)
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, JSON.parse(azurermVersionsData))
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -83,7 +107,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope('https://registry.company.com')
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, JSON.parse(consulData))
+        .reply(200, JSON.parse(azurermData))
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -100,6 +124,10 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/google-beta')
+        .reply(404, {
+          errors: ['Not Found'],
+        })
+        .get('/v1/providers/hashicorp/google-beta/versions')
         .reply(404, {
           errors: ['Not Found'],
         })
@@ -122,6 +150,10 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/datadog')
+        .reply(404, {
+          errors: ['Not Found'],
+        })
+        .get('/v1/providers/hashicorp/datadog/versions')
         .reply(404, {
           errors: ['Not Found'],
         })
