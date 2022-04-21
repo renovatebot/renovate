@@ -2,11 +2,9 @@ import { DateTime, Settings } from 'luxon';
 import { api as ubuntu } from '.';
 
 describe('modules/versioning/ubuntu/index', () => {
-  const orgNow = Settings.now;
   const dt = DateTime.fromISO('2022-04-20');
 
   afterEach(() => {
-    Settings.now = orgNow;
     jest.resetAllMocks();
   });
 
