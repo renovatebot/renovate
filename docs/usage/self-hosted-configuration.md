@@ -367,8 +367,6 @@ This reduces the chance of unintended consequences with global Git configs on sh
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
 
-The value must be between `2000` and `60000` (milliseconds) inclusive.
-
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
