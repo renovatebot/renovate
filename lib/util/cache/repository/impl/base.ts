@@ -1,6 +1,6 @@
 import type { RepoCache, RepoCacheData } from '../types';
 
-export abstract class RepoCacheBase implements RepoCache {
+export class RepoCacheBase implements RepoCache {
   protected data: RepoCacheData = {};
 
   // istanbul ignore next
@@ -13,5 +13,7 @@ export abstract class RepoCacheBase implements RepoCache {
     await Promise.resolve();
   }
 
-  abstract getData(): RepoCacheData;
+  getData(): RepoCacheData {
+    return this.data;
+  }
 }

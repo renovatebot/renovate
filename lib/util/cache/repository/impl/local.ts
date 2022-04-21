@@ -7,7 +7,7 @@ import {
   canBeMigratedToV11,
   isValidCacheRecord,
 } from '../common';
-import type { RepoCacheData, RepoCacheRecord } from '../types';
+import type { RepoCacheRecord } from '../types';
 import { RepoCacheBase } from './base';
 
 export class LocalRepoCache extends RepoCacheBase {
@@ -52,10 +52,5 @@ export class LocalRepoCache extends RepoCacheBase {
     const data = this.getData();
     const record: RepoCacheRecord = { revision, repository, data };
     await outputFile(cacheFileName, JSON.stringify(record));
-  }
-
-  getData(): RepoCacheData {
-    this.data ??= {};
-    return this.data;
   }
 }
