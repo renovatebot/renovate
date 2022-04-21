@@ -49,7 +49,6 @@ function isStable(version: string): boolean {
     DateTime.fromISO(schedule.release).toUTC() >
       DateTime.now().minus({ days: 1 }).toUTC()
   ) {
-    // istanbul ignore next: unreachable as we dont have unreleased version in our distro data file
     return false;
   }
 

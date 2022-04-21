@@ -2,6 +2,13 @@ import { DateTime, Settings } from 'luxon';
 import { api as ubuntu } from '.';
 
 describe('modules/versioning/ubuntu/index', () => {
+  const orgNow = Settings.now;
+  const dt = DateTime.fromISO('2022-04-20');
+
+  afterEach(() => {
+    Settings.now = orgNow;
+  });
+
   test.each`
     version        | expected
     ${undefined}   | ${false}
@@ -148,7 +155,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'19.10'}    | ${false}
     ${'20.04'}    | ${true}
     ${'20.10'}    | ${false}
-    ${'22.04'}    | ${true}
+    ${'22.04'}    | ${false}
     ${'42.01'}    | ${false}
     ${'42.02'}    | ${false}
     ${'42.03'}    | ${false}
@@ -196,17 +203,10 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'groovy'}   | ${false}
     ${'hirsute'}  | ${false}
     ${'impish'}   | ${false}
-    ${'jammy'}    | ${true}
+    ${'jammy'}    | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    const orgNow = Settings.now;
-    const dt = DateTime.fromISO('2022-04-30');
-
-    try {
-      Settings.now = () => dt.valueOf();
-      expect(ubuntu.isStable(version)).toBe(expected);
-    } finally {
-      Settings.now = orgNow;
-    }
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    expect(ubuntu.isStable(version)).toBe(expected);
   });
 
   test.each`
