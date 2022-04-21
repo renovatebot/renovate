@@ -24,7 +24,9 @@ export function updateAtPosition(
     return fileContent;
   }
   if (version === currentValue || upgrade.groupName) {
-    const replacedPart = versionPart.replace(version, newValue);
+    // TODO: validate newValue
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
   }
   logger.debug({ depName, version, currentValue, newValue }, 'Unknown value');
@@ -78,7 +80,7 @@ export function bumpPackageVersion(
 
   try {
     const project = new XmlDocument(content);
-    const versionNode = project.childNamed('version');
+    const versionNode = project.childNamed('version')!;
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 

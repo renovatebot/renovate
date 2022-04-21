@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../../../../../test/util';
+import { loadFixture, partial } from '../../../../../../../test/util';
 import type { UpdateLockedConfig } from '../../../../types';
 import { updateLockedDependency } from '.';
 
@@ -10,7 +10,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/index', () => {
     let config: UpdateLockedConfig;
 
     beforeEach(() => {
-      config = {};
+      config = partial<UpdateLockedConfig>({ packageFile: 'package.json' });
     });
 
     it('returns if cannot parse lock file', () => {

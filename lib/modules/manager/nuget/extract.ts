@@ -38,7 +38,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
   const results: PackageDependency[] = [];
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
-    const child = todo.pop();
+    const child = todo.pop()!;
     const { name, attr } = child;
 
     if (elemNames.has(name)) {
@@ -49,7 +49,8 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
         attr?.VersionOverride ||
         child.valueWithPath('VersionOverride');
       const currentValue = checkVersion
-        ?.exec(version)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        ?.exec(version!)
         ?.groups?.currentValue?.trim();
       if (depName && currentValue) {
         results.push({
