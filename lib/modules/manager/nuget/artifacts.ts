@@ -35,21 +35,25 @@ async function addSourceCmds(
 ): Promise<string[]> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
-  const result = [];
+  const result: string[] = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
     const registryInfo = parseRegistryUrl(registry.url);
-    let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
+    let addSourceCmd = `dotnet nuget add source ${quote(
+      registryInfo.feedUrl
+    )} --configfile ${quote(nugetConfigFile)}`;
     if (registry.name) {
       // Add name for registry, if known.
       addSourceCmd += ` --name ${quote(registry.name)}`;
     }
     if (username && password) {
       // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${username} --password ${password} --store-password-in-clear-text`;
+      addSourceCmd += ` --username ${quote(username)} --password ${quote(
+        password
+      )} --store-password-in-clear-text`;
     }
     result.push(addSourceCmd);
   }
@@ -78,8 +82,10 @@ async function runDotnetRestore(
   const cmds = [
     ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
     ...dependentPackageFileNames.map(
-      (f) =>
-        `dotnet restore ${f} --force-evaluate --configfile ${nugetConfigFile}`
+      (fileName) =>
+        `dotnet restore ${quote(
+          fileName
+        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`
     ),
   ];
   await exec(cmds, execOptions);
@@ -162,7 +168,7 @@ export async function updateArtifacts({
 
     const newLockFileContentMap = await getLockFileContentMap(lockFileNames);
 
-    const retArray = [];
+    const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {
       if (
         existingLockFileContentMap[lockFileName] ===

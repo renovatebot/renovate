@@ -1,5 +1,6 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovatebot/pep440';
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
@@ -30,8 +31,8 @@ export function extractPackageFile(
 ): PackageFile | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
-  let indexUrl: string;
-  const extraUrls = [];
+  let indexUrl: string | undefined;
+  const extraUrls: string[] = [];
   content.split(newlineRegex).forEach((line) => {
     if (line.startsWith('--index-url ')) {
       indexUrl = line.substring('--index-url '.length).split(' ')[0];
@@ -74,7 +75,7 @@ export function extractPackageFile(
       if (!packageMatches && !gitPackageMatches) {
         return null;
       }
-      if (gitPackageMatches) {
+      if (gitPackageMatches?.groups) {
         const currentVersion = gitPackageMatches.groups.version;
         const depName = gitPackageMatches.groups.depName;
         let packageName: string;
@@ -100,7 +101,10 @@ export function extractPackageFile(
         };
         return dep;
       }
-      const [, depName, , currVal] = packageMatches;
+
+      // validated above
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const [, depName, , currVal] = packageMatches!;
       const currentValue = currVal?.trim();
       dep = {
         ...dep,
@@ -113,7 +117,7 @@ export function extractPackageFile(
       }
       return dep;
     })
-    .filter(Boolean);
+    .filter(is.truthy);
   if (!deps.length) {
     return null;
   }

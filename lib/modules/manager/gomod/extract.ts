@@ -71,7 +71,8 @@ export function extractPackageFile(content: string): PackageFile | null {
           if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);
             const dep = getDep(lineNumber, multiMatch, 'require');
-            dep.managerData.multiLine = true;
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            dep.managerData!.multiLine = true;
             deps.push(dep);
           } else if (line.trim() !== ')') {
             logger.debug(`No multi-line match: ${line}`);
