@@ -77,6 +77,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     }
   }
 
+  /**
+   * this uses the api that terraform registry has in addition to the base api
+   * this endpoint provides more information, such as release date
+   * https://www.terraform.io/registry/api-docs#latest-version-for-a-specific-module-provider
+   */
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
     registry: string,
@@ -119,6 +124,10 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     return dep;
   }
 
+  /**
+   * this version uses the Module Registry Protocol that all registries are required to implement
+   * https://www.terraform.io/internals/module-registry-protocol
+   */
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
     registry: string,

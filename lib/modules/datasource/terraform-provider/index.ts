@@ -96,6 +96,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     }
   }
 
+  /**
+   * this uses the api that terraform registry has in addition to the base api
+   * this endpoint provides more information, such as release date
+   */
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
     registryURL: string,
@@ -124,6 +128,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return dep;
   }
 
+  /**
+   * this version uses the Provider Registry Protocol that all registries are required to implement
+   * https://www.terraform.io/internals/provider-registry-protocol
+   */
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
     registryURL: string,
