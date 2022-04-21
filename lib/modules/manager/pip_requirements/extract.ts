@@ -12,7 +12,7 @@ export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
-  /(?<source>(?:git\+)(git|ssh|https):\/\/(?<gitUrl>(?<user>.*)@(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/
+  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?<user>.*?)(@?)(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/
 );
 
 const rangePattern: string = RANGE_PATTERN;
@@ -77,13 +77,19 @@ export function extractPackageFile(
       if (gitPackageMatches) {
         const currentVersion = gitPackageMatches.groups.version;
         const depName = gitPackageMatches.groups.depName;
-
-        // we need to replace the / with a :
-        const scmPath = gitPackageMatches.groups.scmPath;
-        const delimiter = gitPackageMatches.groups.delimiter;
-        const packageName = gitPackageMatches.groups.gitUrl
-          .replace(`${delimiter}${scmPath}`, `:${scmPath}`)
+        let packageName: string;
+        if (gitPackageMatches.groups.protocol == "https") {
+          packageName = "https://"
+          .concat(gitPackageMatches.groups.gitUrl)
           .replace(`@${currentVersion}`, '');
+        } else {
+        // we need to replace the / with a :
+          const scmPath = gitPackageMatches.groups.scmPath;
+          const delimiter = gitPackageMatches.groups.delimiter;
+          packageName = gitPackageMatches.groups.gitUrl
+            .replace(`${delimiter}${scmPath}`, `:${scmPath}`)
+            .replace(`@${currentVersion}`, '');
+        }
         dep = {
           ...dep,
           depName,
