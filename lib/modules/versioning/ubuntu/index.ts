@@ -47,7 +47,7 @@ function isStable(version: string): boolean {
   if (
     schedule &&
     DateTime.fromISO(schedule.release).toUTC() >
-      DateTime.now().minus({ days: 7 }).toUTC()
+      DateTime.now().minus({ days: 1 }).toUTC()
   ) {
     return false;
   }
