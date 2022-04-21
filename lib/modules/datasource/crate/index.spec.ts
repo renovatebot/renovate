@@ -15,6 +15,8 @@ import { CrateDatasource } from '.';
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
+const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
+
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
@@ -56,6 +58,13 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
   });
 
   return { mockClone };
+}
+
+function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
+  httpMock
+    .scope(API_BASE_URL)
+    .get(`/crates/${crateName}?include=`)
+    .reply(response ? 200 : 404, response);
 }
 
 describe('modules/datasource/crate/index', () => {
@@ -133,6 +142,7 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('returns null for empty result', async () => {
+      mockCratesApiCallFor('non_existent_crate');
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
       expect(
         await getPkgReleases({
@@ -144,6 +154,7 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('returns null for missing fields', async () => {
+      mockCratesApiCallFor('non_existent_crate');
       httpMock
         .scope(baseUrl)
         .get('/no/n_/non_existent_crate')
@@ -158,6 +169,7 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('returns null for empty list', async () => {
+      mockCratesApiCallFor('non_existent_crate');
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
       expect(
         await getPkgReleases({
@@ -207,6 +219,8 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('processes real data: libc', async () => {
+      mockCratesApiCallFor('libc', Fixtures.get('libc.json'));
+
       httpMock
         .scope(baseUrl)
         .get('/li/bc/libc')
@@ -222,6 +236,8 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('processes real data: amethyst', async () => {
+      mockCratesApiCallFor('amethyst', Fixtures.get('amethyst.json'));
+
       httpMock
         .scope(baseUrl)
         .get('/am/et/amethyst')
