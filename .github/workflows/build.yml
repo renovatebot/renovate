@@ -100,7 +100,7 @@ jobs:
         run: yarn jest:${{ env.NODE_VERSION }} --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@e3c560433a6cc60aec8812599b7844a7b4fa0d71 # tag=v3.0.0
+        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # tag=v3.1.0
         if: always() && env.coverage == 'true'
 
       - name: E2E Test
