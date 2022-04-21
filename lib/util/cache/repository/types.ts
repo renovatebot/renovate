@@ -32,6 +32,11 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
+export interface GithubGraphqlPageCache {
+  pageLastResizedAt: string;
+  pageSize: number;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
@@ -40,7 +45,9 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    github?: Record<string, unknown>;
+    github?: {
+      graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
+    };
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;

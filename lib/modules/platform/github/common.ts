@@ -1,16 +1,44 @@
 import is from '@sindresorhus/is';
 import { PrState } from '../../../types';
 import type { Pr } from '../types';
-import type { GhRestPr } from './types';
+import type { GhGraphQlPr, GhRestPr } from './types';
+
+/**
+ * @see https://developer.github.com/v4/object/pullrequest/
+ */
+export function coerceGraphqlPr(pr: GhGraphQlPr): Pr {
+  const result: Pr = {
+    number: pr.number,
+    displayNumber: `Pull Request #${pr.number}`,
+    title: pr.title,
+    state: pr.state ? pr.state.toLowerCase() : PrState.Open,
+    sourceBranch: pr.headRefName,
+    body: pr.body ? pr.body : 'dummy body',
+  };
+
+  if (pr.baseRefName) {
+    result.targetBranch = pr.baseRefName;
+  }
+
+  if (pr.assignees) {
+    result.hasAssignees = !!(pr.assignees.totalCount > 0);
+  }
+
+  if (pr.reviewRequests) {
+    result.hasReviewers = !!(pr.reviewRequests.totalCount > 0);
+  }
+
+  if (pr.labels?.nodes) {
+    result.labels = pr.labels.nodes.map((label) => label.name);
+  }
+
+  return result;
+}
 
 /**
  * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests
  */
-export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
-  if (!pr) {
-    return null;
-  }
-
+export function coerceRestPr(pr: GhRestPr): Pr {
   const result: Pr = {
     displayNumber: `Pull Request #${pr.number}`,
     number: pr.number,
@@ -20,7 +48,6 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
       pr.state === PrState.Closed && is.string(pr.merged_at)
         ? PrState.Merged
         : pr.state,
-    body: pr.body ?? 'dummy body',
   };
 
   if (pr.head?.sha) {
