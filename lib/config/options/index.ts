@@ -620,17 +620,18 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'username',
-    description: 'Username for authentication. Currently Bitbucket only.', // Shouldn't we use the `supportedPlatforms` property for the Bitbucket message?
+    description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
     globalOnly: true,
   },
   {
     name: 'password',
-    description:
-      'Password for authentication. Currently Bitbucket only (AppPassword).', // Shouldn't we use the `supportedPlatforms` property for the Bitbucket message?
+    description: 'Password for authentication.',
     stage: 'repository',
     type: 'string',
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
     globalOnly: true,
   },
   {
