@@ -64,7 +64,7 @@ function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
   httpMock
     .scope(API_BASE_URL)
     .get(`/crates/${crateName}?include=`)
-    .reply(response ? 200 : 404, response ?? '');
+    .reply(response ? 200 : 404, response);
 }
 
 describe('modules/datasource/crate/index', () => {
