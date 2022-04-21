@@ -39,7 +39,6 @@
     "lib/config/validation.ts",
     "lib/modules/datasource/github-releases/test/index.ts",
     "lib/modules/platform/api.ts",
-    "lib/modules/platform/bitbucket/index.ts",
     "lib/modules/platform/bitbucket-server/index.ts",
     "lib/modules/platform/bitbucket-server/utils.ts",
     "lib/modules/platform/comment.ts",
