@@ -43,7 +43,7 @@ const options: RenovateOptions[] = [
   {
     name: 'postUpgradeTasks',
     description:
-      'Post-upgrade tasks that are executed before a commit is made by Renovate.', // What's the difference between `postUpgradeTasks` and the `commands` below?
+      'Post-upgrade tasks that are executed before a commit is made by Renovate.',
     type: 'object',
     default: {
       commands: [],
@@ -54,7 +54,7 @@ const options: RenovateOptions[] = [
   {
     name: 'commands',
     description:
-      'A list of post-upgrade commands that are executed before a commit is made by Renovate.', // See comment above.
+      'A list of post-upgrade commands that are executed before a commit is made by Renovate.',
     type: 'array',
     subType: 'string',
     parent: 'postUpgradeTasks',
@@ -164,7 +164,7 @@ const options: RenovateOptions[] = [
   {
     name: 'ignorePresets',
     description:
-      'A list of presets to ignore, including any that are nested inside a `extends` array.',
+      'A list of presets to ignore, including any that are nested inside an `extends` array.',
     stage: 'package',
     type: 'array',
     subType: 'string',
@@ -512,7 +512,7 @@ const options: RenovateOptions[] = [
   {
     name: 'encrypted',
     description:
-      'A configuration object containing configuration encrypted with project key.', // The word configuration is used twice here, not sure how to fix this line.
+      'An object containing configuration encrypted with project key.',
     stage: 'repository',
     type: 'object',
     default: null,
@@ -662,7 +662,7 @@ const options: RenovateOptions[] = [
   {
     name: 'skipInstalls',
     description:
-      'Skip installing modules/dependencies if lock file updating is possible alone.', // Possible alone is weird, need to find a better term
+      'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
     globalOnly: true,
@@ -1170,7 +1170,7 @@ const options: RenovateOptions[] = [
   {
     name: 'ignoreDeprecated',
     description:
-      'Ignore deprecated versions unless the current version is deprecated.', // I don't like this sentence. Needs a rewrite.
+      'Avoid upgrading from a non-deprecated version to a deprecated one.',
     stage: 'package',
     type: 'boolean',
     default: true,
@@ -1597,7 +1597,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prTitle',
     description:
-      'Pull Request title template (deprecated). Now uses `commitMessage`.', // commitMessage is deprecated and not recommended, should that affect this message as well?
+      'Pull Request title template (deprecated). Inherits from `commitMessage` if null.',
     type: 'string',
     default: null,
     cli: false,
@@ -1965,7 +1965,7 @@ const options: RenovateOptions[] = [
   {
     name: 'abortIgnoreStatusCodes',
     description:
-      'A list of HTTP status codes to ignore and *not* abort the run because of when `abortOnError=true`.', // Sentence needs a rewrite also.
+      'A list of HTTP status codes safe to ignore even when `abortOnError=true`.',
     type: 'array',
     subType: 'number',
     stage: 'repository',
