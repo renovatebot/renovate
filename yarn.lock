@@ -1346,17 +1346,17 @@
   dependencies:
     "@seald-io/nedb" "3.0.0"
 
-"@jamiemagee/osv-offline@1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.4.tgz#31b7d039ae9261e90f097be6f6b089b0220147a9"
-  integrity sha512-QXIQNdoOoI1BsjllJKYdIhsqroiD5UT0pTDLhXY1o3wvP+Vg5LH4nJlLf12vDnrKtdGNKpPYuuRTWi2z+dCQmA==
+"@jamiemagee/osv-offline@1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.5.tgz#6285f540478424c2ae2a9e0e36471ec475ae894d"
+  integrity sha512-qKqJXsVdvKVRzL2mWrwhLz/uJ8w3Y4OEhSCLsqYY52lPaizNEX350uzNc/HVpYox9xoOUqwALZcTcpXxEJuENA==
   dependencies:
     "@jamiemagee/osv-offline-db" "1.1.4"
     "@octokit/rest" "18.12.0"
     adm-zip "^0.5.9"
     fs-extra "10.0.0"
     got "11.8.3"
-    luxon "2.3.1"
+    luxon "2.3.2"
 
 "@jest/console@^27.5.1":
   version "27.5.1"
@@ -2527,10 +2527,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.23.tgz#3b41a6e643589ac6442bdbd7a4a3ded62f33f7da"
   integrity sha512-UxDxWn7dl97rKVeVS61vErvw086aCYhDLyvRQZ5Rk65rZKepaFdm53GeqXaKBuOhED4e9uWq34IC3TdSdJJ2Gw==
 
-"@types/node@16.11.26":
-  version "16.11.26"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.26.tgz#63d204d136c9916fb4dcd1b50f9740fe86884e47"
-  integrity sha512-GZ7bu5A6+4DtG7q9GsoHXy3ALcgeIHP4NnL0Vv2wu0uUB/yQex26v0tf6/na1mm0+bS9Uw+0DFex7aaKr2qawQ==
+"@types/node@16.11.27":
+  version "16.11.27"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.27.tgz#5da19383bdbeda99bc0d09cfbb88cab7297ebc51"
+  integrity sha512-C1pD3kgLoZ56Uuy5lhfOxie4aZlA3UMGLX9rXteq4WitEZH6Rl80mwactt9QG0w0gLFlN/kLBTFnGXtDVWvWQw==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -6742,6 +6742,11 @@ luxon@2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.3.1.tgz#f276b1b53fd9a740a60e666a541a7f6dbed4155a"
   integrity sha512-I8vnjOmhXsMSlNMZlMkSOvgrxKJl0uOsEzdGgGNZuZPaS9KlefpE9KV95QFftlJSC+1UyCC9/I69R02cz/zcCA==
+
+luxon@2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.3.2.tgz#5f2f3002b8c39b60a7b7ad24b2a85d90dc5db49c"
+  integrity sha512-MlAQQVMFhGk4WUA6gpfsy0QycnKP0+NlCBJRVRNPxxSIbjrCbQ65nrpJD3FVyJNZLuJ0uoqL57ye6BmDYgHaSw==
 
 make-dir@^3.0.0:
   version "3.1.0"
