@@ -13,7 +13,7 @@ export interface VersioningApi {
   isSingleVersion(version: string): boolean;
   isStable(version: string): boolean;
   isValid(input: string): boolean;
-  isVersion(input: string | undefined | null): boolean;
+  isVersion(input: string): boolean;
 
   // digestion of version
   getMajor(version: string | SemVer): null | number;

@@ -30,14 +30,11 @@ export async function updateLockedDependency(
   try {
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const detectedIndent = detectIndent(lockFileContent!).indent || '  ';
-    let newPackageJsonContent: string | null | undefined;
+    const detectedIndent = detectIndent(lockFileContent).indent || '  ';
+    let newPackageJsonContent: string;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      packageJson = JSON.parse(packageFileContent!);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      packageLockJson = JSON.parse(lockFileContent!);
+      packageJson = JSON.parse(packageFileContent);
+      packageLockJson = JSON.parse(lockFileContent);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
       return { status: 'update-failed' };
@@ -46,8 +43,7 @@ export async function updateLockedDependency(
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      currentVersion!
+      currentVersion
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
       logger.info(
@@ -113,12 +109,10 @@ export async function updateLockedDependency(
       // Don't return {} if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        const files: Record<string, string> = {};
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        files[packageFile!] = packageFileContent!;
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        files[lockFile!] = lockFileContent!;
-        return { status, files: files };
+        const res: UpdateLockedResult = { status, files: {} };
+        res.files[packageFile] = packageFileContent;
+        res.files[lockFile] = lockFileContent;
+        return res;
       }
       return { status };
     }
@@ -129,8 +123,7 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      currentVersion!,
+      currentVersion,
       newVersion
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
@@ -141,7 +134,7 @@ export async function updateLockedDependency(
       );
       return { status: 'update-failed' };
     }
-    const parentUpdates: Partial<UpdateLockedConfig>[] = [];
+    const parentUpdates: UpdateLockedConfig[] = [];
     for (const {
       parentDepName,
       parentVersion,
@@ -179,7 +172,7 @@ export async function updateLockedDependency(
             logger.debug(
               `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`
             );
-            const parentUpdate: Partial<UpdateLockedConfig> = {
+            const parentUpdate: UpdateLockedConfig = {
               depName: parentDepName,
               currentVersion: parentVersion,
               newVersion: parentNewVersion,
@@ -194,17 +187,15 @@ export async function updateLockedDependency(
           return { status: 'update-failed' };
         }
       } else if (depType) {
-        // TODO: `newValue` can probably null
         // The constaint comes from the package.json file, so we need to update it
         const newValue = semver.getNewValue({
           currentValue: constraint,
           rangeStrategy: 'replace',
           currentVersion,
           newVersion,
-        })!;
+        });
         newPackageJsonContent = updateDependency({
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          fileContent: packageFileContent!,
+          fileContent: packageFileContent,
           upgrade: { depName, depType, newValue },
         });
       }
@@ -224,9 +215,9 @@ export async function updateLockedDependency(
     for (const parentUpdate of parentUpdates) {
       const parentUpdateConfig = {
         ...config,
-        ...parentUpdate,
         lockFileContent: newLockFileContent,
         packageFileContent: newPackageJsonContent || packageFileContent,
+        ...parentUpdate,
       };
       const parentUpdateResult = await updateLockedDependency(
         parentUpdateConfig,
@@ -244,7 +235,7 @@ export async function updateLockedDependency(
       newLockFileContent =
         parentUpdateResult.files[lockFile] || newLockFileContent;
     }
-    const files: Record<string, string> = {};
+    const files = {};
     if (newLockFileContent) {
       files[lockFile] = newLockFileContent;
     }

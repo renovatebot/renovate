@@ -66,7 +66,7 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
-  let yarnWorkspacesPackages: string[] | undefined;
+  let yarnWorkspacesPackages: string[];
   if (is.array(packageJson.workspaces)) {
     yarnWorkspacesPackages = packageJson.workspaces;
   } else {
@@ -83,10 +83,7 @@ export async function extractPackageFile(
     pnpmShrinkwrap: 'pnpm-lock.yaml',
   };
 
-  for (const [key, val] of Object.entries(lockFiles) as [
-    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
-    string
-  ][]) {
+  for (const [key, val] of Object.entries(lockFiles)) {
     const filePath = getSiblingFileName(fileName, val);
     if (await readLocalFile(filePath, 'utf8')) {
       lockFiles[key] = filePath;
@@ -98,7 +95,7 @@ export async function extractPackageFile(
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
 
-  let npmrc: string | undefined;
+  let npmrc: string;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
   if (is.string(repoNpmrc)) {
@@ -138,17 +135,15 @@ export async function extractPackageFile(
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
-  let lernaJsonFile: string | undefined;
-  let lernaPackages: string[] | undefined;
-  let lernaClient: 'yarn' | 'npm' | undefined;
+  let lernaJsonFile: string;
+  let lernaPackages: string[];
+  let lernaClient: 'yarn' | 'npm';
   let hasFancyRefs = false;
-  let lernaJson:
-    | {
-        packages: string[];
-        npmClient: string;
-        useWorkspaces?: boolean;
-      }
-    | undefined;
+  let lernaJson: {
+    packages: string[];
+    npmClient: string;
+    useWorkspaces?: boolean;
+  };
   try {
     lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
     lernaJson = JSON.parse(await readLocalFile(lernaJsonFile, 'utf8'));
@@ -337,16 +332,14 @@ export async function extractPackageFile(
     return dep;
   }
 
-  for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
+  for (const depType of Object.keys(depTypes)) {
     let dependencies = packageJson[depType];
     if (dependencies) {
       try {
         if (depType === 'packageManager') {
-          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
-            dependencies as string
-          );
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(dependencies);
           // istanbul ignore next
-          if (!match?.groups) {
+          if (!match) {
             break;
           }
           dependencies = { [match.groups.name]: match.groups.range };
@@ -453,6 +446,6 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  await postExtract(npmFiles, !!config.updateInternalDeps);
+  await postExtract(npmFiles, config.updateInternalDeps);
   return npmFiles;
 }

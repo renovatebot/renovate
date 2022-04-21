@@ -28,13 +28,10 @@ export async function detectMonorepos(
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
-      )
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        .map((pattern) => getSiblingFileName(packageFile!, pattern));
+      ).map((pattern) => getSiblingFileName(packageFile, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          getSubDirectory(sp.packageFile!),
+          getSubDirectory(sp.packageFile),
           internalPackagePatterns
         )
       );

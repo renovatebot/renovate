@@ -10,11 +10,7 @@ import type { PostUpdateConfig } from '../../../../../modules/manager/types';
 import * as _fs from '../../../../../util/fs/proxies';
 import * as _hostRules from '../../../../../util/host-rules';
 
-const config: PostUpdateConfig = {
-  ...getConfig(),
-  upgrades: [],
-  branchName: 'some-branch',
-};
+const config: PostUpdateConfig = getConfig();
 
 const fs = mocked(_fs);
 const lockFiles = mocked(_lockFiles);

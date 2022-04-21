@@ -14,7 +14,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
   try {
     const parsed = parseSyml(yarnLockRaw);
     const lockedVersions: Record<string, string> = {};
-    let lockfileVersion: number | undefined;
+    let lockfileVersion: number;
 
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {

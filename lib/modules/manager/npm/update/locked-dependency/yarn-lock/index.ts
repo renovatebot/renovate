@@ -16,8 +16,7 @@ export function updateLockedDependency(
   );
   let yarnLock: YarnLock;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    yarnLock = parseSyml(lockFileContent!);
+    yarnLock = parseSyml(lockFileContent);
   } catch (err) {
     logger.warn({ err }, 'Failed to parse yarn files');
     return { status: 'update-failed' };
@@ -27,12 +26,7 @@ export function updateLockedDependency(
     return { status: 'unsupported' };
   }
   try {
-    const lockedDeps = getLockedDependencies(
-      yarnLock,
-      depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      currentVersion!
-    );
+    const lockedDeps = getLockedDependencies(yarnLock, depName, currentVersion);
     if (!lockedDeps.length) {
       const newLockedDeps = getLockedDependencies(
         yarnLock,
@@ -67,8 +61,7 @@ export function updateLockedDependency(
       );
       return { status: 'update-failed' };
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    let newLockFileContent = lockFileContent!;
+    let newLockFileContent = lockFileContent;
     for (const dependency of updateLockedDeps) {
       const { depName, constraint, newVersion } = dependency;
       newLockFileContent = replaceConstraintVersion(

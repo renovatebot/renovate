@@ -15,7 +15,7 @@ import type { PnpmWorkspaceFile } from './types';
 
 export async function extractPnpmFilters(
   fileName: string
-): Promise<string[] | undefined> {
+): Promise<string[] | null> {
   try {
     const contents = load(await readLocalFile(fileName, 'utf8'), {
       json: true,
@@ -28,12 +28,12 @@ export async function extractPnpmFilters(
         { fileName },
         'Failed to find required "packages" array in pnpm-workspace.yaml'
       );
-      return undefined;
+      return null;
     }
     return contents.packages;
   } catch (err) {
     logger.trace({ fileName, err }, 'Failed to parse pnpm-workspace.yaml');
-    return undefined;
+    return null;
   }
 }
 
@@ -91,8 +91,7 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
+    const pnpmWorkspace = await findPnpmWorkspace(packageFile);
     if (pnpmWorkspace === null) {
       continue;
     }
@@ -114,8 +113,7 @@ export async function detectPnpmWorkspaces(
     const packagePaths = packagePathCache.get(workspaceYamlPath);
 
     const isPackageInWorkspace = packagePaths?.some((p) =>
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      p.endsWith(packageFile!)
+      p.endsWith(packageFile)
     );
 
     if (isPackageInWorkspace) {

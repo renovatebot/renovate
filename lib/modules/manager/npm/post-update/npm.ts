@@ -6,11 +6,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
-import type {
-  ExecOptions,
-  ExtraEnv,
-  ToolConstraint,
-} from '../../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
@@ -21,19 +17,19 @@ export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
   filename: string,
-  config: Partial<PostUpdateConfig> = {},
+  config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
   const { skipInstalls, postUpdateOptions } = config;
 
-  let lockFile: string | null = null;
+  let lockFile = null;
   try {
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint: config.constraints?.npm,
     };
-    const commands: string[] = [];
+    const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
       logger.debug('Performing node_modules install');
@@ -48,13 +44,12 @@ export async function generateLockFile(
     }
 
     const tagConstraint = await getNodeConstraint(config);
-    const extraEnv: ExtraEnv = {
-      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-      npm_config_store: env.npm_config_store,
-    };
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv,
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
       toolConstraints: [npmToolConstraint],
       docker: {
         image: 'node',
@@ -64,8 +59,8 @@ export async function generateLockFile(
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
-      extraEnv.NPM_AUTH = env.NPM_AUTH;
-      extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
@@ -136,18 +131,14 @@ export async function generateLockFile(
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
       if (lockFileParsed?.lockfileVersion === 2) {
         lockUpdates.forEach((lockUpdate) => {
-          const depType = lockUpdate.depType as
-            | 'dependencies'
-            | 'optionalDependencies';
           if (
-            lockFileParsed.packages?.['']?.[depType]?.[
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-              lockUpdate.depName!
+            lockFileParsed.packages?.['']?.[lockUpdate.depType]?.[
+              lockUpdate.depName
             ]
           ) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            lockFileParsed.packages[''][depType]![lockUpdate.depName!] =
-              lockUpdate.newValue!;
+            lockFileParsed.packages[''][lockUpdate.depType][
+              lockUpdate.depName
+            ] = lockUpdate.newValue;
           }
         });
         lockFile = composeLockFile(lockFileParsed, detectedIndent);

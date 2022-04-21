@@ -75,11 +75,7 @@ export async function getUpdatedPackageFiles(
     } else if (upgrade.isRemediation) {
       const { status, files } = await updateLockedDependency({
         ...upgrade,
-        depName,
-        newVersion,
-        packageFile,
         packageFileContent,
-        lockFile,
         lockFileContent,
         allowParentUpdates: true,
         allowHigherOrRemoved: true,
@@ -104,11 +100,8 @@ export async function getUpdatedPackageFiles(
       if (updateLockedDependency) {
         const { status, files } = await updateLockedDependency({
           ...upgrade,
-          depName,
-          newVersion,
-          packageFile,
-          packageFileContent,
           lockFile,
+          packageFileContent,
           lockFileContent,
           allowParentUpdates: false,
         });

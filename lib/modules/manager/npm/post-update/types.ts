@@ -14,7 +14,7 @@ export interface AdditionalPackageFiles {
 
 export interface ArtifactError {
   lockFile: string;
-  stderr?: string;
+  stderr: string;
 }
 
 export interface WriteExistingFilesResult {
