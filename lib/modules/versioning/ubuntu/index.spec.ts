@@ -7,6 +7,7 @@ describe('modules/versioning/ubuntu/index', () => {
 
   afterEach(() => {
     Settings.now = orgNow;
+    jest.resetAllMocks();
   });
 
   test.each`
