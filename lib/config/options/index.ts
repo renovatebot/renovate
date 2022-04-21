@@ -126,7 +126,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'productLinks',
-    description: 'Links which are used within PRs, issues.', // I don't think etc. applies here, are there other places where Renovate can put links???
+    description: 'Links which are used in PRs, issues and comments.',
     type: 'object',
     globalOnly: true,
     mergeable: true,
