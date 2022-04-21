@@ -75,7 +75,7 @@ describe('util/cache/repository/impl/local', () => {
 
     await localRepoCache.load();
 
-    expect(await localRepoCache.getData()).toBeEmpty();
+    expect(localRepoCache.getData()).toBeEmpty();
   });
 
   it('handles file read error', async () => {
