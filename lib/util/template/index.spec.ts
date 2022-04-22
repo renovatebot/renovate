@@ -74,4 +74,10 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, undefined);
     expect(output).toMatchSnapshot();
   });
+
+  it('lowercase', () => {
+    const userTemplate = "{{{ lowercase 'FOO'}}}";
+    const output = template.compile(userTemplate, undefined);
+    expect(output).toBe('foo');
+  });
 });

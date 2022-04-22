@@ -6,10 +6,13 @@ import type {
 
 export interface ExtractionResult {
   lineNumber: number;
-  dependencies: PackageDependency[];
+  dependencies: PackageDependency<TerraformManagerData>[];
 }
 
 export interface TerraformManagerData {
+  moduleName?: string;
+  source?: string;
+  sourceLine?: number;
   terraformDependencyType: TerraformDependencyTypes;
 }
 

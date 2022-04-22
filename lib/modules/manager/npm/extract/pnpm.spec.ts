@@ -24,7 +24,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
         '..'
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
-      expect(res).toBeNull();
+      expect(res).toBeUndefined();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
           fileName: expect.any(String),
@@ -39,7 +39,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       });
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
-      expect(res).toBeNull();
+      expect(res).toBeUndefined();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           fileName: expect.any(String),
