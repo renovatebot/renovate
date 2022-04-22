@@ -150,7 +150,7 @@
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "9.1.0",
+    "commander": "9.2.0",
     "conventional-commits-detector": "1.0.3",
     "crypto-random-string": "3.3.1",
     "deepmerge": "4.2.2",
