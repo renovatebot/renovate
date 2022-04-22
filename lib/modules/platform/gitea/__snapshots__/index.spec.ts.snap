@@ -70,7 +70,7 @@ Object {
 
 exports[`modules/platform/gitea/index getPrList should filter list by creator 1`] = `
 Object {
-  "endpoint": "https://gitea.com/api/v1/",
+  "endpoint": "https://gitea.com/",
   "gitAuthor": "Renovate Bot <renovate@example.com>",
 }
 `;
@@ -157,14 +157,14 @@ Object {
 
 exports[`modules/platform/gitea/index initPlatform() should support default endpoint 1`] = `
 Object {
-  "endpoint": "https://gitea.com/api/v1/",
+  "endpoint": "https://gitea.com/",
   "gitAuthor": "Renovate Bot <renovate@example.com>",
 }
 `;
 
 exports[`modules/platform/gitea/index initPlatform() should use username as author name if full name is missing 1`] = `
 Object {
-  "endpoint": "https://gitea.com/api/v1/",
+  "endpoint": "https://gitea.com/",
   "gitAuthor": "renovate <renovate@example.com>",
 }
 `;

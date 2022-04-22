@@ -52,7 +52,7 @@ interface GiteaRepoConfig {
 
 const defaults = {
   hostType: PlatformId.Gitea,
-  endpoint: 'https://gitea.com/api/v1/',
+  endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
 
