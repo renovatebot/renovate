@@ -178,6 +178,16 @@ export interface RegExManager extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
 }
 
+export interface JSONataManager {
+  fileMatch: string[];
+  matchQueries: string[];
+  depNameTemplate?: string;
+  datasourceTemplate?: string;
+  packageNameTemplate?: string;
+  versioningTemplate?: string;
+  autoReplaceStringTemplate?: string;
+}
+
 export type UseBaseBranchConfigType = 'merge' | 'none';
 
 // TODO: Proper typings
@@ -234,6 +244,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: RegExManager[];
+
+  jsonataManagers?: JSONataManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
@@ -338,7 +350,12 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
+  parent?:
+    | 'hostRules'
+    | 'packageRules'
+    | 'postUpgradeTasks'
+    | 'regexManagers'
+    | 'jsonataManagers';
 
   // used by tests
   relatedOptions?: string[];

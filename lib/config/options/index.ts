@@ -2254,6 +2254,107 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'jsonataManagers',
+    description: 'Custom managers using JSON queries.',
+    type: 'array',
+    subType: 'object',
+    default: [],
+    stage: 'package',
+    cli: true,
+    mergeable: true,
+  },
+  {
+    name: 'matchQueries',
+    description:
+      'JSON query to use. Valid only within a `jsonataManagers` object.',
+    type: 'array',
+    subType: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'depNameTemplate',
+    description:
+      'Optional depName for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'packageNameTemplate',
+    description:
+      'Optional packageName for extracted dependencies, else defaults to depName value. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'datasourceTemplate',
+    description:
+      'Optional datasource for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'depTypeTemplate',
+    description:
+      'Optional depType for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'currentValueTemplate',
+    description:
+      'Optional currentValue for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'versioningTemplate',
+    description:
+      'Optional versioning for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'registryUrlTemplate',
+    description:
+      'Optional registry URL for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'extractVersionTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'autoReplaceStringTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `jsonataManagers` object.',
+    type: 'string',
+    parent: 'jsonataManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'fetchReleaseNotes',
     description: 'Controls if release notes are fetched.',
     type: 'boolean',

@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { getLanguageList, getManagerList } from '../modules/manager';
+import { testJsonQuery } from '../modules/manager/json-jsonata';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -20,7 +21,7 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, RenovateOptions['parent']>;
+let optionParents: Record<string, RenovateOptions['parent'][]>;
 
 const managerList = getManagerList();
 
@@ -44,6 +45,7 @@ const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 function isManagerPath(parentPath: string): boolean {
   return (
+    regEx(/^jsonataManagers\[[0-9]+]$/).test(parentPath) ||
     regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
@@ -111,7 +113,7 @@ export async function validateConfig(
     optionParents = {};
     options.forEach((option) => {
       if (option.parent) {
-        optionParents[option.name] = option.parent;
+        (optionParents[option.name] ??= []).push(option.parent);
       }
     });
   }
@@ -194,11 +196,15 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        optionParents[key] !== parentName
+        // optionParents keeps now an associative collection of options and their possible parents
+        // An warning is registered if parentName is not one of the possible parents
+        !optionParents[key].some((x) => x === parentName)
       ) {
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        // The warning will suggest the list of possible parents for a given option key
+        const message = `${key} should only be configured within a "${optionParents[
+          key
+        ].join(', ')}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
@@ -470,6 +476,63 @@ export async function validateConfig(
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Each Regex Manager must contain a non-empty fileMatch array`,
+                  });
+                }
+              }
+            }
+            if (key === 'jsonataManagers') {
+              const allowedKeys = [
+                'description',
+                'fileMatch',
+                'matchQueries',
+                'depNameTemplate',
+                'packageNameTemplate',
+                'datasourceTemplate',
+                'versioningTemplate',
+                'registryUrlTemplate',
+                'currentValueTemplate',
+                'extractVersionTemplate',
+                'autoReplaceStringTemplate',
+                'depTypeTemplate',
+              ];
+              // TODO: fix types
+              for (const jsonManager of val as any[]) {
+                if (
+                  Object.keys(jsonManager).some((k) => !allowedKeys.includes(k))
+                ) {
+                  const disallowedKeys = Object.keys(jsonManager).filter(
+                    (k) => !allowedKeys.includes(k)
+                  );
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `JSON Manager contains disallowed fields: ${disallowedKeys.join(
+                      ', '
+                    )}`,
+                  });
+                } else if (is.nonEmptyArray(jsonManager.fileMatch)) {
+                  if (is.nonEmptyArray(jsonManager.matchQueries)) {
+                    for (const matchQuery of jsonManager.matchQueries) {
+                      try {
+                        testJsonQuery(matchQuery);
+                      } catch (e) {
+                        errors.push({
+                          topic: 'Configuration Error',
+                          message: `Invalid JSON query for ${currentPath}: \`${String(
+                            matchQuery
+                          )}\``,
+                        });
+                      }
+                    }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each JSON Manager must contain a non-empty matchQueries array`,
+                    });
+                  }
+                } else {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Each JSON Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }

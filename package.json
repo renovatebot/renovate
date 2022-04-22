@@ -187,6 +187,7 @@
     "json5": "2.2.1",
     "luxon": "2.5.0",
     "markdown-it": "13.0.1",
+    "jsonata": "1.8.5",
     "markdown-table": "2.0.0",
     "marshal": "0.5.4",
     "minimatch": "5.1.0",

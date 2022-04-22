@@ -459,6 +459,118 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('errors if no jsonManager matchQueries', async () => {
+      const config = {
+        jsonataManagers: [
+          {
+            fileMatch: [],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "message": "Each JSON Manager must contain a non-empty fileMatch array",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if empty jsonManager matchQueries', async () => {
+      const config = {
+        jsonataManagers: [
+          {
+            fileMatch: ['foo'],
+            matchQueries: [],
+          },
+          {
+            fileMatch: ['foo'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as RenovateConfig,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "message": "Each JSON Manager must contain a non-empty matchQueries array",
+            "topic": "Configuration Error",
+          },
+          Object {
+            "message": "Each JSON Manager must contain a non-empty matchQueries array",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if no jsonManager fileMatch', async () => {
+      const config = {
+        jsonataManagers: [
+          {
+            matchQueries: ['{}'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates json for each matchQueries', async () => {
+      const config = {
+        jsonataManagers: [
+          {
+            fileMatch: ['foo'],
+            matchQueries: ['{'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('errors if extra jsonManager fields are present', async () => {
+      const config = {
+        jsonataManagers: [
+          {
+            fileMatch: ['foo.json'],
+            matchQueries: ['{}'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            depTypeTemplate: 'apple',
+            automerge: true, // extra field
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
     it('ignore keys', async () => {
       const config = {
         $schema: 'renovate.json',
