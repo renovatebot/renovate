@@ -16,6 +16,7 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
+  PackageDependency,
 } from '../types';
 
 /**
@@ -59,25 +60,6 @@ async function addIfUpdated(
   return null;
 }
 
-/*
-function getDistributionUrl(newPackageFileContent: string): string {
-  const distributionUrlLine = newPackageFileContent
-    .split(newlineRegex)
-    .find((line) => line.startsWith('distributionUrl='));
-  if (distributionUrlLine) {
-    return distributionUrlLine
-      .replace('distributionUrl=', '')
-      .replace('https\\:', 'https:');
-  }
-  return null;
-}
-
-async function getDistributionChecksum(url: string): Promise<string> {
-  const { body } = await http.get(`${url}.sha256`);
-  return body;
-}
-
-*/
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -85,6 +67,8 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
+    logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
+
     let cmd = await createWrapperCommand(updatedDeps);
     if (!cmd) {
       logger.info('No mvnw found - skipping Artifacts update');
@@ -159,12 +143,8 @@ async function executeWrapperCommand(
 }
 
 async function createWrapperCommand(
-  updatedDeps: import('/Users/benkelaar/Workspaces/open-source/renovate/lib/modules/manager/types').PackageDependency<
-    Record<string, any>
-  >[]
+  updatedDeps: PackageDependency<Record<string, any>>[]
 ) {
-  logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-
   const projectDir = GlobalConfig.get('localDir');
   const wrapperExecutableFileName = mavenWrapperFileName();
   const wrapperFullyQualifiedPath = upath.resolve(
@@ -175,7 +155,7 @@ async function createWrapperCommand(
     wrapperExecutableFileName,
     projectDir,
     await stat(wrapperFullyQualifiedPath).catch(() => null),
-    `wrapper`
+    `wrapper:wrapper`
   );
 }
 
