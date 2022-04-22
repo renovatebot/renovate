@@ -68,24 +68,6 @@ Object {
 }
 `;
 
-exports[`modules/platform/gitlab/index filterUnavailableUsers(users) filters users that are busy 1`] = `
-Array [
-  "john",
-]
-`;
-
-exports[`modules/platform/gitlab/index filterUnavailableUsers(users) keeps users with failing requests 1`] = `
-Array [
-  "maria",
-]
-`;
-
-exports[`modules/platform/gitlab/index filterUnavailableUsers(users) keeps users with missing availability 1`] = `
-Array [
-  "maria",
-]
-`;
-
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
 Object {
   "body": undefined,
@@ -216,13 +198,6 @@ Object {
   "targetBranch": "master",
   "title": "do something",
 }
-`;
-
-exports[`modules/platform/gitlab/index getRepos should return an array of repos 1`] = `
-Array [
-  "a/b",
-  "c/d",
-]
 `;
 
 exports[`modules/platform/gitlab/index initPlatform() should accept custom endpoint 1`] = `
