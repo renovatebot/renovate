@@ -16,7 +16,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     email: 'admin@example.com',
   };
 
-  const otherMockUser: ght.User = {
+  const otherMockUser: ght.User & Required<Pick<ght.User, 'full_name'>> = {
     ...mockUser,
     username: 'renovate',
     full_name: 'Renovate Bot',
@@ -296,8 +296,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
         state: mockPR.state,
         title: mockPR.title,
         body: mockPR.body,
-        base: mockPR.base.ref,
-        head: mockPR.head.label,
+        base: mockPR.base?.ref,
+        head: mockPR.head?.label,
         assignees: [mockUser.username],
         labels: [mockLabel.id],
       });
