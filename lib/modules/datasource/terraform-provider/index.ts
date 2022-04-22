@@ -99,6 +99,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   /**
    * this uses the api that terraform registry has in addition to the base api
    * this endpoint provides more information, such as release date
+   * this api is undocumented.
    */
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
