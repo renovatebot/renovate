@@ -176,7 +176,7 @@ describe('modules/platform/gitea/index', () => {
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 
-    setBaseUrl('https://gitea.renovatebot.com/api/v1');
+    setBaseUrl('https://gitea.renovatebot.com/');
   });
 
   function initFakePlatform(version = GITEA_VERSION): Promise<PlatformResult> {
