@@ -3938,12 +3938,12 @@ cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-crypto-random-string@3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-3.3.1.tgz#13cee94cac8001e4842501608ef779e0ed08f82d"
-  integrity sha512-5j88ECEn6h17UePrLi6pn1JcLtAiANa3KExyr9y9Z5vo2mv56Gh3I4Aja/B9P9uyMwyxNHAHWv+nE72f30T5Dg==
+crypto-random-string@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-4.0.0.tgz#5a3cc53d7dd86183df5da0312816ceeeb5bb1fc2"
+  integrity sha512-x8dy3RnvYdlUcPOjkEHqozhiwzKNSq7GcPuXFbnyMOCHxX8V3OgIg/pYuabl2sbUPfIJaeAQB7PMOK8DFIdoRA==
   dependencies:
-    type-fest "^0.8.1"
+    type-fest "^1.0.1"
 
 crypto-random-string@^2.0.0:
   version "2.0.0"
@@ -9510,7 +9510,7 @@ type-fest@^0.8.0, type-fest@^0.8.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
-type-fest@^1.0.2:
+type-fest@^1.0.1, type-fest@^1.0.2:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-1.4.0.tgz#e9fb813fe3bf1744ec359d55d1affefa76f14be1"
   integrity sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==
