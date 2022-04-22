@@ -744,7 +744,7 @@ Set this to `false` if you want to disable release notes fetching.
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 
-- GitHub (.com and Enterprise)
+- GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
 <!-- prettier-ignore -->
