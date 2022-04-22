@@ -14,7 +14,7 @@ export const supportedRangeStrategies: RangeStrategy[] = ['pin'];
 
 const RELEASE_PROP = 'release';
 
-class DebianVersioningApi extends GenericVersioningApi {
+export class DebianVersioningApi extends GenericVersioningApi {
   private _distroInfo: DistroInfo;
   private readonly _ltsToVer = new Map<string, DistroInfoRecordWithVersion>();
   private readonly _verToLts = new Map<string, DistroInfoRecordWithVersion>();

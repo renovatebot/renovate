@@ -51,6 +51,11 @@ export class DistroInfo {
         // istanbul ignore next
         continue;
       }
+
+      if (!this.isReleased(obj.version)) {
+        continue;
+      }
+
       this._sortedInfo.push(obj);
     }
   }
@@ -130,7 +135,7 @@ export class DistroInfo {
 
     if (end) {
       const now = DateTime.now().toUTC();
-      const eol = DateTime.fromISO(end).toUTC();
+      const eol = DateTime.fromISO(end, { zone: 'utc' });
       return eol < now;
     }
 
@@ -151,7 +156,10 @@ export class DistroInfo {
       return false;
     }
 
-    return DateTime.fromISO(schedule.release).toUTC() < DateTime.now().toUTC();
+    const now = DateTime.now().minus({ day: 1 }).toUTC();
+    const release = DateTime.fromISO(schedule.release, { zone: 'utc' });
+
+    return release < now;
   }
 
   /**

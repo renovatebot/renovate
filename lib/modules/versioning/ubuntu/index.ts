@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { regEx } from '../../../util/regex';
 import { DistroInfo } from '../distro';
 import type { NewValueConfig, VersioningApi } from '../types';

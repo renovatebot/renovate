@@ -1,6 +1,18 @@
-import { api as debian } from '.';
+import { DateTime, Settings } from 'luxon';
+import { DebianVersioningApi } from '.';
 
 describe('modules/versioning/debian/index', () => {
+  const dt = DateTime.fromISO('2022-04-20');
+
+  // Debian constructor is dependent on dates (via DistroInfo)
+  const spy = jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+  const debian = new DebianVersioningApi();
+  spy.mockReset();
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it.each`
     version           | expected
     ${undefined}      | ${false}
@@ -132,6 +144,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isStable("$version") === $expected', ({ version, expected }) => {
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
     expect(debian.isStable(version)).toBe(expected);
   });
 
@@ -319,6 +332,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
     ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
