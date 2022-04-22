@@ -623,7 +623,7 @@ const options: RenovateOptions[] = [
     description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
+    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
     globalOnly: true,
   },
   {
@@ -631,7 +631,7 @@ const options: RenovateOptions[] = [
     description: 'Password for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
+    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
     globalOnly: true,
   },
   {
