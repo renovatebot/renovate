@@ -46,7 +46,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
   if (extractResult) {
     if (extractResult.maven?.version) {
       const maven: PackageDependency = {
-        depName: 'maven',
+        depName: 'org.apache.maven:apache-maven',
         currentValue: extractResult.maven?.version,
         replaceString: extractResult.maven?.url,
         datasource: MavenDatasource.id,
@@ -57,7 +57,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
     if (extractResult.wrapper?.version) {
       const wrapper: PackageDependency = {
-        depName: 'maven-wrapper',
+        depName: 'org.apache.maven.wrapper:maven-wrapper',
         currentValue: extractResult.wrapper?.version,
         replaceString: extractResult.wrapper?.url,
         datasource: MavenDatasource.id,
