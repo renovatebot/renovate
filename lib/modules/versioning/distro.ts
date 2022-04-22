@@ -51,11 +51,6 @@ export class DistroInfo {
         // istanbul ignore next
         continue;
       }
-
-      if (!this.isReleased(obj.version)) {
-        continue;
-      }
-
       this._sortedInfo.push(obj);
     }
   }
@@ -135,31 +130,12 @@ export class DistroInfo {
 
     if (end) {
       const now = DateTime.now().toUTC();
-      const eol = DateTime.fromISO(end, { zone: 'utc' });
+      const eol = DateTime.fromISO(end).toUTC();
       return eol < now;
     }
 
     // istanbul ignore next
     return true;
-  }
-
-  /**
-   * Check if a given version has been released
-   * @param input A codename/semVer
-   * @returns false if unreleased or has no schedule, true otherwise
-   */
-  public isReleased(input: string): boolean {
-    const ver = this.getVersionByCodename(input);
-    const schedule = this.getSchedule(ver);
-
-    if (!schedule) {
-      return false;
-    }
-
-    const now = DateTime.now().minus({ day: 1 }).toUTC();
-    const release = DateTime.fromISO(schedule.release, { zone: 'utc' });
-
-    return release < now;
   }
 
   /**
