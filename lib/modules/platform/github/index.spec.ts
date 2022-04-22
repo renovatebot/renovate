@@ -12,6 +12,7 @@ import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import type { CreatePRConfig, UpdatePrConfig } from '../types';
+import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
@@ -559,7 +560,10 @@ describe('modules/platform/github/index', () => {
 
     const pr1 = {
       number: 1,
-      head: { ref: 'branch-1', repo: { full_name: 'some/repo' } },
+      head: {
+        ref: 'branch-1',
+        repo: { full_name: 'some/repo', pushed_at: t4 },
+      },
       state: PrState.Open,
       title: 'PR #1',
       updated_at: t1,
@@ -567,7 +571,10 @@ describe('modules/platform/github/index', () => {
 
     const pr2 = {
       number: 2,
-      head: { ref: 'branch-2', repo: { full_name: 'some/repo' } },
+      head: {
+        ref: 'branch-2',
+        repo: { full_name: 'some/repo', pushed_at: t4 },
+      },
       state: PrState.Open,
       title: 'PR #2',
       updated_at: t2,
@@ -575,7 +582,10 @@ describe('modules/platform/github/index', () => {
 
     const pr3 = {
       number: 3,
-      head: { ref: 'branch-3', repo: { full_name: 'some/repo' } },
+      head: {
+        ref: 'branch-3',
+        repo: { full_name: 'some/repo', pushed_at: t4 },
+      },
       state: PrState.Open,
       title: 'PR #3',
       updated_at: t3,
@@ -634,6 +644,30 @@ describe('modules/platform/github/index', () => {
 
       expect(res1).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
       expect(res1).toEqual(res2);
+    });
+
+    it('does not use ETag for remote cache', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get(pagePath(1)).reply(200, [pr3, pr2, pr1], { etag: 'foobar' });
+      await github.initRepo({
+        repository: 'some/repo',
+        repositoryCache: 'remote',
+      } as never);
+
+      await github.getPrList();
+      const prCache = repository.getCache().platform?.github
+        ?.prCache as ApiPageCache<GhRestPr>;
+
+      expect(prCache.etag).toBeUndefined();
+      expect(prCache.items).toMatchObject({
+        1: { number: 1 },
+        2: { number: 2 },
+        3: { number: 3 },
+      });
+      expect(prCache.items['1']?.head?.repo?.pushed_at).toBeUndefined();
+      expect(prCache.items['2']?.head?.repo?.pushed_at).toBeUndefined();
+      expect(prCache.items['3']?.head?.repo?.pushed_at).toBeUndefined();
     });
 
     it('synchronizes cache', async () => {

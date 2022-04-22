@@ -1,3 +1,4 @@
+import type { RepositoryCacheConfig } from '../../../config/types';
 import type { Pr } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
@@ -24,7 +25,15 @@ export interface GhRestPr {
   head: {
     ref: string;
     sha: string;
-    repo: { full_name: string };
+    repo: {
+      full_name: string;
+      pushed_at?: string;
+    };
+  };
+  base: {
+    repo: {
+      pushed_at?: string;
+    };
   };
   mergeable_state: string;
   number: number;
@@ -91,6 +100,7 @@ export interface LocalRepoConfig {
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
+  repositoryCache: RepositoryCacheConfig;
   renovateUsername: string;
   productLinks: any;
   ignorePrAuthor: boolean;

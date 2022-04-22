@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -30,7 +31,7 @@ function getPrApiCache(): ApiCache<GhRestPr> {
  *
  *   3. Convert items to the Renovate format and return.
  *
- * In order synchronize ApiCache properly, we handle 3 cases:
+ * In order synchronize ApiCache properly, we handle 4 cases:
  *
  *   a. We never fetched PR list for this repo before.
  *      This is detected by `etag` presense in the cache.
@@ -51,11 +52,27 @@ function getPrApiCache(): ApiCache<GhRestPr> {
  *
  *      We expect to fetch just one page per run in average,
  *      since it's rare to have more than 100 updated PRs.
+ *
+ *   d. ETag handling is turned off via `handleEtag`.
+ *
+ *      We suppose that if PR list from the previous cache
+ *      is empty, then this is our initial fetch, so we
+ *      try to speed it up.
+ *
+ *      ETag isn't stored in the cache. This is one more
+ *      request for each Renovate run, compared to ETag
+ *      support is turned on.
+ *
+ *      This option is useful for remotely stored cache,
+ *      in particular it helps not to update `pr.repo.pushed_at`
+ *      which causes ETag to be updated too, which in turn would
+ *      cause Renovate to refresh the cache every single run.
  */
 export async function getPrCache(
   http: GithubHttp,
   repo: string,
-  username: string | null
+  username: string | null,
+  handleEtag = true
 ): Promise<Record<number, Pr>> {
   const prCache: Record<number, Pr> = {};
   const prApiCache = getPrApiCache();
@@ -72,11 +89,15 @@ export async function getPrCache(
 
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
-        const oldEtag = prApiCache.etag;
-        if (oldEtag) {
-          opts.headers = { 'If-None-Match': oldEtag };
-        } else {
-          // Speed up initial fetch
+        if (handleEtag) {
+          const oldEtag = prApiCache.etag;
+          if (oldEtag) {
+            opts.headers = { 'If-None-Match': oldEtag };
+          } else {
+            // Speed up initial fetch
+            opts.paginate = true;
+          }
+        } else if (is.emptyArray(prApiCache.getItems())) {
           opts.paginate = true;
         }
       }
@@ -102,11 +123,18 @@ export async function getPrCache(
         );
       }
 
+      if (!handleEtag) {
+        page.forEach((ghPr) => {
+          delete ghPr?.head?.repo?.pushed_at;
+          delete ghPr?.base?.repo?.pushed_at;
+        });
+      }
+
       needNextPageSync = prApiCache.reconcile(page);
       needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
       if (pageIdx === 1) {
-        if (newEtag) {
+        if (handleEtag && newEtag) {
           prApiCache.etag = newEtag;
         }
 

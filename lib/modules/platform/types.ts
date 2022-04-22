@@ -1,4 +1,4 @@
-import type { MergeStrategy } from '../../config/types';
+import type { MergeStrategy, RepositoryCacheConfig } from '../../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
@@ -41,6 +41,7 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
+  repositoryCache?: RepositoryCacheConfig;
 }
 
 /**

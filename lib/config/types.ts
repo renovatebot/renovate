@@ -10,7 +10,7 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
-export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset' | 'remote';
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 
 export interface GroupConfig extends Record<string, unknown> {

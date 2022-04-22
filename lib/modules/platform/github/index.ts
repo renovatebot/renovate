@@ -243,6 +243,7 @@ export async function initRepo({
   renovateUsername,
   cloneSubmodules,
   ignorePrAuthor,
+  repositoryCache,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
@@ -356,6 +357,7 @@ export async function initRepo({
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.issueList = null;
   config.prList = null;
+  config.repositoryCache = repositoryCache;
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -605,7 +607,8 @@ export async function getPrList(): Promise<Pr[]> {
       !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
-    const prCache = await getPrCache(githubApi, repo, username);
+    const handleEtag = config.repositoryCache !== 'remote';
+    const prCache = await getPrCache(githubApi, repo, username, handleEtag);
     config.prList = Object.values(prCache);
   }
 
