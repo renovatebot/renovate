@@ -132,7 +132,7 @@
     "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ec2": "3.69.0",
+    "@aws-sdk/client-ec2": "3.71.0",
     "@aws-sdk/client-ecr": "3.67.0",
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
@@ -150,7 +150,7 @@
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "9.1.0",
+    "commander": "9.2.0",
     "conventional-commits-detector": "1.0.3",
     "crypto-random-string": "3.3.1",
     "deepmerge": "4.2.2",
@@ -176,7 +176,7 @@
     "handlebars": "4.7.7",
     "hasha": "5.2.2",
     "ignore": "5.2.0",
-    "ini": "2.0.0",
+    "ini": "3.0.0",
     "js-yaml": "4.1.0",
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
