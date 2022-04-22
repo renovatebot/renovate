@@ -139,6 +139,22 @@ export class DistroInfo {
   }
 
   /**
+   * Check if a given version has been released
+   * @param input A codename/semVer
+   * @returns false if unreleased or has no schedule, true otherwise
+   */
+  public isReleased(input: string): boolean {
+    const ver = this.getVersionByCodename(input);
+    const schedule = this.getSchedule(ver);
+
+    if (!schedule) {
+      return false;
+    }
+
+    return DateTime.fromISO(schedule.release).toUTC() < DateTime.now().toUTC();
+  }
+
+  /**
    * Get distro info for the release that has N other newer releases.
    * Example: n=0 corresponds to the latest available release, n=1 the release before, etc.
    * In Debian terms: N = 0 -> stable, N = 1 -> oldstable, N = 2 -> oldoldstalbe

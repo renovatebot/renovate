@@ -77,7 +77,7 @@ class DebianVersioningApi extends GenericVersioningApi {
     let ver: string;
     ver = this._getVersionByLts(version);
     ver = this._distroInfo.getVersionByCodename(ver);
-    return !this._distroInfo.isEolLts(ver);
+    return this._distroInfo.isReleased(ver) && !this._distroInfo.isEolLts(ver);
   }
 
   override getNewValue({
