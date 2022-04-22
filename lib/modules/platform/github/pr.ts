@@ -124,10 +124,10 @@ export async function getPrCache(
       }
 
       if (!handleEtag) {
-        page.forEach((ghPr) => {
+        for (const ghPr of page) {
           delete ghPr?.head?.repo?.pushed_at;
           delete ghPr?.base?.repo?.pushed_at;
-        });
+        }
       }
 
       needNextPageSync = prApiCache.reconcile(page);
