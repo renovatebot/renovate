@@ -71,7 +71,10 @@ module.exports = {
 
     // disallow direct `nock` module usage as it causes memory issues.
     // disallow `parse-link-header` to allow override ENV https://github.com/thlorenz/parse-link-header#environmental-variables
-    'no-restricted-imports': [2, { paths: ['nock', 'parse-link-header'] }],
+    'no-restricted-imports': [
+      2,
+      { paths: ['nock', 'parse-link-header', 'path'] },
+    ],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
