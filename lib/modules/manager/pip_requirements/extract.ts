@@ -79,7 +79,7 @@ export function extractPackageFile(
         const currentVersion = gitPackageMatches.groups.version;
         const depName = gitPackageMatches.groups.depName;
         let packageName: string;
-        if (gitPackageMatches.groups.protocol == "https") {
+        if (gitPackageMatches.groups.protocol === "https") {
           packageName = "https://"
           .concat(gitPackageMatches.groups.gitUrl)
           .replace(`@${currentVersion}`, '');
