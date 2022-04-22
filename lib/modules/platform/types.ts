@@ -7,7 +7,7 @@ type VulnerabilityRangeKey = string;
 type VulnerabilityPatch = string;
 export type AggregatedVulnerabilities = Record<
   VulnerabilityKey,
-  Record<VulnerabilityRangeKey, VulnerabilityPatch>
+  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
 >;
 
 export interface PlatformParams {
@@ -173,7 +173,7 @@ export interface Platform {
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
-  createPr(prConfig: CreatePRConfig): Promise<Pr>;
+  createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;

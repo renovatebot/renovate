@@ -62,8 +62,8 @@ import type {
 let config: {
   repository: string;
   email: string;
-  prList: any[];
-  issueList: GitlabIssue[];
+  prList: any[] | undefined;
+  issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
   cloneSubmodules: boolean;
@@ -180,7 +180,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  // TODO null check #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -219,7 +221,8 @@ function getRepoUrl(
       );
     }
 
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+    // TODO: null check #7154
+    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
@@ -246,8 +249,8 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
-  config.cloneSubmodules = cloneSubmodules;
-  config.ignorePrAuthor = ignorePrAuthor;
+  config.cloneSubmodules = !!cloneSubmodules;
+  config.ignorePrAuthor = !!ignorePrAuthor;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -516,7 +519,7 @@ async function ignoreApprovals(pr: number): Promise<void> {
 
 async function tryPrAutomerge(
   pr: number,
-  platformOptions: PlatformPrOptions
+  platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
   if (platformOptions?.usePlatformAutomerge) {
     try {
@@ -634,7 +637,9 @@ export async function updatePr({
   const newState = {
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
-  }[state];
+    // TODO: null check #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  }[state!];
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
     {
@@ -711,19 +716,21 @@ export async function findPr({
   branchName,
   prTitle,
   state = PrState.All,
-}: FindPRConfig): Promise<Pr> {
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  return prList.find(
-    (p: { sourceBranch: string; title: string; state: string }) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
+  return (
+    prList.find(
+      (p: { sourceBranch: string; title: string; state: string }) =>
+        p.sourceBranch === branchName &&
+        (!prTitle || p.title === prTitle) &&
+        matchesState(p.state, state)
+    ) ?? null
   );
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr> {
+export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
@@ -942,7 +949,7 @@ export async function addAssignees(
 ): Promise<void> {
   try {
     logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
-    const assigneeIds = [];
+    const assigneeIds: number[] = [];
     for (const assignee of assignees) {
       assigneeIds.push(await getUserID(assignee));
     }
@@ -1087,8 +1094,8 @@ export async function ensureComment({
     : topic;
   const comments = await getComments(number);
   let body: string;
-  let commentId: number;
-  let commentNeedsUpdating: boolean;
+  let commentId: number | undefined;
+  let commentNeedsUpdating: boolean | undefined;
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
@@ -1164,7 +1171,7 @@ export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 export async function filterUnavailableUsers(
   users: string[]
 ): Promise<string[]> {
-  const filteredUsers = [];
+  const filteredUsers: string[] = [];
   for (const user of users) {
     if (!(await isUserBusy(user))) {
       filteredUsers.push(user);
