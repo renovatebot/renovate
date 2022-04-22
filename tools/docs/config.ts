@@ -76,7 +76,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     .filter((option) => option.releaseStatus !== 'unpublished')
     .forEach((option) => {
       // TODO: fix types (#9610)
-      const el: Record<string, any> = { ...option };
+      const el: Record<string, any> = { mergeable: false, ...option };
       let headerIndex = configOptionsRaw.indexOf(`## ${option.name}`);
       if (headerIndex === -1) {
         headerIndex = configOptionsRaw.indexOf(`### ${option.name}`);
