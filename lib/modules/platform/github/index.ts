@@ -1350,7 +1350,7 @@ async function tryPrAutomerge(
     }
 
     logger.debug({ prNumber }, 'GitHub-native automerge: success');
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: missing test #7154 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
