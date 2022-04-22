@@ -292,7 +292,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('no git url', async () => {
-          expect.assertions(2);
+          expect.assertions(1);
           httpMock
             .scope(urlHost)
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
@@ -308,12 +308,11 @@ describe('modules/platform/bitbucket-server/index', () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
             })
-          ).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
+          ).toEqual({ defaultBranch: 'master', isFork: false });
         });
 
         it('gitUrl ssh returns ssh url', async () => {
-          expect.assertions(3);
+          expect.assertions(2);
           const responseMock = repoMock(url, 'SOME', 'repo', {
             cloneUrl: { https: false, ssh: true },
           });
@@ -335,12 +334,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
           );
-          expect(res).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
+          expect(res).toEqual({ defaultBranch: 'master', isFork: false });
         });
 
         it('gitURL endpoint returns generates endpoint URL', async () => {
-          expect.assertions(3);
+          expect.assertions(2);
           const link = httpLink(url.toString(), 'SOME', 'repo');
           const responseMock = repoMock(url, 'SOME', 'repo', {
             cloneUrl: { https: false, ssh: false },
@@ -366,12 +364,11 @@ describe('modules/platform/bitbucket-server/index', () => {
               url: link,
             })
           );
-          expect(res).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
+          expect(res).toEqual({ defaultBranch: 'master', isFork: false });
         });
 
         it('gitUrl default returns http from API with injected auth', async () => {
-          expect.assertions(3);
+          expect.assertions(2);
           const responseMock = repoMock(url, 'SOME', 'repo', {
             cloneUrl: { https: true, ssh: true },
           });
@@ -398,8 +395,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               ),
             })
           );
-          expect(res).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
+          expect(res).toEqual({ defaultBranch: 'master', isFork: false });
         });
 
         it('uses ssh url from API if http not in API response', async () => {

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { Response } from 'got';
 import { partial } from '../../../../test/util';
 import type {
@@ -59,7 +60,7 @@ function infoMock(
             name: 'ssh',
           }
         : null,
-    ].filter(Boolean);
+    ].filter(is.truthy);
   }
 
   return { project: undefined, origin: undefined, links } as BbsRestRepo;
@@ -190,7 +191,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
               }),
               opts
             )
-          ).toBeUndefined();
+          ).toBeNull();
         });
 
         it('gitUrl:ssh no ssh url returns undefined', () => {
@@ -204,7 +205,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
               }),
               opts
             )
-          ).toBeUndefined();
+          ).toBeNull();
         });
 
         it('works gitUrl:ssh', () => {

@@ -202,7 +202,7 @@ export async function initRepo({
 
     await git.initRepo({
       ...config,
-      url: url,
+      url,
       cloneSubmodules,
       fullClone: true,
     });

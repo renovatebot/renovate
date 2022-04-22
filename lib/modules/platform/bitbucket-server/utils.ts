@@ -162,12 +162,12 @@ function generateUrlFromEndpoint(
   opts: HostRule,
   repository: string
 ): string {
-  const { host, pathname } = url.parse(defaultEndpoint);
+  const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
-    protocol: defaultEndpoint.split(':')[0] as GitProtocol,
+    protocol: url.protocol as GitProtocol,
     auth: `${opts.username}:${opts.password}`,
-    host: `${host}${pathname}${
-      pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+    host: `${url.host}${url.pathname}${
+      url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
     }scm`,
     repository,
   });
@@ -181,7 +181,7 @@ export function getRepoGitUrl(
   gitUrl: GitUrlOption,
   info: BbsRestRepo,
   opts: HostRule
-): string {
+): string | null {
   if (gitUrl === undefined) {
     let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
     if (!cloneUrl) {
@@ -231,6 +231,6 @@ export function getRepoGitUrl(
       // Fallback to generating the url if the API didn't give us an URL
       return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
     }
-    return undefined;
+    return null;
   }
 }
