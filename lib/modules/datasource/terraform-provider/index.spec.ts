@@ -82,8 +82,21 @@ describe('modules/datasource/terraform-provider/index', () => {
         datasource: TerraformProviderDatasource.id,
         depName: 'azurerm',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            version: '2.52.0',
+          },
+          {
+            releaseTimestamp: '2019-11-26T08:22:56.000Z',
+            version: '2.53.0',
+          },
+        ],
+        sourceUrl:
+          'https://github.com/terraform-providers/terraform-provider-azurerm',
+      });
     });
 
     it('processes real versions data', async () => {
@@ -99,8 +112,21 @@ describe('modules/datasource/terraform-provider/index', () => {
         datasource: TerraformProviderDatasource.id,
         depName: 'azurerm',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            version: '2.49.0',
+          },
+          {
+            version: '3.0.0',
+          },
+          {
+            version: '3.0.1',
+          },
+        ],
+      });
     });
 
     it('processes real data from packageName', async () => {
@@ -116,8 +142,21 @@ describe('modules/datasource/terraform-provider/index', () => {
         packageName: 'hashicorp/azurerm',
         registryUrls: ['https://registry.company.com'],
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.company.com/providers/hashicorp/azurerm',
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '2.52.0',
+          },
+          {
+            releaseTimestamp: '2019-11-26T08:22:56.000Z',
+            version: '2.53.0',
+          },
+        ],
+        sourceUrl:
+          'https://github.com/terraform-providers/terraform-provider-azurerm',
+      });
     });
 
     it('processes data with alternative backend', async () => {
@@ -142,8 +181,22 @@ describe('modules/datasource/terraform-provider/index', () => {
         datasource: TerraformProviderDatasource.id,
         depName: 'google-beta',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        registryUrl: 'https://releases.hashicorp.com',
+        releases: [
+          {
+            version: '1.19.0',
+          },
+          {
+            version: '1.20.0',
+          },
+          {
+            version: '2.0.0',
+          },
+        ],
+        sourceUrl:
+          'https://github.com/terraform-providers/terraform-provider-google-beta',
+      });
     });
 
     it('simulate failing secondary release source', async () => {
@@ -261,8 +314,44 @@ describe('modules/datasource/terraform-provider/index', () => {
         'Telmate/proxmox',
         '2.6.1'
       );
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual([
+        {
+          arch: 'arm64',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'darwin',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+        {
+          arch: 'amd64',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'linux',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+        {
+          arch: 'arm',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'linux',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+        {
+          arch: 'amd64',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'windows',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+      ]);
     });
 
     it('return null if the retrieval of a single build fails', async () => {

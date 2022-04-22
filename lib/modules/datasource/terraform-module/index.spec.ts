@@ -82,8 +82,26 @@ describe('modules/datasource/terraform-module/index', () => {
         datasource,
         depName: 'hashicorp/consul/aws',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            version: '0.3.8',
+          },
+          {
+            version: '0.3.9',
+          },
+          {
+            version: '0.3.10',
+          },
+          {
+            releaseTimestamp: '2018-09-20T11:25:22.957Z',
+            version: '0.4.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
+      });
     });
 
     it('processes real versions data', async () => {
@@ -99,8 +117,27 @@ describe('modules/datasource/terraform-module/index', () => {
         datasource,
         depName: 'hashicorp/consul/aws',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            version: '0.0.2',
+          },
+          {
+            version: '0.2.2',
+          },
+          {
+            version: '0.7.1',
+          },
+          {
+            version: '0.7.5',
+          },
+          {
+            version: '0.8.5',
+          },
+        ],
+      });
     });
 
     it('processes with registry in name', async () => {
@@ -114,8 +151,26 @@ describe('modules/datasource/terraform-module/index', () => {
         datasource,
         depName: 'registry.terraform.io/hashicorp/consul/aws',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            version: '0.3.8',
+          },
+          {
+            version: '0.3.9',
+          },
+          {
+            version: '0.3.10',
+          },
+          {
+            releaseTimestamp: '2018-09-20T11:25:22.957Z',
+            version: '0.4.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
+      });
     });
 
     it('rejects mismatch', async () => {
@@ -182,8 +237,25 @@ describe('modules/datasource/terraform-module/index', () => {
         depName: 'hashicorp/consul/aws',
       });
 
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        registryUrl: 'https://terraform.foo.bar',
+        releases: [
+          {
+            version: '0.3.8',
+          },
+          {
+            version: '0.3.9',
+          },
+          {
+            version: '0.3.10',
+          },
+          {
+            releaseTimestamp: '2018-09-20T11:25:22.957Z',
+            version: '0.4.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
+      });
     });
   });
 });
