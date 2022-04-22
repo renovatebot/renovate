@@ -156,7 +156,7 @@
     "deepmerge": "4.2.2",
     "delay": "5.0.0",
     "dequal": "2.0.2",
-    "detect-indent": "6.1.0",
+    "detect-indent": "7.0.0",
     "editorconfig": "0.15.3",
     "email-addresses": "5.0.0",
     "emoji-regex": "10.1.0",
