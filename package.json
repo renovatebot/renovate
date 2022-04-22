@@ -192,7 +192,7 @@
     "openpgp": "5.2.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
-    "p-queue": "6.6.2",
+    "p-queue": "7.2.0",
     "parse-link-header": "2.0.0",
     "redis": "4.0.6",
     "remark": "13.0.0",
