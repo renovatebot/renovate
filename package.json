@@ -190,7 +190,7 @@
     "nanoid": "3.3.2",
     "node-html-parser": "5.3.3",
     "openpgp": "5.2.1",
-    "p-all": "3.0.0",
+    "p-all": "4.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
     "parse-link-header": "2.0.0",
