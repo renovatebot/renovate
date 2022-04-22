@@ -128,19 +128,6 @@ export async function validateConfig(
       });
       continue;
     }
-    if (key === 'gitTimeout') {
-      if (!is.number(val)) {
-        errors.push({
-          topic: 'Config Error',
-          message: `GitTimeout must be set to an integer value`,
-        });
-      } else if (!(val >= 2000 && val <= 60000)) {
-        errors.push({
-          topic: 'Config Error',
-          message: `GitTimeout value must be within 2 to 60 seconds`,
-        });
-      }
-    }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
         topic: 'Configuration Error',
@@ -252,6 +239,15 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
+                val
+              )} (${typeof val})`,
+            });
+          }
+        } else if (type === 'integer') {
+          if (!is.number(val)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
                 val
               )} (${typeof val})`,
             });

@@ -3,7 +3,7 @@
 exports[`modules/manager/nuget/artifacts aborts if lock file is unchanged 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore 'path/with space/project.csproj' --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -22,8 +22,6 @@ Array [
   },
 ]
 `;
-
-exports[`modules/manager/nuget/artifacts aborts if no lock file found 1`] = `Array []`;
 
 exports[`modules/manager/nuget/artifacts authenticates at registries 1`] = `
 Array [
@@ -65,10 +63,6 @@ Array [
   },
 ]
 `;
-
-exports[`modules/manager/nuget/artifacts does not update lock file when no deps changed 1`] = `Array []`;
-
-exports[`modules/manager/nuget/artifacts does not update lock file when non-proj file is changed 1`] = `Array []`;
 
 exports[`modules/manager/nuget/artifacts performs lock file maintenance 1`] = `
 Array [
