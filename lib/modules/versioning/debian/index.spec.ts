@@ -21,6 +21,7 @@ describe('modules/versioning/debian/index', () => {
     ${'jessie'}       | ${true}
     ${'stretch'}      | ${true}
     ${'buster'}       | ${true}
+    ${'Buster'}       | ${false}
     ${'bullseye'}     | ${true}
     ${'bookworm'}     | ${false}
     ${'trixie'}       | ${false}
@@ -322,9 +323,9 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
-    ${'Buster'}       | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'Buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
-    ${'Buster'}       | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
+    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
+    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
     ${'10'}           | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
     ${'10'}           | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
     ${'10'}           | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}

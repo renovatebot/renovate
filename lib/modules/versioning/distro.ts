@@ -129,8 +129,8 @@ export class DistroInfo {
     }
 
     if (end) {
-      const now = DateTime.now();
-      const eol = DateTime.fromISO(end);
+      const now = DateTime.now().toUTC();
+      const eol = DateTime.fromISO(end).toUTC();
       return eol < now;
     }
 
