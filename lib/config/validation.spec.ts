@@ -195,6 +195,7 @@ describe('config/validation', () => {
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5 as any,
+        prCommitsPerRunLimit: false as any,
         semanticCommitType: 7 as any,
         lockFileMaintenance: false as any,
         extends: [':timezone(Europe/Brussel)'],
@@ -220,7 +221,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(12);
+      expect(errors).toHaveLength(13);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
@@ -738,19 +739,6 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
-    });
-
-    it.each([
-      [
-        'invalid value',
-        {
-          gitTimeout: 'string',
-        },
-      ],
-      ['out of range', { gitTimeout: 1000 }],
-    ])('checks invalid git timeout values', async (_case, config) => {
-      const { errors } = await configValidation.validateConfig(config);
-      expect(errors).toHaveLength(1);
     });
   });
 });
