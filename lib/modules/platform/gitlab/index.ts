@@ -66,8 +66,8 @@ let config: {
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
-  cloneSubmodules: boolean;
-  ignorePrAuthor: boolean;
+  cloneSubmodules: boolean | undefined;
+  ignorePrAuthor: boolean | undefined;
   squash: boolean;
 } = {} as any;
 
@@ -249,8 +249,8 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
-  config.cloneSubmodules = !!cloneSubmodules;
-  config.ignorePrAuthor = !!ignorePrAuthor;
+  config.cloneSubmodules = cloneSubmodules;
+  config.ignorePrAuthor = ignorePrAuthor;
 
   let res: HttpResponse<RepoResponse>;
   try {

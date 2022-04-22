@@ -2045,7 +2045,7 @@ describe('modules/platform/github/index', () => {
       });
       expect(res).toBeDefined();
       res = await github.findPr({ branchName: 'branch-b' });
-      expect(res).toBeUndefined();
+      expect(res).toBeNull();
     });
   });
 
