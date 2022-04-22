@@ -1,0 +1,33 @@
+{
+  "categories": null,
+  "crate": {
+    "badges": null,
+    "categories": null,
+    "created_at": "2016-01-04T03:42:04.120616+00:00",
+    "description": "Data-oriented game engine written in Rust",
+    "documentation": "https://docs.amethyst.rs/stable/amethyst",
+    "downloads": 121814,
+    "exact_match": false,
+    "homepage": "https://amethyst.rs/",
+    "id": "amethyst",
+    "keywords": null,
+    "links": {
+      "owner_team": "/api/v1/crates/amethyst/owner_team",
+      "owner_user": "/api/v1/crates/amethyst/owner_user",
+      "owners": "/api/v1/crates/amethyst/owners",
+      "reverse_dependencies": "/api/v1/crates/amethyst/reverse_dependencies",
+      "version_downloads": "/api/v1/crates/amethyst/downloads",
+      "versions": "/api/v1/crates/amethyst/versions"
+    },
+    "max_stable_version": null,
+    "max_version": "0.0.0",
+    "name": "amethyst",
+    "newest_version": "0.0.0",
+    "recent_downloads": null,
+    "repository": "https://github.com/amethyst/amethyst",
+    "updated_at": "2020-08-23T02:18:12.559064+00:00",
+    "versions": null
+  },
+  "keywords": null,
+  "versions": null
+}

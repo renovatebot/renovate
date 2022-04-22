@@ -33,6 +33,7 @@ Object {
 exports[`modules/datasource/crate/index getReleases processes real data: amethyst 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/amethyst",
+  "homepage": "https://amethyst.rs/",
   "registryUrl": "https://crates.io",
   "releases": Array [
     Object {
@@ -94,6 +95,7 @@ Object {
       "version": "0.10.1",
     },
   ],
+  "sourceUrl": "https://github.com/amethyst/amethyst",
 }
 `;
 
@@ -300,6 +302,7 @@ Object {
       "version": "0.2.51",
     },
   ],
+  "sourceUrl": "https://github.com/rust-lang/libc",
 }
 `;
 
