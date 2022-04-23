@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import * as httpMock from '../../../../test/http-mock';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
@@ -481,6 +482,32 @@ describe('modules/platform/bitbucket-server/index', () => {
             })
           );
           expect(res).toMatchSnapshot();
+        });
+
+        it('throws CONFIG_GIT_URL_UNAVAILABLE if there is no default branch', async () => {
+          expect.assertions(1);
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(
+              200,
+              repoMock(url, 'SOME', 'repo', {
+                cloneUrl: { https: false, ssh: false },
+              })
+            )
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            )
+            .reply(200, {
+              displayId: 'master',
+            });
+          await expect(
+            bitbucket.initRepo({
+              endpoint: 'https://stash.renovatebot.com/vcs/',
+              repository: 'SOME/repo',
+              gitUrl: 'default',
+            })
+          ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
         });
 
         it('throws REPOSITORY_EMPTY if there is no default branch', async () => {

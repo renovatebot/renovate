@@ -4,6 +4,7 @@ import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
 import { PlatformId } from '../../../constants';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
@@ -201,6 +202,10 @@ export async function initRepo({
       info,
       opts
     );
+
+    if (url === null) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
 
     await git.initRepo({
       ...config,

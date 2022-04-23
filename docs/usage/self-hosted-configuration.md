@@ -370,7 +370,7 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for GitLab only.
+Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 

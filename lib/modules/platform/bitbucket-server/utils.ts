@@ -179,7 +179,7 @@ function generateUrlFromEndpoint(
 export function getRepoGitUrl(
   repository: string,
   defaultEndpoint: string,
-  gitUrl: GitUrlOption,
+  gitUrl: GitUrlOption | undefined,
   info: BbsRestRepo,
   opts: HostRule
 ): string | null {
