@@ -582,7 +582,7 @@ describe('modules/platform/github/index', () => {
     };
 
     const pagePath = (x: number) =>
-      `/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${x}`;
+      `/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=${x}`;
     const pageLink = (x: number) =>
       `<${githubApiHost}${pagePath(x)}>; rel="next"`;
 
@@ -690,7 +690,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, []);
 
@@ -706,7 +706,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -739,7 +739,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -781,7 +781,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -810,7 +810,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -838,7 +838,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -866,7 +866,7 @@ describe('modules/platform/github/index', () => {
         .patch('/repos/forked/repo/git/refs/heads/master')
         .reply(200)
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -1952,7 +1952,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock
         .scope(githubApiHost)
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -1994,7 +1994,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -2018,7 +2018,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -2269,7 +2269,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -2304,7 +2304,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -2329,7 +2329,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
@@ -2355,7 +2355,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
@@ -2370,7 +2370,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
@@ -2398,7 +2398,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
@@ -2426,7 +2426,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
@@ -2484,7 +2484,7 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+          '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1'
         )
         .reply(200, [
           {
