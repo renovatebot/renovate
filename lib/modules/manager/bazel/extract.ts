@@ -12,19 +12,21 @@ import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { UrlParsedResult } from './types';
 
-function parseUrl(urlString: string): UrlParsedResult | null {
+function parseUrl(
+  urlString: string | undefined | null
+): UrlParsedResult | null {
   // istanbul ignore if
   if (!urlString) {
     return null;
   }
   const url = _parse(urlString);
-  if (url.host !== 'github.com') {
+  if (url.host !== 'github.com' || !url.path) {
     return null;
   }
   const path = url.path.split('/').slice(1);
   const repo = path[0] + '/' + path[1];
-  let datasource: string;
-  let currentValue: string = null;
+  let datasource = '';
+  let currentValue: string | null = null;
   if (path[2] === 'releases' && path[3] === 'download') {
     datasource = GithubReleasesDatasource.id;
     currentValue = path[4];
@@ -168,16 +170,16 @@ export function extractPackageFile(
     logger.debug({ def }, 'Checking bazel definition');
     const [depType] = def.split('(', 1);
     const dep: PackageDependency = { depType, managerData: { def } };
-    let depName: string;
-    let importpath: string;
-    let remote: string;
-    let currentValue: string;
-    let commit: string;
-    let url: string;
-    let sha256: string;
-    let digest: string;
-    let repository: string;
-    let registry: string;
+    let depName: string | undefined;
+    let importpath: string | undefined;
+    let remote: string | undefined;
+    let currentValue: string | undefined;
+    let commit: string | undefined;
+    let url: string | undefined;
+    let sha256: string | undefined;
+    let digest: string | undefined;
+    let repository: string | undefined;
+    let registry: string | undefined;
     let match = regEx(/name\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, depName] = match;
@@ -252,7 +254,7 @@ export function extractPackageFile(
       (currentValue || commit)
     ) {
       dep.depName = depName;
-      dep.currentValue = currentValue || commit.substr(0, 7);
+      dep.currentValue = currentValue || commit?.substring(0, 7);
       dep.datasource = GoDatasource.id;
       dep.packageName = importpath;
       if (remote) {
@@ -268,7 +270,7 @@ export function extractPackageFile(
       if (commit) {
         dep.currentValue = 'v0.0.0';
         dep.currentDigest = commit;
-        dep.currentDigestShort = commit.substr(0, 7);
+        dep.currentDigestShort = commit.substring(0, 7);
         dep.digestOneAndOnly = true;
       }
       deps.push(dep);
@@ -279,6 +281,10 @@ export function extractPackageFile(
       sha256
     ) {
       const parsedUrl = parseUrl(url);
+      // istanbul ignore if: needs test
+      if (!parsedUrl) {
+        return;
+      }
       dep.depName = depName;
       dep.repo = parsedUrl.repo;
       if (regEx(/^[a-f0-9]{40}$/i).test(parsedUrl.currentValue)) {

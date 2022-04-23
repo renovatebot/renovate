@@ -22,6 +22,7 @@ export class GlobalConfig {
     'migratePresets',
     'privateKey',
     'privateKeyOld',
+    'gitTimeout',
   ];
 
   private static config: RepoGlobalConfig = {};
