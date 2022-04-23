@@ -25,14 +25,14 @@ export async function getLockedVersions(
         if (lockfileVersion && lockfileVersion >= 8) {
           // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          packageFile.constraints!.yarn = '^3.0.0';
+          packageFile.constraints!.yarn ??= '^3.0.0';
         } else if (lockfileVersion && lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          packageFile.constraints!.yarn = '^2.2.0';
+          packageFile.constraints!.yarn ??= '^2.2.0';
         } else {
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          packageFile.constraints!.yarn = '^2.0.0';
+          packageFile.constraints!.yarn ??= '^2.0.0';
         }
       }
       for (const dep of packageFile.deps) {
