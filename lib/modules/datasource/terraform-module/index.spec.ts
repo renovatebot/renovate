@@ -98,7 +98,55 @@ describe('modules/datasource/terraform-module/index', () => {
       });
     });
 
-    it('processes real versions data', async () => {
+    it('returns null for empty result from third party', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/v1/modules/hashicorp/consul/aws/versions')
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
+          registryUrls: ['https://terraform.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null for 404 from third party', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/v1/modules/hashicorp/consul/aws/versions')
+        .reply(404, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
+          registryUrls: ['https://terraform.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null for unknown error from third party', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/v1/modules/hashicorp/consul/aws/versions')
+        .replyWithError('')
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
+          registryUrls: ['https://terraform.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('processes real data from third party', async () => {
       httpMock
         .scope('https://terraform.company.com')
         .get('/v1/modules/hashicorp/consul/aws/versions')
@@ -182,7 +230,7 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(res).toBeNull();
     });
 
-    it('rejects missing module data', async () => {
+    it('rejects missing module data from third party', async () => {
       httpMock
         .scope('https://terraform.company.com')
         .get('/v1/modules/consul/foo/versions')

@@ -93,7 +93,55 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
     });
 
-    it('processes real data from packageName', async () => {
+    it('returns null for empty result from third party', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          depName: 'azurerm',
+          registryUrls: ['https://registry.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null for 404 from third party', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(404)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          depName: 'azurerm',
+          registryUrls: ['https://registry.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null for unknown error from third party', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .replyWithError('')
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          depName: 'azurerm',
+          registryUrls: ['https://registry.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('processes real data from third party', async () => {
       httpMock
         .scope('https://registry.company.com')
         .get('/v1/providers/hashicorp/azurerm/versions')
