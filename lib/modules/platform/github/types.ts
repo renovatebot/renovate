@@ -24,7 +24,15 @@ export interface GhRestPr {
   head: {
     ref: string;
     sha: string;
-    repo: { full_name: string };
+    repo: {
+      full_name: string;
+      pushed_at?: string;
+    };
+  };
+  base: {
+    repo: {
+      pushed_at?: string;
+    };
   };
   mergeable_state: string;
   number: number;
@@ -41,6 +49,7 @@ export interface GhRestPr {
   assignees?: { login?: string }[];
   requested_reviewers?: { login?: string }[];
   labels?: { name: string }[];
+  _links?: unknown;
 }
 
 export interface GhGraphQlPr {
