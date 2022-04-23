@@ -74,7 +74,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   try {
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility: string = yarnUpdate
+    const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
       : config.constraints?.yarn;
     const minYarnVersion =
