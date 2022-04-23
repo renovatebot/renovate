@@ -27,7 +27,7 @@ const depProxyRe = regEx(
 export function getGitlabDep(imageName: string): PackageDependency {
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
-    return getDep(match.groups.depName);
+    return { ...getDep(match.groups.depName), replaceString: imageName ];
   } else {
     return getDep(imageName);
   }
