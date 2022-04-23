@@ -74,7 +74,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   try {
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility = yarnUpdate
+    const yarnCompatibility: string = yarnUpdate
       ? yarnUpdate.newValue
       : config.constraints?.yarn;
     const minYarnVersion =
@@ -87,15 +87,18 @@ export async function generateLockFile(
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
     const preCommands = [];
-    if (config.managerData?.packageManager) {
-      preCommands.push('npm i -g corepack', 'corepack enable');
-    } else {
-      let installYarn = 'npm i -g yarn';
-      if (isYarn1 && minYarnVersion) {
-        installYarn += `@${quote(yarnCompatibility)}`;
+    if (minYarnVersion) {
+      if (isYarn1) {
+        preCommands.push(`npm i -g yarn@${quote(yarnCompatibility)}`);
+      } else {
+        preCommands.push(`npm i -g corepack`);
+        preCommands.push(
+          `corepack prepare --activate yarn@${minYarnVersion.version}`
+        );
+        preCommands.push(`yarn --version`);
       }
-
-      preCommands.push(installYarn);
+    } else {
+      preCommands.push('npm i -g yarn');
     }
 
     const extraEnv: ExtraEnv = {

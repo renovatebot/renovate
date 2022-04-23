@@ -18,7 +18,6 @@ Array [
     "lernaPackages": undefined,
     "managerData": Object {
       "lernaJsonFile": undefined,
-      "packageManager": false,
       "yarnZeroInstall": false,
     },
     "npmLock": undefined,

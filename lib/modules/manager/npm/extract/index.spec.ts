@@ -671,17 +671,6 @@ describe('modules/manager/npm/extract/index', () => {
     });
   });
 
-  it('detects a packageManager', async () => {
-    const res = await npmExtract.extractPackageFile(
-      JSON.stringify({ packageManager: 'yarn@3.0.0' }),
-      'package.json',
-      defaultConfig
-    );
-    expect(res).toMatchSnapshot({
-      managerData: { packageManager: true },
-    });
-  });
-
   describe('.postExtract()', () => {
     it('runs', async () => {
       await expect(npmExtract.postExtract([], false)).resolves.not.toThrow();
