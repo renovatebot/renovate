@@ -64,7 +64,22 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       const repository = TerraformProviderDatasource.getRepository({
         packageName,
       });
-      dep = await this.queryRegistry(registryUrl, repository);
+      const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+        registryUrl
+      );
+      if (registryHost === 'registry.terraform.io') {
+        dep = await this.queryRegistryExtendedApi(
+          serviceDiscovery,
+          registryUrl,
+          repository
+        );
+      } else {
+        dep = await this.queryRegistryVersions(
+          serviceDiscovery,
+          registryUrl,
+          repository
+        );
+      }
     }
 
     return dep;
@@ -72,28 +87,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   private static getRepository({ packageName }: GetReleasesConfig): string {
     return packageName.includes('/') ? packageName : `hashicorp/${packageName}`;
-  }
-
-  private async queryRegistry(
-    registryURL: string,
-    repository: string
-  ): Promise<ReleaseResult> {
-    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryURL
-    );
-    try {
-      return await this.queryRegistryExtendedApi(
-        serviceDiscovery,
-        registryURL,
-        repository
-      );
-    } catch (err) {
-      return await this.queryRegistryVersions(
-        serviceDiscovery,
-        registryURL,
-        repository
-      );
-    }
   }
 
   /**

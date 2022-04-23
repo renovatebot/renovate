@@ -25,8 +25,6 @@ describe('modules/datasource/terraform-module/index', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(200, {})
-        .get('/v1/modules/hashicorp/consul/aws/versions')
-        .reply(200, {})
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       expect(
@@ -42,8 +40,6 @@ describe('modules/datasource/terraform-module/index', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(404, {})
-        .get('/v1/modules/hashicorp/consul/aws/versions')
-        .reply(404, {})
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       expect(
@@ -58,8 +54,6 @@ describe('modules/datasource/terraform-module/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
-        .replyWithError('')
-        .get('/v1/modules/hashicorp/consul/aws/versions')
         .replyWithError('')
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
@@ -106,9 +100,7 @@ describe('modules/datasource/terraform-module/index', () => {
 
     it('processes real versions data', async () => {
       httpMock
-        .scope(baseUrl)
-        .get('/v1/modules/hashicorp/consul/aws')
-        .reply(404, {})
+        .scope('https://terraform.company.com')
         .get('/v1/modules/hashicorp/consul/aws/versions')
         .reply(200, consulVersionsData)
         .get('/.well-known/terraform.json')
@@ -116,10 +108,10 @@ describe('modules/datasource/terraform-module/index', () => {
       const res = await getPkgReleases({
         datasource,
         depName: 'hashicorp/consul/aws',
+        registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toEqual({
-        homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
-        registryUrl: 'https://registry.terraform.io',
+        registryUrl: 'https://terraform.company.com',
         releases: [
           {
             version: '0.0.2',
@@ -176,8 +168,6 @@ describe('modules/datasource/terraform-module/index', () => {
     it('rejects mismatch', async () => {
       httpMock
         .scope('https://terraform.company.com')
-        .get('/v1/modules/consul/foo')
-        .reply(200, consulData)
         .get('/v1/modules/consul/foo/versions')
         .reply(200, {
           modules: [],
@@ -195,8 +185,6 @@ describe('modules/datasource/terraform-module/index', () => {
     it('rejects missing module data', async () => {
       httpMock
         .scope('https://terraform.company.com')
-        .get('/v1/modules/consul/foo')
-        .reply(404, {})
         .get('/v1/modules/consul/foo/versions')
         .reply(200, {
           modules: [],
@@ -227,8 +215,8 @@ describe('modules/datasource/terraform-module/index', () => {
     it('processes real data on changed subpath', async () => {
       httpMock
         .scope(localTerraformEnterprisebaseUrl)
-        .get('/api/registry/v1/modules/hashicorp/consul/aws')
-        .reply(200, consulData)
+        .get('/api/registry/v1/modules/hashicorp/consul/aws/versions')
+        .reply(200, consulVersionsData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryCustomResult);
       const res = await getPkgReleases({
@@ -241,20 +229,21 @@ describe('modules/datasource/terraform-module/index', () => {
         registryUrl: 'https://terraform.foo.bar',
         releases: [
           {
-            version: '0.3.8',
+            version: '0.0.2',
           },
           {
-            version: '0.3.9',
+            version: '0.2.2',
           },
           {
-            version: '0.3.10',
+            version: '0.7.1',
           },
           {
-            releaseTimestamp: '2018-09-20T11:25:22.957Z',
-            version: '0.4.0',
+            version: '0.7.5',
+          },
+          {
+            version: '0.8.5',
           },
         ],
-        sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
       });
     });
   });

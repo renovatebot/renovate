@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
@@ -62,13 +63,14 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryUrl
     );
-    try {
+    const registryHost = parseUrl(registryUrl)?.host;
+    if (registryHost === 'registry.terraform.io') {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registry,
         repository
       );
-    } catch (err) {
+    } else {
       return await this.queryRegistryVersions(
         serviceDiscovery,
         registry,
