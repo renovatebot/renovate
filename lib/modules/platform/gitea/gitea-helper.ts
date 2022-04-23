@@ -54,7 +54,7 @@ export interface Issue {
 export interface User {
   id: number;
   email: string;
-  full_name: string;
+  full_name?: string;
   username: string;
 }
 
@@ -149,7 +149,7 @@ export type IssueUpdateParams = {
 };
 
 export type IssueUpdateLabelsParams = {
-  labels: number[];
+  labels?: number[];
 };
 
 export type IssueSearchParams = {

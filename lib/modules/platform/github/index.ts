@@ -101,8 +101,7 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders: Record<string, string | string[]> =
-      gheQueryRes?.headers || {};
+    const gheHeaders = gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
@@ -142,7 +141,7 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
-  let discoveredGitAuthor: string;
+  let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
@@ -227,7 +226,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  // TODO: null check #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -264,7 +265,7 @@ export async function initRepo({
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  let repo: GhRepo;
+  let repo: GhRepo | undefined;
   try {
     let infoQuery = repoInfoQuery;
 
@@ -477,15 +478,17 @@ export async function initRepo({
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken;
+    parsedEndpoint.auth = config.forkToken ?? null;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token;
+    parsedEndpoint.auth = opts.token ?? null;
   }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
+  // TODO: null checks #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  parsedEndpoint.host = parsedEndpoint.host!.replace(
     'api.github.com',
     'github.com'
   );
@@ -547,10 +550,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
       }
     }
   }
-  return config.repoForceRebase;
+  return !!config.repoForceRebase;
 }
 
-function cachePr(pr?: Pr): void {
+function cachePr(pr?: Pr | null): void {
   config.prList ??= [];
   if (pr) {
     for (let idx = 0; idx < config.prList.length; idx += 1) {
@@ -580,7 +583,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
   const prList = await getPrList();
-  let pr = prList.find(({ number }) => number === prNo);
+  let pr = prList.find(({ number }) => number === prNo) ?? null;
   if (pr) {
     logger.debug('Returning PR from cache');
   }
@@ -605,7 +608,9 @@ export async function getPrList(): Promise<Pr[]> {
       !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
-    const prCache = await getPrCache(githubApi, repo, username);
+    // TODO: check null `repo` #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const prCache = await getPrCache(githubApi, repo!, username);
     config.prList = Object.values(prCache);
   }
 
@@ -629,7 +634,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr;
+  return pr ?? null;
 }
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
@@ -859,7 +864,7 @@ export async function setBranchStatus({
     return;
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
-  let url: string;
+  let url: string | undefined;
   try {
     const branchCommit = git.getBranchCommit(branchName);
     url = `repos/${config.repository}/statuses/${branchCommit}`;
@@ -906,7 +911,7 @@ async function getIssues(): Promise<Issue[]> {
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
     ...issue,
-    state: issue.state.toLowerCase(),
+    state: issue.state?.toLowerCase(),
   }));
 }
 
@@ -956,7 +961,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  return getIssue(issue.number);
+  // TODO: can number be required? #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return getIssue(issue.number!);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1010,7 +1017,8 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn(`Closing duplicate issue ${i.number}`);
-          await closeIssue(i.number);
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          await closeIssue(i.number!);
         }
       }
       const issueBody = (
@@ -1058,7 +1066,7 @@ export async function ensureIssue({
     );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
-    delete config.issueList;
+    config.issueList = null;
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
@@ -1082,7 +1090,8 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      await closeIssue(issue.number);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      await closeIssue(issue.number!);
       logger.debug({ number: issue.number }, 'Issue closed');
     }
   }
@@ -1130,7 +1139,7 @@ export async function addReviewers(
 
 async function addLabels(
   issueNo: number,
-  labels: string[] | null
+  labels: string[] | null | undefined
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
@@ -1308,7 +1317,7 @@ export async function ensureCommentRemoval(
 async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
-  platformOptions: PlatformPrOptions
+  platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
   if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
     return;
@@ -1327,18 +1336,21 @@ async function tryPrAutomerge(
     const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
 
-    const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
+    const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions
     );
 
-    if (errors) {
-      logger.debug({ prNumber, errors }, 'GitHub-native automerge: fail');
+    if (res?.errors) {
+      logger.debug(
+        { prNumber, errors: res.errors },
+        'GitHub-native automerge: fail'
+      );
       return;
     }
 
     logger.debug({ prNumber }, 'GitHub-native automerge: success');
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: missing test #7154 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -1352,11 +1364,13 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
-}: CreatePRConfig): Promise<Pr> {
+}: CreatePRConfig): Promise<Pr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository.split('/')[0]}:${sourceBranch}`;
+  // TODO: can `repository` be null? #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
   const options: any = {
     body: {
       title,
@@ -1540,10 +1554,12 @@ export function massageMarkdown(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
+  let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
 
   const gheSupportsStateFilter = semver.satisfies(
-    platformConfig.gheVersion,
+    // semver not null safe, accepts null and undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    platformConfig.gheVersion!,
     '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
   );
   const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;

@@ -53,20 +53,22 @@ describe('modules/platform/gitea/index', () => {
     },
   });
 
+  type MockPr = ght.PR & Required<Pick<ght.PR, 'head' | 'base'>>;
+
   const mockRepos: ght.Repo[] = [
     partial<ght.Repo>({ full_name: 'a/b' }),
     partial<ght.Repo>({ full_name: 'c/d' }),
   ];
 
-  const mockPRs: ght.PR[] = [
-    partial<ght.PR>({
+  const mockPRs: MockPr[] = [
+    partial<MockPr>({
       number: 1,
       title: 'Some PR',
       body: 'some random pull request',
       state: PrState.Open,
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
-      closed_at: null,
+      closed_at: undefined,
       mergeable: true,
       base: { ref: 'some-base-branch' },
       head: {
@@ -75,7 +77,7 @@ describe('modules/platform/gitea/index', () => {
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
     }),
-    partial<ght.PR>({
+    partial<MockPr>({
       number: 2,
       title: 'Other PR',
       body: 'other random pull request',
@@ -691,7 +693,7 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('createPr', () => {
-    const mockNewPR: ght.PR = {
+    const mockNewPR: MockPr = {
       number: 42,
       state: PrState.Open,
       head: {
@@ -932,11 +934,11 @@ describe('modules/platform/gitea/index', () => {
 
   describe('getIssue', () => {
     it('should return the issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.number === 1);
+      const mockIssue = mockIssues.find((i) => i.number === 1)!;
       helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
-      expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
+      expect(await gitea.getIssue?.(mockIssue.number)).toHaveProperty(
         'number',
         mockIssue.number
       );
@@ -945,7 +947,7 @@ describe('modules/platform/gitea/index', () => {
 
   describe('findIssue', () => {
     it('should return existing open issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'open-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
@@ -957,7 +959,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not return existing closed issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       await initFakeRepo();
 
@@ -1031,7 +1033,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not reopen closed issue by default', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
@@ -1165,7 +1167,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should reopen closed issue if desired', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
@@ -1191,7 +1193,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not update existing closed issue if desired', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
 
       await initFakeRepo();
@@ -1351,7 +1353,7 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.ensureComment({
         number: 1,
         content: 'other-content',
-        topic: undefined,
+        topic: null,
       });
 
       expect(res).toBe(true);

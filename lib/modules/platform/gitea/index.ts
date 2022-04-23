@@ -124,14 +124,14 @@ function findCommentByTopic(
   comments: helper.Comment[],
   topic: string
 ): helper.Comment | null {
-  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`));
+  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`)) ?? null;
 }
 
 function findCommentByContent(
   comments: helper.Comment[],
   content: string
 ): helper.Comment | null {
-  return comments.find((c) => c.body.trim() === content);
+  return comments.find((c) => c.body.trim() === content) ?? null;
 }
 
 function getLabelList(): Promise<helper.Label[]> {
@@ -156,11 +156,11 @@ function getLabelList(): Promise<helper.Label[]> {
       .catch((err) => {
         // Will fail if owner of repo is not org or Gitea version < 1.12
         logger.debug(`Unable to fetch organization labels`);
-        return [];
+        return [] as helper.Label[];
       });
 
     config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
-      [].concat(...labels)
+      ([] as helper.Label[]).concat(...labels)
     );
   }
 
@@ -170,7 +170,7 @@ function getLabelList(): Promise<helper.Label[]> {
 async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
-  return labelList.find((l) => l.name === name)?.id;
+  return labelList.find((l) => l.name === name)?.id ?? null;
 }
 
 const platform: Platform = {
@@ -219,7 +219,7 @@ const platform: Platform = {
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
     const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
-    return contents.contentString;
+    return contents.contentString ?? null;
   },
 
   async getJsonFile(
@@ -227,7 +227,12 @@ const platform: Platform = {
     repoName?: string,
     branchOrTag?: string
   ): Promise<any | null> {
-    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const raw = (await platform.getRawFile(
+      fileName,
+      repoName,
+      branchOrTag
+    )) as string;
     if (fileName.endsWith('.json5')) {
       return JSON5.parse(raw);
     }
@@ -242,7 +247,7 @@ const platform: Platform = {
 
     config = {} as any;
     config.repository = repository;
-    config.cloneSubmodules = cloneSubmodules;
+    config.cloneSubmodules = !!cloneSubmodules;
 
     // Attempt to fetch information about repository
     try {
@@ -301,7 +306,7 @@ const platform: Platform = {
       url: defaults.endpoint,
     });
     const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token;
+    gitEndpoint.auth = opts.token ?? null;
 
     // Initialize Git storage
     await git.initRepo({
@@ -344,7 +349,9 @@ const platform: Platform = {
     try {
       // Create new status for branch commit
       const branchCommit = git.getBranchCommit(branchName);
-      await helper.createCommitStatus(config.repository, branchCommit, {
+      // TODO: check branchCommit
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      await helper.createCommitStatus(config.repository, branchCommit!, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
         description,
@@ -415,7 +422,7 @@ const platform: Platform = {
           { useCache: false }
         )
         .then((prs) => {
-          const prList = prs.map(toRenovatePR).filter(Boolean);
+          const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
           return prList;
         });
@@ -427,7 +434,7 @@ const platform: Platform = {
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
-    let pr = prList.find((p) => p.number === number);
+    let pr = prList.find((p) => p.number === number) ?? null;
     if (pr) {
       logger.debug('Returning from cached PRs');
     } else {
@@ -437,7 +444,8 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (config.prList !== null) {
-        (await config.prList).push(pr);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        (await config.prList).push(pr!);
       }
     }
 
@@ -453,7 +461,7 @@ const platform: Platform = {
     branchName,
     prTitle: title,
     state = PrState.All,
-  }: FindPRConfig): Promise<Pr> {
+  }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title}, ${state})`);
     const prList = await platform.getPrList();
     const pr = prList.find(
@@ -491,7 +499,7 @@ const platform: Platform = {
         head,
         title,
         body,
-        labels: labels.filter(Boolean),
+        labels: labels.filter(is.number),
       });
 
       const pr = toRenovatePR(gpr);
@@ -584,7 +592,7 @@ const platform: Platform = {
     return config.issueList;
   },
 
-  async getIssue(number: number, useCache = true): Promise<Issue> {
+  async getIssue(number: number, useCache = true): Promise<Issue | null> {
     try {
       const body = (
         await helper.getIssue(config.repository, number, {
@@ -601,7 +609,7 @@ const platform: Platform = {
     }
   },
 
-  async findIssue(title: string): Promise<Issue> {
+  async findIssue(title: string): Promise<Issue | null> {
     const issueList = await platform.getIssueList();
     const issue = issueList.find(
       (i) => i.state === 'open' && i.title === title
@@ -611,7 +619,8 @@ const platform: Platform = {
       return null;
     }
     logger.debug(`Found Issue #${issue.number}`);
-    return platform.getIssue(issue.number);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    return getIssue!(issue.number!);
   },
 
   async ensureIssue({
@@ -633,7 +642,9 @@ const platform: Platform = {
       }
 
       const labels = Array.isArray(labelNames)
-        ? await Promise.all(labelNames.map(lookupLabelByName))
+        ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
+            is.number
+          )
         : undefined;
 
       // Update any matching issues which currently exist
@@ -658,7 +669,8 @@ const platform: Platform = {
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
             logger.warn(`Closing duplicate Issue #${issue.number}`);
-            await helper.closeIssue(config.repository, issue.number);
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            await helper.closeIssue(config.repository, issue.number!);
           }
         }
 
@@ -678,7 +690,8 @@ const platform: Platform = {
         logger.debug(`Updating Issue #${activeIssue.number}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
-          activeIssue.number,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          activeIssue.number!,
           {
             body,
             title,
@@ -700,7 +713,8 @@ const platform: Platform = {
         ) {
           await helper.updateIssueLabels(
             config.repository,
-            activeIssue.number,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            activeIssue.number!,
             {
               labels,
             }
@@ -733,7 +747,8 @@ const platform: Platform = {
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
         logger.debug({ number: issue.number }, 'Closing issue');
-        await helper.closeIssue(config.repository, issue.number);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        await helper.closeIssue(config.repository, issue.number!);
       }
     }
   },
@@ -746,8 +761,6 @@ const platform: Platform = {
     } else {
       logger.warn({ issue, labelName }, 'Failed to lookup label for deletion');
     }
-
-    return null;
   },
 
   getRepoForceRebase(): Promise<boolean> {
