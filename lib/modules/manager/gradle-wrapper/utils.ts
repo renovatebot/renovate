@@ -30,7 +30,7 @@ export async function prepareGradleCommand(
   cwd: string,
   gradlew: Stats | null,
   args: string | null
-): Promise<string> {
+): Promise<string | null> {
   // istanbul ignore if
   if (gradlew?.isFile() === true) {
     // if the file is not executable by others
@@ -60,11 +60,11 @@ export function getJavaContraint(gradleVersion: string): string | null {
   }
 
   const major = gradleVersioning.getMajor(gradleVersion);
-  if (major >= 7) {
+  if (major && major >= 7) {
     return '^16.0.0';
   }
   // first public gradle version was 2.0
-  if (major > 0 && major < 5) {
+  if (major && major > 0 && major < 5) {
     return '^8.0.0';
   }
   return '^11.0.0';
@@ -87,7 +87,7 @@ export function extractGradleVersion(
   for (const line of lines) {
     const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
 
-    if (distributionUrlMatch) {
+    if (distributionUrlMatch?.groups) {
       return {
         url: distributionUrlMatch.groups.url,
         version: distributionUrlMatch.groups.version,

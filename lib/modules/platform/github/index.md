@@ -1,4 +1,4 @@
-# GitHub and GitHub Enterprise
+# GitHub and GitHub Enterprise Server
 
 ## Authentication
 
