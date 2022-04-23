@@ -186,7 +186,8 @@ describe('modules/manager/gitlabci/extract', () => {
           datasource: 'docker',
           depName: 'renovate/renovate',
           depType: 'image-name',
-          replaceString: 'renovate/renovate:31.65.1-slim',
+          replaceString:
+            '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim',
         },
         {
           autoReplaceStringTemplate:
@@ -196,7 +197,8 @@ describe('modules/manager/gitlabci/extract', () => {
           datasource: 'docker',
           depName: 'mariadb',
           depType: 'service-image',
-          replaceString: 'mariadb:10.4.11',
+          replaceString:
+            '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11',
         },
         {
           autoReplaceStringTemplate:
@@ -206,7 +208,8 @@ describe('modules/manager/gitlabci/extract', () => {
           datasource: 'docker',
           depName: 'other/image1',
           depType: 'service-image',
-          replaceString: 'other/image1:1.0.0',
+          replaceString:
+            '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0',
         },
       ]);
     });

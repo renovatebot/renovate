@@ -9,7 +9,7 @@ describe('modules/manager/gitlabci/utils', () => {
       ${'variable with brackets'} | ${'${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/mariadb:10.4.11'}
     `('offical image - $name', ({ imageName }: { imageName: string }) => {
       expect(getGitlabDep(imageName)).toMatchObject({
-        replaceString: 'mariadb:10.4.11',
+        replaceString: imageName,
         depName: 'mariadb',
         currentValue: '10.4.11',
       });
@@ -24,7 +24,7 @@ describe('modules/manager/gitlabci/utils', () => {
       'image with organization - %s',
       ({ imageName }: { imageName: string }) => {
         expect(getGitlabDep(imageName)).toMatchObject({
-          replaceString: 'renovate/renovate:19.70.8-slim',
+          replaceString: imageName,
           depName: 'renovate/renovate',
           currentValue: '19.70.8-slim',
         });
