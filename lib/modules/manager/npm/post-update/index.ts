@@ -526,17 +526,17 @@ export async function getAdditionalFiles(
     NODE_ENV: 'dev',
   };
 
-  let token = '';
+  let token: string | undefined;
   try {
-    ({ token = '' } = hostRules.find({
+    ({ token } = hostRules.find({
       hostType: config.platform,
       url: 'https://api.github.com/',
     }));
-    token += '@';
+    token = token ? `${token}@` : token;
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  const tokenRe = regEx(`${token}`, 'g', false);
+  const tokenRe = regEx(`${token ?? ''}`, 'g', false);
   const localDir = GlobalConfig.get('localDir')!;
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);

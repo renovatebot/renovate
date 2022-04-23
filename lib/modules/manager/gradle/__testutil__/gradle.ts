@@ -10,16 +10,11 @@ const gradleJavaVersionSupport = {
 const skipJava = process.env.SKIP_JAVA_TESTS === 'true';
 const enforceJava = process.env[failIfNoJavaEnv] === 'true' && !skipJava;
 
-function parseJavaVersion(
-  javaVersionOutput: string | undefined
-): number | null {
-  if (!javaVersionOutput) {
-    return null;
-  }
+function parseJavaVersion(javaVersionOutput: string | undefined): number {
   const versionMatch = /version "(?:1\.)?(\d+)[\d._-]*"/.exec(
-    javaVersionOutput
+    javaVersionOutput ?? ''
   );
-  if (versionMatch !== null && versionMatch.length === 2) {
+  if (versionMatch?.length === 2) {
     return parseInt(versionMatch[1], 10);
   }
   if (enforceJava) {
@@ -30,10 +25,10 @@ ${javaVersionOutput}`);
   return 0;
 }
 
-let cachedJavaVersion: number | null | undefined = undefined;
+let cachedJavaVersion: number | null = null;
 
-function determineJavaVersion(): number | null {
-  if (cachedJavaVersion === undefined) {
+function determineJavaVersion(): number {
+  if (cachedJavaVersion === null) {
     let javaVersionCommand: SpawnSyncReturns<string> | undefined;
     let error: Error | undefined;
     try {
@@ -67,9 +62,6 @@ class WithGradle {
 
   constructor(gradleVersion: keyof typeof gradleJavaVersionSupport) {
     const javaVersion = determineJavaVersion();
-    if (!javaVersion) {
-      throw Error(`Unknown java version!`);
-    }
     if (gradleJavaVersionSupport[gradleVersion] === undefined) {
       throw Error(`Unknown gradle version '${gradleVersion}'!`);
     }
