@@ -7,7 +7,7 @@ type VulnerabilityRangeKey = string;
 type VulnerabilityPatch = string;
 export type AggregatedVulnerabilities = Record<
   VulnerabilityKey,
-  Record<VulnerabilityRangeKey, VulnerabilityPatch>
+  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
 >;
 
 export interface PlatformParams {
@@ -150,7 +150,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
-  getIssue?(number: number, useCache?: boolean): Promise<Issue>;
+  getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
@@ -173,7 +173,7 @@ export interface Platform {
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
-  createPr(prConfig: CreatePRConfig): Promise<Pr>;
+  createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
@@ -188,8 +188,8 @@ export interface Platform {
       | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  getPr(number: number): Promise<Pr>;
-  findPr(findPRConfig: FindPRConfig): Promise<Pr>;
+  getPr(number: number): Promise<Pr | null>;
+  findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
   getBranchStatus(branchName: string): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
