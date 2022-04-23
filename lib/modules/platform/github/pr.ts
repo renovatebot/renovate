@@ -68,7 +68,7 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
+      const urlPath = `repos/${repo}/pulls?per_page=20&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
