@@ -9,7 +9,7 @@ import { newlineRegex } from '../regex';
 let gitPrivateKey: string | undefined;
 let keyId: string | undefined;
 
-export function setPrivateKey(key: string): void {
+export function setPrivateKey(key: string | undefined): void {
   gitPrivateKey = key?.trim();
 }
 

@@ -38,12 +38,6 @@
     "lib/config/utils.ts",
     "lib/config/validation.ts",
     "lib/modules/datasource/github-releases/test/index.ts",
-    "lib/modules/platform/api.ts",
-    "lib/modules/platform/comment.ts",
-    "lib/modules/platform/commit.ts",
-    "lib/modules/platform/github/index.ts",
-    "lib/modules/platform/gitlab/index.ts",
-    "lib/modules/platform/index.ts",
     "lib/renovate.ts",
     "lib/util/package-rules.ts", // depends on config -> manager
     "lib/workers/repository/update/branch/artifacts.ts",

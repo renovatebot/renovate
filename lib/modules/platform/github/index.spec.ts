@@ -2045,7 +2045,7 @@ describe('modules/platform/github/index', () => {
       });
       expect(res).toBeDefined();
       res = await github.findPr({ branchName: 'branch-b' });
-      expect(res).toBeUndefined();
+      expect(res).toBeNull();
     });
   });
 
@@ -2507,8 +2507,8 @@ describe('modules/platform/github/index', () => {
       const prAfter = await github.getPr(1234); // obtained from cache
 
       expect(mergeResult).toBeTrue();
-      expect(prBefore.state).toBe(PrState.Open);
-      expect(prAfter.state).toBe(PrState.Merged);
+      expect(prBefore?.state).toBe(PrState.Open);
+      expect(prAfter?.state).toBe(PrState.Merged);
     });
 
     it('should handle merge error', async () => {
