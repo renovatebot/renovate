@@ -13,7 +13,7 @@ export * from './types';
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 export const getPlatforms = (): Map<string, Platform> => platforms;
 
-let _platform: Platform;
+let _platform: Platform | undefined;
 
 const handler: ProxyHandler<Platform> = {
   get(_target: Platform, prop: keyof Platform) {
@@ -40,7 +40,9 @@ export function setPlatformApi(name: string): void {
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey);
   setNoVerify(config.gitNoVerify ?? []);
-  setPlatformApi(config.platform);
+  // TODO: `platform` #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  setPlatformApi(config.platform!);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
@@ -55,11 +57,16 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    matchHost: URL.parse(returnConfig.endpoint).hostname,
+    // TODO: null check #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    matchHost: URL.parse(returnConfig.endpoint).hostname!,
   };
-  ['token', 'username', 'password'].forEach((field) => {
+  (
+    ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
+  ).forEach((field) => {
     if (config[field]) {
-      platformRule[field] = config[field];
+      // TODO: types #7154
+      platformRule[field] = config[field] as string;
       delete returnConfig[field];
     }
   });

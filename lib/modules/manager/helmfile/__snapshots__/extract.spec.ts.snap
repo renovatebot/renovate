@@ -116,7 +116,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "1.0.0",
-      "depName": "{{\`{{ .Release.Name }}\`}}",
+      "depName": "!!!!--!",
       "registryUrls": Array [
         "https://charts.helm.sh/stable",
       ],
