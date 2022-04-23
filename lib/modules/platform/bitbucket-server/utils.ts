@@ -167,7 +167,8 @@ function generateUrlFromEndpoint(
     protocol: url.protocol as GitProtocol,
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
-      url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      url.pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
     }scm`,
     repository,
   });

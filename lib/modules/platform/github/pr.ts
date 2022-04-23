@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -9,14 +10,42 @@ import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
 import type { ApiPageCache, GhRestPr } from './types';
 
+function removeUrlFields(input: unknown): void {
+  if (is.plainObject(input)) {
+    for (const [key, val] of Object.entries(input)) {
+      if ((key === 'url' || key.endsWith('_url')) && is.string(val)) {
+        delete input[key];
+      } else {
+        removeUrlFields(val);
+      }
+    }
+  }
+}
+
+function massageGhRestPr(ghPr: GhRestPr): GhRestPr {
+  removeUrlFields(ghPr);
+  delete ghPr?.head?.repo?.pushed_at;
+  delete ghPr?.base?.repo?.pushed_at;
+  delete ghPr?._links;
+  return ghPr;
+}
+
 function getPrApiCache(): ApiCache<GhRestPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
   repoCache.platform.github.prCache ??= { items: {} };
-  const prCache = new ApiCache(
-    repoCache.platform.github.prCache as ApiPageCache<GhRestPr>
-  );
+  const apiPageCache = repoCache.platform.github
+    .prCache as ApiPageCache<GhRestPr>;
+
+  const items = Object.values(apiPageCache.items);
+  if (items?.[0]?._links) {
+    for (const ghPr of items) {
+      massageGhRestPr(ghPr);
+    }
+  }
+
+  const prCache = new ApiCache(apiPageCache);
   return prCache;
 }
 
@@ -68,7 +97,7 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
+      const urlPath = `repos/${repo}/pulls?per_page=20&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
@@ -100,6 +129,10 @@ export async function getPrCache(
         page = page.filter(
           (ghPr) => ghPr?.user?.login && ghPr.user.login === username
         );
+      }
+
+      for (const ghPr of page) {
+        massageGhRestPr(ghPr);
       }
 
       needNextPageSync = prApiCache.reconcile(page);

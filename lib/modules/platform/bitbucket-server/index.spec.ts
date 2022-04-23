@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as httpMock from '../../../../test/http-mock';
 import {
   REPOSITORY_CHANGED,
@@ -56,7 +57,7 @@ function repoMock(
             name: 'ssh',
           }
         : null,
-    ].filter(Boolean);
+    ].filter(is.truthy);
   }
 
   return {
@@ -1226,7 +1227,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest1',
             })
-          ).toBeUndefined();
+          ).toBeNull();
         });
       });
 
@@ -1268,7 +1269,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               state: PrState.Closed,
             })
-          ).toBeUndefined();
+          ).toBeNull();
         });
       });
 
