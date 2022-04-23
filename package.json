@@ -182,7 +182,7 @@
     "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.1",
     "luxon": "2.3.1",
-    "markdown-it": "12.3.2",
+    "markdown-it": "13.0.0",
     "markdown-table": "2.0.0",
     "marshal": "0.5.4",
     "minimatch": "5.0.1",
