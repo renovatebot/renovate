@@ -17,7 +17,7 @@ async function createCacheRecord(
 ): Promise<RepoCacheRecord> {
   const revision = CACHE_REVISION;
   const jsonStr = JSON.stringify(data);
-  const hash = hasha(jsonStr, { algorithm: 'sha1' });
+  const hash = hasha(jsonStr, { algorithm: 'sha256' });
   const compressed = await compress(jsonStr);
   const payload = compressed.toString('base64');
   const record: RepoCacheRecord = { revision, repository, payload, hash };
