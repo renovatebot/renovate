@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import snappy from 'snappy';
+import snappy from 'snappyjs';
 import type { RepoCacheData, RepoCacheRecord } from './types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
@@ -48,7 +48,8 @@ export function isValidRev12(
 
 export async function encodePayload(input: RepoCacheData): Promise<string> {
   const jsonStr = JSON.stringify(input);
-  const compressed = await snappy.compress(jsonStr);
+  const jsonBuf = Buffer.from(jsonStr);
+  const compressed = await snappy.compress(jsonBuf);
   const result = compressed.toString('base64');
   return result;
 }
