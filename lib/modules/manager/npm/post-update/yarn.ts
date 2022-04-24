@@ -92,7 +92,7 @@ export async function generateLockFile(
       if (isYarn1) {
         preCommands.push(`npm i -g yarn@${quote(yarnCompatibility)}`);
       } else {
-        let yarnVersion: string;
+        let yarnVersion: string | null = null;
         if (semver.valid(yarnCompatibility)) {
           yarnVersion = yarnCompatibility;
         } else {
