@@ -1,5 +1,5 @@
 export interface MavenProp {
   val: string;
   fileReplacePosition: number;
-  packageFile: string;
+  packageFile?: string | null;
 }

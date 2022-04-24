@@ -46,8 +46,14 @@ export interface RepoCacheData {
   prComments?: Record<number, Record<string, string>>;
 }
 
-export interface RepoCache {
+export interface RepoCacheRecord {
   repository: string;
   revision: number;
   data: RepoCacheData;
+}
+
+export interface RepoCache {
+  load(): Promise<void>;
+  save(): Promise<void>;
+  getData(): RepoCacheData;
 }

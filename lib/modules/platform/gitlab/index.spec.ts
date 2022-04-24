@@ -165,7 +165,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ]);
       const repos = await gitlab.getRepos();
-      expect(repos).toMatchSnapshot();
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
 
@@ -173,7 +173,7 @@ describe('modules/platform/gitlab/index', () => {
     repoParams: RepoParams = {
       repository: 'some/repo',
     },
-    repoResp = null,
+    repoResp: httpMock.Body | null = null,
     scope = httpMock.scope(gitlabApiHost)
   ): Promise<httpMock.Scope> {
     const repo = repoParams.repository;
@@ -1725,7 +1725,7 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBeFalse();
+      expect(pr?.hasAssignees).toBeFalse();
     });
 
     it('removes draft prefix from returned title', async () => {
@@ -1748,7 +1748,7 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.title).toBe('do something');
+      expect(pr?.title).toBe('do something');
     });
 
     it('removes deprecated draft prefix from returned title', async () => {
@@ -1771,7 +1771,7 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.title).toBe('do something');
+      expect(pr?.title).toBe('do something');
     });
 
     it('returns the mergeable PR', async () => {
@@ -1795,7 +1795,7 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBeTrue();
+      expect(pr?.hasAssignees).toBeTrue();
     });
 
     it('returns the PR with nonexisting branch', async () => {
@@ -1822,7 +1822,7 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBeTrue();
+      expect(pr?.hasAssignees).toBeTrue();
     });
   });
 
@@ -2113,11 +2113,11 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(200, {
           availability: 'not_set',
         });
-      const filteredUsers = await gitlab.filterUnavailableUsers([
+      const filteredUsers = await gitlab.filterUnavailableUsers?.([
         'maria',
         'john',
       ]);
-      expect(filteredUsers).toMatchSnapshot();
+      expect(filteredUsers).toEqual(['john']);
     });
 
     it('keeps users with missing availability', async () => {
@@ -2125,8 +2125,8 @@ These updates have all been created already. Click a checkbox below to force a r
         .scope(gitlabApiHost)
         .get('/api/v4/users/maria/status')
         .reply(200, {});
-      const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
-      expect(filteredUsers).toMatchSnapshot();
+      const filteredUsers = await gitlab.filterUnavailableUsers?.(['maria']);
+      expect(filteredUsers).toEqual(['maria']);
     });
 
     it('keeps users with failing requests', async () => {
@@ -2134,8 +2134,8 @@ These updates have all been created already. Click a checkbox below to force a r
         .scope(gitlabApiHost)
         .get('/api/v4/users/maria/status')
         .reply(404);
-      const filteredUsers = await gitlab.filterUnavailableUsers(['maria']);
-      expect(filteredUsers).toMatchSnapshot();
+      const filteredUsers = await gitlab.filterUnavailableUsers?.(['maria']);
+      expect(filteredUsers).toEqual(['maria']);
     });
   });
 });

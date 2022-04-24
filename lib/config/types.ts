@@ -23,6 +23,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
   manager?: string;
@@ -107,6 +108,7 @@ export interface RepoGlobalConfig {
   dockerUser?: string;
   dryRun?: DryRunConfig;
   executionTimeout?: number;
+  gitTimeout?: number;
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;

@@ -24,7 +24,15 @@ export interface GhRestPr {
   head: {
     ref: string;
     sha: string;
-    repo: { full_name: string };
+    repo: {
+      full_name: string;
+      pushed_at?: string;
+    };
+  };
+  base: {
+    repo: {
+      pushed_at?: string;
+    };
   };
   mergeable_state: string;
   number: number;
@@ -41,6 +49,7 @@ export interface GhRestPr {
   assignees?: { login?: string }[];
   requested_reviewers?: { login?: string }[];
   labels?: { name: string }[];
+  _links?: unknown;
 }
 
 export interface GhGraphQlPr {
@@ -82,16 +91,16 @@ export interface LocalRepoConfig {
   pushProtection: boolean;
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
-  parentRepo: string;
+  parentRepo: string | null;
   forkMode?: boolean;
   forkToken?: string;
-  prList?: Pr[];
+  prList: Pr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
-  renovateUsername: string;
+  renovateUsername: string | undefined;
   productLinks: any;
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;

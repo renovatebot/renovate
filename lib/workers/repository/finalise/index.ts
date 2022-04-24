@@ -18,7 +18,7 @@ export async function finaliseRepo(
     }
   }
   await ensureConfigMigrationPr(config);
-  await repositoryCache.finalize();
+  await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
   await platform.ensureIssueClosing(
     `Action Required: Fix Renovate Configuration`

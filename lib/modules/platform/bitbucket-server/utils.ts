@@ -175,7 +175,8 @@ export function getRepoGitUrl(
       protocol: defaultEndpoint.split(':')[0] as GitProtocol,
       auth: `${opts.username}:${opts.password}`,
       host: `${host}${pathname}${
-        pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
       }scm`,
       repository,
     });
