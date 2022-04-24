@@ -12,7 +12,7 @@ describe('modules/manager/gitlabci/utils', () => {
       ${'group proxy with brackets'} | ${'${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/'}
       ${'direct group proxy'}        | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/'}
     `('offical image - $name', ({ imagePrefix }: { imagePrefix: string }) => {
-      const imageName = imagePrefix + 'mariadb:10.4.11';
+      const imageName = `${imagePrefix}mariadb:10.4.11`;
       expect(getGitlabDep(imageName)).toMatchObject({
         autoReplaceStringTemplate:
           imagePrefix + defaultAutoReplaceStringTemplate,
@@ -31,7 +31,7 @@ describe('modules/manager/gitlabci/utils', () => {
     `(
       'image with organization - $name',
       ({ imagePrefix }: { imagePrefix: string }) => {
-        const imageName = imagePrefix + 'renovate/renovate:19.70.8-slim';
+        const imageName = `${imagePrefix}renovate/renovate:19.70.8-slim`;
         expect(getGitlabDep(imageName)).toMatchObject({
           autoReplaceStringTemplate:
             imagePrefix + defaultAutoReplaceStringTemplate,
@@ -50,15 +50,6 @@ describe('modules/manager/gitlabci/utils', () => {
         replaceString: 'quay.io/prometheus/node-exporter:v1.3.1',
         depName: 'quay.io/prometheus/node-exporter',
         currentValue: 'v1.3.1',
-      });
-    });
-
-    it('empty', () => {
-      expect(getGitlabDep('')).toMatchObject({
-        autoReplaceStringTemplate: defaultAutoReplaceStringTemplate,
-        replaceString: '',
-        depName: '',
-        currentValue: undefined,
       });
     });
   });
