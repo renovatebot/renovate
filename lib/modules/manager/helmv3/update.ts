@@ -12,7 +12,7 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump Chart.yaml version'
   );
-  let newChartVersion: string;
+  let newChartVersion: string | null;
   let bumpedContent = content;
   try {
     newChartVersion = semver.inc(currentValue, bumpVersion as ReleaseType);

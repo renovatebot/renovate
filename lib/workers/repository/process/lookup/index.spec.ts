@@ -60,6 +60,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = 'does not exist';
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
+
     it('returns rollback for pinned version', async () => {
       config.currentValue = '0.9.99';
       config.depName = 'q';
@@ -71,6 +72,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
       config.depName = 'q';
@@ -81,6 +83,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^0.9.7', updateType: 'rollback' },
       ]);
     });
+
     it('supports minor and major upgrades for tilde ranges', async () => {
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'pin';
@@ -93,6 +96,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('supports lock file updates mixed with regular updates', async () => {
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'update-lockfile';
@@ -107,6 +111,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^1.0.0', updateType: 'major' },
       ]);
     });
+
     it('returns multiple updates if grouping but separateMajorMinor=true', async () => {
       config.groupName = 'somegroup';
       config.currentValue = '0.4.0';
@@ -118,6 +123,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(2);
     });
+
     it('returns additional update if grouping but separateMinorPatch=true', async () => {
       config.groupName = 'somegroup';
       config.currentValue = '0.4.0';
@@ -130,6 +136,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(3);
     });
+
     it('returns one update if grouping and separateMajorMinor=false', async () => {
       config.groupName = 'somegroup';
       config.currentValue = '0.4.0';
@@ -142,6 +149,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
     });
+
     it('returns both updates if automerging minor', async () => {
       config.minor = { automerge: true };
       config.currentValue = '^0.4.0';
@@ -155,6 +163,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('enforces allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '<1';
@@ -163,6 +172,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+
     it('enforces allowedVersions with regex', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '/^0/';
@@ -171,6 +181,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+
     it('enforces allowedVersions with negative regex', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '!/^1/';
@@ -179,6 +190,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+
     it('falls back to semver syntax allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '<1';
@@ -188,6 +200,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+
     it('falls back to pep440 syntax allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '==0.9.4';
@@ -197,6 +210,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+
     it('skips invalid allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = 'less than 1';
@@ -207,6 +221,7 @@ describe('workers/repository/process/lookup/index', () => {
         Error(CONFIG_VALIDATION)
       );
     });
+
     it('returns patch update even if separate patches not configured', async () => {
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
@@ -219,6 +234,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].updateType).toBe('patch');
       expect(res.updates[1].updateType).toBe('major');
     });
+
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
         automerge: true,
@@ -235,6 +251,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toBe('patch');
     });
+
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;
       config.currentValue = '0.9.0';
@@ -247,6 +264,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('returns patch minor and major', async () => {
       config.separateMinorPatch = true;
       config.currentValue = '0.8.0';
@@ -258,6 +276,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(3);
       expect(res.updates).toMatchSnapshot();
     });
+
     it('disables major release separation (major)', async () => {
       config.separateMajorMinor = false;
       config.currentValue = '^0.4.0';
@@ -270,6 +289,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('disables major release separation (minor)', async () => {
       config.separateMajorMinor = false;
       config.currentValue = '1.0.0';
@@ -281,6 +301,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('uses minimum version for vulnerabilityAlerts', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
@@ -291,6 +312,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+
     it('supports minor and major upgrades for ranged versions', async () => {
       config.currentValue = '~0.4.0';
       config.rangeStrategy = 'pin';
@@ -303,6 +325,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('ignores pinning for ranges when other upgrade exists', async () => {
       config.currentValue = '~0.9.0';
       config.rangeStrategy = 'pin';
@@ -314,6 +337,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'major' },
       ]);
     });
+
     it('upgrades minor ranged versions', async () => {
       config.currentValue = '~1.0.0';
       config.rangeStrategy = 'pin';
@@ -325,6 +349,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('handles update-lockfile', async () => {
       config.currentValue = '^1.2.1';
       config.lockedVersion = '1.2.1';
@@ -385,6 +410,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].newValue).toBeUndefined();
       expect(res.updates[0].updateType).toBe('minor');
     });
+
     it('widens minor ranged versions if configured', async () => {
       config.currentValue = '~1.3.0';
       config.rangeStrategy = 'widen';
@@ -395,6 +421,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.3.0 || ~1.4.0', updateType: 'minor' },
       ]);
     });
+
     it('replaces minor complex ranged versions if configured', async () => {
       config.currentValue = '~1.2.0 || ~1.3.0';
       config.rangeStrategy = 'replace';
@@ -405,6 +432,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.4.0', updateType: 'minor' },
       ]);
     });
+
     it('widens major ranged versions if configured', async () => {
       config.currentValue = '^2.0.0';
       config.rangeStrategy = 'widen';
@@ -418,6 +446,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^2.0.0 || ^3.0.0', updateType: 'major' },
       ]);
     });
+
     it('replaces major complex ranged versions if configured', async () => {
       config.currentValue = '^1.0.0 || ^2.0.0';
       config.rangeStrategy = 'replace';
@@ -431,6 +460,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^3.0.0', updateType: 'major' },
       ]);
     });
+
     it('pins minor ranged versions', async () => {
       config.currentValue = '^1.0.0';
       config.rangeStrategy = 'pin';
@@ -441,6 +471,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'pin' },
       ]);
     });
+
     it('uses the locked version for pinning', async () => {
       config.currentValue = '^1.0.0';
       config.lockedVersion = '1.0.0';
@@ -453,6 +484,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('ignores minor ranged versions when not pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^1.0.0';
@@ -461,6 +493,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
+
     it('ignores minor ranged versions when locked', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^1.0.0';
@@ -470,6 +503,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
+
     it('upgrades tilde ranges', async () => {
       config.rangeStrategy = 'pin';
       config.currentValue = '~1.3.0';
@@ -481,6 +515,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('upgrades .x minor ranges', async () => {
       config.currentValue = '1.3.x';
       config.rangeStrategy = 'pin';
@@ -492,6 +527,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('upgrades tilde ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~1.3.0';
@@ -502,6 +538,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.4.0', updateType: 'minor' },
       ]);
     });
+
     it('upgrades .x major ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '0.x';
@@ -512,6 +549,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.x', updateType: 'major' },
       ]);
     });
+
     it('upgrades .x minor ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '1.3.x';
@@ -522,6 +560,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.x', updateType: 'minor' },
       ]);
     });
+
     it('upgrades .x complex minor ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1.2.x - 1.3.x';
@@ -532,6 +571,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.2.x - 1.4.x', updateType: 'minor' },
       ]);
     });
+
     it('upgrades shorthand major ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '0';
@@ -542,6 +582,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1', updateType: 'major' },
       ]);
     });
+
     it('upgrades shorthand minor ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '1.3';
@@ -552,6 +593,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4', updateType: 'minor' },
       ]);
     });
+
     it('upgrades multiple tilde ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.7.0';
@@ -563,6 +605,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.4.0', updateType: 'major' },
       ]);
     });
+
     it('upgrades multiple caret ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.7.0';
@@ -574,6 +617,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^1.0.0', updateType: 'major' },
       ]);
     });
+
     it('supports complex ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '^0.7.0 || ^0.8.0';
@@ -587,6 +631,7 @@ describe('workers/repository/process/lookup/index', () => {
         updateType: 'minor',
       });
     });
+
     it('supports complex major ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '^1.0.0 || ^2.0.0';
@@ -603,6 +648,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
       ]);
     });
+
     it('supports complex major hyphen ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1.x - 2.x';
@@ -616,6 +662,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.x - 3.x', updateType: 'major' },
       ]);
     });
+
     it('widens .x OR ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1.x || 2.x';
@@ -629,6 +676,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.x || 2.x || 3.x', updateType: 'major' },
       ]);
     });
+
     it('widens stanndalone major OR ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1 || 2';
@@ -642,6 +690,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1 || 2 || 3', updateType: 'major' },
       ]);
     });
+
     it('supports complex tilde ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '~1.2.0 || ~1.3.0';
@@ -652,6 +701,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.2.0 || ~1.3.0 || ~1.4.0', updateType: 'minor' },
       ]);
     });
+
     it('returns nothing for greater than ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '>= 0.7.0';
@@ -660,6 +710,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
+
     it('upgrades less than equal ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 0.7.2';
@@ -671,6 +722,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '<= 1.4.1', updateType: 'major' },
       ]);
     });
+
     it('upgrades less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '< 0.7.2';
@@ -682,6 +734,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '< 1.4.2', updateType: 'major' },
       ]);
     });
+
     it('upgrades less than major ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '< 1';
@@ -692,6 +745,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '< 2', updateType: 'major' },
       ]);
     });
+
     it('upgrades less than equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 1.3';
@@ -702,6 +756,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '<= 1.4', updateType: 'minor' },
       ]);
     });
+
     it('upgrades equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '=1.3.1';
@@ -712,6 +767,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '=1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('upgrades less than equal major ranges', async () => {
       config.rangeStrategy = 'replace';
       config.respectLatest = false;
@@ -723,6 +779,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '<= 2', updateType: 'major' },
       ]);
     });
+
     it('upgrades major less than equal ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 1.0.0';
@@ -733,6 +790,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toBe('<= 1.4.1');
     });
+
     it('upgrades major less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '< 1.0.0';
@@ -743,6 +801,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toBe('< 2.0.0');
     });
+
     it('upgrades major greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '>= 0.5.0 < 1.0.0';
@@ -753,6 +812,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toBe('>= 0.5.0 < 2.0.0');
     });
+
     it('upgrades minor greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '>= 0.5.0 <0.8';
@@ -764,6 +824,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].newValue).toBe('>= 0.5.0 <0.10');
       expect(res.updates[1].newValue).toBe('>= 0.5.0 <1.5');
     });
+
     it('upgrades minor greater than less than equals ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '>= 0.5.0 <= 0.8.0';
@@ -775,6 +836,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].newValue).toBe('>= 0.5.0 <= 0.9.7');
       expect(res.updates[1].newValue).toBe('>= 0.5.0 <= 1.4.1');
     });
+
     it('rejects reverse ordered less than greater than', async () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '<= 0.8.0 >= 0.5.0';
@@ -784,6 +846,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot([]);
     });
+
     it('supports > latest versions if configured', async () => {
       config.respectLatest = false;
       config.currentValue = '1.4.1';
@@ -794,6 +857,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '2.0.3', updateType: 'major' },
       ]);
     });
+
     it('should ignore unstable versions if the current version is stable', async () => {
       config.currentValue = '2.5.16';
       config.depName = 'vue';
@@ -804,6 +868,7 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(200, vueJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
+
     it('should ignore unstable versions from datasource', async () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
@@ -884,6 +949,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toBe('2.5.17-beta.0');
     });
+
     it('should allow unstable versions if the current version is unstable', async () => {
       config.currentValue = '3.1.0-dev.20180731';
       config.depName = 'typescript';
@@ -897,6 +963,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toBe('3.1.0-dev.20180813');
     });
+
     it('should not jump unstable versions', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
       config.depName = 'typescript';
@@ -953,6 +1020,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
+
     it('should roll back to dist-tag if current version is higher', async () => {
       config.currentValue = '3.1.0-dev.20180813';
       config.depName = 'typescript';
@@ -968,6 +1036,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
+
     it('should jump unstable versions if followTag', async () => {
       config.currentValue = '3.0.0-insiders.20180706';
       config.depName = 'typescript';
@@ -982,6 +1051,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
+
     it('should update nothing if current version is dist-tag', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
       config.depName = 'typescript';
@@ -994,6 +1064,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
+
     it('should warn if no version matches dist-tag', async () => {
       config.currentValue = '3.0.1-dev.20180726';
       config.depName = 'typescript';
@@ -1011,6 +1082,7 @@ describe('workers/repository/process/lookup/index', () => {
         "Can't find version with tag foo for typescript"
       );
     });
+
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
@@ -1022,6 +1094,7 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
+
     it('should treat zero zero caret ranges as pinned', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.0.34';
@@ -1035,6 +1108,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^0.0.35', updateType: 'patch' },
       ]);
     });
+
     it('should downgrade from missing versions', async () => {
       config.currentValue = '1.16.1';
       config.depName = 'coffeelint';
@@ -1048,6 +1122,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0]).toMatchSnapshot();
     });
+
     it('should upgrade to only one major', async () => {
       config.currentValue = '1.0.0';
       config.depName = 'webpack';
@@ -1059,6 +1134,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(2);
     });
+
     it('should upgrade to two majors', async () => {
       config.currentValue = '1.0.0';
       config.separateMultipleMajor = true;
@@ -1071,6 +1147,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(3);
     });
+
     it('does not jump  major unstable', async () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
@@ -1083,6 +1160,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
+
     it('supports in-range caret updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '^1.0.0';
@@ -1093,6 +1171,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '^1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('supports in-range tilde updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '~1.0.0';
@@ -1105,6 +1184,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('supports in-range tilde patch updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '~1.0.0';
@@ -1117,6 +1197,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '~1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('supports in-range gte updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>=1.0.0';
@@ -1127,6 +1208,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '>=1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('supports majorgte updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>=0.9.0';
@@ -1138,6 +1220,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '>=1.4.1', updateType: 'major' },
       ]);
     });
+
     it('rejects in-range unsupported operator', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>1.0.0';
@@ -1146,6 +1229,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('rejects non-fully specified in-range updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '1.x';
@@ -1154,6 +1238,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('rejects complex range in-range updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '^0.9.0 || ^1.0.0';
@@ -1162,6 +1247,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('replaces non-range in-range updates', async () => {
       config.depName = 'q';
       config.datasource = NpmDatasource.id;
@@ -1173,6 +1259,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
+
     it('handles github 404', async () => {
       config.depName = 'foo';
       config.datasource = GithubTagsDatasource.id;
@@ -1181,6 +1268,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://pypi.org').get('/pypi/foo/json').reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('handles pypi 404', async () => {
       config.depName = 'foo';
       config.datasource = PypiDatasource.id;
@@ -1192,6 +1280,7 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('handles packagist', async () => {
       config.depName = 'foo/bar';
       config.datasource = PackagistDatasource.id;
@@ -1204,6 +1293,7 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('handles unknown datasource', async () => {
       config.depName = 'foo';
       config.datasource = 'typo';
@@ -1211,6 +1301,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '1.0.0';
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
+
     it('handles PEP440', async () => {
       config.manager = 'pip_requirements';
       config.versioning = pep440VersioningId;
@@ -1230,6 +1321,7 @@ describe('workers/repository/process/lookup/index', () => {
         { newValue: '==1.4.1', updateType: 'major' },
       ]);
     });
+
     it('returns complex object', async () => {
       config.currentValue = '1.3.0';
       config.depName = 'q';
@@ -1239,6 +1331,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
     });
+
     it('ignores deprecated', async () => {
       config.currentValue = '1.3.0';
       config.depName = 'q2';
@@ -1254,6 +1347,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.updates[0].newVersion).toBe('1.4.0');
     });
+
     it('is deprecated', async () => {
       config.currentValue = '1.3.0';
       config.depName = 'q3';
@@ -1273,6 +1367,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.updates[0].newVersion).toBe('1.4.1');
     });
+
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
@@ -1280,12 +1375,14 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
+
     it('skips undefined values', async () => {
       config.depName = 'node';
       config.datasource = DockerDatasource.id;
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
+
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';
@@ -1322,6 +1419,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
     });
+
     it('skips uncompatible versions for 8.1.0', async () => {
       config.currentValue = '8.1.0';
       config.depName = 'node';
@@ -1345,6 +1443,7 @@ describe('workers/repository/process/lookup/index', () => {
         updates: [{ newValue: '8.2.5', updateType: 'minor' }],
       });
     });
+
     it('skips uncompatible versions for 8.1', async () => {
       config.currentValue = '8.1';
       config.depName = 'node';
@@ -1371,6 +1470,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
     });
+
     it('skips uncompatible versions for 8', async () => {
       config.currentValue = '8';
       config.depName = 'node';
@@ -1394,6 +1494,7 @@ describe('workers/repository/process/lookup/index', () => {
         updates: [{ newValue: '9', updateType: 'major' }],
       });
     });
+
     it('handles digest pin for up to date version', async () => {
       config.currentValue = '8.1.0';
       config.depName = 'node';
@@ -1422,6 +1523,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
     });
+
     it('handles digest pin for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
@@ -1453,6 +1555,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
     });
+
     it('handles digest lookup failure', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
@@ -1475,6 +1578,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
+
     it('handles digest update', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';
@@ -1509,6 +1613,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
     });
+
     it('handles digest update for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
@@ -1540,6 +1645,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
     });
+
     it('handles git submodule update', async () => {
       jest.mock('../../../../modules/datasource/git-refs', () => ({
         GitRefsDatasource: jest.fn(() => ({
@@ -1580,6 +1686,7 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'git',
       });
     });
+
     it('handles sourceUrl packageRules with version restrictions', async () => {
       config.currentValue = '0.9.99';
       config.depName = 'q';

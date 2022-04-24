@@ -14,6 +14,7 @@ describe('config/presets/util', () => {
   beforeEach(() => {
     fetch.mockReset();
   });
+
   it('works', async () => {
     fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(await fetchPreset({ ...config, fetch })).toEqual({

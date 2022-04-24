@@ -11,6 +11,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type DryRunConfig = 'extract' | 'lookup' | 'full';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
@@ -22,6 +23,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
   manager?: string;
@@ -104,9 +106,11 @@ export interface RepoGlobalConfig {
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
-  dryRun?: boolean;
+  dryRun?: DryRunConfig;
   executionTimeout?: number;
+  gitTimeout?: number;
   exposeAllEnv?: boolean;
+  githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;
   privateKeyOld?: string;

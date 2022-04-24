@@ -12,6 +12,9 @@ export interface NpmPackage extends PackageJson {
   _args?: any;
   _id?: any;
   dependenciesMeta?: DependenciesMeta;
+  packageManager?: string;
+
+  volta?: PackageJson.Dependency;
 }
 
 export type LockFileEntry = Record<

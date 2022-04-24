@@ -18,6 +18,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
@@ -25,11 +26,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         repository: 'some/repo',
       };
     });
+
     it('does not rebase modified branch', async () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
+
     it('does nothing if branch is up to date', async () => {
       const contents =
         JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
@@ -39,11 +42,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
+
     it('rebases onboarding branch', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
+
     it('rebases via platform', async () => {
       platform.commitFiles = jest.fn();
       config.platformCommit = true;
@@ -51,6 +56,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       await rebaseOnboardingBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
     });
+
     it('uses the onboardingConfigFileName if set', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch({
@@ -65,6 +71,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         '.github/renovate.json'
       );
     });
+
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch({

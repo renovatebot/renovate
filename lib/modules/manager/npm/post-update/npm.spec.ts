@@ -22,6 +22,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
+
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -42,6 +43,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -61,6 +63,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lock file updates retaining the package.json counterparts', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() =>
@@ -88,6 +91,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs npm-shrinkwrap.json updates', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.pathExists.mockResolvedValueOnce(true);
@@ -117,6 +121,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.pathExists.mockResolvedValueOnce(false);
@@ -142,6 +147,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs full install', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -158,6 +164,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('runs twice if remediating', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -174,6 +181,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
   });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => {
@@ -189,6 +197,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('finds npm globally', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -201,6 +210,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('uses docker npm', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -214,6 +224,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;

@@ -32,7 +32,7 @@ function getDeps(
     const dep: PackageDependency = { ...preset, depName, currentValue };
 
     return [...acc, dep];
-  }, []);
+  }, [] as PackageDependency[]);
 }
 
 export function extractPackageFile(

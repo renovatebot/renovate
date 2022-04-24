@@ -158,12 +158,11 @@ describe('modules/datasource/nuget/index', () => {
         depName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
       };
-      await getPkgReleases({
-        ...config,
-      });
-      const trace = httpMock.getTrace();
-      expect(trace[0].url).toBe('https://my-registry/');
-      expect(trace).toMatchSnapshot();
+      expect(
+        await getPkgReleases({
+          ...config,
+        })
+      ).toBeNull();
     });
 
     it(`can't get packages list (v3)`, async () => {
@@ -179,8 +178,8 @@ describe('modules/datasource/nuget/index', () => {
       });
 
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it(`empty packages list (v3)`, async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -194,7 +193,6 @@ describe('modules/datasource/nuget/index', () => {
       });
 
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for empty result (v3v2)', async () => {
@@ -213,8 +211,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV3V2,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for empty result (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -227,8 +225,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV2,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for empty result (v3)', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -238,7 +236,6 @@ describe('modules/datasource/nuget/index', () => {
         ...configV3,
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for non 200 (v3v2)', async () => {
@@ -254,8 +251,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV3V2,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for non 200 (v3)', async () => {
       httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
       expect(
@@ -263,8 +260,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV3,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for non 200 (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -277,7 +274,6 @@ describe('modules/datasource/nuget/index', () => {
           ...configV2,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for unknown error (v3v2)', async () => {
@@ -296,8 +292,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV3V2,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns deduplicated results', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -322,8 +318,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(45);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for unknown error in getReleasesFromV3Feed (v3)', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -334,8 +330,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV3,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for unknown error in getQueryUrlForV3Feed  (v3)', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -348,8 +344,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV3,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for unknown error (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -362,8 +358,8 @@ describe('modules/datasource/nuget/index', () => {
           ...configV2,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data (v3) feed is a nuget.org', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -380,8 +376,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data (v3) for several catalog pages', async () => {
       const scope = httpMock
         .scope('https://api.nuget.org')
@@ -398,8 +394,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data (v3) feed is not a nuget.org', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -426,9 +422,9 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
     });
+
     it('processes real data (v3) nuspec fetch error', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -445,8 +441,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data (v3) nuspec fetch 404 error', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -463,8 +459,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -478,8 +474,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data no relase (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -491,8 +487,8 @@ describe('modules/datasource/nuget/index', () => {
         ...configV2,
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data without project url (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -506,8 +502,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data with no github project url (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -520,8 +516,8 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('handles paginated results (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
@@ -538,7 +534,6 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

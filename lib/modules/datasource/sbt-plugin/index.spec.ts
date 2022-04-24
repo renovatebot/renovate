@@ -166,6 +166,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         releases: [{ version: '0.5.5' }],
       });
     });
+
     it('fetches sbt plugins 2', async () => {
       expect(
         await getPkgReleases({

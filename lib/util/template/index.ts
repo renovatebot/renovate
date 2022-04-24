@@ -17,6 +17,8 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
+handlebars.registerHelper('lowercase', (str: string) => str.toLowerCase());
+
 handlebars.registerHelper('containsString', (str, subStr, options) =>
   str.includes(subStr)
 );

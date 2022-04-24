@@ -30,6 +30,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
     });
+
     it('handles lockFileMaintenance', () => {
       const branch = [
         {
@@ -52,6 +53,7 @@ describe('workers/repository/updates/generate', () => {
         ],
       });
     });
+
     it('handles lockFileUpdate', () => {
       const branch = [
         {
@@ -90,6 +92,7 @@ describe('workers/repository/updates/generate', () => {
         ],
       });
     });
+
     it('does not group same upgrades', () => {
       const branch = [
         {
@@ -117,6 +120,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
     });
+
     it('groups multiple upgrades same version', () => {
       const branch = [
         {
@@ -185,6 +189,7 @@ describe('workers/repository/updates/generate', () => {
         bar: '2.0.0',
       });
     });
+
     it('groups multiple upgrades different version', () => {
       const branch = [
         {
@@ -225,6 +230,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
+
     it('groups multiple upgrades different version but same value', () => {
       const branch = [
         {
@@ -265,6 +271,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
+
     it('groups multiple upgrades different value but same version', () => {
       const branch = [
         {
@@ -305,6 +312,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
+
     it('groups multiple digest updates', () => {
       const branch = [
         {
@@ -342,6 +350,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
     });
+
     it('pins digest to table', () => {
       const branch = [
         partial<LookupUpdate & BranchUpgradeConfig>({
@@ -357,6 +366,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.upgrades[0].displayFrom).toBe('');
       expect(res.upgrades[0].displayTo).toBe('abcdefg');
     });
+
     it('fixes different messages', () => {
       const branch = [
         {
@@ -394,6 +404,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
     });
+
     it('uses semantic commits', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
@@ -416,6 +427,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(package): update dependency some-dep to v1.2.0'
       );
     });
+
     it('scopes monorepo commits', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
@@ -438,6 +450,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
     });
+
     it('scopes monorepo commits with nested package files using parent directory', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
@@ -463,6 +476,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
+
     it('scopes monorepo commits with nested package files using base directory', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
@@ -487,6 +501,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
     });
+
     it('adds commit message body', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
@@ -502,6 +517,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.commitMessage).toMatchSnapshot();
       expect(res.commitMessage).toContain('\n');
     });
+
     it('supports manual prTitle', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
@@ -514,6 +530,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('upgrade some-dep');
     });
+
     it('handles @types specially', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -573,6 +590,7 @@ describe('workers/repository/updates/generate', () => {
         ],
       });
     });
+
     it('handles @types specially (reversed)', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -628,6 +646,7 @@ describe('workers/repository/updates/generate', () => {
         ],
       });
     });
+
     it('handles upgrades', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -676,6 +695,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toMatchSnapshot('some-title (patch)');
     });
+
     it('combines prBodyColumns', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -690,6 +710,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prBodyColumns).toEqual(['column-a', 'column-b', 'column-c']);
     });
+
     it('sorts upgrades, without position first', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -726,6 +747,7 @@ describe('workers/repository/updates/generate', () => {
         res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
       ).toStrictEqual([undefined, undefined, 4, 1]);
     });
+
     it('passes through pendingChecks', () => {
       const branch = [
         {
@@ -747,6 +769,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.pendingChecks).toBeTrue();
       expect(res.upgrades).toHaveLength(2);
     });
+
     it('filters pendingChecks', () => {
       const branch = [
         {
@@ -767,6 +790,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.pendingChecks).toBeUndefined();
       expect(res.upgrades).toHaveLength(1);
     });
+
     it('displays pending versions', () => {
       const branch = [
         {

@@ -1,6 +1,13 @@
+import { DateTime, Settings } from 'luxon';
 import { api as ubuntu } from '.';
 
 describe('modules/versioning/ubuntu/index', () => {
+  const dt = DateTime.fromISO('2022-04-20');
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test.each`
     version        | expected
     ${undefined}   | ${false}
@@ -79,7 +86,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish'}    | ${true}
     ${'jammy'}     | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    expect(!!ubuntu.isValid(version)).toBe(expected);
+    expect(ubuntu.isValid(version)).toBe(expected);
   });
 
   test.each`
@@ -94,8 +101,7 @@ describe('modules/versioning/ubuntu/index', () => {
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
-      const res = ubuntu.isCompatible(version, range);
-      expect(!!res).toBe(expected);
+      expect(ubuntu.isCompatible(version, range)).toBe(expected);
     }
   );
 
@@ -107,7 +113,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'20.04'}   | ${true}
     ${'>=20.04'} | ${false}
   `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!ubuntu.isSingleVersion(version)).toBe(expected);
+    expect(ubuntu.isSingleVersion(version)).toBe(expected);
   });
 
   test.each`
@@ -148,6 +154,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'19.10'}    | ${false}
     ${'20.04'}    | ${true}
     ${'20.10'}    | ${false}
+    ${'22.04'}    | ${false}
     ${'42.01'}    | ${false}
     ${'42.02'}    | ${false}
     ${'42.03'}    | ${false}
@@ -160,7 +167,6 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'42.10'}    | ${false}
     ${'42.11'}    | ${false}
     ${'2020.04'}  | ${false}
-    ${'22.04'}    | ${false}
     ${'warty'}    | ${false}
     ${'hoary'}    | ${false}
     ${'breezy'}   | ${false}
@@ -198,8 +204,8 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish'}   | ${false}
     ${'jammy'}    | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    const res = !!ubuntu.isStable(version);
-    expect(res).toBe(expected);
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    expect(ubuntu.isStable(version)).toBe(expected);
   });
 
   test.each`
@@ -252,7 +258,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish-'} | ${false}
     ${'JAMMY'}   | ${false}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!ubuntu.isVersion(version)).toBe(expected);
+    expect(ubuntu.isVersion(version)).toBe(expected);
   });
 
   test.each`

@@ -10,7 +10,11 @@ import type { PostUpdateConfig } from '../../../../../modules/manager/types';
 import * as _fs from '../../../../../util/fs/proxies';
 import * as _hostRules from '../../../../../util/host-rules';
 
-const config: PostUpdateConfig = getConfig();
+const config: PostUpdateConfig = {
+  ...getConfig(),
+  upgrades: [],
+  branchName: 'some-branch',
+};
 
 const fs = mocked(_fs);
 const lockFiles = mocked(_lockFiles);
@@ -36,11 +40,13 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       });
       fs.outputFile = jest.fn();
     });
+
     it('returns if no updated packageFiles', async () => {
       delete config.updatedPackageFiles;
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile).toHaveBeenCalledTimes(0);
     });
+
     it('returns if no updated packageFiles are package.json', async () => {
       config.updatedPackageFiles = [
         {
@@ -52,6 +58,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile).toHaveBeenCalledTimes(0);
     });
+
     it('writes updated packageFiles', async () => {
       config.updatedPackageFiles = [
         {
@@ -75,6 +82,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       expect(fs.outputFile).toHaveBeenCalledTimes(2);
     });
   });
+
   describe('getAdditionalFiles', () => {
     beforeEach(() => {
       GlobalConfig.set({
@@ -96,9 +104,11 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       lerna.generateLockFiles = jest.fn();
       lockFiles.determineLockFileDirs = jest.fn();
     });
+
     afterEach(() => {
       jest.resetAllMocks();
     });
+
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {
       config.updateLockFiles = false;
       const res = await getAdditionalFiles(config, { npm: [{}] });
@@ -106,6 +116,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       expect(res.artifactErrors).toHaveLength(0);
       expect(res.updatedArtifacts).toHaveLength(0);
     });
+
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
       config.reuseExistingBranch = true;
