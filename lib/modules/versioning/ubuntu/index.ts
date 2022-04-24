@@ -42,7 +42,9 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  if (!di.isReleased(ver)) {
+  const match = ver.match(regEx(/^\d+.\d+/));
+
+  if (!di.isReleased(match ? match[0] : ver)) {
     return false;
   }
 

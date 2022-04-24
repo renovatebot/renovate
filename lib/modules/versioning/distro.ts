@@ -19,6 +19,9 @@ export type DistroInfoRecord = Record<string, DistroSchedule>;
 
 export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
 
+// Days to delay new releases
+const delay = 1;
+
 export class DistroInfo {
   private readonly _codenameToVersion = new Map<
     string,
@@ -154,7 +157,7 @@ export class DistroInfo {
       return false;
     }
 
-    const now = DateTime.now().minus({ day: 1 }).toUTC();
+    const now = DateTime.now().minus({ day: delay }).toUTC();
     const release = DateTime.fromISO(schedule.release, { zone: 'utc' });
 
     return release < now;
