@@ -2,13 +2,20 @@ import { getGitlabDep } from './utils';
 
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {
+    const defaultAutoReplaceStringTemplate =
+      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+
     it.each`
-      name                        | imageName
-      ${'no variable'}            | ${'mariadb:10.4.11'}
-      ${'variable'}               | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11'}
-      ${'variable with brackets'} | ${'${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/mariadb:10.4.11'}
-    `('offical image - $name', ({ imageName }: { imageName: string }) => {
+      name                           | imagePrefix
+      ${'no variable'}               | ${''}
+      ${'group proxy'}               | ${'$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/'}
+      ${'group proxy with brackets'} | ${'${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/'}
+      ${'direct group proxy'}        | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/'}
+    `('offical image - $name', ({ imagePrefix }: { imagePrefix: string }) => {
+      const imageName = imagePrefix + 'mariadb:10.4.11';
       expect(getGitlabDep(imageName)).toMatchObject({
+        autoReplaceStringTemplate:
+          imagePrefix + defaultAutoReplaceStringTemplate,
         replaceString: imageName,
         depName: 'mariadb',
         currentValue: '10.4.11',
@@ -16,14 +23,18 @@ describe('modules/manager/gitlabci/utils', () => {
     });
 
     it.each`
-      name                        | imageName
-      ${'no variable'}            | ${'renovate/renovate:19.70.8-slim'}
-      ${'variable'}               | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/renovate/renovate:19.70.8-slim'}
-      ${'variable with brackets'} | ${'${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/renovate/renovate:19.70.8-slim'}
+      name                           | imagePrefix
+      ${'no variable'}               | ${''}
+      ${'group proxy'}               | ${'$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/'}
+      ${'group proxy with brackets'} | ${'${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/'}
+      ${'direct group proxy'}        | ${'$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/'}
     `(
-      'image with organization - %s',
-      ({ imageName }: { imageName: string }) => {
+      'image with organization - $name',
+      ({ imagePrefix }: { imagePrefix: string }) => {
+        const imageName = imagePrefix + 'renovate/renovate:19.70.8-slim';
         expect(getGitlabDep(imageName)).toMatchObject({
+          autoReplaceStringTemplate:
+            imagePrefix + defaultAutoReplaceStringTemplate,
           replaceString: imageName,
           depName: 'renovate/renovate',
           currentValue: '19.70.8-slim',
@@ -35,6 +46,7 @@ describe('modules/manager/gitlabci/utils', () => {
       expect(
         getGitlabDep('quay.io/prometheus/node-exporter:v1.3.1')
       ).toMatchObject({
+        autoReplaceStringTemplate: defaultAutoReplaceStringTemplate,
         replaceString: 'quay.io/prometheus/node-exporter:v1.3.1',
         depName: 'quay.io/prometheus/node-exporter',
         currentValue: 'v1.3.1',
@@ -43,6 +55,7 @@ describe('modules/manager/gitlabci/utils', () => {
 
     it('empty', () => {
       expect(getGitlabDep('')).toMatchObject({
+        autoReplaceStringTemplate: defaultAutoReplaceStringTemplate,
         replaceString: '',
         depName: '',
         currentValue: undefined,

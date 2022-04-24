@@ -180,6 +180,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(res.deps).toEqual([
         {
           autoReplaceStringTemplate:
+            '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/' +
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '31.65.1-slim',
@@ -191,6 +192,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
         {
           autoReplaceStringTemplate:
+            '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/' +
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '10.4.11',
@@ -202,6 +204,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
         {
           autoReplaceStringTemplate:
+            '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/' +
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '1.0.0',

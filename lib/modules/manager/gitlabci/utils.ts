@@ -16,7 +16,7 @@ export function replaceReferenceTags(content: string): string {
 }
 
 const depProxyRe = regEx(
-  `(?:\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)?(?<depName>.+)`
+  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)?(?<depName>.+)`
 );
 
 /**
@@ -27,7 +27,10 @@ const depProxyRe = regEx(
 export function getGitlabDep(imageName: string): PackageDependency {
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
-    return { ...getDep(match.groups.depName), replaceString: imageName };
+    const dep = { ...getDep(match.groups.depName), replaceString: imageName };
+    dep.autoReplaceStringTemplate =
+      (match.groups.prefix ?? '') + dep.autoReplaceStringTemplate;
+    return dep;
   } else {
     return getDep(imageName);
   }
