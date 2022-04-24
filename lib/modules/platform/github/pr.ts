@@ -62,17 +62,12 @@ function getPrApiCache(): ApiCache<GhRestPr> {
  * In order synchronize ApiCache properly, we handle 3 cases:
  *
  *   a. We never fetched PR list for this repo before.
- *      This is detected by `etag` presense in the cache.
+ *      If cached PR list is empty, we assume it's the case.
  *
  *      In this case, we're falling back to quick fetch via
  *      `paginate=true` option (see `util/http/github.ts`).
  *
- *   b. None of PRs has changed since last run.
- *
- *      We detect this by setting `If-None-Match` HTTP header
- *      with the `etag` value from the previous run.
- *
- *   c. Some of PRs had changed since last run.
+ *   b. Some of PRs had changed since last run.
  *
  *      In this case, we sequentially fetch page by page
  *      until `ApiCache.coerce` function indicates that
@@ -101,10 +96,7 @@ export async function getPrCache(
 
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
-        const oldEtag = prApiCache.etag;
-        if (oldEtag) {
-          opts.headers = { 'If-None-Match': oldEtag };
-        } else {
+        if (is.emptyArray(prApiCache.getItems())) {
           // Speed up initial fetch
           opts.paginate = true;
         }
@@ -114,13 +106,8 @@ export async function getPrCache(
       apiQuotaAffected = true;
       requestsTotal += 1;
 
-      if (pageIdx === 1 && res.statusCode === 304) {
-        apiQuotaAffected = false;
-        break;
-      }
-
       const {
-        headers: { link: linkHeader, etag: newEtag },
+        headers: { link: linkHeader },
       } = res;
 
       let { body: page } = res;
@@ -139,10 +126,6 @@ export async function getPrCache(
       needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
       if (pageIdx === 1) {
-        if (newEtag) {
-          prApiCache.etag = newEtag;
-        }
-
         needNextPageFetch &&= !opts.paginate;
       }
 

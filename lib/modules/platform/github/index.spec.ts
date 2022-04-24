@@ -618,26 +618,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
     });
 
-    it('uses ETag', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      initRepoMock(scope, 'some/repo');
-      scope
-        .get(pagePath(1))
-        .reply(200, [pr3, pr2, pr1], { etag: 'foobar' })
-        .get(pagePath(1))
-        .reply(304);
-
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const res1 = await github.getPrList();
-
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const res2 = await github.getPrList();
-
-      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
-      expect(res1).toEqual(res2);
-    });
-
     it('synchronizes cache', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -647,7 +627,6 @@ describe('modules/platform/github/index', () => {
         .get(pagePath(1))
         .reply(200, [pr3], {
           link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
-          etag: 'foo',
         })
         .get(pagePath(2))
         .reply(200, [pr2])
@@ -661,7 +640,6 @@ describe('modules/platform/github/index', () => {
         .get(pagePath(1))
         .reply(200, [{ ...pr3, updated_at: t4, title: 'PR #3 (updated)' }], {
           link: `${pageLink(2)}`,
-          etag: 'bar',
         })
         .get(pagePath(2))
         .reply(200, [{ ...pr2, updated_at: t4, title: 'PR #2 (updated)' }], {
