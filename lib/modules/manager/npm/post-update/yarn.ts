@@ -82,6 +82,7 @@ export async function generateLockFile(
       semver.validRange(yarnCompatibility) &&
       semver.minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
+    const isYarn2 = !minYarnVersion || minYarnVersion.major > 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
     const isYarnModeAvailable =
@@ -91,7 +92,7 @@ export async function generateLockFile(
     if (minYarnVersion && !yarnUpdate) {
       if (isYarn1) {
         preCommands.push(`npm i -g yarn@${quote(yarnCompatibility)}`);
-      } else {
+      } else if (isYarn2) {
         let yarnVersion: string | null = null;
         if (semver.valid(yarnCompatibility)) {
           yarnVersion = yarnCompatibility;

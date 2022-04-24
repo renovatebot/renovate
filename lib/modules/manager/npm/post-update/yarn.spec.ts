@@ -6,6 +6,7 @@ import {
   mockExecAll,
 } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
+import * as httpMock from '../../../../../test/http-mock';
 import { mocked } from '../../../../../test/util';
 import * as _env from '../../../../util/exec/env';
 import * as yarnHelper from './yarn';
@@ -38,13 +39,13 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it.each([
-    ['1.22.0', '^1.10.0', 2],
-    ['2.1.0', '>= 2.0.0', 1],
-    ['2.2.0', '2.2.0', 1],
-    ['3.0.0', '3.0.0', 1],
+    ['1.22.0', '^1.10.0', null, 2],
+    ['2.1.0', '>= 2.0.0', ['2.1.0', '2.0.1'], 1],
+    ['2.2.0', '2.2.0', null, 1],
+    ['3.0.0', '3.0.0', null, 1],
   ])(
     'generates lock files using yarn v%s',
-    async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
+    async (yarnVersion, yarnCompatibility, yarnReleases, expectedFsCalls) => {
       Fixtures.mock(
         {
           '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
@@ -52,6 +53,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/some-dir'
       );
+      if (yarnReleases) {
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/@yarnpkg%2Fcli')
+          .reply(200, {
+            releases: [
+              yarnReleases.map((v) => {
+                return { version: v };
+              }),
+            ],
+          });
+      }
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -107,6 +120,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir'
     );
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/@yarnpkg%2Fcli')
+      .reply(200, { releases: [{ version: '2.1.0' }] });
     const execSnapshots = mockExecAll(exec, {
       stdout: '2.1.0',
       stderr: '',
@@ -124,18 +141,30 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it.each([
-    ['1.22.0', '^1.10.0'],
-    ['2.1.0', '>= 2.0.0'],
-    ['3.0.0', '3.0.0'],
+    ['1.22.0', '^1.10.0', null],
+    ['2.1.0', '>= 2.0.0', ['2.1.0']],
+    ['3.0.0', '3.0.0', null],
   ])(
     'performs lock file updates using yarn v%s',
-    async (yarnVersion, yarnCompatibility) => {
+    async (yarnVersion, yarnCompatibility, yarnReleases) => {
       Fixtures.mock(
         {
           'yarn.lock': 'package-lock-contents',
         },
         'some-dir'
       );
+      if (yarnReleases) {
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/@yarnpkg%2Fcli')
+          .reply(200, {
+            releases: [
+              yarnReleases.map((v) => {
+                return { version: v };
+              }),
+            ],
+          });
+      }
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -187,12 +216,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
   );
 
   it.each([
-    ['1.22.0', '^1.10.0', 2],
-    ['2.1.0', '>= 2.0.0', 1],
-    ['2.2.0', '2.2.0', 1],
+    ['1.22.0', '^1.10.0', null, 2],
+    ['2.1.0', '>= 2.0.0', ['2.1.0'], 1],
+    ['2.2.0', '2.2.0', null, 1],
   ])(
     'performs lock file maintenance using yarn v%s',
-    async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
+    async (yarnVersion, yarnCompatibility, yarnReleases, expectedFsCalls) => {
       Fixtures.mock(
         {
           '.yarnrc': null,
@@ -200,6 +229,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
+      if (yarnReleases) {
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/@yarnpkg%2Fcli')
+          .reply(200, {
+            releases: [
+              yarnReleases.map((v) => {
+                return { version: v };
+              }),
+            ],
+          });
+      }
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
