@@ -285,6 +285,25 @@ describe('modules/manager/npm/post-update/yarn', () => {
     }
   );
 
+  it('falls back to the smallest yarn version from constraint', async () => {
+    Fixtures.mock({});
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/@yarnpkg%2Fcli')
+      .reply(200, mockYarnpkgCli(['2.1.0']));
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '1.9.4',
+      stderr: '',
+    });
+    const config = {
+      constraints: {
+        yarn: '>= 4.0.0',
+      },
+    };
+    await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
   it('catches errors', async () => {
     Fixtures.mock({});
     const execSnapshots = mockExecAll(exec, {
