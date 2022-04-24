@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import { migrateAndValidate } from '../../../../config/migrate-validate';
 import type { RenovateConfig } from '../../../../config/types';
@@ -24,11 +25,18 @@ export class MigratedDataFactory {
   // singleton
   private static data: MigratedData;
 
-  public static async getAsync(config: RenovateConfig): Promise<MigratedData> {
+  public static async getAsync(
+    config: RenovateConfig
+  ): Promise<MigratedData | null> {
     if (this.data) {
       return this.data;
     }
     const migrated = await this.build(config);
+
+    if (!migrated) {
+      return null;
+    }
+
     this.data = new MigratedData(migrated?.content, migrated?.fileName);
     return this.data;
   }
@@ -37,7 +45,9 @@ export class MigratedDataFactory {
     this.data = null;
   }
 
-  private static async build(config: RenovateConfig): Promise<IMigratedData> {
+  private static async build(
+    config: RenovateConfig
+  ): Promise<IMigratedData | null> {
     let res: IMigratedData;
     try {
       const rc = await detectRepoFileConfig();
@@ -47,6 +57,10 @@ export class MigratedDataFactory {
       const migrated = await migrateAndValidate(config, configFileParsed);
       delete migrated.errors;
       delete migrated.warnings;
+
+      if (is.emptyObject(migrated)) {
+        return null;
+      }
 
       const raw = await readLocalFile(rc.configFileName, 'utf8');
 

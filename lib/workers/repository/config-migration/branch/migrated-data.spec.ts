@@ -25,6 +25,11 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(migrateAndValidate).mockResolvedValue(migratedConfigObj);
     });
 
+    it('Calls getAsync a first when migration not needed', async () => {
+      mockedFunction(migrateAndValidate).mockResolvedValue({});
+      await expect(MigratedDataFactory.getAsync({})).resolves.toBeNull();
+    });
+
     it('Calls getAsync a first time to initialize the factory', async () => {
       await expect(MigratedDataFactory.getAsync({})).resolves.toEqual(
         migratedData
@@ -61,7 +66,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Returns nothing due to fs error', async () => {
       mockedFunction(readLocalFile).mockResolvedValueOnce(null);
       MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync({})).resolves.toEqual({});
+      await expect(MigratedDataFactory.getAsync({})).resolves.toBeNull();
     });
   });
 });

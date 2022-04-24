@@ -14,7 +14,9 @@ export async function checkConfigMigrationBranch(
   logger.debug('checkConfigMigrationBranch()');
   const migratedConfigData = await MigratedDataFactory.getAsync(config);
   if (!migratedConfigData) {
-    logger.debug('checkConfigMigrationBranch() Error fetching migrated data');
+    logger.debug(
+      'checkConfigMigrationBranch() Config does not need migration\n'
+    );
     return null;
   }
   const configMigrationBranch = getMigrationBranchName(config);

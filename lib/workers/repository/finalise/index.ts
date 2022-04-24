@@ -12,11 +12,11 @@ export async function finaliseRepo(
   branchList: string[]
 ): Promise<void> {
   if (config.configMigration) {
-    const migrationBranch = await checkConfigMigrationBranch(config);
+    const migrationBranch = await checkConfigMigrationBranch(config); // null if migration not needed
     if (migrationBranch) {
       branchList.push(migrationBranch);
+      await ensureConfigMigrationPr(config);
     }
-    await ensureConfigMigrationPr(config);
   }
   await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
