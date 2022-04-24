@@ -421,6 +421,10 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 
 If enabled, Renovate will raise a pull request if config file migration is needed.
 
+<!-- prettier-ignore -->
+!!! info
+    This feature writes plain JSON, Any JSON5 content will be down leveled and all comments be removed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.

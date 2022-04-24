@@ -1,21 +1,16 @@
-import {
-  loadFixture,
-  loadJsonFixture,
-  mockedFunction,
-} from '../../../../../test/util';
+import { Fixtures } from '../../../../../test/fixtures';
+import { loadJsonFixture, mockedFunction } from '../../../../../test/util';
 
 import { migrateAndValidate } from '../../../../config/migrate-validate';
 import { readLocalFile } from '../../../../util/fs';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory } from './migrated-data';
 
-jest.mock('../../../../config/migrate-validate', () => ({
-  migrateAndValidate: jest.fn(),
-}));
+jest.mock('../../../../config/migrate-validate');
 jest.mock('../../../../util/fs');
 jest.mock('../../init/merge');
 
-const rawNonMigrated = loadFixture('./raw-non-migrated.json');
+const rawNonMigrated = Fixtures.get('./renovate.json');
 const migratedData = loadJsonFixture('./migrated-data.json');
 const migratedConfigObj = loadJsonFixture('./migrated.json');
 

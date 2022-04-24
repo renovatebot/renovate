@@ -12,7 +12,6 @@ export async function checkConfigMigrationBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
-  logger.trace({ config });
   const migratedConfigData = await MigratedDataFactory.getAsync(config);
   if (!migratedConfigData) {
     logger.debug('checkConfigMigrationBranch() Error fetching migrated data');
@@ -21,10 +20,7 @@ export async function checkConfigMigrationBranch(
   const configMigrationBranch = getMigrationBranchName(config);
   if (await migrationPrExists(configMigrationBranch)) {
     logger.debug('Config Migration PR already exists');
-    const commit = await rebaseMigrationBranch(config, migratedConfigData);
-    if (commit) {
-      logger.info({ branch: configMigrationBranch, commit }, 'Branch updated');
-    }
+    await rebaseMigrationBranch(config, migratedConfigData);
     // istanbul ignore if
     if (platform.refreshPr) {
       const configMigrationPr = await platform.getBranchPr(

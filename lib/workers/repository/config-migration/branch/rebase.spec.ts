@@ -69,7 +69,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     });
 
     it('rebases via platform', async () => {
-      platform.commitFiles = jest.fn();
       config.platformCommit = true;
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);

@@ -17,9 +17,6 @@ import { getErrors, getWarnings } from './errors-warnings';
 export async function ensureConfigMigrationPr(
   config: RenovateConfig
 ): Promise<void> {
-  if (!config.configMigration) {
-    return;
-  }
   logger.debug('ensureConfigMigrationPr()');
   logger.trace({ config });
   const branchName = getMigrationBranchName(config);
@@ -31,18 +28,27 @@ export async function ensureConfigMigrationPr(
 
 
 ---
+{{#if hasWarningsErrors}}
 {{{warnings}}}
 {{{errors}}}
+{{else}}
+#### Migration completed successfully, No errors or warnings found.
+{{/if}}
 ---
+
 
 :question: Got questions? Check out Renovate's [Docs](${config.productLinks.documentation}), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](${config.productLinks.help}).
 `
   );
+  const warnings = getWarnings(config);
+  const errors = getErrors(config);
+  const hasWarningsErrors = warnings || errors;
   let prBody = prTemplate;
   prBody = template.compile(prBody, {
-    warnings: getWarnings(config),
-    errors: getErrors(config),
+    warnings,
+    errors,
+    hasWarningsErrors,
   });
   if (is.string(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;

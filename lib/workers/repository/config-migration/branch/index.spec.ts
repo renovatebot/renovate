@@ -12,7 +12,7 @@ import type { Pr } from '../../../../modules/platform';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
-import { checkConfigMigrationBranch } from './index';
+import { checkConfigMigrationBranch } from '.';
 
 jest.mock('./migrated-data');
 jest.mock('./rebase');
@@ -36,7 +36,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('Exited due to error fetching migrated data', async () => {
-      MigratedDataFactory.getAsync = jest.fn().mockResolvedValue(undefined);
+      jest.spyOn(MigratedDataFactory, 'getAsync').mockResolvedValue(undefined);
       await expect(checkConfigMigrationBranch(config)).resolves.toBeNull();
     });
 

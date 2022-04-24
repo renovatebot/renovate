@@ -16,8 +16,8 @@ export async function finaliseRepo(
     if (migrationBranch) {
       branchList.push(migrationBranch);
     }
+    await ensureConfigMigrationPr(config);
   }
-  await ensureConfigMigrationPr(config);
   await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
   await platform.ensureIssueClosing(

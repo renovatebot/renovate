@@ -26,17 +26,13 @@ describe('workers/repository/config-migration/pr/index', () => {
         warnings: [],
         description: [],
       };
-      platform.massageMarkdown = jest.fn((input) => input);
+      jest
+        .spyOn(platform, 'massageMarkdown')
+        .mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
     });
 
     let createPrBody: string;
-
-    it('Returns if disabled', async () => {
-      config.configMigration = false;
-      await ensureConfigMigrationPr(config);
-      expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
-    });
 
     it('creates PR', async () => {
       await ensureConfigMigrationPr(config);

@@ -11,7 +11,7 @@ export async function rebaseMigrationBranch(
   config: RenovateConfig,
   migratedConfigData: MigratedData
 ): Promise<string | null> {
-  logger.debug('Checking if onboarding branch needs rebasing');
+  logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
   if (await isBranchModified(branchName)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
