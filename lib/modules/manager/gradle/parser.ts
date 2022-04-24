@@ -248,6 +248,7 @@ function processPlugin({
         const currentValue = varData.value;
         const fileReplacePosition = varData.fileReplacePosition;
         dep.currentValue = currentValue;
+        dep.groupName = varData.key;
         dep.managerData = {
           fileReplacePosition,
           packageFile: varData.packageFile,

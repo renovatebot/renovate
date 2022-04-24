@@ -211,7 +211,10 @@ function extractDependency({
 export function parseCatalog(
   packageFile: string,
   content: string
-): [PackageDependency<GradleManagerData>[], string[]] {
+): {
+  versions: Record<string, GradleVersionPointerTarget>;
+  deps: PackageDependency<GradleManagerData>[];
+} {
   const tomlContent = parse(content) as GradleCatalog;
   const versions = tomlContent.versions || {};
   const libs = tomlContent.libraries || {};
@@ -286,10 +289,8 @@ export function parseCatalog(
 
     extractedDeps.push(dependency);
   }
-  return [
-    extractedDeps.map((dep) =>
-      deepmerge(dep, { managerData: { packageFile } })
-    ),
-    Object.keys(versions),
-  ];
+  const deps = extractedDeps.map((dep) =>
+    deepmerge(dep, { managerData: { packageFile } })
+  );
+  return { versions, deps };
 }

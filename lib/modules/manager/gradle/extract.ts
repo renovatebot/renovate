@@ -67,12 +67,9 @@ export async function extractAllPackageFiles(
         updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const [updatesFromCatalog, references] = parseCatalog(
-          packageFile,
-          content
-        );
-        references.forEach((ref) => versionRefs.add(ref));
-        extractedDeps.push(...updatesFromCatalog);
+        const { versions, deps } = parseCatalog(packageFile, content);
+        Object.keys(versions).forEach((ref) => versionRefs.add(ref));
+        extractedDeps.push(...deps);
       } else {
         const vars = getVars(registry, dir);
         const {
