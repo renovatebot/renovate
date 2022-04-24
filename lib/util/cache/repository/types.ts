@@ -50,6 +50,7 @@ export interface RepoCacheRecord {
   repository: string;
   revision: number;
   payload: string;
+  hash: string;
 }
 
 export interface RepoCache {

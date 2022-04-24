@@ -1,10 +1,28 @@
+import { promisify } from 'util';
+import zlib from 'zlib';
+import hasha from 'hasha';
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { CACHE_REVISION, encodePayload } from '../common';
+import { CACHE_REVISION } from '../common';
 import type { RepoCacheData, RepoCacheRecord } from '../types';
 import { LocalRepoCache } from './local';
 
 jest.mock('../../../fs');
+
+const compress = promisify(zlib.brotliCompress);
+
+async function createCacheRecord(
+  data: RepoCacheData,
+  repository = 'some/repo'
+): Promise<RepoCacheRecord> {
+  const revision = CACHE_REVISION;
+  const jsonStr = JSON.stringify(data);
+  const hash = hasha(jsonStr, { algorithm: 'sha1' });
+  const compressed = await compress(jsonStr);
+  const payload = compressed.toString('base64');
+  const record: RepoCacheRecord = { revision, repository, payload, hash };
+  return record;
+}
 
 describe('util/cache/repository/impl/local', () => {
   beforeEach(() => {
@@ -16,14 +34,10 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.getData()).toBeEmpty();
   });
 
-  it('loads valid cache from disk', async () => {
+  it('loads previously stored cache from disk', async () => {
     const data: RepoCacheData = { semanticCommits: 'enabled' };
-    const cache: RepoCacheRecord = {
-      repository: 'some/repo',
-      revision: CACHE_REVISION,
-      payload: await encodePayload(data),
-    };
-    fs.readFile.mockResolvedValue(JSON.stringify(cache));
+    const cacheRecord = await createCacheRecord(data);
+    fs.readFile.mockResolvedValue(JSON.stringify(cacheRecord));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
 
     await localRepoCache.load();
@@ -40,17 +54,14 @@ describe('util/cache/repository/impl/local', () => {
       })
     );
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
-    await localRepoCache.load();
 
+    await localRepoCache.load();
     await localRepoCache.save();
 
+    const cacheRecord = await createCacheRecord({ semanticCommits: 'enabled' });
     expect(fs.outputFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify({
-        revision: CACHE_REVISION,
-        repository: 'some/repo',
-        payload: await encodePayload({ semanticCommits: 'enabled' }),
-      })
+      JSON.stringify(cacheRecord)
     );
   });
 
@@ -63,17 +74,14 @@ describe('util/cache/repository/impl/local', () => {
       })
     );
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
-    await localRepoCache.load();
 
+    await localRepoCache.load();
     await localRepoCache.save();
 
+    const cacheRecord = await createCacheRecord({ semanticCommits: 'enabled' });
     expect(fs.outputFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify({
-        revision: CACHE_REVISION,
-        repository: 'some/repo',
-        payload: await encodePayload({ semanticCommits: 'enabled' }),
-      })
+      JSON.stringify(cacheRecord)
     );
   });
 
@@ -112,13 +120,8 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('resets if repository does not match', async () => {
-    fs.readFile.mockResolvedValueOnce(
-      JSON.stringify({
-        revision: CACHE_REVISION,
-        repository: 'foo/bar',
-        data: { semanticCommits: 'enabled' },
-      }) as never
-    );
+    const cacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(cacheRecord) as never);
 
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
     await localRepoCache.load();
@@ -126,28 +129,22 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.getData()).toEqual({});
   });
 
-  it('saves cache data to file', async () => {
-    fs.readFile.mockResolvedValueOnce(
-      JSON.stringify({
-        revision: CACHE_REVISION,
-        repository: 'some/repo',
-        data: { semanticCommits: 'enabled' },
-      })
-    );
+  it('saves modified cache data to file', async () => {
+    const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
-    await localRepoCache.load();
 
+    await localRepoCache.load();
     const data = localRepoCache.getData();
     data.semanticCommits = 'disabled';
     await localRepoCache.save();
 
+    const newCacheRecord = await createCacheRecord({
+      semanticCommits: 'disabled',
+    });
     expect(fs.outputFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify({
-        revision: CACHE_REVISION,
-        repository: 'some/repo',
-        payload: await encodePayload({ semanticCommits: 'disabled' }),
-      })
+      JSON.stringify(newCacheRecord)
     );
   });
 });

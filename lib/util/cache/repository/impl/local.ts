@@ -1,11 +1,12 @@
+import { promisify } from 'util';
+import zlib from 'zlib';
+import hasha from 'hasha';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { outputFile, readFile } from '../../../fs';
 import {
   CACHE_REVISION,
-  decodePayload,
-  encodePayload,
   isValidRev10,
   isValidRev11,
   isValidRev12,
@@ -13,7 +14,12 @@ import {
 import type { RepoCacheRecord } from '../types';
 import { RepoCacheBase } from './base';
 
+const compress = promisify(zlib.brotliCompress);
+const decompress = promisify(zlib.brotliDecompress);
+
 export class LocalRepoCache extends RepoCacheBase {
+  private oldHash: string | null = null;
+
   constructor(private platform: string, private repository: string) {
     super();
   }
@@ -34,7 +40,11 @@ export class LocalRepoCache extends RepoCacheBase {
       const oldCache = JSON.parse(rawCache);
 
       if (isValidRev12(oldCache, this.repository)) {
-        this.data = await decodePayload(oldCache.payload);
+        const compressed = Buffer.from(oldCache.payload, 'base64');
+        const uncompressed = await decompress(compressed);
+        const jsonStr = uncompressed.toString('utf8');
+        this.data = JSON.parse(jsonStr);
+        this.oldHash = oldCache.hash;
         logger.debug('Repository cache is valid');
         return;
       }
@@ -64,8 +74,13 @@ export class LocalRepoCache extends RepoCacheBase {
     const revision = CACHE_REVISION;
     const repository = this.repository;
     const data = this.getData();
-    const payload = await encodePayload(data);
-    const record: RepoCacheRecord = { revision, repository, payload };
-    await outputFile(cacheFileName, JSON.stringify(record));
+    const jsonStr = JSON.stringify(data);
+    const hash = hasha(jsonStr, { algorithm: 'sha1' });
+    if (hash !== this.oldHash) {
+      const compressed = await compress(jsonStr);
+      const payload = compressed.toString('base64');
+      const record: RepoCacheRecord = { revision, repository, payload, hash };
+      await outputFile(cacheFileName, JSON.stringify(record));
+    }
   }
 }
