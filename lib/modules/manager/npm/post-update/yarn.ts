@@ -15,6 +15,7 @@ import { exists, readFile, remove, writeFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
+import { resolveRegistryUrl } from '../../../datasource/npm/npmrc';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -87,15 +88,31 @@ export async function generateLockFile(
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
     const preCommands = [];
-    if (minYarnVersion) {
+    if (minYarnVersion && !yarnUpdate) {
       if (isYarn1) {
         preCommands.push(`npm i -g yarn@${quote(yarnCompatibility)}`);
       } else {
+        let yarnVersion: string;
+        if (semver.valid(yarnCompatibility)) {
+          yarnVersion = yarnCompatibility;
+        } else {
+          const result = await new NpmDatasource().getReleases({
+            packageName: '@yarnpkg/cli',
+            registryUrl: resolveRegistryUrl('@yarnpkg/cli'),
+          });
+          if (result) {
+            yarnVersion = semver.maxSatisfying(
+              result.releases.map((release) => release.version),
+              yarnCompatibility
+            );
+          }
+        }
+        if (!yarnVersion) {
+          yarnVersion = minYarnVersion.version;
+        }
+
         preCommands.push(`npm i -g corepack`);
-        preCommands.push(
-          `corepack prepare --activate yarn@${minYarnVersion.version}`
-        );
-        preCommands.push(`yarn --version`);
+        preCommands.push(`corepack prepare --activate yarn@${yarnVersion}`);
       }
     } else {
       preCommands.push('npm i -g yarn');
