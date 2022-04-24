@@ -8,7 +8,7 @@ import * as internal from '.';
 jest.mock('./npm');
 jest.mock('../../../modules/datasource/npm');
 
-jest.spyOn(npm, 'getPreset').mockResolvedValue(null);
+jest.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 
