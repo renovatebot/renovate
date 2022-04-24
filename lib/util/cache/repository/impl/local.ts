@@ -75,7 +75,7 @@ export class LocalRepoCache extends RepoCacheBase {
     const repository = this.repository;
     const data = this.getData();
     const jsonStr = JSON.stringify(data);
-    const hash = hasha(jsonStr, { algorithm: 'sha1' });
+    const hash = await hasha.async(jsonStr, { algorithm: 'sha1' });
     if (hash !== this.oldHash) {
       const compressed = await compress(jsonStr);
       const payload = compressed.toString('base64');
