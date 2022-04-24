@@ -49,7 +49,7 @@ export interface RepoCacheData {
 export interface RepoCacheRecord {
   repository: string;
   revision: number;
-  data: RepoCacheData;
+  payload: string;
 }
 
 export interface RepoCache {

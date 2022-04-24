@@ -4,8 +4,11 @@ import { logger } from '../../../../logger';
 import { outputFile, readFile } from '../../../fs';
 import {
   CACHE_REVISION,
-  canBeMigratedToV11,
-  isValidCacheRecord,
+  decodePayload,
+  encodePayload,
+  isValidRev10,
+  isValidRev11,
+  isValidRev12,
 } from '../common';
 import type { RepoCacheRecord } from '../types';
 import { RepoCacheBase } from './base';
@@ -29,17 +32,28 @@ export class LocalRepoCache extends RepoCacheBase {
       const cacheFileName = this.getCacheFileName();
       const rawCache = await readFile(cacheFileName, 'utf8');
       const oldCache = JSON.parse(rawCache);
-      if (isValidCacheRecord(oldCache, this.repository)) {
-        this.data = oldCache.data;
+
+      if (isValidRev12(oldCache, this.repository)) {
+        this.data = await decodePayload(oldCache.payload);
         logger.debug('Repository cache is valid');
-      } else if (canBeMigratedToV11(oldCache, this.repository)) {
+        return;
+      }
+
+      if (isValidRev11(oldCache, this.repository)) {
+        this.data = oldCache.data;
+        logger.debug('Repository cache is migrated from 11 revision');
+        return;
+      }
+
+      if (isValidRev10(oldCache, this.repository)) {
         delete oldCache.repository;
         delete oldCache.revision;
         this.data = oldCache;
-        logger.debug('Repository cache is migrated');
-      } else {
-        logger.debug('Repository cache is invalid');
+        logger.debug('Repository cache is migrated from 10 revision');
+        return;
       }
+
+      logger.debug('Repository cache is invalid');
     } catch (err) {
       logger.debug({ cacheFileName }, 'Repository cache not found');
     }
@@ -50,7 +64,8 @@ export class LocalRepoCache extends RepoCacheBase {
     const revision = CACHE_REVISION;
     const repository = this.repository;
     const data = this.getData();
-    const record: RepoCacheRecord = { revision, repository, data };
+    const payload = await encodePayload(data);
+    const record: RepoCacheRecord = { revision, repository, payload };
     await outputFile(cacheFileName, JSON.stringify(record));
   }
 }

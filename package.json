@@ -203,6 +203,7 @@
     "shlex": "2.1.0",
     "simple-git": "3.6.0",
     "slugify": "1.6.5",
+    "snappy": "7.1.1",
     "traverse": "0.6.6",
     "tslib": "2.3.1",
     "upath": "2.0.1",

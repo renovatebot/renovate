@@ -1,6 +1,6 @@
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { CACHE_REVISION } from '../common';
+import { CACHE_REVISION, encodePayload } from '../common';
 import type { RepoCacheData, RepoCacheRecord } from '../types';
 import { LocalRepoCache } from './local';
 
@@ -21,7 +21,7 @@ describe('util/cache/repository/impl/local', () => {
     const cache: RepoCacheRecord = {
       repository: 'some/repo',
       revision: CACHE_REVISION,
-      data,
+      payload: await encodePayload(data),
     };
     fs.readFile.mockResolvedValue(JSON.stringify(cache));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
@@ -31,7 +31,7 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.getData()).toEqual(data);
   });
 
-  it('migrates revision from 10 to 11', async () => {
+  it('migrates revision from 10 to 12', async () => {
     fs.readFile.mockResolvedValue(
       JSON.stringify({
         revision: 10,
@@ -49,7 +49,30 @@ describe('util/cache/repository/impl/local', () => {
       JSON.stringify({
         revision: CACHE_REVISION,
         repository: 'some/repo',
+        payload: await encodePayload({ semanticCommits: 'enabled' }),
+      })
+    );
+  });
+
+  it('migrates revision from 11 to 12', async () => {
+    fs.readFile.mockResolvedValue(
+      JSON.stringify({
+        revision: 11,
+        repository: 'some/repo',
         data: { semanticCommits: 'enabled' },
+      })
+    );
+    const localRepoCache = new LocalRepoCache('github', 'some/repo');
+    await localRepoCache.load();
+
+    await localRepoCache.save();
+
+    expect(fs.outputFile).toHaveBeenCalledWith(
+      '/tmp/cache/renovate/repository/github/some/repo.json',
+      JSON.stringify({
+        revision: CACHE_REVISION,
+        repository: 'some/repo',
+        payload: await encodePayload({ semanticCommits: 'enabled' }),
       })
     );
   });
@@ -123,7 +146,7 @@ describe('util/cache/repository/impl/local', () => {
       JSON.stringify({
         revision: CACHE_REVISION,
         repository: 'some/repo',
-        data: { semanticCommits: 'disabled' },
+        payload: await encodePayload({ semanticCommits: 'disabled' }),
       })
     );
   });
