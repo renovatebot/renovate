@@ -18,7 +18,7 @@ export class LocalRepoCache extends RepoCacheBase {
     super();
   }
 
-  private getCacheFileName(): string {
+  public getCacheFileName(): string {
     const cacheDir = GlobalConfig.get('cacheDir');
     const repoCachePath = '/renovate/repository/';
     const platform = this.platform;
