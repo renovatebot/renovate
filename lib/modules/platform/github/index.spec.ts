@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
@@ -699,14 +700,15 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' } as never);
 
       await github.getPrList();
-      const cache = repository.getCache().platform.github
+      const cache = repository.getCache().platform!.github!
         .prCache as ApiPageCache<GhRestPr>;
       const item = cache.items['1'];
 
       expect(item['_links']).toBeUndefined();
-      expect(item['url']).toBeUndefined();
-      expect(item['example_url']).toBeUndefined();
-      expect(item['repo']['example_url']).toBeUndefined();
+      // TODO: fix types #7154
+      expect((item as any)['url']).toBeUndefined();
+      expect((item as any)['example_url']).toBeUndefined();
+      expect((item as any)['repo']['example_url']).toBeUndefined();
     });
 
     it('removes url data from existing cache', async () => {
@@ -739,7 +741,8 @@ describe('modules/platform/github/index', () => {
 
       expect(item['_links']).toBeUndefined();
       expect(item['url']).toBeUndefined();
-      expect(item['example_url']).toBeUndefined();
+      // TODO: fix types #7154
+      expect((item as any)['example_url']).toBeUndefined();
       expect(item['repo']['example_url']).toBeUndefined();
     });
   });
