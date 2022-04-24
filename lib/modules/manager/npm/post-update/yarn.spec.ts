@@ -9,6 +9,8 @@ import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { mocked } from '../../../../../test/util';
 import * as _env from '../../../../util/exec/env';
+import { resetMemCache } from '../../../datasource/npm';
+import type { NpmResponse } from '../../../datasource/npm/types';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
@@ -30,12 +32,19 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
+const mockYarnpkgCli = (versions: string[]): NpmResponse => ({
+  _id: '@yarnpkg/cli',
+  name: '@yarnpkg/cli',
+  versions: Object.fromEntries(versions.map((v) => [v, {}])),
+});
+
 describe('modules/manager/npm/post-update/yarn', () => {
   beforeEach(() => {
     Fixtures.reset();
     jest.clearAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    resetMemCache();
   });
 
   it.each([
@@ -57,13 +66,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/@yarnpkg%2Fcli')
-          .reply(200, {
-            releases: [
-              yarnReleases.map((v) => {
-                return { version: v };
-              }),
-            ],
-          });
+          .reply(200, mockYarnpkgCli(yarnReleases));
       }
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
@@ -123,7 +126,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/@yarnpkg%2Fcli')
-      .reply(200, { releases: [{ version: '2.1.0' }] });
+      .reply(200, mockYarnpkgCli(['2.1.0']));
     const execSnapshots = mockExecAll(exec, {
       stdout: '2.1.0',
       stderr: '',
@@ -157,13 +160,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/@yarnpkg%2Fcli')
-          .reply(200, {
-            releases: [
-              yarnReleases.map((v) => {
-                return { version: v };
-              }),
-            ],
-          });
+          .reply(200, mockYarnpkgCli(yarnReleases));
       }
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
@@ -233,13 +230,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/@yarnpkg%2Fcli')
-          .reply(200, {
-            releases: [
-              yarnReleases.map((v) => {
-                return { version: v };
-              }),
-            ],
-          });
+          .reply(200, mockYarnpkgCli(yarnReleases));
       }
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
