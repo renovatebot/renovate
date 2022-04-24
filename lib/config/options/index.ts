@@ -1060,7 +1060,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchUpdateTypes',
     description:
-      'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
+      'Update types to match against (major, minor, pin, pinDigest, etc). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowedValues: [
@@ -1068,6 +1068,7 @@ const options: RenovateOptions[] = [
       'minor',
       'patch',
       'pin',
+      'pinDigest',
       'digest',
       'lockFileMaintenance',
       'rollback',
@@ -1573,7 +1574,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
