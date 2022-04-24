@@ -12,7 +12,7 @@ export async function checkConfigMigrationBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
-  const migratedConfigData = await MigratedDataFactory.getAsync(config);
+  const migratedConfigData = await MigratedDataFactory.getAsync();
   if (!migratedConfigData) {
     logger.debug(
       'checkConfigMigrationBranch() Config does not need migration\n'

@@ -1,7 +1,5 @@
-import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
-import { migrateAndValidate } from '../../../../config/migrate-validate';
-import type { RenovateConfig } from '../../../../config/types';
+import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { detectRepoFileConfig } from '../../init/merge';
@@ -25,13 +23,11 @@ export class MigratedDataFactory {
   // singleton
   private static data: MigratedData;
 
-  public static async getAsync(
-    config: RenovateConfig
-  ): Promise<MigratedData | null> {
+  public static async getAsync(): Promise<MigratedData | null> {
     if (this.data) {
       return this.data;
     }
-    const migrated = await this.build(config);
+    const migrated = await this.build();
 
     if (!migrated) {
       return null;
@@ -45,29 +41,27 @@ export class MigratedDataFactory {
     this.data = null;
   }
 
-  private static async build(
-    config: RenovateConfig
-  ): Promise<IMigratedData | null> {
+  private static async build(): Promise<IMigratedData | null> {
     let res: IMigratedData;
     try {
       const rc = await detectRepoFileConfig();
       const configFileParsed = rc?.configFileParsed || {};
 
       // get migrated config
-      const migrated = await migrateAndValidate(config, configFileParsed);
-      delete migrated.errors;
-      delete migrated.warnings;
-
-      if (is.emptyObject(migrated)) {
+      const { isMigrated, migratedConfig } = migrateConfig(configFileParsed);
+      if (!isMigrated) {
         return null;
       }
+
+      delete migratedConfig.errors;
+      delete migratedConfig.warnings;
 
       const raw = await readLocalFile(rc.configFileName, 'utf8');
 
       // indent defaults to 2 spaces
       const indent = detectIndent(raw).indent ?? '  ';
       const fileName = rc.configFileName;
-      let content = JSON.stringify(migrated, undefined, indent);
+      let content = JSON.stringify(migratedConfig, undefined, indent);
       if (!content.endsWith('\n')) {
         content += '\n';
       }
