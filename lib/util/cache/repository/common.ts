@@ -1,5 +1,6 @@
+import { promisify } from 'util';
+import zlib from 'zlib';
 import is from '@sindresorhus/is';
-import snappy from 'snappyjs';
 import type { RepoCacheData, RepoCacheRecord } from './types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
@@ -46,17 +47,21 @@ export function isValidRev12(
   );
 }
 
+const gzip = promisify(zlib.gzip);
+
 export async function encodePayload(input: RepoCacheData): Promise<string> {
   const jsonStr = JSON.stringify(input);
   const jsonBuf = Buffer.from(jsonStr);
-  const compressed = await snappy.compress(jsonBuf);
+  const compressed = await gzip(jsonBuf);
   const result = compressed.toString('base64');
   return result;
 }
 
+const gunzip = promisify(zlib.gunzip);
+
 export async function decodePayload(input: string): Promise<RepoCacheData> {
   const compressed = Buffer.from(input, 'base64');
-  const jsonBuf = await snappy.uncompress(compressed);
+  const jsonBuf = await gunzip(compressed);
   const jsonStr = jsonBuf.toString('utf8');
   const result = JSON.parse(jsonStr) as RepoCacheData;
   return result;
