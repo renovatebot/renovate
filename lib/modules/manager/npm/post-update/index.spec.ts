@@ -1,6 +1,7 @@
 // TODO: add tests
 import { fs, git } from '../../../../../test/util';
-import { updateYarnBinary } from './index';
+import type { FileChange } from '../../../../util/git/types';
+import { updateYarnBinary } from './';
 
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
@@ -21,7 +22,7 @@ describe('modules/manager/npm/post-update/index', () => {
       git.getFile.mockResolvedValueOnce(oldYarnrcYml);
       fs.readLocalFile.mockResolvedValueOnce(newYarnrcYml);
       fs.readLocalFile.mockResolvedValueOnce(newYarn);
-      const updatedArtifacts = [];
+      const updatedArtifacts: FileChange[] = [];
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
@@ -34,12 +35,11 @@ describe('modules/manager/npm/post-update/index', () => {
     it('should return .yarnrc.yml content if it has been overwritten', async () => {
       fs.readLocalFile.mockResolvedValueOnce(newYarnrcYml);
       fs.readLocalFile.mockResolvedValueOnce(newYarn);
-      let existingYarnrcYmlContent = oldYarnrcYml;
-      const updatedArtifacts = [];
-      existingYarnrcYmlContent = await updateYarnBinary(
+      const updatedArtifacts: FileChange[] = [];
+      const existingYarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        existingYarnrcYmlContent
+        oldYarnrcYml
       );
       expect(git.getFile).not.toHaveBeenCalled();
       expect(existingYarnrcYmlContent).toMatchSnapshot();
@@ -49,7 +49,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it("should not update the Yarn binary if the old .yarnrc.yml doesn't exist", async () => {
       git.getFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce(newYarnrcYml);
-      const updatedArtifacts = [];
+      const updatedArtifacts: FileChange[] = [];
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
@@ -61,8 +61,8 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it("should not update the Yarn binary if the new .yarnrc.yml doesn't exist", async () => {
       git.getFile.mockResolvedValueOnce(oldYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(null);
-      const updatedArtifacts = [];
+      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      const updatedArtifacts: FileChange[] = [];
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
@@ -73,15 +73,14 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it("should return existing .yarnrc.yml if the new one doesn't exist", async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null);
-      let existingYarnrcYmlContent = oldYarnrcYml;
-      const updatedArtifacts = [];
-      existingYarnrcYmlContent = await updateYarnBinary(
+      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      const updatedArtifacts: FileChange[] = [];
+      const existingYarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        existingYarnrcYmlContent
+        oldYarnrcYml
       );
-      expect(existingYarnrcYmlContent).toMatch(existingYarnrcYmlContent);
+      expect(existingYarnrcYmlContent).toMatch(oldYarnrcYml);
       expect(updatedArtifacts).toBeEmpty();
     });
   });

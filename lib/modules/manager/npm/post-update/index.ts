@@ -44,11 +44,9 @@ import type {
 import * as yarn from './yarn';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
-// istanbul ignore next
 const getDirs = (arr: (string | null | undefined)[]): string[] =>
   Array.from(new Set(arr.filter(is.string)));
 
-// istanbul ignore next
 export function determineLockFileDirs(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
@@ -133,7 +131,6 @@ export function determineLockFileDirs(
   };
 }
 
-// istanbul ignore next
 export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
@@ -251,7 +248,6 @@ export async function writeExistingFiles(
   }
 }
 
-// istanbul ignore next
 export async function writeUpdatedPackageFiles(
   config: PostUpdateConfig
 ): Promise<void> {
@@ -312,7 +308,6 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-// istanbul ignore next
 async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent: string | null = null;
@@ -327,7 +322,6 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   return originalNpmrcContent;
 }
 
-// istanbul ignore next
 async function updateNpmrcContent(
   dir: string,
   originalContent: string | null,
@@ -348,7 +342,6 @@ async function updateNpmrcContent(
   }
 }
 
-// istanbul ignore next
 async function resetNpmrcContent(
   dir: string,
   originalContent: string | null
@@ -468,7 +461,6 @@ export async function updateYarnBinary(
   return existingYarnrcYmlContent && yarnrcYml;
 }
 
-// istanbul ignore next
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
@@ -794,7 +786,7 @@ export async function getAdditionalFiles(
     );
     const res = await lerna.generateLockFiles(
       lernaPackageFile,
-      fullLearnaFileDir,
+      getSubDirectory(lernaJsonFile),
       config,
       env,
       skipInstalls

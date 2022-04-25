@@ -38,7 +38,7 @@ export async function generateLockFile(
       npm_config_store: env.npm_config_store,
     };
     const execOptions: ExecOptions = {
-      cwd: lockFileDir,
+      cwdFile: lockFileName,
       extraEnv,
       docker: {
         image: 'node',

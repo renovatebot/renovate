@@ -1,5 +1,6 @@
 import semver from 'semver';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -80,7 +81,7 @@ export async function generateLockFiles(
       npm_config_store: env.npm_config_store,
     };
     const execOptions: ExecOptions = {
-      cwd: lockFileDir,
+      cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
       docker: {
         image: 'node',
