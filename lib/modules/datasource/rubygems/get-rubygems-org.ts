@@ -63,7 +63,6 @@ export class RubyGemsOrgDatasource extends Datasource {
       if (err.statusCode !== 416) {
         contentLength = 0;
         packageReleases = Object.create(null); // Because we might need a "constructor" key
-        //logger.debug(err)
         logger.debug(err);
         throw new ExternalHostError(new Error('Rubygems fetch error.'));
       }
