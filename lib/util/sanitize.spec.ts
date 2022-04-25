@@ -15,6 +15,7 @@ describe('util/sanitize', () => {
     expect(sanitize(null as never)).toBeNull();
     expect(sanitize('')).toBe('');
   });
+
   it('sanitizes secrets from strings', () => {
     const token = '123testtoken';
     const username = 'userabc';
@@ -33,6 +34,7 @@ describe('util/sanitize', () => {
     const outputX2 = [output, output].join('\n');
     expect(sanitize(inputX2)).toBe(outputX2);
   });
+
   it('sanitizes github app tokens', () => {
     addSecretForSanitizing('x-access-token:abc123');
     expect(sanitize(`hello ${toBase64('abc123')} world`)).toBe(

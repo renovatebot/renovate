@@ -26,7 +26,6 @@ describe('config/presets/bitbucket/index', () => {
         'some-filename.json'
       );
       expect(res).toEqual(data);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws on error', async () => {
@@ -34,7 +33,6 @@ describe('config/presets/bitbucket/index', () => {
       await expect(
         bitbucket.fetchJSONFile('some/repo', 'some-filename.json')
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws on invalid json', async () => {
@@ -45,7 +43,6 @@ describe('config/presets/bitbucket/index', () => {
       await expect(
         bitbucket.fetchJSONFile('some/repo', 'some-filename.json')
       ).rejects.toThrow(PRESET_INVALID_JSON);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 

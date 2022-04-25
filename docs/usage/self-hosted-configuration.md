@@ -292,6 +292,17 @@ Like this:
 
 ## dryRun
 
+Use `dryRun` to preview the behavior of Renovate in logs, without making any changes to the repository files.
+
+You can choose from the following behaviors for the `dryRun` config option:
+
+- `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
+- `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
+- `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
+- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
+
+Information provided mainly in debug log level.
+
 ## endpoint
 
 ## executionTimeout
@@ -352,6 +363,10 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitTimeout
+
+To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
+
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
@@ -362,6 +377,12 @@ Possible values:
 - `default`: use HTTPS URLs provided by the platform for Git
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
+## githubTokenWarn
+
+By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
+Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
 ## globalExtends
 

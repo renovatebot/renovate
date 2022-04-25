@@ -6,6 +6,7 @@ import { prAlreadyExisted } from './check-existing';
 describe('workers/repository/update/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
     let config: BranchConfig;
+
     beforeEach(() => {
       config = partial<BranchConfig>({
         ...defaultConfig,
@@ -14,16 +15,19 @@ describe('workers/repository/update/branch/check-existing', () => {
       });
       jest.resetAllMocks();
     });
+
     it('returns false if recreating closed PRs', async () => {
       config.recreateClosed = true;
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(0);
     });
+
     it('returns false if check misses', async () => {
       config.recreatedClosed = true;
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });
+
     it('returns true if first check hits', async () => {
       platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
       platform.getPr.mockResolvedValueOnce({

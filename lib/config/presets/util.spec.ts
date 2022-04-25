@@ -5,15 +5,16 @@ const config: FetchPresetConfig = {
   repo: 'some/repo',
   filePreset: 'default',
   endpoint: 'endpoint',
-  fetch: undefined,
+  fetch: undefined as never,
 };
 
-const fetch = jest.fn(() => Promise.resolve<Preset>({}));
+const fetch = jest.fn(() => Promise.resolve<Preset | null>({}));
 
 describe('config/presets/util', () => {
   beforeEach(() => {
     fetch.mockReset();
   });
+
   it('works', async () => {
     fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(await fetchPreset({ ...config, fetch })).toEqual({

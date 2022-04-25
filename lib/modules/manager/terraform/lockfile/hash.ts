@@ -105,7 +105,7 @@ export class TerraformProviderHash {
     registryURL: string,
     repository: string,
     version: string
-  ): Promise<string[]> {
+  ): Promise<string[] | null> {
     const builds = await TerraformProviderHash.terraformDatasource.getBuilds(
       registryURL,
       repository,
