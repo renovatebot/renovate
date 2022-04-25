@@ -1285,7 +1285,7 @@ const options: RenovateOptions[] = [
   {
     name: 'pinDigest',
     description:
-      'Configuration to apply when pinning a digest (no change in tag/version).',
+      'Configuration to apply when pinning a digest (no change in tag/version.)',
     stage: 'package',
     type: 'object',
     default: {
