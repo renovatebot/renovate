@@ -9,6 +9,7 @@ import { raiseConfigWarningIssue } from './error-config';
 jest.mock('../../modules/platform');
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -19,6 +20,7 @@ describe('workers/repository/error-config', () => {
     beforeEach(() => {
       GlobalConfig.reset();
     });
+
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -27,15 +29,17 @@ describe('workers/repository/error-config', () => {
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('creates issues (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('handles onboarding', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -48,6 +52,7 @@ describe('workers/repository/error-config', () => {
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('handles onboarding (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -57,7 +62,7 @@ describe('workers/repository/error-config', () => {
         number: 1,
         state: PrState.Open,
       });
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });

@@ -1,4 +1,5 @@
 import URL from 'url';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -54,6 +55,13 @@ export async function getChangeLogJSON({
   // istanbul ignore if
   if (!config.token) {
     if (host.endsWith('github.com')) {
+      if (!GlobalConfig.get().githubTokenWarn) {
+        logger.debug(
+          { manager, depName, sourceUrl },
+          'GitHub token warning has been suppressed. Skipping release notes retrieval'
+        );
+        return null;
+      }
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'

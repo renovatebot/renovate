@@ -5,10 +5,12 @@ import { getPrList } from './pr-list';
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
     });
+
     it('handles empty', () => {
       const branches: BranchConfig[] = [];
       const res = getPrList(config, branches);
@@ -20,6 +22,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
       `);
     });
+
     it('has special lock file maintenance description', () => {
       const branches = [
         {
@@ -52,6 +55,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
       `);
     });
+
     it('handles multiple', () => {
       const branches = [
         {

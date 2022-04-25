@@ -26,7 +26,7 @@ export interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   ignoredAuthors: string[];
-  gitAuthorName?: string;
+  gitAuthorName?: string | null;
   gitAuthorEmail?: string;
 
   writeGitDone?: boolean;

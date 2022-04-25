@@ -7,6 +7,7 @@ describe('workers/repository/process/deprecated', () => {
       const config = {};
       await expect(raiseDeprecationWarnings(config, {})).resolves.not.toThrow();
     });
+
     it('returns if disabled', async () => {
       const config: RenovateConfig = {
         repoIsOnboarded: true,
@@ -14,6 +15,7 @@ describe('workers/repository/process/deprecated', () => {
       };
       await expect(raiseDeprecationWarnings(config, {})).resolves.not.toThrow();
     });
+
     it('raises deprecation warnings', async () => {
       const config: RenovateConfig = {
         repoIsOnboarded: true,
