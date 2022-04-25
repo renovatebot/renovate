@@ -82,7 +82,6 @@ export async function extractAllPackageFiles(
             registryUrls.push(url);
           }
         });
-        Object.keys(gradleVars).forEach((ref) => versionRefs.add(ref));
         registry[dir] = { ...registry[dir], ...gradleVars };
         updateVars(gradleVars);
         extractedDeps.push(...deps);
