@@ -3,10 +3,9 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline, Image, Job, Services } from './types';
-import { replaceReferenceTags } from './utils';
+import { getGitlabDep, replaceReferenceTags } from './utils';
 
 export function extractFromImage(
   image: Image | undefined
@@ -16,10 +15,10 @@ export function extractFromImage(
   }
   let dep: PackageDependency | null = null;
   if (is.string(image)) {
-    dep = getDep(image);
+    dep = getGitlabDep(image);
     dep.depType = 'image';
   } else if (is.string(image?.name)) {
-    dep = getDep(image.name);
+    dep = getGitlabDep(image.name);
     dep.depType = 'image-name';
   }
   return dep;
@@ -34,11 +33,11 @@ export function extractFromServices(
   const deps: PackageDependency[] = [];
   for (const service of services) {
     if (is.string(service)) {
-      const dep = getDep(service);
+      const dep = getGitlabDep(service);
       dep.depType = 'service-image';
       deps.push(dep);
     } else if (is.string(service?.name)) {
-      const dep = getDep(service.name);
+      const dep = getGitlabDep(service.name);
       dep.depType = 'service-image';
       deps.push(dep);
     }
