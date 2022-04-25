@@ -61,5 +61,18 @@ describe('workers/repository/error-config', () => {
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+    it('disable issue creation on config failure', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'package.json';
+      error.validationMessage = 'some-message';
+      // config.suppressNotifications = ['deprecationWarningIssues']
+      config.suppressNotifications = ['configErrorIssue'];
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...mock<Pr>(),
+        number: 1,
+        state: PrState.NotOpen,
+      });
+      await raiseConfigWarningIssue(config, error);
+    });
   });
 });
