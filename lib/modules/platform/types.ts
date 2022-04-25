@@ -180,7 +180,8 @@ export interface Platform {
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    context: string
+    // TODO: can be undefined or null ? #7154
+    context: string | null | undefined
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:

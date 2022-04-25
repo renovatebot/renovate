@@ -32,7 +32,7 @@ export function getGitStatusContextCombinedName(
 }
 
 export function getGitStatusContextFromCombinedName(
-  context: string
+  context: string | undefined | null
 ): GitStatusContext | undefined {
   if (!context) {
     return undefined;
@@ -182,7 +182,7 @@ export function getProjectAndRepo(str: string): {
 
 export function getRepoByName(
   name: string,
-  repos: GitRepository[]
+  repos: (GitRepository | null | undefined)[] | undefined | null
 ): GitRepository | null {
   logger.trace(`getRepoByName(${name})`);
 

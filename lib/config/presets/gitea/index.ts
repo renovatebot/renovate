@@ -18,7 +18,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string
+  tag?: string | null
 ): Promise<Preset> {
   let res: RepoContents;
   try {
@@ -37,7 +37,9 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   try {
-    const content = fromBase64(res.content);
+    // TODO: undefiend content ? #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const content = fromBase64(res.content!);
     const parsed = JSON.parse(content);
     return parsed;
   } catch (err) {
@@ -48,10 +50,10 @@ export async function fetchJSONFile(
 export function getPresetFromEndpoint(
   repo: string,
   filePreset: string,
-  presetPath: string,
+  presetPath?: string,
   endpoint = Endpoint,
   tag?: string
-): Promise<Preset> {
+): Promise<Preset | undefined> {
   return fetchPreset({
     repo,
     filePreset,
@@ -66,7 +68,7 @@ export function getPreset({
   repo,
   presetName = 'default',
   presetPath,
-  tag = null,
-}: PresetConfig): Promise<Preset> {
+  tag = undefined,
+}: PresetConfig): Promise<Preset | undefined> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }
