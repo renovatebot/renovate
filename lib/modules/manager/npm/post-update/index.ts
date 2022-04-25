@@ -173,7 +173,7 @@ export async function writeExistingFiles(
         let existingNpmLock: string;
         try {
           existingNpmLock = (await getFile(npmLock)) ?? '';
-        } catch (err) {
+        } catch (err) /* istanbul ignore next */ {
           logger.warn({ err }, 'Error reading npm lock file');
           existingNpmLock = '';
         }
@@ -222,7 +222,7 @@ export async function writeExistingFiles(
                   delete npmLockParsed.dependencies![depName];
                 });
               }
-            } catch (err) {
+            } catch (err) /* istanbul ignore next */ {
               logger.warn(
                 { npmLock },
                 'Error massaging package-lock.json for widen'
@@ -286,6 +286,7 @@ export async function writeUpdatedPackageFiles(
         url: 'https://api.github.com/',
       });
       for (const upgrade of config.upgrades) {
+        // istanbul ignore if: test me
         if (upgrade.gitRef && upgrade.packageFile === packageFile.path) {
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           massagedFile[upgrade.depType as NpmDepType][upgrade.depName!] =
@@ -298,7 +299,7 @@ export async function writeUpdatedPackageFiles(
             );
         }
       }
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       logger.warn({ err }, 'Error adding token to package files');
     }
     await outputFile(
@@ -308,6 +309,7 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
+// istanbul ignore next
 async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent: string | null = null;
@@ -322,6 +324,7 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   return originalNpmrcContent;
 }
 
+// istanbul ignore next
 async function updateNpmrcContent(
   dir: string,
   originalContent: string | null,
@@ -342,6 +345,7 @@ async function updateNpmrcContent(
   }
 }
 
+// istanbul ignore next
 async function resetNpmrcContent(
   dir: string,
   originalContent: string | null
@@ -461,6 +465,7 @@ export async function updateYarnBinary(
   return existingYarnrcYmlContent && yarnrcYml;
 }
 
+// istanbul ignore next
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
