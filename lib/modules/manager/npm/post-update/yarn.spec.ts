@@ -99,6 +99,29 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
+  it('allows and ignore scripts', async () => {
+    GlobalConfig.set({ localDir: '.', allowScripts: true });
+    Fixtures.mock(
+      {
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir'
+    );
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '3.0.0',
+      stderr: '',
+    });
+    const config = {
+      constraints: {
+        yarn: '3.0.0',
+      },
+      ignoreScripts: true,
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
   it('does not use global cache if zero install is detected', async () => {
     Fixtures.mock(
       {
@@ -276,6 +299,20 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(await yarnHelper.checkYarnrc('.')).toEqual({
         offlineMirror: true,
         yarnPath: './.yarn/cli.js',
+      });
+    });
+
+    it('returns offline mirror', async () => {
+      Fixtures.mock(
+        {
+          '/tmp/renovate/.yarnrc': 'yarn-offline-mirror "./packages-cache"\n',
+        },
+        '/'
+      );
+      GlobalConfig.set({ localDir: '/tmp/renovate' });
+      expect(await yarnHelper.checkYarnrc('.')).toEqual({
+        offlineMirror: true,
+        yarnPath: null,
       });
     });
 
