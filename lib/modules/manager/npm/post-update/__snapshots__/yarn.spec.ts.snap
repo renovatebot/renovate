@@ -56,7 +56,7 @@ Array [
   Object {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -76,7 +76,7 @@ Array [
   Object {
     "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -96,7 +96,7 @@ Array [
   Object {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -116,7 +116,7 @@ Array [
   Object {
     "cmd": "npx yarn-deduplicate --strategy highest",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -136,7 +136,7 @@ Array [
   Object {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -161,7 +161,7 @@ Array [
   Object {
     "cmd": "yarn install",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -190,7 +190,7 @@ Array [
   Object {
     "cmd": "yarn install",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -214,7 +214,7 @@ Array [
   Object {
     "cmd": "yarn dedupe --strategy highest",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -243,7 +243,7 @@ Array [
   Object {
     "cmd": "yarn install --mode=update-lockfile",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",
@@ -266,7 +266,7 @@ Array [
   Object {
     "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
     "options": Object {
-      "cwd": "/some-dir",
+      "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
         "CI": "true",

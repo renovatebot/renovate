@@ -13,7 +13,7 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
 import {
   deleteLocalFile,
-  exists,
+  localPathIsFile,
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs';
@@ -45,7 +45,9 @@ export async function checkYarnrc(
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
       }
-      const yarnBinaryExists = yarnPath ? await exists(yarnPath) : false;
+      const yarnBinaryExists = yarnPath
+        ? await localPathIsFile(yarnPath)
+        : false;
       if (!yarnBinaryExists) {
         const scrubbedYarnrc = yarnrc.replace(
           regEx(/^yarn-path\s+"?.+?"?$/gm),

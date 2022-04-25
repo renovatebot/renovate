@@ -14,8 +14,8 @@ import type {
 import {
   deleteLocalFile,
   localPathExists,
-  move,
   readLocalFile,
+  renameLocalFile,
 } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
@@ -126,14 +126,14 @@ export async function generateLockFile(
       filename === 'npm-shrinkwrap.json' &&
       (await localPathExists(upath.join(lockFileDir, 'package-lock.json')))
     ) {
-      await move(
+      await renameLocalFile(
         upath.join(lockFileDir, 'package-lock.json'),
         upath.join(lockFileDir, 'npm-shrinkwrap.json')
       );
     }
 
     // Read the result
-    lockFile = await readLocalFile(filename, 'utf8');
+    lockFile = await readLocalFile(upath.join(lockFileDir, filename), 'utf8');
 
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile

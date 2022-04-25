@@ -32,7 +32,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     jest.clearAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '.' });
   });
 
   it.each([
@@ -50,6 +50,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/some-dir'
       );
+      GlobalConfig.set({ localDir: '/' });
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -61,7 +62,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile(
-        '/some-dir',
+        'some-dir',
         {
           YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
           YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
@@ -191,7 +192,6 @@ describe('modules/manager/npm/post-update/yarn', () => {
   ])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
-      GlobalConfig.set({ localDir: '.' });
       Fixtures.mock(
         {
           '.yarnrc': null,
@@ -214,7 +214,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       ]);
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(1);
-      expect(res.lockFile).toBeUndefined();
+      expect(res.lockFile).toBeNull();
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
@@ -254,12 +254,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it('catches errors', async () => {
     Fixtures.mock({});
-    const execSnapshots = mockExecAll(exec, {
-      stdout: '1.9.4',
-      stderr: 'some-error',
-    });
+    const execSnapshots = mockExecAll(exec, new Error('some-error'));
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -269,19 +266,20 @@ describe('modules/manager/npm/post-update/yarn', () => {
     it('returns offline mirror and yarn path', async () => {
       Fixtures.mock(
         {
-          '.yarn/cli.js': '',
+          '/tmp/renovate/.yarn/cli.js': '',
           '/tmp/renovate/.yarnrc':
-            'yarn-offline-mirror "./packages-cache"\nyarn-path "/.yarn/cli.js"\n',
+            'yarn-offline-mirror "./packages-cache"\nyarn-path "./.yarn/cli.js"\n',
         },
         '/'
       );
-      expect(await yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
+      GlobalConfig.set({ localDir: '/tmp/renovate' });
+      expect(await yarnHelper.checkYarnrc('.')).toEqual({
         offlineMirror: true,
-        yarnPath: '/.yarn/cli.js',
+        yarnPath: './.yarn/cli.js',
       });
     });
 
-    it('returns no offline mirror and unquoted yarn path', async () => {
+    it('returns no offline mirror and no absolute yarn path', async () => {
       Fixtures.mock(
         {
           '.yarn/cli.js': '',
@@ -289,9 +287,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/'
       );
-      expect(await yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
+      GlobalConfig.set({ localDir: '/tmp' });
+      expect(await yarnHelper.checkYarnrc('renovate')).toEqual({
         offlineMirror: false,
-        yarnPath: '/.yarn/cli.js',
+        yarnPath: null,
       });
     });
 
@@ -302,9 +301,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/tmp/renovate'
       );
-      const { offlineMirror, yarnPath } = await yarnHelper.checkYarnrc(
-        '/tmp/renovate'
-      );
+      GlobalConfig.set({ localDir: '/tmp/renovate' });
+      const { offlineMirror, yarnPath } = await yarnHelper.checkYarnrc('.');
       expect(offlineMirror).toBeFalse();
       expect(yarnPath).toBeNull();
       expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n');

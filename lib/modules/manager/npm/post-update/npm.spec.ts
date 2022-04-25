@@ -6,8 +6,8 @@ import { GlobalConfig } from '../../../../config/global';
 import * as npmHelper from './npm';
 
 jest.mock('child_process');
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
+jest.mock('../../../../util/exec/env');
+jest.mock('../../../../util/fs');
 jest.mock('./node-version');
 
 describe('modules/manager/npm/post-update/npm', () => {
@@ -61,9 +61,9 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('performs lock file updates retaining the package.json counterparts', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() =>
+    fs.readLocalFile.mockResolvedValueOnce(
       Fixtures.get('update-lockfile-massage-1/package-lock.json')
-    ) as never;
+    );
     const skipInstalls = true;
     const updates = [
       {
@@ -81,7 +81,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls },
       updates
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
@@ -98,8 +98,8 @@ describe('modules/manager/npm/post-update/npm', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(fs.move).toHaveBeenCalledTimes(1);
-    expect(fs.move).toHaveBeenCalledWith(
+    expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.renameLocalFile).toHaveBeenCalledWith(
       upath.join('some-dir', 'package-lock.json'),
       upath.join('some-dir', 'npm-shrinkwrap.json')
     );
@@ -124,7 +124,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(fs.move).toHaveBeenCalledTimes(0);
+    expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
