@@ -132,7 +132,7 @@ export async function downloadS3Protocol(
     } else if (isS3NotFound(err)) {
       logger.trace({ failedUrl }, `S3 url not found`);
     } else {
-      logger.info(
+      logger.debug(
         { failedUrl, message: err.message },
         'Unknown S3 download error'
       );
