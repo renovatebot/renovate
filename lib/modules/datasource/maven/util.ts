@@ -111,7 +111,6 @@ export async function downloadS3Protocol(
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     if (s3Url === null) {
-      // istanbul ignore next: null guard
       return null;
     }
     const response = await getS3Client().getObject(s3Url);
@@ -172,12 +171,11 @@ async function checkHttpResource(
   }
 }
 
-async function checkS3Resource(
+export async function checkS3Resource(
   pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
-    // istanbul ignore next: null guard
     if (s3Url === null) {
       return 'error';
     }
