@@ -744,7 +744,7 @@ Set this to `false` if you want to disable release notes fetching.
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 
-- GitHub (.com and Enterprise)
+- GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
 <!-- prettier-ignore -->
@@ -2079,6 +2079,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## pruneBranchAfterAutomerge
+
+By default Renovate deletes, or "prunes", the branch after automerging.
+Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 ## pruneStaleBranches
 

@@ -6,6 +6,8 @@ export interface Repo {
   'packagist.org'?: boolean;
   url: string;
 }
+export type ComposerRepositories = Record<string, Repo | boolean> | Repo[];
+
 export interface ComposerConfig {
   type?: string;
   /**
@@ -25,7 +27,7 @@ export interface ComposerConfig {
    * (Yes this can be confusing, as it is also not properly documented in the composer docs)
    * See https://getcomposer.org/doc/05-repositories.md#disabling-packagist-org
    */
-  repositories?: Record<string, Repo | boolean> | Repo[];
+  repositories?: ComposerRepositories;
 
   require?: Record<string, string>;
   'require-dev'?: Record<string, string>;

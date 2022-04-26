@@ -1,7 +1,11 @@
 import { URL } from 'url';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
-import type { CustomExtractConfig, PackageDependency } from '../types';
+import type {
+  CustomExtractConfig,
+  PackageDependency,
+  RegexManagerTemplates,
+} from '../types';
 import type { ExtractionTemplate } from './types';
 
 export const validMatchFields = [
@@ -14,17 +18,19 @@ export const validMatchFields = [
   'extractVersion',
   'registryUrl',
   'depType',
-];
+] as const;
+
+type ValidMatchFields = typeof validMatchFields[number];
 
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: CustomExtractConfig,
   dep?: PackageDependency
-): PackageDependency {
+): PackageDependency | null {
   const dependency = dep || {};
   const { groups, replaceString } = extractionTemplate;
 
-  function updateDependency(field: string, value: string): void {
+  function updateDependency(field: ValidMatchFields, value: string): void {
     switch (field) {
       case 'registryUrl':
         // check if URL is valid and pack inside an array
@@ -42,14 +48,15 @@ export function createDependency(
   }
 
   for (const field of validMatchFields) {
-    const fieldTemplate = `${field}Template`;
-    if (config[fieldTemplate]) {
+    const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
+    const tmpl = config[fieldTemplate];
+    if (tmpl) {
       try {
-        const compiled = template.compile(config[fieldTemplate], groups, false);
+        const compiled = template.compile(tmpl, groups, false);
         updateDependency(field, compiled);
       } catch (err) {
         logger.warn(
-          { template: config[fieldTemplate] },
+          { template: tmpl },
           'Error compiling template for custom manager'
         );
         return null;
@@ -67,7 +74,7 @@ export function regexMatchAll(
   content: string
 ): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
-  let matchResult;
+  let matchResult: RegExpMatchArray | null;
   do {
     matchResult = regex.exec(content);
     if (matchResult) {

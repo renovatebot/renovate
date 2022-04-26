@@ -3,37 +3,43 @@ import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { readFile, remove } from '../../../../util/fs';
+import type {
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../../util/exec/types';
+import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmPackage } from '../extract/types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
-  cwd: string,
+  lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = upath.join(cwd, 'pnpm-lock.yaml');
+  const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
-  let lockFile = null;
-  let stdout: string;
-  let stderr: string;
+  let lockFile: string | null = null;
+  let stdout: string | undefined;
+  let stderr: string | undefined;
   let cmd = 'pnpm';
   try {
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
-      constraint: config.constraints?.pnpm ?? (await getPnpmContraint(cwd)),
+      constraint:
+        config.constraints?.pnpm ?? (await getPnpmContraint(lockFileDir)),
     };
     const tagConstraint = await getNodeConstraint(config);
+    const extraEnv: ExtraEnv = {
+      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+      npm_config_store: env.npm_config_store,
+    };
     const execOptions: ExecOptions = {
-      cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      cwdFile: lockFileName,
+      extraEnv,
       docker: {
         image: 'node',
         tagScheme: 'node',
@@ -43,8 +49,8 @@ export async function generateLockFile(
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      extraEnv.NPM_AUTH = env.NPM_AUTH;
+      extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
@@ -59,7 +65,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -69,7 +75,7 @@ export async function generateLockFile(
     }
 
     await exec(`${cmd} ${args}`, execOptions);
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -89,10 +95,12 @@ export async function generateLockFile(
   return { lockFile };
 }
 
-async function getPnpmContraint(cwd: string): Promise<string> {
-  let result;
-  const rootPackageJson = upath.join(cwd, 'package.json');
-  const content = await readFile(rootPackageJson, 'utf8');
+async function getPnpmContraint(
+  lockFileDir: string
+): Promise<string | undefined> {
+  let result: string | undefined;
+  const rootPackageJson = upath.join(lockFileDir, 'package.json');
+  const content = await readLocalFile(rootPackageJson, 'utf8');
   if (content) {
     const packageJson: NpmPackage = JSON.parse(content);
     const packageManager = packageJson?.packageManager;

@@ -75,7 +75,7 @@ export async function findFirstParentVersion(
     for (const parentVersion of parentVersions) {
       const constraint = parentDep.releases.find(
         (release) => release.version === parentVersion
-      ).dependencies?.[targetDepName];
+      )?.dependencies?.[targetDepName];
       if (!constraint) {
         logger.debug(
           `${targetDepName} has been removed from ${parentName}@${parentVersion}`

@@ -2,7 +2,7 @@ import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 
 export interface ToolConstraint {
   toolName: string;
-  constraint?: string;
+  constraint?: string | null;
 }
 
 export interface ToolConfig {
@@ -16,9 +16,6 @@ export type Opt<T> = T | null | undefined;
 
 export type VolumesPair = [string, string];
 export type VolumeOption = Opt<string | VolumesPair>;
-
-export type DockerExtraCommand = Opt<string>;
-export type DockerExtraCommands = Opt<DockerExtraCommand[]>;
 
 export interface DockerOptions {
   image: string;
@@ -48,7 +45,7 @@ export interface ExecOptions {
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
-  preCommands?: DockerExtraCommands;
+  preCommands?: Opt<string[]>;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;

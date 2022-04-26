@@ -31,7 +31,7 @@ function getUrlTestContent(
   content: string,
   oldUrl: string,
   newUrl: string
-): string {
+): string | null {
   const urlRegExp = /(^|\s)url(\s)/;
   const cleanContent = removeComments(content);
   let j = cleanContent.search(urlRegExp);
@@ -60,7 +60,7 @@ function updateUrl(
   if (!newContent || !testContent) {
     return null;
   }
-  while (removeComments(newContent) !== testContent) {
+  while (newContent && removeComments(newContent) !== testContent) {
     i += 'url'.length;
     i += content.substring(i).search(urlRegExp);
     if (isSpace(content[i])) {
@@ -124,7 +124,7 @@ function updateSha256(
   if (!newContent || !testContent) {
     return null;
   }
-  while (removeComments(newContent) !== testContent) {
+  while (newContent && removeComments(newContent) !== testContent) {
     i += 'sha256'.length;
     i += content.substring(i).search(sha256RegExp);
     if (isSpace(content[i])) {
@@ -148,8 +148,8 @@ export async function updateDependency({
   // Example urls:
   // "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
   // "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
-  const oldParsedUrlPath = parseUrlPath(upgrade.managerData.url);
-  if (!oldParsedUrlPath) {
+  const oldParsedUrlPath = parseUrlPath(upgrade.managerData?.url);
+  if (!oldParsedUrlPath || !upgrade.managerData) {
     logger.debug(
       `Failed to update - upgrade.managerData.url is invalid ${upgrade.depName}`
     );

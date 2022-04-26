@@ -8,7 +8,7 @@ import {
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
-import { initialize } from '../../../util/cache/repository';
+import { initRepoCache } from '../../../util/cache/repository/init';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -36,7 +36,7 @@ jest.mock('../../../config/migrate-validate');
 describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
-      await initialize({});
+      await initRepoCache({});
     });
 
     it('returns config if not found', async () => {
