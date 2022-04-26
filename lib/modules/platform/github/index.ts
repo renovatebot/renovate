@@ -611,7 +611,7 @@ export async function getPrList(): Promise<Pr[]> {
     // TODO: check null `repo` #7154
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const prCache = await getPrCache(githubApi, repo!, username);
-    config.prList = Object.values(prCache);
+    config.prList = Object.values(prCache).filter((pr) => !pr.byRenovate);
   }
 
   return config.prList;

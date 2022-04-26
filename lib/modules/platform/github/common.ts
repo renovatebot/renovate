@@ -51,5 +51,9 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
     result.closedAt = pr.closed_at;
   }
 
+  if (pr.user?.login?.endsWith('[bot]')) {
+    result.byRenovate = true;
+  }
+
   return result;
 }

@@ -114,7 +114,9 @@ export async function getPrCache(
 
       if (username) {
         page = page.filter(
-          (ghPr) => ghPr?.user?.login && ghPr.user.login === username
+          (ghPr) =>
+            ghPr?.user?.login &&
+            (ghPr.user.login === username || ghPr.user.login.endsWith('[bot]'))
         );
       }
 
