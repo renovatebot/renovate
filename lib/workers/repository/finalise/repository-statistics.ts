@@ -5,7 +5,6 @@ import { PrState } from '../../../types';
 import { GithubHttp } from '../../../util/http/github';
 
 const githubApi = new GithubHttp();
-const renovateBot = 'renovate[bot]';
 
 type PrStats = {
   total: number;
@@ -27,12 +26,9 @@ export async function runRenovateRepoStats(
   config: RenovateConfig
 ): Promise<void> {
   const prStats = initStats();
-  const prCache = await getPrCache(
-    githubApi,
-    config.repository ?? '',
-    renovateBot
-  );
-  const prList = Object.values(prCache);
+
+  const prCache = await getPrCache(githubApi, config.repository ?? '', null);
+  const prList = Object.values(prCache).filter((pr) => pr.byRenovate);
   for (const pr of prList) {
     if (
       pr.title === 'Configure Renovate' ||
