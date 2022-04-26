@@ -49,7 +49,7 @@ export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
   sourceDirectory?: string
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   logger.trace('gitlab.getReleaseNotesMd()');
   const urlEncodedRepo = encodeURIComponent(repository);
   const apiPrefix = `${ensureTrailingSlash(
@@ -76,7 +76,7 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, id } = files.shift();
+  const { path: changelogFile, id } = files.shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(

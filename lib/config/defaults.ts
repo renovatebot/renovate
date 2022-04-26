@@ -6,7 +6,8 @@ const defaultValues = {
   array: [],
   string: null,
   object: null,
-};
+  integer: null,
+} as const;
 
 export function getDefault(option: RenovateOptions): any {
   return option.default === undefined

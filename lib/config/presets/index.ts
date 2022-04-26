@@ -45,6 +45,29 @@ const gitPresetRegex = regEx(
 );
 
 export function replaceArgs(
+  obj: string,
+  argMapping: Record<string, any>
+): string;
+export function replaceArgs(
+  obj: string[],
+  argMapping: Record<string, any>
+): string[];
+export function replaceArgs(
+  obj: Record<string, any>,
+  argMapping: Record<string, any>
+): Record<string, any>;
+export function replaceArgs(
+  obj: Record<string, any>[],
+  argMapping: Record<string, any>
+): Record<string, any>[];
+
+/**
+ * TODO: fix me #7154
+ * @param obj
+ * @param argMapping
+ */
+export function replaceArgs(obj: any, argMapping: Record<string, any>): any;
+export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
 ): any {
@@ -64,7 +87,7 @@ export function replaceArgs(
     return returnArray;
   }
   if (is.object(obj)) {
-    const returnObj = {};
+    const returnObj: Record<string, any> = {};
     for (const [key, val] of Object.entries(obj)) {
       returnObj[key] = replaceArgs(val, argMapping);
     }
@@ -75,12 +98,12 @@ export function replaceArgs(
 
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
-  let presetSource: string;
+  let presetSource: string | undefined;
   let presetPath: string | undefined;
   let repo: string;
   let presetName: string;
   let tag: string | undefined;
-  let params: string[];
+  let params: string[] | undefined;
   if (str.startsWith('github>')) {
     presetSource = 'github';
     str = str.substring('github>'.length);
@@ -101,7 +124,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetSource = 'local';
   }
   str = str.replace(regEx(/^npm>/), '');
-  presetSource = presetSource || 'npm';
+  presetSource = presetSource ?? 'npm';
   if (str.includes('(')) {
     params = str
       .slice(str.indexOf('(') + 1, -1)
@@ -137,7 +160,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
-    [, repo] = regEx(/(@.*?)(:|$)/).exec(str);
+    [, repo] = regEx(/(@.*?)(:|$)/).exec(str)!;
     str = str.slice(repo.length);
     if (!repo.includes('/')) {
       repo += '/renovate-config';
@@ -207,7 +230,7 @@ export async function getPreset(
   }
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
-    const argMapping = {};
+    const argMapping: Record<string, string> = {};
     for (const [index, value] of params.entries()) {
       argMapping[`arg${index}`] = value;
     }

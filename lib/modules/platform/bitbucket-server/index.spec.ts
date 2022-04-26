@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as httpMock from '../../../../test/http-mock';
 import {
   REPOSITORY_CHANGED,
@@ -56,7 +57,7 @@ function repoMock(
             name: 'ssh',
           }
         : null,
-    ].filter(Boolean);
+    ].filter(is.truthy);
   }
 
   return {
@@ -1119,7 +1120,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest1',
             })
-          ).toBeUndefined();
+          ).toBeNull();
         });
       });
 
@@ -1161,7 +1162,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               state: PrState.Closed,
             })
-          ).toBeUndefined();
+          ).toBeNull();
         });
       });
 
@@ -1180,7 +1181,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
-          const { number: id } = await bitbucket.createPr({
+          const pr = await bitbucket.createPr({
             sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
@@ -1189,7 +1190,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               bbUseDefaultReviewers: true,
             },
           });
-          expect(id).toBe(5);
+          expect(pr?.number).toBe(5);
         });
 
         it('posts PR default branch', async () => {
@@ -1206,7 +1207,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
-          const { number: id } = await bitbucket.createPr({
+          const pr = await bitbucket.createPr({
             sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
@@ -1216,7 +1217,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               bbUseDefaultReviewers: true,
             },
           });
-          expect(id).toBe(5);
+          expect(pr?.number).toBe(5);
         });
       });
 

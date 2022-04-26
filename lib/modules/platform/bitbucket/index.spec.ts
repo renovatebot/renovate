@@ -615,7 +615,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = httpMock.scope(baseUrl);
       scope.get('/2.0/user').reply(200, { uuid: '12345' });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      await initRepoMock(null, null, scope);
+      await initRepoMock(undefined, null, scope);
       scope
         .get(
           '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&q=author.uuid="12345"&pagelen=50'
@@ -666,7 +666,7 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
-      const { number } = await bitbucket.createPr({
+      const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',
         prTitle: 'title',
@@ -675,7 +675,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbUseDefaultReviewers: true,
         },
       });
-      expect(number).toBe(5);
+      expect(pr?.number).toBe(5);
     });
 
     it('removes inactive reviewers when updating pr', async () => {
@@ -715,7 +715,7 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
-      const { number } = await bitbucket.createPr({
+      const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',
         prTitle: 'title',
@@ -724,7 +724,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbUseDefaultReviewers: true,
         },
       });
-      expect(number).toBe(5);
+      expect(pr?.number).toBe(5);
     });
 
     it('removes default reviewers no longer member of the workspace when creating pr', async () => {
@@ -767,7 +767,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200)
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
-      const { number } = await bitbucket.createPr({
+      const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',
         prTitle: 'title',
@@ -776,7 +776,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbUseDefaultReviewers: true,
         },
       });
-      expect(number).toBe(5);
+      expect(pr?.number).toBe(5);
     });
 
     it('throws exception when unable to check default reviewers workspace membership', async () => {
