@@ -64,7 +64,7 @@ export class RubyGemsOrgDatasource extends Datasource {
         contentLength = 0;
         packageReleases = Object.create(null); // Because we might need a "constructor" key
         logger.debug({ err }, 'Rubygems fetch error');
-        throw new ExternalHostError(new Error('Rubygems fetch error.'));
+        throw new ExternalHostError(new Error('Rubygems fetch error'));
       }
       logger.debug('Rubygems: No update');
       lastSync = new Date();
