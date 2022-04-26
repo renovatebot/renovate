@@ -1,5 +1,6 @@
 import semver from 'semver';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -27,7 +28,7 @@ export function getLernaVersion(
 
 export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
-  cwd: string,
+  lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
@@ -80,7 +81,7 @@ export async function generateLockFiles(
       npm_config_store: env.npm_config_store,
     };
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
       docker: {
         image: 'node',
