@@ -215,7 +215,6 @@ export async function checkResource(
   pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
-  // istanbul ignore next: null guard
   if (parsedUrl === null) {
     return 'error';
   }
@@ -225,7 +224,6 @@ export async function checkResource(
       return await checkHttpResource(http, parsedUrl);
     case 's3:':
       return await checkS3Resource(parsedUrl);
-    // istanbul ignore next: if downloadMavenXml falls through to default, then this will logically never happen.
     default:
       logger.debug(
         { url: pkgUrl.toString() },
@@ -251,7 +249,6 @@ export async function downloadMavenXml(
   http: Http,
   pkgUrl: URL | null
 ): Promise<MavenXml> {
-  /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
