@@ -108,7 +108,6 @@ export async function downloadS3Protocol(
   pkgUrl: URL | string
 ): Promise<string | null> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
-  let body: string;
   try {
     const s3Url = parseS3Url(pkgUrl.toString());
     if (s3Url === null) {
@@ -123,8 +122,7 @@ export async function downloadS3Protocol(
       stream.once('end', () => resolve(Buffer.concat(chunks)));
       stream.once('error', reject);
     });
-    body = buffers.toString();
-    return body;
+    return buffers.toString();
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {
