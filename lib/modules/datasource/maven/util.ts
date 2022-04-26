@@ -255,7 +255,7 @@ export async function downloadMavenXml(
 
   let isCacheable = false;
 
-  let rawContent: string | undefined | null;
+  let rawContent: string | undefined;
   let authorization: boolean | undefined;
   let statusCode: number | undefined;
   switch (pkgUrl.protocol) {
@@ -268,7 +268,7 @@ export async function downloadMavenXml(
       } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
-      rawContent = await downloadS3Protocol(pkgUrl);
+      rawContent = (await downloadS3Protocol(pkgUrl)) || undefined;
       break;
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
