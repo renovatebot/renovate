@@ -1,4 +1,3 @@
-import type { Readable } from 'stream';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -8,6 +7,7 @@ import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { getS3Client, parseS3Url } from '../../../util/s3';
+import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
@@ -115,14 +115,8 @@ export async function downloadS3Protocol(
       return null;
     }
     const response = await getS3Client().getObject(s3Url);
-    const stream = response.Body as Readable;
-    const buffers = await new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.once('end', () => resolve(Buffer.concat(chunks)));
-      stream.once('error', reject);
-    });
-    return buffers.toString();
+    const buffer = await streamToString(response.Body);
+    return buffer.toString();
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {
