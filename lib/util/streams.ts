@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 import ReadableStream = NodeJS.ReadableStream;
 
 export async function streamToString(
-  stream: Readable | ReadableStream<any> | Blob
+  stream: Readable | ReadableStream | Blob
 ): Promise<string> {
   if (stream instanceof Blob) {
     return stream.text();
