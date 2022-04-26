@@ -66,6 +66,7 @@ describe('workers/repository/error-config', () => {
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('disable issue creation on config failure', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
