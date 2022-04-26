@@ -114,8 +114,10 @@ export async function downloadS3Protocol(
       return null;
     }
     const response = await getS3Client().getObject(s3Url);
-    const buffer = await streamToString(response.Body);
-    return buffer.toString();
+    if (response.Body) {
+      const buffer = await streamToString(response.Body);
+      return buffer.toString();
+    }
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {

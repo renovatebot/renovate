@@ -1,11 +1,8 @@
-// eslint-disable-next-line import/order
-import { s3mock } from '../../../../test/s3-mock';
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
-import { parseUrl } from '../../../util/url';
 import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';
 
@@ -13,7 +10,6 @@ const datasource = MavenDatasource.id;
 
 const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
-const baseUrlS3 = 's3://repobucket';
 
 interface SnapshotOpts {
   version: string;
@@ -32,29 +28,6 @@ interface MockOpts {
   html?: string;
 }
 
-interface ResourceMockers {
-  http?: () => void;
-  s3?: () => void;
-}
-
-function mockResource(protocol: string, mockers: ResourceMockers) {
-  switch (protocol) {
-    case 'http:':
-    case 'https:':
-      if (mockers.http) {
-        mockers.http();
-      }
-      break;
-    case 's3:':
-      if (mockers.s3) {
-        mockers.s3();
-      }
-      break;
-    default:
-      throw new Error(`Unknown protocol: ${protocol}`);
-  }
-}
-
 function mockGenericPackage(opts: MockOpts = {}) {
   const {
     dep = 'org.example:package',
@@ -62,7 +35,6 @@ function mockGenericPackage(opts: MockOpts = {}) {
     latest = '2.0.0',
     html,
   } = opts;
-  const protocol = parseUrl(base).protocol;
   const meta =
     opts.meta === undefined ? loadFixture('metadata.xml') : opts.meta;
   const pom = opts.pom === undefined ? loadFixture('pom.xml') : opts.pom;
@@ -95,35 +67,25 @@ function mockGenericPackage(opts: MockOpts = {}) {
         ]
       : opts.snapshots;
 
+  const scope = httpMock.scope(base);
+
   const [group, artifact] = dep.split(':');
   const packagePath = `${group.replace(/\./g, '/')}/${artifact}`;
 
   if (meta) {
-    const metadataPath = `/${packagePath}/maven-metadata.xml`;
-    mockResource(protocol, {
-      http: () => httpMock.scope(base).get(metadataPath).reply(200, meta),
-      s3: () => s3mock.mockObject(`${base}${metadataPath}`, meta),
-    });
+    scope.get(`/${packagePath}/maven-metadata.xml`).reply(200, meta);
   }
 
-  const indexPath = `/${packagePath}/index.html`;
   if (html) {
-    mockResource(protocol, {
-      http: () => httpMock.scope(base).get(indexPath).reply(200, html),
-      s3: () => s3mock.mockObject(`${base}${indexPath}`, html),
-    });
+    scope.get(`/${packagePath}/index.html`).reply(200, html);
   } else if (html === null) {
-    mockResource(protocol, {
-      http: () => httpMock.scope(base).get(indexPath).reply(404),
-    });
+    scope.get(`/${packagePath}/index.html`).reply(404);
   }
 
   if (pom) {
-    const pomPath = `/${packagePath}/${latest}/${artifact}-${latest}.pom`;
-    mockResource(protocol, {
-      http: () => httpMock.scope(base).get(pomPath).reply(200, pom),
-      s3: () => s3mock.mockObject(`${base}${pomPath}`, pom),
-    });
+    scope
+      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
+      .reply(200, pom);
   }
 
   if (jars) {
@@ -137,28 +99,22 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const headers = version.startsWith('0.')
         ? {}
         : { 'Last-Modified': timestamp };
-      const pomPath = `/${packagePath}/${version}/${artifact}-${version}.pom`;
-      mockResource(protocol, {
-        http: () =>
-          httpMock.scope(base).head(pomPath).reply(status, '', headers),
-        s3: () => s3mock.mockObject(`${base}${pomPath}`, '', headers),
-      });
+      scope
+        .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
+        .reply(status, '', headers);
     });
   }
 
   if (snapshots) {
     snapshots.forEach((snapshot) => {
-      const snapMetaPath = `/${packagePath}/${snapshot.version}/maven-metadata.xml`;
       if (snapshot.meta) {
-        mockResource(protocol, {
-          http: () =>
-            httpMock.scope(base).get(snapMetaPath).reply(200, snapshot.meta),
-          s3: () => s3mock.mockObject(`${base}${snapMetaPath}`, snapshot.meta),
-        });
+        scope
+          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+          .reply(200, snapshot.meta);
       } else {
-        mockResource(protocol, {
-          http: () => httpMock.scope(base).get(snapMetaPath).reply(404, ''),
-        });
+        scope
+          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+          .reply(404, '');
       }
 
       if (snapshot.jarStatus) {
@@ -168,60 +124,26 @@ function mockGenericPackage(opts: MockOpts = {}) {
           .map((x) => parseInt(x, 10))
           .map((x) => (x < 10 ? `0${x}` : `${x}`));
         const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
-        const pomUrl = `/${packagePath}/${
-          snapshot.version
-        }/${artifact}-${snapshot.version.replace(
-          '-SNAPSHOT',
-          ''
-        )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`;
-        const headers = { 'Last-Modified': timestamp };
-        mockResource(protocol, {
-          http: () =>
-            httpMock
-              .scope(base)
-              .head(pomUrl)
-              .reply(snapshot.jarStatus, '', headers),
-          s3: () => s3mock.mockObject(`${base}${pomUrl}`, '', headers),
-        });
+        scope
+          .head(
+            `/${packagePath}/${
+              snapshot.version
+            }/${artifact}-${snapshot.version.replace(
+              '-SNAPSHOT',
+              ''
+            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+          )
+          .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
       } else {
-        mockResource(protocol, {
-          http: () =>
-            httpMock
-              .scope(base)
-              .head(
-                `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
-              )
-              .reply(404, ''),
-        });
+        scope
+          .head(
+            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+          )
+          .reply(404, '');
       }
     });
   }
 }
-
-const basicReleaseResult: ReleaseResult = {
-  display: 'org.example:package',
-  group: 'org.example',
-  homepage: 'https://package.example.org/about',
-  name: 'package',
-  registryUrl: 'https://repo.maven.apache.org/maven2',
-  releases: [
-    {
-      version: '0.0.1',
-    },
-    {
-      releaseTimestamp: '2020-01-01T01:00:00.000Z',
-      version: '1.0.0',
-    },
-    {
-      releaseTimestamp: '2020-01-01T01:00:03.000Z',
-      version: '1.0.3-SNAPSHOT',
-    },
-    {
-      releaseTimestamp: '2020-01-01T02:00:00.000Z',
-      version: '2.0.0',
-    },
-  ],
-} as ReleaseResult;
 
 function get(
   depName = 'org.example:package',
@@ -375,6 +297,7 @@ describe('modules/datasource/maven/index', () => {
     const { releases } = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
+      's3://protocol_error_repo',
       base
     );
 
@@ -680,135 +603,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-    });
-  });
-
-  describe('S3', () => {
-    it('returns releases', async () => {
-      mockGenericPackage({
-        base: baseUrlS3,
-        html: null,
-      });
-
-      const res = await get('org.example:package', baseUrlS3);
-
-      expect(res).toEqual({
-        display: 'org.example:package',
-        group: 'org.example',
-        name: 'package',
-        registryUrl: 's3://repobucket',
-        releases: [
-          {
-            version: '0.0.1',
-          },
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '1.0.1',
-          },
-          {
-            version: '1.0.2',
-          },
-          {
-            version: '1.0.3-SNAPSHOT',
-          },
-          {
-            version: '2.0.0',
-          },
-        ],
-      });
-    });
-
-    const missingReleaseReleaseResult = {
-      display: 'org.example:package',
-      group: 'org.example',
-      name: 'package',
-      registryUrl: 's3://repobucket',
-      releases: [
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
-      ],
-    };
-
-    it('does not return deleted releases', async () => {
-      mockGenericPackage({
-        base: baseUrlS3,
-        html: null,
-      });
-      s3mock.mockDelete(
-        's3://repobucket/org/example/package/0.0.1/package-0.0.1.pom'
-      );
-
-      const res = await get('org.example:package', baseUrlS3);
-
-      expect(res).toEqual(missingReleaseReleaseResult);
-    });
-
-    it('does not return releases with fetch errors', async () => {
-      mockGenericPackage({
-        base: baseUrlS3,
-        html: null,
-      });
-      s3mock.mockError(
-        new Error('Unknown error'),
-        's3://repobucket/org/example/package/0.0.1/package-0.0.1.pom'
-      );
-
-      const res = await get('org.example:package', baseUrlS3);
-
-      expect(res).toEqual(missingReleaseReleaseResult);
-    });
-
-    it('falls back to HTTP when package is not in S3', async () => {
-      mockGenericPackage({ html: null });
-
-      const res = await get('org.example:package', baseUrlS3, baseUrl);
-
-      expect(res).toEqual(basicReleaseResult);
-    });
-
-    it('falls back to HTTP when missing a region', async () => {
-      mockGenericPackage({ html: null });
-      mockGenericPackage({ html: null, base: baseUrlS3 });
-      s3mock.mockError(new Error('Region is missing'));
-
-      const res = await get('org.example:package', baseUrlS3, baseUrl);
-
-      expect(res).toEqual(basicReleaseResult);
-    });
-
-    it('falls back to HTTP when missing credentials', async () => {
-      mockGenericPackage({ html: null });
-      mockGenericPackage({ html: null, base: baseUrlS3 });
-      s3mock.mockError({ name: 'CredentialsProviderError' } as Error);
-
-      const res = await get('org.example:package', baseUrlS3, baseUrl);
-
-      expect(res).toEqual(basicReleaseResult);
-    });
-
-    it('falls back to HTTP when S3 errors', async () => {
-      mockGenericPackage({ html: null });
-      mockGenericPackage({ html: null, base: baseUrlS3 });
-      s3mock.mockError({ name: 'UnknownError' } as Error);
-
-      const res = await get('org.example:package', baseUrlS3, baseUrl);
-
-      expect(res).toEqual(basicReleaseResult);
     });
   });
 });
