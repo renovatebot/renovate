@@ -8,7 +8,7 @@ const githubApi = new GithubHttp();
 const renovateBot = 'renovate[bot]';
 
 type PrStats = {
-  created: number;
+  total: number;
   open: number;
   closed: number;
   merged: number;
@@ -16,7 +16,7 @@ type PrStats = {
 
 function initStats(): PrStats {
   return {
-    created: 0,
+    total: 0,
     open: 0,
     closed: 0,
     merged: 0,
@@ -40,19 +40,21 @@ export async function runRenovateRepoStats(
     ) {
       continue;
     }
-    prStats.created += 1;
-    if (pr.state === PrState.Merged) {
-      prStats.merged += 1;
-    }
-    if (pr.state === PrState.Closed) {
-      prStats.closed += 1;
-    }
-    if (pr.state === PrState.Open) {
-      prStats.open += 1;
+    prStats.total += 1;
+    switch (pr.state) {
+      case PrState.Merged:
+        prStats.merged += 1;
+        break;
+      case PrState.Closed:
+        prStats.closed += 1;
+        break;
+      case PrState.Open:
+        prStats.open += 1;
+        break;
+      // istanbul ignore next: exclude PrState.All & .NotOpen
+      default:
+        break;
     }
   }
-  logger.info(
-    { repo: config.repository, stats: prStats },
-    `Renovate repository PR statistics`
-  );
+  logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
 }

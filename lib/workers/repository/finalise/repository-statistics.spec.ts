@@ -26,11 +26,10 @@ describe('workers/repository/finalise/repository-statistics', () => {
 
     it('Calls runRenovateRepoStats', async () => {
       await runRenovateRepoStats(config);
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         {
-          repo: config.repository,
           stats: {
-            created: 3,
+            total: 3,
             open: 1,
             closed: 1,
             merged: 1,
