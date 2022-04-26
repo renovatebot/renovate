@@ -79,12 +79,12 @@ export function extractPackageFile(
         const currentVersion = gitPackageMatches.groups.version;
         const depName = gitPackageMatches.groups.depName;
         let packageName: string;
-        if (gitPackageMatches.groups.protocol === "https") {
-          packageName = "https://"
-          .concat(gitPackageMatches.groups.gitUrl)
-          .replace(`@${currentVersion}`, '');
+        if (gitPackageMatches.groups.protocol === 'https') {
+          packageName = 'https://'
+            .concat(gitPackageMatches.groups.gitUrl)
+            .replace(`@${currentVersion}`, '');
         } else {
-        // we need to replace the / with a :
+          // we need to replace the / with a :
           const scmPath = gitPackageMatches.groups.scmPath;
           const delimiter = gitPackageMatches.groups.delimiter;
           packageName = gitPackageMatches.groups.gitUrl

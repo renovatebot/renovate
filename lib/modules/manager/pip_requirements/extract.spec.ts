@@ -209,7 +209,8 @@ describe('modules/manager/pip_requirements/extract', () => {
             depName: 'python-pip-setup-test',
             currentValue: 'v0.9.0',
             currentVersion: 'v0.9.0',
-            packageName: 'https://peter@github.com/rwxd/python-pip-setup-test.git',
+            packageName:
+              'https://peter@github.com/rwxd/python-pip-setup-test.git',
             datasource: 'git-tags',
           },
           {
