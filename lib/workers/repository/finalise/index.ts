@@ -3,6 +3,7 @@ import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
 import { pruneStaleBranches } from './prune';
+import { runRenovateRepoStats } from './repository-statistics';
 
 // istanbul ignore next
 export async function finaliseRepo(
@@ -15,4 +16,5 @@ export async function finaliseRepo(
     `Action Required: Fix Renovate Configuration`
   );
   await clearRenovateRefs();
+  await runRenovateRepoStats(config);
 }
