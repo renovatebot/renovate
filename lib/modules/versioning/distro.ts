@@ -53,6 +53,7 @@ export class DistroInfo {
         continue;
       }
 
+      // istanbul ignore next: As of now, all entries in our data are released
       if (!this.isReleased(obj.version)) {
         continue;
       }
