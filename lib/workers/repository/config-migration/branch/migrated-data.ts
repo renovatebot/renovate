@@ -21,7 +21,7 @@ export class MigratedData {
 
 export class MigratedDataFactory {
   // singleton
-  private static data: MigratedData;
+  private static data: MigratedData | null;
 
   public static async getAsync(): Promise<MigratedData | null> {
     if (this.data) {
@@ -42,7 +42,7 @@ export class MigratedDataFactory {
   }
 
   private static async build(): Promise<IMigratedData | null> {
-    let res: IMigratedData;
+    let res: IMigratedData | null = null;
     try {
       const rc = await detectRepoFileConfig();
       const configFileParsed = rc?.configFileParsed || {};
@@ -56,11 +56,11 @@ export class MigratedDataFactory {
       delete migratedConfig.errors;
       delete migratedConfig.warnings;
 
-      const raw = await readLocalFile(rc.configFileName, 'utf8');
+      const raw = await readLocalFile(rc.configFileName ?? '', 'utf8');
 
       // indent defaults to 2 spaces
       const indent = detectIndent(raw).indent ?? '  ';
-      const fileName = rc.configFileName;
+      const fileName = rc.configFileName ?? '';
       let content = JSON.stringify(migratedConfig, undefined, indent);
       if (!content.endsWith('\n')) {
         content += '\n';

@@ -25,7 +25,7 @@ export function createConfigMigrationBranch(
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to config migration branch');
-    return null;
+    return Promise.resolve(null);
   }
 
   return commitAndPush({

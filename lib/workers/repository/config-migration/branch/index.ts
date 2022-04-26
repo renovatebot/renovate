@@ -28,7 +28,9 @@ export async function checkConfigMigrationBranch(
       const configMigrationPr = await platform.getBranchPr(
         configMigrationBranch
       );
-      await platform.refreshPr(configMigrationPr.number);
+      if (configMigrationPr) {
+        await platform.refreshPr(configMigrationPr.number);
+      }
     }
   } else {
     logger.debug('Config Migration PR does not exist');

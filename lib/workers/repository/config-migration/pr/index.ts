@@ -37,8 +37,8 @@ export async function ensureConfigMigrationPr(
 ---
 
 
-:question: Got questions? Check out Renovate's [Docs](${config.productLinks.documentation}), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${config.productLinks.help}).
+:question: Got questions? Check out Renovate's [Docs](${config.productLinks?.documentation}), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${config.productLinks?.help}).
 `
   );
   const warnings = getWarnings(config);
@@ -63,7 +63,7 @@ If you need any further assistance then you can also [request help here](${confi
   if (existingPr) {
     logger.debug('Found open migration PR');
     // Check if existing PR needs updating
-    if (existingPr.body.trim() === prBody.trim()) {
+    if (existingPr.body?.trim() === prBody.trim()) {
       // Bitbucket strips trailing \n)//
       logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
@@ -87,16 +87,24 @@ If you need any further assistance then you can also [request help here](${confi
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create migration PR');
     } else {
-      const pr = await platform.createPr({
-        sourceBranch: branchName,
-        targetBranch: config.defaultBranch,
-        prTitle: config.onboardingPrTitle,
-        prBody,
-        labels,
-        platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
-      });
-      logger.info({ pr: pr.displayNumber }, 'Migration PR created');
-      await addAssigneesReviewers(config, pr);
+      const targetBranch = config.defaultBranch;
+      if (targetBranch) {
+        const pr = await platform.createPr({
+          sourceBranch: branchName,
+          targetBranch,
+          prTitle: config.onboardingPrTitle ?? 'Config Migration',
+          prBody,
+          labels,
+          platformOptions: getPlatformPrOptions({
+            ...config,
+            automerge: false,
+          }),
+        });
+        logger.info({ pr: pr?.displayNumber }, 'Migration PR created');
+        if (pr) {
+          await addAssigneesReviewers(config, pr);
+        }
+      }
     }
   } catch (err) /* istanbul ignore next */ {
     if (
