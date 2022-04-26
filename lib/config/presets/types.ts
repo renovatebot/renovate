@@ -12,7 +12,9 @@ export type PresetConfig = {
 };
 
 export interface PresetApi {
-  getPreset(config: PresetConfig): Promise<Preset> | Preset;
+  getPreset(
+    config: PresetConfig
+  ): Promise<Preset | null | undefined> | Preset | null | undefined;
 }
 
 export interface ParsedPreset {
@@ -28,14 +30,14 @@ export type PresetFetcher = (
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string
-) => Promise<Preset>;
+  tag?: string | null
+) => Promise<Preset | null | undefined>;
 
 export type FetchPresetConfig = {
   repo: string;
   filePreset: string;
   presetPath?: string;
   endpoint: string;
-  tag?: string;
+  tag?: string | null;
   fetch: PresetFetcher;
 };
