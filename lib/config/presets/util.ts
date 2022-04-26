@@ -19,7 +19,9 @@ export async function fetchPreset({
   tag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
-  const endpoint = ensureTrailingSlash(_endpoint);
+  // TODO: fix me, can be undefiend #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;

@@ -9,9 +9,6 @@ describe('util/git/config', () => {
   it('uses "close" events, ignores "exit" events from child processes', () => {
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },
-      timeout: {
-        block: 10000,
-      },
     });
   });
 

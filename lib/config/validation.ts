@@ -77,8 +77,8 @@ function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   );
 }
 
-function getDeprecationMessage(option: string): string {
-  const deprecatedOptions = {
+function getDeprecationMessage(option: string): string | undefined {
+  const deprecatedOptions: Record<string, string | undefined> = {
     branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
@@ -86,13 +86,13 @@ function getDeprecationMessage(option: string): string {
   return deprecatedOptions[option];
 }
 
-export function getParentName(parentPath: string): string {
+export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
         .replace(regEx(/\.?encrypted$/), '')
         .replace(regEx(/\[\d+\]$/), '')
         .split('.')
-        .pop()
+        .pop()!
     : '.';
 }
 
@@ -127,19 +127,6 @@ export async function validateConfig(
         message: '__proto__',
       });
       continue;
-    }
-    if (key === 'gitTimeout') {
-      if (!is.number(val)) {
-        errors.push({
-          topic: 'Config Error',
-          message: `GitTimeout must be set to an integer value`,
-        });
-      } else if (!(val >= 2000 && val <= 60000)) {
-        errors.push({
-          topic: 'Config Error',
-          message: `GitTimeout value must be within 2 to 60 seconds`,
-        });
-      }
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
@@ -180,7 +167,7 @@ export async function validateConfig(
       if (getDeprecationMessage(key)) {
         warnings.push({
           topic: 'Deprecation Warning',
-          message: getDeprecationMessage(key),
+          message: getDeprecationMessage(key)!,
         });
       }
       const templateKeys = [
@@ -192,7 +179,8 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config, false);
+          // TODO: validate string #7154
+          let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
         } catch (err) {
@@ -256,6 +244,15 @@ export async function validateConfig(
               )} (${typeof val})`,
             });
           }
+        } else if (type === 'integer') {
+          if (!is.number(val)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+                val
+              )} (${typeof val})`,
+            });
+          }
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
@@ -282,7 +279,7 @@ export async function validateConfig(
                     });
                   }
                   if (tzRe.test(subval)) {
-                    const [, timezone] = tzRe.exec(subval);
+                    const [, timezone] = tzRe.exec(subval)!;
                     const [validTimezone, errorMessage] =
                       hasValidTimezone(timezone);
                     if (!validTimezone) {
@@ -323,6 +320,7 @@ export async function validateConfig(
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
                 if (is.object(packageRule)) {
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                   const resolvedRule = migrateConfig({
                     packageRules: [
                       await resolveConfigPresets(
@@ -330,7 +328,7 @@ export async function validateConfig(
                         config
                       ),
                     ],
-                  }).migratedConfig.packageRules[0];
+                  }).migratedConfig.packageRules![0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
@@ -408,7 +406,7 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types
+              // TODO: fix types #7154
               for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
@@ -449,8 +447,9 @@ export async function validateConfig(
                       for (const field of mandatoryFields) {
                         if (
                           !regexManager[`${field}Template`] &&
-                          !regexManager.matchStrings.some((matchString) =>
-                            matchString.includes(`(?<${field}>`)
+                          !regexManager.matchStrings.some(
+                            (matchString: string) =>
+                              matchString.includes(`(?<${field}>`)
                           )
                         ) {
                           errors.push({
@@ -505,7 +504,9 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !rulesRe.test(parentPath) && // Inside a packageRule
+              // TODO: can be undefined ? #7154
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+              !rulesRe.test(parentPath!) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
