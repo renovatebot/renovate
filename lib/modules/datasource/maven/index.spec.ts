@@ -32,22 +32,22 @@ interface MockOpts {
   html?: string;
 }
 
-function mockResource(
-  protocol: string,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  mockers: { http?: Function; s3?: Function }
-) {
-  const { http, s3 } = mockers;
+interface ResourceMockers {
+  http?: () => void;
+  s3?: () => void;
+}
+
+function mockResource(protocol: string, mockers: ResourceMockers) {
   switch (protocol) {
     case 'http:':
     case 'https:':
-      if (http) {
-        http();
+      if (mockers.http) {
+        mockers.http();
       }
       break;
     case 's3:':
-      if (s3) {
-        s3();
+      if (mockers.s3) {
+        mockers.s3();
       }
       break;
     default:
