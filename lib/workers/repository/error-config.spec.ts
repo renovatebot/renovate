@@ -78,7 +78,8 @@ describe('workers/repository/error-config', () => {
         number: 1,
         state: PrState.NotOpen,
       });
-      await raiseConfigWarningIssue(config, error);
+      const res = await raiseConfigWarningIssue(config, error);
+      expect(res).toBeUndefined();
     });
   });
 });
