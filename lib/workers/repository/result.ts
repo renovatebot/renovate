@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../config/types';
+
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -18,8 +19,15 @@ import {
   REPOSITORY_UNINITIATED,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { runRenovateRepoStats } from './finalise/repository-statistics';
 
-type ProcessStatus = 'disabled' | 'enabled' | 'onboarding' | 'unknown';
+type ProcessStatus =
+  | 'disabled'
+  | 'onboarded'
+  | 'activated'
+  | 'onboarding'
+  | 'unknown';
+
 export interface ProcessResult {
   res: string;
   status: ProcessStatus;
@@ -27,10 +35,10 @@ export interface ProcessResult {
   onboarded: boolean | undefined;
 }
 
-export function processResult(
+export async function processResult(
   config: RenovateConfig,
   res: string
-): ProcessResult {
+): Promise<ProcessResult> {
   const disabledStatuses = [
     REPOSITORY_ACCESS_FORBIDDEN,
     REPOSITORY_ARCHIVED,
@@ -49,23 +57,45 @@ export function processResult(
   ];
   const enabledStatuses = [CONFIG_SECRETS_EXPOSED, CONFIG_VALIDATION];
   let status: ProcessStatus;
-  let enabled: boolean | undefined;
+  let repoEnabled: boolean | undefined;
   let onboarded: boolean | undefined;
+  let isActivated = false;
+  const prStatsPromise = await runRenovateRepoStats(config);
+  if (prStatsPromise.total > 0 && prStatsPromise.merged > 0) {
+    isActivated = true;
+  }
   // istanbul ignore next
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
-    enabled = false;
-  } else if (enabledStatuses.includes(res) || config.repoIsOnboarded) {
-    status = 'enabled';
-    enabled = true;
+    repoEnabled = false;
+  } else if (
+    enabledStatuses.includes(res) ||
+    (config.repoIsOnboarded && !isActivated)
+  ) {
+    status = 'onboarded';
+    repoEnabled = true;
+    onboarded = true;
+  } else if (isActivated) {
+    status = 'activated';
+    repoEnabled = true;
     onboarded = true;
   } else if (config.repoIsOnboarded === false) {
     status = 'onboarding';
-    enabled = true;
+    repoEnabled = true;
     onboarded = false;
   } else {
     logger.debug({ res }, 'Unknown res');
     status = 'unknown';
   }
-  return { res, status, enabled, onboarded };
+  logger.debug(
+    '--------- result ' +
+      res +
+      '\n status ' +
+      status +
+      '\n enabled ' +
+      repoEnabled +
+      '\n onboarded ' +
+      onboarded
+  );
+  return { res, status, enabled: repoEnabled, onboarded };
 }

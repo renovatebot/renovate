@@ -62,12 +62,12 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches);
       }
       await finaliseRepo(config, branchList);
-      repoResult = processResult(config, res);
+      repoResult = await processResult(config, res);
     }
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
-    repoResult = processResult(config, errorRes);
+    repoResult = await processResult(config, errorRes);
   }
   if (localDir && !repoConfig.persistRepoData) {
     try {

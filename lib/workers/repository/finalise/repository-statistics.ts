@@ -25,7 +25,7 @@ function initStats(): PrStats {
 
 export async function runRenovateRepoStats(
   config: RenovateConfig
-): Promise<void> {
+): Promise<PrStats> {
   const prStats = initStats();
   const prCache = await getPrCache(
     githubApi,
@@ -57,4 +57,5 @@ export async function runRenovateRepoStats(
     }
   }
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
+  return prStats;
 }
