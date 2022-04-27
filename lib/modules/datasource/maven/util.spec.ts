@@ -1,5 +1,10 @@
 import { parseUrl } from '../../../util/url';
-import {checkResource, checkS3Resource, downloadMavenXml, downloadS3Protocol} from './util';
+import {
+  checkResource,
+  checkS3Resource,
+  downloadMavenXml,
+  downloadS3Protocol,
+} from './util';
 
 describe('modules/datasource/maven/util', () => {
   describe('downloadMavenXml', () => {
@@ -19,9 +24,7 @@ describe('modules/datasource/maven/util', () => {
 
   describe('downloadS3Protocol', () => {
     it('returns null for invalid URLs', async () => {
-      const res = await downloadS3Protocol(
-        'not-a-valid-url'
-      );
+      const res = await downloadS3Protocol('not-a-valid-url');
       expect(res).toBeNull();
     });
 
