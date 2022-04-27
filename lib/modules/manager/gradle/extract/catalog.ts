@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
+import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type {
   GradleCatalog,
@@ -13,6 +14,21 @@ import type {
   GradleVersionPointerTarget,
   VersionPointer,
 } from '../types';
+
+function findVersionIndex(
+  content: string,
+  depName: string,
+  version: string
+): number {
+  const re = regEx(
+    `(id\\s*=\\s*)?['"]?${depName}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${version}['"]?`
+  );
+  const match = re.exec(content);
+  if (match) {
+    return match.index + content.slice(match.index).indexOf(version);
+  }
+  return 0;
+}
 
 function findIndexAfter(
   content: string,
@@ -91,7 +107,7 @@ function extractLiteralVersion({
     return { skipReason: 'no-version' };
   } else if (is.string(version)) {
     const fileReplacePosition =
-      depStartIndex + findIndexAfter(depSubContent, sectionKey, version);
+      depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
   } else if (is.plainObject(version)) {
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
