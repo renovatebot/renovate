@@ -24,11 +24,13 @@ function findVersionIndex(
   const re = regEx(
     `(id\\s*=\\s*)?['"]?${depName}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${version}['"]?`
   );
-  const match = re.exec(contents);
-  if (match) {
-    return match.index + contents.slice(match.index).indexOf(version);
+  if (re) {
+    const match = re.exec(contents);
+    if (match) {
+      return match.index + contents.slice(match.index).indexOf(version);
+    }
   }
-  return 0;
+  return findIndexAfter(content, depName, version);
 }
 
 function findIndexAfter(
