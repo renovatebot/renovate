@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
@@ -617,26 +618,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
     });
 
-    it('uses ETag', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      initRepoMock(scope, 'some/repo');
-      scope
-        .get(pagePath(1))
-        .reply(200, [pr3, pr2, pr1], { etag: 'foobar' })
-        .get(pagePath(1))
-        .reply(304);
-
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const res1 = await github.getPrList();
-
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const res2 = await github.getPrList();
-
-      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
-      expect(res1).toEqual(res2);
-    });
-
     it('synchronizes cache', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -646,7 +627,6 @@ describe('modules/platform/github/index', () => {
         .get(pagePath(1))
         .reply(200, [pr3], {
           link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
-          etag: 'foo',
         })
         .get(pagePath(2))
         .reply(200, [pr2])
@@ -660,7 +640,6 @@ describe('modules/platform/github/index', () => {
         .get(pagePath(1))
         .reply(200, [{ ...pr3, updated_at: t4, title: 'PR #3 (updated)' }], {
           link: `${pageLink(2)}`,
-          etag: 'bar',
         })
         .get(pagePath(2))
         .reply(200, [{ ...pr2, updated_at: t4, title: 'PR #2 (updated)' }], {
@@ -699,14 +678,15 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' } as never);
 
       await github.getPrList();
-      const cache = repository.getCache().platform.github
+      const cache = repository.getCache().platform!.github!
         .prCache as ApiPageCache<GhRestPr>;
       const item = cache.items['1'];
 
       expect(item['_links']).toBeUndefined();
-      expect(item['url']).toBeUndefined();
-      expect(item['example_url']).toBeUndefined();
-      expect(item['repo']['example_url']).toBeUndefined();
+      // TODO: fix types #7154
+      expect((item as any)['url']).toBeUndefined();
+      expect((item as any)['example_url']).toBeUndefined();
+      expect((item as any)['repo']['example_url']).toBeUndefined();
     });
 
     it('removes url data from existing cache', async () => {
@@ -739,7 +719,8 @@ describe('modules/platform/github/index', () => {
 
       expect(item['_links']).toBeUndefined();
       expect(item['url']).toBeUndefined();
-      expect(item['example_url']).toBeUndefined();
+      // TODO: fix types #7154
+      expect((item as any)['example_url']).toBeUndefined();
       expect(item['repo']['example_url']).toBeUndefined();
     });
   });

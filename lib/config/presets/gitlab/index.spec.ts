@@ -29,9 +29,9 @@ describe('config/presets/gitlab/index', () => {
         .twice()
         .reply(200, [])
         .get(`${basePath}/files/default.json/raw?ref=master`)
-        .reply(404, null)
+        .reply(404)
         .get(`${basePath}/files/renovate.json/raw?ref=master`)
-        .reply(404, null);
+        .reply(404);
       await expect(gitlab.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_DEP_NOT_FOUND
       );

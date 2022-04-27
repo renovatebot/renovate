@@ -1315,7 +1315,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
-          const { number: id } = await bitbucket.createPr({
+          const pr = await bitbucket.createPr({
             sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
@@ -1324,7 +1324,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               bbUseDefaultReviewers: true,
             },
           });
-          expect(id).toBe(5);
+          expect(pr?.number).toBe(5);
         });
 
         it('posts PR default branch', async () => {
@@ -1341,7 +1341,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
-          const { number: id } = await bitbucket.createPr({
+          const pr = await bitbucket.createPr({
             sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
@@ -1351,7 +1351,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               bbUseDefaultReviewers: true,
             },
           });
-          expect(id).toBe(5);
+          expect(pr?.number).toBe(5);
         });
       });
 
