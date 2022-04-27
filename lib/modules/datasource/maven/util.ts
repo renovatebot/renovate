@@ -1,3 +1,6 @@
+import { Blob } from 'buffer';
+import { Readable } from 'stream';
+import { blob } from 'stream/consumers';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -113,9 +116,15 @@ export async function downloadS3Protocol(
     if (s3Url === null) {
       return null;
     }
-    const response = await getS3Client().getObject(s3Url);
-    const buffer = await streamToString(response.Body);
-    return buffer.toString();
+    const { Body: res } = await getS3Client().getObject(s3Url);
+
+    if (res instanceof Blob) {
+      return blob.toString();
+    }
+
+    if (res instanceof Readable) {
+      return streamToString(res);
+    }
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {

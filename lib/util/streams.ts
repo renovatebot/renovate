@@ -1,13 +1,8 @@
-import { Blob } from 'buffer';
 import { Readable } from 'stream';
-import ReadableStream = NodeJS.ReadableStream;
 
 export async function streamToString(
-  stream: Readable | ReadableStream | Blob
+  stream: NodeJS.ReadableStream
 ): Promise<string> {
-  if (stream instanceof Blob) {
-    return stream.text();
-  }
   const readable = Readable.from(stream);
   const chunks: Uint8Array[] = [];
   const p = await new Promise<string>((resolve, reject) => {
