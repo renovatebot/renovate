@@ -132,9 +132,9 @@
     "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ec2": "3.71.0",
-    "@aws-sdk/client-ecr": "3.67.0",
-    "@aws-sdk/client-s3": "3.67.0",
+    "@aws-sdk/client-ec2": "3.72.0",
+    "@aws-sdk/client-ecr": "3.72.0",
+    "@aws-sdk/client-s3": "3.72.0",
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "2.2.5",
