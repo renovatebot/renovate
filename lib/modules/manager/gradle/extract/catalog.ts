@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
-import { regEx } from '../../../../util/regex';
+import { escapeRegExp, regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type {
   GradleCatalog,
@@ -21,8 +21,10 @@ function findVersionIndex(
   version: string
 ): number {
   const contents = content.replaceAll('\r\n', '\n');
+  const eDn = escapeRegExp(depName);
+  const eVer = escapeRegExp(version);
   const re = regEx(
-    `(id\\s*=\\s*)?['"]?${depName}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${version}['"]?`
+    `(id\\s*=\\s*)?['"]?${eDn}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${eVer}['"]?`
   );
   if (re) {
     const match = re.exec(contents);
