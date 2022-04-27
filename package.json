@@ -146,7 +146,7 @@
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.1.1",
     "bunyan": "1.8.15",
-    "cacache": "16.0.5",
+    "cacache": "16.0.6",
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
