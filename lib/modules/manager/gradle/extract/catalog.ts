@@ -32,6 +32,7 @@ function findVersionIndex(
       return match.index + contents.slice(match.index).indexOf(version);
     }
   }
+  /* istanbul ignore next */
   return findIndexAfter(content, depName, version);
 }
 
