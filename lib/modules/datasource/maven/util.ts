@@ -1,6 +1,5 @@
 import { Blob } from 'buffer';
 import { Readable } from 'stream';
-import { blob } from 'stream/consumers';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -119,7 +118,7 @@ export async function downloadS3Protocol(
     const { Body: res } = await getS3Client().getObject(s3Url);
 
     if (res instanceof Blob) {
-      return blob.toString();
+      return res.toString();
     }
 
     if (res instanceof Readable) {
