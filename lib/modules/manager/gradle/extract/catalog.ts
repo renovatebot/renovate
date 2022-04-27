@@ -20,12 +20,13 @@ function findVersionIndex(
   depName: string,
   version: string
 ): number {
+  const contents = content.replaceAll('\r\n', '\n');
   const re = regEx(
     `(id\\s*=\\s*)?['"]?${depName}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${version}['"]?`
   );
-  const match = re.exec(content);
+  const match = re.exec(contents);
   if (match) {
-    return match.index + content.slice(match.index).indexOf(version);
+    return match.index + contents.slice(match.index).indexOf(version);
   }
   return 0;
 }
