@@ -117,6 +117,7 @@ export async function downloadS3Protocol(
     }
     const { Body: res } = await getS3Client().getObject(s3Url);
 
+    // istanbul ignore if
     if (res instanceof Blob) {
       return res.toString();
     }
