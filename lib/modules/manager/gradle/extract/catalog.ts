@@ -32,6 +32,7 @@ function findVersionIndex(
       return match.index + contents.slice(match.index).indexOf(version);
     }
   }
+  // ignoring Fallback because I can't reach it in tests, and code is not supposed to reach it but just in case.
   /* istanbul ignore next */
   return findIndexAfter(content, depName, version);
 }
