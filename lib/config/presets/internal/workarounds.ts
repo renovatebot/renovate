@@ -21,7 +21,7 @@ export const presets: Record<string, Preset> = {
       {
         matchDatasources: ['maven', 'sbt-package'],
         matchPackagePrefixes: ['commons-'],
-        allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
+        allowedVersions: '!/^200/',
       },
     ],
   },
