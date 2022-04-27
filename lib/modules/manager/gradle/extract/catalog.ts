@@ -20,7 +20,7 @@ function findVersionIndex(
   depName: string,
   version: string
 ): number {
-  const contents = content.replaceAll('\r\n', '\n');
+  const contents = content.replace(regEx(/\r\n/g), '\n');
   const eDn = escapeRegExp(depName);
   const eVer = escapeRegExp(version);
   const re = regEx(
