@@ -377,6 +377,7 @@ export async function extractPackageFile(
         dep.prettyDepType = depType;
         dep.depType = depType;
         const depName = key === '.' ? parentDep : key;
+        dep.depName = depName;
         dep = { ...dep, ...extractDependency(depType, depName, val) };
         deps.push(dep);
       } else {

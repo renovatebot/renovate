@@ -721,18 +721,21 @@ describe('modules/manager/npm/extract/index', () => {
           {
             prettyDepType: 'overrides',
             depType: 'overrides',
+            depName: 'foo',
             currentValue: '1.0.0',
             datasource: 'npm',
           },
           {
             prettyDepType: 'overrides',
             depType: 'overrides',
+            depName: 'foo2',
             currentValue: '1.0.0',
             datasource: 'npm',
           },
           {
             prettyDepType: 'overrides',
             depType: 'overrides',
+            depName: 'bar2',
             currentValue: '1.0.0',
             datasource: 'npm',
           },

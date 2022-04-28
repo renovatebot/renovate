@@ -58,18 +58,21 @@ Object {
     Object {
       "currentValue": "1.0.0",
       "datasource": "npm",
+      "depName": "foo",
       "depType": "overrides",
       "prettyDepType": "overrides",
     },
     Object {
       "currentValue": "1.0.0",
       "datasource": "npm",
+      "depName": "foo2",
       "depType": "overrides",
       "prettyDepType": "overrides",
     },
     Object {
       "currentValue": "1.0.0",
       "datasource": "npm",
+      "depName": "bar2",
       "depType": "overrides",
       "prettyDepType": "overrides",
     },
