@@ -65,7 +65,7 @@ export function processResult(
   } else if (config.repoIsActivated) {
     status = 'activated';
     repoEnabled = true;
-    onboarded = true;
+    onboarded = true; //TODO need to check
   } else if (enabledStatuses.includes(res) || config.repoIsOnboarded) {
     status = 'onboarded';
     repoEnabled = true;
