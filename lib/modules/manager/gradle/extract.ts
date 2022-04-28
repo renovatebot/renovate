@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -45,7 +44,6 @@ export async function extractAllPackageFiles(
   const packageFilesByName: Record<string, PackageFile> = {};
   const registryUrls: string[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
-  const versionRefs: Set<string> = new Set();
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
@@ -67,9 +65,8 @@ export async function extractAllPackageFiles(
         updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const { versions, deps } = parseCatalog(packageFile, content);
-        Object.keys(versions).forEach((ref) => versionRefs.add(ref));
-        extractedDeps.push(...deps);
+        const updatesFromCatalog = parseCatalog(packageFile, content);
+        extractedDeps.push(...updatesFromCatalog);
       } else {
         const vars = getVars(registry, dir);
         const {
@@ -104,12 +101,6 @@ export async function extractAllPackageFiles(
     if (key) {
       const pkgFile: PackageFile = packageFilesByName[key];
       const { deps } = pkgFile;
-      if (
-        !is.nullOrUndefined(dep.groupName) &&
-        versionRefs.has(dep.groupName)
-      ) {
-        delete dep.commitMessageTopic;
-      }
       deps.push({
         ...dep,
         registryUrls: [

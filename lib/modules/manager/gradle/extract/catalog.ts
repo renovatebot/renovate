@@ -211,10 +211,7 @@ function extractDependency({
 export function parseCatalog(
   packageFile: string,
   content: string
-): {
-  versions: Record<string, GradleVersionPointerTarget>;
-  deps: PackageDependency<GradleManagerData>[];
-} {
+): PackageDependency<GradleManagerData>[] {
   const tomlContent = parse(content) as GradleCatalog;
   const versions = tomlContent.versions || {};
   const libs = tomlContent.libraries || {};
@@ -265,32 +262,30 @@ export function parseCatalog(
       managerData: { fileReplacePosition },
     };
 
-    let dependency: PackageDependency<GradleManagerData>;
+    const dependency: PackageDependency<GradleManagerData> = {
+      ...dependencyBase,
+      currentValue,
+      managerData: { fileReplacePosition },
+    };
     if (skipReason) {
-      dependency = {
-        ...dependencyBase,
-        skipReason,
-      };
-    } else {
-      const groupName = isVersionPointer(version) ? version.ref : null;
-      dependency = is.nullOrUndefined(groupName)
-        ? {
-            ...dependencyBase,
-            currentValue,
-            managerData: { fileReplacePosition },
-          }
-        : {
-            ...dependencyBase,
-            currentValue,
-            managerData: { fileReplacePosition },
-            groupName,
-          };
+      dependency.skipReason = skipReason;
+    }
+    if (isVersionPointer(version)) {
+      dependency.groupName = version.ref;
+      delete dependency.commitMessageTopic;
     }
 
     extractedDeps.push(dependency);
   }
-  const deps = extractedDeps.map((dep) =>
-    deepmerge(dep, { managerData: { packageFile } })
-  );
-  return { versions, deps };
+
+  const versionRefs: Set<string> = new Set();
+  Object.keys(versions).forEach((ref) => versionRefs.add(ref));
+  const deps = extractedDeps.map((dep) => {
+    const d = deepmerge(dep, { managerData: { packageFile } });
+    if (d.groupName && versionRefs.has(d.groupName)) {
+      delete d.commitMessageTopic;
+    }
+    return d;
+  });
+  return deps;
 }
