@@ -62,15 +62,12 @@ export function processResult(
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
     repoEnabled = false;
-  } else if (
-    enabledStatuses.includes(res) ||
-    (config.repoIsOnboarded && !config.repoIsActivated)
-  ) {
-    status = 'onboarded';
-    repoEnabled = true;
-    onboarded = true;
   } else if (config.repoIsActivated) {
     status = 'activated';
+    repoEnabled = true;
+    onboarded = true;
+  } else if (enabledStatuses.includes(res) || config.repoIsOnboarded) {
+    status = 'onboarded';
     repoEnabled = true;
     onboarded = true;
   } else if (config.repoIsOnboarded === false) {
