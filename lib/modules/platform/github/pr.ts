@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -9,14 +10,42 @@ import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
 import type { ApiPageCache, GhRestPr } from './types';
 
+function removeUrlFields(input: unknown): void {
+  if (is.plainObject(input)) {
+    for (const [key, val] of Object.entries(input)) {
+      if ((key === 'url' || key.endsWith('_url')) && is.string(val)) {
+        delete input[key];
+      } else {
+        removeUrlFields(val);
+      }
+    }
+  }
+}
+
+function massageGhRestPr(ghPr: GhRestPr): GhRestPr {
+  removeUrlFields(ghPr);
+  delete ghPr?.head?.repo?.pushed_at;
+  delete ghPr?.base?.repo?.pushed_at;
+  delete ghPr?._links;
+  return ghPr;
+}
+
 function getPrApiCache(): ApiCache<GhRestPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
   repoCache.platform.github.prCache ??= { items: {} };
-  const prCache = new ApiCache(
-    repoCache.platform.github.prCache as ApiPageCache<GhRestPr>
-  );
+  const apiPageCache = repoCache.platform.github
+    .prCache as ApiPageCache<GhRestPr>;
+
+  const items = Object.values(apiPageCache.items);
+  if (items?.[0]?._links) {
+    for (const ghPr of items) {
+      massageGhRestPr(ghPr);
+    }
+  }
+
+  const prCache = new ApiCache(apiPageCache);
   return prCache;
 }
 
@@ -33,17 +62,12 @@ function getPrApiCache(): ApiCache<GhRestPr> {
  * In order synchronize ApiCache properly, we handle 3 cases:
  *
  *   a. We never fetched PR list for this repo before.
- *      This is detected by `etag` presense in the cache.
+ *      If cached PR list is empty, we assume it's the case.
  *
  *      In this case, we're falling back to quick fetch via
  *      `paginate=true` option (see `util/http/github.ts`).
  *
- *   b. None of PRs has changed since last run.
- *
- *      We detect this by setting `If-None-Match` HTTP header
- *      with the `etag` value from the previous run.
- *
- *   c. Some of PRs had changed since last run.
+ *   b. Some of PRs had changed since last run.
  *
  *      In this case, we sequentially fetch page by page
  *      until `ApiCache.coerce` function indicates that
@@ -68,14 +92,11 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
+      const urlPath = `repos/${repo}/pulls?per_page=20&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
-        const oldEtag = prApiCache.etag;
-        if (oldEtag) {
-          opts.headers = { 'If-None-Match': oldEtag };
-        } else {
+        if (is.emptyArray(prApiCache.getItems())) {
           // Speed up initial fetch
           opts.paginate = true;
         }
@@ -85,13 +106,8 @@ export async function getPrCache(
       apiQuotaAffected = true;
       requestsTotal += 1;
 
-      if (pageIdx === 1 && res.statusCode === 304) {
-        apiQuotaAffected = false;
-        break;
-      }
-
       const {
-        headers: { link: linkHeader, etag: newEtag },
+        headers: { link: linkHeader },
       } = res;
 
       let { body: page } = res;
@@ -102,14 +118,14 @@ export async function getPrCache(
         );
       }
 
+      for (const ghPr of page) {
+        massageGhRestPr(ghPr);
+      }
+
       needNextPageSync = prApiCache.reconcile(page);
       needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
       if (pageIdx === 1) {
-        if (newEtag) {
-          prApiCache.etag = newEtag;
-        }
-
         needNextPageFetch &&= !opts.paginate;
       }
 

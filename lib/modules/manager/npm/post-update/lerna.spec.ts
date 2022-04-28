@@ -1,6 +1,7 @@
 import { envMock, exec, mockExecAll } from '../../../../../test/exec-util';
 import { env, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import type { RepoGlobalConfig } from '../../../../config/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 
@@ -26,11 +27,14 @@ function lernaPkgFileWithoutLernaDep(
 const config = partial<PostUpdateConfig>({});
 
 describe('modules/manager/npm/post-update/lerna', () => {
+  const globalConfig: RepoGlobalConfig = { localDir: '' };
+
   describe('generateLockFiles()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
+      GlobalConfig.set(globalConfig);
     });
 
     it('returns if no lernaClient', async () => {
@@ -107,7 +111,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
-      GlobalConfig.set({ allowScripts: true });
+      GlobalConfig.set({ ...globalConfig, allowScripts: true });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',

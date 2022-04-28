@@ -23,9 +23,10 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
-  manager?: string;
+  manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -144,7 +145,7 @@ export type PostUpgradeTasks = {
 };
 
 type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
-  Partial<Record<UpdateType, T>>;
+  Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
   | string
@@ -327,7 +328,7 @@ export interface RenovateOptionBase {
 export interface RenovateArrayOption<
   T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
-  default?: T[];
+  default?: T[] | null;
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
@@ -349,21 +350,21 @@ export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
-  default?: boolean;
+  default?: boolean | null;
   type: 'boolean';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
-  default?: number;
+  default?: number | null;
   type: 'integer';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
-  default?: string;
+  default?: string | null;
   format?: 'regex';
 
   // Not used
@@ -374,7 +375,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any;
+  default?: any | null;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
@@ -422,6 +423,7 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
   node?: RenovateConfig;
   travis?: RenovateConfig;
+  gradle?: RenovateConfig;
 }
 
 export interface ValidationResult {

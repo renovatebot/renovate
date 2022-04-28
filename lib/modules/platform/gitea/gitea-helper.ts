@@ -247,7 +247,7 @@ export async function getRepo(
 export async function getRepoContents(
   repoPath: string,
   filePath: string,
-  ref?: string,
+  ref?: string | null,
   options?: GiteaHttpOptions
 ): Promise<RepoContents> {
   const query = getQueryString(ref ? { ref } : {});
