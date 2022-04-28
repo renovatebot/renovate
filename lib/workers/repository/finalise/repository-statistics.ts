@@ -1,10 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getPrCache } from '../../../modules/platform/github/pr';
+import type { Pr } from '../../../modules/platform';
 import { PrState } from '../../../types';
-import { GithubHttp } from '../../../util/http/github';
-
-const githubApi = new GithubHttp();
 
 type PrStats = {
   total: number;
@@ -22,13 +19,13 @@ function initStats(): PrStats {
   };
 }
 
+// eslint-disable-next-line require-await,@typescript-eslint/require-await
 export async function runRenovateRepoStats(
-  config: RenovateConfig
-): Promise<PrStats> {
+  config: RenovateConfig,
+  prList: Pr[]
+): Promise<void> {
   const prStats = initStats();
 
-  const prCache = await getPrCache(githubApi, config.repository ?? '', null);
-  const prList = Object.values(prCache).filter((pr) => pr.byRenovate);
   for (const pr of prList) {
     if (
       pr.title === 'Configure Renovate' ||
@@ -53,5 +50,4 @@ export async function runRenovateRepoStats(
     }
   }
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
-  return prStats;
 }

@@ -19,7 +19,6 @@ import {
   REPOSITORY_UNINITIATED,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { runRenovateRepoStats } from './finalise/repository-statistics';
 
 type ProcessStatus =
   | 'disabled'
@@ -35,10 +34,10 @@ export interface ProcessResult {
   onboarded: boolean | undefined;
 }
 
-export async function processResult(
+export function processResult(
   config: RenovateConfig,
   res: string
-): Promise<ProcessResult> {
+): ProcessResult {
   const disabledStatuses = [
     REPOSITORY_ACCESS_FORBIDDEN,
     REPOSITORY_ARCHIVED,
@@ -59,23 +58,18 @@ export async function processResult(
   let status: ProcessStatus;
   let repoEnabled: boolean | undefined;
   let onboarded: boolean | undefined;
-  let isActivated = false;
-  const prStatsPromise = await runRenovateRepoStats(config);
-  if (prStatsPromise.total > 0 && prStatsPromise.merged > 0) {
-    isActivated = true;
-  }
   // istanbul ignore next
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
     repoEnabled = false;
   } else if (
     enabledStatuses.includes(res) ||
-    (config.repoIsOnboarded && !isActivated)
+    (config.repoIsOnboarded && !config.repoIsActivated)
   ) {
     status = 'onboarded';
     repoEnabled = true;
     onboarded = true;
-  } else if (isActivated) {
+  } else if (config.repoIsActivated) {
     status = 'activated';
     repoEnabled = true;
     onboarded = true;
@@ -88,14 +82,7 @@ export async function processResult(
     status = 'unknown';
   }
   logger.debug(
-    '--------- result ' +
-      res +
-      '\n status ' +
-      status +
-      '\n enabled ' +
-      repoEnabled +
-      '\n onboarded ' +
-      onboarded
+    `Repository result: ${res} status: ${status} enabled: ${repoEnabled} onboarded: ${onboarded}`
   );
   return { res, status, enabled: repoEnabled, onboarded };
 }

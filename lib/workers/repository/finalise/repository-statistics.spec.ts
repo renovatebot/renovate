@@ -12,6 +12,9 @@ jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
 const prCache = loadJsonFixture('./pr-cache.json');
+const result = Object.keys(prCache).map((key) => {
+  return prCache[key];
+});
 
 describe('workers/repository/finalise/repository-statistics', () => {
   let config: RenovateConfig;
@@ -25,7 +28,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
     });
 
     it('Calls runRenovateRepoStats', async () => {
-      await runRenovateRepoStats(config);
+      await runRenovateRepoStats(config, result);
       expect(logger.debug).toHaveBeenCalledWith(
         {
           stats: {

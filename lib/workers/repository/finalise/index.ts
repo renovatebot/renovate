@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
@@ -16,7 +17,17 @@ export async function finaliseRepo(
     `Action Required: Fix Renovate Configuration`
   );
   await clearRenovateRefs();
-  if (config.platform === 'github') {
-    await runRenovateRepoStats(config);
+  const prList = await platform.getPrList();
+  if (
+    prList?.some(
+      (pr) =>
+        pr.state === 'merged' &&
+        (pr.title !== 'Configure Renovate' ||
+          pr.title !== config.onboardingPrTitle)
+    )
+  ) {
+    logger.info('Repo is activated');
+    config.repoIsActivated = true;
   }
+  await runRenovateRepoStats(config, prList);
 }
