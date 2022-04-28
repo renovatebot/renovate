@@ -2060,6 +2060,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'deprecationWarningIssues',
       'onboardingClose',
+      'configErrorIssue',
     ],
     cli: false,
     env: false,
