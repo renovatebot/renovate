@@ -6,7 +6,7 @@ import {
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
-import { AllConfig, RenovateConfig } from './types';
+import type { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 
@@ -83,7 +83,7 @@ function replaceSecretsInString(
   });
 }
 
-function replaceSecretsinObject(
+function replaceSecretsInObject(
   config_: RenovateConfig,
   secrets: Record<string, string>,
   deleteSecrets: boolean
@@ -94,7 +94,7 @@ function replaceSecretsinObject(
   }
   for (const [key, value] of Object.entries(config)) {
     if (is.plainObject(value)) {
-      config[key] = replaceSecretsinObject(value, secrets, deleteSecrets);
+      config[key] = replaceSecretsInObject(value, secrets, deleteSecrets);
     }
     if (is.string(value)) {
       config[key] = replaceSecretsInString(key, value, secrets);
@@ -102,17 +102,13 @@ function replaceSecretsinObject(
     if (is.array(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
         if (is.plainObject(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsinObject(
+          value[arrayIndex] = replaceSecretsInObject(
             arrayItem,
             secrets,
             deleteSecrets
           );
         } else if (is.string(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsInString(
-            key,
-            arrayItem,
-            secrets
-          );
+          value[arrayIndex] = replaceSecretsInString(key, arrayItem, secrets);
         }
       }
     }
@@ -131,5 +127,6 @@ export function applySecretsToConfig(
       addSecretForSanitizing(String(secret));
     }
   }
-  return replaceSecretsinObject(config, secrets, deleteSecrets);
+  // TODO: fix types (#9610)
+  return replaceSecretsInObject(config, secrets as never, deleteSecrets);
 }

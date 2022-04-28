@@ -7,8 +7,8 @@ import {
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../manager/types';
-import { Pr } from '../../../../platform';
+import type { PackageFile } from '../../../../modules/manager/types';
+import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 import { ensureOnboardingPr } from '.';
 
@@ -19,6 +19,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     let config: RenovateConfig;
     let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
@@ -33,13 +34,16 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
       GlobalConfig.reset();
     });
+
     let createPrBody: string;
+
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
       await expect(
         ensureOnboardingPr(config, packageFiles, branches)
       ).resolves.not.toThrow();
     });
+
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
@@ -126,6 +130,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
+
     it('updates PR when conflicted', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
@@ -140,6 +145,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
+
     it('updates PR when modified', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
@@ -153,13 +159,15 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
+
     it('creates PR (no require config)', async () => {
       config.requireConfig = false;
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
+
     it('dryrun of updates PR when modified', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
@@ -177,8 +185,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         'DRY-RUN: Would update onboarding PR'
       );
     });
+
     it('dryrun of creates PR', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure'

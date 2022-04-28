@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/github-tags/index getReleases returns tags 1`] = `
+Object {
+  "registryUrl": "https://github.com",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "1970-01-01T00:00:00.000Z",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "isStable": false,
+      "releaseTimestamp": "1970-01-01T00:00:00.001Z",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/some/dep2",
+}
+`;
+
+exports[`modules/datasource/github-tags/index getReleases supports ghe 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://git.enterprise.com/some/dep2",
+}
+`;

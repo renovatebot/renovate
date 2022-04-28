@@ -2,7 +2,7 @@ import table from 'markdown-table';
 import { getOptions } from '../../lib/config/options';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
-import { readFile, updateFile } from '../utils/index';
+import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
 
@@ -15,12 +15,17 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'default',
     'stage',
     'allowString',
-    'cli',
-    'env',
     'admin',
+    'globalOnly',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
+    if (key === 'cli' && !val) {
+      ignoredKeys.push('cli');
+    }
+    if (key === 'env' && !val) {
+      ignoredKeys.push('env');
+    }
     if (
       !ignoredKeys.includes(el[0]) ||
       (el[0] === 'default' && typeof el[1] !== 'object' && name !== 'prBody')
@@ -28,7 +33,11 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       if (type === 'string' && el[0] === 'default') {
         el[1] = `\`"${el[1]}"\``;
       }
-      if (type === 'boolean' && el[0] === 'default') {
+      if (
+        (type === 'boolean' && el[0] === 'default') ||
+        el[0] === 'cli' ||
+        el[0] === 'env'
+      ) {
         el[1] = `\`${el[1]}\``;
       }
       if (type === 'string' && el[0] === 'default' && el[1].length > 200) {
@@ -66,21 +75,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   options
     .filter((option) => option.releaseStatus !== 'unpublished')
     .forEach((option) => {
+      // TODO: fix types (#9610)
       const el: Record<string, any> = { ...option };
       let headerIndex = configOptionsRaw.indexOf(`## ${option.name}`);
       if (headerIndex === -1) {
         headerIndex = configOptionsRaw.indexOf(`### ${option.name}`);
       }
-      if (bot) {
-        el.cli = getCliName(el);
-        el.env = getEnvName(el);
-        if (el.cli === '') {
-          el.cli = `N/A`;
-        }
-        if (el.env === '') {
-          el.env = 'N/A';
-        }
-      }
+      el.cli = getCliName(option);
+      el.env = getEnvName(option);
 
       configOptionsRaw[headerIndex] +=
         `\n${option.description}\n\n` +

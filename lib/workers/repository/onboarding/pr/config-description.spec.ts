@@ -1,19 +1,22 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import type { PackageFile } from '../../../../manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
     });
+
     it('returns empty', () => {
       delete config.description;
       const res = getConfigDesc(config);
       expect(res).toBe('');
     });
+
     it('returns a full list', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [],
@@ -29,6 +32,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res).toMatchSnapshot();
       expect(res.indexOf('Docker-only')).not.toBe(-1);
     });
+
     it('assignees, labels and schedule', () => {
       delete config.description;
       config.packageFiles = [];
@@ -51,6 +55,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
         "
       `);
     });
+
     it('contains the onboardingConfigFileName if set', () => {
       delete config.description;
       config.schedule = ['before 5am'];
@@ -60,6 +65,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res.indexOf('`.github/renovate.json`')).not.toBe(-1);
       expect(res.indexOf('`renovate.json`')).toBe(-1);
     });
+
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', () => {
       delete config.description;
       config.schedule = ['before 5am'];
@@ -68,6 +74,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res).toMatchSnapshot();
       expect(res.indexOf('`renovate.json`')).not.toBe(-1);
     });
+
     it('falls back to "renovate.json" if onboardingConfigFileName is not valid', () => {
       delete config.description;
       config.schedule = ['before 5am'];

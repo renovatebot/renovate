@@ -5,8 +5,8 @@ import {
 } from '../../../../test/exec-util';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
+import { getPkgReleases as _getPkgReleases } from '../../../modules/datasource';
 import type { VolumeOption } from '../types';
 import {
   generateDockerCommand,
@@ -21,7 +21,7 @@ jest.mock('child_process');
 
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
-jest.mock('../../../datasource');
+jest.mock('../../../modules/datasource');
 
 describe('util/exec/docker/index', () => {
   beforeEach(() => {
@@ -95,6 +95,7 @@ describe('util/exec/docker/index', () => {
       getPkgReleases.mockResolvedValueOnce({ releases } as never);
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
+
     it('filters out node unstable', async () => {
       const releases = [
         { version: '12.0.0' },

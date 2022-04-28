@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../config';
 import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
-import * as allVersioning from '../versioning';
+import * as allVersioning from '../modules/versioning';
 import { configRegexPredicate, regEx } from './regex';
 
 function matchesRule(
@@ -45,6 +45,7 @@ function matchesRule(
   const excludePackagePatterns = packageRule.excludePackagePatterns || [];
   const excludePackagePrefixes = packageRule.excludePackagePrefixes || [];
   const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
+  const matchSourceUrls = packageRule.matchSourceUrls || [];
   const matchCurrentVersion = packageRule.matchCurrentVersion || null;
   const matchUpdateTypes = packageRule.matchUpdateTypes || [];
   let positiveMatch = false;
@@ -72,7 +73,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchPaths.length) {
+  if (matchPaths.length && packageFile) {
     const isMatch = matchPaths.some(
       (rulePath) =>
         packageFile.includes(rulePath) ||
@@ -85,7 +86,7 @@ function matchesRule(
   }
   if (matchDepTypes.length) {
     const isMatch =
-      matchDepTypes.includes(depType) ||
+      (depType && matchDepTypes.includes(depType)) ||
       depTypes?.some((dt) => matchDepTypes.includes(dt));
     if (!isMatch) {
       return false;
@@ -93,6 +94,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchLanguages.length) {
+    if (!language) {
+      return false;
+    }
     const isMatch = matchLanguages.includes(language);
     if (!isMatch) {
       return false;
@@ -100,6 +104,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
+    if (!baseBranch) {
+      return false;
+    }
     const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
       const isAllowedPred = configRegexPredicate(matchBaseBranch);
       if (isAllowedPred) {
@@ -114,6 +121,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchManagers.length) {
+    if (!manager) {
+      return false;
+    }
     const isMatch = matchManagers.includes(manager);
     if (!isMatch) {
       return false;
@@ -121,6 +131,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchDatasources.length) {
+    if (!datasource) {
+      return false;
+    }
     const isMatch = matchDatasources.includes(datasource);
     if (!isMatch) {
       return false;
@@ -129,7 +142,7 @@ function matchesRule(
   }
   if (matchUpdateTypes.length) {
     const isMatch =
-      matchUpdateTypes.includes(updateType) ||
+      (updateType && matchUpdateTypes.includes(updateType)) ||
       (isBump && matchUpdateTypes.includes('bump'));
     if (!isMatch) {
       return false;
@@ -137,11 +150,13 @@ function matchesRule(
     positiveMatch = true;
   }
   if (
-    depName &&
-    (matchPackageNames.length ||
-      matchPackagePatterns.length ||
-      matchPackagePrefixes.length)
+    matchPackageNames.length ||
+    matchPackagePatterns.length ||
+    matchPackagePrefixes.length
   ) {
+    if (!depName) {
+      return false;
+    }
     let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -169,7 +184,7 @@ function matchesRule(
     positiveMatch = true;
   }
   if (excludePackageNames.length) {
-    const isMatch = excludePackageNames.includes(depName);
+    const isMatch = depName && excludePackageNames.includes(depName);
     if (isMatch) {
       return false;
     }
@@ -210,6 +225,16 @@ function matchesRule(
     }
     positiveMatch = true;
   }
+  if (matchSourceUrls.length) {
+    const upperCaseSourceUrl = sourceUrl?.toUpperCase();
+    const isMatch = matchSourceUrls.some(
+      (url) => upperCaseSourceUrl === url.toUpperCase()
+    );
+    if (!isMatch) {
+      return false;
+    }
+    positiveMatch = true;
+  }
   if (matchCurrentVersion) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
@@ -217,7 +242,10 @@ function matchesRule(
       matchCurrentVersionStr
     );
     if (matchCurrentVersionPred) {
-      if (!unconstrainedValue && !matchCurrentVersionPred(currentValue)) {
+      if (
+        !unconstrainedValue &&
+        (!currentValue || !matchCurrentVersionPred(currentValue))
+      ) {
         return false;
       }
       positiveMatch = true;
@@ -226,7 +254,10 @@ function matchesRule(
       try {
         isMatch =
           unconstrainedValue ||
-          version.matches(matchCurrentVersionStr, currentValue);
+          !!(
+            currentValue &&
+            version.matches(matchCurrentVersionStr, currentValue)
+          );
       } catch (err) {
         // Do nothing
       }

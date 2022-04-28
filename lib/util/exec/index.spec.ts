@@ -13,7 +13,7 @@ import { exec } from '.';
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
-jest.mock('../../../lib/datasource');
+jest.mock('../../modules/datasource');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -764,6 +764,7 @@ describe('util/exec/index', () => {
       `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
     ]);
   });
+
   it('Supports binarySource=install', async () => {
     process.env = processEnv;
     cpExec.mockImplementation(() => {
@@ -823,6 +824,7 @@ describe('util/exec/index', () => {
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
+
   it('converts to TEMPORARY_ERROR', async () => {
     cpExec.mockImplementation(() => {
       class ErrorSignal extends Error {

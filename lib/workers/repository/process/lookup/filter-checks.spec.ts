@@ -1,9 +1,9 @@
 import { getConfig, mocked } from '../../../../../test/util';
-import type { Release } from '../../../../datasource';
+import type { Release } from '../../../../modules/datasource';
+import * as allVersioning from '../../../../modules/versioning';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
-import * as allVersioning from '../../../../versioning';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
@@ -38,6 +38,7 @@ const releases: Release[] = [
 
 describe('workers/repository/process/lookup/filter-checks', () => {
   let sortedReleases: Release[];
+
   beforeEach(() => {
     config = getConfig();
     config.currentVersion = '1.0.0';

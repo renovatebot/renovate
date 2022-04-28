@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { PackageFile } from '../../../manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';

@@ -1,6 +1,6 @@
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import * as _datasource from '../../datasource';
+import * as _datasource from '../../modules/datasource';
 import {
   generateInstallCommands,
   isDynamicInstall,
@@ -8,7 +8,7 @@ import {
 } from './buildpack';
 import type { ToolConstraint } from './types';
 
-jest.mock('../../../lib/datasource');
+jest.mock('../../modules/datasource');
 
 const datasource = mocked(_datasource);
 
@@ -18,13 +18,16 @@ describe('util/exec/buildpack', () => {
       GlobalConfig.reset();
       delete process.env.BUILDPACK;
     });
+
     it('returns false if binarySource is not install', () => {
       expect(isDynamicInstall()).toBeFalse();
     });
+
     it('returns false if not buildpack', () => {
       GlobalConfig.set({ binarySource: 'install' });
       expect(isDynamicInstall()).toBeFalse();
     });
+
     it('returns false if any unsupported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
       process.env.BUILDPACK = 'true';
@@ -34,6 +37,7 @@ describe('util/exec/buildpack', () => {
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
     });
+
     it('returns false if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
       process.env.BUILDPACK = 'true';
@@ -41,6 +45,7 @@ describe('util/exec/buildpack', () => {
       expect(isDynamicInstall(toolConstraints)).toBeTrue();
     });
   });
+
   describe('resolveConstraint()', () => {
     beforeEach(() => {
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -53,6 +58,7 @@ describe('util/exec/buildpack', () => {
         ],
       });
     });
+
     it('returns from config', async () => {
       expect(
         await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' })
@@ -103,6 +109,7 @@ describe('util/exec/buildpack', () => {
       ).toBe('1.2.3');
     });
   });
+
   describe('generateInstallCommands()', () => {
     beforeEach(() => {
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -115,6 +122,7 @@ describe('util/exec/buildpack', () => {
         ],
       });
     });
+
     it('returns install commands', async () => {
       const toolConstraints: ToolConstraint[] = [
         {
@@ -128,6 +136,7 @@ describe('util/exec/buildpack', () => {
         ]
       `);
     });
+
     it('hashes npm', async () => {
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       const res = await generateInstallCommands(toolConstraints);

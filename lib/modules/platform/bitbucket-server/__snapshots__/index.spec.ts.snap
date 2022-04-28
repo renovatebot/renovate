@@ -1,0 +1,407 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path addAssignees() does not throw 1`] = `undefined`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers does not throw 1`] = `undefined`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers throws on invalid reviewers 1`] = `"Response code 409 (Conflict)"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path deleteLAbel() does not throw 1`] = `undefined`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path findPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 2`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 3`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a PR 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #undefined",
+  "hasReviewers": false,
+  "number": undefined,
+  "reviewers": Array [],
+  "sourceBranch": undefined,
+  "state": "merged",
+  "targetBranch": undefined,
+  "title": undefined,
+  "version": 0,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path getPrList() has pr 1`] = `
+Array [
+  Object {
+    "body": "* Line 1
+* Line 2",
+    "createdAt": 1547853840016,
+    "number": 5,
+    "sourceBranch": "userName1/pullRequest5",
+    "state": "open",
+    "targetBranch": "master",
+    "title": "title",
+    "version": 1,
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://stash.renovatebot.com/",
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() generates URL if API does not contain clone links 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() uses http url from API with injected auth if http url in API response 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() uses ssh url from API if http not in API response 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() works 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, click this checkbox
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path updatePr() throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path addAssignees() does not throw 1`] = `undefined`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers does not throw 1`] = `undefined`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers throws on invalid reviewers 1`] = `"Response code 409 (Conflict)"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path findPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getBranchPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 2`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 3`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "hasReviewers": true,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #undefined",
+  "hasReviewers": false,
+  "number": undefined,
+  "reviewers": Array [],
+  "sourceBranch": undefined,
+  "state": "merged",
+  "targetBranch": undefined,
+  "title": undefined,
+  "version": 0,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() has pr 1`] = `
+Array [
+  Object {
+    "body": "* Line 1
+* Line 2",
+    "createdAt": 1547853840016,
+    "number": 5,
+    "sourceBranch": "userName1/pullRequest5",
+    "state": "open",
+    "targetBranch": "master",
+    "title": "title",
+    "version": 1,
+  },
+]
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://stash.renovatebot.com/",
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() generates URL if API does not contain clone links 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() uses http url from API with injected auth if http url in API response 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() uses ssh url from API if http not in API response 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() works 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, click this checkbox
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path updatePr() throws 1`] = `"Response code 405 (Method Not Allowed)"`;

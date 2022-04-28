@@ -38,7 +38,7 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 #### Windows
 
 Follow these steps to set up your development environment on Windows 10.
-If you already installed a component, skip the corresponding step.
+If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
@@ -64,6 +64,21 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
 The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+
+#### Local Docker
+
+If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
+To build the correct docker image:
+
+```
+docker build -f .devcontainer/Dockerfile -t renovatebot_local .
+```
+
+Then you can run Yarn directly from Docker, for instance:
+
+```
+docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local yarn install
+```
 
 ## Fork and Clone
 
@@ -125,13 +140,13 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 ### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
-You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
+You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
-The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
+The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
@@ -164,7 +179,7 @@ To do this, see these GitHub guides:
 ### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-However, by default Renovate skips over repositories that are forked.
+But by default Renovate skips over repositories that are forked.
 To override this default, you need to specify the setting `includeForks` as `true`.
 
 Tell Renovate to run on your forked repository by doing one of the following:

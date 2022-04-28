@@ -14,30 +14,34 @@ const resolvers = {
   [PlatformId.Gitea]: gitea,
   [PlatformId.Github]: github,
   [PlatformId.Gitlab]: gitlab,
-};
+} as const;
 
 export function getPreset({
-  packageName: pkgName,
+  repo,
   presetName = 'default',
   presetPath,
-  packageTag,
+  tag,
   baseConfig,
-}: PresetConfig): Promise<Preset> {
-  const { platform, endpoint } = baseConfig;
+}: PresetConfig): Promise<Preset | undefined> {
+  const { platform, endpoint } = baseConfig ?? {};
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  const resolver = resolvers[platform.toLowerCase()];
+  const resolver = resolvers[platform.toLowerCase() as PlatformId];
   if (!resolver) {
     throw new Error(
-      `Unsupported platform '${baseConfig.platform}' for local preset.`
+      // TODO: can be undefined? #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      `Unsupported platform '${baseConfig!.platform}' for local preset.`
     );
   }
   return resolver.getPresetFromEndpoint(
-    pkgName,
+    repo,
     presetName,
     presetPath,
-    endpoint,
-    packageTag
+    // TODO: fix type #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    endpoint!,
+    tag
   );
 }

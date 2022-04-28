@@ -1,5 +1,5 @@
 import type fs from 'fs';
-import type { PathLike } from 'fs';
+import type { PathLike, Stats } from 'fs';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
@@ -65,6 +65,7 @@ export class Fixtures {
       readFile: jest.fn().mockImplementation(memfs.promises.readFile),
       writeFile: jest.fn().mockImplementation(memfs.promises.writeFile),
       outputFile: jest.fn().mockImplementation(outputFile),
+      stat: jest.fn().mockImplementation(stat),
     };
   }
 
@@ -98,4 +99,9 @@ async function pathExists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function stat(path: string): Promise<Stats> {
+  // memfs type mismatch
+  return (await memfs.promises.stat(path)) as Stats;
 }

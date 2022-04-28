@@ -1,12 +1,12 @@
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { initApis } from './apis';
-import { initializeCaches } from './cache';
+import { initializeCaches, resetCaches } from './cache';
 import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
@@ -26,8 +26,9 @@ export async function initRepo(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
   let config: RenovateConfig = initializeConfig(config_);
-  await initializeCaches(config);
+  await resetCaches();
   config = await initApis(config);
+  await initializeCaches(config);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);

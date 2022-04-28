@@ -17,6 +17,8 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
+handlebars.registerHelper('lowercase', (str: string) => str.toLowerCase());
+
 handlebars.registerHelper('containsString', (str, subStr, options) =>
   str.includes(subStr)
 );
@@ -90,7 +92,7 @@ export const allowedFields = {
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
   logJSON: 'ChangeLogResult object for the upgrade',
-  lookupName: 'The full name that was used to look up the dependency.',
+  manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
@@ -106,6 +108,7 @@ export const allowedFields = {
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
+  packageName: 'The full name that was used to look up the dependency',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
@@ -149,9 +152,11 @@ const allowedFieldsList = Object.keys(allowedFields)
 
 type CompileInput = Record<string, unknown>;
 
-function getFilteredObject(input: CompileInput): any {
+type FilteredObject = Record<string, CompileInput | CompileInput[] | unknown>;
+
+function getFilteredObject(input: CompileInput): FilteredObject {
   const obj = clone(input);
-  const res = {};
+  const res: FilteredObject = {};
   const allAllowed = [
     ...Object.keys(allowedFields),
     ...exposedConfigOptions,
@@ -159,9 +164,9 @@ function getFilteredObject(input: CompileInput): any {
   for (const field of allAllowed) {
     const value = obj[field];
     if (is.array(value)) {
-      res[field] = value.map((element) =>
-        getFilteredObject(element as CompileInput)
-      );
+      res[field] = value
+        .filter(is.plainObject)
+        .map((element) => getFilteredObject(element as CompileInput));
     } else if (is.plainObject(value)) {
       res[field] = getFilteredObject(value);
     } else if (!is.undefined(value)) {

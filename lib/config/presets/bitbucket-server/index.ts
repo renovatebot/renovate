@@ -18,8 +18,8 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  branchOrTag?: string
-): Promise<Preset> {
+  branchOrTag?: string | null
+): Promise<Preset | null> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
   let url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
@@ -55,16 +55,18 @@ export async function fetchJSONFile(
 }
 
 export function getPresetFromEndpoint(
-  pkgName: string,
+  repo: string,
   filePreset: string,
-  presetPath: string,
-  endpoint: string
-): Promise<Preset> {
+  presetPath: string | undefined,
+  endpoint: string,
+  tag?: string | null
+): Promise<Preset | undefined> {
   return fetchPreset({
-    pkgName,
+    repo,
     filePreset,
     presetPath,
     endpoint,
+    tag,
     fetch: fetchJSONFile,
   });
 }

@@ -1,0 +1,325 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/azure/index createPr() should create and return a PR object 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index createPr() should create and return a PR object from base branch 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index createPr() should create and return a PR object with auto-complete set 1`] = `
+Object {
+  "autoCompleteSetBy": Object {
+    "id": 123,
+  },
+  "body": undefined,
+  "completionOptions": Object {
+    "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
+    "squashMerge": true,
+  },
+  "createdAt": undefined,
+  "createdBy": Object {
+    "id": 123,
+  },
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+  "title": "The Title",
+}
+`;
+
+exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "createdBy": Object {
+    "id": 123,
+    "url": "user-url",
+  },
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index deleteLabel() Should delete a label 1`] = `
+Array [
+  Array [],
+  Array [],
+]
+`;
+
+exports[`modules/platform/azure/index ensureComment adds comment if missing 1`] = `
+Array [
+  Array [
+    Object {
+      "comments": Array [
+        Object {
+          "commentType": 1,
+          "content": "### some-subject
+
+some
+content",
+          "parentCommentId": 0,
+        },
+      ],
+      "status": 1,
+    },
+    "1",
+    42,
+  ],
+]
+`;
+
+exports[`modules/platform/azure/index ensureComment adds comment if missing 2`] = `Array []`;
+
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 1`] = `Array []`;
+
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 2`] = `Array []`;
+
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `Array []`;
+
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `Array []`;
+
+exports[`modules/platform/azure/index ensureComment updates comment if missing 1`] = `Array []`;
+
+exports[`modules/platform/azure/index ensureComment updates comment if missing 2`] = `
+Array [
+  Array [
+    Object {
+      "content": "### some-subject
+
+some
+new
+content",
+    },
+    "1",
+    42,
+    4,
+    2,
+  ],
+]
+`;
+
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
+  "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
+  "sourceRefName": "refs/heads/branch-a",
+  "state": "closed",
+  "status": 2,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
+  "title": "branch a pr",
+}
+`;
+
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
+  "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
+  "sourceRefName": "refs/heads/branch-a",
+  "state": "closed",
+  "status": 2,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
+  "title": "branch a pr",
+}
+`;
+
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
+  "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
+  "sourceRefName": "refs/heads/branch-a",
+  "state": "open",
+  "status": 1,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
+  "title": "branch a pr",
+}
+`;
+
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
+  "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
+  "sourceRefName": "refs/heads/branch-a",
+  "state": "merged",
+  "status": 3,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
+  "title": "branch a pr",
+}
+`;
+
+exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
+Array [
+  Array [
+    "123456",
+    "file.json",
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  ],
+]
+`;
+
+exports[`modules/platform/azure/index getPr(prNo) should return a pr in the right format 1`] = `
+Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1234",
+  "hasReviewers": false,
+  "labels": Array [
+    "renovate",
+  ],
+  "number": 1234,
+  "pullRequestId": 1234,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index getRepos() should return an array of repos 1`] = `
+Array [
+  Array [],
+]
+`;
+
+exports[`modules/platform/azure/index getRepos() should return an array of repos 2`] = `
+Array [
+  "prj1/repo1",
+  "prj1/repo2",
+]
+`;
+
+exports[`modules/platform/azure/index initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://dev.azure.com/renovate12345/",
+}
+`;
+
+exports[`modules/platform/azure/index initRepo should initialise the config for a repo 1`] = `
+Array [
+  Array [],
+]
+`;
+
+exports[`modules/platform/azure/index initRepo should initialise the config for a repo 2`] = `
+Object {
+  "defaultBranch": "defBr",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/azure/index updatePr(prNo, title, body) should close the PR 1`] = `
+Array [
+  Array [
+    Object {
+      "description": "Hello world again",
+      "status": 2,
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
+]
+`;
+
+exports[`modules/platform/azure/index updatePr(prNo, title, body) should reopen the PR 1`] = `
+Array [
+  Array [
+    Object {
+      "status": 1,
+    },
+    "1",
+    1234,
+  ],
+  Array [
+    Object {
+      "description": "Hello world again",
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
+]
+`;
+
+exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR 1`] = `
+Array [
+  Array [
+    Object {
+      "description": "Hello world again",
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
+]
+`;
+
+exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR without description 1`] = `
+Array [
+  Array [
+    Object {
+      "title": "The New Title - autoclose",
+    },
+    "1",
+    1234,
+  ],
+]
+`;

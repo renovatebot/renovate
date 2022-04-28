@@ -1,13 +1,13 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
-import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
-import * as allVersioning from '../../versioning';
-import { id as composerVersioningId } from '../../versioning/composer';
-import { id as npmVersioningId } from '../../versioning/npm';
-import { id as pep440VersioningId } from '../../versioning/pep440';
-import { id as semverVersioningId } from '../../versioning/semver';
-import type { ToolConfig, ToolConstraint } from './types';
+import { getPkgReleases } from '../../modules/datasource';
+import * as allVersioning from '../../modules/versioning';
+import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as npmVersioningId } from '../../modules/versioning/npm';
+import { id as pep440VersioningId } from '../../modules/versioning/pep440';
+import { id as semverVersioningId } from '../../modules/versioning/semver';
+import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
   bundler: {
@@ -61,7 +61,9 @@ export function isBuildpack(): boolean {
   return !!process.env.BUILDPACK;
 }
 
-export function isDynamicInstall(toolConstraints?: ToolConstraint[]): boolean {
+export function isDynamicInstall(
+  toolConstraints?: Opt<ToolConstraint[]>
+): boolean {
   const { binarySource } = GlobalConfig.get();
   if (binarySource !== 'install') {
     return false;
@@ -125,9 +127,9 @@ export async function resolveConstraint(
 }
 
 export async function generateInstallCommands(
-  toolConstraints: ToolConstraint[]
+  toolConstraints: Opt<ToolConstraint[]>
 ): Promise<string[]> {
-  const installCommands = [];
+  const installCommands: string[] = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);

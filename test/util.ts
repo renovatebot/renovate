@@ -5,7 +5,7 @@ import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { platform as _platform } from '../lib/platform';
+import { platform as _platform } from '../lib/modules/platform';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
@@ -16,7 +16,17 @@ import * as _hostRules from '../lib/util/host-rules';
  * @param module module which is mocked by `jest.mock`
  */
 export function mocked<T>(module: T): jest.Mocked<T> {
-  return module as never;
+  return module as jest.Mocked<T>;
+}
+
+/**
+ * Simple wrapper for getting mocked version of a function
+ * @param func function which is mocked by `jest.mock`
+ */
+export function mockedFunction<T extends (...args: any[]) => any>(
+  func: T
+): jest.MockedFunction<T> {
+  return func as jest.MockedFunction<T>;
 }
 
 /**
@@ -41,7 +51,7 @@ export const defaultConfig = getConfig();
 export { getConfig };
 
 function getCallerFileName(): string | null {
-  let result = null;
+  let result: string | null = null;
 
   const prepareStackTrace = Error.prepareStackTrace;
   const stackTraceLimit = Error.stackTraceLimit;
@@ -54,7 +64,7 @@ function getCallerFileName(): string | null {
 
     const stack = err.stack as unknown as NodeJS.CallSite[];
 
-    let currentFile = null;
+    let currentFile: string | null = null;
     for (const frame of stack) {
       const fileName = frame.getFileName();
       if (!currentFile) {
@@ -75,7 +85,7 @@ function getCallerFileName(): string | null {
 }
 
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
-  const callerDir = upath.dirname(getCallerFileName());
+  const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
 }
 

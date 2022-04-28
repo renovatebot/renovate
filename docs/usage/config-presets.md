@@ -41,9 +41,11 @@ In order to achieve these goals, preset configs allow for a very modular approac
 
 ## Preset Hosting
 
-In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+Presets should be hosted in repositories, which usually means the same platform host as Renovate is running against.
 
-An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
+<!-- prettier-ignore -->
+!!! warning
+    npm-based presets are deprecated and support will be removed in a future major release.
 
 You can set a Git tag (like a SemVer) to use a specific release of your shared config.
 
@@ -137,7 +139,7 @@ You can find the Renovate team's preset configs at the "Config Presets" section 
 
 ## Preset Parameters
 
-If you browse the "default" presets, you will see some that contain parameters, e.g.:
+If you browse the "default" presets, you will see some that have parameters, e.g.:
 
 ```json
 {
@@ -168,9 +170,6 @@ Or if you think your preset would be valuable for others, please contribute a PR
 
 ## GitHub-hosted Presets
 
-It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `default.json` file in the default branch, e.g. `main`.
-
 To host your preset config on GitHub:
 
 - Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
@@ -188,9 +187,6 @@ You do not need to add it as a devDependency or add any other files to the prese
 
 ## GitLab-hosted Presets
 
-It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `default.json` file in the default branch.
-
 For a private GitLab repository Renovate requires at least _Reporter_ level access.
 
 To host your preset config on GitLab:
@@ -200,9 +196,6 @@ To host your preset config on GitLab:
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
 ## Gitea-hosted Presets
-
-It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `default.json` file in the default branch.
 
 To host your preset config on Gitea:
 
@@ -217,17 +210,6 @@ This is especially helpful in self-hosted scenarios where public presets cannot 
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
-## Presets and Private Modules
-
-Using your own preset config along with private npm modules can present a chicken and egg problem.
-You want to configure the encrypted token just once, which means in the preset.
-But you also probably want the preset to be private too, so how can the other repos reference it?
-
-The answer is to host your preset using GitHub or GitLab - not npmjs - and make sure you have added the preset's repo to Renovate too.
-GitHub will then allow Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
-
-For a private GitLab repository Renovate requires at least _Reporter_ level access.
-
 ## Contributing to presets
 
 Have you configured a rule that you think others might benefit from?
@@ -235,7 +217,7 @@ Please consider contributing it to the [Renovate](https://github.com/renovatebot
 
 ## Organization level presets
 
-Whenever repository onboarding happens, Renovate checks if the current user/group/org contains a default config to extend.
+Whenever repository onboarding happens, Renovate checks if the current user/group/org has a default config to extend.
 It looks for:
 
 - A repository called `renovate-config` under the same user/group/org with a `default.json` file or
@@ -264,7 +246,7 @@ Let's say that your username on npm and elsewhere is "fastcore".
 In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
 Let's assume you choose `renovate-config-fastcore` as the package name.
 
-You then need to publish the `renovate-config-fastcore` package where the `package.json` contains the field `renovate-config` and then put your config under the field `default`.
+You then need to publish the `renovate-config-fastcore` package where the `package.json` has the field `renovate-config` and then put your config under the field `default`.
 For example:
 
 ```json

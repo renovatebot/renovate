@@ -1,9 +1,10 @@
 import { mergeChildConfig } from '../../../config';
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { PackageFile } from '../../../manager/types';
-import { platform } from '../../../platform';
+import type { PackageFile } from '../../../modules/manager/types';
+import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { branchExists } from '../../../util/git';
@@ -103,6 +104,11 @@ export async function extractDependencies(
     logger.debug('No baseBranches');
     const packageFiles = await extract(config);
     addSplit('extract');
+    if (GlobalConfig.get('dryRun') === 'extract') {
+      res.packageFiles = packageFiles;
+      logger.info({ packageFiles }, 'Extracted dependencies');
+      return res;
+    }
     res = await lookup(config, packageFiles);
   }
   addSplit('lookup');

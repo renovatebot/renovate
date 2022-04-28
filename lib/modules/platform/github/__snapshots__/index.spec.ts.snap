@@ -1,0 +1,199 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object 1`] = `
+Object {
+  "body": "dummy body",
+  "displayNumber": "Pull Request #91",
+  "number": 91,
+  "sourceBranch": "somebranch",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "title": "Some title",
+}
+`;
+
+exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object in fork mode 1`] = `
+Object {
+  "body": "dummy body",
+  "displayNumber": "Pull Request #90",
+  "number": 90,
+  "sourceBranch": "somebranch",
+  "sourceRepo": "other/repo",
+  "state": "open",
+  "title": "Some title",
+}
+`;
+
+exports[`modules/platform/github/index getBranchPr(branchName) should reopen and cache autoclosed PR 1`] = `
+Object {
+  "body": "dummy body",
+  "displayNumber": "Pull Request #91",
+  "number": 91,
+  "sourceBranch": "somebranch",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "title": "old title",
+}
+`;
+
+exports[`modules/platform/github/index getPr(prNo) should return PR 1`] = `
+Object {
+  "body": "dummy body",
+  "displayNumber": "Pull Request #2500",
+  "number": 2500,
+  "sourceBranch": "renovate/jest-monorepo",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "title": "chore(deps): update dependency jest to v23.6.0",
+}
+`;
+
+exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
+Object {
+  "body": "dummy body",
+  "createdAt": "01-01-2022",
+  "displayNumber": "Pull Request #1234",
+  "hasAssignees": true,
+  "labels": Array [
+    "foo",
+    "bar",
+  ],
+  "number": 1234,
+  "sha": "def",
+  "sourceBranch": "some/branch",
+  "state": "merged",
+  "title": "Some title",
+}
+`;
+
+exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
+Object {
+  "body": "dummy body",
+  "displayNumber": "Pull Request #1234",
+  "hasAssignees": true,
+  "hasReviewers": true,
+  "number": 1234,
+  "sourceBranch": "some/branch",
+  "state": "open",
+  "title": "Some title",
+}
+`;
+
+exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
+Object {
+  "body": "dummy body",
+  "displayNumber": "Pull Request #1234",
+  "number": 1234,
+  "sourceBranch": "some/branch",
+  "state": "open",
+  "title": "Some title",
+}
+`;
+
+exports[`modules/platform/github/index getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
+
+exports[`modules/platform/github/index getRepos should return an array of repos 1`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`modules/platform/github/index initPlatform() should support custom endpoint 1`] = `
+Object {
+  "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`modules/platform/github/index initPlatform() should support custom endpoint without version 1`] = `
+Object {
+  "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`modules/platform/github/index initPlatform() should support default endpoint no email access 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`modules/platform/github/index initPlatform() should support default endpoint no email result 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`modules/platform/github/index initPlatform() should support default endpoint with email 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`modules/platform/github/index initPlatform() should support gitAuthor and username 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": "renovate@whitesourcesoftware.com",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`modules/platform/github/index initRepo detects fork default branch mismatch 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index initRepo should fork when forkMode 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index initRepo should merge 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index initRepo should not guess at merge 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index initRepo should rebase 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index initRepo should squash 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index initRepo should update fork when forkMode 1`] = `
+Object {
+  "defaultBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`modules/platform/github/index massageMarkdown(input) returns updated pr body 1`] = `"[https://github.com/foo/bar/issues/5](https://togithub.com/foo/bar/issues/5) plus also [a link](https://togithub.com/foo/bar/issues/5)"`;

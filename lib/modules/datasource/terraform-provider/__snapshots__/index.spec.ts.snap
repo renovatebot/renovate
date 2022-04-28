@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/terraform-provider/index getBuilds processes real data 1`] = `
+Array [
+  Object {
+    "arch": "arm64",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "darwin",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+  Object {
+    "arch": "amd64",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "linux",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+  Object {
+    "arch": "arm",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "linux",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+  Object {
+    "arch": "amd64",
+    "download_url": "https://downloads.example.com/proxmox",
+    "filename": "aFileName.zip",
+    "name": "Telmate/proxmox",
+    "os": "windows",
+    "url": "https://downloads.example.com/proxmox",
+    "version": "2.6.1",
+  },
+]
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes data with alternative backend 1`] = `
+Object {
+  "registryUrl": "https://releases.hashicorp.com",
+  "releases": Array [
+    Object {
+      "version": "1.19.0",
+    },
+    Object {
+      "version": "1.20.0",
+    },
+    Object {
+      "version": "2.0.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-google-beta",
+}
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real data 1`] = `
+Object {
+  "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
+  "registryUrl": "https://registry.terraform.io",
+  "releases": Array [
+    Object {
+      "version": "2.52.0",
+    },
+    Object {
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
+      "version": "2.53.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
+}
+`;
+
+exports[`modules/datasource/terraform-provider/index getReleases processes real data from packageName 1`] = `
+Object {
+  "homepage": "https://registry.company.com/providers/hashicorp/azurerm",
+  "registryUrl": "https://registry.company.com",
+  "releases": Array [
+    Object {
+      "version": "2.52.0",
+    },
+    Object {
+      "releaseTimestamp": "2019-11-26T08:22:56.000Z",
+      "version": "2.53.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/terraform-providers/terraform-provider-azurerm",
+}
+`;
