@@ -45,7 +45,6 @@
     "release:publish": "node tools/release.mjs",
     "start": "node -r ts-node/register/transpile-only -- lib/renovate.ts",
     "test": "run-s lint test-schema type-check null-check jest",
-    "test-maven": "jest -- lib/modules/manager/maven-wrapper",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd test/e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "run-s create-json-schema",
