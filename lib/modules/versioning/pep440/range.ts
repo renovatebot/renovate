@@ -316,6 +316,9 @@ function updateRangeValue(
     return range.operator + newVersion;
   }
   if (['==', '<='].includes(range.operator)) {
+    if (lte(newVersion, range.version)) {
+      return currentValue;
+    }
     return range.operator + newVersion;
   }
 
