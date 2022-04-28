@@ -49,7 +49,8 @@ export interface RepoCacheData {
 export interface RepoCacheRecord {
   repository: string;
   revision: number;
-  data: RepoCacheData;
+  payload: string;
+  hash: string;
 }
 
 export interface RepoCache {

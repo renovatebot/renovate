@@ -51,7 +51,7 @@ export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
   sourceDirectory: string
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
   const { default_branch: defaultBranch = 'HEAD' } = (
@@ -88,7 +88,7 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, sha } = files.shift();
+  const { path: changelogFile, sha } = files.shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
