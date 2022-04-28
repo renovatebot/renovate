@@ -68,4 +68,5 @@ export type NpmDepType =
   | 'devDependencies'
   | 'optionalDependencies'
   | 'peerDependencies'
-  | 'resolutions';
+  | 'resolutions'
+  | 'overrides';
