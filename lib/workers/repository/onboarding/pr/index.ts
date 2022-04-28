@@ -12,11 +12,8 @@ import {
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
-import {
-  addAssigneesReviewers,
-  getPlatformPrOptions,
-  prepareLabels,
-} from '../../update/pr';
+import { addAssigneesReviewers, getPlatformPrOptions } from '../../update/pr';
+import { prepareLabels } from '../../update/pr/labels';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
