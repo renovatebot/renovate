@@ -16,5 +16,7 @@ export async function finaliseRepo(
     `Action Required: Fix Renovate Configuration`
   );
   await clearRenovateRefs();
-  await runRenovateRepoStats(config);
+  if (config.platform === 'github') {
+    await runRenovateRepoStats(config);
+  }
 }
