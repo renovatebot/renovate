@@ -686,7 +686,8 @@ describe('modules/manager/npm/extract/index', () => {
           "foo2": {
             ".": "1.0.0",
             "bar2": "1.0.0"
-          }
+          },
+          "emptyObject":{}
         }
       }`;
       const res = await npmExtract.extractPackageFile(

@@ -339,52 +339,41 @@ export async function extractPackageFile(
   }
 
   /**
-   * Used when there is a json object in override block.
-   * i.e :
-   * "overrides": {
-    "foo": {
-      ".": "1.0.0", // override parent (foo) to be "1.0.0"
-      "bar": "1.0.0" // override bar to be 1.0.0 when its a child of foo
-    }
-  }
-    * object can be nested. i.e:
-    "overrides": {
-    "baz": {
-      "bar": {
-        "foo": "1.0.0"
-      }
-    }
-  }
+   * Used when there is a json object as a value in overrides block.
    * @param depType
    * @param parentDep
    * @param children
    * @returns PackageDependency array
    */
-  function extractOverrideDeps(
+  function extractOverrideDepsRec(
     depType: string,
     parentDep: string,
     children: NpmPackageDependency
   ): PackageDependency[] {
     const deps: PackageDependency[] = [];
-    // istanbul ignore if
-    if (is.nullOrUndefined(depType) || is.nullOrUndefined(children)) {
-      return deps; // extra safe check
+    if (!depType || !children || is.emptyObject(children)) {
+      return deps;
     }
 
     for (const [key, val] of Object.entries(children)) {
       if (is.string(val)) {
+        // val is a normal version
         let dep: PackageDependency = {};
         dep.prettyDepType = depType;
         dep.depType = depType;
+        // special handling for "." key
+        // "." means the constraint is applied to the parent dep
         const depName = key === '.' ? parentDep : key;
         dep.depName = depName;
         dep = { ...dep, ...extractDependency(depType, depName, val) };
         deps.push(dep);
       } else {
-        const depsOfObject = extractOverrideDeps(depType, parentDep, val);
+        // val is an object, run recursively.
+        const depsOfObject = extractOverrideDepsRec(depType, key, val);
         deps.push(...depsOfObject);
       }
     }
+
     return deps;
   }
 
@@ -414,7 +403,7 @@ export async function extractPackageFile(
             dep.managerData = { key };
           }
           if (depType === 'overrides' && !is.string(val)) {
-            deps.push(...extractOverrideDeps(depType, depName, val));
+            deps.push(...extractOverrideDepsRec(depType, depName, val));
           } else {
             dep = { ...dep, ...extractDependency(depType, depName, val) };
             if (depName === 'node') {
