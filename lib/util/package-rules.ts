@@ -254,8 +254,10 @@ function matchesRule(
       try {
         isMatch =
           unconstrainedValue ||
-          (currentValue &&
-            version.matches(matchCurrentVersionStr, currentValue));
+          !!(
+            currentValue &&
+            version.matches(matchCurrentVersionStr, currentValue)
+          );
       } catch (err) {
         // Do nothing
       }
