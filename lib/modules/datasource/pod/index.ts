@@ -59,7 +59,7 @@ function releasesGithubUrl(
 function handleError(packageName: string, err: HttpError): void {
   const errorData = { packageName, err };
 
-  const statusCode = err.response?.statusCode;
+  const statusCode = err.response?.statusCode ?? 0;
   if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
     logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
@@ -80,7 +80,7 @@ function handleError(packageName: string, err: HttpError): void {
 function isDefaultRepo(url: string): boolean {
   const match = githubRegex.exec(url);
   if (match) {
-    const { account, repo } = match.groups || {};
+    const { account, repo } = match.groups ?? {};
     return (
       account.toLowerCase() === 'cocoapods' && repo.toLowerCase() === 'specs'
     ); // https://github.com/CocoaPods/Specs.git
@@ -215,9 +215,13 @@ export class PodDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const podName = packageName.replace(regEx(/\/.*$/), '');
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
-    baseUrl = massageGithubUrl(baseUrl);
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(baseUrl)) {
       [baseUrl] = this.defaultRegistryUrls;
@@ -226,7 +230,8 @@ export class PodDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const match = githubRegex.exec(baseUrl);
     if (match) {
-      const { hostURL, account, repo } = match?.groups || {};
+      baseUrl = massageGithubUrl(baseUrl);
+      const { hostURL, account, repo } = match?.groups ?? {};
       const opts = { hostURL, account, repo };
       result = await this.getReleasesFromGithub(podName, opts);
     } else {

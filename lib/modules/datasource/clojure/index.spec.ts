@@ -172,7 +172,6 @@ describe('modules/datasource/clojure/index', () => {
     const res = await get('org.example:package', baseUrlCustom);
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('collects releases from all registry urls', async () => {
@@ -198,7 +197,6 @@ describe('modules/datasource/clojure/index', () => {
       { version: '2.0.0' },
       { version: '3.0.0' },
     ]);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('falls back to next registry url', async () => {
@@ -230,7 +228,6 @@ describe('modules/datasource/clojure/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('ignores unsupported protocols', async () => {
@@ -245,7 +242,6 @@ describe('modules/datasource/clojure/index', () => {
     );
 
     expect(releases).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips registry with invalid metadata structure', async () => {
@@ -265,7 +261,6 @@ describe('modules/datasource/clojure/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips registry with invalid XML', async () => {
@@ -282,7 +277,6 @@ describe('modules/datasource/clojure/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('handles optional slash at the end of registry url', async () => {
@@ -293,7 +287,6 @@ describe('modules/datasource/clojure/index', () => {
     expect(resA).not.toBeNull();
     expect(resB).not.toBeNull();
     expect(resA.releases).toEqual(resB.releases);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns null for invalid registryUrls', async () => {

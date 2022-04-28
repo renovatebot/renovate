@@ -28,7 +28,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       };
       httpMock
         .scope('https://api.bitbucket.org')
-        .get('/2.0/repositories/some/dep2/refs/tags')
+        .get('/2.0/repositories/some/dep2/refs/tags?pagelen=100')
         .reply(200, body);
       const res = await getPkgReleases({
         datasource,
@@ -36,9 +36,9 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('getDigest', () => {
     it('returns commits from bitbucket cloud', async () => {
       const body = {
@@ -74,9 +74,9 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('getDigest with no commits', () => {
     it('returns commits from bitbucket cloud', async () => {
       const body = {
@@ -96,11 +96,10 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         datasource,
         depName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
   describe('getTagCommit', () => {
     it('returns tags commit hash from bitbucket cloud', async () => {
       const body = {
@@ -124,7 +123,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

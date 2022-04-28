@@ -54,41 +54,46 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import { coerceRestPr } from './common';
 import {
-  closedPrsQuery,
   enableAutoMergeMutation,
   getIssuesQuery,
-  openPrsQuery,
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
+import { getPrCache } from './pr';
 import type {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
-  GhGraphQlPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
   PlatformConfig,
-  PrList,
 } from './types';
-import { UserDetails, getUserDetails, getUserEmail } from './user';
+import { getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
 
-let config: LocalRepoConfig = {} as any;
+let config: LocalRepoConfig;
+let platformConfig: PlatformConfig;
 
-const platformConfig: PlatformConfig = {
-  hostType: PlatformId.Github,
-  endpoint: 'https://api.github.com/',
-};
+export function resetConfigs(): void {
+  config = {} as never;
+  platformConfig = {
+    hostType: PlatformId.Github,
+    endpoint: 'https://api.github.com/',
+  };
+}
 
-const escapeHash = (input: string): string =>
-  input ? input.replace(regEx(/#/g), '%23') : input;
+resetConfigs();
+
+function escapeHash(input: string): string {
+  return input ? input.replace(regEx(/#/g), '%23') : input;
+}
 
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
@@ -96,8 +101,7 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders: Record<string, string | string[]> =
-      gheQueryRes?.headers || {};
+    const gheHeaders = gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
@@ -127,20 +131,28 @@ export async function initPlatform({
 
   await detectGhe(token);
 
-  let userDetails: UserDetails;
   let renovateUsername: string;
   if (username) {
     renovateUsername = username;
   } else {
-    userDetails = await getUserDetails(platformConfig.endpoint, token);
-    renovateUsername = userDetails.username;
+    platformConfig.userDetails ??= await getUserDetails(
+      platformConfig.endpoint,
+      token
+    );
+    renovateUsername = platformConfig.userDetails.username;
   }
-  let discoveredGitAuthor: string;
+  let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
-    userDetails = await getUserDetails(platformConfig.endpoint, token);
-    const userEmail = await getUserEmail(platformConfig.endpoint, token);
-    if (userEmail) {
-      discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
+    platformConfig.userDetails ??= await getUserDetails(
+      platformConfig.endpoint,
+      token
+    );
+    platformConfig.userEmail ??= await getUserEmail(
+      platformConfig.endpoint,
+      token
+    );
+    if (platformConfig.userEmail) {
+      discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
@@ -164,13 +176,15 @@ export async function getRepos(): Promise<string[]> {
         paginationField: 'repositories',
         paginate: 'all',
       });
-      return res.body.repositories.map((repo) => repo.full_name);
+      return res.body.repositories
+        .filter(is.nonEmptyObject)
+        .map((repo) => repo.full_name);
     } else {
       const res = await githubApi.getJson<{ full_name: string }[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' }
       );
-      return res.body.map((repo) => repo.full_name);
+      return res.body.filter(is.nonEmptyObject).map((repo) => repo.full_name);
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
@@ -212,14 +226,14 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  // TODO: null check #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
   return JSON.parse(raw);
 }
-
-let existingRepos;
 
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
@@ -251,7 +265,7 @@ export async function initRepo({
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  let repo: GhRepo;
+  let repo: GhRepo | undefined;
   try {
     let infoQuery = repoInfoQuery;
 
@@ -277,7 +291,10 @@ export async function initRepo({
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
+    if (
+      repo.nameWithOwner &&
+      repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
+    ) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
         'Repository has been renamed'
@@ -340,9 +357,6 @@ export async function initRepo({
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.issueList = null;
   config.prList = null;
-  config.openPrList = null;
-  config.closedPrList = null;
-  config.branchPrs = [];
 
   config.forkMode = !!forkMode;
   if (forkMode) {
@@ -352,18 +366,16 @@ export async function initRepo({
     config.parentRepo = config.repository;
     config.repository = null;
     // Get list of existing repos
-    existingRepos =
-      existingRepos ||
-      (
-        await githubApi.getJson<{ full_name: string }[]>(
-          'user/repos?per_page=100',
-          {
-            token: forkToken || opts.token,
-            paginate: true,
-            pageLimit: 100,
-          }
-        )
-      ).body.map((r) => r.full_name);
+    platformConfig.existingRepos ??= (
+      await githubApi.getJson<{ full_name: string }[]>(
+        'user/repos?per_page=100',
+        {
+          token: forkToken || opts.token,
+          paginate: true,
+          pageLimit: 100,
+        }
+      )
+    ).body.map((r) => r.full_name);
     try {
       const forkedRepo = await githubApi.postJson<{
         full_name: string;
@@ -424,7 +436,7 @@ export async function initRepo({
       logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
     }
-    if (existingRepos.includes(config.repository)) {
+    if (platformConfig.existingRepos.includes(config.repository)) {
       logger.debug(
         { repository_fork: config.repository },
         'Found existing fork'
@@ -456,7 +468,7 @@ export async function initRepo({
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
-      existingRepos.push(config.repository);
+      platformConfig.existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
     }
@@ -466,15 +478,17 @@ export async function initRepo({
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken;
+    parsedEndpoint.auth = config.forkToken ?? null;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token;
+    parsedEndpoint.auth = opts.token ?? null;
   }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
+  // TODO: null checks #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  parsedEndpoint.host = parsedEndpoint.host!.replace(
     'api.github.com',
     'github.com'
   );
@@ -536,111 +550,31 @@ export async function getRepoForceRebase(): Promise<boolean> {
       }
     }
   }
-  return config.repoForceRebase;
+  return !!config.repoForceRebase;
 }
 
-async function getClosedPrs(): Promise<PrList> {
-  if (!config.closedPrList) {
-    config.closedPrList = {};
-    try {
-      // prettier-ignore
-      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        closedPrsQuery,
-        'pullRequests',
-        {
-          variables: {
-            owner: config.repositoryOwner,
-            name: config.repositoryName,
-          },
-        }
-      );
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!nodes?.length) {
-        logger.debug('getClosedPrs(): no graphql data');
-        return {};
+function cachePr(pr?: Pr | null): void {
+  config.prList ??= [];
+  if (pr) {
+    for (let idx = 0; idx < config.prList.length; idx += 1) {
+      const cachedPr = config.prList[idx];
+      if (cachedPr.number === pr.number) {
+        config.prList[idx] = pr;
+        return;
       }
-      for (const pr of nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = pr.state.toLowerCase();
-        pr.sourceBranch = pr.headRefName;
-        delete pr.headRefName;
-        pr.comments = pr.comments.nodes.map((comment) => ({
-          id: comment.databaseId,
-          body: comment.body,
-        }));
-        pr.body = 'dummy body'; // just in case
-        config.closedPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'getClosedPrs(): error');
     }
+    config.prList.push(pr);
   }
-  return config.closedPrList;
 }
 
-async function getOpenPrs(): Promise<PrList> {
-  // The graphql query is supported in the current oldest GHE version 2.19
-  if (!config.openPrList) {
-    config.openPrList = {};
-    try {
-      // prettier-ignore
-      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        openPrsQuery,
-        'pullRequests',
-        {
-          variables: {
-            owner: config.repositoryOwner,
-            name: config.repositoryName,
-          },
-          acceptHeader: 'application/vnd.github.merge-info-preview+json',
-        }
-      );
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!nodes?.length) {
-        logger.debug('getOpenPrs(): no graphql data');
-        return {};
-      }
-      for (const pr of nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = PrState.Open;
-        pr.sourceBranch = pr.headRefName;
-        delete pr.headRefName;
-        pr.targetBranch = pr.baseRefName;
-        delete pr.baseRefName;
-        // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS', 'UNSTABLE'];
-        const hasNegativeReview = pr.reviews?.nodes?.length > 0;
-        // istanbul ignore if
-        if (hasNegativeReview) {
-          pr.cannotMergeReason = `PR has a negative review`;
-        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
-          pr.cannotMergeReason = `pr.mergeStateStatus = ${pr.mergeStateStatus}`;
-        }
-        if (pr.labels) {
-          pr.labels = pr.labels.nodes.map((label) => label.name);
-        }
-        pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
-        delete pr.assignees;
-        pr.hasReviewers = !!(pr.reviewRequests?.totalCount > 0);
-        delete pr.reviewRequests;
-        delete pr.mergeStateStatus;
-        config.openPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'getOpenPrs(): error');
-    }
-  }
-  return config.openPrList;
+// Fetch fresh Pull Request and cache it when possible
+async function fetchPr(prNo: number): Promise<Pr | null> {
+  const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+    `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+  );
+  const result = coerceRestPr(ghRestPr);
+  cachePr(result);
+  return result;
 }
 
 // Gets details for a PR
@@ -648,36 +582,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (!prNo) {
     return null;
   }
-  const openPrs = await getOpenPrs();
-  const openPr = openPrs[prNo];
-  if (openPr) {
-    logger.debug('Returning from graphql open PR list');
-    return openPr;
+  const prList = await getPrList();
+  let pr = prList.find(({ number }) => number === prNo) ?? null;
+  if (pr) {
+    logger.debug('Returning PR from cache');
   }
-  const closedPrs = await getClosedPrs();
-  const closedPr = closedPrs[prNo];
-  if (closedPr) {
-    logger.debug('Returning from graphql closed PR list');
-    return closedPr;
-  }
-  logger.debug(
-    { prNo },
-    'PR not found in open or closed PRs list - trying to fetch it directly'
-  );
-  const pr = (
-    await githubApi.getJson<GhRestPr>(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-    )
-  ).body;
-  if (!pr) {
-    return null;
-  }
-  // Harmonise PR values
-  pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === PrState.Open) {
-    pr.sourceBranch = pr.head ? pr.head.ref : undefined;
-    pr.sha = pr.head ? pr.head.sha : undefined;
-  }
+  pr ??= await fetchPr(prNo);
   return pr;
 }
 
@@ -692,50 +602,18 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  logger.trace('getPrList()');
   if (!config.prList) {
-    logger.debug('Retrieving PR list');
-    let prList: GhRestPr[];
-    try {
-      prList = (
-        await githubApi.getJson<GhRestPr[]>(
-          `repos/${
-            config.parentRepo || config.repository
-          }/pulls?per_page=100&state=all`,
-          { paginate: true }
-        )
-      ).body;
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'getPrList err');
-      throw new ExternalHostError(err, PlatformId.Github);
-    }
-    config.prList = prList
-      .filter(
-        (pr) =>
-          config.forkMode ||
-          config.ignorePrAuthor ||
-          (pr?.user?.login && config?.renovateUsername
-            ? pr.user.login === config.renovateUsername
-            : true)
-      )
-      .map(
-        (pr) =>
-          ({
-            number: pr.number,
-            sourceBranch: pr.head.ref,
-            sha: pr.head.sha,
-            title: pr.title,
-            state:
-              pr.state === PrState.Closed && pr.merged_at?.length
-                ? /* istanbul ignore next */ PrState.Merged
-                : pr.state,
-            createdAt: pr.created_at,
-            closedAt: pr.closed_at,
-            sourceRepo: pr.head?.repo?.full_name,
-          } as never)
-      );
-    logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
+    const repo = config.parentRepo ?? config.repository;
+    const username =
+      !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
+        ? config.renovateUsername
+        : null;
+    // TODO: check null `repo` #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const prCache = await getPrCache(githubApi, repo!, username);
+    config.prList = Object.values(prCache);
   }
+
   return config.prList;
 }
 
@@ -756,26 +634,23 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr;
+  return pr ?? null;
 }
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  // istanbul ignore if
-  if (config.branchPrs[branchName]) {
-    return config.branchPrs[branchName];
-  }
   logger.debug(`getBranchPr(${branchName})`);
+
   const openPr = await findPr({
     branchName,
     state: PrState.Open,
   });
   if (openPr) {
-    config.branchPrs[branchName] = await getPr(openPr.number);
-    return config.branchPrs[branchName];
+    return openPr;
   }
+
   const autoclosedPr = await findPr({
     branchName,
     state: PrState.Closed,
@@ -804,24 +679,26 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     }
     try {
       const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
-      await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
-        body: {
-          state: 'open',
-          title,
-        },
-      });
+      const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
+        `repos/${config.repository}/pulls/${number}`,
+        {
+          body: {
+            state: 'open',
+            title,
+          },
+        }
+      );
       logger.info(
         { branchName, title, number },
         'Successfully reopened autoclosed PR'
       );
+      const result = coerceRestPr(ghPr);
+      cachePr(result);
+      return result;
     } catch (err) {
       logger.debug('Could not reopen autoclosed PR');
       return null;
     }
-    delete config.openPrList; // So that it gets refreshed
-    delete config.closedPrList?.[number]; // So that it's no longer found in the closed list
-    config.branchPrs[branchName] = await getPr(number);
-    return config.branchPrs[branchName];
   }
   return null;
 }
@@ -987,7 +864,7 @@ export async function setBranchStatus({
     return;
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
-  let url: string;
+  let url: string | undefined;
   try {
     const branchCommit = git.getBranchCommit(branchName);
     url = `repos/${config.repository}/statuses/${branchCommit}`;
@@ -1034,7 +911,7 @@ async function getIssues(): Promise<Issue[]> {
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
     ...issue,
-    state: issue.state.toLowerCase(),
+    state: issue.state?.toLowerCase(),
   }));
 }
 
@@ -1084,7 +961,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  return getIssue(issue.number);
+  // TODO: can number be required? #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return getIssue(issue.number!);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1138,7 +1017,8 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn(`Closing duplicate issue ${i.number}`);
-          await closeIssue(i.number);
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          await closeIssue(i.number!);
         }
       }
       const issueBody = (
@@ -1186,7 +1066,7 @@ export async function ensureIssue({
     );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
-    delete config.issueList;
+    config.issueList = null;
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
@@ -1210,7 +1090,8 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      await closeIssue(issue.number);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      await closeIssue(issue.number!);
       logger.debug({ number: issue.number }, 'Issue closed');
     }
   }
@@ -1258,7 +1139,7 @@ export async function addReviewers(
 
 async function addLabels(
   issueNo: number,
-  labels: string[] | null
+  labels: string[] | null | undefined
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
@@ -1318,11 +1199,6 @@ async function deleteComment(commentId: number): Promise<void> {
 }
 
 async function getComments(issueNo: number): Promise<Comment[]> {
-  const pr = (await getClosedPrs())[issueNo];
-  if (pr) {
-    logger.debug('Returning closed PR list comments');
-    return pr.comments;
-  }
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `repos/${
@@ -1441,7 +1317,7 @@ export async function ensureCommentRemoval(
 async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
-  platformOptions: PlatformPrOptions
+  platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
   if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
     return;
@@ -1460,18 +1336,21 @@ async function tryPrAutomerge(
     const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
 
-    const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
+    const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions
     );
 
-    if (errors) {
-      logger.debug({ prNumber, errors }, 'GitHub-native automerge: fail');
+    if (res?.errors) {
+      logger.debug(
+        { prNumber, errors: res.errors },
+        'GitHub-native automerge: fail'
+      );
       return;
     }
 
     logger.debug({ prNumber }, 'GitHub-native automerge: success');
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: missing test #7154 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -1485,11 +1364,13 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
-}: CreatePRConfig): Promise<Pr> {
+}: CreatePRConfig): Promise<Pr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository.split('/')[0]}:${sourceBranch}`;
+  // TODO: can `repository` be null? #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
   const options: any = {
     body: {
       title,
@@ -1505,26 +1386,22 @@ export async function createPr({
     options.body.maintainer_can_modify = true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
-  const pr = (
+  const ghPr = (
     await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
   logger.debug(
-    { branch: sourceBranch, pr: pr.number, draft: draftPR },
+    { branch: sourceBranch, pr: ghPr.number, draft: draftPR },
     'PR created'
   );
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
-  }
-  pr.displayNumber = `Pull Request #${pr.number}`;
-  pr.sourceBranch = sourceBranch;
-  pr.sourceRepo = pr.head.repo.full_name;
-  await addLabels(pr.number, labels);
-  await tryPrAutomerge(pr.number, pr.node_id, platformOptions);
-  return pr;
+  const { number, node_id } = ghPr;
+  await addLabels(number, labels);
+  await tryPrAutomerge(number, node_id, platformOptions);
+  const result = coerceRestPr(ghPr);
+  cachePr(result);
+  return result;
 }
 
 export async function updatePr({
@@ -1550,10 +1427,12 @@ export async function updatePr({
     options.token = config.forkToken;
   }
   try {
-    await githubApi.patchJson(
+    const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
+    const result = coerceRestPr(ghPr);
+    cachePr(result);
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
@@ -1652,6 +1531,10 @@ export async function mergePr({
     { automergeResult: automergeResult.body, pr: prNo },
     'PR merged'
   );
+  const cachedPr = config.prList?.find(({ number }) => number === prNo);
+  if (cachedPr) {
+    cachePr({ ...cachedPr, state: PrState.Merged });
+  }
   return true;
 }
 
@@ -1671,11 +1554,21 @@ export function massageMarkdown(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
+  let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
+
+  const gheSupportsStateFilter = semver.satisfies(
+    // semver not null safe, accepts null and undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    platformConfig.gheVersion!,
+    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
+  );
+  const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
+  const query = vulnerabilityAlertsQuery(filterByState);
+
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
-    }>(vulnerabilityAlertsQuery, 'vulnerabilityAlerts', {
+    }>(query, 'vulnerabilityAlerts', {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',

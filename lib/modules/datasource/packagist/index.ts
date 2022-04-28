@@ -35,8 +35,12 @@ export class PackagistDatasource extends Datasource {
   public override getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult> {
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
+    // istanbul ignore if
+    if (!registryUrl) {
+      return Promise.resolve(null);
+    }
     return this.packageLookup(registryUrl, packageName);
   }
 
@@ -59,8 +63,8 @@ export class PackagistDatasource extends Datasource {
     const res = (await this.http.getJson<PackageMeta>(url, opts)).body;
     const meta: RegistryMeta = {
       providerPackages: {},
+      packages: res.packages,
     };
-    meta.packages = res.packages;
     if (res.includes) {
       meta.includesFiles = [];
       for (const [name, val] of Object.entries(res.includes)) {
@@ -95,48 +99,51 @@ export class PackagistDatasource extends Datasource {
     return meta;
   }
 
-  private async getPackagistFile(
-    regUrl: string,
-    file: RegistryFile
-  ): Promise<PackagistFile> {
-    const { key, sha256 } = file;
-    const fileName = key.replace('%hash%', sha256);
+  private static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
-    if (opts.password || opts.headers?.authorization) {
-      return (
-        await this.http.getJson<PackagistFile>(regUrl + '/' + fileName, opts)
-      ).body;
-    }
-    const cacheNamespace = 'datasource-packagist-files';
-    const cacheKey = regUrl + key;
-    // Check the persistent cache for public registries
-    const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
-    // istanbul ignore if
-    if (cachedResult && cachedResult.sha256 === sha256) {
-      return cachedResult.res as Promise<PackagistFile>;
-    }
-    const res = (
-      await this.http.getJson<PackagistFile>(regUrl + '/' + fileName, opts)
-    ).body;
-    const cacheMinutes = 1440; // 1 day
-    await packageCache.set(
-      cacheNamespace,
-      cacheKey,
-      { res, sha256 },
-      cacheMinutes
+    return !!opts.password || !!opts.headers?.authorization;
+  }
+
+  private static getPackagistFileUrl(
+    regUrl: string,
+    regFile: RegistryFile
+  ): string {
+    const { key, sha256 } = regFile;
+    const fileName = key.replace('%hash%', sha256);
+    const url = `${regUrl}/${fileName}`;
+    return url;
+  }
+
+  @cache({
+    namespace: `datasource-${PackagistDatasource.id}-public-files`,
+    key: (regUrl: string, regFile: RegistryFile) =>
+      PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+    cacheable: (regUrl: string) =>
+      !PackagistDatasource.isPrivatePackage(regUrl),
+    ttlMinutes: 1440,
+  })
+  async getPackagistFile(
+    regUrl: string,
+    regFile: RegistryFile
+  ): Promise<PackagistFile> {
+    const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
+    const opts = PackagistDatasource.getHostOpts(regUrl);
+    const { body: packagistFile } = await this.http.getJson<PackagistFile>(
+      url,
+      opts
     );
-    return res;
+    return packagistFile;
   }
 
   private static extractDepReleases(versions: RegistryFile): ReleaseResult {
-    const dep: ReleaseResult = { releases: null };
+    const dep: ReleaseResult = { releases: [] };
     // istanbul ignore if
     if (!versions) {
-      dep.releases = [];
       return dep;
     }
     dep.releases = Object.keys(versions).map((version) => {
-      const release = versions[version];
+      // TODO: fix function parameter type: `versions`
+      const release = (versions as any)[version];
       const parsedVersion = release.version ?? version;
       dep.homepage = release.homepage || dep.homepage;
       if (release.source?.url) {
@@ -157,6 +164,11 @@ export class PackagistDatasource extends Datasource {
   })
   async getAllPackages(regUrl: string): Promise<AllPackages | null> {
     const registryMeta = await this.getRegistryMeta(regUrl);
+    // istanbul ignore if: needs test
+    if (!registryMeta) {
+      return null;
+    }
+
     const {
       packages,
       providersUrl,
@@ -199,7 +211,7 @@ export class PackagistDatasource extends Datasource {
     return allPackages;
   }
 
-  async packagistOrgLookup(name: string): Promise<ReleaseResult> {
+  async packagistOrgLookup(name: string): Promise<ReleaseResult | null> {
     const cacheNamespace = 'datasource-packagist-org';
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
@@ -209,7 +221,7 @@ export class PackagistDatasource extends Datasource {
     if (cachedResult) {
       return cachedResult;
     }
-    let dep: ReleaseResult = null;
+    let dep: ReleaseResult | null = null;
     const regUrl = 'https://packagist.org';
     const pkgUrl = [
       joinUrlParts(regUrl, `/p2/${name}.json`),
@@ -240,6 +252,10 @@ export class PackagistDatasource extends Datasource {
         return packagistResult;
       }
       const allPackages = await this.getAllPackages(regUrl);
+      // istanbul ignore if: needs test
+      if (!allPackages) {
+        return null;
+      }
       const {
         packages,
         providersUrl,
@@ -258,7 +274,8 @@ export class PackagistDatasource extends Datasource {
       if (name in providerPackages) {
         pkgUrl = URL.resolve(
           regUrl,
-          providersUrl
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          providersUrl!
             .replace('%package%', name)
             .replace('%hash%', providerPackages[name])
         );

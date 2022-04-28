@@ -3,13 +3,21 @@ import { loadAll } from 'js-yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { ApplicationDefinition } from './types';
+import type { ApplicationDefinition, ApplicationSource } from './types';
 import { fileTestRegex } from './util';
 
 function createDependency(
   definition: ApplicationDefinition
-): PackageDependency {
-  const source = definition?.spec?.source;
+): PackageDependency | null {
+  let source: ApplicationSource;
+  switch (definition.kind) {
+    case 'Application':
+      source = definition?.spec?.source;
+      break;
+    case 'ApplicationSet':
+      source = definition?.spec?.template?.spec?.source;
+      break;
+  }
 
   if (
     !source ||
@@ -37,8 +45,8 @@ function createDependency(
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config?: ExtractConfig
+  _fileName: string,
+  _config?: ExtractConfig
 ): PackageFile | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
@@ -49,7 +57,7 @@ export function extractPackageFile(
 
   const deps = definitions
     .map((definition) => createDependency(definition))
-    .filter(Boolean);
+    .filter(is.truthy);
 
   return deps.length ? { deps } : null;
 }

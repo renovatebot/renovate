@@ -15,7 +15,7 @@ If you want to use these package managers to update your lockfiles, you must ens
 npm install -g yarn pnpm
 ```
 
-The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the appropriate version before running Renovate.
+The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the correct version before running Renovate.
 
 ### Docker
 
@@ -247,7 +247,7 @@ module.exports = {
 Here change the `logFile` and `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
-If running against GitHub Enterprise, change the above `gitlab` values to the equivalent GitHub ones.
+If running against GitHub Enterprise Server, change the above `gitlab` values to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
 
@@ -269,7 +269,7 @@ renovate
 <!-- prettier-ignore -->
 !!! note
     The GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
-    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
+    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 

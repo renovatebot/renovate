@@ -47,7 +47,7 @@ export async function readLocalFile(
 
 export async function writeLocalFile(
   fileName: string,
-  fileContent: string
+  fileContent: string | Buffer
 ): Promise<void> {
   const { localDir } = GlobalConfig.get();
   const localFileName = upath.join(localDir, fileName);

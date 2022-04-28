@@ -31,8 +31,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, []);
       const res = await github.getDigest({ packageName }, null);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -40,8 +40,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, [{ sha: 'abcdef' }]);
       const res = await github.getDigest({ packageName }, null);
       expect(res).toBe('abcdef');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns commit digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -49,8 +49,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, { object: { type: 'commit', sha: 'ddd111' } });
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBe('ddd111');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns tagged commit digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -62,8 +62,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, { object: { type: 'commit', sha: 'ddd111' } });
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBe('ddd111');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('warns if unknown ref', async () => {
       httpMock
         .scope(githubApiHost)
@@ -71,8 +71,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, { object: { sha: 'ddd111' } });
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for missed tagged digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -80,7 +80,6 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, {});
       const res = await github.getDigest({ packageName: 'some/dep' }, 'v1.2.0');
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('supports ghe', async () => {
@@ -99,11 +98,12 @@ describe('modules/datasource/github-tags/index', () => {
         { packageName: 'some/dep', registryUrl: githubEnterpriseApiHost },
         'v1.2.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(sha1).toBe('abcdef');
       expect(sha2).toBe('ddd111');
     });
   });
+
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -131,7 +131,6 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await getPkgReleases({ datasource: github.id, depName });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('supports ghe', async () => {
@@ -148,7 +147,6 @@ describe('modules/datasource/github-tags/index', () => {
         packageName: depName,
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -5,7 +5,7 @@ import nock from 'nock';
 import { makeGraphqlSnapshot } from './graphql-snapshot';
 
 // eslint-disable-next-line no-restricted-imports
-export type { Scope, ReplyHeaders } from 'nock';
+export type { Scope, ReplyHeaders, Body } from 'nock';
 
 interface RequestLogItem {
   headers: Record<string, string>;
@@ -82,7 +82,7 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
 }
 
 export function getTrace(): RequestLogItem[] /* istanbul ignore next */ {
-  const errorLines = [];
+  const errorLines: string[] = [];
   if (missingLog.length) {
     errorLines.push('Missing mocks:');
     errorLines.push(...missingLog);

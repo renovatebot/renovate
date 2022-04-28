@@ -105,6 +105,21 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
         } else {
           const coerce = coersions[option.type];
           config[option.name] = coerce(envVal);
+          if (option.name === 'dryRun') {
+            if (config[option.name] === 'true') {
+              logger.warn(
+                'env config dryRun property has been changed to full'
+              );
+              config[option.name] = 'full';
+            } else if (config[option.name] === 'false') {
+              logger.warn(
+                'env config dryRun property has been changed to null'
+              );
+              config[option.name] = null;
+            } else if (config[option.name] === 'null') {
+              config[option.name] = null;
+            }
+          }
         }
       }
     }

@@ -1,6 +1,12 @@
 import { logger } from '../../../logger';
-import { resolvePackage } from '../../../modules/datasource/npm/npmrc';
-import type { NpmResponse } from '../../../modules/datasource/npm/types';
+import {
+  resolvePackageUrl,
+  resolveRegistryUrl,
+} from '../../../modules/datasource/npm/npmrc';
+import type {
+  NpmResponse,
+  NpmResponseVersion,
+} from '../../../modules/datasource/npm/types';
 import { Http } from '../../../util/http';
 import type { Preset, PresetConfig } from '../types';
 import {
@@ -16,10 +22,11 @@ const http = new Http(id);
 export async function getPreset({
   repo: pkg,
   presetName = 'default',
-}: PresetConfig): Promise<Preset> {
-  let dep;
+}: PresetConfig): Promise<Preset | undefined> {
+  let dep: (NpmResponseVersion & { 'renovate-config'?: any }) | undefined;
   try {
-    const { packageUrl } = resolvePackage(pkg);
+    const registryUrl = resolveRegistryUrl(pkg);
+    const packageUrl = resolvePackageUrl(registryUrl, pkg);
     // istanbul ignore if
     if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
       logger.warn(
@@ -27,11 +34,13 @@ export async function getPreset({
       );
     }
     const body = (await http.getJson<NpmResponse>(packageUrl)).body;
-    dep = body.versions[body['dist-tags'].latest];
+    // TODO: check null #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    dep = body.versions![body['dist-tags']!.latest];
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  if (!dep['renovate-config']) {
+  if (!dep?.['renovate-config']) {
     throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
   }
   const presetConfig = dep['renovate-config'][presetName];

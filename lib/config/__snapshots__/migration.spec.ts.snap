@@ -100,13 +100,6 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 2`] = `
-Array [
-  "after 10pm every weekday",
-  "before 7am every weekday",
-]
-`;
-
 exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`] = `
 Object {
   "additionalBranchPrefix": "{{parentDir}}-",
@@ -367,22 +360,6 @@ Object {
         "other/package.json",
       ],
       "rangeStrategy": "pin",
-    },
-  ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) migrates packageRules objects 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "commitMessage": "fix(package): update peerDependency to accept typescript ^{{newMajor}} {{newMajor}}",
-      "matchPackageNames": Array [
-        "typescript",
-      ],
-      "matchUpdateTypes": Array [
-        "major",
-      ],
     },
   ],
 }

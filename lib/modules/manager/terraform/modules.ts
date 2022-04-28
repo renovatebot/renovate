@@ -27,17 +27,20 @@ export function extractTerraformModule(
 ): ExtractionResult {
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    dep.managerData.terraformDependencyType = TerraformDependencyTypes.module;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    dep.managerData!.terraformDependencyType = TerraformDependencyTypes.module;
   });
   return result;
 }
 
 export function analyseTerraformModule(dep: PackageDependency): void {
-  const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
-  const bitbucketRefMatch = bitbucketRefMatchRegex.exec(dep.managerData.source);
-  const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const source = dep.managerData!.source as string;
+  const githubRefMatch = githubRefMatchRegex.exec(source);
+  const bitbucketRefMatch = bitbucketRefMatchRegex.exec(source);
+  const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source);
 
-  if (githubRefMatch) {
+  if (githubRefMatch?.groups) {
     dep.packageName = githubRefMatch.groups.project.replace(
       regEx(/\.git$/),
       ''
@@ -46,7 +49,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = GithubTagsDatasource.id;
-  } else if (bitbucketRefMatch) {
+  } else if (bitbucketRefMatch?.groups) {
     dep.depType = 'module';
     dep.depName =
       bitbucketRefMatch.groups.workspace +
@@ -55,7 +58,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.packageName = dep.depName;
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
-  } else if (gitTagsRefMatch) {
+  } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'module';
     if (gitTagsRefMatch.groups.path.includes('//')) {
       logger.debug('Terraform module contains subdirectory');
@@ -68,13 +71,13 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;
-  } else if (dep.managerData.source) {
-    const moduleParts = dep.managerData.source.split('//')[0].split('/');
+  } else if (source) {
+    const moduleParts = source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
       dep.skipReason = 'local';
     } else if (moduleParts.length >= 3) {
-      const hostnameMatch = hostnameMatchRegex.exec(dep.managerData.source);
-      if (hostnameMatch) {
+      const hostnameMatch = hostnameMatchRegex.exec(source);
+      if (hostnameMatch?.groups) {
         dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
       }
       dep.depType = 'module';

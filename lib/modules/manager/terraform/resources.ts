@@ -2,6 +2,7 @@ import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import { analyseTerraformVersion } from './required-version';
 import type { ExtractionResult, ResourceManagerData } from './types';
 import {
   checkIfStringIsPath,
@@ -23,32 +24,39 @@ export function extractTerraformResource(
 ): ExtractionResult {
   let lineNumber = startingLine;
   let line = lines[lineNumber];
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<ResourceManagerData>[] = [];
+  const managerData: ResourceManagerData = {
+    terraformDependencyType: TerraformDependencyTypes.resource,
+  };
   const dep: PackageDependency<ResourceManagerData> = {
-    managerData: {
-      terraformDependencyType: TerraformDependencyTypes.resource,
-    },
+    managerData,
   };
 
   const typeMatch = resourceTypeExtractionRegex.exec(line);
 
-  dep.managerData.resourceType =
-    TerraformResourceTypes[typeMatch?.groups?.type] ??
+  // Sets the resourceType, e.g. "helm_release" 'resource "helm_release" "test_release"'
+  managerData.resourceType =
+    TerraformResourceTypes[typeMatch?.groups?.type as TerraformResourceTypes] ??
     TerraformResourceTypes.unknown;
 
+  /**
+   * Iterates over all lines of the resource to extract the relevant key value pairs,
+   * e.g. the chart name for helm charts or the terraform_version for tfe_workspace
+   */
   do {
     lineNumber += 1;
     line = lines[lineNumber];
     const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
+    if (kvMatch?.groups) {
       switch (kvMatch.groups.key) {
         case 'chart':
         case 'image':
         case 'name':
         case 'repository':
-          dep.managerData[kvMatch.groups.key] = kvMatch.groups.value;
+          managerData[kvMatch.groups.key] = kvMatch.groups.value;
           break;
         case 'version':
+        case 'terraform_version':
           dep.currentValue = kvMatch.groups.value;
           break;
         default:
@@ -64,6 +72,10 @@ export function extractTerraformResource(
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
+  // istanbul ignore if: should tested?
+  if (!dep.managerData) {
+    return;
+  }
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
@@ -99,9 +111,19 @@ export function analyseTerraformResource(
         dep.skipReason = 'local-chart';
       }
       dep.depType = 'helm_release';
-      dep.registryUrls = [dep.managerData.repository];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      dep.registryUrls = [dep.managerData.repository!];
       dep.depName = dep.managerData.chart;
       dep.datasource = HelmDatasource.id;
+      break;
+
+    case TerraformResourceTypes.tfe_workspace:
+      if (dep.currentValue) {
+        analyseTerraformVersion(dep);
+        dep.depType = 'tfe_workspace';
+      } else {
+        dep.skipReason = 'no-version';
+      }
       break;
 
     default:

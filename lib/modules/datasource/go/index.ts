@@ -1,4 +1,7 @@
+import is from '@sindresorhus/is';
 import { cache } from '../../../util/cache/package/decorator';
+import { addSecretForSanitizing } from '../../../util/sanitize';
+import { parseUrl } from '../../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GithubTagsDatasource } from '../github-tags';
@@ -42,11 +45,11 @@ export class GoDatasource extends Datasource {
    */
   @cache({
     namespace: GoDatasource.id,
-    key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
+    key: ({ packageName }: DigestConfig) => `${packageName}-digest`,
   })
   override async getDigest(
-    { packageName }: Partial<DigestConfig>,
-    value?: string
+    { packageName }: DigestConfig,
+    value?: string | null
   ): Promise<string | null> {
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
@@ -61,15 +64,26 @@ export class GoDatasource extends Datasource {
         return this.direct.github.getDigest(source, tag);
       }
       case BitBucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest(source, tag);
+        return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
       }
       case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest(source, tag);
+        return this.direct.gitlab.getDigest?.(source, tag) ?? null;
       }
       /* istanbul ignore next: can never happen, makes lint happy */
       default: {
         return null;
       }
     }
+  }
+}
+
+// istanbul ignore if
+if (is.string(process.env.GOPROXY)) {
+  const uri = parseUrl(process.env.GOPROXY);
+  if (uri?.username) {
+    addSecretForSanitizing(uri.username, 'global');
+  }
+  if (uri?.password) {
+    addSecretForSanitizing(uri.password, 'global');
   }
 }

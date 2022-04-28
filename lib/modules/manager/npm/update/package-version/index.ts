@@ -12,17 +12,17 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
-  let newPjVersion: string;
+  let newPjVersion: string | null;
   let bumpedContent = content;
   try {
     if (bumpVersion.startsWith('mirror:')) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
       newPjVersion =
-        (parsedContent.dependencies || {})[mirrorPackage] ||
-        (parsedContent.devDependencies || {})[mirrorPackage] ||
-        (parsedContent.optionalDependencies || {})[mirrorPackage] ||
-        (parsedContent.peerDependencies || {})[mirrorPackage];
+        parsedContent.dependencies?.[mirrorPackage] ??
+        parsedContent.devDependencies?.[mirrorPackage] ??
+        parsedContent.optionalDependencies?.[mirrorPackage] ??
+        parsedContent.peerDependencies?.[mirrorPackage];
       if (!newPjVersion) {
         logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
         return { bumpedContent };

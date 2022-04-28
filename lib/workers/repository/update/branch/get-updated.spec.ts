@@ -4,7 +4,7 @@ import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
-import * as _poetry from '../../../../modules/manager/poetry';
+import * as _terraform from '../../../../modules/manager/terraform';
 import type { BranchConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -13,20 +13,21 @@ const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
-const poetry = mocked(_poetry);
+const terraform = mocked(_terraform);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/poetry');
+jest.mock('../../../../modules/manager/terraform');
 jest.mock('../../../../util/git');
 jest.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
+
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -35,6 +36,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       npm.updateDependency = jest.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
+
     it('handles autoreplace base updated', async () => {
       config.upgrades.push({
         packageFile: 'index.html',
@@ -49,6 +51,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles autoreplace branch no update', async () => {
       config.upgrades.push({
         packageFile: 'index.html',
@@ -64,11 +67,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         updatedPackageFiles: [],
       });
     });
+
     it('handles autoreplace failure', async () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
+
     it('handles autoreplace branch needs update', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -85,6 +90,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toEqual({
@@ -94,6 +100,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         updatedPackageFiles: [],
       });
     });
+
     it('handles null content', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -101,6 +108,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       } as never);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
+
     it('handles content change', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -119,6 +127,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -154,6 +163,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -179,6 +189,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -200,6 +211,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles unsupported isRemediation', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -219,6 +231,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('handles isRemediation rebase', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -241,6 +254,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -259,6 +273,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
       });
     });
+
     it('handles lock file errors', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -279,6 +294,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
       });
     });
+
     it('handles git submodules', async () => {
       config.upgrades.push({
         packageFile: '.gitmodules',
@@ -297,6 +313,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
@@ -334,18 +351,19 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
       config.upgrades.push({
-        packageFile: 'pyproject.toml',
-        manager: 'poetry',
+        packageFile: 'abc.tf',
+        manager: 'terraform',
         branchName: undefined,
         isLockfileUpdate: true,
       });
-      poetry.updateArtifacts.mockResolvedValueOnce([
+      terraform.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
             type: 'addition',
-            path: 'poetry.lock',
+            path: 'terraform.lock',
             contents: 'some contents',
           },
         },
@@ -353,17 +371,22 @@ describe('workers/repository/update/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedArtifacts: [
-          { type: 'addition', path: 'poetry.lock', contents: 'some contents' },
+          {
+            type: 'addition',
+            path: 'terraform.lock',
+            contents: 'some contents',
+          },
         ],
         updatedPackageFiles: [
           {
             type: 'addition',
-            path: 'pyproject.toml',
+            path: 'abc.tf',
             contents: 'existing content',
           },
         ],
       });
     });
+
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({
         packageFile: 'package.json',
@@ -385,6 +408,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('attempts updateLockedDependency and handles already-updated', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -407,6 +431,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -431,6 +456,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
         packageFile: 'package.json',
@@ -451,6 +477,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('bumps versions in autoReplace managers', async () => {
       config.upgrades.push({
         packageFile: 'Chart.yaml',

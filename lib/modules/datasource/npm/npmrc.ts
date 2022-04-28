@@ -10,7 +10,7 @@ import { regEx } from '../../../util/regex';
 import { fromBase64 } from '../../../util/string';
 import { ensureTrailingSlash, validateUrl } from '../../../util/url';
 import { defaultRegistryUrls } from './common';
-import type { NpmrcRules, PackageResolution } from './types';
+import type { NpmrcRules } from './types';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
@@ -24,12 +24,12 @@ function envReplace(value: any, env = process.env): any {
 
   const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
 
-  return value.replace(ENV_EXPR, (match, esc, envVarName) => {
+  return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
     if (env[envVarName] === undefined) {
       logger.warn('Failed to replace env in config: ' + match);
       throw new Error('env-replace');
     }
-    return env[envVarName];
+    return env[envVarName]!;
   });
 }
 
@@ -82,17 +82,17 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     if (matchHost) {
       hostRule.matchHost = matchHost;
     }
-    rules.hostRules.push(hostRule);
+    rules.hostRules?.push(hostRule);
   }
   // Generate packageRules
-  const matchDataSources = ['npm'];
+  const matchDatasources = ['npm'];
   const { registry } = npmrc;
   // packageRules order matters, so look for a default registry first
   if (is.nonEmptyString(registry)) {
     if (validateUrl(registry)) {
       // Default registry
-      rules.packageRules.push({
-        matchDataSources,
+      rules.packageRules?.push({
+        matchDatasources,
         registryUrls: [registry],
       });
     } else {
@@ -109,8 +109,8 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
       const scope = keyParts.join(':');
       if (validateUrl(value)) {
-        rules.packageRules.push({
-          matchDataSources,
+        rules.packageRules?.push({
+          matchDatasources,
           matchPackagePrefixes: [scope + '/'],
           registryUrls: [value],
         });
@@ -153,7 +153,7 @@ export function setNpmrc(input?: string): void {
       }
     }
     const npmrcRules = convertNpmrcToRules(npmrc);
-    if (npmrcRules.hostRules.length) {
+    if (npmrcRules.hostRules?.length) {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;
@@ -179,11 +179,12 @@ export function resolveRegistryUrl(packageName: string): string {
   return registryUrl;
 }
 
-export function resolvePackage(packageName: string): PackageResolution {
-  const registryUrl = resolveRegistryUrl(packageName);
-  const packageUrl = url.resolve(
+export function resolvePackageUrl(
+  registryUrl: string,
+  packageName: string
+): string {
+  return url.resolve(
     ensureTrailingSlash(registryUrl),
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
   );
-  return { packageUrl, registryUrl };
 }

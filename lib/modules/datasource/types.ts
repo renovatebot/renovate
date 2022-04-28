@@ -1,7 +1,7 @@
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
-  datasource?: string;
+  datasource: string;
   packageName?: string;
   depName: string;
   defaultRegistryUrls?: string[];
@@ -18,7 +18,6 @@ export interface DigestConfig {
 }
 
 export interface GetReleasesConfig {
-  npmrc?: string;
   packageName: string;
   registryUrl?: string;
 }
@@ -64,7 +63,7 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
   replacementName?: string;

@@ -52,9 +52,9 @@ export function parseAzurePipelines(
   content: string,
   filename: string
 ): AzurePipelines | null {
-  let pkg = null;
+  let pkg: AzurePipelines | null = null;
   try {
-    pkg = load(content, { json: true });
+    pkg = load(content, { json: true }) as AzurePipelines;
   } catch (err) /* istanbul ignore next */ {
     logger.info({ filename, err }, 'Error parsing azure-pipelines content');
     return null;

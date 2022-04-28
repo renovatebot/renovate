@@ -1,20 +1,27 @@
+import { DateTime } from 'luxon';
 import { regEx } from '../../../util/regex';
+import { DistroInfo } from '../distro';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
-export const urls = ['https://changelogs.ubuntu.com/meta-release'];
+export const urls = [
+  'https://changelogs.ubuntu.com/meta-release',
+  'https://debian.pages.debian.net/distro-info-data/ubuntu.csv',
+];
 export const supportsRanges = false;
 
-// #12509
-const temporarilyUnstable = ['22.04'];
+const di = new DistroInfo('data/ubuntu-distro-info.json');
 
 // validation
 
 function isValid(input: string): boolean {
   return (
-    typeof input === 'string' &&
-    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
+    (typeof input === 'string' &&
+      regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(
+        input
+      )) ||
+    di.isCodename(input)
   );
 }
 
@@ -31,36 +38,47 @@ function isSingleVersion(version: string): boolean {
 }
 
 function isStable(version: string): boolean {
-  if (!isValid(version)) {
+  const ver = di.getVersionByCodename(version);
+  if (!isValid(ver)) {
     return false;
   }
-  if (temporarilyUnstable.includes(version)) {
+
+  const schedule = di.getSchedule(ver);
+  if (
+    schedule &&
+    DateTime.fromISO(schedule.release).toUTC() >
+      DateTime.now().minus({ days: 1 }).toUTC()
+  ) {
     return false;
   }
-  return regEx(/^\d?[02468]\.04/).test(version);
+
+  return regEx(/^\d?[02468]\.04/).test(ver);
 }
 
 // digestion of version
 
 function getMajor(version: string): null | number {
-  if (isValid(version)) {
-    const [major] = version.split('.');
+  const ver = di.getVersionByCodename(version);
+  if (isValid(ver)) {
+    const [major] = ver.split('.');
     return parseInt(major, 10);
   }
   return null;
 }
 
 function getMinor(version: string): null | number {
-  if (isValid(version)) {
-    const [, minor] = version.split('.');
+  const ver = di.getVersionByCodename(version);
+  if (isValid(ver)) {
+    const [, minor] = ver.split('.');
     return parseInt(minor, 10);
   }
   return null;
 }
 
 function getPatch(version: string): null | number {
-  if (isValid(version)) {
-    const [, , patch] = version.split('.');
+  const ver = di.getVersionByCodename(version);
+  if (isValid(ver)) {
+    const [, , patch] = ver.split('.');
     return patch ? parseInt(patch, 10) : null;
   }
   return null;
@@ -69,7 +87,9 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  return isVersion(version) && isVersion(other) && version === other;
+  const ver = di.getVersionByCodename(version);
+  const otherVer = di.getVersionByCodename(other);
+  return isVersion(ver) && isVersion(otherVer) && ver === otherVer;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
@@ -110,8 +130,16 @@ function minSatisfyingVersion(
   return getSatisfyingVersion(versions, range);
 }
 
-function getNewValue(newValueConfig: NewValueConfig): string {
-  return newValueConfig.newVersion;
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (di.isCodename(currentValue)) {
+    return di.getCodenameByVersion(newVersion);
+  }
+  return di.getVersionByCodename(newVersion);
 }
 
 function sortVersions(version: string, other: string): number {

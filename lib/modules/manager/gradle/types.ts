@@ -38,7 +38,7 @@ export interface SyntaxMatcher {
 export type TokenMap = Record<string, Token>;
 
 export interface SyntaxHandlerInput {
-  packageFile: string;
+  packageFile?: string;
   variables: PackageVariables;
   tokenMap: TokenMap;
 }
@@ -57,7 +57,7 @@ export interface SyntaxMatchConfig {
 export interface MatchConfig {
   tokens: Token[];
   variables: PackageVariables;
-  packageFile: string;
+  packageFile?: string;
 }
 
 export interface ParseGradleResult {
@@ -67,7 +67,7 @@ export interface ParseGradleResult {
 }
 
 export interface GradleCatalog {
-  versions?: Record<string, string>;
+  versions?: Record<string, GradleVersionPointerTarget>;
   libraries?: Record<
     string,
     GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor | string
@@ -77,20 +77,38 @@ export interface GradleCatalog {
 
 export interface GradleCatalogModuleDescriptor {
   module: string;
-  version?: string | VersionPointer;
+  version?: GradleVersionCatalogVersion;
 }
 
 export interface GradleCatalogArtifactDescriptor {
   name: string;
   group: string;
-  version?: string | VersionPointer;
+  version?: GradleVersionCatalogVersion;
 }
 
 export interface GradleCatalogPluginDescriptor {
   id: string;
-  version: string | VersionPointer;
+  version: GradleVersionCatalogVersion;
 }
 
 export interface VersionPointer {
   ref: string;
 }
+
+/**
+ * Rich version declarations in Gradle version catalogs
+ *
+ * @see https://docs.gradle.org/current/userguide/rich_versions.html
+ * @see https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
+ */
+export interface RichVersion {
+  require?: string;
+  strictly?: string;
+  prefer?: string;
+  reject?: string[];
+  rejectAll?: boolean;
+}
+
+// references cannot themselves be references
+export type GradleVersionPointerTarget = string | RichVersion;
+export type GradleVersionCatalogVersion = string | VersionPointer | RichVersion;

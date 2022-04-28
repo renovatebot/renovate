@@ -32,8 +32,8 @@ export function parsePom(raw: string): XmlDocument | null {
   return null;
 }
 
-function containsPlaceholder(str: string): boolean {
-  return regEx(/\${.*?}/g).test(str);
+function containsPlaceholder(str: string | null | undefined): boolean {
+  return !!str && regEx(/\${.*?}/g).test(str);
 }
 
 function depFromNode(
@@ -46,7 +46,7 @@ function depFromNode(
   let groupId = node.valueWithPath('groupId')?.trim();
   const artifactId = node.valueWithPath('artifactId')?.trim();
   const currentValue = node.valueWithPath('version')?.trim();
-  let depType: string;
+  let depType: string | undefined;
 
   if (!groupId && node.name === 'plugin') {
     groupId = 'org.apache.maven.plugins';
@@ -54,7 +54,7 @@ function depFromNode(
 
   if (groupId && artifactId && currentValue) {
     const depName = `${groupId}:${artifactId}`;
-    const versionNode = node.descendantWithPath('version');
+    const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position;
     const datasource = MavenDatasource.id;
     const registryUrls = [MAVEN_REPO];
@@ -122,30 +122,87 @@ function applyProps(
   depPackageFile: string,
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
+  let result = dep;
+  let anyChange = false;
+  const alreadySeenProps: string[] = [];
+
+  do {
+    const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
+      result,
+      depPackageFile,
+      props,
+      alreadySeenProps
+    );
+    if (fatal) {
+      dep.skipReason = 'recursive-placeholder';
+      return dep;
+    }
+    result = returnedResult;
+    anyChange = returnedAnyChange;
+  } while (anyChange);
+
+  if (containsPlaceholder(result.depName)) {
+    result.skipReason = 'name-placeholder';
+  } else if (containsPlaceholder(result.currentValue)) {
+    result.skipReason = 'version-placeholder';
+  }
+
+  return result;
+}
+
+function applyPropsInternal(
+  dep: PackageDependency<Record<string, any>>,
+  depPackageFile: string,
+  props: MavenProp,
+  alreadySeenProps: string[]
+): [PackageDependency<Record<string, any>>, boolean, boolean] {
+  let anyChange = false;
+  let fatal = false;
+
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${.*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
-      const propValue = props[propKey];
-      return propValue ? propValue.val : substr;
+      // TODO: wrong types here, props is already `MavenProp`
+      const propValue = (props as any)[propKey] as MavenProp;
+      if (propValue) {
+        anyChange = true;
+        if (alreadySeenProps.find((it) => it === propKey)) {
+          fatal = true;
+        } else {
+          alreadySeenProps.push(propKey);
+        }
+        return propValue.val;
+      }
+      return substr;
     });
 
-  const depName = replaceAll(dep.depName);
-  const registryUrls = dep.registryUrls.map((url) => replaceAll(url));
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const depName = replaceAll(dep.depName!);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
-  let propSource = null;
-  let groupName = null;
-  const currentValue = dep.currentValue.replace(
+  let propSource = dep.propSource;
+  let groupName: string | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const currentValue = dep.currentValue!.replace(
     regEx(/^\${.*?}$/),
     (substr) => {
       const propKey = substr.slice(2, -1).trim();
-      const propValue = props[propKey];
+      // TODO: wrong types here, props is already `MavenProp`
+      const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
         if (!groupName) {
           groupName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource = propValue.packageFile;
+        propSource = propValue.packageFile ?? undefined;
+        anyChange = true;
+        if (alreadySeenProps.find((it) => it === propKey)) {
+          fatal = true;
+        } else {
+          alreadySeenProps.push(propKey);
+        }
         return propValue.val;
       }
       return substr;
@@ -165,17 +222,11 @@ function applyProps(
     result.groupName = groupName;
   }
 
-  if (containsPlaceholder(depName)) {
-    result.skipReason = 'name-placeholder';
-  } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = 'version-placeholder';
-  }
-
   if (propSource && depPackageFile !== propSource) {
     result.editFile = propSource;
   }
 
-  return result;
+  return [result, anyChange, fatal];
 }
 
 function resolveParentFile(packageFile: string, parentPath: string): string {
@@ -227,7 +278,7 @@ export function extractPackage(
 
   const repositories = project.childNamed('repositories');
   if (repositories?.children) {
-    const repoUrls = [];
+    const repoUrls: string[] = [];
     for (const repo of repositories.childrenNamed('repository')) {
       const repoUrl = repo.valueWithPath('url')?.trim();
       if (repoUrl) {
@@ -235,8 +286,9 @@ export function extractPackage(
       }
     }
     result.deps.forEach((dep) => {
-      if (dep.registryUrls) {
-        repoUrls.forEach((url) => dep.registryUrls.push(url));
+      if (is.array(dep.registryUrls)) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        repoUrls.forEach((url) => dep.registryUrls!.push(url));
       }
     });
   }
@@ -248,7 +300,7 @@ export function extractPackage(
   }
 
   if (project.childNamed('version')) {
-    result.packageFileVersion = project.valueWithPath('version').trim();
+    result.packageFileVersion = project.valueWithPath('version')!.trim();
   }
 
   return result;
@@ -264,7 +316,7 @@ export function extractRegistries(rawContent: string): string[] {
     return [];
   }
 
-  const urls = [];
+  const urls: string[] = [];
 
   const mirrorUrls = parseUrls(settings, 'mirrors');
   urls.push(...mirrorUrls);
@@ -280,7 +332,7 @@ export function extractRegistries(rawContent: string): string[] {
 
 function parseUrls(xmlNode: XmlElement, path: string): string[] {
   const children = xmlNode.descendantWithPath(path);
-  const urls = [];
+  const urls: string[] = [];
   if (children?.children) {
     children.eachChild((child) => {
       const url = child.valueWithPath('url');
@@ -316,7 +368,8 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const name = pkg.packageFile!;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -329,9 +382,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
-    let pkg = extractedPackages[name];
+    let pkg: PackageFile | null = extractedPackages[name];
     while (pkg) {
-      propsHierarchy.unshift(pkg.mavenProps);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      propsHierarchy.unshift(pkg.mavenProps!);
 
       if (pkg.deps) {
         pkg.deps.forEach((dep) => {
@@ -358,7 +412,8 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const urlsSet = new Set([...rawDep.registryUrls!, ...registryUrls[name]]);
       rawDep.registryUrls = [...urlsSet];
     });
   });
@@ -396,7 +451,7 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
-  const additionalRegistryUrls = [];
+  const additionalRegistryUrls: string[] = [];
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');

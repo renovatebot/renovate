@@ -1,31 +1,68 @@
 import { dequal } from 'dequal';
-import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
+import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
+import type { DependenciesMeta, NpmPackage } from '../../extract/types';
+import type { NpmDepType } from '../../types';
+
+function renameObjKey(
+  oldObj: DependenciesMeta,
+  oldKey: string,
+  newKey: string
+): DependenciesMeta {
+  const keys = Object.keys(oldObj);
+  return keys.reduce((acc, key) => {
+    if (key === oldKey) {
+      acc[newKey] = oldObj[oldKey];
+    } else {
+      acc[key] = oldObj[key];
+    }
+    return acc;
+  }, {} as DependenciesMeta);
+}
 
 function replaceAsString(
-  parsedContents: PackageJson,
+  parsedContents: NpmPackage,
   fileContent: string,
-  depType: string,
+  depType: NpmDepType | 'dependenciesMeta' | 'packageManager',
   depName: string,
   oldValue: string,
   newValue: string
-): string | null {
+): string {
   if (depType === 'packageManager') {
     parsedContents[depType] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
     delete Object.assign(parsedContents[depType], {
-      [newValue]: parsedContents[depType][oldValue],
+      [newValue]: parsedContents[depType]![oldValue],
     })[oldValue];
+  } else if (depType === 'dependenciesMeta') {
+    if (oldValue !== newValue) {
+      parsedContents.dependenciesMeta = renameObjKey(
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        parsedContents.dependenciesMeta!,
+        oldValue,
+        newValue
+      );
+    }
   } else {
     // The old value is the version of the dependency
-    parsedContents[depType][depName] = newValue;
+    parsedContents[depType]![depName] = newValue;
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
-  const newString = `"${newValue}"`;
+  let newString = `"${newValue}"`;
+
+  const escapedDepName = escapeRegExp(depName);
+  const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
+  const match = patchRe.exec(oldValue);
+  if (match && depType === 'resolutions') {
+    const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
+    parsedContents[depType]![depName] = patch;
+    newString = `"${patch}"`;
+  }
+
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
@@ -63,7 +100,8 @@ export function updateDependency({
       logger.debug('Updating package.json git digest');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentDigest,
-        upgrade.newDigest.substring(0, upgrade.currentDigest.length)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        upgrade.newDigest!.substring(0, upgrade.currentDigest.length)
       );
     } else {
       logger.debug('Updating package.json git version tag');
@@ -78,37 +116,40 @@ export function updateDependency({
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
-    const parsedContents: PackageJson = JSON.parse(fileContent);
+    const parsedContents: NpmPackage = JSON.parse(fileContent);
     // Save the old version
-    let oldVersion: string;
+    let oldVersion: string | undefined;
     if (depType === 'packageManager') {
       oldVersion = parsedContents[depType];
       newValue = `${depName}@${newValue}`;
     } else {
-      oldVersion = parsedContents[depType][depName];
+      oldVersion = parsedContents[depType as NpmDepType]![depName];
     }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
       return fileContent;
     }
+
+    /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
     let newFileContent = replaceAsString(
       parsedContents,
       fileContent,
-      depType,
+      depType as NpmDepType,
       depName,
-      oldVersion,
-      newValue
+      oldVersion!,
+      newValue!
     );
     if (upgrade.newName) {
       newFileContent = replaceAsString(
         parsedContents,
         newFileContent,
-        depType,
+        depType as NpmDepType,
         depName,
         depName,
         upgrade.newName
       );
     }
+    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
     // istanbul ignore if
     if (!newFileContent) {
       logger.debug(
@@ -118,7 +159,7 @@ export function updateDependency({
       return fileContent;
     }
     if (parsedContents?.resolutions) {
-      let depKey: string;
+      let depKey: string | undefined;
       if (parsedContents.resolutions[depName]) {
         depKey = depName;
       } else if (parsedContents.resolutions[`**/${depName}`]) {
@@ -143,7 +184,8 @@ export function updateDependency({
           'resolutions',
           depKey,
           parsedContents.resolutions[depKey],
-          newValue
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          newValue!
         );
         if (upgrade.newName) {
           if (depKey === `**/${depName}`) {
@@ -157,6 +199,20 @@ export function updateDependency({
             depKey,
             depKey,
             upgrade.newName
+          );
+        }
+      }
+    }
+    if (parsedContents?.dependenciesMeta) {
+      for (const [depKey] of Object.entries(parsedContents.dependenciesMeta)) {
+        if (depKey.startsWith(depName + '@')) {
+          newFileContent = replaceAsString(
+            parsedContents,
+            newFileContent,
+            'dependenciesMeta',
+            depName,
+            depKey,
+            depName + '@' + newValue
           );
         }
       }

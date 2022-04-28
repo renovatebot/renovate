@@ -31,6 +31,7 @@ describe('modules/versioning/index', () => {
       'sortVersions',
     ]);
   });
+
   it('validates', () => {
     function validate(
       module: VersioningApi | VersioningApiConstructor,

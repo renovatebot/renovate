@@ -8,7 +8,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
+import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import { Http, HttpError } from '../../../util/http';
 import type {
@@ -32,7 +32,14 @@ import {
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
-import { Image, ImageList, MediaType, RegistryRepository } from './types';
+import {
+  Image,
+  ImageList,
+  MediaType,
+  OciImage,
+  OciImageList,
+  RegistryRepository,
+} from './types';
 
 export const DOCKER_HUB = 'https://index.docker.io';
 
@@ -83,7 +90,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using ecr auth for Docker registry`
       );
-      const [, region] = ecrRegex.exec(registryHost);
+      const [, region] = ecrRegex.exec(registryHost) ?? [];
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
@@ -125,7 +132,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository, authenticateHeader },
         `Invalid realm, testing direct auth`
       );
-      return opts.headers;
+      return opts.headers ?? null;
     }
 
     const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
@@ -193,7 +200,7 @@ export async function getAuthHeaders(
 }
 
 async function getECRAuthToken(
-  region: string,
+  region: string | undefined,
   opts: HostRule
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };
@@ -237,7 +244,7 @@ export function getRegistryRepository(
       }
       let dockerRepository = packageName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
-      const { origin, pathname } = parseUrl(fullUrl);
+      const { origin, pathname } = parseUrl(fullUrl)!;
       registryHost = origin;
       dockerRepository = pathname.substring(1);
       return {
@@ -246,7 +253,7 @@ export function getRegistryRepository(
       };
     }
   }
-  let registryHost: string;
+  let registryHost: string | undefined;
   const split = packageName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registryHost] = split;
@@ -292,11 +299,12 @@ export function extractDigestFromResponseBody(
 }
 
 export function isECRMaxResultsError(err: HttpError): boolean {
+  const resp = err.response as HttpResponse<any> | undefined;
   return !!(
-    err.response?.statusCode === 405 &&
-    err.response?.headers?.['docker-distribution-api-version'] &&
+    resp?.statusCode === 405 &&
+    resp.headers?.['docker-distribution-api-version'] &&
     // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    err.response.body?.['errors']?.[0]?.message?.includes(
+    resp.body?.['errors']?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000'
     )
   );
@@ -329,12 +337,12 @@ export const defaultConfig = {
   },
 };
 
-function findLatestStable(tags: string[]): string {
+function findLatestStable(tags: string[]): string | null {
   const versions = tags
     .filter((v) => dockerVersioning.isValid(v) && dockerVersioning.isStable(v))
     .sort((a, b) => dockerVersioning.sortVersions(a, b));
 
-  return versions.pop() ?? tags.slice(-1).pop();
+  return versions.pop() ?? tags.slice(-1).pop() ?? null;
 }
 
 export class DockerDatasource extends Datasource {
@@ -354,7 +362,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     tag: string,
     mode: 'head' | 'get' = 'get'
-  ): Promise<HttpResponse> {
+  ): Promise<HttpResponse | null> {
     logger.debug(
       `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
     );
@@ -368,8 +376,12 @@ export class DockerDatasource extends Datasource {
         logger.debug('No docker auth found - returning');
         return null;
       }
-      headers.accept =
-        'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
+      headers.accept = [
+        MediaType.manifestListV2,
+        MediaType.manifestV2,
+        MediaType.ociManifestV1,
+        MediaType.ociManifestIndexV1,
+      ].join(', ');
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
         headers,
@@ -431,7 +443,7 @@ export class DockerDatasource extends Datasource {
     registry: string,
     dockerRepository: string,
     tag: string
-  ): Promise<string> {
+  ): Promise<string | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
@@ -444,7 +456,11 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as ImageList | Image;
+    const manifest = JSON.parse(manifestResponse.body) as
+      | ImageList
+      | Image
+      | OciImageList
+      | OciImage;
     if (manifest.schemaVersion !== 2) {
       logger.debug(
         { registry, dockerRepository, tag },
@@ -453,23 +469,62 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    if (
-      manifest.mediaType === MediaType.manifestListV2 &&
-      manifest.manifests.length
-    ) {
-      logger.trace(
-        { registry, dockerRepository, tag },
-        'Found manifest list, using first image'
-      );
-      return this.getConfigDigest(
-        registry,
-        dockerRepository,
-        manifest.manifests[0].digest
-      );
+    if (manifest.mediaType === MediaType.manifestListV2) {
+      if (manifest.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest list, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest list with no manifests - returning'
+        );
+        return null;
+      }
     }
 
     if (
       manifest.mediaType === MediaType.manifestV2 &&
+      is.string(manifest.config?.digest)
+    ) {
+      return manifest.config?.digest;
+    }
+
+    // OCI image lists are not required to specify a mediaType
+    if (
+      manifest.mediaType === MediaType.ociManifestIndexV1 ||
+      (!manifest.mediaType && hasKey('manifests', manifest))
+    ) {
+      const imageList = manifest as OciImageList;
+      if (imageList.manifests.length) {
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest index, using first image'
+        );
+        return this.getConfigDigest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
+      } else {
+        logger.debug(
+          { manifest },
+          'Invalid manifest index with no manifests - returning'
+        );
+        return null;
+      }
+    }
+
+    // OCI manifests are not required to specify a mediaType
+    if (
+      (manifest.mediaType === MediaType.ociManifestV1 ||
+        (!manifest.mediaType && hasKey('config', manifest))) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
@@ -485,22 +540,18 @@ export class DockerDatasource extends Datasource {
    * This function will:
    *  - Return the labels for the requested image
    */
-  private async getLabels(
+  @cache({
+    namespace: 'datasource-docker-labels',
+    key: (registryHost: string, dockerRepository: string, tag: string) =>
+      `${registryHost}:${dockerRepository}:${tag}`,
+    ttlMinutes: 60,
+  })
+  public async getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string
   ): Promise<Record<string, string>> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
-    const cacheNamespace = 'datasource-docker-labels';
-    const cacheKey = `${registryHost}:${dockerRepository}:${tag}`;
-    const cachedResult = await packageCache.get<Record<string, string>>(
-      cacheNamespace,
-      cacheKey
-    );
-    // istanbul ignore if
-    if (cachedResult !== undefined) {
-      return cachedResult;
-    }
     try {
       let labels: Record<string, string> = {};
       const configDigest = await this.getConfigDigest(
@@ -537,8 +588,6 @@ export class DockerDatasource extends Datasource {
           'found labels in manifest'
         );
       }
-      const cacheMinutes = 60;
-      await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
       return labels;
     } catch (err) /* istanbul ignore next: should be tested in future */ {
       if (err instanceof ExternalHostError) {
@@ -605,17 +654,25 @@ export class DockerDatasource extends Datasource {
       `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
 
     let page = 1;
-    let url = pageUrl(page);
-    do {
-      const res = await this.http.getJson<{
-        tags: { name: string }[];
+    let url: string | null = pageUrl(page);
+    while (url && page <= 20) {
+      interface QuayRestDockerTags {
+        tags: {
+          name: string;
+        }[];
         has_additional: boolean;
-      }>(url, {});
+      }
+
+      // typescript issue :-/
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const res = (await this.http.getJson<QuayRestDockerTags>(
+        url
+      )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
       page += 1;
       url = res.body.has_additional ? pageUrl(page) : null;
-    } while (url && page < 20);
+    }
     return tags;
   }
 
@@ -627,7 +684,9 @@ export class DockerDatasource extends Datasource {
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
-    let url = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    let url:
+      | string
+      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
@@ -669,22 +728,16 @@ export class DockerDatasource extends Datasource {
     return tags;
   }
 
-  private async getTags(
+  @cache({
+    namespace: 'datasource-docker-tags',
+    key: (registryHost: string, dockerRepository: string) =>
+      `${registryHost}:${dockerRepository}`,
+  })
+  public async getTags(
     registryHost: string,
     dockerRepository: string
   ): Promise<string[] | null> {
     try {
-      const cacheNamespace = 'datasource-docker-tags';
-      const cacheKey = `${registryHost}:${dockerRepository}`;
-      const cachedResult = await packageCache.get<string[]>(
-        cacheNamespace,
-        cacheKey
-      );
-      // istanbul ignore if
-      if (cachedResult !== undefined) {
-        return cachedResult;
-      }
-
       const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
         registryHost
       );
@@ -694,8 +747,6 @@ export class DockerDatasource extends Datasource {
       } else {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
-      const cacheMinutes = 30;
-      await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
       return tags;
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {
@@ -743,30 +794,36 @@ export class DockerDatasource extends Datasource {
    *  - Look up a sha256 digest for a tag on its registry
    *  - Return the digest as a string
    */
+  @cache({
+    namespace: 'datasource-docker-digest',
+    key: (
+      { registryUrl, packageName }: GetReleasesConfig,
+      newValue?: string
+    ) => {
+      const newTag = newValue || 'latest';
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        registryUrl!
+      );
+      return `${registryHost}:${dockerRepository}:${newTag}`;
+    },
+  })
   override async getDigest(
     { registryUrl, packageName }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      registryUrl
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      registryUrl!
     );
     logger.debug(
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue || 'latest';
-    const cacheNamespace = 'datasource-docker-digest';
-    const cacheKey = `${registryHost}:${dockerRepository}:${newTag}`;
-    let digest: string = null;
+    let digest: string | null = null;
     try {
-      const cachedResult = await packageCache.get<string>(
-        cacheNamespace,
-        cacheKey
-      );
-      // istanbul ignore if
-      if (cachedResult !== undefined) {
-        return cachedResult;
-      }
       let manifestResponse = await this.getManifestResponse(
         registryHost,
         dockerRepository,
@@ -788,7 +845,8 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             newTag
           );
-          digest = extractDigestFromResponseBody(manifestResponse);
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          digest = extractDigestFromResponseBody(manifestResponse!);
         }
         logger.debug({ digest }, 'Got docker digest');
       }
@@ -805,8 +863,6 @@ export class DockerDatasource extends Datasource {
         'Unknown Error looking up docker image digest'
       );
     }
-    const cacheMinutes = 30;
-    await packageCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   }
 
@@ -827,7 +883,8 @@ export class DockerDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      registryUrl
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      registryUrl!
     );
     const tags = await this.getTags(registryHost, dockerRepository);
     if (!tags) {
@@ -842,6 +899,11 @@ export class DockerDatasource extends Datasource {
     const latestTag = tags.includes('latest')
       ? 'latest'
       : findLatestStable(tags);
+
+    // istanbul ignore if: needs test
+    if (!latestTag) {
+      return ret;
+    }
     const labels = await this.getLabels(
       registryHost,
       dockerRepository,

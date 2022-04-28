@@ -19,7 +19,7 @@ const gitUrl = regEx(
 export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
-  if (!match) {
+  if (!match?.groups) {
     return null;
   }
 
@@ -132,6 +132,8 @@ export function parseKustomize(content: string): Kustomize | null {
   if (!pkg) {
     return null;
   }
+
+  pkg.kind ??= 'Kustomization';
 
   if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;

@@ -292,6 +292,17 @@ Like this:
 
 ## dryRun
 
+Use `dryRun` to preview the behavior of Renovate in logs, without making any changes to the repository files.
+
+You can choose from the following behaviors for the `dryRun` config option:
+
+- `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
+- `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
+- `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
+- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
+
+Information provided mainly in debug log level.
+
 ## endpoint
 
 ## executionTimeout
@@ -352,6 +363,10 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitTimeout
+
+To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
+
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
@@ -363,10 +378,16 @@ Possible values:
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
+## githubTokenWarn
+
+By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
+Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
+
 ## globalExtends
 
 Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.
-Therefore you need to use this field if your preset contains any global-only configuration options, such as the list of repositories to run against.
+Therefore you need to use this field if your preset has any global-only configuration options, such as the list of repositories to run against.
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
@@ -537,10 +558,10 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 ## privateKeyOld
 
 Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
-Decryption with this key will be attempted after `privateKey`.
+Decryption with this key will be tried after `privateKey`.
 
 If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
-Doing so will mean that Renovate will first attempt to decrypt using the GPG key but fall back to the legacy key and try that next.
+Doing so will mean that Renovate will first try to decrypt using the GPG key but fall back to the legacy key and try that next.
 
 You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
 
@@ -563,6 +584,17 @@ The global cache is used to store lookup results (e.g. dependency versions and r
 Example url: `redis://localhost`.
 
 ## repositories
+
+Elements in the `repositories` array can be an object if you wish to define additional settings:
+
+```js
+{
+  repositories: [
+    { repository: 'g/r1', bumpVersion: true },
+    'g/r2'
+  ],
+}
+```
 
 ## repositoryCache
 
@@ -619,7 +651,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-Secret names must start with an upper or lower case character and can contain only characters, digits, or underscores.
+Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
 
 ## skipInstalls
 
@@ -631,7 +663,12 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## username
 
-Mandatory if a GitHub app token is in use using the CLI.
+You might need to set a `username` if you use:
+
+- The Bitbucket platform, or
+- use the GitHub App with CLI (required)
+
+If you're using a Personal Access Token (PAT) to authenticate then you should not specify `username`.
 
 ## writeDiscoveredRepos
 
