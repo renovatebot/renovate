@@ -13,7 +13,7 @@ export interface NpmPackage extends PackageJson {
   _id?: any;
   dependenciesMeta?: DependenciesMeta;
   packageManager?: string;
-
+  overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;
 }
 
@@ -31,3 +31,5 @@ export interface LockFile {
 export interface PnpmWorkspaceFile {
   packages: string[];
 }
+
+export type OverrideDependency = Record<string, string | any>;
