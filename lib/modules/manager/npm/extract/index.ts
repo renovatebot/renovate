@@ -172,6 +172,7 @@ export async function extractPackageFile(
     volta: 'volta',
     resolutions: 'resolutions',
     packageManager: 'packageManager',
+    overrides: 'overrides',
   };
 
   const constraints: Record<string, any> = {};
@@ -337,6 +338,55 @@ export async function extractPackageFile(
     return dep;
   }
 
+  /**
+   * Used when there is a json object in override block.
+   * i.e :
+   * "overrides": {
+    "foo": {
+      ".": "1.0.0", // override parent (foo) to be "1.0.0"
+      "bar": "1.0.0" // override bar to be 1.0.0 when its a child of foo
+    }
+  }
+    * object can be nested. i.e:
+    "overrides": {
+    "baz": {
+      "bar": {
+        "foo": "1.0.0"
+      }
+    }
+  }
+   * @param depType
+   * @param parentDep
+   * @param children
+   * @returns PackageDependency array
+   */
+  function extractOverrideDeps(
+    depType: string,
+    parentDep: string,
+    children: NpmPackageDependency
+  ): PackageDependency[] {
+    const deps: PackageDependency[] = [];
+    // istanbul ignore if
+    if (is.nullOrUndefined(depType) || is.nullOrUndefined(children)) {
+      return deps; // extra safe check
+    }
+
+    for (const [key, val] of Object.entries(children)) {
+      if (is.string(val)) {
+        let dep: PackageDependency = {};
+        dep.prettyDepType = depType;
+        dep.depType = depType;
+        const depName = key === '.' ? parentDep : key;
+        dep = { ...dep, ...extractDependency(depType, depName, val) };
+        deps.push(dep);
+      } else {
+        const depsOfObject = extractOverrideDeps(depType, parentDep, val);
+        deps.push(...depsOfObject);
+      }
+    }
+    return deps;
+  }
+
   for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
     let dependencies = packageJson[depType];
     if (dependencies) {
@@ -362,13 +412,17 @@ export async function extractPackageFile(
           if (depName !== key) {
             dep.managerData = { key };
           }
-          dep = { ...dep, ...extractDependency(depType, depName, val) };
-          if (depName === 'node') {
-            // This is a special case for Node.js to group it together with other managers
-            dep.commitMessageTopic = 'Node.js';
+          if (depType === 'overrides' && !is.string(val)) {
+            deps.push(...extractOverrideDeps(depType, depName, val));
+          } else {
+            dep = { ...dep, ...extractDependency(depType, depName, val) };
+            if (depName === 'node') {
+              // This is a special case for Node.js to group it together with other managers
+              dep.commitMessageTopic = 'Node.js';
+            }
+            dep.prettyDepType = depTypes[depType];
+            deps.push(dep);
           }
-          dep.prettyDepType = depTypes[depType];
-          deps.push(dep);
         }
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ fileName, depType, err }, 'Error parsing package.json');

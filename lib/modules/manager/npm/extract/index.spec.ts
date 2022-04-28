@@ -669,6 +669,76 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
+    it('extracts dependencies from overrides', async () => {
+      const content = `{
+        "devDependencies": {
+          "@types/react": "18.0.5"
+        },
+        "overrides": {
+          "node": "8.9.2",
+          "@types/react": "18.0.5",
+          "baz": {
+            "bar": {
+              "foo": "1.0.0"
+            }
+          },
+          "foo2": {
+            ".": "1.0.0",
+            "bar2": "1.0.0"
+          }
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot({
+        deps: [
+          {
+            depType: 'devDependencies',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'devDependency',
+          },
+          {
+            depType: 'overrides',
+            depName: 'node',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+            commitMessageTopic: 'Node.js',
+            prettyDepType: 'overrides',
+          },
+          {
+            depType: 'overrides',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'overrides',
+          },
+          {
+            prettyDepType: 'overrides',
+            depType: 'overrides',
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            prettyDepType: 'overrides',
+            depType: 'overrides',
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            prettyDepType: 'overrides',
+            depType: 'overrides',
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+        ],
+      });
+    });
   });
 
   describe('.postExtract()', () => {
