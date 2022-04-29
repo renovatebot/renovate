@@ -58,7 +58,7 @@ export function constructPipCompileCmd(
   if (headers?.groups) {
     logger.debug({ header: headers[0] }, 'Found pip-compile header');
     for (const argument of split(headers.groups.arguments)) {
-      if (['--allow-unsafe', '--generate-hashes'].includes(argument)) {
+      if (['--allow-unsafe', '--generate-hashes', '--no-emit-index-url'].includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
