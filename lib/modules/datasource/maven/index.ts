@@ -6,7 +6,6 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
-import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
@@ -28,9 +27,7 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
     return null;
   }
   const allVersions = releases.map(({ version }) => version);
-  const stableVersions = allVersions.filter((x) => mavenVersion.isStable(x));
-  const versions = stableVersions.length ? stableVersions : allVersions;
-  return versions.reduce((latestVersion, version) =>
+  return allVersions.reduce((latestVersion, version) =>
     compare(version, latestVersion) === 1 ? version : latestVersion
   );
 }
