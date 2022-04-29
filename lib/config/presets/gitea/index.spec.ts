@@ -36,6 +36,23 @@ describe('config/presets/gitea/index', () => {
       );
       expect(res).toEqual({ from: 'api' });
     });
+
+    it('returns JSON5', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.json5`)
+        .reply(200, {
+          content: toBase64('{"from":"api"}'),
+        });
+
+      const res = await gitea.fetchJSONFile(
+        'some/repo',
+        'some-filename.json5',
+        giteaApiHost,
+        null
+      );
+      expect(res).toEqual({ from: 'api' });
+    });
   });
 
   describe('getPreset()', () => {
