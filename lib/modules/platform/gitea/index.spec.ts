@@ -235,15 +235,13 @@ describe('modules/platform/gitea/index', () => {
       helper.getCurrentUser.mockResolvedValueOnce(mockUser);
 
       expect(
-       await gitea.initPlatform({
+        await gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com/api/v1',
         })
-      ).toMatchObject(
-        {
-          endpoint: 'https://gitea.renovatebot.com/',
-        }
-      );
+      ).toMatchObject({
+        endpoint: 'https://gitea.renovatebot.com/',
+      });
     });
 
     it('should use username as author name if full name is missing', async () => {
