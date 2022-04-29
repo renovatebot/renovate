@@ -233,10 +233,7 @@ const platform: Platform = {
       repoName,
       branchOrTag
     )) as string;
-    if (fileName.endsWith('.json5')) {
-      return JSON5.parse(raw);
-    }
-    return JSON.parse(raw);
+    return JSON5.parse(raw);
   },
 
   async initRepo({

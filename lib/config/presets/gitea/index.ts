@@ -6,11 +6,7 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
-import {
-  PRESET_DEP_NOT_FOUND,
-  PRESET_INVALID_JSON,
-  fetchPreset,
-} from '../util';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
 export const Endpoint = 'https://gitea.com/';
 
@@ -36,15 +32,10 @@ export async function fetchJSONFile(
     );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  try {
-    // TODO: undefiend content ? #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const content = fromBase64(res.content!);
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error(PRESET_INVALID_JSON);
-  }
+
+  // TODO: null check #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return parsePreset(fromBase64(res.content!));
 }
 
 export function getPresetFromEndpoint(

@@ -159,12 +159,8 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return JSON5.parse(raw!);
-  }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  return JSON.parse(raw!);
+  return JSON5.parse(raw!);
 }
 
 export async function initRepo({
