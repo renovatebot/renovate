@@ -708,7 +708,7 @@ const options: RenovateOptions[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from `baseBranches` instead of only the default branch',
+      'Whether to read configuration from `baseBranches` instead of only the default branch.',
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
@@ -2079,6 +2079,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'deprecationWarningIssues',
       'onboardingClose',
+      'configErrorIssue',
     ],
     cli: false,
     env: false,
