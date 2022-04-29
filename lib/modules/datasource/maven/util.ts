@@ -151,7 +151,7 @@ export async function downloadS3Protocol(
 
 async function checkHttpResource(
   http: Http,
-  pkgUrl: URL | string
+   pkgUrl: URL
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());
