@@ -181,7 +181,7 @@ describe('modules/manager/pip_requirements/extract', () => {
         'unused_file_name',
         {}
       );
-      expect(res.deps).toHaveLength(4);
+      expect(res.deps).toHaveLength(5);
       expect(res).toEqual({
         deps: [
           {
@@ -209,7 +209,15 @@ describe('modules/manager/pip_requirements/extract', () => {
             depName: 'python-pip-setup-test',
             currentValue: 'v0.9.0',
             currentVersion: 'v0.9.0',
-            packageName: 'peter@github.com:rwxd/python-pip-setup-test.git',
+            packageName:
+              'https://peter@github.com/rwxd/python-pip-setup-test.git',
+            datasource: 'git-tags',
+          },
+          {
+            depName: 'python-pip-setup-test',
+            currentValue: 'v0.9.0',
+            currentVersion: 'v0.9.0',
+            packageName: 'https://github.com/rwxd/python-pip-setup-test.git',
             datasource: 'git-tags',
           },
         ],
