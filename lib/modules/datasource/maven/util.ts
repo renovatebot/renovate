@@ -285,7 +285,12 @@ export async function getDependencyInfo(
   recursionLimit = 5
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
-  const path = `${version}/${dependency.name}-${version}.pom`;
+  const path = await createUrlForDependencyPom(
+    http,
+    version,
+    dependency,
+    repoUrl
+  );
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const { xml: pomContent } = await downloadMavenXml(http, pomUrl);
