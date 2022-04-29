@@ -55,10 +55,15 @@ export function constructPipCompileCmd(
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
+  const allowedPipArguments = [
+    '--allow-unsafe',
+    '--generate-hashes',
+    '--no-emit-index-url',
+  ];
   if (headers?.groups) {
     logger.debug({ header: headers[0] }, 'Found pip-compile header');
     for (const argument of split(headers.groups.arguments)) {
-      if (['--allow-unsafe', '--generate-hashes', '--no-emit-index-url'].includes(argument)) {
+      if (allowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
