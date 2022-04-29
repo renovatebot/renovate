@@ -1411,9 +1411,10 @@ describe('workers/repository/process/lookup/index', () => {
             updateType: 'minor',
           },
           {
+            isPinDigest: true,
             newDigest: 'sha256:0123456789abcdef',
             newValue: '8.0.0',
-            updateType: 'pin',
+            updateType: 'pinDigest',
           },
         ],
       });
@@ -1514,9 +1515,10 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot({
         updates: [
           {
+            isPinDigest: true,
             newDigest: 'sha256:abcdef1234567890',
             newValue: '8.1.0',
-            updateType: 'pin',
+            updateType: 'pinDigest',
           },
         ],
       });
@@ -1545,9 +1547,10 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot({
         updates: [
           {
+            isPinDigest: true,
             newDigest: 'sha256:abcdef1234567890',
             newValue: 'alpine',
-            updateType: 'pin',
+            updateType: 'pinDigest',
           },
         ],
       });
