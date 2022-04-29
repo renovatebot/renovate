@@ -1082,7 +1082,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchUpdateTypes',
     description:
-      'Update types to match against (major, minor, pin, pinDigest, etc). Valid only within `packageRules` object.',
+      'Update types to match against (`major`, `minor`, `pin`, `pinDigest`, etc). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowedValues: [
