@@ -379,17 +379,6 @@ describe('config/presets/index', () => {
       });
     });
 
-    it('parses github subfiles with .json extension', () => {
-      expect(presets.parsePreset('github>some/repo:somefile.json')).toEqual({
-        repo: 'some/repo',
-        params: undefined,
-        presetName: 'somefile.json',
-        presetPath: undefined,
-        presetSource: 'github',
-        tag: undefined,
-      });
-    });
-
     it('parses github subfiles with preset name', () => {
       expect(
         presets.parsePreset('github>some/repo:somefile/somepreset')
