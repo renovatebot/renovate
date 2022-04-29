@@ -98,18 +98,18 @@ describe('config/presets/github/index', () => {
       expect(content).toEqual({ foo: 'bar' });
     });
 
-    it('should query preset within the file when .json extension provided', async () => {
+    it('should query preset within the file when .json5 extension provided', async () => {
       httpMock
         .scope(githubApiHost)
-        .get(`${basePath}/somefile.json`)
+        .get(`${basePath}/somefile.json5`)
         .reply(200, {
-          content: toBase64('{"somename":{"foo":"bar"}}'),
+          content: toBase64('{"foo":"bar"}'),
         });
       const content = await github.getPreset({
         repo: 'some/repo',
-        presetName: 'somefile.json',
+        presetName: 'somefile.json5',
       });
-      expect(content).toEqual({ somename: { foo: 'bar' } });
+      expect(content).toEqual({ foo: 'bar' });
     });
 
     it('should query subpreset', async () => {
