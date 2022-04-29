@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -15,7 +14,6 @@ import { sampleSize } from '../../../../util';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { regEx } from '../../../../util/regex';
-import * as template from '../../../../util/template';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -26,6 +24,7 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
+import { prepareLabels } from './labels';
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
@@ -57,15 +56,6 @@ function prepareAssigneesReviewers(
 ): Promise<string[]> {
   const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
   return filterUnavailableUsers(config, normalizedUsernames);
-}
-
-export function prepareLabels(config: RenovateConfig): string[] {
-  const labels = config.labels ?? [];
-  const addLabels = config.addLabels ?? [];
-  return [...new Set([...labels, ...addLabels])]
-    .filter(is.nonEmptyStringAndNotWhitespace)
-    .map((label) => template.compile(label, config))
-    .filter(is.nonEmptyStringAndNotWhitespace);
 }
 
 export async function addAssigneesReviewers(
