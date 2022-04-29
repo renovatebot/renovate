@@ -1,4 +1,4 @@
-import {getS3Client, parseS3Url} from './s3';
+import { getS3Client, parseS3Url } from './s3';
 
 describe('util/s3', () => {
   it('parses S3 URLs', () => {
