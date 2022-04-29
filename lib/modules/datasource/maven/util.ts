@@ -106,12 +106,10 @@ function isS3NotFound(err: Error): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
 
-export async function downloadS3Protocol(
-  pkgUrl: URL
-): Promise<string | null> {
+export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   try {
-    const s3Url = parseS3Url(pkgUrl.toString());
+    const s3Url = parseS3Url(pkgUrl);
     if (s3Url === null) {
       return null;
     }
@@ -151,7 +149,7 @@ export async function downloadS3Protocol(
 
 async function checkHttpResource(
   http: Http,
-   pkgUrl: URL
+  pkgUrl: URL
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());

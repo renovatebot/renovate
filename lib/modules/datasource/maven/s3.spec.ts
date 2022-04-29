@@ -7,7 +7,8 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import { DateTime } from 'luxon';
 import { ReleaseResult, getPkgReleases } from '..';
-import { loadFixture, logger } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
+import { logger } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';

@@ -17,20 +17,15 @@ describe('modules/datasource/maven/util', () => {
     });
 
     it('returns empty object for invalid URLs', async () => {
-      const res = await downloadMavenXml(null, parseUrl('not-a-valid-url'));
+      const res = await downloadMavenXml(null, null);
       expect(res).toEqual({});
     });
   });
 
   describe('downloadS3Protocol', () => {
-    it('returns null for invalid URLs', async () => {
-      const res = await downloadS3Protocol('not-a-valid-url');
+    it('returns null for non-S3 URLs', async () => {
+      const res = await downloadS3Protocol(parseUrl('http://not-s3.com/'));
       expect(res).toBeNull();
-    });
-
-    it('returns emprty object for invalid URLs', async () => {
-      const res = await downloadMavenXml(null, parseUrl('not-a-valid-url'));
-      expect(res).toEqual({});
     });
   });
 
@@ -47,8 +42,8 @@ describe('modules/datasource/maven/util', () => {
   });
 
   describe('checkS3Resource', () => {
-    it('returns error for invalid URLs', async () => {
-      const res = await checkS3Resource('not-a-valid-url');
+    it('returns error for non-S3 URLs', async () => {
+      const res = await checkS3Resource(parseUrl('http://not-s3.com/'));
       expect(res).toBe('error');
     });
   });
