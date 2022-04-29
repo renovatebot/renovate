@@ -51,9 +51,7 @@ export async function fetchPreset({
   } else {
     jsonContent = await fetch(
       repo,
-      buildFilePath(
-        fileName.endsWith('.json5') ? fileName : `${fileName}.json`
-      ),
+      buildFilePath(/\.json5?$/.test(fileName) ? fileName : `${fileName}.json`),
       endpoint,
       tag
     );
