@@ -234,15 +234,15 @@ describe('modules/platform/gitea/index', () => {
     it('should support custom endpoint including api path', async () => {
       helper.getCurrentUser.mockResolvedValueOnce(mockUser);
 
-      await expect(
-        gitea.initPlatform({
+      expect(
+       await gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com/api/v1',
         })
-      ).resolves.toEqual(
-        expect.objectContaining({
+      ).toMatchObject(
+        {
           endpoint: 'https://gitea.renovatebot.com/',
-        })
+        }
       );
     });
 
