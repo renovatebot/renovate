@@ -205,7 +205,7 @@
     "simple-git": "3.7.0",
     "slugify": "1.6.5",
     "traverse": "0.6.6",
-    "tslib": "2.3.1",
+    "tslib": "2.4.0",
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "4.0.0",
