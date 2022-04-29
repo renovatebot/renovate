@@ -2,7 +2,7 @@
 import { S3 } from '@aws-sdk/client-s3';
 import { parseUrl } from './url';
 
-let s3Instance: S3;
+let s3Instance: S3 | undefined;
 export function getS3Client(): S3 {
   if (!s3Instance) {
     s3Instance = new S3({});
@@ -15,7 +15,7 @@ export interface S3UrlParts {
   Key: string;
 }
 
-export function parseS3Url(rawUrl: string): S3UrlParts | null {
+export function parseS3Url(rawUrl: URL | string): S3UrlParts | null {
   const parsedUrl = parseUrl(rawUrl);
   if (parsedUrl === null) {
     return null;

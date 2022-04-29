@@ -25,7 +25,7 @@ function get(
 }
 
 const meta = Readable.from(
-  Buffer.from(loadFixture('metadata-s3.xml'), 'utf-8')
+  Buffer.from(Fixtures.get('metadata-s3.xml'), 'utf-8')
 );
 
 describe('modules/datasource/maven/s3', () => {

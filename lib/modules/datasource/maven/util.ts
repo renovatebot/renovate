@@ -102,12 +102,12 @@ export async function downloadHttpProtocol(
   }
 }
 
-function isS3NotFound(err: { name: string; message: string }): boolean {
+function isS3NotFound(err: Error): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
 
 export async function downloadS3Protocol(
-  pkgUrl: URL | string
+  pkgUrl: URL
 ): Promise<string | null> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
   try {
@@ -181,10 +181,10 @@ async function checkHttpResource(
 }
 
 export async function checkS3Resource(
-  pkgUrl: URL | string
+  pkgUrl: URL
 ): Promise<HttpResourceCheckResult> {
   try {
-    const s3Url = parseS3Url(pkgUrl.toString());
+    const s3Url = parseS3Url(pkgUrl);
     if (s3Url === null) {
       return 'error';
     }
@@ -267,7 +267,7 @@ export async function downloadMavenXml(
       } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
-      rawContent = (await downloadS3Protocol(pkgUrl)) || undefined;
+      rawContent = (await downloadS3Protocol(pkgUrl)) ?? undefined;
       break;
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
