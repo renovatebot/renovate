@@ -155,7 +155,7 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
-  const getBranchStatus = memoize<Promise<BranchStatus>>(() =>
+  const getBranchStatus = memoize(() =>
     resolveBranchStatus(branchName, ignoreTests)
   );
 
