@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -37,7 +38,7 @@ export async function addParticipants(
   config: RenovateConfig,
   pr: Pr
 ): Promise<void> {
-  let assignees = config.assignees;
+  let assignees = config.assignees ?? [];
   logger.debug(`addParticipants(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(assignees, pr);
@@ -45,7 +46,7 @@ export async function addParticipants(
   if (assignees.length > 0) {
     try {
       assignees = await prepareParticipants(config, assignees);
-      if (config.assigneesSampleSize !== null) {
+      if (is.number(config.assigneesSampleSize)) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
       if (assignees.length > 0) {
@@ -64,17 +65,20 @@ export async function addParticipants(
     }
   }
 
-  let reviewers = config.reviewers;
+  let reviewers = config.reviewers ?? [];
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(reviewers, pr);
   }
-  if (config.additionalReviewers.length > 0) {
+  if (
+    is.array(config.additionalReviewers) &&
+    config.additionalReviewers.length > 0
+  ) {
     reviewers = reviewers.concat(config.additionalReviewers);
   }
   if (reviewers.length > 0) {
     try {
       reviewers = await prepareParticipants(config, reviewers);
-      if (config.reviewersSampleSize !== null) {
+      if (is.number(config.reviewersSampleSize)) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
       if (reviewers.length > 0) {
