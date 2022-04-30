@@ -2,23 +2,24 @@ import { CustomCommitMessage } from './custom-commit-message';
 
 describe('workers/repository/model/custom-commit-message', () => {
   describe('CustomCommitMessage', () => {
-    const TEST_CASES: ReadonlyArray<
-      [message: string, prefix: string | undefined, result: string]
-    > = [
-      ['test', '', 'Test'],
-      ['  test  ', '  ', 'Test'],
-      ['test', 'fix', 'fix: test'],
-      ['test', 'fix:', 'fix: test'],
-      [
-        'Message    With   Extra  Whitespaces   ',
-        '  refactor   ',
-        'refactor: message With Extra Whitespaces',
-      ],
-    ];
-
-    it.each(TEST_CASES)(
-      'given %p and %p as arguments, returns %p',
-      (subject, prefix, result) => {
+    it.each`
+      subject                                      | prefix             | result
+      ${'test'}                                    | ${''}              | ${'Test'}
+      ${'  test  '}                                | ${'  '}            | ${'Test'}
+      ${'test'}                                    | ${'fix'}           | ${'fix: test'}
+      ${'test'}                                    | ${'fix:'}          | ${'fix: test'}
+      ${'Message    With   Extra  Whitespaces   '} | ${'  refactor   '} | ${'refactor: message With Extra Whitespaces'}
+    `(
+      'given subject $subject and prefix $prefix as arguments, returns $result',
+      ({
+        subject,
+        prefix,
+        result,
+      }: {
+        subject: string;
+        prefix: string;
+        result: string;
+      }) => {
         const commitMessage = new CustomCommitMessage();
         commitMessage.subject = subject;
         commitMessage.prefix = prefix;
