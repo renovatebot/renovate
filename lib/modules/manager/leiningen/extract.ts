@@ -36,7 +36,8 @@ export function extractFromVectors(
   let artifactId = '';
   let version = '';
 
-  const isSpace = (ch: string): boolean => ch && regEx(/[\s,]/).test(ch);
+  const isSpace = (ch: string | null): boolean =>
+    !!ch && regEx(/[\s,]/).test(ch);
 
   const cleanStrLiteral = (s: string): string =>
     s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
@@ -69,7 +70,7 @@ export function extractFromVectors(
     version = '';
   };
 
-  let prevChar = null;
+  let prevChar: string | null = null;
   while (idx < str.length) {
     const char = str.charAt(idx);
     if (char === '[') {
@@ -102,7 +103,7 @@ export function extractFromVectors(
 }
 
 function extractLeinRepos(content: string): string[] {
-  const result = [];
+  const result: string[] = [];
 
   const repoContent = trimAtKey(
     content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
@@ -146,7 +147,7 @@ export function extractVariables(content: string): ExtractedVariables {
   for (let idx = 0; idx < lines.length; idx += 1) {
     const line = lines[idx];
     const match = defRegex.exec(line);
-    if (match) {
+    if (match?.groups) {
       const { varName: key, stringValue: val } = match.groups;
       result[key] = val;
     }

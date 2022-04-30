@@ -17,7 +17,7 @@ const languageList = Object.values(ProgrammingLanguage);
 export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
-): ManagerApi[T] | null {
+): ManagerApi[T] | undefined {
   return managers.get(manager)?.[name];
 }
 export const getLanguageList = (): string[] => languageList;
@@ -27,7 +27,7 @@ export const getManagers = (): Map<string, ManagerApi> => managers;
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
   for (const managerName of managerList) {
-    const manager = managers.get(managerName);
+    const manager = managers.get(managerName)!;
     if (manager.detectGlobalConfig) {
       // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };
@@ -44,7 +44,7 @@ export async function extractAllPackageFiles(
   if (!managers.has(manager)) {
     return null;
   }
-  const m = managers.get(manager);
+  const m = managers.get(manager)!;
   if (m.extractAllPackageFiles) {
     const res = await m.extractAllPackageFiles(config, files);
     // istanbul ignore if
@@ -65,18 +65,18 @@ export function extractPackageFile(
   if (!managers.has(manager)) {
     return null;
   }
-  const m = managers.get(manager);
+  const m = managers.get(manager)!;
   return m.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)
     : null;
 }
 
-export function getRangeStrategy(config: RangeConfig): RangeStrategy {
+export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   const { manager, rangeStrategy } = config;
-  if (!managers.has(manager)) {
+  if (!manager || !managers.has(manager)) {
     return null;
   }
-  const m = managers.get(manager);
+  const m = managers.get(manager)!;
   if (m.getRangeStrategy) {
     // Use manager's own function if it exists
     const managerRangeStrategy = m.getRangeStrategy(config);

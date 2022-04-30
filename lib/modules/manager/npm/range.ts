@@ -6,7 +6,8 @@ import type { RangeConfig } from '../types';
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const { depType, depName, packageJsonType, currentValue, rangeStrategy } =
     config;
-  const isComplexRange = parseRange(currentValue).length > 1;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const isComplexRange = parseRange(currentValue!).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(
       { currentValue },

@@ -21,6 +21,10 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
+    // istanbul ignore if: should never happen
+    if (!depName || !upgrade.managerData) {
+      return null;
+    }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split(newlineRegex);
     const lineToChange = lines[upgrade.managerData.lineNumber];
@@ -34,7 +38,7 @@ export function updateDependency({
       );
       return null;
     }
-    let updateLineExp: RegExp;
+    let updateLineExp: RegExp | undefined;
     if (depType === 'replace') {
       updateLineExp = regEx(
         /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
@@ -54,9 +58,11 @@ export function updateDependency({
     }
     let newLine: string;
     if (upgrade.updateType === 'digest') {
-      const newDigestRightSized = upgrade.newDigest.substring(
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const newDigestRightSized = upgrade.newDigest!.substring(
         0,
-        upgrade.currentDigest.length
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        upgrade.currentDigest!.length
       );
       if (lineToChange.includes(newDigestRightSized)) {
         return fileContent;
@@ -66,12 +72,16 @@ export function updateDependency({
         'gomod: need to update digest'
       );
       newLine = lineToChange.replace(
-        updateLineExp,
+        // TODO: can be undefined?
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        updateLineExp!,
         `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
       newLine = lineToChange.replace(
-        updateLineExp,
+        // TODO: can be undefined?
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        updateLineExp!,
         `$<depPart>$<divider>${upgrade.newValue}`
       );
     }
@@ -86,7 +96,8 @@ export function updateDependency({
           'rethinkdb/rethinkdb-go.v5'
         );
       } else if (
-        upgrade.newMajor > 1 &&
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        upgrade.newMajor! > 1 &&
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
         if (depName === depNameNoVersion) {
@@ -94,7 +105,8 @@ export function updateDependency({
           newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
-          const [oldV] = upgrade.currentValue.split('.');
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          const [oldV] = upgrade.currentValue!.split('.');
           newLine = newLine.replace(
             regEx(`/${oldV}(\\s+)`, undefined, false),
             `/v${upgrade.newMajor}$1`
@@ -105,7 +117,8 @@ export function updateDependency({
     if (lineToChange.endsWith('+incompatible')) {
       let toAdd = '+incompatible';
 
-      if (upgrade.updateType === 'major' && upgrade.newMajor >= 2) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (upgrade.updateType === 'major' && upgrade.newMajor! >= 2) {
         toAdd = '';
       }
       newLine += toAdd;

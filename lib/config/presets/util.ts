@@ -1,3 +1,4 @@
+import JSON5 from 'json5';
 import { logger } from '../../logger';
 import { ensureTrailingSlash } from '../../util/url';
 import type { FetchPresetConfig, Preset } from './types';
@@ -18,7 +19,9 @@ export async function fetchPreset({
   tag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
-  const endpoint = ensureTrailingSlash(_endpoint);
+  // TODO: fix me, can be undefiend #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
@@ -72,4 +75,12 @@ export async function fetchPreset({
     return preset;
   }
   return jsonContent;
+}
+
+export function parsePreset(content: string): Preset {
+  try {
+    return JSON5.parse(content);
+  } catch (err) {
+    throw new Error(PRESET_INVALID_JSON);
+  }
 }

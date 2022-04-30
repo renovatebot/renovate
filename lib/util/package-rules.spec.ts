@@ -52,7 +52,6 @@ describe('util/package-rules', () => {
         },
         {
           excludePackagePatterns: ['*'],
-          matchPackageNames: ['b'],
         },
         {
           matchUpdateTypes: ['bump'],
@@ -340,6 +339,10 @@ describe('util/package-rules', () => {
           matchDatasources: [OrbDatasource.id, DockerDatasource.id],
           x: 1,
         },
+        {
+          matchDatasources: [DockerDatasource.id],
+          y: 1,
+        },
       ],
     };
     const dep = {
@@ -349,6 +352,7 @@ describe('util/package-rules', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
+    expect(res.y).toBeUndefined();
   });
 
   it('filters branches with matching branch', () => {
@@ -446,6 +450,10 @@ describe('util/package-rules', () => {
           matchUpdateTypes: ['minor', 'patch'],
           x: 1,
         },
+        {
+          matchUpdateTypes: ['minor'],
+          y: 1,
+        },
       ],
     };
     const dep = {
@@ -455,6 +463,7 @@ describe('util/package-rules', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
+    expect(res.y).toBeUndefined();
   });
 
   it('matches matchSourceUrlPrefixes', () => {
@@ -649,6 +658,14 @@ describe('util/package-rules', () => {
       },
     });
     expect(res2.x).toBeUndefined();
+    const res3 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        lockedVersion: '^1.0.0',
+      },
+    });
+    expect(res3.x).toBeUndefined();
   });
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
@@ -916,5 +933,56 @@ describe('util/package-rules', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
+  });
+
+  it('needs language to match', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['abc'],
+          matchLanguages: ['js'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'abc',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('needs baseBranch to match', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['abc'],
+          matchBaseBranches: ['dev'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'abc',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('needs manager to match', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['abc'],
+          matchManagers: ['npm'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'abc',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
   });
 });

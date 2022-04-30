@@ -15,9 +15,9 @@ class LineMapper {
       .map(([lineNumber, line]) => ({ lineNumber, line, used: false }));
   }
 
-  pluckLineNumber(imageName: string): number {
+  pluckLineNumber(imageName: string | undefined): number | null {
     const lineMeta = this.imageLines.find(
-      ({ line, used }) => !used && line.includes(imageName)
+      ({ line, used }) => !used && imageName && line.includes(imageName)
     );
     // istanbul ignore if
     if (!lineMeta) {
@@ -79,7 +79,7 @@ export function extractPackageFile(
         }
         return dep;
       })
-      .filter(Boolean);
+      .filter(is.truthy);
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };

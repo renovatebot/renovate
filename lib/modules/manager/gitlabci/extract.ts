@@ -3,10 +3,9 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline, Image, Job, Services } from './types';
-import { replaceReferenceTags } from './utils';
+import { getGitlabDep, replaceReferenceTags } from './utils';
 
 export function extractFromImage(
   image: Image | undefined
@@ -14,12 +13,12 @@ export function extractFromImage(
   if (is.undefined(image)) {
     return null;
   }
-  let dep: PackageDependency = null;
+  let dep: PackageDependency | null = null;
   if (is.string(image)) {
-    dep = getDep(image);
+    dep = getGitlabDep(image);
     dep.depType = 'image';
   } else if (is.string(image?.name)) {
-    dep = getDep(image.name);
+    dep = getGitlabDep(image.name);
     dep.depType = 'image-name';
   }
   return dep;
@@ -34,11 +33,11 @@ export function extractFromServices(
   const deps: PackageDependency[] = [];
   for (const service of services) {
     if (is.string(service)) {
-      const dep = getDep(service);
+      const dep = getGitlabDep(service);
       dep.depType = 'service-image';
       deps.push(dep);
     } else if (is.string(service?.name)) {
-      const dep = getDep(service.name);
+      const dep = getGitlabDep(service.name);
       dep.depType = 'service-image';
       deps.push(dep);
     }
@@ -54,7 +53,10 @@ export function extractFromJob(job: Job | undefined): PackageDependency[] {
   if (is.object(job)) {
     const { image, services } = { ...job };
     if (is.object(image) || is.string(image)) {
-      deps.push(extractFromImage(image));
+      const dep = extractFromImage(image);
+      if (dep) {
+        deps.push(dep);
+      }
     }
     if (is.array(services)) {
       deps.push(...extractFromServices(services));
@@ -73,7 +75,12 @@ export function extractPackageFile(content: string): PackageFile | null {
       for (const [property, value] of Object.entries(doc)) {
         switch (property) {
           case 'image':
-            deps.push(extractFromImage(value as Image));
+            {
+              const dep = extractFromImage(value as Image);
+              if (dep) {
+                deps.push(dep);
+              }
+            }
             break;
 
           case 'services':
@@ -90,10 +97,8 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting GitLab CI dependencies');
   }
-  if (!deps.length) {
-    return null;
-  }
-  return { deps };
+
+  return deps.length ? { deps } : null;
 }
 
 export async function extractAllPackageFiles(
@@ -106,7 +111,7 @@ export async function extractAllPackageFiles(
 
   // extract all includes from the files
   while (filesToExamine.length > 0) {
-    const file = filesToExamine.pop();
+    const file = filesToExamine.pop()!;
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
@@ -121,6 +126,7 @@ export async function extractAllPackageFiles(
       }) as GitlabPipeline;
     } catch (err) {
       logger.warn({ err, file }, 'Error extracting GitLab CI dependencies');
+      continue;
     }
 
     if (is.array(doc?.include)) {
