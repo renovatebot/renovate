@@ -64,7 +64,11 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns two projects for three projects with two linear references', async () => {
-      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj', 'three/three.csproj']);
+      git.getFileList.mockResolvedValue([
+        'one/one.csproj',
+        'two/two.csproj',
+        'three/three.csproj',
+      ]);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
           'three-two-linear-references/one/one.csproj'
@@ -90,7 +94,11 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns two projects for three projects with two tree-like references', async () => {
-      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj', 'three/three.csproj']);
+      git.getFileList.mockResolvedValue([
+        'one/one.csproj',
+        'two/two.csproj',
+        'three/three.csproj',
+      ]);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
           'three-two-treelike-references/one/one.csproj'
