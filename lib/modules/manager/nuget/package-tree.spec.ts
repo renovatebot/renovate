@@ -63,6 +63,55 @@ describe('modules/manager/nuget/package-tree', () => {
       ]);
     });
 
+    it('returns two projects for three projects with two linear references', async () => {
+      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj', 'three/three.csproj']);
+      Fixtures.mock({
+        '/tmp/repo/one/one.csproj': Fixtures.get(
+          'three-two-linear-references/one/one.csproj'
+        ),
+        '/tmp/repo/two/two.csproj': Fixtures.get(
+          'three-two-linear-references/two/two.csproj'
+        ),
+        '/tmp/repo/three/three.csproj': Fixtures.get(
+          'three-two-linear-references/three/three.csproj'
+        ),
+      });
+
+      expect(await getDependentPackageFiles('one/one.csproj')).toEqual([
+        'two/two.csproj',
+        'three/three.csproj',
+      ]);
+
+      expect(await getDependentPackageFiles('two/two.csproj')).toEqual([
+        'three/three.csproj',
+      ]);
+
+      expect(await getDependentPackageFiles('three/three.csproj')).toEqual([]);
+    });
+
+    it('returns two projects for three projects with two tree-like references', async () => {
+      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj', 'three/three.csproj']);
+      Fixtures.mock({
+        '/tmp/repo/one/one.csproj': Fixtures.get(
+          'three-two-treelike-references/one/one.csproj'
+        ),
+        '/tmp/repo/two/two.csproj': Fixtures.get(
+          'three-two-treelike-references/two/two.csproj'
+        ),
+        '/tmp/repo/three/three.csproj': Fixtures.get(
+          'three-two-treelike-references/three/three.csproj'
+        ),
+      });
+
+      expect(await getDependentPackageFiles('one/one.csproj')).toEqual([
+        'two/two.csproj',
+        'three/three.csproj',
+      ]);
+
+      expect(await getDependentPackageFiles('two/two.csproj')).toEqual([]);
+      expect(await getDependentPackageFiles('three/three.csproj')).toEqual([]);
+    });
+
     it('throws error on circular reference', async () => {
       git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
