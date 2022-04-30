@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // istanbul ignore file
 import { dequal } from 'dequal';
-import { readFile } from 'fs-extra';
+import { pathExists, readFile } from 'fs-extra';
 import { configFileNames } from './config/app-strings';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
@@ -54,17 +54,20 @@ type PackageJson = {
     (name) => name !== 'package.json'
   )) {
     try {
+      if (!(await pathExists(file))) {
+        continue;
+      }
       const parsedContent = await getParsedContent(file);
       try {
         logger.info(`Validating ${file}`);
         await validate(file, parsedContent);
       } catch (err) {
-        logger.info({ err }, `${file} is not valid Renovate config`);
+        logger.warn({ err }, `${file} is not valid Renovate config`);
         returnVal = 1;
       }
     } catch (err) {
-      // file does not exist
-      continue;
+      logger.warn({ err }, `${file} could not be parsed`);
+      returnVal = 1;
     }
   }
   try {

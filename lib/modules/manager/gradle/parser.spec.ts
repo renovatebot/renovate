@@ -29,13 +29,15 @@ describe('modules/manager/gradle/parser', () => {
   describe('dependencies', () => {
     describe('simple cases', () => {
       test.each`
-        input                                                                     | output
-        ${'group: "foo", name: "bar", version: "1.2.3"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'group: "foo", name: "bar", version: depVersion'}                       | ${null}
-        ${'("foo", "bar", "1.2.3")'}                                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'(group = "foo", name = "bar", version = "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
+        input                                                                             | output
+        ${'group: "foo", name: "bar", version: "1.2.3"'}                                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'group: "foo", name: "bar", version: depVersion'}                               | ${null}
+        ${'("foo", "bar", "1.2.3")'}                                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'(group = "foo", name = "bar", version = "1.2.3")'}                             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'"foo:bar:1.2.3@zip"'}                                                          | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
+        ${'(group: "foo", name: "bar", version: "1.2.3", classifier: "sources")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'(group: "foo", name: "bar", version: "1.2.3") {exclude module: "spring-jcl"}'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$input', ({ input, output }) => {
         const { deps } = parseGradle(input);
         expect(deps).toMatchObject([output].filter(Boolean));
