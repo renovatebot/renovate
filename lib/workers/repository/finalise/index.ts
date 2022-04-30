@@ -9,7 +9,7 @@ export async function finaliseRepo(
   config: RenovateConfig,
   branchList: string[]
 ): Promise<void> {
-  await repositoryCache.finalize();
+  await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
   await platform.ensureIssueClosing(
     `Action Required: Fix Renovate Configuration`

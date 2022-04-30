@@ -23,6 +23,7 @@ import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { MasterIssueMigration } from './custom/master-issue-migration';
+import { MatchStringsMigration } from './custom/match-strings-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackagesMigration } from './custom/packages-migration';
@@ -87,6 +88,7 @@ export class MigrationsService {
     BranchPrefixMigration,
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
+    DryRunMigration,
     EnabledManagersMigration,
     ExtendsMigration,
     GoModTidyMigration,
@@ -94,6 +96,7 @@ export class MigrationsService {
     IgnoreNodeModulesMigration,
     IgnoreNpmrcFileMigration,
     MasterIssueMigration,
+    MatchStringsMigration,
     PackageNameMigration,
     PackagePatternMigration,
     PackagesMigration,
@@ -113,7 +116,6 @@ export class MigrationsService {
     UnpublishSafeMigration,
     UpgradeInRangeMigration,
     VersionStrategyMigration,
-    DryRunMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

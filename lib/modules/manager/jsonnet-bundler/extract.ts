@@ -49,7 +49,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
 
   return {
     depName:
-      dependency.name || match.groups.depName || dependency.source.git.remote,
+      dependency.name ?? match?.groups?.depName ?? dependency.source.git.remote,
     packageName: dependency.source.git.remote,
     currentValue: dependency.version,
     managerData: { subdir: dependency.source.git.subdir },

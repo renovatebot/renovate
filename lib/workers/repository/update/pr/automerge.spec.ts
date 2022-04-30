@@ -26,8 +26,14 @@ describe('workers/repository/update/pr/automerge', () => {
       jest.clearAllMocks();
     });
 
+    it('should not automerge if not configured', async () => {
+      await prAutomerge.checkAutoMerge(pr, config);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
@@ -70,6 +76,16 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(res).toEqual({ automerged: true, branchRemoved: false });
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip branch deletion after automerge if prune is disabled', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = false;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.mergePr.mockResolvedValueOnce(true);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
 
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {

@@ -4,6 +4,7 @@ import * as packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
+import type { BazelManagerData } from './types';
 
 const http = new Http('bazel');
 
@@ -89,20 +90,21 @@ function setNewHash(content: string, hash: string): string {
 export async function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): Promise<string | null> {
+}: UpdateDependencyConfig<BazelManagerData>): Promise<string | null> {
   try {
     logger.debug(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
     );
-    let newDef: string;
-    if (upgrade.depType === 'container_pull') {
+    let newDef: string | undefined;
+    if (upgrade.depType === 'container_pull' && upgrade.managerData?.def) {
       newDef = upgrade.managerData.def
         .replace(regEx(/(tag\s*=\s*)"[^"]+"/), `$1"${upgrade.newValue}"`)
         .replace(regEx(/(digest\s*=\s*)"[^"]+"/), `$1"${upgrade.newDigest}"`);
     }
     if (
-      upgrade.depType === 'git_repository' ||
-      upgrade.depType === 'go_repository'
+      (upgrade.depType === 'git_repository' ||
+        upgrade.depType === 'go_repository') &&
+      upgrade.managerData?.def
     ) {
       newDef = upgrade.managerData.def
         .replace(regEx(/(tag\s*=\s*)"[^"]+"/), `$1"${upgrade.newValue}"`)
@@ -114,13 +116,15 @@ export async function updateDependency({
         );
       }
     } else if (
-      upgrade.depType === 'http_archive' ||
-      upgrade.depType === 'http_file'
+      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
+      upgrade.managerData?.def &&
+      (upgrade.currentValue || upgrade.currentDigest) &&
+      (upgrade.newValue ?? upgrade.newDigest)
     ) {
       newDef = updateWithNewVersion(
         upgrade.managerData.def,
-        upgrade.currentValue || upgrade.currentDigest,
-        upgrade.newValue || upgrade.newDigest
+        (upgrade.currentValue ?? upgrade.currentDigest)!,
+        (upgrade.newValue ?? upgrade.newDigest)!
       );
       const massages = {
         'bazel-skylib.': 'bazel_skylib-',
@@ -145,7 +149,13 @@ export async function updateDependency({
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
     }
-    logger.debug({ oldDef: upgrade.managerData.def, newDef });
+    logger.debug({ oldDef: upgrade.managerData?.def, newDef });
+
+    // istanbul ignore if: needs test
+    if (!newDef) {
+      return null;
+    }
+
     let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';

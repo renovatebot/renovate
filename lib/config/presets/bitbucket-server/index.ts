@@ -10,6 +10,7 @@ import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID_JSON,
   fetchPreset,
+  parsePreset,
 } from '../util';
 
 const http = new BitbucketServerHttp();
@@ -18,8 +19,8 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  branchOrTag?: string
-): Promise<Preset> {
+  branchOrTag?: string | null
+): Promise<Preset | null> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
   let url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
@@ -45,26 +46,22 @@ export async function fetchJSONFile(
     logger.warn({ size: res.body.size }, 'Renovate config to big');
     throw new Error(PRESET_INVALID_JSON);
   }
-  try {
-    const content = res.body.lines.map((l) => l.text).join('');
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error(PRESET_INVALID_JSON);
-  }
+  return parsePreset(res.body.lines.map((l) => l.text).join(''));
 }
 
 export function getPresetFromEndpoint(
   repo: string,
   filePreset: string,
-  presetPath: string,
-  endpoint: string
-): Promise<Preset> {
+  presetPath: string | undefined,
+  endpoint: string,
+  tag?: string | null
+): Promise<Preset | undefined> {
   return fetchPreset({
     repo,
     filePreset,
     presetPath,
     endpoint,
+    tag,
     fetch: fetchJSONFile,
   });
 }

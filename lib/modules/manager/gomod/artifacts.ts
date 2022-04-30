@@ -43,7 +43,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   // get extra host rules for other git-based Go Module hosts
   const hostRules = getAll() || [];
 
-  const goGitAllowedHostType: string[] = [
+  const goGitAllowedHostType: (string | undefined)[] = [
     // All known git platforms
     PlatformId.Azure,
     PlatformId.Bitbucket,
@@ -62,13 +62,15 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
       hostRule.matchHost &&
       goGitAllowedHostType.includes(hostRule.hostType)
     ) {
-      const httpUrl = createURLFromHostOrURL(hostRule.matchHost).toString();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
       if (validateUrl(httpUrl)) {
         logger.debug(
           `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
-          httpUrl,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          httpUrl!,
           hostRule,
           environmentVariables
         );
@@ -87,7 +89,8 @@ function getUpdateImportPathCmds(
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
-    .map((dep) => dep.depName)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    .map((dep) => dep.depName!)
     .filter((x) => !x.startsWith('gopkg.in'))
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
@@ -121,7 +124,7 @@ function getUpdateImportPathCmds(
   return updateImportCommands;
 }
 
-function useModcacherw(goVersion: string): boolean {
+function useModcacherw(goVersion: string | undefined): boolean {
   if (!is.string(goVersion)) {
     return true;
   }
@@ -179,7 +182,7 @@ export async function updateArtifacts({
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match): string =>
+    const blockCommentOut = (match: string): string =>
       match.replace(/(\r?\n)/g, '$1// renovate-replace ');
 
     // Comment out golang replace directives
@@ -213,7 +216,7 @@ export async function updateArtifacts({
       },
     };
 
-    const execCommands = [];
+    const execCommands: string[] = [];
 
     let args = 'get -d -t ./...';
     logger.debug({ cmd, args }, 'go get command included');
@@ -223,7 +226,8 @@ export async function updateArtifacts({
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major' &&
-      config.newMajor > 1;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      config.newMajor! > 1;
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
       if (updateImportCmds.length > 0) {
