@@ -10,7 +10,6 @@ import { PlatformPrOptions, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { sampleSize } from '../../../../util';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { regEx } from '../../../../util/regex';
@@ -23,101 +22,11 @@ import type {
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
-import { codeOwnersForPr } from './code-owners';
 import { prepareLabels } from './labels';
+import { addParticipants } from './participants';
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
-}
-
-function noLeadingAtSymbol(input: string): string {
-  return input.length && input.startsWith('@') ? input.slice(1) : input;
-}
-
-async function addCodeOwners(
-  assigneesOrReviewers: string[],
-  pr: Pr
-): Promise<string[]> {
-  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
-}
-
-function filterUnavailableUsers(
-  config: RenovateConfig,
-  users: string[]
-): Promise<string[]> {
-  return config.filterUnavailableUsers && platform.filterUnavailableUsers
-    ? platform.filterUnavailableUsers(users)
-    : Promise.resolve(users);
-}
-
-function prepareAssigneesReviewers(
-  config: RenovateConfig,
-  usernames: string[]
-): Promise<string[]> {
-  const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
-  return filterUnavailableUsers(config, normalizedUsernames);
-}
-
-export async function addAssigneesReviewers(
-  config: RenovateConfig,
-  pr: Pr
-): Promise<void> {
-  let assignees = config.assignees;
-  logger.debug(`addAssigneesReviewers(pr=${pr?.number})`);
-  if (config.assigneesFromCodeOwners) {
-    assignees = await addCodeOwners(assignees, pr);
-  }
-  if (assignees.length > 0) {
-    try {
-      assignees = await prepareAssigneesReviewers(config, assignees);
-      if (config.assigneesSampleSize !== null) {
-        assignees = sampleSize(assignees, config.assigneesSampleSize);
-      }
-      if (assignees.length > 0) {
-        // istanbul ignore if
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
-        } else {
-          await platform.addAssignees(pr.number, assignees);
-          logger.debug({ assignees }, 'Added assignees');
-        }
-      }
-    } catch (err) {
-      logger.debug(
-        { assignees: config.assignees, err },
-        'Failed to add assignees'
-      );
-    }
-  }
-  let reviewers = config.reviewers;
-  if (config.reviewersFromCodeOwners) {
-    reviewers = await addCodeOwners(reviewers, pr);
-  }
-  if (config.additionalReviewers.length > 0) {
-    reviewers = reviewers.concat(config.additionalReviewers);
-  }
-  if (reviewers.length > 0) {
-    try {
-      reviewers = await prepareAssigneesReviewers(config, reviewers);
-      if (config.reviewersSampleSize !== null) {
-        reviewers = sampleSize(reviewers, config.reviewersSampleSize);
-      }
-      if (reviewers.length > 0) {
-        // istanbul ignore if
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
-        } else {
-          await platform.addReviewers(pr.number, reviewers);
-          logger.debug({ reviewers }, 'Added reviewers');
-        }
-      }
-    } catch (err) {
-      logger.debug(
-        { reviewers: config.reviewers, err },
-        'Failed to add reviewers'
-      );
-    }
-  }
 }
 
 export function getPlatformPrOptions(
@@ -359,7 +268,7 @@ export async function ensurePr(
         (await getBranchStatus()) === BranchStatus.red
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
-        await addAssigneesReviewers(config, existingPr);
+        await addParticipants(config, existingPr);
       }
       // Check if existing PR needs updating
       const reviewableIndex = existingPr.body.indexOf(
@@ -503,7 +412,7 @@ export async function ensurePr(
         `Skipping assignees and reviewers as automerge=${config.automerge}`
       );
     } else {
-      await addAssigneesReviewers(config, pr);
+      await addParticipants(config, pr);
     }
     logger.debug(`Created ${pr.displayNumber}`);
     return { type: 'with-pr', pr };
