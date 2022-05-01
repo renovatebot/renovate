@@ -279,11 +279,16 @@ export function parseCatalog(
   }
 
   const versionRefs: Set<string> = new Set();
-  Object.keys(versions).forEach((ref) => versionRefs.add(ref));
+  for (const ref of Object.keys(versions)) {
+    versionRefs.add(ref);
+  }
+
   const deps = extractedDeps.map((dep) => {
     const d = deepmerge(dep, { managerData: { packageFile } });
-    if (d.groupName && versionRefs.has(d.groupName)) {
-      delete d.commitMessageTopic;
+    if (d.groupName && versionRefs.has(d.groupName) && d.commitMessageTopic) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { commitMessageTopic, ...depWithoutCommitMsg } = d;
+      return depWithoutCommitMsg;
     }
     return d;
   });
