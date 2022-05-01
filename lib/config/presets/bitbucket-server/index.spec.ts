@@ -42,7 +42,7 @@ describe('config/presets/bitbucket-server/index', () => {
         .query({ limit: 20000 })
         .reply(200, {
           isLastPage: true,
-          lines: [{ text: '{"from":"api"' }, { text: '}' }],
+          lines: [{ text: '{from:"api"' }, { text: '}' }],
         });
 
       const res = await bitbucketServer.fetchJSONFile(

@@ -117,7 +117,7 @@ describe('config/presets/github/index', () => {
         .scope(githubApiHost)
         .get(`${basePath}/somefile.json5`)
         .reply(200, {
-          content: toBase64('{"foo":"bar"}'),
+          content: toBase64('{foo:"bar"}'),
         });
       const content = await github.getPreset({
         repo: 'some/repo',

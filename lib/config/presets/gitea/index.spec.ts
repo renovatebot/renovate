@@ -42,7 +42,7 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.json5`)
         .reply(200, {
-          content: toBase64('{"from":"api"}'),
+          content: toBase64('{from:"api"}'),
         });
 
       const res = await gitea.fetchJSONFile(
