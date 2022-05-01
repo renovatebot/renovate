@@ -6,14 +6,14 @@ export interface CustomCommitMessageJSON extends CommitMessageJSON {
 }
 
 export class CustomCommitMessage extends CommitMessage {
-  #prefix = '';
+  private _prefix = '';
 
   get prefix(): string {
-    return this.#prefix;
+    return this._prefix;
   }
 
   set prefix(value: string) {
-    this.#prefix = this.normalizeInput(value);
+    this._prefix = this.normalizeInput(value);
   }
 
   override toJSON(): CustomCommitMessageJSON {
@@ -21,7 +21,7 @@ export class CustomCommitMessage extends CommitMessage {
 
     return {
       ...json,
-      prefix: this.#prefix,
+      prefix: this._prefix,
     };
   }
 }

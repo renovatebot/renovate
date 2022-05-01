@@ -14,18 +14,18 @@ export interface SemanticCommitMessageJSON extends CommitMessageJSON {
  * [optional footer]
  */
 export class SemanticCommitMessage extends CommitMessage {
-  static readonly #REGEXP =
+  private static readonly REGEXP =
     /^(?<type>[\w]+)(\((?<scope>[\w-]+)\))?(?<breaking>!)?: ((?<issue>([A-Z]+-|#)[\d]+) )?(?<description>.*)/;
 
-  #scope = '';
-  #type = '';
+  private _scope = '';
+  private _type = '';
 
   static is(value: unknown): value is SemanticCommitMessage {
     return value instanceof SemanticCommitMessage;
   }
 
   static fromString(value: string): SemanticCommitMessage | undefined {
-    const match = value.match(SemanticCommitMessage.#REGEXP);
+    const match = value.match(SemanticCommitMessage.REGEXP);
 
     if (!match) {
       return undefined;
@@ -45,26 +45,26 @@ export class SemanticCommitMessage extends CommitMessage {
 
     return {
       ...json,
-      scope: this.#scope,
-      type: this.#type,
+      scope: this._scope,
+      type: this._type,
     };
   }
 
   set scope(value: string) {
-    this.#scope = this.normalizeInput(value);
+    this._scope = this.normalizeInput(value);
   }
 
   set type(value: string) {
-    this.#type = this.normalizeInput(value);
+    this._type = this.normalizeInput(value);
   }
 
   protected get prefix(): string {
-    if (this.#type && !this.#scope) {
-      return this.#type;
+    if (this._type && !this._scope) {
+      return this._type;
     }
 
-    if (this.#scope) {
-      return `${this.#type}(${this.#scope})`;
+    if (this._scope) {
+      return `${this._type}(${this._scope})`;
     }
 
     return '';
