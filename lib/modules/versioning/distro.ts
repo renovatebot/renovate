@@ -52,12 +52,6 @@ export class DistroInfo {
         // istanbul ignore next
         continue;
       }
-
-      // istanbul ignore next: As of now, all entries in our data are released
-      if (!this.isReleased(obj.version)) {
-        continue;
-      }
-
       this._sortedInfo.push(obj);
     }
   }
@@ -173,9 +167,16 @@ export class DistroInfo {
    */
   public getNLatest(n: number): DistroInfoRecordWithVersion | null {
     const len = this._sortedInfo.length - 1;
-    const i = len - Math.floor(n);
+    let i = len - Math.floor(n);
+    let j = 0;
 
-    if (len >= i && i >= 0) {
+    while (!this.isReleased(this._sortedInfo[len - j].version)) {
+      j++;
+    }
+
+    i -= j;
+
+    if (len >= i && i >= 0 && this.isReleased(this._sortedInfo[i]?.version)) {
       return this._sortedInfo[i];
     }
 

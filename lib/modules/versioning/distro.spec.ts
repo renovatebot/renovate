@@ -1,7 +1,17 @@
+import { DateTime, Settings } from 'luxon';
 import { DistroInfo } from './distro';
 
 describe('modules/versioning/distro', () => {
   const di = new DistroInfo('data/ubuntu-distro-info.json');
+
+  beforeAll(() => {
+    const dt = DateTime.fromISO('2022-03-20');
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
 
   it.each`
     version            | expected
@@ -93,12 +103,12 @@ describe('modules/versioning/distro', () => {
     ${'groovy'}  | ${true}
     ${'hirsute'} | ${true}
     ${'impish'}  | ${true}
-    ${'jammy'}   | ${true}
+    ${'jammy'}   | ${false}
     ${'20.04'}   | ${true}
     ${'20.10'}   | ${true}
     ${'21.04'}   | ${true}
     ${'21.10'}   | ${true}
-    ${'22.04'}   | ${true}
+    ${'22.04'}   | ${false}
     ${'24.04'}   | ${false}
   `('isReleased("$version") === $expected', ({ version, expected }) => {
     expect(di.isReleased(version)).toBe(expected);
@@ -106,14 +116,12 @@ describe('modules/versioning/distro', () => {
 
   it('retrieves schedule of the most recent release', () => {
     expect(di.getNLatest(0)).toEqual({
-      codename: 'Jammy Jellyfish',
-      created: '2021-10-14',
-      eol: '2027-04-21',
-      eol_esm: '2032-04-21',
-      eol_server: '2027-04-21',
-      release: '2022-04-21',
-      series: 'jammy',
-      version: '22.04',
+      codename: 'Impish Indri',
+      series: 'impish',
+      created: '2021-04-22',
+      release: '2021-10-14',
+      eol: '2022-07-14',
+      version: '21.10',
     });
   });
 
@@ -123,25 +131,23 @@ describe('modules/versioning/distro', () => {
 
   it('sends a float as an argument', () => {
     expect(di.getNLatest(0.1)).toEqual({
-      codename: 'Jammy Jellyfish',
-      created: '2021-10-14',
-      eol: '2027-04-21',
-      eol_esm: '2032-04-21',
-      eol_server: '2027-04-21',
-      release: '2022-04-21',
-      series: 'jammy',
-      version: '22.04',
-    });
-  });
-
-  it('retrieves schedule of the previous release', () => {
-    expect(di.getNLatest(1)).toEqual({
       codename: 'Impish Indri',
       series: 'impish',
       created: '2021-04-22',
       release: '2021-10-14',
       eol: '2022-07-14',
       version: '21.10',
+    });
+  });
+
+  it('retrieves schedule of the previous release', () => {
+    expect(di.getNLatest(1)).toEqual({
+      codename: 'Hirsute Hippo',
+      created: '2020-10-22',
+      eol: '2022-01-20',
+      release: '2021-04-22',
+      series: 'hirsute',
+      version: '21.04',
     });
   });
 
