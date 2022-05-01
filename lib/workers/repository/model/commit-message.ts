@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { CommitMessageJSON } from '../../../types';
 
 /**
@@ -42,7 +43,7 @@ export abstract class CommitMessage {
       this._footer,
     ];
 
-    return parts.filter(Boolean).join('\n\n');
+    return parts.filter(is.nonEmptyStringAndNotWhitespace).join('\n\n');
   }
 
   get title(): string {
