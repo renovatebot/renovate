@@ -12,6 +12,7 @@ import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import { memoize } from '../../../../util/memoize';
 import { regEx } from '../../../../util/regex';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -63,15 +64,9 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
-  let branchStatus: BranchStatus;
-  async function getBranchStatus(): Promise<BranchStatus> {
-    if (branchStatus) {
-      return branchStatus;
-    }
-    branchStatus = await resolveBranchStatus(branchName, ignoreTests);
-    logger.debug(`Branch status is: ${branchStatus}`);
-    return branchStatus;
-  }
+  const getBranchStatus = memoize(() =>
+    resolveBranchStatus(branchName, ignoreTests)
+  );
 
   const config: BranchConfig = { ...prConfig };
 
