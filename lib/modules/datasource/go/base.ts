@@ -73,7 +73,7 @@ export class BaseGoDatasource {
     goModule: string
   ): DataSource | null {
     const sourceMatch = regEx(
-      `<meta\\s+name="go-source"\\s+content="([^\\s]+)\\s+([^\\s]+)`
+      `<meta\\s+name="?go-source"?\\s+content="([^\\s]+)\\s+([^\\s]+)`
     ).exec(res);
     if (!sourceMatch) {
       return null;
@@ -154,7 +154,7 @@ export class BaseGoDatasource {
     goModule: string
   ): DataSource | null {
     const importMatch = regEx(
-      `<meta\\s+name="go-import"\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
+      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
     ).exec(res);
     if (importMatch) {
       const [, prefix, , goImportURL] = importMatch;
