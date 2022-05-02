@@ -3,7 +3,7 @@ import { loadFixture } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 
@@ -32,24 +32,24 @@ describe('modules/manager/nuget/extract', () => {
         'with-centralized-package-versions/Directory.Packages.props';
       const sample = loadFixture(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
       const sample = loadFixture(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
     });
 
     it('extracts all dependencies from global packages file', async () => {
       const packageFile = 'packages.props';
       const sample = loadFixture(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
     });
 
     it('considers NuGet.config', async () => {

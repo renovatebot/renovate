@@ -23,6 +23,7 @@ export function getSiblingFileName(
   return upath.join(subDirectory, otherFileName);
 }
 
+// TODO: can return null #7154
 export async function readLocalFile(fileName: string): Promise<Buffer>;
 export async function readLocalFile(
   fileName: string,
