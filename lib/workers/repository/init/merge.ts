@@ -37,7 +37,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     logger.debug('Existing config file no longer exists');
   }
   const fileList = await getFileList();
-
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
@@ -186,7 +185,7 @@ export async function mergeRenovateConfig(
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
-      ?.map((e) => e.message)
+      .map((e) => e.message)
       .join(', ');
     throw error;
   }
@@ -199,7 +198,8 @@ export async function mergeRenovateConfig(
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
-  const repository = config.repository ?? 'shouldnt-happen';
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
   // istanbul ignore if
