@@ -5,14 +5,8 @@ description: Renovate's support for ESLint-like shareable configs
 
 # Shareable Config Presets
 
-Renovate's "config presets" are a convenient way to distribute config for reuse across multiple repositories.
-It is similar in design to ESLint's shareable configs, and can be used for whole repository configs and for individual rules.
-They are defined using the `extends` array within config and may also be nested.
-
-In short:
-
-- Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you
-- Publish your own if you wish to reuse them across repositories
+This document describes how to configure your shared presets.
+Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more about presets in general.
 
 Shareable config presets can only be used with the JSON format, other formats are not supported.
 
@@ -25,19 +19,17 @@ Shareable config presets can only be used with the JSON format, other formats ar
 !!! info
     We've deprecated the use of a `renovate.json` file for presets as this can cause issues if the repository configuration uses a `renovate.json` file as well.
 
-## Goals of Preset Configs
+<!-- prettier-ignore -->
+!!! tip
+    Describe what your preset is doing by using the `"description"` field.
+    This way your configuration is self-documenting.
 
-The main reason for supporting preset configs is to decrease duplication.
-By using a preset config you:
+## Extending from a preset
 
-1. Avoid duplicating the same config across all your repositories
-2. Can use someone else's configuration and extend it
+To use a preset put it in an `extends` array within your Renovate config.
+Presets can be nested.
 
-Renovate's configuration is self-documenting, because you can fill in the `"description"` field in all preset configs.
-
-## Implementation Approach
-
-In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an ESLint config.
+QUESTION: Insert `renovate.json` example config with nested preset?
 
 ## Preset Hosting
 
