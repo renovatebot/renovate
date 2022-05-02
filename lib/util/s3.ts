@@ -17,7 +17,7 @@ export interface S3UrlParts {
 
 export function parseS3Url(rawUrl: URL | string): S3UrlParts | null {
   const parsedUrl =
-    typeof rawUrl === 'string' ? parseUrl(rawUrl.toString()) : rawUrl;
+    typeof rawUrl === 'string' ? parseUrl(rawUrl) : rawUrl;
   if (parsedUrl === null) {
     return null;
   }
