@@ -20,11 +20,14 @@ export async function finaliseRepo(
   const prList = await platform.getPrList();
   if (
     prList?.some(
-      (pr) => pr.state === 'merged' && pr.title !== 'Configure Renovate'
+      (pr) =>
+        pr.state === 'merged' &&
+        pr.title !== 'Configure Renovate' &&
+        pr.title !== config.onboardingPrTitle
     )
   ) {
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
-  await runRenovateRepoStats(config, prList);
+  runRenovateRepoStats(config, prList);
 }

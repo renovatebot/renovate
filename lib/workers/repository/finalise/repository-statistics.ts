@@ -19,11 +19,10 @@ function initStats(): PrStats {
   };
 }
 
-// eslint-disable-next-line require-await,@typescript-eslint/require-await
-export async function runRenovateRepoStats(
+export function runRenovateRepoStats(
   config: RenovateConfig,
   prList: Pr[]
-): Promise<void> {
+): void {
   const prStats = initStats();
 
   for (const pr of prList) {
@@ -44,7 +43,6 @@ export async function runRenovateRepoStats(
       case PrState.Open:
         prStats.open += 1;
         break;
-      // istanbul ignore next: exclude PrState.All & .NotOpen
       default:
         break;
     }

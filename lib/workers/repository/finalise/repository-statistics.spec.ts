@@ -27,12 +27,12 @@ describe('workers/repository/finalise/repository-statistics', () => {
       config.repository = 'owner/repo';
     });
 
-    it('Calls runRenovateRepoStats', async () => {
-      await runRenovateRepoStats(config, result);
+    it('Calls runRenovateRepoStats', () => {
+      runRenovateRepoStats(config, result);
       expect(logger.debug).toHaveBeenCalledWith(
         {
           stats: {
-            total: 3,
+            total: 4,
             open: 1,
             closed: 1,
             merged: 1,
