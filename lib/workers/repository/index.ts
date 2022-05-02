@@ -23,7 +23,7 @@ import * as hostRules from '../../util/host-rules';
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
-  sshSocket: SshSocket | null = null,
+  sshSocket: SshSocket,
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
@@ -41,10 +41,8 @@ export async function renovateRepository(
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
-    if (sshSocket) {
-      for (var hostRule of hostRules.getAll()) {
-        await sshSocket.addKeyFromHostRule(hostRule);
-      }
+    for (var hostRule of hostRules.getAll()) {
+      await sshSocket.addKeyFromHostRule(hostRule);
     }
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
@@ -62,7 +60,11 @@ export async function renovateRepository(
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Renovating repository again after automerge result');
-          const recursiveRes = await renovateRepository(repoConfig, ssh_socket, false);
+          const recursiveRes = await renovateRepository(
+            repoConfig,
+            ssh_socket,
+            false
+          );
           return recursiveRes;
         }
         logger.debug(`Automerged but already retried once`);

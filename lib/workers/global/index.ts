@@ -104,7 +104,7 @@ export async function resolveGlobalExtends(
 
 export async function start(): Promise<number> {
   let config: AllConfig;
-  let sshSocket: SshSocket = null;
+  let sshSocket: SshSocket = new SshSocket();
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
@@ -117,13 +117,11 @@ export async function start(): Promise<number> {
     }
     // initialize all submodules
     config = await globalInitialize(config);
+    sshSocket.setCacheDir(config.cacheDir);
 
     await validatePresets(config);
 
     checkEnv();
-
-    sshSocket = new SshSocket();
-    await sshSocket.start(config.cacheDir);
 
     // validate secrets. Will throw and abort if invalid
     validateConfigSecrets(config);
@@ -168,9 +166,7 @@ export async function start(): Promise<number> {
       return 2;
     }
   } finally {
-    if (sshSocket) {
-      sshSocket.stop();
-    }
+    sshSocket.stop();
     await globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }
