@@ -17,6 +17,7 @@ import {
   reorderFiles,
   toAbsolutePath,
 } from './utils';
+import { regEx } from '../../../util/regex';
 
 const datasource = MavenDatasource.id;
 
@@ -52,7 +53,8 @@ export async function extractAllPackageFiles(
     };
 
     try {
-      const content = await readLocalFile(packageFile, 'utf8');
+      let content = await readLocalFile(packageFile, 'utf8');
+      content = content.replace(regEx(/\r\n/g), '\n');
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {
