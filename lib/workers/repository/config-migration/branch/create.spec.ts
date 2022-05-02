@@ -81,8 +81,9 @@ describe('workers/repository/config-migration/branch/create', () => {
     describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         config.commitMessagePrefix = 'PREFIX:';
+        config.commitMessage = '';
 
-        const message = `PREFIX: Migrate config renovate.json`;
+        const message = `PREFIX: migrate config renovate.json`;
         await createConfigMigrationBranch(config, migratedConfigData);
 
         expect(commitFiles).toHaveBeenCalledWith({
@@ -101,8 +102,8 @@ describe('workers/repository/config-migration/branch/create', () => {
 
       it('to the supplied commit message prefix, topic & action', async () => {
         const prefix = 'PREFIX:';
-        const topic = 'Thats a topic';
-        const action = 'Action';
+        const topic = 'thats a topic';
+        const action = 'action';
 
         const message = `${prefix} ${action} ${topic}`;
 
@@ -130,7 +131,7 @@ describe('workers/repository/config-migration/branch/create', () => {
     describe('applies semanticCommit prefix', () => {
       it('to the default commit message', async () => {
         const prefix = 'chore(config)';
-        const message = `${prefix} Migrate config renovate.json`;
+        const message = `${prefix}: migrate config renovate.json`;
 
         config.semanticCommits = 'enabled';
 
@@ -152,8 +153,8 @@ describe('workers/repository/config-migration/branch/create', () => {
 
       it('to the supplied commit message topic', async () => {
         const prefix = 'chore(config)';
-        const topic = 'Supplied topic';
-        const message = `${prefix} ${topic}`;
+        const topic = 'supplied topic';
+        const message = `${prefix}: ${topic}`;
 
         config.semanticCommits = 'enabled';
         config.commitMessageTopic = topic;

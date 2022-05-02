@@ -1,5 +1,7 @@
 import type { RenovateConfig } from '../../../../config/types';
 import * as template from '../../../../util/template';
+import type { CommitMessage } from '../../model/commit-message';
+import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class ConfigMigrationCommitMessageFactory {
   private readonly config: RenovateConfig;
@@ -11,39 +13,34 @@ export class ConfigMigrationCommitMessageFactory {
     this.configFile = configFile;
   }
 
-  create(): string {
-    const { commitMessagePrefix, commitMessage, semanticCommitType } =
-      this.config;
-    let prefix: string | null = null;
+  create(): CommitMessage {
+    const { commitMessage } = this.config;
 
-    if (commitMessagePrefix) {
-      prefix = (commitMessagePrefix ?? '').trim();
-    } else if (this.areSemanticCommitsEnabled()) {
-      prefix = (semanticCommitType ?? '').trim() + '(config)';
-    }
-
-    const action =
+    this.config.commitMessageAction =
       this.config.commitMessageAction === 'Update'
         ? ''
         : this.config.commitMessageAction;
-    const topic =
+
+    this.config.commitMessageTopic =
       this.config.commitMessageTopic === 'dependency {{depName}}'
         ? `Migrate config ${this.configFile}`
         : this.config.commitMessageTopic;
 
-    return template
-      .compile(commitMessage ?? `Migrate config ${this.configFile}`, {
-        ...this.config,
-        commitMessagePrefix: prefix ?? '',
-        commitMessageAction: action,
-        commitMessageTopic: topic,
-        commitMessageExtra: '',
-      })
-      .trim()
-      .replace(/\s\s/g, ' ');
-  }
+    this.config.commitMessageExtra = '';
+    this.config.semanticCommitScope = 'config';
 
-  private areSemanticCommitsEnabled(): boolean {
-    return this.config.semanticCommits === 'enabled';
+    const commitMessageFactory = new CommitMessageFactory(this.config);
+    const commit = commitMessageFactory.create();
+
+    if (commitMessage) {
+      commit.subject = template.compile(commitMessage, {
+        ...this.config,
+        commitMessagePrefix: '',
+      });
+    } else {
+      commit.subject = `Migrate config ${this.configFile}`;
+    }
+
+    return commit;
   }
 }
