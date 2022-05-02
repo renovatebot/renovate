@@ -41,6 +41,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ---
 
 ## addLabels
@@ -1848,6 +1852,10 @@ Add to this object if you wish to define rules that apply only to patch updates.
 ## pin
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
+
+## pinDigest
+
+Add to this object if you wish to define rules that apply only to PRs that pin digests.
 
 ## pinDigests
 

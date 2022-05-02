@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
@@ -54,7 +55,7 @@ export function getConfig(input: string[]): AllConfig {
         return [];
       }
       try {
-        return JSON.parse(val);
+        return JSON5.parse(val);
       } catch (err) {
         return val.split(',').map((el) => el.trim());
       }
@@ -64,7 +65,7 @@ export function getConfig(input: string[]): AllConfig {
         return {};
       }
       try {
-        return JSON.parse(val);
+        return JSON5.parse(val);
       } catch (err) {
         throw new Error("Invalid JSON value: '" + val + "'");
       }

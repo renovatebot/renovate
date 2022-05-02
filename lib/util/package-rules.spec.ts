@@ -665,7 +665,7 @@ describe('util/package-rules', () => {
         lockedVersion: '^1.0.0',
       },
     });
-    expect(res3.x).toBe(1);
+    expect(res3.x).toBeUndefined();
   });
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
@@ -933,5 +933,56 @@ describe('util/package-rules', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
+  });
+
+  it('needs language to match', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['abc'],
+          matchLanguages: ['js'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'abc',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('needs baseBranch to match', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['abc'],
+          matchBaseBranches: ['dev'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'abc',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('needs manager to match', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['abc'],
+          matchManagers: ['npm'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'abc',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
   });
 });

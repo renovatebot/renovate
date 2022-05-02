@@ -180,13 +180,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  // TODO null check #7154
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  return JSON5.parse(raw);
 }
 
 function getRepoUrl(
