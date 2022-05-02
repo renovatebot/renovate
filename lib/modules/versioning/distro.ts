@@ -168,13 +168,13 @@ export class DistroInfo {
   public getNLatest(n: number): DistroInfoRecordWithVersion | null {
     const len = this._sortedInfo.length - 1;
     let i = len - Math.floor(n);
-    let j = 0;
 
-    while (!this.isReleased(this._sortedInfo[len - j].version)) {
-      j++;
+    // compensate i for unreleased versions
+    for (let j = len; j >= 0; j--, i--) {
+      if (this.isReleased(this._sortedInfo[j].version)) {
+        break;
+      }
     }
-
-    i -= j;
 
     if (len >= i && i >= 0 && this.isReleased(this._sortedInfo[i]?.version)) {
       return this._sortedInfo[i];
