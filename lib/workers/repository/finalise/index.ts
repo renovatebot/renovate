@@ -22,7 +22,7 @@ export async function finaliseRepo(
     prList?.some(
       (pr) =>
         pr.state === 'merged' &&
-        pr.title !== 'Configure Renovate' &&
+        pr.title !== 'Configure Renovate ' &&
         pr.title !== config.onboardingPrTitle
     )
   ) {
