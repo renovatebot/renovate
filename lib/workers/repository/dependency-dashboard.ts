@@ -349,11 +349,11 @@ export async function ensureDependencyDashboard(
 
   let deps = '## Dependencies detected\n\n';
 
-  for (const key of Object.keys(packageFiles)) {
-    deps += `<details><summary>${key}</summary>\n\n`;
-    for (const packageDependency of packageFiles[key]) {
-      deps += `  - <details><summary>${packageDependency.packageFile}</summary>\n\n`;
-      for (const dep of packageDependency.deps) {
+  for (const manager of Object.keys(packageFiles)) {
+    deps += `<details><summary>${manager}</summary>\n\n`;
+    for (const packageFile of packageFiles[manager]) {
+      deps += `  - <details><summary>${packageFile.packageFile}</summary>\n\n`;
+      for (const dep of packageFile.deps) {
         deps += `    - ${dep.depName}@${dep.currentVersion}\n`;
       }
     }
