@@ -298,6 +298,84 @@ export function getDependencyParts(packageName: string): MavenDependency {
   };
 }
 
+function extractSnapshotVersion(metadata: XmlDocument): string | null {
+  // Parse the maven-metadata.xml for the snapshot version and determine
+  // the fixed version of the latest deployed snapshot.
+  // The metadata descriptor can be found at
+  // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
+  //
+  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
+  // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
+  const version = metadata
+    .descendantWithPath('version')
+    ?.val?.replace('-SNAPSHOT', '');
+
+  const snapshot = metadata.descendantWithPath('versioning.snapshot');
+  const timestamp = snapshot?.childNamed('timestamp')?.val;
+  const build = snapshot?.childNamed('buildNumber')?.val;
+
+  // If we weren't able to parse out the required 3 version elements,
+  // return null because we can't determine the fixed version of the latest snapshot.
+  if (!version || !timestamp || !build) {
+    return null;
+  }
+  return `${version}-${timestamp}-${build}`;
+}
+
+async function getSnapshotFullVersion(
+  http: Http,
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string | null> {
+  // To determine what actual files are available for the snapshot, first we have to fetch and parse
+  // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
+  const metadataUrl = getMavenUrl(
+    dependency,
+    repoUrl,
+    `${version}/maven-metadata.xml`
+  );
+
+  const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
+  if (!mavenMetadata) {
+    return null;
+  }
+
+  return extractSnapshotVersion(mavenMetadata);
+}
+
+function isSnapshotVersion(version: string): boolean {
+  if (version.endsWith('-SNAPSHOT')) {
+    return true;
+  }
+  return false;
+}
+
+export async function createUrlForDependencyPom(
+  http: Http,
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string> {
+  if (isSnapshotVersion(version)) {
+    // By default, Maven snapshots are deployed to the repository with fixed file names.
+    // Resolve the full, actual pom file name for the version.
+    const fullVersion = await getSnapshotFullVersion(
+      http,
+      version,
+      dependency,
+      repoUrl
+    );
+
+    // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
+    if (fullVersion !== null) {
+      return `${version}/${dependency.name}-${fullVersion}.pom`;
+    }
+  }
+
+  return `${version}/${dependency.name}-${version}.pom`;
+}
+
 export async function getDependencyInfo(
   http: Http,
   dependency: MavenDependency,
