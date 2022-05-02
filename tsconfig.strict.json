@@ -45,7 +45,6 @@
     "lib/workers/repository/init/cache.ts",
     "lib/workers/repository/init/config.ts",
     "lib/workers/repository/init/index.ts",
-    "lib/workers/repository/init/merge.ts",
     "lib/workers/repository/init/semantic.ts",
     "lib/workers/repository/init/vulnerability.ts",
     "lib/workers/repository/onboarding/branch/check.ts",
