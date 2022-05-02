@@ -30,6 +30,7 @@ const repoGroups = {
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
+  'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',

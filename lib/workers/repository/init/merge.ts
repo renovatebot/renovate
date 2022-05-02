@@ -130,7 +130,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         };
       }
       try {
-        configFileParsed = JSON.parse(rawFileContents);
+        configFileParsed = JSON5.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },

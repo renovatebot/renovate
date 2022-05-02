@@ -48,11 +48,11 @@ describe('config/presets/github/index', () => {
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
     });
 
-    it('throws if no content', async () => {
+    it('throws if invalid content', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, {});
+        .reply(200, { content: toBase64('invalid') });
 
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON
