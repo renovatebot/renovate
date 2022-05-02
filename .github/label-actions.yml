@@ -3,17 +3,17 @@
     Hi there,
 
 
-    Help us by making a minimal reproduction repository.
+    Get your issue fixed faster by creating a minimal reproduction.
 
 
-    Before we can start work on your issue we first need to know exactly what's causing the current behavior.
+    Before we start working on your issue we need to know exactly what's causing the current behavior.
     A minimal reproduction helps us with this.
 
 
-    To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to understand what is needed.
+    To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
 
 
-    We may close the issue if you (or someone else) have not provided a minimal reproduction within two weeks.
+    We may close the issue if you, or someone else, haven't created a minimal reproduction within two weeks.
     If you need more time, or are stuck, please ask for help or more time in a comment.
 
 
