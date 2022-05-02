@@ -1,9 +1,9 @@
 import { mock } from 'jest-mock-extended';
+import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
   getConfig,
   git,
-  loadJsonFixture,
   mockedFunction,
   platform,
 } from '../../../../../test/util';
@@ -19,11 +19,12 @@ jest.mock('./rebase');
 jest.mock('./create');
 jest.mock('../../../../util/git');
 
-const migratedData = loadJsonFixture('./migrated-data.json');
+const migratedData = JSON.parse(Fixtures.get('./migrated-data.json'));
 
 describe('workers/repository/config-migration/branch/index', () => {
   describe('checkConfigMigrationBranch', () => {
     let config: RenovateConfig;
+    const getAsyncSpy = jest.spyOn(MigratedDataFactory, 'getAsync');
 
     beforeEach(() => {
       GlobalConfig.set({
@@ -32,16 +33,19 @@ describe('workers/repository/config-migration/branch/index', () => {
       jest.resetAllMocks();
       config = getConfig();
       config.branchPrefix = 'some/';
-      MigratedDataFactory.getAsync = jest.fn().mockResolvedValue(migratedData);
+      getAsyncSpy.mockResolvedValue(migratedData);
     });
 
     it('Exited due to error fetching migrated data', async () => {
-      jest.spyOn(MigratedDataFactory, 'getAsync').mockResolvedValue(undefined);
+      getAsyncSpy.mockResolvedValue(undefined);
       await expect(checkConfigMigrationBranch(config)).resolves.toBeNull();
     });
 
-    it('Updates migration branch', async () => {
-      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+    it('Updates migration branch & refresh PR', async () => {
+      platform.getBranchPr.mockResolvedValue(mock<Pr>());
+      // platform.refreshPr is undefined as it is an optional function
+      // declared as: refreshPr?(number: number): Promise<void>;
+      platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config);
       expect(res).toBe(`${config.branchPrefix}migrate-config`);

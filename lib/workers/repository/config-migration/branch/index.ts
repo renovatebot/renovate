@@ -23,7 +23,7 @@ export async function checkConfigMigrationBranch(
   if (await migrationPrExists(configMigrationBranch)) {
     logger.debug('Config Migration PR already exists');
     await rebaseMigrationBranch(config, migratedConfigData);
-    // istanbul ignore if
+
     if (platform.refreshPr) {
       const configMigrationPr = await platform.getBranchPr(
         configMigrationBranch
@@ -35,14 +35,7 @@ export async function checkConfigMigrationBranch(
   } else {
     logger.debug('Config Migration PR does not exist');
     logger.debug('Need to create migration PR');
-    const commit = await createConfigMigrationBranch(
-      config,
-      migratedConfigData
-    );
-
-    if (commit) {
-      logger.info({ branch: configMigrationBranch, commit }, 'Branch created');
-    }
+    await createConfigMigrationBranch(config, migratedConfigData);
   }
   if (!GlobalConfig.get('dryRun')) {
     await checkoutBranch(configMigrationBranch);
@@ -51,5 +44,6 @@ export async function checkConfigMigrationBranch(
   return configMigrationBranch;
 }
 
-export const migrationPrExists = async (branchName: string): Promise<boolean> =>
-  !!(await platform.getBranchPr(branchName));
+export async function migrationPrExists(branchName: string): Promise<boolean> {
+  return !!(await platform.getBranchPr(branchName));
+}

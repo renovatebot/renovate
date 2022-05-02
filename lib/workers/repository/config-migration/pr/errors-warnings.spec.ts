@@ -2,14 +2,14 @@ import { RenovateConfig, getConfig } from '../../../../../test/util';
 import { getErrors, getWarnings } from './errors-warnings';
 
 describe('workers/repository/config-migration/pr/errors-warnings', () => {
+  let config: RenovateConfig;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    config = getConfig();
+  });
+
   describe('getWarnings()', () => {
-    let config: RenovateConfig;
-
-    beforeEach(() => {
-      jest.resetAllMocks();
-      config = getConfig();
-    });
-
     it('returns warning text', () => {
       config.warnings = [
         {
@@ -33,13 +33,6 @@ describe('workers/repository/config-migration/pr/errors-warnings', () => {
   });
 
   describe('getErrors()', () => {
-    let config: RenovateConfig;
-
-    beforeEach(() => {
-      jest.resetAllMocks();
-      config = getConfig();
-    });
-
     it('returns error text', () => {
       config.errors = [
         {

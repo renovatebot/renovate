@@ -26,16 +26,16 @@ export async function rebaseMigrationBranch(
   }
   logger.debug('Rebasing migration branch');
 
+  if (GlobalConfig.get('dryRun')) {
+    logger.info('DRY-RUN: Would rebase files in migration branch');
+    return null;
+  }
+
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName
   );
   const commitMessage = commitMessageFactory.create();
-
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would rebase files in migration branch');
-    return null;
-  }
 
   return commitAndPush({
     branchName,

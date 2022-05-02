@@ -1,9 +1,5 @@
-import {
-  RenovateConfig,
-  getConfig,
-  loadJsonFixture,
-  platform,
-} from '../../../../../test/util';
+import { Fixtures } from '../../../../../test/fixtures';
+import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
 import { MigratedData } from './migrated-data';
@@ -11,7 +7,7 @@ import { MigratedData } from './migrated-data';
 jest.mock('../../../../util/git');
 
 describe('workers/repository/config-migration/branch/create', () => {
-  const raw = loadJsonFixture('./renovate.json');
+  const raw = JSON.parse(Fixtures.get('./renovate.json'));
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const fileName = 'renovate.json';

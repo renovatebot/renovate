@@ -41,8 +41,8 @@ export class MigratedDataFactory {
     this.data = null;
   }
 
-  private static async build(): Promise<IMigratedData | null> {
-    let res: IMigratedData | null = null;
+  private static async build(): Promise<MigratedData | null> {
+    let res: MigratedData | null = null;
     try {
       const rc = await detectRepoFileConfig();
       const configFileParsed = rc?.configFileParsed || {};
@@ -66,7 +66,7 @@ export class MigratedDataFactory {
         content += '\n';
       }
 
-      res = { content, fileName };
+      res = new MigratedData(content, fileName);
     } catch (err) {
       logger.debug(
         err,
@@ -75,9 +75,4 @@ export class MigratedDataFactory {
     }
     return res;
   }
-}
-
-interface IMigratedData {
-  content: string;
-  fileName: string;
 }

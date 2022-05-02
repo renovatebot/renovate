@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
-import { loadJsonFixture, mockedFunction } from '../../../../../test/util';
+import { mockedFunction } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
 import { readLocalFile } from '../../../../util/fs';
@@ -11,8 +11,8 @@ jest.mock('../../../../util/fs');
 jest.mock('../../init/merge');
 
 const rawNonMigrated = Fixtures.get('./renovate.json');
-const migratedData = loadJsonFixture('./migrated-data.json');
-const migratedConfigObj = loadJsonFixture('./migrated.json');
+const migratedData = JSON.parse(Fixtures.get('./migrated-data.json'));
+const migratedConfigObj = JSON.parse(Fixtures.get('./migrated.json'));
 
 describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {

@@ -18,7 +18,6 @@ export async function ensureConfigMigrationPr(
   config: RenovateConfig
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
-  logger.trace({ config });
   const branchName = getMigrationBranchName(config);
   const existingPr = await platform.getBranchPr(branchName);
   logger.debug('Filling in config migration PR template');
@@ -56,7 +55,7 @@ If you need any further assistance then you can also [request help here](${confi
   if (is.string(config.prFooter)) {
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
-  logger.trace('prBody:\n' + prBody);
+  logger.trace({ prBody }, 'prBody');
 
   prBody = platform.massageMarkdown(prBody);
 
@@ -65,7 +64,7 @@ If you need any further assistance then you can also [request help here](${confi
     // Check if existing PR needs updating
     if (existingPr.body?.trim() === prBody.trim()) {
       // Bitbucket strips trailing \n)//
-      logger.debug(`${existingPr.displayNumber} does not need updating`);
+      logger.debug({ pr: existingPr.displayNumber }, `does not need updating`);
       return;
     }
     // PR must need updating

@@ -1,8 +1,8 @@
+import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
   defaultConfig,
   git,
-  loadJsonFixture,
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -19,7 +19,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
   });
 
   describe('rebaseMigrationBranch()', () => {
-    const raw = loadJsonFixture('./renovate.json');
+    const raw = JSON.parse(Fixtures.get('./renovate.json'));
     const indent = '  ';
     const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
     const fileName = 'renovate.json';
@@ -29,9 +29,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      GlobalConfig.set({
-        dryRun: false,
-      });
+      GlobalConfig.reset();
       migratedConfigData = new MigratedData(renovateConfig, fileName);
       config = {
         ...defaultConfig,
