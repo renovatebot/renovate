@@ -146,6 +146,7 @@ export class BaseGoDatasource {
         packageName,
       };
     }
+    /* istanbul ignore next */
     return null;
   }
 
