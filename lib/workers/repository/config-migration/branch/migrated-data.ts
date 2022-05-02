@@ -56,11 +56,11 @@ export class MigratedDataFactory {
       delete migratedConfig.errors;
       delete migratedConfig.warnings;
 
-      const raw = await readLocalFile(rc.configFileName ?? '', 'utf8');
+      const fileName = rc.configFileName ?? '';
+      const raw = await readLocalFile(fileName, 'utf8');
 
       // indent defaults to 2 spaces
       const indent = detectIndent(raw).indent ?? '  ';
-      const fileName = rc.configFileName ?? '';
       let content = JSON.stringify(migratedConfig, undefined, indent);
       if (!content.endsWith('\n')) {
         content += '\n';

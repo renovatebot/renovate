@@ -1,3 +1,4 @@
+import detectIndent from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
 import { mockedFunction } from '../../../../../test/util';
 
@@ -9,6 +10,7 @@ import { MigratedDataFactory } from './migrated-data';
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/fs');
 jest.mock('../../init/merge');
+jest.mock('detect-indent');
 
 const rawNonMigrated = Fixtures.get('./renovate.json');
 const migratedData = JSON.parse(Fixtures.get('./migrated-data.json'));
@@ -18,6 +20,11 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      mockedFunction(detectIndent).mockReturnValue({
+        type: 'space',
+        amount: 2,
+        indent: '  ',
+      });
       mockedFunction(detectRepoFileConfig).mockResolvedValue({
         configFileName: 'renovate.json',
       });
@@ -69,8 +76,23 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       );
     });
 
+    it('Resets the factory and gets a new value with default indentation', async () => {
+      mockedFunction(detectIndent).mockReturnValue({
+        type: null,
+        amount: 0,
+        indent: null,
+      });
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+    });
+
     it('Returns nothing due to fs error', async () => {
-      mockedFunction(readLocalFile).mockResolvedValueOnce(null);
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: null,
+      });
+      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
     });

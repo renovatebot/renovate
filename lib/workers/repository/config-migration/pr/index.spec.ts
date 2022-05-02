@@ -42,6 +42,13 @@ describe('workers/repository/config-migration/pr/index', () => {
       createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
 
+    it('creates PR with default PR title', async () => {
+      await ensureConfigMigrationPr({ ...config, onboardingPrTitle: null });
+      expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      createPrBody = platform.createPr.mock.calls[0][0].prBody;
+    });
+
     it('Founds an open PR and as it is up to date and returns', async () => {
       platform.getBranchPr.mockResolvedValueOnce(
         mock<Pr>({
