@@ -20,17 +20,14 @@ function findVersionIndex(
   depName: string,
   version: string
 ): number {
-  const contents = content.replace(regEx(/\r\n/g), '\n');
   const eDn = escapeRegExp(depName);
   const eVer = escapeRegExp(version);
   const re = regEx(
-    `(id\\s*=\\s*)?['"]?${eDn}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${eVer}['"]?`
+    `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`
   );
-  if (re) {
-    const match = re.exec(contents);
-    if (match) {
-      return match.index + contents.slice(match.index).indexOf(version);
-    }
+  const match = re.exec(content);
+  if (match) {
+    return match.index + content.slice(match.index).indexOf(version);
   }
   // ignoring Fallback because I can't reach it in tests, and code is not supposed to reach it but just in case.
   /* istanbul ignore next */

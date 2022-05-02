@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { regEx } from '../regex';
 
 export * from './proxies';
 
@@ -38,7 +39,7 @@ export async function readLocalFile(
     const fileContent = encoding
       ? await fs.readFile(localFileName, encoding)
       : await fs.readFile(localFileName);
-    return fileContent;
+    return fileContent.toString().replace(regEx(/\r\n/g), '\n');
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
     return null;
