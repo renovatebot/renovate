@@ -56,30 +56,30 @@ export function processResult(
   ];
   const enabledStatuses = [CONFIG_SECRETS_EXPOSED, CONFIG_VALIDATION];
   let status: ProcessStatus;
-  let repoEnabled: boolean | undefined;
+  let enabled: boolean | undefined;
   let onboarded: boolean | undefined;
   // istanbul ignore next
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
-    repoEnabled = false;
+    enabled = false;
   } else if (config.repoIsActivated) {
     status = 'activated';
-    repoEnabled = true;
+    enabled = true;
     onboarded = true;
   } else if (enabledStatuses.includes(res) || config.repoIsOnboarded) {
     status = 'onboarded';
-    repoEnabled = true;
+    enabled = true;
     onboarded = true;
   } else if (config.repoIsOnboarded === false) {
     status = 'onboarding';
-    repoEnabled = true;
+    enabled = true;
     onboarded = false;
   } else {
     logger.debug({ res }, 'Unknown res');
     status = 'unknown';
   }
   logger.debug(
-    `Repository result: ${res} status: ${status} enabled: ${repoEnabled} onboarded: ${onboarded}`
+    `Repository result: ${res} status: ${status} enabled: ${enabled} onboarded: ${onboarded}`
   );
-  return { res, status, enabled: repoEnabled, onboarded };
+  return { res, status, enabled: enabled, onboarded };
 }
