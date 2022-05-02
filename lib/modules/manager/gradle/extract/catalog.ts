@@ -24,7 +24,7 @@ function findVersionIndex(
   const eDn = escapeRegExp(depName);
   const eVer = escapeRegExp(version);
   const re = regEx(
-    `(id\\s*=\\s*)?['"]?${eDn}["']?((\\s*=\\s*)|:|,\\s*)(.*version(\\.ref)?(\\s*\\=\\s*))?["']?${eVer}['"]?`
+    `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`
   );
   if (re) {
     const match = re.exec(contents);
