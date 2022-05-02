@@ -6,11 +6,9 @@ import { platform } from '../../../../modules/platform';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
-import {
-  addAssigneesReviewers,
-  getPlatformPrOptions,
-  prepareLabels,
-} from '../../update/pr';
+import { getPlatformPrOptions } from '../../update/pr';
+import { prepareLabels } from '../../update/pr/labels';
+import { addParticipants } from '../../update/pr/participants';
 import { getMigrationBranchName } from '../common';
 import { getErrors, getWarnings } from './errors-warnings';
 
@@ -101,7 +99,7 @@ If you need any further assistance then you can also [request help here](${confi
         });
         logger.info({ pr: pr?.displayNumber }, 'Migration PR created');
         if (pr) {
-          await addAssigneesReviewers(config, pr);
+          await addParticipants(config, pr);
         }
       }
     }
