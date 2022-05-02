@@ -26,7 +26,7 @@ export async function finaliseRepo(
           pr.title !== config.onboardingPrTitle)
     )
   ) {
-    logger.info('Repo is activated');
+    logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
   await runRenovateRepoStats(config, prList);

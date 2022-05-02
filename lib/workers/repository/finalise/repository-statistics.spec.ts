@@ -5,15 +5,15 @@ import {
   mockedFunction,
 } from '../../../../test/util';
 import { logger } from '../../../logger';
-import { getPrCache } from '../../../modules/platform/github/pr';
+import { platform } from '../../../modules/platform';
 import { runRenovateRepoStats } from './repository-statistics';
 
 jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
-const prCache = loadJsonFixture('./pr-cache.json');
-const result = Object.keys(prCache).map((key) => {
-  return prCache[key];
+const prList = loadJsonFixture('./pr-list.json');
+const result = Object.keys(prList).map((key) => {
+  return prList[key];
 });
 
 describe('workers/repository/finalise/repository-statistics', () => {
@@ -23,7 +23,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
-      mockedFunction(getPrCache).mockReturnValue(prCache);
+      mockedFunction(platform.getPrList).mockReturnValue(prList);
       config.repository = 'owner/repo';
     });
 
