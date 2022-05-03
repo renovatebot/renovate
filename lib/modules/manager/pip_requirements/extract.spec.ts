@@ -170,7 +170,6 @@ describe('modules/manager/pip_requirements/extract', () => {
             currentVersion: '20.3.0',
             datasource: 'pypi',
             depName: 'attrs',
-            versioning: 'pep440',
           },
         ],
       });
