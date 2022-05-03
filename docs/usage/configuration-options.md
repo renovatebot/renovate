@@ -554,6 +554,10 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 
 You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
 
+## dependencyDashboardDetectedDeps
+
+You can configure this to `true` if you wish to display all detected dependencies in the Dependency Dashboard.
+
 ## dependencyDashboardFooter
 
 ## dependencyDashboardHeader
