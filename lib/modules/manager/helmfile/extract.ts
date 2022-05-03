@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { HelmDatasource } from '../../datasource/helm';
 import { DockerDatasource } from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { Doc } from './types';
 
@@ -13,13 +13,6 @@ const isValidChartName = (name: string | undefined): boolean =>
 function extractYaml(content: string): string {
   // regex remove go templated ({{ . }}) values
   return content.replace(/(^|:)\s*{{.+}}\s*$/gm, '$1');
-}
-
-function getDatasourceId(repos: any, repoName: string): string {
-  if (repos.find((repo) => repo.name === repoName && repo.oci === true)) {
-    return DockerDatasource.id;
-  }
-  return HelmDatasource.id;
 }
 
 export function extractPackageFile(
@@ -95,7 +88,10 @@ export function extractPackageFile(
       };
 
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-      if (getDatasourceId(doc.repositories, repoName) === DockerDatasource.id) {
+      const repository = doc.repositories?.find(
+        (repo) => repo.name === repoName
+      );
+      if (repository?.oci) {
         res.datasource = DockerDatasource.id;
         res.packageName = aliases[repoName] + '/' + depName;
       }
