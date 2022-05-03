@@ -41,6 +41,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ---
 
 ## addLabels
@@ -741,6 +745,17 @@ A similar one could strip leading `v` prefixes:
 ## fetchReleaseNotes
 
 Set this to `false` if you want to disable release notes fetching.
+
+Renovate can fetch release notes when they are hosted on one of these platforms:
+
+- GitHub (.com and Enterprise Server)
+- GitLab (.com and CE/EE)
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate can only show release notes from some platforms and some package managers.
+    We're planning improvements so that Renovate can show more release notes.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
 
 ## fileMatch
 
@@ -1830,6 +1845,10 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
+## pinDigest
+
+Add to this object if you wish to define rules that apply only to PRs that pin digests.
+
 ## pinDigests
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
@@ -2068,6 +2087,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## pruneBranchAfterAutomerge
+
+By default Renovate deletes, or "prunes", the branch after automerging.
+Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 ## pruneStaleBranches
 

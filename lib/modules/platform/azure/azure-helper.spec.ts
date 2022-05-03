@@ -24,6 +24,7 @@ describe('modules/platform/azure/azure-helper', () => {
       const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
     });
+
     it('should not get ref', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -34,6 +35,7 @@ describe('modules/platform/azure/azure-helper', () => {
       const res = await azureHelper.getRefs('123');
       expect(res).toHaveLength(0);
     });
+
     it('should get the ref with full ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -61,6 +63,7 @@ describe('modules/platform/azure/azure-helper', () => {
       );
       expect(res).toMatchSnapshot();
     });
+
     it('should get the branch object when ref missing', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -207,6 +210,7 @@ describe('modules/platform/azure/azure-helper', () => {
         GitPullRequestMergeStrategy.NoFastForward
       );
     });
+
     it('should return Squash', async () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
@@ -232,6 +236,7 @@ describe('modules/platform/azure/azure-helper', () => {
         GitPullRequestMergeStrategy.Squash
       );
     });
+
     it('should return default branch policy', async () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
@@ -270,6 +275,7 @@ describe('modules/platform/azure/azure-helper', () => {
         GitPullRequestMergeStrategy.Rebase
       );
     });
+
     it('should return most specific exact branch policy', async () => {
       const refMock = 'refs/heads/ding';
       const defaultBranchMock = 'dong';
@@ -338,6 +344,7 @@ describe('modules/platform/azure/azure-helper', () => {
         await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock)
       ).toEqual(GitPullRequestMergeStrategy.Rebase);
     });
+
     it('should return most specific prefix branch policy', async () => {
       const refMock = 'refs/heads/ding-wow';
       const defaultBranchMock = 'dong-wow';

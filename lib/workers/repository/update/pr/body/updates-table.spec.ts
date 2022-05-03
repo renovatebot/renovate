@@ -11,6 +11,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     const result = getPrUpdatesTable(configObj);
     expect(result).toBe('');
   });
+
   it('checks results for getPrUpdatesTable', () => {
     const upgrade0: BranchUpgradeConfig = {
       branchName: 'some-branch',

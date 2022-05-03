@@ -10,7 +10,6 @@ import type { Pr } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig } from '../../../types';
-import * as prAutomerge from './automerge';
 import * as _changelogHelper from './changelog';
 import type { ChangeLogResult } from './changelog';
 import * as codeOwners from './code-owners';
@@ -116,74 +115,6 @@ function isResultWithoutPr(
 }
 
 describe('workers/repository/update/pr/index', () => {
-  describe('checkAutoMerge(pr, config)', () => {
-    let config: BranchConfig;
-    let pr: Pr;
-    beforeEach(() => {
-      config = partial<BranchConfig>({
-        ...getConfig(),
-      });
-      pr = partial<Pr>({});
-    });
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-    it('should not automerge if not configured', async () => {
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-    it('should automerge if enabled and pr is mergeable', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      platform.mergePr.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(1);
-    });
-    it('should automerge comment', async () => {
-      config.automerge = true;
-      config.automergeType = 'pr-comment';
-      config.automergeComment = '!merge';
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-    });
-    it('should remove previous automerge comment when rebasing', async () => {
-      config.automerge = true;
-      config.automergeType = 'pr-comment';
-      config.automergeComment = '!merge';
-      config.rebaseRequested = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-    });
-    it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      git.isBranchModified.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-    it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-    it('should not automerge if enabled and pr is mergeable but unstable', async () => {
-      config.automerge = true;
-      pr.cannotMergeReason = 'some reason';
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-    it('should not automerge if enabled and pr is unmergeable', async () => {
-      config.automerge = true;
-      git.isBranchConflicted.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-  });
   describe('ensurePr', () => {
     let config: BranchConfig;
     // TODO fix type
@@ -192,6 +123,7 @@ describe('workers/repository/update/pr/index', () => {
       title: 'Update dependency dummy to v1.1.0',
       body: 'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
+
     beforeEach(() => {
       jest.resetAllMocks();
       setupChangelogMock();
@@ -217,9 +149,11 @@ describe('workers/repository/update/pr/index', () => {
       config.upgrades = [config];
       platform.massageMarkdown.mockImplementation((input) => input);
     });
+
     afterEach(() => {
       jest.clearAllMocks();
     });
+
     it('should return PR if update fails', async () => {
       platform.updatePr.mockImplementationOnce(() => {
         throw new Error('oops');
@@ -230,6 +164,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithPr(result);
       expect(result.pr).toBeDefined();
     });
+
     it('should return null if waiting for success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.red);
       config.prCreation = 'status-success';
@@ -237,6 +172,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('AwaitingTests');
     });
+
     it('should return needs-approval if prCreation set to approval', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'approval';
@@ -244,6 +180,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('NeedsApproval');
     });
+
     it('should create PR if success for gitlab deps', async () => {
       setupGitlabChangelogMock();
       config.branchName = 'renovate/gitlabdummy-1.x';
@@ -270,6 +207,7 @@ describe('workers/repository/update/pr/index', () => {
       config.sourceUrl = 'https://github.com/renovateapp/dummy';
       config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
     });
+
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
@@ -287,6 +225,7 @@ describe('workers/repository/update/pr/index', () => {
       ]);
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
+
     it('should not create PR if limit is reached', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
@@ -299,6 +238,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(result.prBlockedBy).toBe('RateLimited');
       expect(platform.createPr.mock.calls).toBeEmpty();
     });
+
     it('should create PR if limit is reached but dashboard checked', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
@@ -312,6 +252,7 @@ describe('workers/repository/update/pr/index', () => {
       });
       expect(platform.createPr).toHaveBeenCalled();
     });
+
     it('should create group PR', async () => {
       const depsWithSameNotesSourceUrl = ['e', 'f'];
       const depsWithSameSourceUrl = ['g', 'h'];
@@ -455,6 +396,7 @@ describe('workers/repository/update/pr/index', () => {
         },
       ]);
     });
+
     it('should add note about Pin', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
@@ -488,6 +430,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('Error');
     });
+
     it('should return null if waiting for not pending', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockImplementationOnce(() =>
@@ -498,6 +441,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('AwaitingTests');
     });
+
     it('should not create PR if waiting for not pending with stabilityStatus yellow', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockImplementationOnce(() =>
@@ -509,6 +453,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('AwaitingTests');
     });
+
     it('should create PR if pending timeout hit', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockImplementationOnce(() =>
@@ -520,6 +465,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithPr(result);
       expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
     it('should create PR if no longer pending', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.red);
       config.prCreation = 'not-pending';
@@ -527,11 +473,13 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithPr(result);
       expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
     it('should create new branch if none exists', async () => {
       const result = await prWorker.ensurePr(config);
       isResultWithPr(result);
       expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
     it('should add assignees and reviewers to new PR', async () => {
       config.assignees = ['@foo', 'bar'];
       config.reviewers = ['baz', '@boo'];
@@ -543,6 +491,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
+
     it('should filter assignees and reviewers based on their availability', async () => {
       config.assignees = ['@foo', 'bar'];
       config.reviewers = ['foo', '@bar', 'foo@bar.com'];
@@ -555,6 +504,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
       expect(platform.filterUnavailableUsers.mock.calls).toMatchSnapshot();
     });
+
     it('should determine assignees from code owners', async () => {
       config.assigneesFromCodeOwners = true;
       codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);
@@ -562,6 +512,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
     });
+
     it('should determine reviewers from code owners', async () => {
       config.reviewersFromCodeOwners = true;
       codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);
@@ -569,6 +520,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
+
     it('should combine assignees from code owners and config', async () => {
       codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@jimmy']);
       config.assignees = ['@mike', '@julie'];
@@ -577,6 +529,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
     });
+
     it('should add reviewers even if assignees fails', async () => {
       platform.addAssignees.mockImplementationOnce(() => {
         throw new Error('some error');
@@ -589,6 +542,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
     });
+
     it('should handled failed reviewers add', async () => {
       platform.addReviewers.mockImplementationOnce(() => {
         throw new Error('some error');
@@ -601,6 +555,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
     });
+
     it('should not add assignees and reviewers to new PR if automerging enabled regularly', async () => {
       config.assignees = ['bar'];
       config.reviewers = ['baz'];
@@ -611,6 +566,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(0);
       expect(platform.addReviewers).toHaveBeenCalledTimes(0);
     });
+
     it('should add assignees and reviewers to new PR if automerging enabled but configured to always assign', async () => {
       config.assignees = ['bar'];
       config.reviewers = ['baz'];
@@ -622,6 +578,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
     });
+
     it('should add random sample of assignees and reviewers to new PR', async () => {
       config.assignees = ['foo', 'bar', 'baz'];
       config.assigneesSampleSize = 2;
@@ -640,6 +597,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(reviewers).toHaveLength(2);
       expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
     });
+
     it('should not add any assignees or reviewers to new PR', async () => {
       config.assignees = ['foo', 'bar', 'baz'];
       config.assigneesSampleSize = 0;
@@ -651,6 +609,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(0);
       expect(platform.addReviewers).toHaveBeenCalledTimes(0);
     });
+
     it('should add and deduplicate additionalReviewers on new PR', async () => {
       config.reviewers = ['@foo', 'bar'];
       config.additionalReviewers = ['bar', 'baz', '@boo'];
@@ -660,6 +619,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
+
     it('should add and deduplicate additionalReviewers to empty reviewers on new PR', async () => {
       config.reviewers = [];
       config.additionalReviewers = ['bar', 'baz', '@boo', '@foo', 'bar'];
@@ -669,6 +629,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
+
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       config.semanticCommitScope = null;
@@ -681,6 +642,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(result.pr).toMatchObject(existingPr);
     });
+
     it('should return unmodified existing PR if only whitespace changes', async () => {
       const modifiedPr = JSON.parse(
         JSON.stringify(existingPr).replace(' ', '  ').replace('\n', '\r\n')
@@ -695,6 +657,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(result.pr).toMatchObject(modifiedPr);
     });
+
     it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
       config.automerge = true;
@@ -708,6 +671,7 @@ describe('workers/repository/update/pr/index', () => {
         title: 'Update dependency dummy to v1.1.0',
       });
     });
+
     it('should return modified existing PR title', async () => {
       config.newValue = '1.2.0';
       platform.getBranchPr.mockResolvedValueOnce({
@@ -721,6 +685,7 @@ describe('workers/repository/update/pr/index', () => {
         title: 'wrong',
       });
     });
+
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -730,6 +695,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithPr(result);
       expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
     it('should create PR if branch automerging failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -739,6 +705,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithPr(result);
       expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
     it('should return no PR if branch automerging not failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -748,6 +715,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('BranchAutomerge');
     });
+
     it('should return PR if branch automerging taking too long', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -757,6 +725,7 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithPr(result);
       expect(result.pr).toBeDefined();
     });
+
     it('should return no PR if stabilityStatus yellow', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -767,12 +736,14 @@ describe('workers/repository/update/pr/index', () => {
       isResultWithoutPr(result);
       expect(result.prBlockedBy).toBe('BranchAutomerge');
     });
+
     it('handles duplicate upgrades', async () => {
       config.upgrades.push(config.upgrades[0]);
       const result = await prWorker.ensurePr(config);
       isResultWithPr(result);
       expect(result.pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
     it('should create privateRepo PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
@@ -785,6 +756,7 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
+
     it('should create PR if waiting for not pending but artifactErrors', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
@@ -817,83 +789,6 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.createPr.mock.calls[0][0]).toMatchObject({
         labels: ['deps', 'renovate', 'js'],
       });
-    });
-  });
-
-  describe('prepareLabels(config)', () => {
-    it('returns empty array if no labels are configured', () => {
-      const result = prWorker.prepareLabels({});
-      expect(result).toBeArrayOfSize(0);
-    });
-
-    it('only labels', () => {
-      const result = prWorker.prepareLabels({ labels: ['labelA', 'labelB'] });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('only addLabels', () => {
-      const result = prWorker.prepareLabels({
-        addLabels: ['labelA', 'labelB'],
-      });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('merge labels and addLabels', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', 'labelB'],
-        addLabels: ['labelC'],
-      });
-      expect(result).toBeArrayOfSize(3);
-      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
-    });
-
-    it('deduplicate merged labels and addLabels', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', 'labelB'],
-        addLabels: ['labelB', 'labelC'],
-      });
-      expect(result).toBeArrayOfSize(3);
-      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
-    });
-
-    it('empty labels ignored', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', ''],
-        addLabels: [' ', 'labelB'],
-      });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('null labels ignored', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', null],
-        // an empty space between two commas in an array is categorized as a null value
-        // eslint-disable-next-line no-sparse-arrays
-        addLabels: ['labelB', '', undefined, , ,],
-      });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('template labels', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['datasource-{{{datasource}}}'],
-        datasource: 'npm',
-      });
-      expect(result).toBeArrayOfSize(1);
-      expect(result).toEqual(['datasource-npm']);
-    });
-
-    it('template labels with empty datasource', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['{{{datasource}}}', ' {{{datasource}}} '],
-        datasource: null,
-      });
-      expect(result).toBeArrayOfSize(0);
-      expect(result).toEqual([]);
     });
   });
 });

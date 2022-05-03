@@ -1,4 +1,3 @@
-import url from 'url';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -7,6 +6,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
@@ -17,9 +17,11 @@ import type {
   MavenXml,
 } from './types';
 
-const getHost = (x: string): string => new url.URL(x).host;
+function getHost(url: string): string | null {
+  return parseUrl(url)?.host ?? null;
+}
 
-function isMavenCentral(pkgUrl: url.URL | string): boolean {
+function isMavenCentral(pkgUrl: URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
   return getHost(MAVEN_REPO) === host;
 }
@@ -58,7 +60,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 
 export async function downloadHttpProtocol(
   http: Http,
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
@@ -99,7 +101,7 @@ export async function downloadHttpProtocol(
 
 export async function checkHttpResource(
   http: Http,
-  pkgUrl: url.URL | string
+  pkgUrl: URL | string
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());
@@ -136,18 +138,21 @@ export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): url.URL {
-  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+): URL {
+  return new URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
   http: Http,
-  pkgUrl: url.URL | null
+  pkgUrl: URL | null
 ): Promise<MavenXml> {
   /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
+
+  let isCacheable = false;
+
   let rawContent: string | undefined;
   let authorization: boolean | undefined;
   let statusCode: number | undefined;
@@ -176,7 +181,11 @@ export async function downloadMavenXml(
     return {};
   }
 
-  return { authorization, xml: new XmlDocument(rawContent) };
+  if (!authorization) {
+    isCacheable = true;
+  }
+
+  return { isCacheable, xml: new XmlDocument(rawContent) };
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {
@@ -188,6 +197,84 @@ export function getDependencyParts(packageName: string): MavenDependency {
     name,
     dependencyUrl,
   };
+}
+
+function extractSnapshotVersion(metadata: XmlDocument): string | null {
+  // Parse the maven-metadata.xml for the snapshot version and determine
+  // the fixed version of the latest deployed snapshot.
+  // The metadata descriptor can be found at
+  // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
+  //
+  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
+  // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
+  const version = metadata
+    .descendantWithPath('version')
+    ?.val?.replace('-SNAPSHOT', '');
+
+  const snapshot = metadata.descendantWithPath('versioning.snapshot');
+  const timestamp = snapshot?.childNamed('timestamp')?.val;
+  const build = snapshot?.childNamed('buildNumber')?.val;
+
+  // If we weren't able to parse out the required 3 version elements,
+  // return null because we can't determine the fixed version of the latest snapshot.
+  if (!version || !timestamp || !build) {
+    return null;
+  }
+  return `${version}-${timestamp}-${build}`;
+}
+
+async function getSnapshotFullVersion(
+  http: Http,
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string | null> {
+  // To determine what actual files are available for the snapshot, first we have to fetch and parse
+  // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
+  const metadataUrl = getMavenUrl(
+    dependency,
+    repoUrl,
+    `${version}/maven-metadata.xml`
+  );
+
+  const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
+  if (!mavenMetadata) {
+    return null;
+  }
+
+  return extractSnapshotVersion(mavenMetadata);
+}
+
+function isSnapshotVersion(version: string): boolean {
+  if (version.endsWith('-SNAPSHOT')) {
+    return true;
+  }
+  return false;
+}
+
+export async function createUrlForDependencyPom(
+  http: Http,
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string> {
+  if (isSnapshotVersion(version)) {
+    // By default, Maven snapshots are deployed to the repository with fixed file names.
+    // Resolve the full, actual pom file name for the version.
+    const fullVersion = await getSnapshotFullVersion(
+      http,
+      version,
+      dependency,
+      repoUrl
+    );
+
+    // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
+    if (fullVersion !== null) {
+      return `${version}/${dependency.name}-${fullVersion}.pom`;
+    }
+  }
+
+  return `${version}/${dependency.name}-${version}.pom`;
 }
 
 export async function getDependencyInfo(

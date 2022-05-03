@@ -44,6 +44,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
       ],
     });
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });

@@ -36,6 +36,7 @@ describe('modules/manager/sbt/extract', () => {
         extractPackageFile('libraryDependencies += "foo" % "bar" % "baz" %%')
       ).toBeNull();
     });
+
     it('extracts deps for generic use-cases', () => {
       expect(extractPackageFile(sbt)).toMatchSnapshot({
         deps: [
@@ -61,6 +62,7 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: '1.0',
       });
     });
+
     it('extracts deps when scala version is defined in a variable', () => {
       expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
         deps: [
@@ -78,6 +80,7 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: '3.2.1',
       });
     });
+
     it('skips deps when scala version is missing', () => {
       expect(extractPackageFile(sbtMissingScalaVersion)).toEqual({
         deps: [
@@ -104,6 +107,7 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: '1.0.1',
       });
     });
+
     it('extract deps from native scala file with variables', () => {
       expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot({
         deps: [
@@ -122,6 +126,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extracts deps when scala version is defined with a trailing comma', () => {
       const content = `
         lazy val commonSettings = Seq(
@@ -142,6 +147,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extracts deps when scala version is defined in a variable with a trailing comma', () => {
       const content = `
         val ScalaVersion = "2.12.10"
@@ -154,6 +160,7 @@ describe('modules/manager/sbt/extract', () => {
         deps: [{ packageName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
       });
     });
+
     it('extracts deps when scala version is defined with ThisBuild scope', () => {
       const content = `
         ThisBuild / scalaVersion := "2.12.10"
@@ -172,6 +179,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
       const content = `
         val ScalaVersion = "2.12.10"
@@ -187,6 +195,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extract deps from native scala file with private variables', () => {
       expect(
         extractPackageFile(sbtPrivateVariableDependencyFile)

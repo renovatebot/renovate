@@ -17,30 +17,31 @@ export function extractPackageFile(content: string): PackageFile | null {
       const pluginsSection = regEx(
         /^(?<pluginsIndent>\s*)(-?\s*)plugins:/
       ).exec(line);
-      if (pluginsSection) {
+      if (pluginsSection?.groups) {
         logger.trace(`Matched plugins on line ${lineNumber}`);
         isPluginsSection = true;
         pluginsIndent = pluginsSection.groups.pluginsIndent;
       } else if (isPluginsSection) {
         logger.debug(`serviceImageLine: "${line}"`);
-        const { currentIndent } = regEx(/^(?<currentIndent>\s*)/).exec(
-          line
-        ).groups;
+        const { currentIndent } = regEx(/^(?<currentIndent>\s*)/).exec(line)
+          ?.groups ?? /* istanbul ignore next: should never happen */ {
+          currentIndent: '',
+        };
         const depLineMatch = regEx(
           /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/
         ).exec(line);
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
           pluginsIndent = '';
-        } else if (depLineMatch) {
+        } else if (depLineMatch?.groups) {
           const { depName, currentValue } = depLineMatch.groups;
           logger.trace('depLineMatch');
-          let skipReason: SkipReason;
-          let repo: string;
+          let skipReason: SkipReason | undefined;
+          let repo: string | undefined;
           const gitPluginMatch = regEx(
             /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
           ).exec(depName);
-          if (gitPluginMatch) {
+          if (gitPluginMatch?.groups) {
             logger.debug('Examining git plugin');
             const { registry, gitPluginName } = gitPluginMatch.groups;
             const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');

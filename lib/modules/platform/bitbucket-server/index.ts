@@ -73,7 +73,7 @@ const defaults: {
 
 /* istanbul ignore next */
 function updatePrVersion(pr: number, version: number): number {
-  const res = Math.max(config.prVersions.get(pr) || 0, version);
+  const res = Math.max(config.prVersions.get(pr) ?? 0, version);
   config.prVersions.set(pr, res);
   return res;
 }
@@ -144,11 +144,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
+  return JSON5.parse(raw);
 }
 
 // Initialize BitBucket Server by getting base branch
@@ -193,7 +191,8 @@ export async function initRepo({
 
     const gitUrl = utils.getRepoGitUrl(
       config.repositorySlug,
-      defaults.endpoint,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      defaults.endpoint!,
       info,
       opts
     );
@@ -264,7 +263,8 @@ export async function getPr(
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
-  pr.version = updatePrVersion(pr.number, pr.version);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  pr.version = updatePrVersion(pr.number, pr.version!);
 
   return pr;
 }
@@ -295,7 +295,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList || refreshCache) {
-    const searchParams = {
+    const searchParams: Record<string, string> = {
       state: 'ALL',
     };
     if (!config.ignorePrAuthor) {
@@ -331,7 +331,7 @@ export async function findPr({
   } else {
     logger.debug(`Renovate did not find a PR for branch #${branchName}`);
   }
-  return pr;
+  return pr ?? null;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -503,7 +503,7 @@ export function findIssue(title: string): Promise<Issue | null> {
   // config error notifications, or "dependencyDashboard"
   //
   // Bitbucket Server does not have issues
-  return null;
+  return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
@@ -516,7 +516,7 @@ export function ensureIssue({
   // config error notifications, or "dependencyDashboard"
   //
   // Bitbucket Server does not have issues
-  return null;
+  return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
@@ -563,7 +563,9 @@ export async function addReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    const reviewersSet = new Set([...pr.reviewers, ...reviewers]);
+    // TODO: can `reviewers` be undefined?
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -759,7 +761,7 @@ export async function ensureCommentRemoval(
 // Pull Request
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(regEx(/#/g), '%23') : input;
+  input?.replace(regEx(/#/g), '%23');
 
 export async function createPr({
   sourceBranch,
@@ -833,7 +835,8 @@ export async function createPr({
     ...utils.prInfo(prInfoRes.body),
   };
 
-  updatePrVersion(pr.number, pr.version);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  updatePrVersion(pr.number, pr.version!);
 
   // istanbul ignore if
   if (config.prList) {
@@ -872,7 +875,7 @@ export async function updatePr({
           description,
           version: pr.version,
           reviewers: pr.reviewers
-            .filter(
+            ?.filter(
               (name: string) => !bitbucketInvalidReviewers?.includes(name)
             )
             .map((name: string) => ({ user: { name } })),
@@ -886,7 +889,8 @@ export async function updatePr({
     const newState = {
       [PrState.Open]: 'OPEN',
       [PrState.Closed]: 'DECLINED',
-    }[state];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    }[state!];
 
     if (
       newState &&

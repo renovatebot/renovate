@@ -62,3 +62,10 @@ export interface ParseLockFileResult {
   detectedIndent: string;
   lockFileParsed: LockFile | undefined;
 }
+
+export type NpmDepType =
+  | 'dependencies'
+  | 'devDependencies'
+  | 'optionalDependencies'
+  | 'peerDependencies'
+  | 'resolutions';

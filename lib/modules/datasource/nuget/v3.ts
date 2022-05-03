@@ -62,13 +62,16 @@ export async function getResourceUrl(
       .filter(
         ({ type, version }) => type === resourceType && semver.valid(version)
       )
-      .sort((x, y) => semver.compare(x.version, y.version));
-    const { serviceId, version } = services.pop();
+      .sort((x, y) =>
+        x.version && y.version ? semver.compare(x.version, y.version) : 0
+      );
+    const { serviceId, version } = services.pop()!;
 
     // istanbul ignore if
     if (
       resourceType === 'RegistrationsBaseUrl' &&
-      !version?.startsWith('3.0.0-') &&
+      version &&
+      !version.startsWith('3.0.0-') &&
       !semver.satisfies(version, '^3.0.0')
     ) {
       logger.warn(
@@ -122,8 +125,8 @@ export async function getReleases(
     await pAll(catalogPagesQueue, { concurrency: 5 })
   ).flat();
 
-  let homepage = null;
-  let latestStable: string = null;
+  let homepage: string | null = null;
+  let latestStable: string | null = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl, listed }) => {
       const release: Release = { version: removeBuildMeta(version) };
@@ -132,7 +135,7 @@ export async function getReleases(
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
         latestStable = removeBuildMeta(version);
-        homepage = massageUrl(projectUrl || homepage);
+        homepage = projectUrl ? massageUrl(projectUrl) : homepage;
       }
       if (listed === false) {
         release.isDeprecated = true;
@@ -146,10 +149,10 @@ export async function getReleases(
   }
 
   // istanbul ignore if: only happens when no stable version exists
-  if (latestStable === null) {
-    const last = catalogEntries.pop();
+  if (latestStable === null && catalogPages.length) {
+    const last = catalogEntries.pop()!;
     latestStable = removeBuildMeta(last.version);
-    homepage ??= last.projectUrl;
+    homepage ??= last.projectUrl ?? null;
   }
 
   const dep: ReleaseResult = {

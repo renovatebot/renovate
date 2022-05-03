@@ -18,6 +18,7 @@ describe('modules/platform/azure/util', () => {
       const res = getNewBranchName('testBB');
       expect(res).toBe(`refs/heads/testBB`);
     });
+
     it('should be the same', () => {
       const res = getNewBranchName('refs/heads/testBB');
       expect(res).toBe(`refs/heads/testBB`);
@@ -29,6 +30,7 @@ describe('modules/platform/azure/util', () => {
       const contextName = getGitStatusContextCombinedName(null);
       expect(contextName).toBeUndefined();
     });
+
     it('should combine valid genre and name with slash', () => {
       const contextName = getGitStatusContextCombinedName({
         genre: 'my-genre',
@@ -36,6 +38,7 @@ describe('modules/platform/azure/util', () => {
       });
       expect(contextName).toMatch('my-genre/status-name');
     });
+
     it('should combine valid empty genre and name without a slash', () => {
       const contextName = getGitStatusContextCombinedName({
         genre: undefined,
@@ -50,6 +53,7 @@ describe('modules/platform/azure/util', () => {
       const context = getGitStatusContextFromCombinedName(null);
       expect(context).toBeUndefined();
     });
+
     it('should parse valid genre and name with slash', () => {
       const context = getGitStatusContextFromCombinedName(
         'my-genre/status-name'
@@ -59,6 +63,7 @@ describe('modules/platform/azure/util', () => {
         name: 'status-name',
       });
     });
+
     it('should parse valid genre and name with multiple slashes', () => {
       const context = getGitStatusContextFromCombinedName(
         'my-genre/sub-genre/status-name'
@@ -68,6 +73,7 @@ describe('modules/platform/azure/util', () => {
         name: 'status-name',
       });
     });
+
     it('should parse valid empty genre and name without a slash', () => {
       const context = getGitStatusContextFromCombinedName('status-name');
       expect(context).toEqual({
@@ -82,10 +88,12 @@ describe('modules/platform/azure/util', () => {
       const res = getBranchNameWithoutRefsheadsPrefix('refs/heads/testBB');
       expect(res).toBe(`testBB`);
     });
+
     it('should log error and return undefined', () => {
       const res = getBranchNameWithoutRefsheadsPrefix(undefined as any);
       expect(res).toBeUndefined();
     });
+
     it('should return the input', () => {
       const res = getBranchNameWithoutRefsheadsPrefix('testBB');
       expect(res).toBe('testBB');
@@ -114,6 +122,7 @@ describe('modules/platform/azure/util', () => {
       const res = await streamToString(Readable.from('foobar'));
       expect(res).toBe('foobar');
     });
+
     it('handles error', async () => {
       const stream = Readable.from('foobar');
       const res = streamToString(stream);
@@ -130,12 +139,14 @@ describe('modules/platform/azure/util', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
     it('should configure personal access token', () => {
       const res = getStorageExtraCloneOpts({
         token: '123456789012345678901234567890123456789012345678test',
       });
       expect(res).toMatchSnapshot();
     });
+
     it('should configure bearer token', () => {
       const res = getStorageExtraCloneOpts({ token: 'token' });
       expect(res).toMatchSnapshot();
@@ -147,6 +158,7 @@ describe('modules/platform/azure/util', () => {
       const res = max4000Chars('Hello');
       expect(res).toMatchSnapshot();
     });
+
     it('should be truncated', () => {
       let str = '';
       for (let i = 0; i < 5000; i += 1) {
@@ -162,10 +174,12 @@ describe('modules/platform/azure/util', () => {
       const res = getProjectAndRepo('myRepoName');
       expect(res).toMatchSnapshot();
     });
+
     it('should return the object with project and repo', () => {
       const res = getProjectAndRepo('prjName/myRepoName');
       expect(res).toMatchSnapshot();
     });
+
     it('should return an error', () => {
       expect(() => getProjectAndRepo('prjName/myRepoName/blalba')).toThrow(
         Error(
@@ -181,11 +195,13 @@ describe('modules/platform/azure/util', () => {
       expect(getRepoByName('foo/bar', undefined)).toBeNull();
       expect(getRepoByName('foo/bar', null)).toBeNull();
     });
+
     it('returns null when repo is not found', () => {
       expect(
         getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }])
       ).toBeNull();
     });
+
     it('finds repo', () => {
       expect(
         getRepoByName('foo/bar', [
@@ -198,6 +214,7 @@ describe('modules/platform/azure/util', () => {
         ])
       ).toMatchObject({ id: '3' });
     });
+
     it('supports shorthand names', () => {
       expect(
         getRepoByName('foo', [
@@ -206,6 +223,7 @@ describe('modules/platform/azure/util', () => {
         ])
       ).toMatchObject({ id: '2' });
     });
+
     it('is case-independent', () => {
       const repos = [
         { id: '1', name: 'FOO', project: { name: 'FOO' } },
@@ -215,9 +233,11 @@ describe('modules/platform/azure/util', () => {
       expect(getRepoByName('foo/FOO', repos)).toMatchObject({ id: '1' });
       expect(getRepoByName('foo/foo', repos)).toMatchObject({ id: '1' });
     });
+
     it('throws when repo name is invalid', () => {
-      expect(() => getRepoByName(undefined, [])).toThrow();
-      expect(() => getRepoByName(null, [])).toThrow();
+      // TODO: better error handling #7154
+      expect(() => getRepoByName(undefined as never, [])).toThrow();
+      expect(() => getRepoByName(null as never, [])).toThrow();
       expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
     });
   });

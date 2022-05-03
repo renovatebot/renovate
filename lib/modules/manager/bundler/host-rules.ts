@@ -21,5 +21,5 @@ export function getAuthenticationHeaderValue(hostRule: HostRule): string {
     return `${hostRule.username}:${hostRule.password}`;
   }
 
-  return hostRule.token;
+  return `${hostRule.token}`;
 }
