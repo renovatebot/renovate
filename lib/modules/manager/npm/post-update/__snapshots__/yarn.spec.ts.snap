@@ -365,7 +365,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn patchest local yarn 1`] = `
+exports[`modules/manager/npm/post-update/yarn patches local yarn 1`] = `
 Array [
   Object {
     "cmd": "install-tool yarn-slim 1.22.18",

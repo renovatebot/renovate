@@ -315,7 +315,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
-  it('patchest local yarn', async () => {
+  it('patches local yarn', async () => {
     process.env.BUILDPACK = 'true';
     GlobalConfig.set({ localDir: '.', binarySource: 'install' });
     Fixtures.mock(
