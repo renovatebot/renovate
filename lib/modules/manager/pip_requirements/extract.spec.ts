@@ -170,6 +170,7 @@ describe('modules/manager/pip_requirements/extract', () => {
             currentVersion: '20.3.0',
             datasource: 'pypi',
             depName: 'attrs',
+            versioning: 'pep440',
           },
         ],
       });
@@ -190,6 +191,7 @@ describe('modules/manager/pip_requirements/extract', () => {
             currentVersion: 'v1.1.0',
             packageName: 'git@github.com:rwxd/python-pip-setup-test.git',
             datasource: 'git-tags',
+            versioning: 'loose',
           },
           {
             depName: 'test_package',
@@ -197,6 +199,7 @@ describe('modules/manager/pip_requirements/extract', () => {
             currentVersion: '1.0.0',
             packageName: 'git@github.com:rwxd/test_package',
             datasource: 'git-tags',
+            versioning: 'loose',
           },
           {
             depName: 'python-package',
@@ -204,6 +207,7 @@ describe('modules/manager/pip_requirements/extract', () => {
             currentVersion: 'abcde',
             packageName: 'git@gitlab.company.com:rwxd/python-package.git',
             datasource: 'git-tags',
+            versioning: 'loose',
           },
           {
             depName: 'python-pip-setup-test',
@@ -212,6 +216,7 @@ describe('modules/manager/pip_requirements/extract', () => {
             packageName:
               'https://peter@github.com/rwxd/python-pip-setup-test.git',
             datasource: 'git-tags',
+            versioning: 'loose',
           },
           {
             depName: 'python-pip-setup-test',
@@ -219,6 +224,7 @@ describe('modules/manager/pip_requirements/extract', () => {
             currentVersion: 'v0.9.0',
             packageName: 'https://github.com/rwxd/python-pip-setup-test.git',
             datasource: 'git-tags',
+            versioning: 'loose',
           },
         ],
       });

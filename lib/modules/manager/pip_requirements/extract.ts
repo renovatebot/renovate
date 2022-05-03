@@ -7,6 +7,8 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import * as looseVersioning from '../../versioning/loose';
+import * as pep440Versioning from '../../versioning/pep440';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
@@ -98,6 +100,7 @@ export function extractPackageFile(
           currentVersion,
           packageName,
           datasource: GitTagsDatasource.id,
+          versioning: looseVersioning.id,
         };
         return dep;
       }
@@ -111,6 +114,7 @@ export function extractPackageFile(
         depName,
         currentValue,
         datasource: PypiDatasource.id,
+        versioning: pep440Versioning.id,
       };
       if (currentValue?.startsWith('==')) {
         dep.currentVersion = currentValue.replace(/^==\s*/, '');
