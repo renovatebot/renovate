@@ -8,6 +8,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
+import { DashboardPackageFiles } from './dashboard-package-files';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -68,41 +69,6 @@ function getListItem(branch: BranchConfig, type: string): string {
     return item + '\n';
   }
   return item + ' (' + uniquePackages.join(', ') + ')\n';
-}
-
-function getDetectedDependencies(
-  config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]> | null
-): string {
-  const title = '## Dependencies detected\n\n';
-  const none = 'None detected\n\n';
-  let deps = '';
-
-  if (!config.dependencyDashboardDetectedDeps) {
-    return '';
-  }
-
-  if (packageFiles === null) {
-    return title + none;
-  }
-
-  const managers = Object.keys(packageFiles);
-  if (managers.length === 0) {
-    return title + none;
-  }
-
-  for (const manager of managers) {
-    deps += `<details><summary>${manager}</summary>\n\n`;
-    for (const packageFile of packageFiles[manager]) {
-      deps += `  - <details><summary>${packageFile.packageFile}</summary>\n\n`;
-      for (const dep of packageFile.deps) {
-        deps += `    - \`${dep.depName}@${dep.currentValue}\`\n`;
-      }
-    }
-    deps += `</details>\n\n</details>\n\n`;
-  }
-
-  return title + deps;
 }
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
@@ -382,7 +348,7 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  issueBody += getDetectedDependencies(config, packageFiles);
+  issueBody += DashboardPackageFiles.getDetectedDependencies(config);
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(
