@@ -349,6 +349,7 @@ export async function ensureDependencyDashboard(
   }
 
   issueBody += DashboardPackageFiles.getDetectedDependencies(config);
+  DashboardPackageFiles.clear();
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(
