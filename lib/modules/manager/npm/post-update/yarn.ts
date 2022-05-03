@@ -113,6 +113,7 @@ export async function generateLockFile(
     const needsCorepack = await isCorepack(lockFileDir);
     const yarnTool: ToolConstraint = {
       toolName: 'yarn',
+      constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
     };
 
     if (needsCorepack) {
