@@ -427,7 +427,7 @@ If enabled, Renovate will raise a pull request if config file migration is neede
 
 <!-- prettier-ignore -->
 !!! info
-    This feature writes plain JSON, Any JSON5 content will be down leveled and all comments be removed.
+    This feature writes plain JSON, any JSON5 content will be down leveled and all comments will be removed.
 
 ## configWarningReuseIssue
 
