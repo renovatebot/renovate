@@ -348,7 +348,21 @@ describe('modules/manager/npm/post-update/yarn', () => {
       GlobalConfig.set({ localDir: '/tmp/renovate' });
       expect(await yarnHelper.checkYarnrc('.')).toEqual({
         offlineMirror: true,
-        yarnPath: './.yarn/cli.js',
+        yarnPath: '.yarn/cli.js',
+      });
+    });
+
+    it('returns yarn path in subdir', async () => {
+      Fixtures.mock(
+        {
+          '.yarn/cli.js': '',
+          '.yarnrc': 'yarn-path "./.yarn/cli.js"\n',
+        },
+        'some-dir'
+      );
+      expect(await yarnHelper.checkYarnrc('some-dir')).toEqual({
+        offlineMirror: false,
+        yarnPath: 'some-dir/.yarn/cli.js',
       });
     });
 
