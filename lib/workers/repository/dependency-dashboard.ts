@@ -70,6 +70,41 @@ function getListItem(branch: BranchConfig, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function getDetectedDependencies(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]> | null
+): string {
+  const title = '## Dependencies detected\n\n';
+  const none = 'None detected\n\n';
+  let deps = '';
+
+  if (!config.dependencyDashboardDetectedDeps) {
+    return '';
+  }
+
+  if (packageFiles === null) {
+    return title + none;
+  }
+
+  const managers = Object.keys(packageFiles);
+  if (managers.length === 0) {
+    return title + none;
+  }
+
+  for (const manager of managers) {
+    deps += `<details><summary>${manager}</summary>\n\n`;
+    for (const packageFile of packageFiles[manager]) {
+      deps += `  - <details><summary>${packageFile.packageFile}</summary>\n\n`;
+      for (const dep of packageFile.deps) {
+        deps += `    - \`${dep.depName}@${dep.currentValue}\`\n`;
+      }
+    }
+    deps += `</details>\n\n</details>\n\n`;
+  }
+
+  return title + deps;
+}
+
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = new Set(
@@ -347,20 +382,7 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  let deps = '## Dependencies detected\n\n';
-
-  for (const manager of Object.keys(packageFiles)) {
-    deps += `<details><summary>${manager}</summary>\n\n`;
-    for (const packageFile of packageFiles[manager]) {
-      deps += `  - <details><summary>${packageFile.packageFile}</summary>\n\n`;
-      for (const dep of packageFile.deps) {
-        deps += `    - ${dep.depName}@${dep.currentVersion}\n`;
-      }
-    }
-    deps += `</details>\n\n</details>\n\n`;
-  }
-
-  issueBody += deps;
+  issueBody += getDetectedDependencies(config, packageFiles);
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(

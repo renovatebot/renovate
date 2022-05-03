@@ -1,5 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() add detected dependencies to the Dependency Dashboard body 1`] = `
+"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+
+This repository currently has no open or pending branches.
+
+## Dependencies detected
+
+<details><summary>dockerfile</summary>
+
+  - <details><summary>Dockerfile</summary>
+
+    - \`ubuntu@20.04\`
+</details>
+
+</details>
+
+<details><summary>npm</summary>
+
+  - <details><summary>package.json</summary>
+
+    - \`cookie-parser@^1.4.5\`
+    - \`express@~4.17.1\`
+    - \`express-handlebars@>=5.3.4\`
+    - \`geoip-lite@1.4.*\`
+    - \`nodemailer@6.7.0\`
+    - \`redis@3.1.2-3.4.0\`
+    - \`dotenv@10.0.0\`
+    - \`nodemon@2.0.14\`
+</details>
+
+</details>
+
+<details><summary>poetry</summary>
+
+  - <details><summary>pyproject.toml</summary>
+
+    - \`six@<=1.3.0\`
+</details>
+
+</details>
+
+"
+`;
+
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems 1`] = `
 "This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
 
@@ -57,6 +101,30 @@ These branches will be created by Renovate only once you click their checkbox be
 These updates are awaiting their schedule. Click on a checkbox to get an update now.
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() show default message in issues body when packageFiles is empty 1`] = `
+"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+
+This repository currently has no open or pending branches.
+
+## Dependencies detected
+
+None detected
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() show default message in issues body when when packageFiles is null 1`] = `
+"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+
+This repository currently has no open or pending branches.
+
+## Dependencies detected
+
+None detected
 
 "
 `;
