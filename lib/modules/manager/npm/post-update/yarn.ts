@@ -10,7 +10,11 @@ import {
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { exec } from '../../../../util/exec';
-import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
+import type {
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../../util/exec/types';
 import {
   deleteLocalFile,
   localPathIsFile,
@@ -45,6 +49,7 @@ export async function checkYarnrc(
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
       }
+      // FIXME: resolve yarnPath relative to lockFileDir
       const yarnBinaryExists = yarnPath
         ? await localPathIsFile(yarnPath)
         : false;
@@ -66,9 +71,7 @@ export async function checkYarnrc(
   return { offlineMirror, yarnPath };
 }
 
-export function getOptimizeCommand(
-  fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
-): string {
+export function getOptimizeCommand(fileName: string): string {
   return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
@@ -86,6 +89,7 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
+    const toolConstraints: ToolConstraint[] = [];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
@@ -99,12 +103,21 @@ export async function generateLockFile(
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
-    let installYarn = 'npm i -g yarn';
-    if (isYarn1 && minYarnVersion) {
-      installYarn += `@${quote(yarnCompatibility)}`;
-    }
+    const preCommands: string[] = [];
 
-    const preCommands = [installYarn];
+    const needsCorepack = await isCorepack(lockFileDir);
+    const yarnTool: ToolConstraint = {
+      toolName: 'yarn',
+    };
+
+    if (needsCorepack) {
+      toolConstraints.push({ toolName: 'corepack' });
+    } else {
+      toolConstraints.push(yarnTool);
+      if (isYarn1 && minYarnVersion) {
+        yarnTool.constraint = yarnCompatibility;
+      }
+    }
 
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
@@ -120,8 +133,7 @@ export async function generateLockFile(
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-          preCommands.push(getOptimizeCommand());
-          // istanbul ignore if
+          yarnTool.toolName = 'yarn-slim';
           if (yarnPath) {
             preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
@@ -167,6 +179,7 @@ export async function generateLockFile(
         tagConstraint,
       },
       preCommands,
+      toolConstraints,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
@@ -272,4 +285,12 @@ export async function generateLockFile(
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
+}
+async function isCorepack(lockFileDir: string): Promise<boolean> {
+  const pkgJson = await readLocalFile(
+    upath.join(lockFileDir, 'package.json'),
+    'utf8'
+  );
+
+  return is.nonEmptyStringAndNotWhitespace(JSON.parse(pkgJson)?.packageManager);
 }

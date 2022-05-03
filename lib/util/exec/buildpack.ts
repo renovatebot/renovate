@@ -20,6 +20,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  corepack: {
+    datasource: 'corepack',
+    depName: 'corepack',
+    versioning: npmVersioningId,
+  },
   flux: {
     datasource: 'github-releases',
     depName: 'fluxcd/flux2',
@@ -50,6 +55,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'pypi',
     depName: 'poetry',
     versioning: pep440VersioningId,
+  },
+  yarn: {
+    datasource: 'yarn',
+    depName: 'yarn',
+    versioning: npmVersioningId,
+  },
+  'yarn-slim': {
+    datasource: 'yarn',
+    depName: 'yarn',
+    versioning: npmVersioningId,
   },
 };
 
