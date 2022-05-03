@@ -25,6 +25,7 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import type { NpmManagerData } from '../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
@@ -87,7 +88,7 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
-  config: Partial<PostUpdateConfig> = {},
+  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
@@ -110,13 +111,12 @@ export async function generateLockFile(
 
     const preCommands: string[] = [];
 
-    const needsCorepack = await isCorepack(lockFileDir);
     const yarnTool: ToolConstraint = {
       toolName: 'yarn',
       constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
     };
 
-    if (needsCorepack) {
+    if (config.managerData?.hasPackageManager) {
       toolConstraints.push({ toolName: 'corepack' });
     } else {
       toolConstraints.push(yarnTool);
@@ -291,12 +291,4 @@ export async function generateLockFile(
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
-}
-async function isCorepack(lockFileDir: string): Promise<boolean> {
-  const pkgJson = await readLocalFile(
-    upath.join(lockFileDir, 'package.json'),
-    'utf8'
-  );
-
-  return is.nonEmptyStringAndNotWhitespace(JSON.parse(pkgJson)?.packageManager);
 }

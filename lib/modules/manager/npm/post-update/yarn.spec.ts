@@ -6,9 +6,11 @@ import {
   mockExecAll,
 } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
-import { env, mockedFunction } from '../../../../../test/util';
+import { env, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
+import type { PostUpdateConfig } from '../../types';
+import type { NpmManagerData } from '../types';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
@@ -39,10 +41,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it.each([
-    ['1.22.0', '^1.10.0', 3],
-    ['2.1.0', '>= 2.0.0', 2],
-    ['2.2.0', '2.2.0', 2],
-    ['3.0.0', '3.0.0', 2],
+    ['1.22.0', '^1.10.0', 2],
+    ['2.1.0', '>= 2.0.0', 1],
+    ['2.2.0', '2.2.0', 1],
+    ['3.0.0', '3.0.0', 1],
   ])(
     'generates lock files using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
@@ -212,9 +214,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
   );
 
   it.each([
-    ['1.22.0', '^1.10.0', 3],
-    ['2.1.0', '>= 2.0.0', 2],
-    ['2.2.0', '2.2.0', 2],
+    ['1.22.0', '^1.10.0', 2],
+    ['2.1.0', '>= 2.0.0', 1],
+    ['2.2.0', '2.2.0', 1],
   ])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
@@ -282,7 +284,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     Fixtures.mock({});
     const execSnapshots = mockExecAll(exec, new Error('some-error'));
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -305,7 +307,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = {};
+    const config = partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
