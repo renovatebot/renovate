@@ -21,7 +21,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: composerVersioningId,
   },
   corepack: {
-    datasource: 'corepack',
+    datasource: 'npm',
     depName: 'corepack',
     versioning: npmVersioningId,
   },
@@ -57,12 +57,12 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: pep440VersioningId,
   },
   yarn: {
-    datasource: 'yarn',
+    datasource: 'npm',
     depName: 'yarn',
     versioning: npmVersioningId,
   },
   'yarn-slim': {
-    datasource: 'yarn',
+    datasource: 'npm',
     depName: 'yarn',
     versioning: npmVersioningId,
   },
