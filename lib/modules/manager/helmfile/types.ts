@@ -7,5 +7,6 @@ export interface Doc {
   repositories?: {
     name: string;
     url: string;
+    oci?: boolean;
   }[];
 }
