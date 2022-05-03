@@ -333,7 +333,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = { constraints: { yarn: '1.22.18' } };
+    const config = partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('.', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
