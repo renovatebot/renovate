@@ -53,8 +53,7 @@ export async function extractAllPackageFiles(
     };
 
     try {
-      let content = await readLocalFile(packageFile, 'utf8');
-      content = content.replace(regEx(/\r\n/g), '\n');
+      const content = await readLocalFile(packageFile, 'utf8');
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {
