@@ -252,7 +252,7 @@ export function parseCatalog(
       versionSubContent,
     });
 
-    const dependencyBase = {
+    const dependency: PackageDependency<GradleManagerData> = {
       depType: 'plugin',
       depName,
       packageName: `${depName}:${depName}.gradle.plugin`,
@@ -261,16 +261,10 @@ export function parseCatalog(
       commitMessageTopic: `plugin ${pluginName}`,
       managerData: { fileReplacePosition },
     };
-
-    const dependency: PackageDependency<GradleManagerData> = {
-      ...dependencyBase,
-      currentValue,
-      managerData: { fileReplacePosition },
-    };
     if (skipReason) {
       dependency.skipReason = skipReason;
     }
-    if (isVersionPointer(version)) {
+    if (isVersionPointer(version) && dependency.commitMessageTopic) {
       dependency.groupName = version.ref;
       delete dependency.commitMessageTopic;
     }
@@ -278,19 +272,8 @@ export function parseCatalog(
     extractedDeps.push(dependency);
   }
 
-  const versionRefs: Set<string> = new Set();
-  for (const ref of Object.keys(versions)) {
-    versionRefs.add(ref);
-  }
-
   const deps = extractedDeps.map((dep) => {
-    const d = deepmerge(dep, { managerData: { packageFile } });
-    if (d.groupName && versionRefs.has(d.groupName) && d.commitMessageTopic) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { commitMessageTopic, ...depWithoutCommitMsg } = d;
-      return depWithoutCommitMsg;
-    }
-    return d;
+    return deepmerge(dep, { managerData: { packageFile } });
   });
   return deps;
 }
