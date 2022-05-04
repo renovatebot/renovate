@@ -45,6 +45,10 @@ export async function checkYarnrc(
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
       }
+      if (yarnPath) {
+        // resolve binary relative to `yarnrc`
+        yarnPath = upath.join(lockFileDir, yarnPath);
+      }
       const yarnBinaryExists = yarnPath
         ? await localPathIsFile(yarnPath)
         : false;
