@@ -7,7 +7,6 @@ import type { BranchConfig } from '../../../../types';
 import releaseNotesHbs from '../changelog/hbs-template';
 
 export function getChangelogs(config: BranchConfig): string {
-  throw new ExternalHostError(new Error('wtf?'));
   let releaseNotes = '';
   // istanbul ignore if
   if (!config.hasReleaseNotes) {
@@ -20,6 +19,8 @@ export function getChangelogs(config: BranchConfig): string {
     if (upgrade.hasReleaseNotes && upgrade.repoName) {
       countReleaseNodesByRepoName[upgrade.repoName] =
         (countReleaseNodesByRepoName[upgrade.repoName] || 0) + 1;
+    } else {
+      throw new ExternalHostError(new Error('wtf?'));
     }
   }
 
