@@ -1,8 +1,15 @@
 import { DateTime } from 'luxon';
 import { git, logger, mocked, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import {
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+} from '../../../../constants/error-messages';
+import * as _comment from '../../../../modules/platform/comment';
 import type { Pr } from '../../../../modules/platform/types';
 import { BranchStatus, PrState } from '../../../../types';
+import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _statusChecks from '../branch/status-checks';
@@ -14,13 +21,6 @@ import {
 } from './changelog/types';
 import * as _participants from './participants';
 import { ensurePr } from '.';
-import * as _comment from '../../../../modules/platform/comment';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import {
-  PLATFORM_INTEGRATION_UNAUTHORIZED,
-  PLATFORM_RATE_LIMIT_EXCEEDED,
-  REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
 
 jest.mock('../../../../util/git');
 
@@ -39,7 +39,7 @@ const participants = mocked(_participants);
 jest.mock('../../../../modules/platform/comment');
 const comment = mocked(_comment);
 
-describe('workers/repository/update/pr/index-new', () => {
+describe('workers/repository/update/pr/index', () => {
   describe('ensurePr', () => {
     const number = 123;
     const sourceBranch = 'renovate-branch';
