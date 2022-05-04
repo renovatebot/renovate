@@ -68,7 +68,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     controls: await getControls(config),
     footer: getPrFooter(config),
   };
-  const prBodyTemplate = config.prBodyTemplate ?? '';
+  const prBodyTemplate = config.prBodyTemplate;
   let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();
   prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
