@@ -5,7 +5,7 @@ describe('modules/versioning/distro', () => {
   const di = new DistroInfo('data/ubuntu-distro-info.json');
 
   beforeAll(() => {
-    const dt = DateTime.fromISO('2022-03-20');
+    const dt = DateTime.fromISO('2021-03-20');
     jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
   });
 
@@ -83,14 +83,16 @@ describe('modules/versioning/distro', () => {
 
   it.each`
     version      | expected
+    ${'eoan'}    | ${true}
     ${'focal'}   | ${false}
-    ${'groovy'}  | ${true}
-    ${'hirsute'} | ${true}
+    ${'groovy'}  | ${false}
+    ${'hirsute'} | ${false}
     ${'impish'}  | ${false}
     ${'jammy'}   | ${false}
+    ${'19.10'}   | ${true}
     ${'20.04'}   | ${false}
-    ${'20.10'}   | ${true}
-    ${'21.04'}   | ${true}
+    ${'20.10'}   | ${false}
+    ${'21.04'}   | ${false}
     ${'21.10'}   | ${false}
     ${'22.04'}   | ${false}
   `('isEolLts("$version") === $expected', ({ version, expected }) => {
@@ -101,27 +103,37 @@ describe('modules/versioning/distro', () => {
     version      | expected
     ${'focal'}   | ${true}
     ${'groovy'}  | ${true}
-    ${'hirsute'} | ${true}
-    ${'impish'}  | ${true}
+    ${'hirsute'} | ${false}
+    ${'impish'}  | ${false}
     ${'jammy'}   | ${false}
     ${'20.04'}   | ${true}
     ${'20.10'}   | ${true}
-    ${'21.04'}   | ${true}
-    ${'21.10'}   | ${true}
+    ${'21.04'}   | ${false}
+    ${'21.10'}   | ${false}
     ${'22.04'}   | ${false}
     ${'24.04'}   | ${false}
   `('isReleased("$version") === $expected', ({ version, expected }) => {
     expect(di.isReleased(version)).toBe(expected);
   });
 
+  it('retrieves schedule of the previous release', () => {
+    expect(di.getNLatest(1)).toMatchObject({
+      series: 'focal',
+      version: '20.04',
+    });
+  });
+
   it('retrieves schedule of the most recent release', () => {
-    expect(di.getNLatest(0)).toEqual({
-      codename: 'Impish Indri',
-      series: 'impish',
-      created: '2021-04-22',
-      release: '2021-10-14',
-      eol: '2022-07-14',
-      version: '21.10',
+    expect(di.getNLatest(0)).toMatchObject({
+      series: 'groovy',
+      version: '20.10',
+    });
+  });
+
+  it('sends a float as an argument', () => {
+    expect(di.getNLatest(0.1)).toMatchObject({
+      series: 'groovy',
+      version: '20.10',
     });
   });
 
@@ -129,35 +141,12 @@ describe('modules/versioning/distro', () => {
     expect(di.getNLatest(-1)).toBeNull();
   });
 
-  it('sends a float as an argument', () => {
-    expect(di.getNLatest(0.1)).toEqual({
-      codename: 'Impish Indri',
-      series: 'impish',
-      created: '2021-04-22',
-      release: '2021-10-14',
-      eol: '2022-07-14',
-      version: '21.10',
-    });
-  });
-
-  it('retrieves schedule of the previous release', () => {
-    expect(di.getNLatest(1)).toEqual({
-      codename: 'Hirsute Hippo',
-      created: '2020-10-22',
-      eol: '2022-01-20',
-      release: '2021-04-22',
-      series: 'hirsute',
-      version: '21.04',
-    });
+  it('sends another out of bound argument', () => {
+    expect(di.getNLatest(100)).toBeNull();
   });
 
   it('retrieves focal release schedule', () => {
-    expect(di.getSchedule('20.04')).toEqual({
-      codename: 'Focal Fossa',
-      created: '2019-10-17',
-      eol: '2025-04-23',
-      eol_esm: '2030-04-23',
-      eol_server: '2025-04-23',
+    expect(di.getSchedule('20.04')).toMatchObject({
       release: '2020-04-23',
       series: 'focal',
     });
