@@ -59,7 +59,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
-        await ensureDependencyDashboard(config, packageFiles, branches);
+        await ensureDependencyDashboard(config, branches);
       }
       await finaliseRepo(config, branchList);
       repoResult = processResult(config, res);

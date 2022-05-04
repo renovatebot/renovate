@@ -3,7 +3,6 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -98,7 +97,6 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]> | null,
   allBranches: BranchConfig[]
 ): Promise<void> {
   // legacy/migrated issue
