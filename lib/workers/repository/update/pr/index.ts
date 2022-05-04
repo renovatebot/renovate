@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -72,7 +73,7 @@ export async function ensurePr(
 
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, ignoreTests, prTitle, upgrades } = config;
+  const { branchName, ignoreTests, prTitle = '', upgrades } = config;
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if existing PR exists
@@ -90,13 +91,14 @@ export async function ensurePr(
   // Only create a PR if a branch automerge has failed
   if (
     config.automerge === true &&
-    config.automergeType.startsWith('branch') &&
+    config.automergeType?.startsWith('branch') &&
     !config.forcePr
   ) {
     logger.debug(`Branch automerge is enabled`);
     if (
       config.stabilityStatus !== BranchStatus.yellow &&
-      (await getBranchStatus()) === BranchStatus.yellow
+      (await getBranchStatus()) === BranchStatus.yellow &&
+      is.number(config.prNotPendingHours)
     ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
@@ -148,7 +150,8 @@ export async function ensurePr(
         !dependencyDashboardCheck &&
         ((config.stabilityStatus &&
           config.stabilityStatus !== BranchStatus.yellow) ||
-          elapsedHours < config.prNotPendingHours)
+          (is.number(config.prNotPendingHours) &&
+            elapsedHours < config.prNotPendingHours))
       ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
@@ -204,13 +207,14 @@ export async function ensurePr(
           commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
-            logJSON.versions.forEach((version) => {
+            for (const version of logJSON.versions) {
               const release = { ...version };
               upgrade.releases.push(release);
-            });
+            }
           }
         }
       } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+        upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
           [
@@ -265,6 +269,7 @@ export async function ensurePr(
         await addParticipants(config, existingPr);
       }
       // Check if existing PR needs updating
+      existingPr.body ??= '';
       const reviewableIndex = existingPr.body.indexOf(
         '<!-- Reviewable:start -->'
       );
@@ -319,7 +324,7 @@ export async function ensurePr(
     if (config.updateType === 'rollback') {
       logger.info('Creating Rollback PR');
     }
-    let pr: Pr;
+    let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create PR: ' + prTitle);
       pr = { number: 0, displayNumber: 'Dry run PR' } as never;
@@ -335,7 +340,7 @@ export async function ensurePr(
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
-          targetBranch: config.baseBranch,
+          targetBranch: config.baseBranch ?? '',
           prTitle,
           prBody,
           labels: prepareLabels(config),
@@ -343,7 +348,7 @@ export async function ensurePr(
           draftPR: config.draftPR,
         });
         incLimitedValue(Limit.PullRequests);
-        logger.info({ pr: pr.number, prTitle }, 'PR created');
+        logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
         if (
@@ -367,8 +372,9 @@ export async function ensurePr(
       }
     }
     if (
+      pr &&
       config.branchAutomergeFailureMessage &&
-      !config.suppressNotifications.includes('branchAutomergeFailure')
+      !config.suppressNotifications?.includes('branchAutomergeFailure')
     ) {
       const topic = 'Branch automerge failure';
       let content =
@@ -389,19 +395,21 @@ export async function ensurePr(
       }
     }
     // Skip assign and review if automerging PR
-    if (
-      config.automerge &&
-      !config.assignAutomerge &&
-      (await getBranchStatus()) !== BranchStatus.red
-    ) {
-      logger.debug(
-        `Skipping assignees and reviewers as automerge=${config.automerge}`
-      );
-    } else {
-      await addParticipants(config, pr);
+    if (pr) {
+      if (
+        config.automerge &&
+        !config.assignAutomerge &&
+        (await getBranchStatus()) !== BranchStatus.red
+      ) {
+        logger.debug(
+          `Skipping assignees and reviewers as automerge=${config.automerge}`
+        );
+      } else {
+        await addParticipants(config, pr);
+      }
+      logger.debug(`Created ${pr.displayNumber}`);
+      return { type: 'with-pr', pr };
     }
-    logger.debug(`Created ${pr.displayNumber}`);
-    return { type: 'with-pr', pr };
   } catch (err) {
     if (
       err instanceof ExternalHostError ||
