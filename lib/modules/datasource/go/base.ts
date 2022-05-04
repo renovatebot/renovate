@@ -157,31 +157,32 @@ export class BaseGoDatasource {
     const importMatch = regEx(
       `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
     ).exec(res);
-    if (importMatch) {
-      const [, prefix, , goImportURL] = importMatch;
-      if (!goModule.startsWith(prefix)) {
-        logger.trace({ goModule }, 'go-import header prefix not match');
-        return null;
-      }
-      logger.debug({ goModule, goImportURL }, 'Go lookup import url');
-
-      // get server base url from import url
-      const parsedUrl = URL.parse(goImportURL);
-
-      // split the go module from the URL: host/go/module -> go/module
-      // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
-        .replace(regEx(/\.git$/), '')
-        .split('/')
-        .slice(-2)
-        .join('/');
-
-      return {
-        datasource: GithubTagsDatasource.id,
-        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-        packageName,
-      };
+    if (!importMatch) {
+      return null;
     }
+    const [, prefix, , goImportURL] = importMatch;
+    if (!goModule.startsWith(prefix)) {
+      logger.trace({ goModule }, 'go-import header prefix not match');
+      return null;
+    }
+    logger.debug({ goModule, goImportURL }, 'Go lookup import url');
+
+    // get server base url from import url
+    const parsedUrl = URL.parse(goImportURL);
+
+    // split the go module from the URL: host/go/module -> go/module
+    // TODO: `parsedUrl.pathname` can be undefined
+    const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
+      .replace(regEx(/\.git$/), '')
+      .split('/')
+      .slice(-2)
+      .join('/');
+
+    return {
+      datasource: GithubTagsDatasource.id,
+      registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+      packageName,
+    };
 
     logger.trace({ goModule }, 'No go-source or go-import header found');
     return null;
