@@ -319,8 +319,20 @@ describe('modules/manager/npm/post-update/yarn', () => {
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots[0].cmd).toBe('install-tool corepack 0.10.0');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            YARN_ENABLE_GLOBAL_CACHE: '1',
+            YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+            YARN_HTTP_TIMEOUT: '100000',
+          },
+        },
+      },
+    ]);
   });
 
   it('uses slim yarn instead of corepack', async () => {
