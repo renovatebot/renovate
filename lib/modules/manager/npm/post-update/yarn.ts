@@ -141,7 +141,7 @@ export async function generateLockFile(
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
           yarnTool.toolName = 'yarn-slim';
           if (yarnPath) {
-            preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+            commands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
         }
       } else if (isYarnModeAvailable) {
