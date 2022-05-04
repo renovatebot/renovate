@@ -1,4 +1,3 @@
-import { ExternalHostError } from '../../../../../types/errors/external-host-error';
 import { unemojify } from '../../../../../util/emoji';
 import { sanitizeMarkdown } from '../../../../../util/markdown';
 import { regEx } from '../../../../../util/regex';
@@ -8,7 +7,6 @@ import releaseNotesHbs from '../changelog/hbs-template';
 
 export function getChangelogs(config: BranchConfig): string {
   let releaseNotes = '';
-  // istanbul ignore if
   if (!config.hasReleaseNotes) {
     return releaseNotes;
   }
@@ -19,8 +17,6 @@ export function getChangelogs(config: BranchConfig): string {
     if (upgrade.hasReleaseNotes && upgrade.repoName) {
       countReleaseNodesByRepoName[upgrade.repoName] =
         (countReleaseNodesByRepoName[upgrade.repoName] || 0) + 1;
-    } else {
-      throw new ExternalHostError(new Error('wtf?'));
     }
   }
 
