@@ -254,7 +254,6 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
-      // istanbul ignore if
       if (
         !existingPr.hasAssignees &&
         !existingPr.hasReviewers &&
@@ -303,7 +302,6 @@ export async function ensurePr(
           'PR body changed'
         );
       }
-      // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
@@ -318,17 +316,15 @@ export async function ensurePr(
       return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
-    // istanbul ignore if
     if (config.updateType === 'rollback') {
       logger.info('Creating Rollback PR');
     }
     let pr: Pr;
-    try {
-      // istanbul ignore if
-      if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would create PR: ' + prTitle);
-        pr = { number: 0, displayNumber: 'Dry run PR' } as never;
-      } else {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      pr = { number: 0, displayNumber: 'Dry run PR' } as never;
+    } else {
+      try {
         if (
           !dependencyDashboardCheck &&
           isLimitReached(Limit.PullRequests) &&
@@ -348,31 +344,27 @@ export async function ensurePr(
         });
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'Pull request creation error');
-      if (
-        err.body?.message === 'Validation failed' &&
-        err.body.errors?.length &&
-        err.body.errors.some((error: { message?: string }) =>
-          error.message?.startsWith('A pull request already exists')
-        )
-      ) {
-        logger.warn('A pull requests already exists');
-        return { type: 'without-pr', prBlockedBy: 'Error' };
-      }
-      if (err.statusCode === 502) {
-        logger.warn(
-          { branch: branchName },
-          'Deleting branch due to server error'
-        );
-        if (GlobalConfig.get('dryRun')) {
-          logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
-        } else {
+      } catch (err) {
+        logger.debug({ err }, 'Pull request creation error');
+        if (
+          err.body?.message === 'Validation failed' &&
+          err.body.errors?.length &&
+          err.body.errors.some((error: { message?: string }) =>
+            error.message?.startsWith('A pull request already exists')
+          )
+        ) {
+          logger.warn('A pull requests already exists');
+          return { type: 'without-pr', prBlockedBy: 'Error' };
+        }
+        if (err.statusCode === 502) {
+          logger.warn(
+            { branch: branchName },
+            'Deleting branch due to server error'
+          );
           await deleteBranch(branchName);
         }
+        return { type: 'without-pr', prBlockedBy: 'Error' };
       }
-      return { type: 'without-pr', prBlockedBy: 'Error' };
     }
     if (
       config.branchAutomergeFailureMessage &&
@@ -386,7 +378,6 @@ export async function ensurePr(
       }
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
-      // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
@@ -412,9 +403,9 @@ export async function ensurePr(
     logger.debug(`Created ${pr.displayNumber}`);
     return { type: 'with-pr', pr };
   } catch (err) {
-    // istanbul ignore if
+    const x = err instanceof ExternalHostError;
     if (
-      err instanceof ExternalHostError ||
+      x ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
@@ -427,6 +418,5 @@ export async function ensurePr(
   if (existingPr) {
     return { type: 'with-pr', pr: existingPr };
   }
-  // istanbul ignore next
   return { type: 'without-pr', prBlockedBy: 'Error' };
 }
