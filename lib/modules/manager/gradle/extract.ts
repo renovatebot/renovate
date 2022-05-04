@@ -1,7 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import { MavenDatasource, defaultRegistryUrls } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
