@@ -134,6 +134,7 @@
   "dependencies": {
     "@aws-sdk/client-ec2": "3.72.0",
     "@aws-sdk/client-ecr": "3.72.0",
+    "@aws-sdk/client-s3": "3.72.0",
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "2.2.5",
@@ -215,7 +216,6 @@
   },
   "devDependencies": {
     "@actions/core": "1.7.0",
-    "@aws-sdk/client-s3": "3.72.0",
     "@jest/globals": "27.5.1",
     "@jest/reporters": "27.5.1",
     "@jest/test-result": "27.5.1",
@@ -246,7 +246,7 @@
     "@types/marshal": "0.5.1",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
-    "@types/node": "16.11.29",
+    "@types/node": "16.11.31",
     "@types/parse-link-header": "2.0.0",
     "@types/semver": "7.3.9",
     "@types/semver-stable": "3.0.0",

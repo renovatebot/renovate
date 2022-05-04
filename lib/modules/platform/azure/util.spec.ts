@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { streamToString } from '../../../util/streams';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -9,7 +10,6 @@ import {
   getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
-  streamToString,
 } from './util';
 
 describe('modules/platform/azure/util', () => {

@@ -15,6 +15,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
+import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -38,7 +39,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFile<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
@@ -416,6 +417,9 @@ export async function extractPackageFile(
     managerData: {
       lernaJsonFile,
       yarnZeroInstall,
+      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
+        packageJson.packageManager
+      ),
     },
     lernaClient,
     lernaPackages,

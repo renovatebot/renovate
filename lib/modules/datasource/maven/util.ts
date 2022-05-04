@@ -1,3 +1,5 @@
+import { Blob } from 'buffer';
+import { Readable } from 'stream';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -6,9 +8,10 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { getS3Client, parseS3Url } from '../../../util/s3';
+import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
-
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type {
@@ -93,15 +96,60 @@ export async function downloadHttpProtocol(
       // istanbul ignore next
       logger.debug({ failedUrl }, 'Unsupported host');
     } else {
-      logger.info({ failedUrl, err }, 'Unknown error');
+      logger.info({ failedUrl, err }, 'Unknown HTTP download error');
     }
     return {};
   }
 }
 
-export async function checkHttpResource(
+function isS3NotFound(err: Error): boolean {
+  return err.message === 'NotFound' || err.message === 'NoSuchKey';
+}
+
+export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
+  logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
+  try {
+    const s3Url = parseS3Url(pkgUrl);
+    if (s3Url === null) {
+      return null;
+    }
+    const { Body: res } = await getS3Client().getObject(s3Url);
+
+    // istanbul ignore if
+    if (res instanceof Blob) {
+      return res.toString();
+    }
+
+    if (res instanceof Readable) {
+      return streamToString(res);
+    }
+  } catch (err) {
+    const failedUrl = pkgUrl.toString();
+    if (err.name === 'CredentialsProviderError') {
+      logger.debug(
+        { failedUrl },
+        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
+      );
+    } else if (err.message === 'Region is missing') {
+      logger.debug(
+        { failedUrl },
+        'Dependency lookup failed. Please a correct AWS_REGION env var'
+      );
+    } else if (isS3NotFound(err)) {
+      logger.trace({ failedUrl }, `S3 url not found`);
+    } else {
+      logger.debug(
+        { failedUrl, message: err.message },
+        'Unknown S3 download error'
+      );
+    }
+  }
+  return null;
+}
+
+async function checkHttpResource(
   http: Http,
-  pkgUrl: URL | string
+  pkgUrl: URL
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());
@@ -130,6 +178,58 @@ export async function checkHttpResource(
   }
 }
 
+export async function checkS3Resource(
+  pkgUrl: URL
+): Promise<HttpResourceCheckResult> {
+  try {
+    const s3Url = parseS3Url(pkgUrl);
+    if (s3Url === null) {
+      return 'error';
+    }
+    const response = await getS3Client().headObject(s3Url);
+    if (response.DeleteMarker) {
+      return 'not-found';
+    }
+    if (response.LastModified) {
+      return response.LastModified;
+    }
+    return 'found';
+  } catch (err) {
+    if (isS3NotFound(err)) {
+      return 'not-found';
+    } else {
+      logger.debug(
+        { pkgUrl, name: err.name, message: err.message },
+        `Can't check S3 resource existence`
+      );
+    }
+    return 'error';
+  }
+}
+
+export async function checkResource(
+  http: Http,
+  pkgUrl: URL | string
+): Promise<HttpResourceCheckResult> {
+  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
+  if (parsedUrl === null) {
+    return 'error';
+  }
+  switch (parsedUrl.protocol) {
+    case 'http:':
+    case 'https:':
+      return await checkHttpResource(http, parsedUrl);
+    case 's3:':
+      return await checkS3Resource(parsedUrl);
+    default:
+      logger.debug(
+        { url: pkgUrl.toString() },
+        `Unsupported Maven protocol in check resource`
+      );
+      return 'not-found';
+  }
+}
+
 function containsPlaceholder(str: string): boolean {
   return regEx(/\${.*?}/g).test(str);
 }
@@ -146,7 +246,6 @@ export async function downloadMavenXml(
   http: Http,
   pkgUrl: URL | null
 ): Promise<MavenXml> {
-  /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
@@ -166,8 +265,8 @@ export async function downloadMavenXml(
       } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
-      logger.debug('Skipping s3 dependency');
-      return {};
+      rawContent = (await downloadS3Protocol(pkgUrl)) ?? undefined;
+      break;
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
       return {};
