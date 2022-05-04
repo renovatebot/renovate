@@ -403,9 +403,8 @@ export async function ensurePr(
     logger.debug(`Created ${pr.displayNumber}`);
     return { type: 'with-pr', pr };
   } catch (err) {
-    const x = err instanceof ExternalHostError;
     if (
-      x ||
+      err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
