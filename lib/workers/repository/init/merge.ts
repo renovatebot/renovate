@@ -55,7 +55,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
-  configFileName = await detectConfigFile();
+  configFileName = (await detectConfigFile()) ?? undefined;
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
@@ -130,7 +130,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         };
       }
       try {
-        configFileParsed = JSON.parse(rawFileContents);
+        configFileParsed = JSON5.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
@@ -179,7 +179,7 @@ export async function mergeRenovateConfig(
   }
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
-  if (migratedConfig.errors.length) {
+  if (migratedConfig.errors?.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = repoConfig.configFileName;
     error.validationError =
@@ -198,11 +198,10 @@ export async function mergeRenovateConfig(
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = await decryptConfig(
-    migratedConfig,
-    config.repository
-  );
+  const decryptedConfig = await decryptConfig(migratedConfig, repository);
   // istanbul ignore if
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
@@ -211,7 +210,7 @@ export async function mergeRenovateConfig(
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
     await presets.resolveConfigPresets(decryptedConfig, config),
-    config.repository
+    repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);

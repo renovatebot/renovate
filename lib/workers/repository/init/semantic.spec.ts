@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig, git } from '../../../../test/util';
-import { initialize } from '../../../util/cache/repository';
+import { initRepoCache } from '../../../util/cache/repository/init';
 import { detectSemanticCommits } from './semantic';
 
 jest.mock('../../../util/git');
@@ -16,7 +16,7 @@ beforeEach(() => {
 describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {
     beforeEach(async () => {
-      await initialize({});
+      await initRepoCache({});
     });
 
     it('detects false if unknown', async () => {

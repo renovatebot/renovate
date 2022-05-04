@@ -9,6 +9,10 @@ The configuration options listed in this document are applicable to self-hosted 
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ## allowCustomCrateRegistries
 
 ## allowPlugins
@@ -366,8 +370,6 @@ This reduces the chance of unintended consequences with global Git configs on sh
 ## gitTimeout
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
-
-The value must be between `2000` and `60000` (milliseconds) inclusive.
 
 ## gitUrl
 

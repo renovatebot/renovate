@@ -4,12 +4,12 @@ import {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
+import { streamToString } from '../../../util/streams';
 import * as azureApi from './azure-got-wrapper';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
   getNewBranchName,
-  streamToString,
 } from './util';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
@@ -42,14 +42,17 @@ export async function getAzureBranchObj(
   const refs = await getRefs(repoId, fromBranchName);
   if (refs.length === 0) {
     logger.debug(`getAzureBranchObj without a valid from, so initial commit.`);
+    // TODO: fix undefined
     return {
-      name: getNewBranchName(branchName),
+      name: getNewBranchName(branchName)!,
       oldObjectId: '0000000000000000000000000000000000000000',
     };
   }
   return {
-    name: getNewBranchName(branchName),
-    oldObjectId: refs[0].objectId,
+    // TODO: fix undefined
+    name: getNewBranchName(branchName)!,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    oldObjectId: refs[0].objectId!,
   };
 }
 
@@ -110,7 +113,7 @@ export async function getCommitDetails(
 export async function getMergeMethod(
   repoId: string,
   project: string,
-  branchRef?: string,
+  branchRef?: string | null,
   defaultBranch?: string
 ): Promise<GitPullRequestMergeStrategy> {
   type Scope = {
@@ -133,7 +136,8 @@ export async function getMergeMethod(
     }
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
-      : branchRef.startsWith(scope.refName);
+      : // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        branchRef.startsWith(scope.refName!);
   };
 
   const policyConfigurations = (
@@ -141,7 +145,7 @@ export async function getMergeMethod(
   )
     .filter(
       (p) =>
-        p.settings.scope.some(isRelevantScope) && p.type.id === mergePolicyGuid
+        p.settings.scope.some(isRelevantScope) && p.type?.id === mergePolicyGuid
     )
     .map((p) => p.settings)[0];
 
@@ -154,9 +158,15 @@ export async function getMergeMethod(
   );
 
   try {
+    // TODO: fix me, wrong types
     return Object.keys(policyConfigurations)
-      .map((p) => GitPullRequestMergeStrategy[p.slice(5)])
-      .find((p) => p);
+      .map(
+        (p) =>
+          GitPullRequestMergeStrategy[
+            p.slice(5) as never
+          ] as never as GitPullRequestMergeStrategy
+      )
+      .find((p) => p)!;
   } catch (err) {
     return GitPullRequestMergeStrategy.NoFastForward;
   }
