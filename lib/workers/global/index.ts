@@ -1,3 +1,4 @@
+import * as opentelemetry from '@opentelemetry/api';
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
@@ -14,6 +15,7 @@ import type {
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
+import { getTracer } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
 import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
@@ -102,8 +104,14 @@ export async function resolveGlobalExtends(
 }
 
 export async function start(): Promise<number> {
+  const tracer = getTracer();
   let config: AllConfig;
   try {
+    const configSpan = tracer.startSpan(
+      'load config',
+      {},
+      opentelemetry.context.active()
+    );
     // read global config from file, env and cli args
     config = await getGlobalConfig();
     if (config?.globalExtends) {
@@ -122,9 +130,17 @@ export async function start(): Promise<number> {
 
     // validate secrets. Will throw and abort if invalid
     validateConfigSecrets(config);
+    configSpan.end();
 
     // autodiscover repositories (needs to come after platform initialization)
-    config = await autodiscoverRepositories(config);
+    config = await tracer.startActiveSpan(
+      'discover repositories',
+      async (span) => {
+        await autodiscoverRepositories(config);
+        span.end();
+        return config;
+      }
+    );
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
@@ -140,15 +156,30 @@ export async function start(): Promise<number> {
       if (haveReachedLimits()) {
         break;
       }
-      const repoConfig = await getRepositoryConfig(config, repository);
-      if (repoConfig.hostRules) {
-        logger.debug('Reinitializing hostRules for repo');
-        hostRules.clear();
-        repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
-        repoConfig.hostRules = [];
-      }
-      await repositoryWorker.renovateRepository(repoConfig);
-      setMeta({});
+      await tracer.startActiveSpan(
+        'renovate repository',
+        {
+          attributes: {
+            repository:
+              typeof repository === 'string'
+                ? repository
+                : repository.repository,
+          },
+        },
+        async (span) => {
+          const repoConfig = await getRepositoryConfig(config, repository);
+          if (repoConfig.hostRules) {
+            logger.debug('Reinitializing hostRules for repo');
+            hostRules.clear();
+            repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+            repoConfig.hostRules = [];
+          }
+          await repositoryWorker.renovateRepository(repoConfig);
+          setMeta({});
+
+          span.end();
+        }
+      );
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

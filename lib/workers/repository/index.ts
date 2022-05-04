@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
+import { getTracer } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -23,6 +24,8 @@ export async function renovateRepository(
   repoConfig: RenovateConfig,
   canRetry = true
 ): Promise<ProcessResult> {
+  const tracer = getTracer();
+
   splitInit();
   let config = GlobalConfig.set(
     applySecretsToConfig(repoConfig, undefined, false)
@@ -39,15 +42,31 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    const { branches, branchList, packageFiles } = await extractDependencies(
-      config
+    const { branches, branchList, packageFiles } = await tracer.startActiveSpan(
+      'extractDependencies',
+      async (span) => {
+        const res = await extractDependencies(config);
+        span.end();
+        return res;
+      }
     );
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await ensureOnboardingPr(config, packageFiles, branches);
-      const res = await updateRepo(config, branches);
+      await tracer.startActiveSpan('ensure onboarding PR', async (span) => {
+        await ensureOnboardingPr(config, packageFiles, branches);
+        span.end();
+      });
+
+      const res = await tracer.startActiveSpan(
+        'update repository',
+        async (span) => {
+          const res = await updateRepo(config, branches);
+          span.end();
+          return res;
+        }
+      );
       setMeta({ repository: config.repository });
       addSplit('update');
       await setBranchCache(branches);
