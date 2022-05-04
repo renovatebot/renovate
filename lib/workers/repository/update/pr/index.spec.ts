@@ -43,14 +43,12 @@ describe('workers/repository/update/pr/index', () => {
   describe('ensurePr', () => {
     const number = 123;
     const sourceBranch = 'renovate-branch';
-    const targetBranch = 'base-branch';
     const prTitle = 'Some title';
     const body = 'Some body';
 
     const pr: Pr = {
       number,
       sourceBranch,
-      targetBranch,
       title: prTitle,
       body,
       state: PrState.Open,
@@ -58,7 +56,6 @@ describe('workers/repository/update/pr/index', () => {
 
     const config: BranchConfig = {
       branchName: sourceBranch,
-      baseBranch: targetBranch,
       upgrades: [],
       prTitle,
     };
@@ -653,7 +650,6 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
-          baseBranch: 'base-branch',
           branchName: 'renovate-branch',
           hasReleaseNotes: true,
           prTitle: 'Some title',
@@ -682,7 +678,6 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
-          baseBranch: 'base-branch',
           branchName: 'renovate-branch',
           hasReleaseNotes: true,
           prTitle: 'Some title',
