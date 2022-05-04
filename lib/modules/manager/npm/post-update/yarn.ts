@@ -116,7 +116,7 @@ export async function generateLockFile(
       constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
     };
 
-    if (config.managerData?.hasPackageManager) {
+    if (!isYarn1 && config.managerData?.hasPackageManager) {
       toolConstraints.push({ toolName: 'corepack' });
     } else {
       toolConstraints.push(yarnTool);
