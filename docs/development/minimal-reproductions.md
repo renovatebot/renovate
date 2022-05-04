@@ -16,7 +16,14 @@ It's fastest if you - as the bug reporter or feature requester - create the repr
 
 ## How the Renovate developers use your minimal reproduction
 
-TODO: `@rarkins` should fill out this section.
+The first benefit of a public reproduction is to prove that the problem is not caused by your environment or by a setting you left out of your description, thinking it wasn't relevant.
+If there were any doubts about whether you'd found a genuine problem before, they are usually removed once a reproduction is made.
+
+Next, when a reproduction has minimal config, it can often let us narrow down or even identify the root cause, suggest workarounds, etc.
+This means we can often help you from code inspection alone.
+
+Finally, by making the code/dependencies minimal, it usually makes the problem feasible to step through using a debugging if code inspection wasn't sufficient.
+Production repositories or non-minimal reproductions are often very difficult to debug because break points get triggered dozens or hundreds or times.
 
 ## What is a minimal reproduction?
 

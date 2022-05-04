@@ -4,6 +4,7 @@
 
 
     Get your issue fixed faster by creating a minimal reproduction.
+This means a repository dedicated to reproducing this issue with the minimal dependencies and config possible.
 
 
     Before we start working on your issue we need to know exactly what's causing the current behavior.
