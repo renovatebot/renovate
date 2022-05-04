@@ -19,7 +19,7 @@ export class DashboardPackageFiles {
   public static getDetectedDependencies(config: RenovateConfig): string {
     const title = `## Dependencies detected\n\n`;
     const none = 'None detected\n\n';
-    const multiBranch = this.data.size > 1;
+    const pad = this.data.size > 1; // padding condition for a multi base branch repo
     let deps = '';
 
     if (!config.dependencyDashboardDetectedDeps) {
@@ -27,9 +27,7 @@ export class DashboardPackageFiles {
     }
 
     for (const [branch, packageFiles] of this.data) {
-      deps += multiBranch
-        ? `<details><summary>Branch ${branch}\n</summary>\n\n`
-        : '';
+      deps += pad ? `<details><summary>Branch ${branch}\n</summary>\n\n` : '';
       if (packageFiles === null) {
         deps += none + '\n';
         continue;
@@ -42,7 +40,9 @@ export class DashboardPackageFiles {
       }
 
       for (const manager of managers) {
-        deps += `<ul><details><summary>${manager}</summary>\n\n`;
+        deps += `${
+          pad ? '<ul>' : ''
+        }<details><summary>${manager}</summary>\n\n`;
         for (const packageFile of packageFiles[manager]) {
           deps += `<ul><details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
@@ -50,9 +50,9 @@ export class DashboardPackageFiles {
           }
           deps += '</details></ul>';
         }
-        deps += '</details></ul>';
+        deps += `</details>${pad ? '</ul>' : ''}`;
       }
-      deps += multiBranch ? '</details>\n\n' : '';
+      deps += pad ? '</details>\n\n' : '';
     }
 
     return title + deps;
