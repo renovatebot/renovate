@@ -29,8 +29,6 @@ Shareable config presets can only be used with the JSON format, other formats ar
 To use a preset put it in an `extends` array within your Renovate config.
 Presets can be nested.
 
-QUESTION: Insert `renovate.json` example config with nested preset?
-
 ## Preset Hosting
 
 Presets should be hosted in repositories, which usually means the same platform host as Renovate is running against.
