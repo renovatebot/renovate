@@ -66,7 +66,7 @@ A production repository usually has:
 - many custom rules in the Renovate configuration file
 - many files that are not relevant
 
-Having lots of "moving parts" makes debugging tricky, because debug statements can be triggered hundreds of times.
+Having lots of "moving parts" makes debugging tricky, because debug break points can be triggered hundreds of times.
 
 When you have lots of custom config for Renovate, it's easy to think that you've found the root cause of the behavior.
 Bugs are often caused by multiple features interacting.
