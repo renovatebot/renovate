@@ -20,6 +20,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
@@ -42,6 +43,7 @@ import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
+import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -56,14 +58,10 @@ import { setConfidence, setStability } from './status-checks';
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
   const labelRebase = branchPr.labels?.includes(config.rebaseLabel);
-  const prRebaseChecked = branchPr.body?.includes(
-    `- [x] <!-- rebase-check -->`
-  );
+  const prRebaseChecked = !!branchPr.bodyStruct?.rebaseRequested;
 
   return titleRebase || labelRebase || prRebaseChecked;
 }
-
-const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
@@ -181,11 +179,12 @@ export async function processBranch(
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = branchPr.body?.replace(
-              rebasingRegex,
-              '**Rebasing**: Renovate will not automatically rebase this PR, because other commits have been found.'
+            const newBody = await getPrBody(
+              branchConfig,
+              branchPr.bodyStruct?.reviewableSection
             );
-            if (newBody !== branchPr.body) {
+            const newBodyHash = hashBody(newBody);
+            if (newBodyHash !== branchPr.bodyStruct?.hash) {
               logger.debug(
                 'Updating existing PR to indicate that rebasing is not possible'
               );
@@ -453,9 +452,7 @@ export async function processBranch(
 
     config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel);
 
-    const prRebaseChecked = branchPr?.body?.includes(
-      `- [x] <!-- rebase-check -->`
-    );
+    const prRebaseChecked = branchPr?.bodyStruct?.rebaseRequested;
 
     if (branchExists && dependencyDashboardCheck && config.stopUpdating) {
       if (!prRebaseChecked) {

@@ -12,8 +12,9 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path deleteLAb
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path findPr() has pr 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "number": 5,
   "sourceBranch": "userName1/pullRequest5",
@@ -26,8 +27,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -45,8 +47,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -64,8 +67,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 2`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -83,8 +87,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 3`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -102,8 +107,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a PR 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -121,7 +127,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
@@ -138,8 +146,9 @@ Object {
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPrList() has pr 1`] = `
 Array [
   Object {
-    "body": "* Line 1
-* Line 2",
+    "bodyStruct": Object {
+      "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+    },
     "createdAt": 1547853840016,
     "number": 5,
     "sourceBranch": "userName1/pullRequest5",
@@ -215,8 +224,9 @@ exports[`modules/platform/bitbucket-server/index endpoint with path deleteLAbel(
 
 exports[`modules/platform/bitbucket-server/index endpoint with path findPr() has pr 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "number": 5,
   "sourceBranch": "userName1/pullRequest5",
@@ -229,8 +239,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getBranchPr() has pr 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -248,8 +259,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -267,8 +279,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 2`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -286,8 +299,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 3`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -305,8 +319,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`] = `
 Object {
-  "body": "* Line 1
-* Line 2",
+  "bodyStruct": Object {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
@@ -324,7 +339,9 @@ Object {
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
@@ -341,8 +358,9 @@ Object {
 exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() has pr 1`] = `
 Array [
   Object {
-    "body": "* Line 1
-* Line 2",
+    "bodyStruct": Object {
+      "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+    },
     "createdAt": 1547853840016,
     "number": 5,
     "sourceBranch": "userName1/pullRequest5",

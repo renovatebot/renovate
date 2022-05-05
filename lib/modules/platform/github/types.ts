@@ -1,4 +1,4 @@
-import type { Pr } from '../types';
+import type { Pr, PrBodyStruct } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
@@ -37,7 +37,8 @@ export interface GhRestPr {
   mergeable_state: string;
   number: number;
   title: string;
-  body: string;
+  body?: string;
+  bodyStruct?: PrBodyStruct;
   state: string;
   merged_at: string;
   created_at: string;

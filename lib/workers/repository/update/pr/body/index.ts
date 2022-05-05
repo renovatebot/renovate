@@ -57,7 +57,10 @@ function massageUpdateMetadata(config: BranchConfig): void {
   });
 }
 
-export async function getPrBody(config: BranchConfig): Promise<string> {
+export async function getPrBody(
+  config: BranchConfig,
+  reviewableSection: string | null | undefined = ''
+): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
     header: getPrHeader(config),
@@ -76,6 +79,9 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     prBody = platform.massageMarkdown(prBody);
+    if (reviewableSection) {
+      prBody += reviewableSection;
+    }
   }
   return prBody;
 }

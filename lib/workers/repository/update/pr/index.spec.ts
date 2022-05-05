@@ -7,6 +7,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
 import * as _comment from '../../../../modules/platform/comment';
+import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
@@ -45,12 +46,13 @@ describe('workers/repository/update/pr/index', () => {
     const sourceBranch = 'renovate-branch';
     const prTitle = 'Some title';
     const body = 'Some body';
+    const bodyStruct = getPrBodyStruct(body);
 
     const pr: Pr = {
       number,
       sourceBranch,
       title: prTitle,
-      body,
+      bodyStruct,
       state: PrState.Open,
     };
 
@@ -255,7 +257,10 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('updates PR due to body change', async () => {
-        const changedPr: Pr = { ...pr, body: `${body} updated` };
+        const changedPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(`${body} updated`),
+        };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
 
         const res = await ensurePr(config);
@@ -270,7 +275,10 @@ describe('workers/repository/update/pr/index', () => {
 
         const reviewableContent =
           '<!-- Reviewable:start -->something<!-- Reviewable:end -->';
-        const changedPr: Pr = { ...pr, body: `${body}${reviewableContent}` };
+        const changedPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(`${body}${reviewableContent}`),
+        };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
 
         const res = await ensurePr(config);
