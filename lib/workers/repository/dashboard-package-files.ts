@@ -17,7 +17,7 @@ export class DashboardPackageFiles {
   }
 
   public static getDetectedDependencies(config: RenovateConfig): string {
-    const title = `## Dependencies detected\n\n`;
+    const title = `## Detected dependencies\n\n`;
     const none = 'None detected\n\n';
     const pad = this.data.size > 1; // padding condition for a multi base branch repo
     let deps = '';
