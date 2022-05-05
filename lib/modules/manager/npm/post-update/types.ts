@@ -28,3 +28,7 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
 }
+
+export interface PnpmLockFile {
+  lockfileVersion?: number;
+}
