@@ -163,4 +163,14 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       },
     ]);
   });
+
+  it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}'); // package.json
+    fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n'); // pnpm-lock.yaml
+    fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n'); // pnpm-lock.yaml
+    delete config.constraints.pnpm;
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.lockFile).toBe('lockfileVersion: 5.3\n');
+  });
 });
