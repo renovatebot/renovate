@@ -29,7 +29,7 @@ describe('modules/manager/flux/artifacts', () => {
           },
         },
       ],
-      newPackageFileContent: '',
+      newPackageFileContent: undefined,
       config: {},
     });
 
@@ -42,18 +42,16 @@ describe('modules/manager/flux/artifacts', () => {
         },
       },
     ]);
-    expect(snapshots).toMatchObject([
-      {
-        cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml',
-      },
-    ]);
+    expect(snapshots[0].cmd).toBe(
+      'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml'
+    );
   });
 
   it('ignores non-system manifests', async () => {
     const res = await updateArtifacts({
       packageFileName: 'not-a-system-manifest.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: '',
+      newPackageFileContent: undefined,
       config: {},
     });
 
@@ -61,29 +59,23 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('ignores unchanged system manifests', async () => {
-    const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('old');
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: '',
+      newPackageFileContent: undefined,
       config: {},
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'flux install --export > clusters/my-cluster/flux-system/gotk-components.yaml',
-      },
-    ]);
   });
 
   it('ignores system manifests without a new version', async () => {
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: undefined }],
-      newPackageFileContent: '',
+      newPackageFileContent: undefined,
       config: {},
     });
 
@@ -95,7 +87,7 @@ describe('modules/manager/flux/artifacts', () => {
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: '',
+      newPackageFileContent: undefined,
       config: {},
     });
 
@@ -116,7 +108,7 @@ describe('modules/manager/flux/artifacts', () => {
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: '',
+      newPackageFileContent: undefined,
       config: {},
     });
 

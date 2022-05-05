@@ -9,7 +9,6 @@ type CallOptions = ExecOptions | null | undefined;
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
-// TODO: fix type #7154
 export type ExecMock = jest.Mock<typeof _exec>;
 export const exec: ExecMock = _exec as any;
 
@@ -100,9 +99,3 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
-
-// reset exec mock, otherwise there can be some left over from previous test
-beforeEach(() => {
-  // maybe not mocked
-  exec.mockReset?.();
-});

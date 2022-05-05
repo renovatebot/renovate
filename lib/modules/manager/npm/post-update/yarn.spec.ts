@@ -9,7 +9,6 @@ import {
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import * as docker from '../../../../util/exec/docker';
 import { getPkgReleases } from '../../../datasource';
 import type { PostUpdateConfig } from '../../types';
 import type { NpmManagerData } from '../types';
@@ -35,16 +34,14 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
-env.getChildProcessEnv.mockReturnValue(envMock.basic);
-
 describe('modules/manager/npm/post-update/yarn', () => {
   beforeEach(() => {
-    delete process.env.BUILDPACK;
-    jest.clearAllMocks();
     Fixtures.reset();
-    docker.resetPrefetchedImages();
+    jest.clearAllMocks();
+    jest.resetModules();
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '.' });
+    delete process.env.BUILDPACK;
   });
 
   it.each([
@@ -372,11 +369,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
     ]);
   });
 
-  it('patches local yarn', async () => {
+  it('patches local yarn (docker)', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
     expect(plocktest1PackageJson).toBeTruthy();
-    GlobalConfig.set({ localDir: '.' });
+    GlobalConfig.set({ localDir: '.', binarySource: 'docker' });
     Fixtures.mock(
       {
         'package.json': plocktest1PackageJson,
@@ -397,43 +394,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const config = partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
-    const options = { encoding: 'utf-8', cwd: 'some-dir' };
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true`,
-        options,
-      },
-      {
-        cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
-        options,
-      },
-    ]);
-  });
-
-  it('patches local yarn (docker)', async () => {
-    // sanity check for later refactorings
-    expect(plocktest1YarnLockV1).toBeTruthy();
-    expect(plocktest1PackageJson).toBeTruthy();
-    GlobalConfig.set({ localDir: '.', binarySource: 'docker' });
-    Fixtures.mock(
-      {
-        'package.json': plocktest1PackageJson,
-        '.yarn/cli.js': '',
-        'yarn.lock': plocktest1YarnLockV1,
-        '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
-      },
-      'some-dir'
-    );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
-      releases: [{ version: '1.22.18' }],
-    });
-    const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
-    const config = partial<PostUpdateConfig<NpmManagerData>>({});
-    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-    expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { encoding: 'utf-8' };
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull renovate/node', options },
+      { cmd: 'docker ps --filter name=renovate_node -aq', options },
       {
         cmd:
           `docker run --rm --name=renovate_node --label=renovate_child -v ".":"." -e CI -w "some-dir" renovate/node ` +
