@@ -38,7 +38,6 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
-import { regEx } from '../../../../util/regex';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { ensurePr, getPlatformPrOptions } from '../pr';

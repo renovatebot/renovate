@@ -40,9 +40,9 @@ export interface GhRestPr {
   body?: string;
   bodyStruct?: PrBodyStruct;
   state: string;
-  merged_at: string;
+  merged_at?: string;
   created_at: string;
-  closed_at: string;
+  closed_at?: string;
   updated_at: string;
   user?: { login?: string };
   node_id: string;
