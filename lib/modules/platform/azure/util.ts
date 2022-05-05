@@ -118,19 +118,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   } as AzurePr;
 }
 
-export async function streamToString(
-  stream: NodeJS.ReadableStream
-): Promise<string> {
-  const chunks: Uint8Array[] = [];
-
-  const p = await new Promise<string>((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    stream.on('error', (err) => reject(err));
-  });
-  return p;
-}
-
 export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   let authType: string;
   let authValue: string;
