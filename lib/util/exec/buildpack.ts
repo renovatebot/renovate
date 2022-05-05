@@ -6,6 +6,7 @@ import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
+import { id as rubyVersioningId } from '../../modules/versioning/ruby';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
@@ -14,6 +15,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'rubygems',
     depName: 'bundler',
     versioning: 'ruby',
+  },
+  cocoapods: {
+    datasource: 'rubygems',
+    depName: 'cocoapods',
+    versioning: rubyVersioningId,
   },
   composer: {
     datasource: 'github-releases',
