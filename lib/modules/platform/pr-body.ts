@@ -34,16 +34,19 @@ export function isRebaseRequested(body: string | undefined): boolean {
   return !!body?.includes(`- [x] <!-- rebase-check -->`);
 }
 
-export function getPrBodyStruct(input = ''): PrBodyStruct {
-  const hash = hashBody(input);
+export function getPrBodyStruct(
+  input: string | undefined | null
+): PrBodyStruct {
+  const str = input ?? '';
+  const hash = hashBody(str);
   const result: PrBodyStruct = { hash };
 
-  const rebaseRequested = isRebaseRequested(input);
+  const rebaseRequested = isRebaseRequested(str);
   if (rebaseRequested) {
     result.rebaseRequested = rebaseRequested;
   }
 
-  const reviewableSection = getReviewableSection(input);
+  const reviewableSection = getReviewableSection(str);
   if (reviewableSection) {
     result.reviewableSection = reviewableSection;
   }
