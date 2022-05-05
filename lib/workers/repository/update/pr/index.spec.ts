@@ -10,7 +10,6 @@ import type { Pr } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig } from '../../../types';
-import * as prAutomerge from './automerge';
 import * as _changelogHelper from './changelog';
 import type { ChangeLogResult } from './changelog';
 import * as codeOwners from './code-owners';
@@ -116,85 +115,6 @@ function isResultWithoutPr(
 }
 
 describe('workers/repository/update/pr/index', () => {
-  describe('checkAutoMerge(pr, config)', () => {
-    let config: BranchConfig;
-    let pr: Pr;
-
-    beforeEach(() => {
-      config = partial<BranchConfig>({
-        ...getConfig(),
-      });
-      pr = partial<Pr>({});
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should not automerge if not configured', async () => {
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-
-    it('should automerge if enabled and pr is mergeable', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      platform.mergePr.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(1);
-    });
-
-    it('should automerge comment', async () => {
-      config.automerge = true;
-      config.automergeType = 'pr-comment';
-      config.automergeComment = '!merge';
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-    });
-
-    it('should remove previous automerge comment when rebasing', async () => {
-      config.automerge = true;
-      config.automergeType = 'pr-comment';
-      config.automergeComment = '!merge';
-      config.rebaseRequested = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      git.isBranchModified.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-
-    it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-
-    it('should not automerge if enabled and pr is mergeable but unstable', async () => {
-      config.automerge = true;
-      pr.cannotMergeReason = 'some reason';
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-
-    it('should not automerge if enabled and pr is unmergeable', async () => {
-      config.automerge = true;
-      git.isBranchConflicted.mockResolvedValueOnce(true);
-      await prAutomerge.checkAutoMerge(pr, config);
-      expect(platform.mergePr).toHaveBeenCalledTimes(0);
-    });
-  });
-
   describe('ensurePr', () => {
     let config: BranchConfig;
     // TODO fix type
@@ -869,83 +789,6 @@ describe('workers/repository/update/pr/index', () => {
       expect(platform.createPr.mock.calls[0][0]).toMatchObject({
         labels: ['deps', 'renovate', 'js'],
       });
-    });
-  });
-
-  describe('prepareLabels(config)', () => {
-    it('returns empty array if no labels are configured', () => {
-      const result = prWorker.prepareLabels({});
-      expect(result).toBeArrayOfSize(0);
-    });
-
-    it('only labels', () => {
-      const result = prWorker.prepareLabels({ labels: ['labelA', 'labelB'] });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('only addLabels', () => {
-      const result = prWorker.prepareLabels({
-        addLabels: ['labelA', 'labelB'],
-      });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('merge labels and addLabels', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', 'labelB'],
-        addLabels: ['labelC'],
-      });
-      expect(result).toBeArrayOfSize(3);
-      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
-    });
-
-    it('deduplicate merged labels and addLabels', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', 'labelB'],
-        addLabels: ['labelB', 'labelC'],
-      });
-      expect(result).toBeArrayOfSize(3);
-      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
-    });
-
-    it('empty labels ignored', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', ''],
-        addLabels: [' ', 'labelB'],
-      });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('null labels ignored', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['labelA', null],
-        // an empty space between two commas in an array is categorized as a null value
-        // eslint-disable-next-line no-sparse-arrays
-        addLabels: ['labelB', '', undefined, , ,],
-      });
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toEqual(['labelA', 'labelB']);
-    });
-
-    it('template labels', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['datasource-{{{datasource}}}'],
-        datasource: 'npm',
-      });
-      expect(result).toBeArrayOfSize(1);
-      expect(result).toEqual(['datasource-npm']);
-    });
-
-    it('template labels with empty datasource', () => {
-      const result = prWorker.prepareLabels({
-        labels: ['{{{datasource}}}', ' {{{datasource}}} '],
-        datasource: null,
-      });
-      expect(result).toBeArrayOfSize(0);
-      expect(result).toEqual([]);
     });
   });
 });

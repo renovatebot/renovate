@@ -133,6 +133,7 @@ export interface LookupUpdate {
   isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
+  isPinDigest?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
   isReplacement?: boolean;
