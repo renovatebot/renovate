@@ -59,7 +59,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
 
 export async function getPrBody(
   config: BranchConfig,
-  reviewableSection: string | null | undefined = ''
+  appendExtra: string | null | undefined = ''
 ): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
@@ -79,8 +79,8 @@ export async function getPrBody(
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     prBody = platform.massageMarkdown(prBody);
-    if (reviewableSection) {
-      prBody += reviewableSection;
+    if (appendExtra) {
+      prBody += appendExtra;
     }
   }
   return prBody;

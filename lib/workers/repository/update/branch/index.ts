@@ -451,7 +451,7 @@ export async function processBranch(
 
     config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel);
 
-    const prRebaseChecked = branchPr?.bodyStruct?.rebaseRequested;
+    const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
 
     if (branchExists && dependencyDashboardCheck && config.stopUpdating) {
       if (!prRebaseChecked) {
