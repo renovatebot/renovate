@@ -30,7 +30,6 @@ export async function getPrConfigDescription(
       config.branchName,
       config.ignoreTests
     );
-    // istanbul ignore if
     if (branchStatus === BranchStatus.red) {
       prBody += 'Disabled due to failing status checks.';
     } else {
