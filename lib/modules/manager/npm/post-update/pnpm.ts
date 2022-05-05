@@ -123,7 +123,7 @@ async function getPnpmContraint(
     const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
     const content = await readLocalFile(lockFileName, 'utf8');
     if (content) {
-      const pnpmLock: PnpmLockFile = load(content);
+      const pnpmLock = load(content) as PnpmLockFile;
       if (
         is.number(pnpmLock.lockfileVersion) &&
         pnpmLock.lockfileVersion < 5.4
