@@ -1884,6 +1884,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration object for Python.',
     stage: 'package',
     type: 'object',
+    default: {},
     mergeable: true,
     cli: false,
   },
