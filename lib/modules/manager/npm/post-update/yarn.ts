@@ -10,11 +10,7 @@ import {
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { exec } from '../../../../util/exec';
-import type {
-  ExecOptions,
-  ExtraEnv,
-  ToolConstraint,
-} from '../../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
 import {
   deleteLocalFile,
   localPathIsFile,
@@ -25,7 +21,6 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
-import type { NpmManagerData } from '../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
@@ -88,14 +83,13 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
-  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
+  config: Partial<PostUpdateConfig> = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
-    const toolConstraints: ToolConstraint[] = [];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
@@ -109,21 +103,12 @@ export async function generateLockFile(
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
-    const preCommands: string[] = [];
-
-    const yarnTool: ToolConstraint = {
-      toolName: 'yarn',
-      constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
-    };
-
-    if (!isYarn1 && config.managerData?.hasPackageManager) {
-      toolConstraints.push({ toolName: 'corepack' });
-    } else {
-      toolConstraints.push(yarnTool);
-      if (isYarn1 && minYarnVersion) {
-        yarnTool.constraint = yarnCompatibility;
-      }
+    let installYarn = 'npm i -g yarn';
+    if (isYarn1 && minYarnVersion) {
+      installYarn += `@${quote(yarnCompatibility)}`;
     }
+
+    const preCommands = [installYarn];
 
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
@@ -139,7 +124,8 @@ export async function generateLockFile(
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-          yarnTool.toolName = 'yarn-slim';
+          preCommands.push(getOptimizeCommand());
+          // istanbul ignore if
           if (yarnPath) {
             preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
@@ -185,7 +171,6 @@ export async function generateLockFile(
         tagConstraint,
       },
       preCommands,
-      toolConstraints,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

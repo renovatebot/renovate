@@ -14,7 +14,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -137,7 +136,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -314,7 +312,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -364,7 +361,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -399,7 +395,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": true,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -467,7 +462,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -522,7 +516,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -659,7 +652,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -796,7 +788,6 @@ Object {
   "lernaClient": "yarn",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -933,7 +924,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -956,7 +946,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -1095,7 +1084,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -1118,7 +1106,6 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -1143,7 +1130,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -1282,7 +1268,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -1401,7 +1386,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -1538,7 +1522,6 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
-    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": true,
   },
