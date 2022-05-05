@@ -1820,6 +1820,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodNoMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
