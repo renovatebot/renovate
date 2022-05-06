@@ -180,7 +180,7 @@ export async function resolveConstraint(
     );
   }
 
-  const highestVersion = releases.pop()?.version;
+  const highestVersion = releases.pop()!.version;
   logger.warn(
     { toolName, constraint, highestVersion },
     'No matching or stable tool versions found - using an unstable version'
