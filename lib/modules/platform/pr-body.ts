@@ -21,14 +21,6 @@ export function hashBody(body: string | undefined): string {
   return result;
 }
 
-export function getReviewableSection(input: string): string | null {
-  const index = input.search(reviewableRegex);
-  if (index > -1) {
-    return input.slice(index);
-  }
-  return null;
-}
-
 export function isRebaseRequested(body: string | undefined): boolean {
   return !!body?.includes(`- [x] <!-- rebase-check -->`);
 }
@@ -43,11 +35,6 @@ export function getPrBodyStruct(
   const rebaseRequested = isRebaseRequested(str);
   if (rebaseRequested) {
     result.rebaseRequested = rebaseRequested;
-  }
-
-  const reviewableSection = getReviewableSection(str);
-  if (reviewableSection) {
-    result.reviewableSection = reviewableSection;
   }
 
   return result;

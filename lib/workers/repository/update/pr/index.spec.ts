@@ -270,7 +270,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
       });
 
-      it('ignores eviewable content ', async () => {
+      it('ignores reviewable content ', async () => {
         // See: https://reviewable.io/
 
         const reviewableContent =

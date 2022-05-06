@@ -46,7 +46,6 @@ export interface RepoParams {
 export interface PrBodyStruct {
   hash: string;
   rebaseRequested?: boolean;
-  reviewableSection?: string;
 }
 
 /**

@@ -21,10 +21,9 @@ describe('modules/platform/pr-body', () => {
       });
     });
 
-    it('returns reviewable section', () => {
+    it('strips reviewable section', () => {
       expect(getPrBodyStruct('foo<!-- Reviewable:start -->bar')).toEqual({
         hash: hashBody('foo'),
-        reviewableSection: '<!-- Reviewable:start -->bar',
       });
     });
   });

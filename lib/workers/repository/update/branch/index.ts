@@ -179,7 +179,6 @@ export async function processBranch(
             logger.debug('Manual rebase has been requested for PR');
           } else {
             const newBody = await getPrBody(branchConfig, {
-              appendExtra: branchPr.bodyStruct?.reviewableSection,
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
             });

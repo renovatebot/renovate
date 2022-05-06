@@ -108,20 +108,6 @@ describe('workers/repository/update/pr/body/index', () => {
       expect(res).toBe('PR BODY');
     });
 
-    it('supports extra string appending', async () => {
-      platform.massageMarkdown.mockImplementation((x) => x);
-      template.compile.mockImplementation((x) => x);
-      const res = await getPrBody(
-        {
-          branchName: 'some-branch',
-          upgrades: [],
-          prBodyTemplate: 'PR BODY',
-        },
-        { appendExtra: '+EXTRA' }
-      );
-      expect(res).toBe('PR BODY+EXTRA');
-    });
-
     it('supports custom rebasing message', async () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);

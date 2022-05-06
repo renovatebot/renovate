@@ -93,10 +93,6 @@ export async function getPrBody(
         `**Rebasing**: ${prBodyConfig.rebasingNotice}`
       );
     }
-
-    if (prBodyConfig?.appendExtra) {
-      prBody += prBodyConfig.appendExtra;
-    }
   }
   return prBody;
 }
