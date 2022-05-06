@@ -1,4 +1,5 @@
 import {
+  azureDevOpsSshRefMatchRegex,
   bitbucketRefMatchRegex,
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
@@ -112,6 +113,48 @@ describe('modules/manager/terraform/modules', () => {
 
       expect(dots.workspace).toBe('hashicorp');
       expect(dots.project).toBe('example.repo-123');
+      expect(dots.tag).toBe('v1.0.0');
+    });
+  });
+
+  describe('azureDevOpsSshRefMatchRegex', () => {
+    it('should split organization, project, repository and tag from source', () => {
+      const ssh = azureDevOpsSshRefMatchRegex.exec(
+        'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
+      ).groups;
+      const sshGit = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
+      ).groups;
+      const subfolder = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0'
+      ).groups;
+
+      expect(ssh.organization).toBe('MyOrg');
+      expect(ssh.project).toBe('MyProject');
+      expect(ssh.repository).toBe('MyRepository');
+      expect(ssh.tag).toBe('1.0.0');
+
+      expect(sshGit.organization).toBe('MyOrg');
+      expect(sshGit.project).toBe('MyProject');
+      expect(sshGit.repository).toBe('MyRepository');
+      expect(sshGit.tag).toBe('1.0.0');
+
+      expect(subfolder.organization).toBe('MyOrg');
+      expect(subfolder.project).toBe('MyProject');
+      expect(subfolder.repository).toBe('MyRepository');
+      expect(subfolder.modulepath).toBe('//some-module/path');
+      expect(subfolder.tag).toBe('1.0.0');
+    });
+
+    it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
+      const dots = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=v1.0.0'
+      ).groups;
+
+      expect(dots.organization).toBe('MyOrg');
+      expect(dots.project).toBe('MyProject');
+      expect(dots.repository).toBe('MyRepository');
+      expect(dots.modulepath).toBe('//some-module/path');
       expect(dots.tag).toBe('v1.0.0');
     });
   });
