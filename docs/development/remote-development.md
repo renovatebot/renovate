@@ -41,7 +41,7 @@ For proper development, use GitHub Codespaces.
 
 The config file for Gitpod is `.gitpod.yml` in the root of the repository.
 
-Gitpod has comes with 50 free hours each month.
+Gitpod comes with 50 free hours each month.
 If you need more hours you'll need to buy a plan with more hours.
 
 ### Gitpod tips
@@ -51,11 +51,11 @@ If you need more hours you'll need to buy a plan with more hours.
 ### Known problems with Gitpod
 
 - `yarn jest:16` has some failing tests
-- You can't preview Markdown files
+- You can't preview Markdown files in the VS Code online editor
 
 ## GitHub Codespaces
 
 The Renovate developers use [GitHub Codespaces](https://github.com/features/codespaces).
 The config files are in the `.devcontainer` folder in the repository.
 
-You can only use GitHub Codespaces if you're a member of the Renovate organization, and have permission to use Codespaces.
+You can only use GitHub Codespaces if you're invited into the beta by GitHub.
