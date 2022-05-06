@@ -17,7 +17,6 @@ export function hashBody(body: string | undefined): string {
   }
   result = stripEmojis(result);
   result = noWhitespaceOrHeadings(result);
-  result = result.trim();
   result = hasha(result, { algorithm: 'sha256' });
   return result;
 }

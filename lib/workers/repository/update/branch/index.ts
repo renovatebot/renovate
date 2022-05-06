@@ -178,10 +178,11 @@ export async function processBranch(
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = await getPrBody(
-              branchConfig,
-              branchPr.bodyStruct?.reviewableSection
-            );
+            const newBody = await getPrBody(branchConfig, {
+              appendExtra: branchPr.bodyStruct?.reviewableSection,
+              rebasingNotice:
+                'Renovate will not automatically rebase this PR, because other commits have been found.',
+            });
             const newBodyHash = hashBody(newBody);
             if (newBodyHash !== branchPr.bodyStruct?.hash) {
               logger.debug(

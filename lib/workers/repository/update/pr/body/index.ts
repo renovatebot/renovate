@@ -57,30 +57,48 @@ function massageUpdateMetadata(config: BranchConfig): void {
   });
 }
 
+interface PrBodyConfig {
+  appendExtra?: string | null | undefined;
+  rebasingNotice?: string;
+}
+
+const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
+
 export async function getPrBody(
-  config: BranchConfig,
-  appendExtra: string | null | undefined = ''
+  branchConfig: BranchConfig,
+  prBodyConfig?: PrBodyConfig
 ): Promise<string> {
-  massageUpdateMetadata(config);
+  massageUpdateMetadata(branchConfig);
   const content = {
-    header: getPrHeader(config),
-    table: getPrUpdatesTable(config),
-    notes: getPrNotes(config) + getPrExtraNotes(config),
-    changelogs: getChangelogs(config),
-    configDescription: await getPrConfigDescription(config),
-    controls: await getControls(config),
-    footer: getPrFooter(config),
+    header: getPrHeader(branchConfig),
+    table: getPrUpdatesTable(branchConfig),
+    notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
+    changelogs: getChangelogs(branchConfig),
+    configDescription: await getPrConfigDescription(branchConfig),
+    controls: await getControls(branchConfig),
+    footer: getPrFooter(branchConfig),
   };
 
   let prBody = '';
-  if (config.prBodyTemplate) {
-    const prBodyTemplate = config.prBodyTemplate;
+  if (branchConfig.prBodyTemplate) {
+    const prBodyTemplate = branchConfig.prBodyTemplate;
     prBody = template.compile(prBodyTemplate, content, false);
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     prBody = platform.massageMarkdown(prBody);
-    if (appendExtra) {
-      prBody += appendExtra;
+    if (prBodyConfig?.appendExtra) {
+      prBody += prBodyConfig.appendExtra;
+    }
+
+    if (prBodyConfig?.rebasingNotice) {
+      prBody = prBody.replace(
+        rebasingRegex,
+        `**Rebasing**: ${prBodyConfig.rebasingNotice}`
+      );
+    }
+
+    if (prBodyConfig?.appendExtra) {
+      prBody += prBodyConfig.appendExtra;
     }
   }
   return prBody;
