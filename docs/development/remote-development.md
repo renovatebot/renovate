@@ -59,11 +59,3 @@ The Renovate developers use [GitHub Codespaces](https://github.com/features/code
 The config files are in the `.devcontainer` folder in the repository.
 
 You can only use GitHub Codespaces if you're a member of the Renovate organization, and have permission to use Codespaces.
-
-### Codespaces tips
-
-List the tips for codespaces here.
-
-### Known problems with codespaces
-
-List the known problems with codespaces here.
