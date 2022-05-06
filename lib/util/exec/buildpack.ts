@@ -142,7 +142,7 @@ export async function resolveConstraint(
   const pkgReleases = await getPkgReleases(toolConfig);
   const releases = pkgReleases?.releases ?? [];
 
-  if (!releases.length) {
+  if (!releases?.length) {
     throw new Error('No tool releases found.');
   }
 
@@ -180,7 +180,7 @@ export async function resolveConstraint(
     );
   }
 
-  const highestVersion = releases.pop().version;
+  const highestVersion = releases.pop()?.version;
   logger.warn(
     { toolName, constraint, highestVersion },
     'No matching or stable tool versions found - using an unstable version'
