@@ -86,9 +86,6 @@ export async function getPrBody(
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     prBody = platform.massageMarkdown(prBody);
-    if (prBodyConfig?.appendExtra) {
-      prBody += prBodyConfig.appendExtra;
-    }
 
     if (prBodyConfig?.rebasingNotice) {
       prBody = prBody.replace(
