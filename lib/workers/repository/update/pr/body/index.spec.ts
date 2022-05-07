@@ -107,5 +107,19 @@ describe('workers/repository/update/pr/body/index', () => {
       });
       expect(res).toBe('PR BODY');
     });
+
+    it('supports custom rebasing message', async () => {
+      platform.massageMarkdown.mockImplementation((x) => x);
+      template.compile.mockImplementation((x) => x);
+      const res = await getPrBody(
+        {
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
+        },
+        { rebasingNotice: 'BAR' }
+      );
+      expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
+    });
   });
 });
