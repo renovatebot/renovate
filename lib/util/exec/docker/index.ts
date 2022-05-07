@@ -25,10 +25,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     const res = await rawExec(`docker pull ${taggedImage}`, {
       encoding: 'utf-8',
     });
-    let imageDigest = 'unknown';
-    if (digestRegex.test(res.stdout)) {
-      imageDigest = digestRegex.exec(res.stdout)[1];
-    }
+    const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
     logger.debug(
       `Finished fetching Docker image ${taggedImage}@${imageDigest}`
     );
