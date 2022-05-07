@@ -1153,7 +1153,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
       });
       const errorMessage = expect.stringContaining(
-        "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
+        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand"
       );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
