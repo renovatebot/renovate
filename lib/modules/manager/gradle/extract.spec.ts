@@ -534,7 +534,7 @@ describe('modules/manager/gradle/extract', () => {
           },
           {
             depName: 'mocha-junit:mocha-junit',
-            groupName: 'mocha-junit',
+            groupName: 'mocha-junit-reporter',
             currentValue: '2.0.2',
             managerData: {
               fileReplacePosition: 82,
