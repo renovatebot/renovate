@@ -46,7 +46,7 @@ export class PackageFiles {
         for (const packageFile of packageFiles[manager]) {
           deps += `<ul><details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
-            deps += ` - \`${dep.depName}@${dep.currentValue}\`\n`;
+            deps += ` - \`${dep.depName} ${dep.currentValue}\`\n`;
           }
           deps += '</details></ul>';
         }
