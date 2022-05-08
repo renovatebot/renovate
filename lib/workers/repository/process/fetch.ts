@@ -10,7 +10,7 @@ import type {
 } from '../../../modules/manager/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
-import { DashboardPackageFiles } from '../dashboard-package-files';
+import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
@@ -101,7 +101,7 @@ export async function fetchUpdates(
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  DashboardPackageFiles.add(config.baseBranch, { ...packageFiles });
+  PackageFiles.add(config.baseBranch, { ...packageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete'

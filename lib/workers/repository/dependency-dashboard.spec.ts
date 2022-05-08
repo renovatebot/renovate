@@ -12,8 +12,8 @@ import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import type { Platform } from '../../modules/platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
-import { DashboardPackageFiles } from './dashboard-package-files';
 import * as dependencyDashboard from './dependency-dashboard';
+import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -573,11 +573,11 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('single base branch repo', () => {
         beforeEach(() => {
-          DashboardPackageFiles.add('main', packageFiles);
+          PackageFiles.add('main', packageFiles);
         });
 
         afterEach(() => {
-          DashboardPackageFiles.clear();
+          PackageFiles.clear();
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -592,8 +592,8 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('show default message in issues body when packageFiles is empty', async () => {
           const branches: BranchConfig[] = [];
-          DashboardPackageFiles.clear();
-          DashboardPackageFiles.add('main', {});
+          PackageFiles.clear();
+          PackageFiles.add('main', {});
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
@@ -604,8 +604,8 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('show default message in issues body when when packageFiles is null', async () => {
           const branches: BranchConfig[] = [];
-          DashboardPackageFiles.clear();
-          DashboardPackageFiles.add('main', null);
+          PackageFiles.clear();
+          PackageFiles.add('main', null);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
@@ -617,12 +617,12 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('multi base branch repo', () => {
         beforeEach(() => {
-          DashboardPackageFiles.add('main', packageFiles);
-          DashboardPackageFiles.add('dev', packageFiles);
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFiles);
         });
 
         afterEach(() => {
-          DashboardPackageFiles.clear();
+          PackageFiles.clear();
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -637,7 +637,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('show default message in issues body when packageFiles is empty', async () => {
           const branches: BranchConfig[] = [];
-          DashboardPackageFiles.add('main', {});
+          PackageFiles.add('main', {});
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
@@ -648,7 +648,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('show default message in issues body when when packageFiles is null', async () => {
           const branches: BranchConfig[] = [];
-          DashboardPackageFiles.add('main', null);
+          PackageFiles.add('main', null);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();

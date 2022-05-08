@@ -7,7 +7,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
-import { DashboardPackageFiles } from './dashboard-package-files';
+import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -346,8 +346,8 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  issueBody += DashboardPackageFiles.getDetectedDependencies(config);
-  DashboardPackageFiles.clear();
+  issueBody += PackageFiles.getDashboardMarkdown(config);
+  PackageFiles.clear();
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(

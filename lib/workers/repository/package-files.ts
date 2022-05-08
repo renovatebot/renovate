@@ -1,7 +1,7 @@
 import type { RenovateConfig } from '../../config/types';
 import type { PackageFile } from '../../modules/manager/types';
 
-export class DashboardPackageFiles {
+export class PackageFiles {
   private static data: Map<string, Record<string, PackageFile[]> | null> =
     new Map<string, Record<string, PackageFile[]>>();
 
@@ -16,7 +16,7 @@ export class DashboardPackageFiles {
     this.data.clear();
   }
 
-  public static getDetectedDependencies(config: RenovateConfig): string {
+  public static getDashboardMarkdown(config: RenovateConfig): string {
     const title = `## Detected dependencies\n\n`;
     const none = 'None detected\n\n';
     const pad = this.data.size > 1; // padding condition for a multi base branch repo
