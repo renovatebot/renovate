@@ -1,4 +1,6 @@
+import JSON5 from 'json5';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { FetchPresetConfig, Preset } from './types';
 
@@ -50,7 +52,9 @@ export async function fetchPreset({
   } else {
     jsonContent = await fetch(
       repo,
-      buildFilePath(`${fileName}.json`),
+      buildFilePath(
+        regEx(/\.json5?$/).test(fileName) ? fileName : `${fileName}.json`
+      ),
       endpoint,
       tag
     );
@@ -74,4 +78,12 @@ export async function fetchPreset({
     return preset;
   }
   return jsonContent;
+}
+
+export function parsePreset(content: string): Preset {
+  try {
+    return JSON5.parse(content);
+  } catch (err) {
+    throw new Error(PRESET_INVALID_JSON);
+  }
 }

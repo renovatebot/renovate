@@ -70,3 +70,10 @@ export type NpmDepType =
   | 'peerDependencies'
   | 'resolutions'
   | 'overrides';
+
+export interface NpmManagerData extends Record<string, any> {
+  hasPackageManager?: boolean;
+
+  lernaJsonFile?: string;
+  yarnZeroInstall?: boolean;
+}
