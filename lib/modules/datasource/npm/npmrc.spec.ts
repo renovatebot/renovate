@@ -134,7 +134,7 @@ describe('modules/datasource/npm/npmrc', () => {
           ],
           "packageRules": Array [
             Object {
-              "matchDataSources": Array [
+              "matchDatasources": Array [
                 "npm",
               ],
               "matchPackagePrefixes": Array [

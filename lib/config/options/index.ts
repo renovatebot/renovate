@@ -3,7 +3,6 @@ import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import * as dockerVersioning from '../../modules/versioning/docker';
-import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -708,7 +707,7 @@ const options: RenovateOptions[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from `baseBranches` instead of only the default branch',
+      'Whether to read configuration from `baseBranches` instead of only the default branch.',
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
@@ -1082,7 +1081,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchUpdateTypes',
     description:
-      'Update types to match against (`major`, `minor`, `pin`, etc.). Valid only within a `packageRules` object.',
+      'Update types to match against (`major`, `minor`, `pin`, `pinDigest`, etc). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowedValues: [
@@ -1090,6 +1089,7 @@ const options: RenovateOptions[] = [
       'minor',
       'patch',
       'pin',
+      'pinDigest',
       'digest',
       'lockFileMaintenance',
       'rollback',
@@ -1277,6 +1277,24 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
       commitMessageTopic: '{{{depName}}} digest',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'pinDigest',
+    description:
+      'Configuration to apply when pinning a digest (no change in tag/version).',
+    stage: 'package',
+    type: 'object',
+    default: {
+      groupName: 'Pin Dependencies',
+      groupSlug: 'pin-dependencies',
+      commitMessageAction: 'Pin',
+      group: {
+        commitMessageTopic: 'dependencies',
+        commitMessageExtra: '',
+      },
     },
     cli: false,
     mergeable: true,
@@ -1583,7 +1601,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1801,6 +1819,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodNoMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
@@ -1866,9 +1885,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration object for Python.',
     stage: 'package',
     type: 'object',
-    default: {
-      versioning: pep440Versioning.id,
-    },
+    default: {},
     mergeable: true,
     cli: false,
   },
@@ -2060,6 +2077,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'deprecationWarningIssues',
       'onboardingClose',
+      'configErrorIssue',
     ],
     cli: false,
     env: false,
