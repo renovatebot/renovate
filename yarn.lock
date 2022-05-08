@@ -2000,15 +2000,15 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.1.tgz#ba50b2a08eae1333139fddeced8627e8a409f261"
-  integrity sha512-s1dsOQRnLkbUgr3CkZgZ/vbNq7vUYOAaFquRbQmkxO5fPsOyvUnDXOOh6fcr6ynRfG07qg7i6K4OX6UdPgsQNw==
+"@pnpm/read-project-manifest@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.2.tgz#92611664b2caa93d385369e1df77fd0b33d01e21"
+  integrity sha512-v0gayZ6KbGsbhbWDC1j60HkEmsirdORKymRCvga1vPubE9Zo1vtYwzfHk20kJASvav5B4xEV7iDspn8uS34fOQ==
   dependencies:
     "@pnpm/error" "3.0.1"
     "@pnpm/graceful-fs" "2.0.0"
-    "@pnpm/types" "8.0.0"
-    "@pnpm/write-project-manifest" "3.0.0"
+    "@pnpm/types" "8.0.1"
+    "@pnpm/write-project-manifest" "3.0.1"
     detect-indent "^6.0.0"
     fast-deep-equal "^3.1.3"
     is-windows "^1.0.2"
@@ -2018,17 +2018,17 @@
     sort-keys "^4.2.0"
     strip-bom "^4.0.0"
 
-"@pnpm/types@8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.0.0.tgz#8216a93e6981d31459bc0649a0cc79a3fbbaafc9"
-  integrity sha512-Ahxjk7CtuPt+0mnqpKFksru3bnZdAZtmv6Lz+OFqOSSiEC1XLxVmkkuyhcAV58r6fa9PiOSBFXHtYnnJLo25/g==
+"@pnpm/types@8.0.1":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.0.1.tgz#695620221d4c75ac006d1033c87d05e2fd23759f"
+  integrity sha512-2CdIXHvUvTXo/R+rFthQhQw3MdppvXOVl2QXDDjRPgNR8i6HemYceYqgBZ24alXJqmLzTsnuLKBXPdwiLq6nlA==
 
-"@pnpm/write-project-manifest@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.0.tgz#e7ee85bb89fefd61a3a87d204fdd1859afa74349"
-  integrity sha512-aUahy7BVdp1L0z/na+K3IVtW2Dr9DssEyvREjt3CbeLDBB5BQkrDAs7K0mjjSUtCjR8SqRB9otCCO4F26Ics0g==
+"@pnpm/write-project-manifest@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.1.tgz#c3943039f6ad45e2fb6d8be9f597f2ac34e707ea"
+  integrity sha512-zu6yNmiT6Ipmm/ULrjs+iVErj0R1+PnaYLwAElCdLNhsJ6YHvOy7RRdjyAj7nPmChNode7CZbdQg8Bt0cgyO0w==
   dependencies:
-    "@pnpm/types" "8.0.0"
+    "@pnpm/types" "8.0.1"
     json5 "^2.1.3"
     write-file-atomic "^3.0.3"
     write-yaml-file "^4.2.0"
@@ -4798,13 +4798,13 @@ filter-obj@^1.1.0:
   resolved "https://registry.yarnpkg.com/filter-obj/-/filter-obj-1.1.0.tgz#9b311112bc6c6127a16e016c6c5d7f19e0805c5b"
   integrity sha1-mzERErxsYSehbgFsbF1/GeCAXFs=
 
-find-packages@9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.1.tgz#734dc4f94c6df0a2cff146ab0b1078b863b39962"
-  integrity sha512-0xl1nboFd1GFDll4cYMjFCsbcW5prb7r2YOWjuunalWOu0O+ZWmmyIZlYJ7HOEMvn3b62VKxs5ZUCvUFTAFu3A==
+find-packages@9.0.2:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.2.tgz#aef17f954069679dd471900c07f4fb6f77b66b13"
+  integrity sha512-C8CXm4ns4Vb03yHqRyr2dRMyF1/E7dyBPMvgF0kVpC2dS4pDoqzDQbxWgzTm1ySqhYTmo2i0iiaBojnzVop/VQ==
   dependencies:
-    "@pnpm/read-project-manifest" "3.0.1"
-    "@pnpm/types" "8.0.0"
+    "@pnpm/read-project-manifest" "3.0.2"
+    "@pnpm/types" "8.0.1"
     fast-glob "^3.2.4"
     p-filter "^2.1.0"
 
