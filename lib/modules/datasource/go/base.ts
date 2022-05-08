@@ -157,6 +157,7 @@ export class BaseGoDatasource {
     const importMatch = regEx(
       `<meta\\s+name="go-import"\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
     ).exec(res);
+    // istanbul ignore if
     if (!importMatch) {
       return null;
     }
