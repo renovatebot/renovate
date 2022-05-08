@@ -196,7 +196,6 @@ export interface RenovateConfig
   configWarningReuseIssue?: boolean;
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
-  dependencyDashboardDetectedDeps?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
   dependencyDashboardRebaseAllOpen?: boolean;

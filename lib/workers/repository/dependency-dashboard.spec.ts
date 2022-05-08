@@ -69,6 +69,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
+      PackageFiles.add('main', null);
       GlobalConfig.reset();
     });
 
@@ -564,11 +565,6 @@ describe('workers/repository/dependency-dashboard', () => {
         GlobalConfig.reset();
         config = getConfig();
         config.dependencyDashboard = true;
-        config.dependencyDashboardDetectedDeps = true;
-      });
-
-      afterAll(() => {
-        config.dependencyDashboardDetectedDeps = false;
       });
 
       describe('single base branch repo', () => {

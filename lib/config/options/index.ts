@@ -436,13 +436,6 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'dependencyDashboardDetectedDeps',
-    description:
-      'Set to `true` to display detected dependencies in the Dependency Dashboard',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'dependencyDashboardAutoclose',
     description:
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',

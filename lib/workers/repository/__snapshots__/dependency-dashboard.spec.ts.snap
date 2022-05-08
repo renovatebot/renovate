@@ -227,6 +227,11 @@ These updates await pending status checks. To force their creation now, click th
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
+## Detected dependencies
+
+None detected
+
+
 "
 `;
 
@@ -234,6 +239,11 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() ope
 "This is a header
 
 This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
+
 
 ---
 And this is a footer
@@ -244,6 +254,11 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() ope
 "This is a header for platform:github
 
 This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
+
 
 ---
 And this is a footer for repository:test
@@ -265,6 +280,11 @@ These branches will be created by Renovate only once you click their checkbox be
 These updates are awaiting their schedule. Click on a checkbox to get an update now.
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
+
+## Detected dependencies
+
+None detected
+
 
 "
 `;

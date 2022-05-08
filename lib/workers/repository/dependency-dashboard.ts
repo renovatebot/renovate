@@ -317,6 +317,9 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
+  issueBody += PackageFiles.getDashboardMarkdown(config);
+  PackageFiles.clear();
+
   if (config.dependencyDashboardFooter?.length) {
     issueBody +=
       '---\n' +
@@ -345,9 +348,6 @@ export async function ensureDependencyDashboard(
       }
     }
   }
-
-  issueBody += PackageFiles.getDashboardMarkdown(config);
-  PackageFiles.clear();
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(

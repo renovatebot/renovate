@@ -22,10 +22,6 @@ export class PackageFiles {
     const pad = this.data.size > 1; // padding condition for a multi base branch repo
     let deps = '';
 
-    if (!config.dependencyDashboardDetectedDeps) {
-      return '';
-    }
-
     for (const [branch, packageFiles] of this.data) {
       deps += pad ? `<details><summary>Branch ${branch}\n</summary>\n\n` : '';
       if (packageFiles === null) {
