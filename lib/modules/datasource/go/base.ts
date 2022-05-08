@@ -159,6 +159,7 @@ export class BaseGoDatasource {
     ).exec(res);
     // istanbul ignore if
     if (!importMatch) {
+      logger.trace({ goModule }, 'No go-source or go-import header found');
       return null;
     }
     const [, prefix, , goImportURL] = importMatch;
@@ -184,8 +185,5 @@ export class BaseGoDatasource {
       registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
       packageName,
     };
-
-    logger.trace({ goModule }, 'No go-source or go-import header found');
-    return null;
   }
 }
