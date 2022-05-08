@@ -29,7 +29,7 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-tags',
           depName: 'pascalgn/automerge-action',
           depType: 'action',
-          replaceString: '"pascalgn/automerge-action@v0.13.1"',
+          replaceString: 'pascalgn/automerge-action@v0.13.1',
           versioning: 'docker',
         },
         {
@@ -54,7 +54,7 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-tags',
           depName: 'actions/checkout',
           depType: 'action',
-          replaceString: '"actions/checkout@v1.1.2"',
+          replaceString: 'actions/checkout@v1.1.2',
           versioning: 'docker',
         },
       ]);
