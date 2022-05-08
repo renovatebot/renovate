@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
+import { PrState } from '../../../../types';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
@@ -18,6 +19,7 @@ export async function ensureConfigMigrationPr(
   logger.debug('ensureConfigMigrationPr()');
   const branchName = getMigrationBranchName(config);
   const existingPr = await platform.getBranchPr(branchName);
+  const closedPr = await platform.findPr({ branchName, state: PrState.Closed });
   logger.debug('Filling in config migration PR template');
   let prTemplate = `Config migration needed, merge this PR to update your Renovate configuration file.\n\n`;
   prTemplate += emojify(
@@ -76,6 +78,12 @@ If you need any further assistance then you can also [request help here](${confi
       });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');
     }
+    return;
+  }
+  if (
+    [config.onboardingPrTitle, 'Config Migration'].includes(closedPr?.title)
+  ) {
+    logger.debug('Found closed migration PR, exiting...');
     return;
   }
   logger.debug('Creating migration PR');

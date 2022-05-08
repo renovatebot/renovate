@@ -14,7 +14,7 @@ export async function rebaseMigrationBranch(
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
   if (await isBranchModified(branchName)) {
-    logger.debug('Onboarding branch has been edited and cannot be rebased');
+    logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
   const configFileName = migratedConfigData.fileName;
