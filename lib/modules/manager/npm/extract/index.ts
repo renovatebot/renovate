@@ -340,40 +340,41 @@ export async function extractPackageFile(
 
   /**
    * Used when there is a json object as a value in overrides block.
-   * @param depType
-   * @param parentDep
-   * @param children
+   * @param parents
+   * @param child
    * @returns PackageDependency array
    */
   function extractOverrideDepsRec(
-    depType: string,
-    parentDep: string,
-    children: NpmPackageDependency
+    parents: string[],
+    child: NpmPackageDependency
   ): PackageDependency[] {
     const deps: PackageDependency[] = [];
-    if (!depType || !children || is.emptyObject(children)) {
+    if (!child || is.emptyObject(child)) {
       return deps;
     }
-
-    for (const [key, val] of Object.entries(children)) {
+    for (const [key, val] of Object.entries(child)) {
       if (is.string(val)) {
-        // val is a normal version
-        let dep: PackageDependency = {};
-        dep.prettyDepType = depType;
-        dep.depType = depType;
+        const dep: PackageDependency = {};
         // special handling for "." key
         // "." means the constraint is applied to the parent dep
-        const depName = key === '.' ? parentDep : key;
-        dep.depName = depName;
-        dep = { ...dep, ...extractDependency(depType, depName, val) };
-        deps.push(dep);
+        dep.depName = key === '.' ? parents[parents.length - 1] : key;
+        dep.groupName = 'overrides';
+        dep.parents = parents.slice(); // set parents for dependency
+        if (dep.depName === 'node') {
+          dep.commitMessageTopic = 'Node.js';
+        }
+        deps.push({
+          ...dep,
+          ...extractDependency('overrides', dep.depName, val),
+        });
       } else {
         // val is an object, run recursively.
-        const depsOfObject = extractOverrideDepsRec(depType, key, val);
+        parents.push(key);
+        const depsOfObject = extractOverrideDepsRec(parents, val);
         deps.push(...depsOfObject);
       }
     }
-
+    parents.pop();
     return deps;
   }
 
@@ -403,7 +404,7 @@ export async function extractPackageFile(
             dep.managerData = { key };
           }
           if (depType === 'overrides' && !is.string(val)) {
-            deps.push(...extractOverrideDepsRec(depType, depName, val));
+            deps.push(...extractOverrideDepsRec([depName], val));
           } else {
             dep = { ...dep, ...extractDependency(depType, depName, val) };
             if (depName === 'node') {

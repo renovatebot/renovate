@@ -679,6 +679,7 @@ describe('modules/manager/npm/extract/index', () => {
           "node": "8.9.2",
           "@types/react": "18.0.5",
           "baz": {
+            "node": "8.9.2",
             "bar": {
               "foo": "1.0.0"
             }
@@ -695,7 +696,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         deps: [
           {
             depType: 'devDependencies',
@@ -720,23 +721,31 @@ describe('modules/manager/npm/extract/index', () => {
             prettyDepType: 'overrides',
           },
           {
-            prettyDepType: 'overrides',
-            depType: 'overrides',
+            depName: 'node',
+            groupName: 'overrides',
+            parents: ['baz'],
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+          },
+          {
             depName: 'foo',
+            groupName: 'overrides',
+            parents: ['baz', 'bar'],
             currentValue: '1.0.0',
             datasource: 'npm',
           },
           {
-            prettyDepType: 'overrides',
-            depType: 'overrides',
             depName: 'foo2',
+            groupName: 'overrides',
+            parents: ['foo2'],
             currentValue: '1.0.0',
             datasource: 'npm',
           },
           {
-            prettyDepType: 'overrides',
-            depType: 'overrides',
             depName: 'bar2',
+            groupName: 'overrides',
+            parents: ['foo2'],
             currentValue: '1.0.0',
             datasource: 'npm',
           },

@@ -3,7 +3,12 @@ import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
-import type { DependenciesMeta, NpmPackage } from '../../extract/types';
+import type {
+  DependenciesMeta,
+  NpmPackage,
+  OverrideDependency,
+  RecursiveOverride,
+} from '../../extract/types';
 import type { NpmDepType } from '../../types';
 
 function renameObjKey(
@@ -28,7 +33,8 @@ function replaceAsString(
   depType: NpmDepType | 'dependenciesMeta' | 'packageManager',
   depName: string,
   oldValue: string,
-  newValue: string
+  newValue: string,
+  parents?: string[]
 ): string {
   if (depType === 'packageManager') {
     parsedContents[depType] = newValue;
@@ -45,6 +51,16 @@ function replaceAsString(
         oldValue,
         newValue
       );
+    }
+  } else if (parents && depType === 'overrides') {
+    // there is an object as a value in overrides block
+    const { depObjectReference, overrideDepName } = overrideDepPosition(
+      parsedContents[depType]!,
+      parents,
+      depName
+    );
+    if (depObjectReference) {
+      depObjectReference[overrideDepName] = newValue;
     }
   } else {
     // The old value is the version of the dependency
@@ -122,8 +138,18 @@ export function updateDependency({
     if (depType === 'packageManager') {
       oldVersion = parsedContents[depType];
       newValue = `${depName}@${newValue}`;
+    } else if (upgrade.parents && depType === 'overrides') {
+      // old version when there is an object as a value in overrides block
+      const { depObjectReference, overrideDepName } = overrideDepPosition(
+        parsedContents[depType]!,
+        upgrade.parents,
+        depName
+      );
+      if (depObjectReference) {
+        oldVersion = depObjectReference[overrideDepName]!;
+      }
     } else {
-      oldVersion = parsedContents[depType as NpmDepType]![depName];
+      oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
@@ -137,7 +163,8 @@ export function updateDependency({
       depType as NpmDepType,
       depName,
       oldVersion!,
-      newValue!
+      newValue!,
+      upgrade.parents
     );
     if (upgrade.newName) {
       newFileContent = replaceAsString(
@@ -146,7 +173,8 @@ export function updateDependency({
         depType as NpmDepType,
         depName,
         depName,
-        upgrade.newName
+        upgrade.newName,
+        upgrade.parents
       );
     }
     /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
@@ -222,4 +250,23 @@ export function updateDependency({
     logger.debug({ err }, 'updateDependency error');
     return null;
   }
+}
+function overrideDepPosition(
+  overrideBlock: OverrideDependency,
+  parents: string[],
+  depName: string
+): {
+  depObjectReference: Record<string, string>;
+  overrideDepName: string;
+} {
+  const lastParent = parents[parents.length - 1];
+  let overrideDep: OverrideDependency = overrideBlock;
+  for (const parent of parents) {
+    if (overrideDep) {
+      overrideDep = overrideDep[parent]! as Record<string, RecursiveOverride>;
+    }
+  }
+  const overrideDepName = depName === lastParent ? '.' : depName;
+  const depObjectReference = overrideDep as Record<string, string>;
+  return { depObjectReference, overrideDepName };
 }

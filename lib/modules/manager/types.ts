@@ -173,6 +173,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  parents?: string[];
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -195,6 +196,7 @@ export interface Upgrade<T = Record<string, any>>
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
+  parents?: string[];
 }
 
 export interface ArtifactError {
