@@ -157,18 +157,19 @@ export class BaseGoDatasource {
     const importMatch = regEx(
       `<meta\\s+name="go-import"\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
     ).exec(res);
-    // istanbul ignore if
+
     if (!importMatch) {
       logger.trace({ goModule }, 'No go-source or go-import header found');
       return null;
     }
+
     const [, prefix, , goImportURL] = importMatch;
     if (!goModule.startsWith(prefix)) {
       logger.trace({ goModule }, 'go-import header prefix not match');
       return null;
     }
-    logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
+    logger.debug({ goModule, goImportURL }, 'Go lookup import url');
     // get server base url from import url
     const parsedUrl = URL.parse(goImportURL);
 
