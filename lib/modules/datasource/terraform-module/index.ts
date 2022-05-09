@@ -49,17 +49,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       'terraform-module.getReleases()'
     );
 
-    const dep = await this.queryRegistry(registryUrl, registry, repository);
-
-    logger.trace({ dep }, 'dep');
-    return dep;
-  }
-
-  private async queryRegistry(
-    registryUrl: string,
-    registry: string,
-    repository: string
-  ): Promise<ReleaseResult> {
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryUrl
     );
@@ -70,13 +59,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         registry,
         repository
       );
-    } else {
-      return await this.queryRegistryVersions(
-        serviceDiscovery,
-        registry,
-        repository
-      );
     }
+
+    return await this.queryRegistryVersions(
+      serviceDiscovery,
+      registry,
+      repository
+    );
   }
 
   /**
@@ -98,7 +87,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
-        throw new Error('Terraform registry result mismatch');
+        return null;
       }
     } catch (err) {
       this.handleGenericErrors(err);
@@ -113,9 +102,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-      dep.homepage = `https://registry.terraform.io/modules/${repository}`;
-    }
+    dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     // set published date for latest release
     const latestVersion = dep.releases.find(
       (release) => res.version === release.version
@@ -142,7 +129,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
-        throw new Error('Terraform registry result mismatch');
+        return null;
       }
     } catch (err) {
       this.handleGenericErrors(err);
@@ -154,12 +141,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         version,
       })),
     };
-    if (res.modules[0].source) {
-      dep.sourceUrl = res.modules[0].source;
-    }
-    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-      dep.homepage = `https://registry.terraform.io/modules/${repository}`;
-    }
     return dep;
   }
 

@@ -56,33 +56,31 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       return null;
     }
     logger.debug({ packageName }, 'terraform-provider.getDependencies()');
-    let dep: ReleaseResult | null = null;
+
     const registryHost = parseUrl(registryUrl)?.host;
     if (registryHost === 'releases.hashicorp.com') {
-      dep = await this.queryReleaseBackend(packageName, registryUrl);
-    } else {
-      const repository = TerraformProviderDatasource.getRepository({
-        packageName,
-      });
-      const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-        registryUrl
+      return await this.queryReleaseBackend(packageName, registryUrl);
+    }
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+      registryUrl
+    );
+
+    if (registryHost === 'registry.terraform.io') {
+      return await this.queryRegistryExtendedApi(
+        serviceDiscovery,
+        registryUrl,
+        repository
       );
-      if (registryHost === 'registry.terraform.io') {
-        dep = await this.queryRegistryExtendedApi(
-          serviceDiscovery,
-          registryUrl,
-          repository
-        );
-      } else {
-        dep = await this.queryRegistryVersions(
-          serviceDiscovery,
-          registryUrl,
-          repository
-        );
-      }
     }
 
-    return dep;
+    return await this.queryRegistryVersions(
+      serviceDiscovery,
+      registryUrl,
+      repository
+    );
   }
 
   private static getRepository({ packageName }: GetReleasesConfig): string {
@@ -118,7 +116,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       latestVersion.releaseTimestamp = res.published_at;
     }
     dep.homepage = `${registryURL}/providers/${repository}`;
-    logger.trace({ dep }, 'dep');
     return dep;
   }
 
@@ -139,7 +136,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         version,
       })),
     };
-    dep.homepage = `${registryURL}/providers/${repository}`;
     logger.trace({ dep }, 'dep');
     return dep;
   }
@@ -165,7 +161,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       })),
       sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
     };
-    logger.trace({ dep }, 'dep');
     return dep;
   }
 

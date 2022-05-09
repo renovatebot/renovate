@@ -13,13 +13,15 @@ export interface TerraformRelease {
   published_at: string;
 }
 
+/**
+ * API docs https://www.terraform.io/internals/module-registry-protocol
+ */
 export interface TerraformModuleVersions {
   modules: TerraformModuleVersionsModules[];
 }
 
 export interface TerraformModuleVersionsModules {
   versions: TerraformModuleVersionsModuleVersion[];
-  source?: string;
 }
 
 export interface TerraformModuleVersionsModuleVersion {

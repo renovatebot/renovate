@@ -3,11 +3,11 @@ import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
 import { TerraformProviderDatasource } from '.';
 
-const azurermData: any = loadFixture('azurerm-provider.json');
-const azurermVersionsData: any = loadFixture('azurerm-provider-versions.json');
-const hashicorpReleases: any = loadFixture('releaseBackendIndex.json');
-const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
-const telmateProxmocVersions: any = loadFixture(
+const azurermData = loadFixture('azurerm-provider.json');
+const azurermVersionsData = loadFixture('azurerm-provider-versions.json');
+const hashicorpReleases = loadFixture('releaseBackendIndex.json');
+const serviceDiscoveryResult = loadFixture('service-discovery.json');
+const telmateProxmocVersions = loadFixture(
   'telmate-proxmox-versions-response.json'
 );
 
@@ -69,7 +69,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, JSON.parse(azurermData))
+        .reply(200, azurermData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -145,7 +145,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope('https://registry.company.com')
         .get('/v1/providers/hashicorp/azurerm/versions')
-        .reply(200, JSON.parse(azurermVersionsData))
+        .reply(200, azurermVersionsData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -155,7 +155,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         registryUrls: ['https://registry.company.com'],
       });
       expect(res).toEqual({
-        homepage: 'https://registry.company.com/providers/hashicorp/azurerm',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -183,7 +182,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(secondaryUrl)
         .get('/index.json')
-        .reply(200, JSON.parse(hashicorpReleases));
+        .reply(200, hashicorpReleases);
 
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,

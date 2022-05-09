@@ -3,10 +3,10 @@ import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
 import { TerraformModuleDatasource } from '.';
 
-const consulData: any = loadFixture('registry-consul.json');
-const consulVersionsData: any = loadFixture('registry-consul-versions.json');
-const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
-const serviceDiscoveryCustomResult: any = loadFixture(
+const consulData = loadFixture('registry-consul.json');
+const consulVersionsData = loadFixture('registry-consul-versions.json');
+const serviceDiscoveryResult = loadFixture('service-discovery.json');
+const serviceDiscoveryCustomResult = loadFixture(
   'service-custom-discovery.json'
 );
 
