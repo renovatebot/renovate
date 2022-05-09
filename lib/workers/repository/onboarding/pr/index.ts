@@ -117,7 +117,7 @@ If you need any further assistance then you can also [request help here](${confi
     logger.debug('Found open onboarding PR');
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
-    if (existingPr.bodyStruct.hash === prBodyHash) {
+    if (existingPr.bodyStruct?.hash === prBodyHash) {
       logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
     }
