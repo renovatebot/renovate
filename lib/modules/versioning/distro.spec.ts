@@ -112,6 +112,13 @@ describe('modules/versioning/distro', () => {
     expect(di.isReleased(version)).toBe(expected);
   });
 
+  it('retrieves schedule of the previous previous release', () => {
+    expect(di.getNLatest(2)).toMatchObject({
+      series: 'eoan',
+      version: '19.10',
+    });
+  });
+
   it('retrieves schedule of the previous release', () => {
     expect(di.getNLatest(1)).toMatchObject({
       series: 'focal',
