@@ -6,6 +6,7 @@ import { extractPackageFile } from '.';
 
 const modules = loadFixture('modules.tf');
 const bitbucketModules = loadFixture('bitbucketModules.tf');
+const azureDevOpsModules = loadFixture('azureDevOpsModules.tf');
 const providers = loadFixture('providers.tf');
 const docker = loadFixture('docker.tf');
 
@@ -48,6 +49,17 @@ describe('modules/manager/terraform/extract', () => {
     it('extracts bitbucket modules', async () => {
       const res = await extractPackageFile(bitbucketModules, 'modules.tf', {});
       expect(res.deps).toHaveLength(11);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts azureDevOps modules', async () => {
+      const res = await extractPackageFile(
+        azureDevOpsModules,
+        'modules.tf',
+        {}
+      );
+      expect(res.deps).toHaveLength(3);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
       expect(res).toMatchSnapshot();
     });

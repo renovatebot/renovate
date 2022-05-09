@@ -129,21 +129,32 @@ describe('modules/manager/terraform/modules', () => {
         'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0'
       ).groups;
 
-      expect(ssh.organization).toBe('MyOrg');
-      expect(ssh.project).toBe('MyProject');
-      expect(ssh.repository).toBe('MyRepository');
-      expect(ssh.tag).toBe('1.0.0');
+      expect(ssh).toEqual({
+        modulepath: '',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
 
-      expect(sshGit.organization).toBe('MyOrg');
-      expect(sshGit.project).toBe('MyProject');
-      expect(sshGit.repository).toBe('MyRepository');
-      expect(sshGit.tag).toBe('1.0.0');
+      expect(sshGit).toEqual({
+        modulepath: '',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
 
-      expect(subfolder.organization).toBe('MyOrg');
-      expect(subfolder.project).toBe('MyProject');
-      expect(subfolder.repository).toBe('MyRepository');
-      expect(subfolder.modulepath).toBe('//some-module/path');
-      expect(subfolder.tag).toBe('1.0.0');
+      expect(subfolder).toEqual({
+        modulepath: '//some-module/path',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
@@ -151,11 +162,15 @@ describe('modules/manager/terraform/modules', () => {
         'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=v1.0.0'
       ).groups;
 
-      expect(dots.organization).toBe('MyOrg');
-      expect(dots.project).toBe('MyProject');
-      expect(dots.repository).toBe('MyRepository');
-      expect(dots.modulepath).toBe('//some-module/path');
       expect(dots.tag).toBe('v1.0.0');
+      expect(dots).toEqual({
+        modulepath: '//some-module/path',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: 'v1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
     });
   });
 });
