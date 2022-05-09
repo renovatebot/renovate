@@ -20,7 +20,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
-type ProcessStatus =
+export type ProcessStatus =
   | 'disabled'
   | 'onboarded'
   | 'activated'
