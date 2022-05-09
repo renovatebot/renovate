@@ -2,11 +2,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Preset } from '../types';
-import {
-  PRESET_DEP_NOT_FOUND,
-  PRESET_INVALID_JSON,
-  fetchPreset,
-} from '../util';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
 export async function fetchJSONFile(
   repo: string,
@@ -30,13 +26,9 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  try {
-    // TODO: null check #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return JSON.parse(raw!);
-  } catch (err) {
-    throw new Error(PRESET_INVALID_JSON);
-  }
+  // TODO: null check #7154
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return parsePreset(raw!);
 }
 
 export function getPresetFromEndpoint(

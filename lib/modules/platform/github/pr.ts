@@ -83,6 +83,7 @@ export async function getPrCache(
 ): Promise<Record<number, Pr>> {
   const prCache: Record<number, Pr> = {};
   const prApiCache = getPrApiCache();
+  const isInitial = is.emptyArray(prApiCache.getItems());
 
   try {
     let requestsTotal = 0;
@@ -92,15 +93,14 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const urlPath = `repos/${repo}/pulls?per_page=20&state=all&sort=updated&direction=desc&page=${pageIdx}`;
-
       const opts: GithubHttpOptions = { paginate: false };
-      if (pageIdx === 1) {
-        if (is.emptyArray(prApiCache.getItems())) {
-          // Speed up initial fetch
-          opts.paginate = true;
-        }
+      if (pageIdx === 1 && isInitial) {
+        // Speed up initial fetch
+        opts.paginate = true;
       }
+
+      const perPage = isInitial ? 100 : 20;
+      const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const res = await http.getJson<GhRestPr[]>(urlPath, opts);
       apiQuotaAffected = true;

@@ -41,6 +41,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ---
 
 ## addLabels
@@ -1841,6 +1845,10 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
+## pinDigest
+
+Add to this object if you wish to define rules that apply only to PRs that pin digests.
+
 ## pinDigests
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
@@ -1873,6 +1881,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `gomodNoMassage`: Skip massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
