@@ -9,12 +9,12 @@ import {
 import { logger } from '../../../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { regEx } from '../../../../util/regex';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -26,10 +26,6 @@ import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
-
-function noWhitespaceOrHeadings(input: string): string {
-  return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
-}
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -269,22 +265,13 @@ export async function ensurePr(
         await addParticipants(config, existingPr);
       }
       // Check if existing PR needs updating
-      existingPr.body ??= '';
-      const reviewableIndex = existingPr.body.indexOf(
-        '<!-- Reviewable:start -->'
-      );
-      let existingPrBody = existingPr.body;
-      if (reviewableIndex > -1) {
-        logger.debug('Stripping Reviewable content');
-        existingPrBody = existingPrBody.slice(0, reviewableIndex);
-      }
       const existingPrTitle = stripEmojis(existingPr.title);
+      const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
-      existingPrBody = existingPrBody.trim();
+      const newPrBodyHash = hashBody(prBody);
       if (
         existingPrTitle === newPrTitle &&
-        noWhitespaceOrHeadings(stripEmojis(existingPrBody)) ===
-          noWhitespaceOrHeadings(stripEmojis(prBody))
+        existingPrBodyHash === newPrBodyHash
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
         return { type: 'with-pr', pr: existingPr };
