@@ -280,6 +280,46 @@ describe('modules/manager/helmfile/extract', () => {
       });
     });
 
+    it('parses a chart with an oci repository and non-oci one', () => {
+      const content = `
+      repositories:
+        - name: oci-repo
+          url: ghcr.io/example/oci-repo
+          oci: true
+        - name: jenkins
+          url: https://charts.jenkins.io
+
+      releases:
+        - name: example
+          version: 0.1.0
+          chart: oci-repo/example
+        - name: jenkins
+          chart: jenkins/jenkins
+          version: 3.3.0
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.1.0',
+            depName: 'example',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/example',
+          },
+          {
+            currentValue: '3.3.0',
+            depName: 'jenkins',
+          },
+        ],
+      });
+    });
+
     it('parses and replaces templating strings', () => {
       const filename = 'helmfile.yaml';
       const result = extractPackageFile(

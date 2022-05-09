@@ -35,6 +35,24 @@ describe('config/presets/bitbucket-server/index', () => {
       expect(res).toEqual({ from: 'api' });
     });
 
+    it('returns JSON5', async () => {
+      httpMock
+        .scope(bitbucketApiHost)
+        .get(`${basePath}/some-filename.json5`)
+        .query({ limit: 20000 })
+        .reply(200, {
+          isLastPage: true,
+          lines: [{ text: '{from:"api"' }, { text: '}' }],
+        });
+
+      const res = await bitbucketServer.fetchJSONFile(
+        'some/repo',
+        'some-filename.json5',
+        bitbucketApiHost
+      );
+      expect(res).toEqual({ from: 'api' });
+    });
+
     it('handles branches/tags', async () => {
       httpMock
         .scope(bitbucketApiHost)

@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { Doc } from './types';
@@ -85,6 +86,15 @@ export function extractPackageFile(
           .concat([config.aliases?.[repoName]] as string[])
           .filter(is.string),
       };
+
+      // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+      const repository = doc.repositories?.find(
+        (repo) => repo.name === repoName
+      );
+      if (repository?.oci) {
+        res.datasource = DockerDatasource.id;
+        res.packageName = aliases[repoName] + '/' + depName;
+      }
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field

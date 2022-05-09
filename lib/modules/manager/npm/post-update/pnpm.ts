@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -12,7 +14,7 @@ import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmPackage } from '../extract/types';
 import { getNodeConstraint } from './node-version';
-import type { GenerateLockFileResult } from './types';
+import type { GenerateLockFileResult, PnpmLockFile } from './types';
 
 export async function generateLockFile(
   lockFileDir: string,
@@ -114,6 +116,19 @@ async function getPnpmContraint(
       const engines = packageJson?.engines;
       if (engines) {
         result = engines['pnpm'];
+      }
+    }
+  }
+  if (!result) {
+    const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
+    const content = await readLocalFile(lockFileName, 'utf8');
+    if (content) {
+      const pnpmLock = load(content) as PnpmLockFile;
+      if (
+        is.number(pnpmLock.lockfileVersion) &&
+        pnpmLock.lockfileVersion < 5.4
+      ) {
+        result = '<7';
       }
     }
   }
