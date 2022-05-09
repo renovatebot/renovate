@@ -64,6 +64,7 @@ const staticGroups = {
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
       'group:kubernetes',
+      'group:phpstan',
       'group:polymer',
       'group:resilience4j',
       'group:rubyOmniauth',
@@ -178,6 +179,15 @@ const staticGroups = {
         matchPackagePrefixes: ['symfony/'],
         groupName: 'symfony packages',
         groupSlug: 'symfony',
+      },
+    ],
+  },
+  phpstan: {
+    description: 'Group PHPStan packages together',
+    packageRules: [
+      {
+        matchPackagePatterns: ['phpstan'],
+        groupName: 'phpstan packages',
       },
     ],
   },
