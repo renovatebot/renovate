@@ -30,6 +30,7 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
+import { getPrBodyStruct } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -607,7 +608,7 @@ export async function getPr(iid: number): Promise<Pr> {
     targetBranch: mr.target_branch,
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
-    body: mr.description,
+    bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? PrState.Open : mr.state,
     hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
