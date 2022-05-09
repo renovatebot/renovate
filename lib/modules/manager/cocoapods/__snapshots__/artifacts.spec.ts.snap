@@ -3,19 +3,13 @@
 exports[`modules/manager/cocoapods/artifacts dynamically selects Docker image tag 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/cocoapods:1.2.4",
+    "cmd": "docker pull renovate/ruby:2.7.4",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -38,19 +32,13 @@ Array [
 exports[`modules/manager/cocoapods/artifacts falls back to the \`latest\` Docker image tag 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/cocoapods:latest",
+    "cmd": "docker pull renovate/ruby:latest",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -139,19 +127,13 @@ Array [
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile 2`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/cocoapods",
+    "cmd": "docker pull renovate/ruby:2.7.4",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"gem install cocoapods-acknowledgements && pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -206,13 +188,13 @@ Array [
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile and Pods files 2`] = `
 Array [
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
+    "cmd": "docker pull renovate/ruby:2.7.4",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

@@ -86,14 +86,12 @@ export async function postUpgradeCommandsExecutor(
               cmd,
               allowedPostUpgradeCommands,
             },
-            'Post-upgrade task did not match any on allowed list'
+            'Post-upgrade task did not match any on allowedPostUpgradeCommands list'
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' does not match allowed pattern${
-                allowedPostUpgradeCommands.length === 1 ? '' : 's'
-              } ${allowedPostUpgradeCommands.map((x) => `'${x}'`).join(', ')}`
+              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
             ),
           });
         }
