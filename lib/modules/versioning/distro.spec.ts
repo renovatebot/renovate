@@ -9,10 +9,6 @@ describe('modules/versioning/distro', () => {
     jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
   });
 
-  afterAll(() => {
-    jest.resetAllMocks();
-  });
-
   it.each`
     version            | expected
     ${'jammy'}         | ${true}
