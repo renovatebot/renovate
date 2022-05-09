@@ -12,6 +12,7 @@ jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
 const prList = loadJsonFixture('./pr-list.json');
+
 const result = Object.keys(prList).map((key) => {
   return prList[key];
 });

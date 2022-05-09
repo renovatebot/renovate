@@ -3,27 +3,11 @@ import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { PrState } from '../../../types';
 
-type PrStats = {
-  total: number;
-  open: number;
-  closed: number;
-  merged: number;
-};
-
-function initStats(): PrStats {
-  return {
-    total: 0,
-    open: 0,
-    closed: 0,
-    merged: 0,
-  };
-}
-
 export function runRenovateRepoStats(
   config: RenovateConfig,
   prList: Pr[]
 ): void {
-  const prStats = initStats();
+  const prStats = { total: 0, open: 0, closed: 0, merged: 0 };
 
   for (const pr of prList) {
     if (
