@@ -5,6 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
 import { parseLinkHeader } from '../../../util/url';
+import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
@@ -22,11 +23,23 @@ function removeUrlFields(input: unknown): void {
   }
 }
 
+function compactPrBodyStructure(input: unknown): void {
+  if (is.plainObject(input)) {
+    if (!input.bodyStruct && is.string(input.body)) {
+      input.bodyStruct = getPrBodyStruct(input.body);
+      delete input.body;
+    }
+  }
+}
+
 function massageGhRestPr(ghPr: GhRestPr): GhRestPr {
   removeUrlFields(ghPr);
-  delete ghPr?.head?.repo?.pushed_at;
-  delete ghPr?.base?.repo?.pushed_at;
-  delete ghPr?._links;
+  delete ghPr.head?.repo?.pushed_at;
+  delete ghPr.base?.repo?.pushed_at;
+  delete ghPr._links;
+
+  compactPrBodyStructure(ghPr);
+
   return ghPr;
 }
 
@@ -39,7 +52,11 @@ function getPrApiCache(): ApiCache<GhRestPr> {
     .prCache as ApiPageCache<GhRestPr>;
 
   const items = Object.values(apiPageCache.items);
-  if (items?.[0]?._links) {
+
+  const firstItem = items?.[0];
+  if (firstItem?.body) {
+    apiPageCache.items = {};
+  } else if (firstItem?._links) {
     for (const ghPr of items) {
       massageGhRestPr(ghPr);
     }
@@ -145,7 +162,8 @@ export async function getPrCache(
     throw new ExternalHostError(err, PlatformId.Github);
   }
 
-  for (const ghPr of prApiCache.getItems()) {
+  const cacheItems = prApiCache.getItems();
+  for (const ghPr of cacheItems) {
     const pr = coerceRestPr(ghPr);
     if (pr) {
       prCache[ghPr.number] = pr;
