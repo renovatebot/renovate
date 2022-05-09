@@ -318,7 +318,6 @@ export async function ensureDependencyDashboard(
   }
 
   issueBody += PackageFiles.getDashboardMarkdown(config);
-  PackageFiles.clear();
 
   if (config.dependencyDashboardFooter?.length) {
     issueBody +=

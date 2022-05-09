@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../config/types';
+import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 
 export class PackageFiles {
@@ -9,10 +10,17 @@ export class PackageFiles {
     baseBranch: string,
     packageFiles: Record<string, PackageFile[]> | null
   ): void {
+    logger.debug(
+      `PackageFiles.add() - Package file saved for branch=${baseBranch}`
+    );
     this.data.set(baseBranch, packageFiles);
   }
 
   public static clear(): void {
+    logger.debug(
+      { baseBranches: [...this.data.keys()] },
+      'PackageFiles.clear() - Package files deleted'
+    );
     this.data.clear();
   }
 
