@@ -167,19 +167,25 @@ export class DistroInfo {
    */
   public getNLatest(n: number): DistroInfoRecordWithVersion | null {
     const len = this._sortedInfo.length - 1;
-    let i = len - Math.floor(n);
+    let idx = -1;
 
-    // compensate i for unreleased versions
-    for (let j = len; j >= 0; j--, i--) {
-      if (this.isReleased(this._sortedInfo[j].version)) {
+    if (n < 0) {
+      return null;
+    }
+
+    for (let i = len; i >= 0; i--) {
+      if (this.isReleased(this._sortedInfo[i].version)) {
+        // 'i' holds the latest released version index
+        // compensate for the requested 'n'
+        idx = i - Math.floor(n);
         break;
       }
     }
 
-    if (len >= i && i >= 0 && this.isReleased(this._sortedInfo[i]?.version)) {
-      return this._sortedInfo[i];
+    if (idx > len || idx < 0) {
+      return null;
     }
 
-    return null;
+    return this._sortedInfo[idx];
   }
 }
