@@ -186,6 +186,7 @@ const staticGroups = {
     description: 'Group PHPStan packages together',
     packageRules: [
       {
+        matchDatasources: ['packagist'],
         matchPackagePatterns: ['phpstan'],
         groupName: 'phpstan packages',
       },
