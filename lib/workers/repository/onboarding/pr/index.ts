@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { emojify } from '../../../../util/emoji';
 import {
   deleteBranch,
@@ -12,8 +13,9 @@ import {
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
-import { addAssigneesReviewers, getPlatformPrOptions } from '../../update/pr';
+import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
+import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
@@ -114,9 +116,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (existingPr) {
     logger.debug('Found open onboarding PR');
     // Check if existing PR needs updating
-    if (
-      existingPr.body.trim() === prBody.trim() // Bitbucket strips trailing \n
-    ) {
+    const prBodyHash = hashBody(prBody);
+    if (existingPr.bodyStruct?.hash === prBodyHash) {
       logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
     }
@@ -148,7 +149,7 @@ If you need any further assistance then you can also [request help here](${confi
         platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
-      await addAssigneesReviewers(config, pr);
+      await addParticipants(config, pr);
     }
   } catch (err) /* istanbul ignore next */ {
     if (

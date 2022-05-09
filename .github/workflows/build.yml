@@ -70,7 +70,7 @@ jobs:
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.SKIP_JAVA_TESTS == 'false'
-        uses: actions/setup-java@4fe61d24fe5472910b93bdeffb8aad49f979d862 # tag=v3.2.0
+        uses: actions/setup-java@860f60056505705214d223b91ed7a30f173f6142 # tag=v3.3.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'

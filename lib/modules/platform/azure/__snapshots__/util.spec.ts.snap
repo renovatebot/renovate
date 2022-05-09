@@ -16,7 +16,9 @@ Object {
 
 exports[`modules/platform/azure/util getRenovatePRFormat should be formated (closed v2) 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
@@ -30,7 +32,9 @@ Object {
 
 exports[`modules/platform/azure/util getRenovatePRFormat should be formated (closed) 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
@@ -44,7 +48,9 @@ Object {
 
 exports[`modules/platform/azure/util getRenovatePRFormat should be formated (not closed) 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,

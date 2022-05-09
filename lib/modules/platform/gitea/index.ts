@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
+import { getPrBodyStruct, hashBody } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -96,7 +97,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     displayNumber: `Pull Request #${data.number}`,
     state: data.state,
     title: data.title,
-    body: data.body,
+    bodyStruct: getPrBodyStruct(data.body),
     sha: data.head.sha,
     sourceBranch: data.head.label,
     targetBranch: data.base.ref,
@@ -526,8 +527,8 @@ const platform: Platform = {
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
-        if (pr) {
-          if (pr.title !== title || pr.body !== body) {
+        if (pr?.bodyStruct) {
+          if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
               `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating...`
             );
@@ -537,7 +538,7 @@ const platform: Platform = {
               prBody: body,
             });
             pr.title = title;
-            pr.body = body;
+            pr.bodyStruct = getPrBodyStruct(body);
           } else {
             logger.debug(
               `Recovered from 409 Conflict and PR for ${sourceBranch} is up-to-date`
