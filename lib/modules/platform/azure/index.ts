@@ -22,6 +22,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -53,7 +54,6 @@ import {
   getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
-  streamToString,
 } from './util';
 
 interface Config {

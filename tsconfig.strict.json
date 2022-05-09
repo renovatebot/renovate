@@ -45,7 +45,6 @@
     "lib/workers/repository/init/cache.ts",
     "lib/workers/repository/init/config.ts",
     "lib/workers/repository/init/index.ts",
-    "lib/workers/repository/init/merge.ts",
     "lib/workers/repository/init/semantic.ts",
     "lib/workers/repository/init/vulnerability.ts",
     "lib/workers/repository/onboarding/branch/check.ts",
@@ -90,12 +89,8 @@
     "lib/workers/repository/update/branch/index.ts",
     "lib/workers/repository/update/branch/reuse.ts",
     "lib/workers/repository/update/branch/schedule.ts",
-    "lib/workers/repository/update/branch/status-checks.ts",
     "lib/workers/repository/update/pr/automerge.ts",
-    "lib/workers/repository/update/pr/body/changelogs.ts",
-    "lib/workers/repository/update/pr/body/config-description.ts",
     "lib/workers/repository/update/pr/body/controls.ts",
-    "lib/workers/repository/update/pr/body/index.ts",
     "lib/workers/repository/update/pr/changelog/github/index.ts",
     "lib/workers/repository/update/pr/changelog/gitlab/index.ts",
     "lib/workers/repository/update/pr/changelog/index.ts",
@@ -103,7 +98,6 @@
     "lib/workers/repository/update/pr/changelog/releases.ts",
     "lib/workers/repository/update/pr/changelog/source-github.ts",
     "lib/workers/repository/update/pr/changelog/source-gitlab.ts",
-    "lib/workers/repository/update/pr/code-owners.ts",
-    "lib/workers/repository/update/pr/index.ts"
+    "lib/workers/repository/update/pr/code-owners.ts"
   ]
 }
