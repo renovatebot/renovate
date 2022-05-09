@@ -32,8 +32,6 @@ export interface PnpmWorkspaceFile {
   packages: string[];
 }
 
-export type OverrideDependency = Record<string, string | RecursiveOverride>;
+export type OverrideDependency = Record<string, RecursiveOverride>;
 
-export interface RecursiveOverride {
-  [P: string]: RecursiveOverride;
-}
+export type RecursiveOverride = string | { [_: string]: RecursiveOverride };
