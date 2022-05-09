@@ -1,3 +1,4 @@
+import { Fixtures } from '../../../../test/fixtures';
 import {
   RenovateConfig,
   getConfig,
