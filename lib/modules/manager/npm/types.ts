@@ -74,7 +74,7 @@ export type NpmDepType =
 
 export interface NpmManagerData extends Record<string, any> {
   hasPackageManager?: boolean;
-
   lernaJsonFile?: string;
+  parents?: string[];
   yarnZeroInstall?: boolean;
 }

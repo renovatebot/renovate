@@ -347,7 +347,7 @@ export async function extractPackageFile(
    */
   function extractOverrideDepsRec(
     parents: string[],
-    child: NpmPackageDependency
+    child: NpmManagerData
   ): PackageDependency[] {
     const deps: PackageDependency[] = [];
     if (!child || is.emptyObject(child)) {
@@ -355,15 +355,13 @@ export async function extractPackageFile(
     }
     for (const [key, val] of Object.entries(child)) {
       if (is.string(val)) {
-        const dep: PackageDependency = {};
+        const dep: NpmManagerData = {};
         // special handling for "." key
         // "." means the constraint is applied to the parent dep
         dep.depName = key === '.' ? parents[parents.length - 1] : key;
-        dep.groupName = 'overrides';
+        dep.depType = 'overrides';
         dep.parents = parents.slice(); // set parents for dependency
-        if (dep.depName === 'node') {
-          dep.commitMessageTopic = 'Node.js';
-        }
+        nodeCommitTopic(dep);
         deps.push({
           ...dep,
           ...extractDependency('overrides', dep.depName, val),
@@ -408,10 +406,7 @@ export async function extractPackageFile(
             deps.push(...extractOverrideDepsRec([depName], val));
           } else {
             dep = { ...dep, ...extractDependency(depType, depName, val) };
-            if (depName === 'node') {
-              // This is a special case for Node.js to group it together with other managers
-              dep.commitMessageTopic = 'Node.js';
-            }
+            nodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
           }
@@ -504,4 +499,11 @@ export async function extractAllPackageFiles(
   }
   await postExtract(npmFiles, !!config.updateInternalDeps);
   return npmFiles;
+}
+
+function nodeCommitTopic(dep: NpmManagerData): void {
+  // This is a special case for Node.js to group it together with other managers
+  if (dep.depName === 'node') {
+    dep.commitMessageTopic = 'Node.js';
+  }
 }

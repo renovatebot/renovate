@@ -722,7 +722,6 @@ describe('modules/manager/npm/extract/index', () => {
           },
           {
             depName: 'node',
-            groupName: 'overrides',
             parents: ['baz'],
             commitMessageTopic: 'Node.js',
             currentValue: '8.9.2',
@@ -730,21 +729,18 @@ describe('modules/manager/npm/extract/index', () => {
           },
           {
             depName: 'foo',
-            groupName: 'overrides',
             parents: ['baz', 'bar'],
             currentValue: '1.0.0',
             datasource: 'npm',
           },
           {
             depName: 'foo2',
-            groupName: 'overrides',
             parents: ['foo2'],
             currentValue: '1.0.0',
             datasource: 'npm',
           },
           {
             depName: 'bar2',
-            groupName: 'overrides',
             parents: ['foo2'],
             currentValue: '1.0.0',
             datasource: 'npm',
