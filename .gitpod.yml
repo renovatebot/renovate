@@ -3,5 +3,6 @@ tasks:
       nvm install 16 &&
       nvm use 16 &&
       yarn install &&
-      yarn run build
+      yarn run build &&
+      brew install vale
     command: yarn run start

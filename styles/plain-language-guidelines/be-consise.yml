@@ -1,0 +1,28 @@
+# Vale-code for the lists on https://www.plainlanguage.gov/guidelines/concise/
+
+extends: substitution
+message: Consider using '%s' instead of '%s'
+level: suggestion
+ignorecase: true
+swap:
+  # Start of the list for "Check your prepositions"
+  a number of: several, a few, or many
+  a sufficient number of: enough
+  at this point in time: now
+  is able to: can
+  on a daily basis: daily
+  on a weekly basis: weekly
+  on a monthly basis: monthly
+  on a yearly basis: yearly
+  on the ground that: because
+  an amount of: omit, use the number on its own
+  be reponsible for: must
+  in order to: to
+  # End of the list for "Check your prepositions"
+
+  # Start of the list for "Avoid doublets and triplets"
+  due and payable: due
+  cease and desist: stop
+  knowledge and information: (either one)
+  begin and commence: start
+  # End of the list for "Avoid doublets and triplets"

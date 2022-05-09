@@ -1,0 +1,67 @@
+# This is the list of acceptable vocab for the Renovate project.
+
+# By default all entries are case sensitive!
+# Use (?i) to mark the entire pattern case insensitive.
+# Use [Oo]bservability to accept both observability and Observability.
+
+# Docs: https://docs.errata.ai/vale/vocab
+
+[Aa]utodetect
+[Aa]utomerge
+[Aa]utomerging
+[Cc]odeowners
+[Cc]onfig
+[Dd]atasource
+[Ff]unction
+[yaml, YAML]
+AdBlock
+Ansible
+Artifactory
+breejs
+Bundler
+cron
+Dependabot
+Docker
+Dockerfile
+dotnet
+ESLint
+Gemfile
+Gitea
+GitHub
+GitLab
+Gitpod
+Gradle
+Habjan
+hostname
+HTTP
+HTTPS
+JavaScript
+js
+lockfile
+mergeable
+minimatch
+MongoDB
+monorepo
+monorepos
+MySQL
+namespace
+Nejc
+nodenv
+npm
+npmrc
+NuGet
+Packagist
+PHP
+Pipenv
+pnpm
+rebase
+rebasing
+Renovate bot
+repo
+SemVer
+TypeScript
+URIs
+URL
+URLs
+Vue
+Webpack

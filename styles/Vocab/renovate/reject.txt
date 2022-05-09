@@ -1,0 +1,9 @@
+# This is the list of vocab to avoid for the Renovate project.
+
+# By default all entries are case sensitive!
+# Use (?i) to mark the entire pattern case insensitive.
+# Use [Oo]bservability to accept both observability and Observability.
+
+# Docs: https://docs.errata.ai/vale/vocab
+
+renovatebot
