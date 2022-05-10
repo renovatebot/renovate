@@ -188,7 +188,7 @@
     "marshal": "0.5.4",
     "minimatch": "5.0.1",
     "moo": "0.5.1",
-    "nanoid": "3.3.3",
+    "nanoid": "3.3.4",
     "node-html-parser": "5.3.3",
     "openpgp": "5.2.1",
     "p-all": "3.0.0",
