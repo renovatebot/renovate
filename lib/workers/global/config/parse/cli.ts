@@ -1,7 +1,9 @@
 import { Command } from 'commander';
+import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
+import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import type { ParseConfigOptions } from './types';
 
@@ -16,18 +18,18 @@ export function getCliName(option: ParseConfigOptions): string {
 export function getConfig(input: string[]): AllConfig {
   // massage migrated configuration keys
   const argv = input
-    .map(
-      (a) =>
-        a
-          .replace('--endpoints=', '--host-rules=')
-          .replace('--expose-env=true', '--trust-level=high')
-          .replace('--expose-env', '--trust-level=high')
-          .replace('--renovate-fork', '--include-forks')
-          .replace('"platform":"', '"hostType":"')
-          .replace('"endpoint":"', '"matchHost":"')
-          .replace('"host":"', '"matchHost":"')
-          .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
-          .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
+    .map((a) =>
+      a
+        .replace('--endpoints=', '--host-rules=')
+        .replace('--expose-env=true', '--trust-level=high')
+        .replace('--expose-env', '--trust-level=high')
+        .replace('--renovate-fork', '--include-forks')
+        .replace('"platform":"', '"hostType":"')
+        .replace('"endpoint":"', '"matchHost":"')
+        .replace('"host":"', '"matchHost":"')
+        .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
+        .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
+        .replace(/^--dry-run$/, '--dry-run=true')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -53,7 +55,7 @@ export function getConfig(input: string[]): AllConfig {
         return [];
       }
       try {
-        return JSON.parse(val);
+        return JSON5.parse(val);
       } catch (err) {
         return val.split(',').map((el) => el.trim());
       }
@@ -63,7 +65,7 @@ export function getConfig(input: string[]): AllConfig {
         return {};
       }
       try {
-        return JSON.parse(val);
+        return JSON5.parse(val);
       } catch (err) {
         throw new Error("Invalid JSON value: '" + val + "'");
       }
@@ -114,6 +116,21 @@ export function getConfig(input: string[]): AllConfig {
         if (option.cli !== false) {
           if (opts[option.name] !== undefined) {
             config[option.name] = opts[option.name];
+            if (option.name === 'dryRun') {
+              if (config[option.name] === 'true') {
+                logger.warn(
+                  'cli config dryRun property has been changed to full'
+                );
+                config[option.name] = 'full';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config dryRun property has been changed to null'
+                );
+                config[option.name] = null;
+              } else if (config[option.name] === 'null') {
+                config[option.name] = null;
+              }
+            }
           }
         }
       }

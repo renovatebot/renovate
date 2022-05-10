@@ -7,6 +7,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       version: '0.0.2',
       dependencies: { chalk: '2.4.2' },
     });
+
     it('mirrors', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
@@ -16,6 +17,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });
+
     it('aborts mirror', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
@@ -24,6 +26,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       );
       expect(bumpedContent).toEqual(content);
     });
+
     it('increments', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
@@ -33,6 +36,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });
+
     it('no ops', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
@@ -41,6 +45,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       );
       expect(bumpedContent).toEqual(content);
     });
+
     it('updates', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
@@ -50,6 +55,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });
+
     it('returns content if bumping errors', async () => {
       jest.mock('semver', () => ({
         inc: () => {

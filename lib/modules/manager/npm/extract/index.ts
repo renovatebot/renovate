@@ -15,6 +15,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../types';
+import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -38,7 +39,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFile<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
@@ -66,7 +67,7 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
-  let yarnWorkspacesPackages: string[];
+  let yarnWorkspacesPackages: string[] | undefined;
   if (is.array(packageJson.workspaces)) {
     yarnWorkspacesPackages = packageJson.workspaces;
   } else {
@@ -83,7 +84,10 @@ export async function extractPackageFile(
     pnpmShrinkwrap: 'pnpm-lock.yaml',
   };
 
-  for (const [key, val] of Object.entries(lockFiles)) {
+  for (const [key, val] of Object.entries(lockFiles) as [
+    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
+    string
+  ][]) {
     const filePath = getSiblingFileName(fileName, val);
     if (await readLocalFile(filePath, 'utf8')) {
       lockFiles[key] = filePath;
@@ -95,7 +99,7 @@ export async function extractPackageFile(
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
 
-  let npmrc: string;
+  let npmrc: string | undefined;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
   if (is.string(repoNpmrc)) {
@@ -135,15 +139,17 @@ export async function extractPackageFile(
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
-  let lernaJsonFile: string;
-  let lernaPackages: string[];
-  let lernaClient: 'yarn' | 'npm';
+  let lernaJsonFile: string | undefined;
+  let lernaPackages: string[] | undefined;
+  let lernaClient: 'yarn' | 'npm' | undefined;
   let hasFancyRefs = false;
-  let lernaJson: {
-    packages: string[];
-    npmClient: string;
-    useWorkspaces?: boolean;
-  };
+  let lernaJson:
+    | {
+        packages: string[];
+        npmClient: string;
+        useWorkspaces?: boolean;
+      }
+    | undefined;
   try {
     lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
     lernaJson = JSON.parse(await readLocalFile(lernaJsonFile, 'utf8'));
@@ -209,7 +215,6 @@ export async function extractPackageFile(
       } else if (depName === 'pnpm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'pnpm';
-        constraints.pnpm = dep.currentValue;
       } else if (depName === 'vscode') {
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'microsoft/vscode';
@@ -333,14 +338,16 @@ export async function extractPackageFile(
     return dep;
   }
 
-  for (const depType of Object.keys(depTypes)) {
+  for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
     let dependencies = packageJson[depType];
     if (dependencies) {
       try {
         if (depType === 'packageManager') {
-          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(dependencies);
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
+            dependencies as string
+          );
           // istanbul ignore next
-          if (!match) {
+          if (!match?.groups) {
             break;
           }
           dependencies = { [match.groups.name]: match.groups.range };
@@ -410,6 +417,9 @@ export async function extractPackageFile(
     managerData: {
       lernaJsonFile,
       yarnZeroInstall,
+      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
+        packageJson.packageManager
+      ),
     },
     lernaClient,
     lernaPackages,
@@ -447,6 +457,6 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  await postExtract(npmFiles, config.updateInternalDeps);
+  await postExtract(npmFiles, !!config.updateInternalDeps);
   return npmFiles;
 }

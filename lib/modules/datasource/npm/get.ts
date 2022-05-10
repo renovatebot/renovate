@@ -87,7 +87,7 @@ export async function getDependency(
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags']?.latest];
+    const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
     res.repository = res.repository || latestVersion?.repository;
     res.homepage = res.homepage || latestVersion?.homepage;
 
@@ -100,7 +100,7 @@ export async function getDependency(
       sourceUrl,
       sourceDirectory,
       versions: {},
-      releases: null,
+      releases: [],
       'dist-tags': res['dist-tags'],
       registryUrl,
     };
@@ -112,17 +112,17 @@ export async function getDependency(
     dep.releases = Object.keys(res.versions).map((version) => {
       const release: NpmRelease = {
         version,
-        gitRef: res.versions[version].gitHead,
-        dependencies: res.versions[version].dependencies,
-        devDependencies: res.versions[version].devDependencies,
+        gitRef: res.versions?.[version].gitHead,
+        dependencies: res.versions?.[version].dependencies,
+        devDependencies: res.versions?.[version].devDependencies,
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
       }
-      if (res.versions[version].deprecated) {
+      if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
       }
-      const source = getPackageSource(res.versions[version].repository);
+      const source = getPackageSource(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
         release.sourceUrl = source.sourceUrl;
       }

@@ -10,6 +10,7 @@ describe('modules/manager/conan/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts multiple image lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile1);
       expect(res?.deps).toEqual([
@@ -87,10 +88,12 @@ describe('modules/manager/conan/extract', () => {
         },
       ]);
     });
+
     it('extracts multiple 0 lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile2);
       expect(res).toBeNull();
     });
+
     it('extracts multiple image lines from conanfile.py', () => {
       const res = extractPackageFile(conanfile3);
       expect(res?.deps).toEqual([

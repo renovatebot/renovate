@@ -23,7 +23,8 @@ describe('config/options/index', () => {
       .filter((option) => option.supportedManagers)
       .forEach((option) => {
         expect(option.supportedManagers).toBeNonEmptyArray();
-        for (const item of option.supportedManagers) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        for (const item of option.supportedManagers!) {
           expect(managerList).toContain(item);
         }
       });
@@ -38,7 +39,8 @@ describe('config/options/index', () => {
       .filter((option) => option.supportedPlatforms)
       .forEach((option) => {
         expect(option.supportedPlatforms).toBeNonEmptyArray();
-        for (const item of option.supportedPlatforms) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        for (const item of option.supportedPlatforms!) {
           expect(platformList).toContain(item);
         }
       });

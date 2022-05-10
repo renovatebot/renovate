@@ -13,7 +13,8 @@ import type {
 } from '../types';
 
 function dependencyUrl(dep: PackageDependency): string {
-  const url = dep.packageName;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const url = dep.packageName!;
   if (dep.managerData?.subdir) {
     return url.concat('/', dep.managerData.subdir);
   }

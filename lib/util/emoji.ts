@@ -20,7 +20,6 @@ const hexCodesByShort = new Map<string, string>();
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
     const table: Record<string, string | string[]> = JSON.parse(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
     );
     for (const [hex, val] of Object.entries(table)) {

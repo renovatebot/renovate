@@ -7,63 +7,42 @@ Object {
       "currentValue": "~> 0.8.1",
       "datasource": "hex",
       "depName": "postgrex",
-      "managerData": Object {
-        "lineNumber": 18,
-      },
       "packageName": "postgrex",
     },
     Object {
       "currentValue": ">2.1.0 or <=3.0.0",
       "datasource": "hex",
       "depName": "ecto",
-      "managerData": Object {
-        "lineNumber": 19,
-      },
       "packageName": "ecto",
     },
     Object {
       "currentValue": "ninenines/cowboy",
       "datasource": "github",
       "depName": "cowboy",
-      "managerData": Object {
-        "lineNumber": 20,
-      },
       "skipReason": "non-hex-dep-types",
     },
     Object {
       "currentValue": "~> 1.0",
       "datasource": "hex",
       "depName": "secret",
-      "managerData": Object {
-        "lineNumber": 21,
-      },
       "packageName": "secret:acme",
     },
     Object {
       "currentValue": ">2.1.0 and <=3.0.0",
       "datasource": "hex",
       "depName": "ex_doc",
-      "managerData": Object {
-        "lineNumber": 22,
-      },
       "packageName": "ex_doc",
     },
     Object {
       "currentValue": ">= 1.0.0",
       "datasource": "hex",
       "depName": "jason",
-      "managerData": Object {
-        "lineNumber": 24,
-      },
       "packageName": "jason",
     },
     Object {
       "currentValue": "~> 1.0",
       "datasource": "hex",
       "depName": "jason",
-      "managerData": Object {
-        "lineNumber": 24,
-      },
       "packageName": "jason",
     },
   ],

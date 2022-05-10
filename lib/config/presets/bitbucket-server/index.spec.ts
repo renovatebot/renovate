@@ -33,7 +33,24 @@ describe('config/presets/bitbucket-server/index', () => {
         bitbucketApiHost
       );
       expect(res).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns JSON5', async () => {
+      httpMock
+        .scope(bitbucketApiHost)
+        .get(`${basePath}/some-filename.json5`)
+        .query({ limit: 20000 })
+        .reply(200, {
+          isLastPage: true,
+          lines: [{ text: '{from:"api"' }, { text: '}' }],
+        });
+
+      const res = await bitbucketServer.fetchJSONFile(
+        'some/repo',
+        'some-filename.json5',
+        bitbucketApiHost
+      );
+      expect(res).toEqual({ from: 'api' });
     });
 
     it('handles branches/tags', async () => {
@@ -53,7 +70,6 @@ describe('config/presets/bitbucket-server/index', () => {
         'feature/branch'
       );
       expect(res).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws 404', async () => {
@@ -70,7 +86,6 @@ describe('config/presets/bitbucket-server/index', () => {
           bitbucketApiHost
         )
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws to big', async () => {
@@ -91,7 +106,6 @@ describe('config/presets/bitbucket-server/index', () => {
           bitbucketApiHost
         )
       ).rejects.toThrow(PRESET_INVALID_JSON);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws to invalid', async () => {
@@ -111,7 +125,6 @@ describe('config/presets/bitbucket-server/index', () => {
           bitbucketApiHost
         )
       ).rejects.toThrow(PRESET_INVALID_JSON);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -133,8 +146,8 @@ describe('config/presets/bitbucket-server/index', () => {
           'https://api.github.example.org'
         )
       ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('uses custom path', async () => {
       httpMock
         .scope('https://api.github.example.org')
@@ -152,7 +165,6 @@ describe('config/presets/bitbucket-server/index', () => {
           'https://api.github.example.org'
         )
       ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

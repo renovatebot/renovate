@@ -20,7 +20,6 @@ describe('config/presets/gitlab/index', () => {
           presetName: 'non-default',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws if missing', async () => {
@@ -30,13 +29,12 @@ describe('config/presets/gitlab/index', () => {
         .twice()
         .reply(200, [])
         .get(`${basePath}/files/default.json/raw?ref=master`)
-        .reply(404, null)
+        .reply(404)
         .get(`${basePath}/files/renovate.json/raw?ref=master`)
-        .reply(404, null);
+        .reply(404);
       await expect(gitlab.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_DEP_NOT_FOUND
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return the preset', async () => {
@@ -57,7 +55,6 @@ describe('config/presets/gitlab/index', () => {
 
       const content = await gitlab.getPreset({ repo: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return the preset with a tag', async () => {
@@ -71,7 +68,6 @@ describe('config/presets/gitlab/index', () => {
         tag: 'someTag',
       });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should query custom paths', async () => {
@@ -96,7 +92,54 @@ describe('config/presets/gitlab/index', () => {
         presetName: 'custom',
       });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('should query custom paths with .json extension', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`${basePath}/branches`)
+        .reply(200, [
+          {
+            name: 'devel',
+          },
+          {
+            name: 'master',
+            default: true,
+          },
+        ])
+        .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({
+        repo: 'some/repo',
+        presetPath: 'path',
+        presetName: 'custom.json',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
+    it('should query custom paths with .json5 extension', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`${basePath}/branches`)
+        .reply(200, [
+          {
+            name: 'devel',
+          },
+          {
+            name: 'master',
+            default: true,
+          },
+        ])
+        .get(`${basePath}/files/path%2Fcustom.json5/raw?ref=master`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({
+        repo: 'some/repo',
+        presetPath: 'path',
+        presetName: 'custom.json5',
+      });
+      expect(content).toEqual({ foo: 'bar' });
     });
   });
 
@@ -120,7 +163,6 @@ describe('config/presets/gitlab/index', () => {
           undefined
         )
       ).toEqual({});
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses custom endpoint', async () => {
@@ -143,7 +185,6 @@ describe('config/presets/gitlab/index', () => {
           'https://gitlab.example.org/api/v4'
         )
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -160,7 +201,6 @@ describe('config/presets/gitlab/index', () => {
           'someTag'
         )
       ).toEqual({});
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -177,7 +217,6 @@ describe('config/presets/gitlab/index', () => {
           'someTag'
         )
       ).toEqual({});
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

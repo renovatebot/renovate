@@ -25,6 +25,7 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
         },
       ]);
     });
+
     it('finds direct dependency', () => {
       expect(
         findDepConstraints(
@@ -36,6 +37,7 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
         )
       ).toEqual([{ constraint: '4.0.0', depType: 'dependencies' }]);
     });
+
     it('skips non-matching direct dependency', () => {
       expect(
         findDepConstraints(
@@ -47,6 +49,7 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
         )
       ).toHaveLength(0);
     });
+
     it('finds direct devDependency', () => {
       const packageJsonDev = { ...packageJson };
       packageJsonDev.devDependencies = packageJsonDev.dependencies;

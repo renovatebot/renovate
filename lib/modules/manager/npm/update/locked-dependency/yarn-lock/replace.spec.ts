@@ -1,4 +1,4 @@
-import * as Diff from 'diff'; // = require('diff');
+import * as Diff from 'diff';
 import { loadFixture } from '../../../../../../../test/util';
 import { replaceConstraintVersion } from './replace';
 
@@ -17,6 +17,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       );
       expect(res).toBe(yarn2Lock);
     });
+
     it('replaces without dependencies', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
@@ -31,7 +32,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version: \\"0.2.5\\"
+        "  version \\"0.2.5\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -41,6 +42,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         "
       `);
     });
+
     it('replaces with dependencies', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
@@ -55,7 +57,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-              "  version: \\"4.4.0\\"
+              "  version \\"4.4.0\\"
               "
           `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -65,6 +67,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
               "
           `);
     });
+
     it('replaces constraint too', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
@@ -81,7 +84,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
                   "express@4.4.0:
-                    version: \\"4.4.0\\"
+                    version \\"4.4.0\\"
                   "
               `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -92,6 +95,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
                   "
               `);
     });
+
     it('handles escaped constraints', () => {
       const res = replaceConstraintVersion(
         yarnLock2,
@@ -106,7 +110,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version: \\"2.2.0\\"
+        "  version \\"2.2.0\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
@@ -117,6 +121,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         "
       `);
     });
+
     it('handles quoted', () => {
       const res = replaceConstraintVersion(
         yarnLock2,
@@ -131,7 +136,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version: \\"0.48.1\\"
+        "  version \\"0.48.1\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`

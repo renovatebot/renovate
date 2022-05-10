@@ -17,6 +17,8 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
+handlebars.registerHelper('lowercase', (str: string) => str.toLowerCase());
+
 handlebars.registerHelper('containsString', (str, subStr, options) =>
   str.includes(subStr)
 );
@@ -84,6 +86,7 @@ export const allowedFields = {
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
+  isPinDigest: 'true if the upgrade is pinning digests',
   isRollback: 'true if the upgrade is a rollback PR',
   isReplacement: 'true if the upgrade is a replacement',
   isRange: 'true if the new value is a range',
@@ -123,7 +126,8 @@ export const allowedFields = {
   sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
-  updateType: 'One of digest, pin, rollback, patch, minor, major, replacement',
+  updateType:
+    'One of digest, pin, rollback, patch, minor, major, replacement, pinDigest',
   upgrades: 'An array of upgrade objects in the branch',
   url: 'The url of the release notes',
   version: 'The version number of the changelog',

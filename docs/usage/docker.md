@@ -8,7 +8,7 @@ description: Docker Package Manager Support in Renovate
 Renovate supports upgrading dependencies in various types of Docker definition files:
 
 - Docker's `Dockerfile` files
-- Docker Compose `docker-compose.yml` files
+- Docker Compose `docker-compose.yml`, `compose.yml` files
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
@@ -250,7 +250,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:32.7.5
+FROM renovate/renovate:32.45.5
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

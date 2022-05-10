@@ -53,20 +53,22 @@ describe('modules/platform/gitea/index', () => {
     },
   });
 
+  type MockPr = ght.PR & Required<Pick<ght.PR, 'head' | 'base'>>;
+
   const mockRepos: ght.Repo[] = [
     partial<ght.Repo>({ full_name: 'a/b' }),
     partial<ght.Repo>({ full_name: 'c/d' }),
   ];
 
-  const mockPRs: ght.PR[] = [
-    partial<ght.PR>({
+  const mockPRs: MockPr[] = [
+    partial<MockPr>({
       number: 1,
       title: 'Some PR',
       body: 'some random pull request',
       state: PrState.Open,
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
-      closed_at: null,
+      closed_at: undefined,
       mergeable: true,
       base: { ref: 'some-base-branch' },
       head: {
@@ -75,7 +77,7 @@ describe('modules/platform/gitea/index', () => {
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
     }),
-    partial<ght.PR>({
+    partial<MockPr>({
       number: 2,
       title: 'Other PR',
       body: 'other random pull request',
@@ -462,6 +464,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toBeNull();
     });
+
     it('should return yellow with unknown status', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<ght.CombinedCommitStatus>({
@@ -675,7 +678,7 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('createPr', () => {
-    const mockNewPR: ght.PR = {
+    const mockNewPR: MockPr = {
       number: 42,
       state: PrState.Open,
       head: {
@@ -916,11 +919,11 @@ describe('modules/platform/gitea/index', () => {
 
   describe('getIssue', () => {
     it('should return the issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.number === 1);
+      const mockIssue = mockIssues.find((i) => i.number === 1)!;
       helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
-      expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
+      expect(await gitea.getIssue?.(mockIssue.number)).toHaveProperty(
         'number',
         mockIssue.number
       );
@@ -929,7 +932,7 @@ describe('modules/platform/gitea/index', () => {
 
   describe('findIssue', () => {
     it('should return existing open issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'open-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
@@ -941,7 +944,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not return existing closed issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       await initFakeRepo();
 
@@ -1015,7 +1018,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not reopen closed issue by default', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
@@ -1149,7 +1152,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should reopen closed issue if desired', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
@@ -1175,7 +1178,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not update existing closed issue if desired', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
 
       await initFakeRepo();
@@ -1335,7 +1338,7 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.ensureComment({
         number: 1,
         content: 'other-content',
-        topic: undefined,
+        topic: null,
       });
 
       expect(res).toBe(true);
@@ -1497,6 +1500,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.requestPrReviewers).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
     it('should should do nothing if version to old', async () => {
       expect.assertions(3);
       const mockPR = mockPRs[0];
@@ -1507,6 +1511,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.requestPrReviewers).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
     it('catches errors', async () => {
       expect.assertions(2);
       const mockPR = mockPRs[0];
@@ -1520,10 +1525,13 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('massageMarkdown', () => {
-    it('should truncate body to 1000000 characters', () => {
-      const excessiveBody = '*'.repeat(1000001);
+    it('replaces pr links', () => {
+      const body =
+        '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
-      expect(gitea.massageMarkdown(excessiveBody)).toHaveLength(1000000);
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)'
+      );
     });
   });
 
@@ -1578,6 +1586,7 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
     });
+
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
@@ -1585,6 +1594,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
       await initFakeRepo({ full_name: 'some/repo' });

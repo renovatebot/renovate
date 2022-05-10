@@ -14,6 +14,7 @@ import {
 } from '../../../../constants/error-messages';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
 import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
@@ -83,6 +84,7 @@ describe('workers/repository/update/branch/index', () => {
       updatedArtifacts: [],
     };
     let config: BranchConfig;
+
     beforeEach(() => {
       git.branchExists.mockReturnValue(false);
       prWorker.ensurePr = jest.fn();
@@ -110,6 +112,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
     });
+
     afterEach(() => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
@@ -117,6 +120,7 @@ describe('workers/repository/update/branch/index', () => {
       jest.resetAllMocks();
       GlobalConfig.reset();
     });
+
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
@@ -126,6 +130,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'not-scheduled',
       });
     });
+
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
@@ -137,6 +142,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'update-not-scheduled',
       });
     });
+
     it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -159,6 +165,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pending',
       });
     });
+
     it('skips branch if not stabilityDays not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -223,6 +230,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
     });
+
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -234,6 +242,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
+
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -245,6 +254,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
+
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -255,6 +265,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
+
     it('skips branch if merged PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -265,6 +276,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
+
     it('throws error if closed PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -276,6 +288,7 @@ describe('workers/repository/update/branch/index', () => {
         REPOSITORY_CHANGED
       );
     });
+
     it('does not skip branch if edited PR found with rebaseLabel', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -291,6 +304,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'error',
       });
     });
+
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -306,6 +320,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
     });
+
     it('skips branch if target branch changed', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -322,6 +337,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
     });
+
     it('skips branch if branch edited and no PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -332,6 +348,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
     });
+
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -344,6 +361,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'error',
       });
     });
+
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -356,6 +374,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
     });
+
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -372,6 +391,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'branch-limit-reached',
       });
     });
+
     it('returns if pr creation limit exceeded and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -392,6 +412,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-limit-reached',
       });
     });
+
     it('returns if commit limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -409,6 +430,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'commit-limit-reached',
       });
     });
+
     it('returns if no work', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -487,12 +509,13 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      GlobalConfig.set({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
     });
+
     it('returns if branch exists and prCreation set to approval', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -514,6 +537,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'needs-pr-approval',
       });
     });
+
     it('returns if branch exists but pending', async () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -536,6 +560,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pending',
       });
     });
+
     it('returns if branch automerge is pending', async () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -558,6 +583,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
       });
     });
+
     it('returns if PR creation failed', async () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -580,6 +606,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'error',
       });
     });
+
     it('handles unknown PrBlockedBy', async () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -602,6 +629,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'error',
       });
     });
+
     it('returns if branch exists but updated', async () => {
       expect.assertions(3);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -626,6 +654,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
+
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -647,6 +676,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
+
     it('ensures PR when impossible to automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -672,6 +702,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
+
     it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -693,6 +724,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
+
     it('ensures PR and adds lock file error comment if old releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -715,6 +747,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
+
     it('ensures PR and adds lock file error comment if new releaseTimestamp and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -737,6 +770,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
+
     it('throws error if lock file errors and new releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -757,6 +791,7 @@ describe('workers/repository/update/branch/index', () => {
         Error(MANAGER_LOCKFILE_ERROR)
       );
     });
+
     it('ensures PR and adds lock file error comment recreate closed', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -779,6 +814,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
+
     it('swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockImplementationOnce(() => {
         throw new Error('some error');
@@ -790,6 +826,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'error',
       });
     });
+
     it('throws and swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -805,6 +842,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-created',
       });
     });
+
     it('swallows pr errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -831,7 +869,7 @@ describe('workers/repository/update/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as Pr);
-      GlobalConfig.set({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -845,7 +883,7 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      GlobalConfig.set({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -866,12 +904,15 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      GlobalConfig.set({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -899,7 +940,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -908,7 +952,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: {},
       } as ResultWithPr);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      GlobalConfig.set({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -934,7 +978,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -967,7 +1014,7 @@ describe('workers/repository/update/branch/index', () => {
         title: 'rebase!',
         state: PrState.Open,
         labels: ['stop-updating'],
-        body: `- [ ] <!-- rebase-check -->`,
+        bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1002,7 +1049,10 @@ describe('workers/repository/update/branch/index', () => {
         title: 'Update dependency',
         state: PrState.Open,
         labels: ['stop-updating'],
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1047,7 +1097,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -1100,7 +1153,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
       });
       const errorMessage = expect.stringContaining(
-        "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
+        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand"
       );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1133,7 +1186,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -1210,7 +1266,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -1290,7 +1349,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus
@@ -1435,7 +1497,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({

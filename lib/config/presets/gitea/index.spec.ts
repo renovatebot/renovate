@@ -35,7 +35,23 @@ describe('config/presets/gitea/index', () => {
         null
       );
       expect(res).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns JSON5', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.json5`)
+        .reply(200, {
+          content: toBase64('{from:"api"}'),
+        });
+
+      const res = await gitea.fetchJSONFile(
+        'some/repo',
+        'some-filename.json5',
+        giteaApiHost,
+        null
+      );
+      expect(res).toEqual({ from: 'api' });
     });
   });
 
@@ -49,19 +65,17 @@ describe('config/presets/gitea/index', () => {
         .reply(200, {});
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('throws if no content', async () => {
+    it('throws if invalid content', async () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, {});
+        .reply(200, { content: toBase64('invalid') });
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws if fails to parse', async () => {
@@ -75,7 +89,6 @@ describe('config/presets/gitea/index', () => {
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return default.json', async () => {
@@ -88,7 +101,6 @@ describe('config/presets/gitea/index', () => {
 
       const content = await gitea.getPreset({ repo: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should query preset within the file', async () => {
@@ -103,7 +115,6 @@ describe('config/presets/gitea/index', () => {
         presetName: 'somefile/somename',
       });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should query subpreset', async () => {
@@ -121,7 +132,6 @@ describe('config/presets/gitea/index', () => {
         presetName: 'somefile/somename/somesubname',
       });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should return custom.json', async () => {
@@ -136,7 +146,6 @@ describe('config/presets/gitea/index', () => {
         presetName: 'custom',
       });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should query custom paths', async () => {
@@ -152,7 +161,6 @@ describe('config/presets/gitea/index', () => {
         presetPath: 'path',
       });
       expect(content).toEqual({ foo: 'bar' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should throws not-found', async () => {
@@ -168,7 +176,6 @@ describe('config/presets/gitea/index', () => {
           presetName: 'somefile/somename/somesubname',
         })
       ).rejects.toThrow(PRESET_NOT_FOUND);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -183,7 +190,6 @@ describe('config/presets/gitea/index', () => {
       expect(
         await gitea.getPresetFromEndpoint('some/repo', 'default', undefined)
       ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses custom endpoint', async () => {
@@ -203,7 +209,6 @@ describe('config/presets/gitea/index', () => {
           )
           .catch(() => ({ from: 'api' }))
       ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -222,8 +227,8 @@ describe('config/presets/gitea/index', () => {
           'someTag'
         )
       ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('uses custom endpoint with a tag', async () => {
       httpMock
         .scope('https://api.gitea.example.org')
@@ -242,7 +247,6 @@ describe('config/presets/gitea/index', () => {
           )
           .catch(() => ({ from: 'api' }))
       ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -15,6 +15,7 @@ describe('workers/repository/update/branch/reuse', () => {
       title: 'any',
     };
     let config: BranchConfig;
+
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
@@ -24,17 +25,20 @@ describe('workers/repository/update/branch/reuse', () => {
       };
       jest.resetAllMocks();
     });
+
     it('returns false if branch does not exist', async () => {
       git.branchExists.mockReturnValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
+
     it('returns true if no PR', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValue(null);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });
+
     it('returns true if does not need rebasing', async () => {
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchConflicted.mockResolvedValueOnce(false);
@@ -96,6 +100,7 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });
+
     it('returns true if unmergeable and can rebase, but rebaseWhen is never', async () => {
       config.rebaseWhen = 'never';
       git.branchExists.mockReturnValueOnce(true);
@@ -105,6 +110,7 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });
+
     it('returns false if PR title rebase!', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -114,16 +120,21 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
+
     it('returns false if PR body check rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         title: 'Update foo to v4',
-        body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
+        bodyStruct: {
+          hash: '123',
+          rebaseRequested: true,
+        },
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
+
     it('returns false if manual rebase by label', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -133,6 +144,7 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
+
     it('returns false if unmergeable and can rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchConflicted.mockResolvedValueOnce(true);
@@ -141,6 +153,7 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
+
     it('returns true if automerge branch and not stale', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -148,6 +161,7 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });
+
     it('returns false if automerge branch and stale', async () => {
       config.rebaseWhen = 'auto';
       config.automerge = true;
@@ -157,6 +171,7 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
+
     it('returns true if rebaseWhen=behind-base-branch but cannot rebase', async () => {
       config.rebaseWhen = 'behind-base-branch';
       git.branchExists.mockReturnValueOnce(true);
