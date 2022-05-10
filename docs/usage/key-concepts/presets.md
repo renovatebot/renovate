@@ -5,7 +5,7 @@ description: Learn about Renovate configuration presets
 
 This document describes Renovate configuration presets and why you should use them.
 
-To learn how to create your own presets, how to host them, and how to extend from presets read the [Shareable Config Presets](./config-presets.md) page.
+To learn how to create your own presets, how to host them, and how to extend from presets read the [Shareable Config Presets](../config-presets.md) page.
 
 ## Why you should use presets
 
