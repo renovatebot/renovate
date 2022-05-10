@@ -2041,7 +2041,6 @@
 
 "@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.4":
   version "0.0.4"
-  uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
 "@renovatebot/pep440@2.1.1":
@@ -2391,6 +2390,11 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/conventional-commits-detector/-/conventional-commits-detector-1.0.0.tgz#27e143c481d6fa6146863d77e6b91de877d4f09e"
   integrity sha512-ZB+G1yG5pQoWaaHg0D4H9c29q61Y0O/kyOtEx0IKL3Gca3EGEcN3jh5OHnoQp00/pFoqJR63htsviivOkTXuCw==
+
+"@types/diff@5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.2.tgz#dd565e0086ccf8bc6522c6ebafd8a3125c91c12b"
+  integrity sha512-uw8eYMIReOwstQ0QKF0sICefSy8cNO/v7gOTiIy9SbwuHyEecJUm7qlgueOO5S1udZ5I/irVydHVwMchgzbKTg==
 
 "@types/emscripten@^1.38.0":
   version "1.39.6"
