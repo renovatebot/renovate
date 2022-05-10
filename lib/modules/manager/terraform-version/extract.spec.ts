@@ -14,6 +14,7 @@ describe('modules/manager/terraform-version/extract', () => {
         ],
       });
     });
+
     it('skips non ranges', () => {
       const res = extractPackageFile('latest');
       expect(res).toEqual({

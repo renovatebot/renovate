@@ -14,6 +14,7 @@ describe('modules/manager/regex/index', () => {
       pinDigests: false,
     });
   });
+
   it('extracts multiple dependencies', async () => {
     const config = {
       matchStrings: [
@@ -38,6 +39,7 @@ describe('modules/manager/regex/index', () => {
     );
     expect(res.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
+
   it('returns null if no dependencies found', async () => {
     const config = {
       matchStrings: [
@@ -49,6 +51,7 @@ describe('modules/manager/regex/index', () => {
     const res = await extractPackageFile('', 'Dockerfile', config);
     expect(res).toBeNull();
   });
+
   it('returns null if invalid template', async () => {
     const config = {
       matchStrings: [
@@ -63,6 +66,7 @@ describe('modules/manager/regex/index', () => {
     );
     expect(res).toBeNull();
   });
+
   it('extracts extractVersion', async () => {
     const config = {
       matchStrings: [
@@ -82,6 +86,7 @@ describe('modules/manager/regex/index', () => {
       ).extractVersion
     ).toBe('^v(?<version>.*)$');
   });
+
   it('extracts registryUrl', async () => {
     const config = {
       matchStrings: [
@@ -117,6 +122,7 @@ describe('modules/manager/regex/index', () => {
       ],
     });
   });
+
   it('extracts and applies a registryUrlTemplate', async () => {
     const config = {
       matchStrings: [
@@ -135,6 +141,7 @@ describe('modules/manager/regex/index', () => {
       res.deps.find((dep) => dep.depName === 'gradle').registryUrls
     ).toEqual(['http://registry.gradle.com/']);
   });
+
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
     jest.mock('../../../logger');
     const config = {
@@ -163,6 +170,7 @@ describe('modules/manager/regex/index', () => {
       'Invalid regex manager registryUrl'
     );
   });
+
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
       matchStrings: [
@@ -262,6 +270,7 @@ describe('modules/manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
   it('extracts with combination strategy and registry url', async () => {
     const config: CustomExtractConfig = {
       matchStringsStrategy: 'combination',
@@ -330,6 +339,7 @@ describe('modules/manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
   it('extracts with recursive strategy and multiple matches', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
@@ -346,6 +356,7 @@ describe('modules/manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(2);
   });
+
   it('extracts with recursive strategy and multiple layers ', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
@@ -363,6 +374,7 @@ describe('modules/manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
   it('extracts with recursive strategy and fail because of not sufficient regexes', async () => {
     const config: CustomExtractConfig = {
       matchStrings: ['"group.{1}":\\s*\\{[^}]*}'],
@@ -373,9 +385,9 @@ describe('modules/manager/regex/index', () => {
       'example.json',
       config
     );
-    expect(res).toMatchSnapshot();
     expect(res).toBeNull();
   });
+
   it('extracts with recursive strategy and fail because there is no match', async () => {
     const config: CustomExtractConfig = {
       matchStrings: ['"trunk.{1}":\\s*\\{[^}]*}'],
@@ -386,9 +398,9 @@ describe('modules/manager/regex/index', () => {
       'example.json',
       config
     );
-    expect(res).toMatchSnapshot();
     expect(res).toBeNull();
   });
+
   it('extracts with recursive strategy and merged groups', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [

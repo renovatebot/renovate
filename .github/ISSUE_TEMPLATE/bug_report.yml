@@ -47,6 +47,14 @@ body:
     id: platform-version-if-selfhosting
     attributes:
       label: If you're self-hosting Renovate, tell us what version of the platform you run.
+      description: |
+        This field is for the version number of your _platform_, so one of these:
+          - GitHub (.com and Enterprise Server)
+          - GitLab (.com and CE/EE)
+          - Bitbucket Cloud
+          - Bitbucket Server
+          - Azure DevOps
+          - Gitea
     validations:
       required: false
 
@@ -75,13 +83,15 @@ body:
       description: |
         Try not to raise a bug report unless you've looked at the logs first.
         If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
-        If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
-        Paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others do not have permissions to view them).
+        If you are using the Renovate App, log into [Renovate's app dashboard](https://app.renovatebot.com/dashboard) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
+        If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
+        Try to highlight the important logs into the issue itself.
       value: |
         <details><summary>Logs</summary>
 
         ```
-        Copy/paste any log here, between the starting and ending backticks
+        Copy/paste the relevant log(s) here, between the starting and ending backticks
         ```
 
         </details>

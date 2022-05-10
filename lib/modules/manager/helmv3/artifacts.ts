@@ -27,7 +27,7 @@ async function helmCommands(
   manifestPath: string,
   repositories: Repository[]
 ): Promise<void> {
-  const cmd = [];
+  const cmd: string[] = [];
   // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
   const helmConfigParameters = [
     `--registry-config ${upath.join(privateCacheDir(), 'registry.json')}`,
@@ -128,7 +128,7 @@ export async function updateArtifacts({
     const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
     const locks = yaml.load(existingLockFileContent) as ChartDefinition; //TODO #9610
 
-    const chartDefinitions = [];
+    const chartDefinitions: ChartDefinition[] = [];
     // prioritize alias naming for Helm repositories
     if (config.aliases) {
       chartDefinitions.push({

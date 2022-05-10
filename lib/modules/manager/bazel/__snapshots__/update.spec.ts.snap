@@ -131,20 +131,6 @@ http_file(
 "
 `;
 
-exports[`modules/manager/bazel/update updateDependency updates commit-based http archive 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://github.com/GoogleContainerTools/distroless/archive/033387ac8853e6cc1cd47df6c346bc53cbc490d8.tar.gz",
-  },
-]
-`;
-
 exports[`modules/manager/bazel/update updateDependency updates container_pull deptype and preserves comment 1`] = `
 "container_pull(
           name=\\"hasura\\",
@@ -155,55 +141,4 @@ exports[`modules/manager/bazel/update updateDependency updates container_pull de
           tag=\\"v1.0.0-alpha42.cli-migrations\\"
       )
 "
-`;
-
-exports[`modules/manager/bazel/update updateDependency updates finds url instead of urls 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://github.com/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz",
-  },
-]
-`;
-
-exports[`modules/manager/bazel/update updateDependency updates http archive with content other then WORKSPACE 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://github.com/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz",
-  },
-]
-`;
-
-exports[`modules/manager/bazel/update updateDependency updates http_archive with urls array 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "mirror.bazel.build",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz",
-  },
-]
 `;

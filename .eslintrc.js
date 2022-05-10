@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['@renovate', 'typescript-enum'],
+  plugins: ['@renovate', 'typescript-enum', 'jest-formatting'],
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -15,6 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
+    'plugin:jest-formatting/recommended',
     'prettier',
   ],
   parserOptions: {
@@ -70,7 +71,10 @@ module.exports = {
 
     // disallow direct `nock` module usage as it causes memory issues.
     // disallow `parse-link-header` to allow override ENV https://github.com/thlorenz/parse-link-header#environmental-variables
-    'no-restricted-imports': [2, { paths: ['nock', 'parse-link-header'] }],
+    'no-restricted-imports': [
+      2,
+      { paths: ['nock', 'parse-link-header', 'path'] },
+    ],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
@@ -80,7 +84,8 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/no-explicit-any': 0,
-    '@typescript-eslint/no-non-null-assertion': 2,
+    // TODO: https://github.com/renovatebot/renovate/issues/7154
+    '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,
       {

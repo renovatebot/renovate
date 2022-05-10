@@ -345,7 +345,7 @@ Object {
       "versioning": "pep440",
     },
   ],
-  "registryUrls": null,
+  "registryUrls": undefined,
 }
 `;
 
@@ -424,7 +424,7 @@ Object {
       "versioning": "poetry",
     },
   ],
-  "registryUrls": null,
+  "registryUrls": undefined,
 }
 `;
 
@@ -546,7 +546,7 @@ Object {
       "skipReason": "multiple-constraint-dep",
     },
   ],
-  "registryUrls": null,
+  "registryUrls": undefined,
 }
 `;
 
@@ -568,6 +568,6 @@ Object {
       "versioning": "poetry",
     },
   ],
-  "registryUrls": null,
+  "registryUrls": undefined,
 }
 `;

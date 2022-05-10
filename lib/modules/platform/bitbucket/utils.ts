@@ -7,6 +7,7 @@ import type {
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
+import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
 
@@ -70,14 +71,14 @@ const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
   ]);
 
 export function mergeBodyTransformer(
-  mergeStrategy: MergeStrategy
+  mergeStrategy: MergeStrategy | undefined
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,
   };
 
   // The `auto` strategy will use the strategy configured inside Bitbucket.
-  if (mergeStrategy !== 'auto') {
+  if (mergeStrategy && mergeStrategy !== 'auto') {
     body.merge_strategy = bitbucketMergeStrategies.get(mergeStrategy);
   }
 
@@ -180,7 +181,7 @@ export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
     displayNumber: `Pull Request #${pr.id}`,
-    body: pr.summary?.raw,
+    bodyStruct: getPrBodyStruct(pr.summary?.raw),
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,

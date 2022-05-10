@@ -6,17 +6,20 @@ describe('modules/manager/npm/post-update/rules', () => {
     beforeEach(() => {
       hostRules.clear();
     });
+
     it('returns empty if no rules', () => {
       const res = processHostRules();
       expect(res.additionalNpmrcContent).toHaveLength(0);
       expect(res.additionalYarnRcYml).toBeUndefined();
     });
+
     it('returns empty if no resolvedHost', () => {
       hostRules.add({ hostType: 'npm', token: '123test' });
       const res = processHostRules();
       expect(res.additionalNpmrcContent).toHaveLength(0);
       expect(res.additionalYarnRcYml).toBeUndefined();
     });
+
     it('returns rules content', () => {
       hostRules.add({
         hostType: 'npm',
@@ -57,6 +60,7 @@ describe('modules/manager/npm/post-update/rules', () => {
       `
       );
     });
+
     it('returns mixed rules content', () => {
       hostRules.add({
         hostType: 'npm',

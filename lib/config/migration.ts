@@ -3,10 +3,8 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';
-import { removedPresets } from './presets/common';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
@@ -22,11 +20,7 @@ export function fixShortHours(input: string): string {
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 // Returns a migrated config
-export function migrateConfig(
-  config: RenovateConfig,
-  // TODO: remove any type (#9611)
-  parentKey?: string | any
-): MigratedConfig {
+export function migrateConfig(config: RenovateConfig): MigratedConfig {
   try {
     if (!optionTypes) {
       optionTypes = {};
@@ -43,17 +37,8 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'matchStrings' && is.array(val)) {
-        migratedConfig.matchStrings = val
-          .map(
-            (matchString) =>
-              is.string(matchString) &&
-              matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
-          )
-          .filter(Boolean);
-      } else if (key.startsWith('masterIssue')) {
+      if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
         if (optionTypes[newKey] === 'boolean' && val === 'true') {
@@ -72,8 +57,7 @@ export function migrateConfig(
                 ? migratedConfig.packageRules
                 : [];
               const payload = migrateConfig(
-                packageFile as RenovateConfig,
-                key
+                packageFile as RenovateConfig
               ).migratedConfig;
               for (const subrule of payload.packageRules || []) {
                 subrule.paths = [(packageFile as any).packageFile];
@@ -99,8 +83,7 @@ export function migrateConfig(
           ? migratedConfig.packageRules
           : [];
         const depTypePackageRule = migrateConfig(
-          val as RenovateConfig,
-          key
+          val as RenovateConfig
         ).migratedConfig;
         depTypePackageRule.depTypeList = [key];
         delete depTypePackageRule.packageRules;
@@ -121,14 +104,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (
-        key === 'branchPrefix' &&
-        is.string(val) &&
-        val.includes('{{')
-      ) {
-        const templateIndex = val.indexOf(`{{`);
-        migratedConfig.branchPrefix = val.substring(0, templateIndex);
-        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
@@ -139,31 +114,6 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (
-        key === 'extends' &&
-        (is.array<string>(val) || is.string(val))
-      ) {
-        if (is.string(migratedConfig.extends)) {
-          migratedConfig.extends = [migratedConfig.extends];
-        }
-        const presets = migratedConfig.extends;
-        for (let i = 0; i < presets.length; i += 1) {
-          const preset = presets[i];
-          if (is.string(preset)) {
-            let newPreset = removedPresets[preset];
-            if (newPreset !== undefined) {
-              presets[i] = newPreset;
-            }
-            newPreset = migratePresets?.[preset];
-            if (newPreset !== undefined) {
-              presets[i] = newPreset;
-            }
-          }
-        }
-        migratedConfig.extends = migratedConfig.extends.filter(Boolean);
-      } else if (key === 'separateMajorReleases') {
-        delete migratedConfig.separateMultipleMajor;
-        migratedConfig.separateMajorMinor = val;
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
@@ -180,8 +130,7 @@ export function migrateConfig(
                 ? migratedConfig.packageRules
                 : [];
               const newPackageRule = migrateConfig(
-                depType as RenovateConfig,
-                key
+                depType as RenovateConfig
               ).migratedConfig;
               delete newPackageRule.depType;
               newPackageRule.depTypeList = [depTypeName];
@@ -205,11 +154,15 @@ export function migrateConfig(
       ) {
         migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        delete migratedConfig.node.enabled;
+        // validated non-null
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        delete migratedConfig.node!.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
-        if (Object.keys(migratedConfig.node).length) {
-          const subMigrate = migrateConfig(migratedConfig.node, key);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        if (Object.keys(migratedConfig.node!).length) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          const subMigrate = migrateConfig(migratedConfig.node!);
           migratedConfig.node = subMigrate.migratedConfig;
         } else {
           delete migratedConfig.node;
@@ -219,7 +172,7 @@ export function migrateConfig(
           const newArray = [];
           for (const item of migratedConfig[key] as unknown[]) {
             if (is.object(item) && !is.array(item)) {
-              const arrMigrate = migrateConfig(item as RenovateConfig, key);
+              const arrMigrate = migrateConfig(item as RenovateConfig);
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);
@@ -228,18 +181,10 @@ export function migrateConfig(
           migratedConfig[key] = newArray;
         }
       } else if (is.object(val)) {
-        const subMigrate = migrateConfig(
-          migratedConfig[key] as RenovateConfig,
-          key
-        );
+        const subMigrate = migrateConfig(migratedConfig[key] as RenovateConfig);
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
-        if (migratedConfig[key] !== undefined) {
-          migratedConfig.platformAutomerge = migratedConfig[key];
-        }
-        delete migratedConfig[key];
       }
 
       const migratedTemplates = {
@@ -271,10 +216,10 @@ export function migrateConfig(
         packagePatterns: 'matchPackagePatterns',
         sourceUrlPrefixes: 'matchSourceUrlPrefixes',
         updateTypes: 'matchUpdateTypes',
-      };
+      } as const;
       for (const packageRule of migratedConfig.packageRules) {
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const newKey = renameMap[oldKey];
+          const newKey = renameMap[oldKey as keyof typeof renameMap];
           if (newKey) {
             packageRule[newKey] = ruleVal;
             delete packageRule[oldKey];
@@ -291,7 +236,8 @@ export function migrateConfig(
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
-            const combinedRule = mergeChildConfig(packageRule, subrule);
+            // TODO: fix types #7154
+            const combinedRule = mergeChildConfig(packageRule, subrule as any);
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }

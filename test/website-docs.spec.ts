@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import fs from 'fs';
+import is from '@sindresorhus/is';
 import { getOptions } from '../lib/config/options';
 
 declare global {
@@ -26,10 +28,10 @@ describe('website-docs', () => {
   );
   const headers = doc
     .match(/\n## (.*?)\n/g)
-    .map((match) => match.substring(4, match.length - 1));
+    ?.map((match) => match.substring(4, match.length - 1));
   const selfHostHeaders = selfHostDoc
     .match(/\n## (.*?)\n/g)
-    .map((match) => match.substring(4, match.length - 1));
+    ?.map((match) => match.substring(4, match.length - 1));
   const expectedOptions = options
     .filter((option) => option.stage !== 'global')
     .filter((option) => option.releaseStatus !== 'unpublished')
@@ -45,21 +47,25 @@ describe('website-docs', () => {
     .sort();
 
   it('has doc headers sorted alphabetically', () => {
-    expect(headers).toEqual([...headers].sort());
+    expect(headers).toEqual([...headers!].sort());
   });
+
   it('has headers for every required option', () => {
     expect(headers).toEqual(expectedOptions);
   });
+
   it('has self hosted doc headers sorted alphabetically', () => {
-    expect(selfHostHeaders).toEqual([...selfHostHeaders].sort());
+    expect(selfHostHeaders).toEqual([...selfHostHeaders!].sort());
   });
+
   it('has headers (self hosted) for every required option', () => {
     expect(selfHostHeaders).toEqual(selfHostExpectedOptions);
   });
+
   const headers3 = doc
     .match(/\n### (.*?)\n/g)
-    .map((match) => match.substring(5, match.length - 1));
-  headers3.sort();
+    ?.map((match) => match.substring(5, match.length - 1));
+  headers3!.sort();
   const expectedOptions3 = options
     .filter((option) => option.stage !== 'global')
     .filter((option) => !option.globalOnly)
@@ -67,17 +73,18 @@ describe('website-docs', () => {
     .map((option) => option.name)
     .sort();
   expectedOptions3.sort();
+
   it('has headers for every required sub-option', () => {
     expect(headers3).toEqual(expectedOptions3);
   });
 
   // Checking relatedOptions field in options
   const relatedOptionsMatrix = options
-    .filter((option) => option.relatedOptions)
     .map((option) => option.relatedOptions)
+    .filter(is.truthy)
     .sort();
 
-  let relatedOptions: string[] = [].concat(...relatedOptionsMatrix); // Converts the matrix to an 1D array
+  let relatedOptions = ([] as string[]).concat(...relatedOptionsMatrix!); // Converts the matrix to an 1D array
   relatedOptions = [...new Set(relatedOptions)]; // Makes all options unique
 
   /*

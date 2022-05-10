@@ -1,6 +1,5 @@
 import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
-import { CommitMessage } from '../../model/commit-message';
 import { createOnboardingBranch } from './create';
 
 jest.mock('../../../../util/git');
@@ -13,10 +12,12 @@ jest.mock('./config', () => ({
 
 describe('workers/repository/onboarding/branch/create', () => {
   let config: RenovateConfig;
+
   beforeEach(() => {
     jest.clearAllMocks();
     config = getConfig();
   });
+
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
@@ -33,6 +34,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         platformCommit: false,
       });
     });
+
     it('commits via platform', async () => {
       platform.commitFiles = jest.fn();
 
@@ -53,6 +55,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         platformCommit: true,
       });
     });
+
     it('applies supplied commit message', async () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
@@ -74,10 +77,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         platformCommit: false,
       });
     });
+
     describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';
-        const message = `${prefix}${CommitMessage.SEPARATOR} add renovate.json`;
+        const message = `${prefix}: add renovate.json`;
 
         config.commitMessagePrefix = prefix;
 
@@ -96,11 +100,14 @@ describe('workers/repository/onboarding/branch/create', () => {
           platformCommit: false,
         });
       });
+
       it('to the supplied commit message', async () => {
         const prefix = 'RENOV-123';
         const text =
           "Cause your deps need an update and if they dont update, well they're no deps of mine";
-        const message = `${prefix}${CommitMessage.SEPARATOR} ${text}`;
+        const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
+          1
+        )}`;
 
         config.commitMessagePrefix = prefix;
         config.onboardingCommitMessage = text;
@@ -121,10 +128,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         });
       });
     });
+
     describe('applies semanticCommit prefix', () => {
       it('to the default commit message', async () => {
         const prefix = 'chore(deps)';
-        const message = `${prefix}${CommitMessage.SEPARATOR} add renovate.json`;
+        const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
 
@@ -143,11 +151,14 @@ describe('workers/repository/onboarding/branch/create', () => {
           platformCommit: false,
         });
       });
+
       it('to the supplied commit message', async () => {
         const prefix = 'chore(deps)';
         const text =
           'I say, we can update when we want to, a commit they will never mind';
-        const message = `${prefix}${CommitMessage.SEPARATOR} ${text}`;
+        const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
+          1
+        )}`;
 
         config.semanticCommits = 'enabled';
         config.onboardingCommitMessage = text;
@@ -168,10 +179,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         });
       });
     });
+
     describe('setting the onboarding configuration file name', () => {
       it('falls back to the default option if not present', async () => {
         const prefix = 'chore(deps)';
-        const message = `${prefix}${CommitMessage.SEPARATOR} add renovate.json`;
+        const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = undefined;
@@ -191,9 +203,10 @@ describe('workers/repository/onboarding/branch/create', () => {
           platformCommit: false,
         });
       });
+
       it('falls back to the default option if in list of allowed names', async () => {
         const prefix = 'chore(deps)';
-        const message = `${prefix}${CommitMessage.SEPARATOR} add renovate.json`;
+        const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = 'superConfigFile.yaml';
@@ -213,10 +226,11 @@ describe('workers/repository/onboarding/branch/create', () => {
           platformCommit: false,
         });
       });
+
       it('uses the given name if valid', async () => {
         const prefix = 'chore(deps)';
         const path = '.gitlab/renovate.json';
-        const message = `${prefix}${CommitMessage.SEPARATOR} add ${path}`;
+        const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = path;
@@ -236,10 +250,11 @@ describe('workers/repository/onboarding/branch/create', () => {
           platformCommit: false,
         });
       });
+
       it('applies to the default commit message', async () => {
         const prefix = 'chore(deps)';
         const path = `.renovaterc`;
-        const message = `${prefix}${CommitMessage.SEPARATOR} add ${path}`;
+        const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = path;

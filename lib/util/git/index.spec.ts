@@ -18,7 +18,7 @@ const conflictsCache = mocked(_conflictsCache);
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
-  jest.setTimeout(15000);
+  jest.setTimeout(25000);
 
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -169,10 +169,12 @@ describe('util/git/index', () => {
     it('sets the base branch as master', async () => {
       await expect(git.checkoutBranch(defaultBranch)).resolves.not.toThrow();
     });
+
     it('sets non-master base branch', async () => {
       await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
     });
   });
+
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
       expect(await git.getFileList()).toEqual([
@@ -181,6 +183,7 @@ describe('util/git/index', () => {
         'past_file',
       ]);
     });
+
     it('should exclude submodules', async () => {
       const repo = Git(base.path);
       await repo.submoduleAdd(base.path, 'submodule');
@@ -200,14 +203,17 @@ describe('util/git/index', () => {
       await repo.reset(['--hard', 'HEAD^']);
     });
   });
+
   describe('branchExists(branchName)', () => {
     it('should return true if found', () => {
       expect(git.branchExists('renovate/future_branch')).toBeTrue();
     });
+
     it('should return false if not found', () => {
       expect(git.branchExists('not_found')).toBeFalse();
     });
   });
+
   describe('getBranchList()', () => {
     it('should return all branches', () => {
       const res = git.getBranchList();
@@ -216,32 +222,39 @@ describe('util/git/index', () => {
       expect(res).toContain(defaultBranch);
     });
   });
+
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
     });
+
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
     });
+
     it('should return result even if non-default and not under branchPrefix', async () => {
       expect(await git.isBranchStale('develop')).toBeTrue();
       expect(await git.isBranchStale('develop')).toBeTrue(); // cache
     });
   });
+
   describe('isBranchModified()', () => {
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
+
     it('should return false when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
       expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
     });
+
     it('should return false when author is ignored', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
       expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
     });
+
     it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
     });
@@ -253,20 +266,24 @@ describe('util/git/index', () => {
       expect(hex).toBe(git.getBranchCommit(defaultBranch));
       expect(hex).toHaveLength(40);
     });
+
     it('should return null', () => {
       expect(git.getBranchCommit('not_found')).toBeNull();
     });
   });
+
   describe('getBranchParentSha(branchName)', () => {
     it('should return sha if found', async () => {
       const parentSha = await git.getBranchParentSha('renovate/future_branch');
       expect(parentSha).toHaveLength(40);
       expect(parentSha).toEqual(git.getBranchCommit(defaultBranch));
     });
+
     it('should return false if not found', async () => {
       expect(await git.getBranchParentSha('not_found')).toBeNull();
     });
   });
+
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file: FileChange = {
@@ -276,7 +293,7 @@ describe('util/git/index', () => {
       };
       await git.commitFiles({
         branchName: 'renovate/branch_with_changes',
-        files: [file],
+        files: [file, { type: 'addition', path: 'dummy', contents: null }],
         message: 'Create something',
       });
       const branchFiles = await git.getBranchFiles(
@@ -296,10 +313,12 @@ describe('util/git/index', () => {
       ]);
       expect(merged.all).toContain('renovate/future_branch');
     });
+
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
   });
+
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       await git.deleteBranch('renovate/past_branch');
@@ -307,29 +326,35 @@ describe('util/git/index', () => {
       expect(branches.all).not.toContain('renovate/past_branch');
     });
   });
+
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {
       const time = await git.getBranchLastCommitTime(defaultBranch);
       expect(time).toEqual(masterCommitDate);
     });
+
     it('handles error', async () => {
       const res = await git.getBranchLastCommitTime('some-branch');
       expect(res).toBeDefined();
     });
   });
+
   describe('getFile(filePath, branchName)', () => {
     it('gets the file', async () => {
       const res = await git.getFile('master_file');
       expect(res).toBe(defaultBranch);
     });
+
     it('short cuts 404', async () => {
       const res = await git.getFile('some-missing-path');
       expect(res).toBeNull();
     });
+
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
+
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
       const file: FileChange = {
@@ -344,6 +369,7 @@ describe('util/git/index', () => {
       });
       expect(commit).not.toBeNull();
     });
+
     it('deletes file', async () => {
       const file: FileChange = {
         type: 'deletion',
@@ -356,6 +382,7 @@ describe('util/git/index', () => {
       });
       expect(commit).not.toBeNull();
     });
+
     it('updates multiple files', async () => {
       const files: FileChange[] = [
         {
@@ -376,6 +403,7 @@ describe('util/git/index', () => {
       });
       expect(commit).not.toBeNull();
     });
+
     it('uses right commit SHA', async () => {
       const files: FileChange[] = [
         {
@@ -398,6 +426,7 @@ describe('util/git/index', () => {
       const remoteSha = await git.fetchCommit(commitConfig);
       expect(commitSha).toEqual(remoteSha);
     });
+
     it('updates git submodules', async () => {
       const files: FileChange[] = [
         {
@@ -413,6 +442,7 @@ describe('util/git/index', () => {
       });
       expect(commit).toBeNull();
     });
+
     it('does not push when no diff', async () => {
       const files: FileChange[] = [
         {
@@ -552,6 +582,7 @@ describe('util/git/index', () => {
 
   describe('Storage.getUrl()', () => {
     const getUrl = git.getUrl;
+
     it('returns https url', () => {
       expect(
         getUrl({
@@ -680,6 +711,7 @@ describe('util/git/index', () => {
       expect(res).toBe('test-extra-config-value');
     });
   });
+
   describe('setGitAuthor()', () => {
     it('throws for invalid', () => {
       expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
@@ -770,6 +802,7 @@ describe('util/git/index', () => {
       beforeEach(() => {
         jest.resetAllMocks();
       });
+
       it('returns cached values', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(true);
 
@@ -839,13 +872,22 @@ describe('util/git/index', () => {
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
 
-    it('creates renovate ref', async () => {
+    it('creates renovate ref in default section', async () => {
       const commit = git.getBranchCommit('develop');
 
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
-      const funnyRefs = await lsRenovateRefs();
-      expect(funnyRefs).toContain('refs/renovate/foo/bar');
+      const renovateRefs = await lsRenovateRefs();
+      expect(renovateRefs).toContain('refs/renovate/branches/foo/bar');
+    });
+
+    it('creates custom section for renovate ref', async () => {
+      const commit = git.getBranchCommit('develop');
+
+      await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
+
+      const renovateRefs = await lsRenovateRefs();
+      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
@@ -866,8 +908,18 @@ describe('util/git/index', () => {
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
+      await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
+    });
+
+    it('preserves unknown sections by default', async () => {
+      const commit = git.getBranchCommit('develop');
+      const tmpGit = Git(tmpDir.path);
+      await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
+      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
     });
   });
 

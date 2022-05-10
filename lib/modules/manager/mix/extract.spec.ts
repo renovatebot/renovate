@@ -12,6 +12,7 @@ describe('modules/manager/mix/extract', () => {
       const { deps } = await extractPackageFile('nothing here', 'mix.exs');
       expect(deps).toBeEmpty();
     });
+
     it('extracts all dependencies', async () => {
       const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs');
       expect(res).toMatchSnapshot({

@@ -10,21 +10,35 @@ import {
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { exec } from '../../../../util/exec';
-import type { ExecOptions } from '../../../../util/exec/types';
-import { exists, readFile, remove, writeFile } from '../../../../util/fs';
+import type {
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../../util/exec/types';
+import {
+  deleteLocalFile,
+  localPathIsFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import type { NpmManagerData } from '../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
-  cwd: string
+  lockFileDir: string
 ): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
   let offlineMirror = false;
-  let yarnPath: string = null;
+  let yarnPath: string | null = null;
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(
+      upath.join(lockFileDir, '.yarnrc'),
+      'utf8'
+    );
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
@@ -36,13 +50,22 @@ export async function checkYarnrc(
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
       }
-      const yarnBinaryExists = await exists(yarnPath);
+      if (yarnPath) {
+        // resolve binary relative to `yarnrc`
+        yarnPath = upath.join(lockFileDir, yarnPath);
+      }
+      const yarnBinaryExists = yarnPath
+        ? await localPathIsFile(yarnPath)
+        : false;
       if (!yarnBinaryExists) {
         const scrubbedYarnrc = yarnrc.replace(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
-        await writeFile(`${cwd}/.yarnrc`, scrubbedYarnrc);
+        await writeLocalFile(
+          upath.join(lockFileDir, '.yarnrc'),
+          scrubbedYarnrc
+        );
         yarnPath = null;
       }
     }
@@ -63,15 +86,16 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
 }
 
 export async function generateLockFile(
-  cwd: string,
+  lockFileDir: string,
   env: NodeJS.ProcessEnv,
-  config: PostUpdateConfig = {},
+  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = upath.join(cwd, 'yarn.lock');
+  const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
-  let lockFile = null;
+  let lockFile: string | null = null;
   try {
+    const toolConstraints: ToolConstraint[] = [];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
@@ -85,31 +109,39 @@ export async function generateLockFile(
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
-    let installYarn = 'npm i -g yarn';
-    if (isYarn1 && minYarnVersion) {
-      installYarn += `@${quote(yarnCompatibility)}`;
+    const preCommands: string[] = [];
+
+    const yarnTool: ToolConstraint = {
+      toolName: 'yarn',
+      constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
+    };
+
+    if (!isYarn1 && config.managerData?.hasPackageManager) {
+      toolConstraints.push({ toolName: 'corepack' });
+    } else {
+      toolConstraints.push(yarnTool);
+      if (isYarn1 && minYarnVersion) {
+        yarnTool.constraint = yarnCompatibility;
+      }
     }
 
-    const preCommands = [installYarn];
-
-    const extraEnv: ExecOptions['extraEnv'] = {
+    const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       CI: 'true',
     };
 
-    const commands = [];
+    const commands: string[] = [];
     let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {
-        const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+        const { offlineMirror, yarnPath } = await checkYarnrc(lockFileDir);
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-          preCommands.push(getOptimizeCommand());
-          // istanbul ignore if
+          yarnTool.toolName = 'yarn-slim';
           if (yarnPath) {
-            preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+            commands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
         }
       } else if (isYarnModeAvailable) {
@@ -145,7 +177,7 @@ export async function generateLockFile(
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: lockFileName,
       extraEnv,
       docker: {
         image: 'node',
@@ -153,11 +185,12 @@ export async function generateLockFile(
         tagConstraint,
       },
       preCommands,
+      toolConstraints,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      extraEnv.NPM_AUTH = env.NPM_AUTH;
+      extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
     if (yarnUpdate && !isYarn1) {
@@ -178,6 +211,8 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
+            .filter(is.string)
+            .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
         );
       } else {
@@ -185,6 +220,7 @@ export async function generateLockFile(
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
+            .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
         );
       }
@@ -215,7 +251,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -228,7 +264,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

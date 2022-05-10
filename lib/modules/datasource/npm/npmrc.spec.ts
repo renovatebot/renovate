@@ -18,23 +18,27 @@ describe('modules/datasource/npm/npmrc', () => {
     GlobalConfig.reset();
     jest.resetAllMocks();
   });
+
   describe('getMatchHostFromNpmrcHost()', () => {
     it('parses //host', () => {
       expect(getMatchHostFromNpmrcHost('//registry.npmjs.org')).toBe(
         'registry.npmjs.org'
       );
     });
+
     it('parses //host/path', () => {
       expect(
         getMatchHostFromNpmrcHost('//registry.company.com/some/path')
       ).toBe('https://registry.company.com/some/path');
     });
+
     it('parses https://host', () => {
       expect(getMatchHostFromNpmrcHost('https://registry.npmjs.org')).toBe(
         'https://registry.npmjs.org'
       );
     });
   });
+
   describe('convertNpmrcToRules()', () => {
     it('rejects invalid registries', () => {
       const res = convertNpmrcToRules(
@@ -43,6 +47,7 @@ describe('modules/datasource/npm/npmrc', () => {
       expect(res.hostRules).toHaveLength(0);
       expect(res.packageRules).toHaveLength(0);
     });
+
     it('handles naked auth', () => {
       expect(convertNpmrcToRules(ini.parse('_auth=abc123\n')))
         .toMatchInlineSnapshot(`
@@ -58,6 +63,7 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+
     it('handles host, path and auth', () => {
       expect(
         convertNpmrcToRules(ini.parse('//some.test/with/path:_auth=abc123'))
@@ -75,6 +81,7 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+
     it('handles host, path, port and auth', () => {
       expect(
         convertNpmrcToRules(
@@ -93,6 +100,7 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+
     it('handles naked authToken', () => {
       expect(convertNpmrcToRules(ini.parse('_authToken=abc123\n')))
         .toMatchInlineSnapshot(`
@@ -107,6 +115,7 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+
     it('handles host authToken', () => {
       expect(
         convertNpmrcToRules(
@@ -125,7 +134,7 @@ describe('modules/datasource/npm/npmrc', () => {
           ],
           "packageRules": Array [
             Object {
-              "matchDataSources": Array [
+              "matchDatasources": Array [
                 "npm",
               ],
               "matchPackagePrefixes": Array [
@@ -139,6 +148,7 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+
     it('handles username and _password', () => {
       expect(
         convertNpmrcToRules(
@@ -161,6 +171,7 @@ describe('modules/datasource/npm/npmrc', () => {
       `);
     });
   });
+
   it('sanitize _auth', () => {
     setNpmrc('_auth=test');
     expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
