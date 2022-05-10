@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { emojify } from '../../../../util/emoji';
 import {
   deleteBranch,
@@ -115,9 +116,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (existingPr) {
     logger.debug('Found open onboarding PR');
     // Check if existing PR needs updating
-    if (
-      existingPr.body.trim() === prBody.trim() // Bitbucket strips trailing \n
-    ) {
+    const prBodyHash = hashBody(prBody);
+    if (existingPr.bodyStruct?.hash === prBodyHash) {
       logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
     }
