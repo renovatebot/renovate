@@ -231,7 +231,7 @@
     "@types/clean-git-ref": "2.0.0",
     "@types/conventional-commits-detector": "1.0.0",
     "@types/diff": "5.0.2",
-    "@types/eslint": "8.4.1",
+    "@types/eslint": "8.4.2",
     "@types/fs-extra": "9.0.13",
     "@types/git-url-parse": "9.0.1",
     "@types/github-url-from-git": "1.5.1",
