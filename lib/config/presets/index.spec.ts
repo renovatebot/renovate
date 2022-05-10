@@ -391,6 +391,54 @@ describe('config/presets/index', () => {
       });
     });
 
+    it('parses github file with preset name with .json extension', () => {
+      expect(presets.parsePreset('github>some/repo:somefile.json')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github file with preset name with .json5 extension', () => {
+      expect(presets.parsePreset('github>some/repo:somefile.json5')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json5',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github subfiles with preset name with .json extension', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile.json/somepreset')
+      ).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github subfiles with preset name with .json5 extension', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile.json5/somepreset')
+      ).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json5/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
     it('parses github subfiles with preset and sub-preset name', () => {
       expect(
         presets.parsePreset(

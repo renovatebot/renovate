@@ -17,6 +17,7 @@ Array [
     "lernaClient": undefined,
     "lernaPackages": undefined,
     "managerData": Object {
+      "hasPackageManager": false,
       "lernaJsonFile": undefined,
       "yarnZeroInstall": false,
     },
