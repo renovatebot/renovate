@@ -93,13 +93,13 @@ Array [
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines with double quotes and comments 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "\\"{{depName}}@{{#if newDigest}}{{newDigest}}\\"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}\\"{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "v0.13.1",
     "datasource": "github-tags",
     "depName": "pascalgn/automerge-action",
     "depType": "action",
-    "replaceString": "pascalgn/automerge-action@v0.13.1",
+    "replaceString": "\\"pascalgn/automerge-action@v0.13.1\\"",
     "versioning": "docker",
   },
   Object {
@@ -124,13 +124,13 @@ Array [
     "versioning": "docker",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "\\"{{depName}}@{{#if newDigest}}{{newDigest}}\\"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}\\"{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "v1.1.2",
     "datasource": "github-tags",
     "depName": "actions/checkout",
     "depType": "action",
-    "replaceString": "actions/checkout@v1.1.2",
+    "replaceString": "\\"actions/checkout@v1.1.2\\"",
     "versioning": "docker",
   },
 ]
