@@ -7,7 +7,7 @@ const language = ProgrammingLanguage.Docker;
 export { extractPackageFile, language };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/).vela.yml$', '(^|/).vela.yaml$'],
+  fileMatch: ['(^|/).vela.ya?ml$'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

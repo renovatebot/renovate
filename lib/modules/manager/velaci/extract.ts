@@ -5,7 +5,7 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { VelaPipelineConfiguration } from './types';
 
 export function extractPackageFile(file: string): PackageFile | null {
-  let doc: VelaPipelineConfiguration;
+  let doc: VelaPipelineConfiguration | null;
 
   try {
     doc = load(file, { json: true }) as VelaPipelineConfiguration;
@@ -17,37 +17,36 @@ export function extractPackageFile(file: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     // iterate over steps
-    doc.steps?.forEach((step) => {
+    for (const step of doc.steps ?? []) {
       const dep: PackageDependency = getDep(step.image);
 
       deps.push(dep);
-    });
+    }
 
     // iterate over services
-    doc.services?.forEach((service) => {
+    for (const service of doc.services ?? []) {
       const dep: PackageDependency = getDep(service.image);
 
       deps.push(dep);
-    });
+    }
 
     // iterate over stages
-    for (const stage in doc.stages) {
-      logger.debug(doc.stages[stage]);
-      doc.stages[stage].steps.forEach((step) => {
+    for (const [, stage] of Object.entries(doc.stages ?? {})) {
+      for (const step of stage.steps ?? []) {
         const dep: PackageDependency = getDep(step.image);
 
         deps.push(dep);
-      });
+      }
     }
 
     // check secrets
-    doc.secrets?.forEach((secret) => {
+    for (const [, secret] of Object.entries(doc.secrets)) {
       if (secret.origin) {
         const dep: PackageDependency = getDep(secret.origin.image);
 
         deps.push(dep);
       }
-    });
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting VelaCI images');
   }

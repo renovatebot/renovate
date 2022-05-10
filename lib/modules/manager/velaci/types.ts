@@ -4,24 +4,22 @@
  * Spec: https://github.com/go-vela/types/releases/latest/download/schema.json
  * Docs: https://go-vela.github.io/docs/reference/yaml/
  */
-export type Step = { image: string };
+export interface ObjectWithImageProp {
+  image: string;
+}
 
 export interface VelaPipelineConfiguration {
   secrets?: {
-    origin?: {
-      image: string;
-    };
+    origin?: ObjectWithImageProp;
   }[];
 
-  services?: {
-    image: string;
-  }[];
+  services?: ObjectWithImageProp[];
 
   stages?: Record<string, Stage>;
 
-  steps?: Step[];
+  steps?: ObjectWithImageProp[];
 }
 
 export interface Stage {
-  steps: Step[];
+  steps: ObjectWithImageProp[];
 }
