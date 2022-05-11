@@ -357,26 +357,24 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
   const fileReplacePosition = varNameToken.offset;
   const packageFile = input.packageFile;
 
-  const versionRefToken = tokenMap.version;
-  if (versionRefToken) {
-    const version: Token = { ...versionRefToken, type: TokenType.Word };
-    const res = processLongFormDep({
-      ...input,
-      tokenMap: { ...input.tokenMap, version },
-    });
-    const dep = res?.deps?.[res.deps.length - 1];
-    if (dep?.depName) {
-      const value = dep.depName;
-      res.vars ??= {};
-      res.vars[key] = { key, value, fileReplacePosition, packageFile };
-    }
-    return res;
-  }
-
   const groupId = tokenMap.groupId?.value;
   const artifactId = tokenMap.artifactId?.value;
   const value = `${groupId}:${artifactId}`;
-  return { vars: { [key]: { key, value, fileReplacePosition, packageFile } } };
+  const res: SyntaxHandlerOutput =
+    groupId && artifactId
+      ? { vars: { [key]: { key, value, fileReplacePosition, packageFile } } }
+      : {};
+
+  const versionRefToken = tokenMap.version;
+  if (versionRefToken) {
+    const version: Token = { ...versionRefToken, type: TokenType.Word };
+    const depRes = processLongFormDep({
+      ...input,
+      tokenMap: { ...input.tokenMap, version },
+    });
+    return { ...depRes, ...res };
+  }
+  return res;
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
