@@ -334,7 +334,8 @@ export async function lookupUpdates(
         if (!res.updates.some((update) => update.updateType === 'pin')) {
           // pin digest
           res.updates.push({
-            updateType: 'pin',
+            isPinDigest: true,
+            updateType: 'pinDigest',
             newValue: currentValue,
           });
         }

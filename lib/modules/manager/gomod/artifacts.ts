@@ -158,7 +158,9 @@ export async function updateArtifacts({
   const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
-  try {
+  let massagedGoMod = newGoModContent;
+
+  if (!config.postUpdateOptions?.includes('gomodNoMassage')) {
     // Regex match inline replace directive, example:
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
@@ -186,13 +188,15 @@ export async function updateArtifacts({
       match.replace(/(\r?\n)/g, '$1// renovate-replace ');
 
     // Comment out golang replace directives
-    const massagedGoMod = newGoModContent
+    massagedGoMod = newGoModContent
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
     if (massagedGoMod !== newGoModContent) {
       logger.debug('Removed some relative replace statements from go.mod');
     }
+  }
+  try {
     await writeLocalFile(goModFileName, massagedGoMod);
 
     const cmd = 'go';
