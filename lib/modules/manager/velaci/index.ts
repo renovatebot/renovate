@@ -1,10 +1,9 @@
 import { ProgrammingLanguage } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
-import { extractPackageFile } from './extract';
 
-const language = ProgrammingLanguage.Docker;
+export { extractPackageFile } from './extract';
 
-export { extractPackageFile, language };
+export const language = ProgrammingLanguage.Docker;
 
 export const defaultConfig = {
   fileMatch: ['(^|/).vela.ya?ml$'],

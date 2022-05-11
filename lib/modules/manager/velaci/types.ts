@@ -1,13 +1,9 @@
 /**
- * VelaPipelineConfiguration Types
+ * VelaPipelineConfiguration
  *
  * Spec: https://github.com/go-vela/types/releases/latest/download/schema.json
  * Docs: https://go-vela.github.io/docs/reference/yaml/
  */
-export interface ObjectWithImageProp {
-  image: string;
-}
-
 export interface VelaPipelineConfiguration {
   secrets?: {
     origin?: ObjectWithImageProp;
@@ -18,6 +14,10 @@ export interface VelaPipelineConfiguration {
   stages?: Record<string, Stage>;
 
   steps?: ObjectWithImageProp[];
+}
+
+export interface ObjectWithImageProp {
+  image: string;
 }
 
 export interface Stage {
