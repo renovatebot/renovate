@@ -4,7 +4,6 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
 import type { ServiceDiscoveryResult } from '../terraform-module/types';
@@ -57,8 +56,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     }
     logger.debug({ packageName }, 'terraform-provider.getDependencies()');
 
-    const registryHost = parseUrl(registryUrl)?.host;
-    if (registryHost === 'releases.hashicorp.com') {
+    if (registryUrl === this.defaultRegistryUrls[1]) {
       return await this.queryReleaseBackend(packageName, registryUrl);
     }
     const repository = TerraformProviderDatasource.getRepository({
@@ -68,7 +66,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       registryUrl
     );
 
-    if (registryHost === 'registry.terraform.io') {
+    if (registryUrl === this.defaultRegistryUrls[0]) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registryUrl,
@@ -94,10 +92,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    */
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
-    registryURL: string,
+    registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}`;
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       releases: res.versions.map((version) => ({
@@ -115,7 +113,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
-    dep.homepage = `${registryURL}/providers/${repository}`;
+    dep.homepage = `${registryUrl}/providers/${repository}`;
     return dep;
   }
 

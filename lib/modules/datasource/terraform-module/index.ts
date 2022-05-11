@@ -1,7 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
@@ -42,28 +41,27 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       return null;
     }
 
-    const { registry, repository } =
+    const { registry: registryUrlNormalized, repository } =
       TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     logger.trace(
-      { registry, terraformRepository: repository },
+      { registryUrlNormalized, terraformRepository: repository },
       'terraform-module.getReleases()'
     );
 
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryUrl
+      registryUrlNormalized
     );
-    const registryHost = parseUrl(registryUrl)?.host;
-    if (registryHost === 'registry.terraform.io') {
+    if (registryUrlNormalized === this.defaultRegistryUrls[0]) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
-        registry,
+        registryUrlNormalized,
         repository
       );
     }
 
     return await this.queryRegistryVersions(
       serviceDiscovery,
-      registry,
+      registryUrlNormalized,
       repository
     );
   }
@@ -75,14 +73,14 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    */
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
-    registry: string,
+    registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
     let res: TerraformRelease;
     let pkgUrl: string;
 
     try {
-      pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
+      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}`;
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
@@ -102,7 +100,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    dep.homepage = `https://registry.terraform.io/modules/${repository}`;
+    dep.homepage = `${registryUrl}/modules/${repository}`;
     // set published date for latest release
     const latestVersion = dep.releases.find(
       (release) => res.version === release.version
@@ -119,13 +117,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    */
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
-    registry: string,
+    registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}/versions`;
+      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}/versions`;
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
