@@ -13,7 +13,9 @@ jest.mock('../../init/merge');
 jest.mock('detect-indent');
 
 const rawNonMigrated = Fixtures.get('./renovate.json');
+const rawNonMigratedJson5 = Fixtures.get('./renovate.json5');
 const migratedData = Fixtures.getJson('./migrated-data.json');
+const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJson('./migrated.json');
 
 describe('workers/repository/config-migration/branch/migrated-data', () => {
@@ -36,7 +38,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('Calls getAsync a first when migration not needed', async () => {
-      mockedFunction(migrateConfig).mockReturnValue({
+      mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: false,
         migratedConfig: null,
       });
@@ -77,7 +79,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('Resets the factory and gets a new value with default indentation', async () => {
-      mockedFunction(detectIndent).mockReturnValue({
+      mockedFunction(detectIndent).mockReturnValueOnce({
         type: null,
         amount: 0,
         indent: null,
@@ -85,6 +87,17 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
         migratedData
+      );
+    });
+
+    it('Migrate a JSON5 config file', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json5',
+      });
+      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigratedJson5);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedDataJson5
       );
     });
 
