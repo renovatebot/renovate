@@ -11,10 +11,9 @@ import { runRenovateRepoStats } from './repository-statistics';
 jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
-const prJson = Fixtures.get('./pr-list.json');
-const prObject = JSON.parse(prJson);
-const result = Object.keys(prObject).map((key) => {
-  return prObject[key];
+const prJson = Fixtures.getJson('./pr-list.json');
+const result = Object.keys(prJson).map((key) => {
+  return prJson[key];
 });
 
 describe('workers/repository/finalise/repository-statistics', () => {
@@ -24,7 +23,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
-      mockedFunction(platform.getPrList).mockReturnValue(prObject);
+      mockedFunction(platform.getPrList).mockReturnValue(prJson);
       config.repository = 'owner/repo';
     });
 
