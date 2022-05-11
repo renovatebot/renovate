@@ -353,23 +353,26 @@ export async function extractPackageFile(
     if (!child || is.emptyObject(child)) {
       return deps;
     }
-    for (const [key, val] of Object.entries(child)) {
-      if (is.string(val)) {
-        const dep: NpmManagerData = {};
-        // special handling for "." key
+    for (const [overrideName, versionValue] of Object.entries(child)) {
+      if (is.string(versionValue)) {
+        // special handling for "." override depenency name
         // "." means the constraint is applied to the parent dep
-        dep.depName = key === '.' ? parents[parents.length - 1] : key;
-        dep.depType = 'overrides';
-        dep.parents = parents.slice(); // set parents for dependency
-        nodeCommitTopic(dep);
+        const currDepName =
+          overrideName === '.' ? parents[parents.length - 1] : overrideName;
+        const dep: PackageDependency<NpmManagerData> = {
+          depName: currDepName,
+          depType: 'overrides',
+          managerData: { parents: parents.slice() }, // set parents for dependency
+        };
+        setNodeCommitTopic(dep);
         deps.push({
           ...dep,
-          ...extractDependency('overrides', dep.depName, val),
+          ...extractDependency('overrides', currDepName, versionValue),
         });
       } else {
-        // val is an object, run recursively.
-        parents.push(key);
-        const depsOfObject = extractOverrideDepsRec(parents, val);
+        // versionValue is an object, run recursively.
+        parents.push(overrideName);
+        const depsOfObject = extractOverrideDepsRec(parents, versionValue);
         deps.push(...depsOfObject);
       }
     }
@@ -406,7 +409,7 @@ export async function extractPackageFile(
             deps.push(...extractOverrideDepsRec([depName], val));
           } else {
             dep = { ...dep, ...extractDependency(depType, depName, val) };
-            nodeCommitTopic(dep);
+            setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
           }
@@ -501,7 +504,7 @@ export async function extractAllPackageFiles(
   return npmFiles;
 }
 
-function nodeCommitTopic(dep: NpmManagerData): void {
+function setNodeCommitTopic(dep: NpmManagerData): void {
   // This is a special case for Node.js to group it together with other managers
   if (dep.depName === 'node') {
     dep.commitMessageTopic = 'Node.js';

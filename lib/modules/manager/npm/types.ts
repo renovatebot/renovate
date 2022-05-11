@@ -69,8 +69,7 @@ export type NpmDepType =
   | 'optionalDependencies'
   | 'overrides'
   | 'peerDependencies'
-  | 'resolutions'
-  | 'overrides';
+  | 'resolutions';
 
 export interface NpmManagerData extends Record<string, any> {
   hasPackageManager?: boolean;

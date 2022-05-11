@@ -3,7 +3,7 @@ import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
-import type { UpdateDependencyConfig } from '../../../types';
+import type { UpdateDependencyConfig, Upgrade } from '../../../types';
 import type {
   DependenciesMeta,
   NpmPackage,
@@ -141,8 +141,7 @@ export function updateDependency({
       oldVersion = parsedContents[depType];
       newValue = `${depName}@${newValue}`;
     } else if (isOverrideObject(upgrade)) {
-      const npmOverrideDep: NpmManagerData = upgrade;
-      overrideDepParents = npmOverrideDep.parents;
+      overrideDepParents = managerData?.parents;
       if (overrideDepParents) {
         // old version when there is an object as a value in overrides block
         const { depObjectReference, overrideDepName } = overrideDepPosition(
@@ -278,6 +277,9 @@ function overrideDepPosition(
   return { depObjectReference, overrideDepName };
 }
 
-function isOverrideObject(upgrade: NpmManagerData): boolean {
-  return !is.undefined(upgrade.parents) && upgrade.depType === 'overrides';
+function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
+  return (
+    !is.undefined(upgrade.managerData?.parents) &&
+    upgrade.depType === 'overrides'
+  );
 }

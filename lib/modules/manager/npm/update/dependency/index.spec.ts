@@ -325,7 +325,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depType: 'overrides',
         depName: 'typescript',
         newValue: '0.60.0',
-        parents: ['awesome-typescript-loader'],
+        managerData: { parents: ['awesome-typescript-loader'] },
       };
       const overrideDependencies = `{
         "overrides": {
