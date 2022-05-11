@@ -20,6 +20,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
 
+    const bodyStruct = {
+      hash: '8d5d8373c3fc54803f573ea57ded60686a9df8eb0430ad25da281472eed9ce4e',
+    };
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
@@ -35,8 +39,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       GlobalConfig.reset();
     });
 
-    let createPrBody: string;
-
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
       await expect(
@@ -47,7 +49,6 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
 
     it('creates PR with labels', async () => {
@@ -123,7 +124,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       await ensureOnboardingPr(config, packageFiles, branches);
@@ -136,7 +137,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       git.isBranchConflicted.mockResolvedValueOnce(true);
@@ -151,7 +152,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -172,7 +173,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       git.isBranchConflicted.mockResolvedValueOnce(true);

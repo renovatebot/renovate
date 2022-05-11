@@ -155,17 +155,6 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'20.04'}    | ${true}
     ${'20.10'}    | ${false}
     ${'22.04'}    | ${false}
-    ${'42.01'}    | ${false}
-    ${'42.02'}    | ${false}
-    ${'42.03'}    | ${false}
-    ${'42.04'}    | ${true}
-    ${'42.05'}    | ${false}
-    ${'42.06'}    | ${false}
-    ${'42.07'}    | ${false}
-    ${'42.08'}    | ${false}
-    ${'42.09'}    | ${false}
-    ${'42.10'}    | ${false}
-    ${'42.11'}    | ${false}
     ${'2020.04'}  | ${false}
     ${'warty'}    | ${false}
     ${'hoary'}    | ${false}
