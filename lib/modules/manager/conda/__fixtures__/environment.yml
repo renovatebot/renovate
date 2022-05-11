@@ -1,0 +1,20 @@
+name: renovate-fixture
+channels:
+  - defaults
+dependencies:
+  - click=7.1
+  - dask
+  - distributed==2022.5.0
+  - mamba[subdir=linux-64,version='>=1.0']
+  - matplotlib==1.0=py27_0
+  - conda-forge::seaborn==2.7.1[build=py2*]
+  - conda-forge/testdir::graphviz==2.7.1[build=py2*]
+  - conda-forge::mkl==2.7.1
+  - libblas==1.2.beta3
+  - cloudpickle==2022.5.0a1
+  - django-extensions=1!3.1.7
+  - pip:
+      - s3fs==7.1.2
+category: dev
+platforms:
+  - arm64

@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/conda/extract extractPackageFile extracts dependencies 1`] = `
+Object {
+  "datasource": "conda",
+  "deps": Array [
+    Object {
+      "currentValue": "7.1",
+      "depName": "click",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "depName": "dask",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "2022.5.0",
+      "currentVersion": "2022.5.0",
+      "depName": "main/distributed",
+      "packageName": "main/distributed",
+      "versioning": "semver",
+    },
+    Object {
+      "currentValue": "2022.5.0",
+      "currentVersion": "2022.5.0",
+      "depName": "r/distributed",
+      "packageName": "r/distributed",
+      "versioning": "semver",
+    },
+    Object {
+      "depName": "mamba[subdir=linux-64,version='>=1.0']",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "1.0",
+      "depName": "matplotlib",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "2.7.1",
+      "depName": "seaborn",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "2.7.1",
+      "depName": "graphviz",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "2.7.1",
+      "currentVersion": "2.7.1",
+      "depName": "conda-forge/mkl",
+      "packageName": "conda-forge/mkl",
+      "versioning": "semver",
+    },
+    Object {
+      "currentValue": "1.2.beta3",
+      "depName": "libblas",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "2022.5.0a1",
+      "depName": "cloudpickle",
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "3.1.7",
+      "depName": "django-extensions",
+      "skipReason": "unsupported",
+    },
+  ],
+}
+`;
