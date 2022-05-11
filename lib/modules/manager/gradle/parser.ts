@@ -360,19 +360,19 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
   const groupId = tokenMap.groupId?.value;
   const artifactId = tokenMap.artifactId?.value;
   const value = `${groupId}:${artifactId}`;
-  const res: SyntaxHandlerOutput =
-    groupId && artifactId
-      ? { vars: { [key]: { key, value, fileReplacePosition, packageFile } } }
-      : {};
+  const res: SyntaxHandlerOutput = {};
 
-  const versionRefToken = tokenMap.version;
-  if (versionRefToken) {
-    const version: Token = { ...versionRefToken, type: TokenType.Word };
-    const depRes = processLongFormDep({
-      ...input,
-      tokenMap: { ...input.tokenMap, version },
-    });
-    return { ...depRes, ...res };
+  if (groupId && artifactId) {
+    res.vars = { [key]: { key, value, fileReplacePosition, packageFile } };
+    const versionRefToken = tokenMap.version;
+    if (versionRefToken) {
+      const version: Token = { ...versionRefToken, type: TokenType.Word };
+      const depRes = processLongFormDep({
+        ...input,
+        tokenMap: { ...input.tokenMap, version },
+      });
+      return { ...depRes, ...res };
+    }
   }
   return res;
 }
