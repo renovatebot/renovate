@@ -1,5 +1,6 @@
 import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
+import { CLOJARS_REPO } from './common';
 
 export class ClojureDatasource extends MavenDatasource {
   static override readonly id = 'clojure';
@@ -10,8 +11,5 @@ export class ClojureDatasource extends MavenDatasource {
 
   override readonly registryStrategy = 'merge';
 
-  override readonly defaultRegistryUrls = [
-    'https://clojars.org/repo',
-    MAVEN_REPO,
-  ];
+  override readonly defaultRegistryUrls = [CLOJARS_REPO, MAVEN_REPO];
 }

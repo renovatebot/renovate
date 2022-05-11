@@ -126,7 +126,10 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         title: 'Update foo to v4',
-        body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
+        bodyStruct: {
+          hash: '123',
+          rebaseRequested: true,
+        },
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
