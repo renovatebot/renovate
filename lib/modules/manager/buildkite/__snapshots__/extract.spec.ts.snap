@@ -88,6 +88,19 @@ Array [
 ]
 `;
 
+exports[`modules/manager/buildkite/extract extractPackageFile() extracts plugins outside plugins sections 1`] = `
+Array [
+  Object {
+    "currentValue": "v3.2.7",
+    "datasource": "github-tags",
+    "depName": "some-org/some-plugin",
+    "registryUrls": Array [
+      "https://github.some-domain.com",
+    ],
+  },
+]
+`;
+
 exports[`modules/manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
 Array [
   Object {

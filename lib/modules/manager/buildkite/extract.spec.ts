@@ -49,5 +49,11 @@ describe('modules/manager/buildkite/extract', () => {
       expect(res).toHaveLength(1);
       expect(res).toEqual([expectedPackageDependency]);
     });
+
+    it('extracts plugins outside plugins sections', () => {
+      const res = extractPackageFile(Fixtures.get('pipeline7.yml')).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
   });
 });
