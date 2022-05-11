@@ -10,7 +10,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   try {
     const lines = content.split(newlineRegex);
 
-    lines.forEach((line) => {
+    for (const line of lines) {
       // Search each line for plugin names
       const depLineMatch = regEx(
         /^[\s-]*(?<depName>[^#\s]+)#(?<currentValue>[^:]+)/
@@ -37,7 +37,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             datasource: GithubTagsDatasource.id,
           };
           deps.push(dep);
-          return;
+          continue;
         } else if (isVersion(currentValue)) {
           const splitName = depName.split('/');
           if (splitName.length === 1) {
@@ -66,7 +66,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
         deps.push(dep);
       }
-    });
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting BuildKite plugins');
   }
