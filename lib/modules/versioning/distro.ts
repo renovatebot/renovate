@@ -50,7 +50,7 @@ export class DistroInfo {
 
     for (const v of arr) {
       const obj = { version: v, ...this._distroInfo[v.toString()] };
-      if (!obj.eol) {
+      if (!obj.release) {
         // istanbul ignore next
         continue;
       }
