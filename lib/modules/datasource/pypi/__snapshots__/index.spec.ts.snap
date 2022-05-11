@@ -280,5 +280,3 @@ Object {
   ],
 }
 `;
-
-exports[`modules/datasource/pypi/index getReleases returns non-github home_page 1`] = `"https://microsoft.com"`;
