@@ -9,6 +9,10 @@ The configuration options listed in this document are applicable to self-hosted 
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ## allowCustomCrateRegistries
 
 ## allowPlugins
@@ -143,13 +147,13 @@ Unsupported tools will fall back to `binarySource=global`.
 
 ## cacheDir
 
-By default Renovate uses a temporary directory like `/tmp/renovate/cache` to store cache data.
+By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
 Use the `cacheDir` option to override this default.
 
-The `baseDir` and `cacheDir` option do not need to point to the same directory.
-You can use one directory for the repo data, and another for the the cache data.
+The `baseDir` and `cacheDir` option may point to different directories.
+You can use one directory for the repo data, and another for the cache data.
 
-e.g.
+For example:
 
 ```json
 {

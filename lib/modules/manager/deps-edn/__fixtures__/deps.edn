@@ -1,6 +1,8 @@
 {
   :deps {
 ,,,,persistent-sorted-set,{:mvn/version,"0.1.2"}
+    invalid/package! {:mvn/version "1.2.3"}
+    invalid/version nil
   }
 
   :aliases {
@@ -26,8 +28,36 @@
       :extra-paths ["test"]
       :extra-deps {
         org.clojure/clojurescript {:mvn/version "1.10.520"}
-        lambdaisland/kaocha       {:mvn/version "0.0-389"}
-        lambdaisland/kaocha-cljs  {:mvn/version "0.0-21"}
+        lambdaisland/kaocha       {:git/url "https://github.com/lambdaisland/kaocha.git"
+                                   :git/tag "0.0-389"}
+        io.github.lambdaisland/kaocha-cljs {:git/tag "0.0-21"}
+      }
+    }
+
+    :test-gitlab {
+      :extra-paths ["test"]
+      :extra-deps {
+        lambdaisland/kaocha       {:git/url "https://gitlab.com/lambdaisland/kaocha.git"
+                                   :git/tag "0.0-389"}
+        com.gitlab.lambdaisland/kaocha-cljs {:git/tag "0.0-21"}
+      }
+    }
+
+    :test-bitbucket {
+      :extra-paths ["test"]
+      :extra-deps {
+        lambdaisland/kaocha       {:git/url "https://bitbucket.org/lambdaisland/kaocha.git"
+                                   :git/tag "0.0-389"}
+        org.bitbucket.lambdaisland/kaocha-cljs {:git/tag "0.0-21"}
+      }
+    }
+
+    :test-git {
+      :extra-paths ["test"]
+      :extra-deps {
+        foo/foo {:git/url "git@example.com/foo.git" :git/sha "123"}
+        bar/bar {:git/url "https://example.com/bar.git"}
+        baz/baz {}
       }
     }
 
@@ -47,5 +77,12 @@
         com.datomic/datomic-free {:mvn/version  "0.9.5703"}
       }
     }
+  }
+
+  :mvn/repos {
+    "my-auth-repo" {:url "https://my.auth.com/repo"}
+    "central" nil
+    "my-private-repo" {:url "s3://my-bucket/maven/releases"}
+    "clojars" {:url "https://deps.com/foo/bar"}
   }
 }

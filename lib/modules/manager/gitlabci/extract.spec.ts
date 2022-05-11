@@ -167,6 +167,56 @@ describe('modules/manager/gitlabci/extract', () => {
       ]);
     });
 
+    it('extract images from dependency proxy', () => {
+      const res = extractPackageFile(`
+        image:
+          name: $\{CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim
+
+        services:
+          - $CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11
+          - name: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0
+            alias: imagealias1
+      `);
+      expect(res.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/' +
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '31.65.1-slim',
+          datasource: 'docker',
+          depName: 'renovate/renovate',
+          depType: 'image-name',
+          replaceString:
+            '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim',
+        },
+        {
+          autoReplaceStringTemplate:
+            '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/' +
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10.4.11',
+          datasource: 'docker',
+          depName: 'mariadb',
+          depType: 'service-image',
+          replaceString:
+            '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11',
+        },
+        {
+          autoReplaceStringTemplate:
+            '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/' +
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'other/image1',
+          depType: 'service-image',
+          replaceString:
+            '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0',
+        },
+      ]);
+    });
+
     it('extracts from image', () => {
       let expectedRes = {
         autoReplaceStringTemplate:

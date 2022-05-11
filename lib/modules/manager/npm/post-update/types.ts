@@ -24,7 +24,11 @@ export interface WriteExistingFilesResult {
 
 export interface GenerateLockFileResult {
   error?: boolean;
-  lockFile?: string;
+  lockFile?: string | null;
   stderr?: string;
   stdout?: string;
+}
+
+export interface PnpmLockFile {
+  lockfileVersion?: number;
 }

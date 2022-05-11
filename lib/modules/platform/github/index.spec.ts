@@ -11,7 +11,9 @@ import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
+import { hashBody } from '../pr-body';
 import type { CreatePRConfig, UpdatePrConfig } from '../types';
+import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
@@ -557,32 +559,38 @@ describe('modules/platform/github/index', () => {
     const t3 = t.plus({ minutes: 3 }).toISO();
     const t4 = t.plus({ minutes: 4 }).toISO();
 
-    const pr1 = {
+    const pr1: GhRestPr = {
       number: 1,
-      head: { ref: 'branch-1', repo: { full_name: 'some/repo' } },
+      head: { ref: 'branch-1', sha: '111', repo: { full_name: 'some/repo' } },
+      base: { repo: { pushed_at: '' } },
       state: PrState.Open,
       title: 'PR #1',
+      created_at: t1,
       updated_at: t1,
+      mergeable_state: 'clean',
+      node_id: '12345',
     };
 
-    const pr2 = {
+    const pr2: GhRestPr = {
+      ...pr1,
       number: 2,
-      head: { ref: 'branch-2', repo: { full_name: 'some/repo' } },
+      head: { ref: 'branch-2', sha: '222', repo: { full_name: 'some/repo' } },
       state: PrState.Open,
       title: 'PR #2',
       updated_at: t2,
     };
 
-    const pr3 = {
+    const pr3: GhRestPr = {
+      ...pr1,
       number: 3,
-      head: { ref: 'branch-3', repo: { full_name: 'some/repo' } },
+      head: { ref: 'branch-3', sha: '333', repo: { full_name: 'some/repo' } },
       state: PrState.Open,
       title: 'PR #3',
       updated_at: t3,
     };
 
-    const pagePath = (x: number) =>
-      `/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${x}`;
+    const pagePath = (x: number, perPage = 100) =>
+      `/repos/some/repo/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${x}`;
     const pageLink = (x: number) =>
       `<${githubApiHost}${pagePath(x)}>; rel="next"`;
 
@@ -616,26 +624,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
     });
 
-    it('uses ETag', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      initRepoMock(scope, 'some/repo');
-      scope
-        .get(pagePath(1))
-        .reply(200, [pr3, pr2, pr1], { etag: 'foobar' })
-        .get(pagePath(1))
-        .reply(304);
-
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const res1 = await github.getPrList();
-
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const res2 = await github.getPrList();
-
-      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
-      expect(res1).toEqual(res2);
-    });
-
     it('synchronizes cache', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -645,7 +633,6 @@ describe('modules/platform/github/index', () => {
         .get(pagePath(1))
         .reply(200, [pr3], {
           link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
-          etag: 'foo',
         })
         .get(pagePath(2))
         .reply(200, [pr2])
@@ -656,16 +643,15 @@ describe('modules/platform/github/index', () => {
       const res1 = await github.getPrList();
 
       scope
-        .get(pagePath(1))
+        .get(pagePath(1, 20))
         .reply(200, [{ ...pr3, updated_at: t4, title: 'PR #3 (updated)' }], {
           link: `${pageLink(2)}`,
-          etag: 'bar',
         })
-        .get(pagePath(2))
+        .get(pagePath(2, 20))
         .reply(200, [{ ...pr2, updated_at: t4, title: 'PR #2 (updated)' }], {
           link: `${pageLink(3)}`,
         })
-        .get(pagePath(3))
+        .get(pagePath(3, 20))
         .reply(200, [{ ...pr1, updated_at: t4, title: 'PR #1 (updated)' }]);
 
       await github.initRepo({ repository: 'some/repo' } as never);
@@ -681,6 +667,112 @@ describe('modules/platform/github/index', () => {
         { number: 2, title: 'PR #2 (updated)' },
         { number: 3, title: 'PR #3 (updated)' },
       ]);
+    });
+
+    describe('Url cleanup', () => {
+      type GhRestPrWithUrls = GhRestPr & {
+        url: string;
+        example_url: string;
+        repo: {
+          example_url: string;
+        };
+      };
+
+      type PrCache = ApiPageCache<GhRestPrWithUrls>;
+
+      const prWithUrls = (): GhRestPrWithUrls => ({
+        ...pr1,
+        url: 'https://example.com',
+        example_url: 'https://example.com',
+        _links: { foo: { href: 'https://example.com' } },
+        repo: { example_url: 'https://example.com' },
+      });
+
+      it('removes url data from response', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [prWithUrls()]);
+        await github.initRepo({ repository: 'some/repo' } as never);
+
+        await github.getPrList();
+
+        const repoCache = repository.getCache();
+        const prCache = repoCache.platform?.github?.prCache as PrCache;
+        expect(prCache).toMatchObject({ items: {} });
+
+        const item = prCache.items[1];
+        expect(item).toBeDefined();
+        expect(item._links).toBeUndefined();
+        expect(item.url).toBeUndefined();
+        expect(item.example_url).toBeUndefined();
+        expect(item.repo.example_url).toBeUndefined();
+      });
+
+      it('removes url data from existing cache', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(200, []);
+        await github.initRepo({ repository: 'some/repo' } as never);
+        const repoCache = repository.getCache();
+        const prCache: PrCache = { items: { 1: prWithUrls() } };
+        repoCache.platform = { github: { prCache } };
+
+        await github.getPrList();
+
+        const item = prCache.items[1];
+        expect(item._links).toBeUndefined();
+        expect(item.url).toBeUndefined();
+        expect(item.example_url).toBeUndefined();
+        expect(item.repo.example_url).toBeUndefined();
+      });
+    });
+
+    describe('Body compaction', () => {
+      type PrCache = ApiPageCache<GhRestPr>;
+
+      const prWithBody = (body: string): GhRestPr => ({
+        ...pr1,
+        body,
+      });
+
+      it('compacts body from response', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
+        await github.initRepo({ repository: 'some/repo' } as never);
+
+        await github.getPrList();
+
+        const repoCache = repository.getCache();
+        const prCache = repoCache.platform?.github?.prCache as PrCache;
+        expect(prCache).toMatchObject({ items: {} });
+
+        const item = prCache.items[1];
+        expect(item).toBeDefined();
+        expect(item.body).toBeUndefined();
+        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
+      });
+
+      it('removes url data from existing cache', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
+        await github.initRepo({ repository: 'some/repo' } as never);
+        const repoCache = repository.getCache();
+        const prCache: PrCache = {
+          items: { 1: prWithBody('bar'), 2: prWithBody('baz') },
+        };
+        repoCache.platform = { github: { prCache } };
+
+        await github.getPrList();
+
+        expect(prCache.items[2]).toBeUndefined();
+
+        const item = prCache.items[1];
+        expect(item).toBeDefined();
+        expect(item.body).toBeUndefined();
+        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
+      });
     });
   });
 

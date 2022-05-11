@@ -1,22 +1,68 @@
+import is from '@sindresorhus/is';
 import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
 import { parseLinkHeader } from '../../../util/url';
+import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
 import type { ApiPageCache, GhRestPr } from './types';
+
+function removeUrlFields(input: unknown): void {
+  if (is.plainObject(input)) {
+    for (const [key, val] of Object.entries(input)) {
+      if ((key === 'url' || key.endsWith('_url')) && is.string(val)) {
+        delete input[key];
+      } else {
+        removeUrlFields(val);
+      }
+    }
+  }
+}
+
+function compactPrBodyStructure(input: unknown): void {
+  if (is.plainObject(input)) {
+    if (!input.bodyStruct && is.string(input.body)) {
+      input.bodyStruct = getPrBodyStruct(input.body);
+      delete input.body;
+    }
+  }
+}
+
+function massageGhRestPr(ghPr: GhRestPr): GhRestPr {
+  removeUrlFields(ghPr);
+  delete ghPr.head?.repo?.pushed_at;
+  delete ghPr.base?.repo?.pushed_at;
+  delete ghPr._links;
+
+  compactPrBodyStructure(ghPr);
+
+  return ghPr;
+}
 
 function getPrApiCache(): ApiCache<GhRestPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
   repoCache.platform.github.prCache ??= { items: {} };
-  const prCache = new ApiCache(
-    repoCache.platform.github.prCache as ApiPageCache<GhRestPr>
-  );
+  const apiPageCache = repoCache.platform.github
+    .prCache as ApiPageCache<GhRestPr>;
+
+  const items = Object.values(apiPageCache.items);
+
+  const firstItem = items?.[0];
+  if (firstItem?.body) {
+    apiPageCache.items = {};
+  } else if (firstItem?._links) {
+    for (const ghPr of items) {
+      massageGhRestPr(ghPr);
+    }
+  }
+
+  const prCache = new ApiCache(apiPageCache);
   return prCache;
 }
 
@@ -33,17 +79,12 @@ function getPrApiCache(): ApiCache<GhRestPr> {
  * In order synchronize ApiCache properly, we handle 3 cases:
  *
  *   a. We never fetched PR list for this repo before.
- *      This is detected by `etag` presense in the cache.
+ *      If cached PR list is empty, we assume it's the case.
  *
  *      In this case, we're falling back to quick fetch via
  *      `paginate=true` option (see `util/http/github.ts`).
  *
- *   b. None of PRs has changed since last run.
- *
- *      We detect this by setting `If-None-Match` HTTP header
- *      with the `etag` value from the previous run.
- *
- *   c. Some of PRs had changed since last run.
+ *   b. Some of PRs had changed since last run.
  *
  *      In this case, we sequentially fetch page by page
  *      until `ApiCache.coerce` function indicates that
@@ -59,6 +100,7 @@ export async function getPrCache(
 ): Promise<Record<number, Pr>> {
   const prCache: Record<number, Pr> = {};
   const prApiCache = getPrApiCache();
+  const isInitial = is.emptyArray(prApiCache.getItems());
 
   try {
     let requestsTotal = 0;
@@ -68,30 +110,21 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const urlPath = `repos/${repo}/pulls?per_page=100&state=all&sort=updated&direction=desc&page=${pageIdx}`;
-
       const opts: GithubHttpOptions = { paginate: false };
-      if (pageIdx === 1) {
-        const oldEtag = prApiCache.etag;
-        if (oldEtag) {
-          opts.headers = { 'If-None-Match': oldEtag };
-        } else {
-          // Speed up initial fetch
-          opts.paginate = true;
-        }
+      if (pageIdx === 1 && isInitial) {
+        // Speed up initial fetch
+        opts.paginate = true;
       }
+
+      const perPage = isInitial ? 100 : 20;
+      const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const res = await http.getJson<GhRestPr[]>(urlPath, opts);
       apiQuotaAffected = true;
       requestsTotal += 1;
 
-      if (pageIdx === 1 && res.statusCode === 304) {
-        apiQuotaAffected = false;
-        break;
-      }
-
       const {
-        headers: { link: linkHeader, etag: newEtag },
+        headers: { link: linkHeader },
       } = res;
 
       let { body: page } = res;
@@ -102,14 +135,14 @@ export async function getPrCache(
         );
       }
 
+      for (const ghPr of page) {
+        massageGhRestPr(ghPr);
+      }
+
       needNextPageSync = prApiCache.reconcile(page);
       needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
       if (pageIdx === 1) {
-        if (newEtag) {
-          prApiCache.etag = newEtag;
-        }
-
         needNextPageFetch &&= !opts.paginate;
       }
 
@@ -129,7 +162,8 @@ export async function getPrCache(
     throw new ExternalHostError(err, PlatformId.Github);
   }
 
-  for (const ghPr of prApiCache.getItems()) {
+  const cacheItems = prApiCache.getItems();
+  for (const ghPr of cacheItems) {
     const pr = coerceRestPr(ghPr);
     if (pr) {
       prCache[ghPr.number] = pr;
