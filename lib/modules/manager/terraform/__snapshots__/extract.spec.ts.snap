@@ -186,34 +186,6 @@ Object {
 }
 `;
 
-exports[`modules/manager/terraform/extract extractPackageFile() extracts azureDevOps modules 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "v1.0.0",
-      "datasource": "git-tags",
-      "depName": "MyOrg/MyProject/MyRepository",
-      "depType": "module",
-      "packageName": "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository",
-    },
-    Object {
-      "currentValue": "v1.0.0",
-      "datasource": "git-tags",
-      "depName": "MyOrg/MyProject/MyRepository",
-      "depType": "module",
-      "packageName": "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository",
-    },
-    Object {
-      "currentValue": "v1.0.0",
-      "datasource": "git-tags",
-      "depName": "MyOrg/MyProject/MyRepository//some-module/path",
-      "depType": "module",
-      "packageName": "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository",
-    },
-  ],
-}
-`;
-
 exports[`modules/manager/terraform/extract extractPackageFile() extracts bitbucket modules 1`] = `
 Object {
   "deps": Array [

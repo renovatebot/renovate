@@ -59,9 +59,34 @@ describe('modules/manager/terraform/extract', () => {
         'modules.tf',
         {}
       );
-      expect(res.deps).toHaveLength(3);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'MyOrg/MyProject/MyRepository',
+            depType: 'module',
+            packageName:
+              'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+          },
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'MyOrg/MyProject/MyRepository',
+            depType: 'module',
+            packageName:
+              'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+          },
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'MyOrg/MyProject/MyRepository//some-module/path',
+            depType: 'module',
+            packageName:
+              'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+          },
+        ],
+      });
     });
 
     it('extracts providers', async () => {

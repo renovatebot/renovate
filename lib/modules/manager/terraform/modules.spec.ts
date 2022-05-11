@@ -118,15 +118,9 @@ describe('modules/manager/terraform/modules', () => {
   });
 
   describe('azureDevOpsSshRefMatchRegex', () => {
-    it('should split organization, project, repository and tag from source', () => {
+    it('should split organization, project, repository and tag from source url', () => {
       const ssh = azureDevOpsSshRefMatchRegex.exec(
         'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
-      ).groups;
-      const sshGit = azureDevOpsSshRefMatchRegex.exec(
-        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
-      ).groups;
-      const subfolder = azureDevOpsSshRefMatchRegex.exec(
-        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0'
       ).groups;
 
       expect(ssh).toEqual({
@@ -137,6 +131,12 @@ describe('modules/manager/terraform/modules', () => {
         tag: '1.0.0',
         url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
       });
+    });
+
+    it('should split organization, project, repository and tag from source url with git prefix', () => {
+      const sshGit = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
+      ).groups;
 
       expect(sshGit).toEqual({
         modulepath: '',
@@ -146,6 +146,12 @@ describe('modules/manager/terraform/modules', () => {
         tag: '1.0.0',
         url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
       });
+    });
+
+    it('should split organization, project, repository and tag from source url with subfolder', () => {
+      const subfolder = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0'
+      ).groups;
 
       expect(subfolder).toEqual({
         modulepath: '//some-module/path',
