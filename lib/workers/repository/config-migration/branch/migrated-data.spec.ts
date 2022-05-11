@@ -13,8 +13,8 @@ jest.mock('../../init/merge');
 jest.mock('detect-indent');
 
 const rawNonMigrated = Fixtures.get('./renovate.json');
-const migratedData = JSON.parse(Fixtures.get('./migrated-data.json'));
-const migratedConfigObj = JSON.parse(Fixtures.get('./migrated.json'));
+const migratedData = Fixtures.getJson('./migrated-data.json');
+const migratedConfigObj = Fixtures.getJson('./migrated.json');
 
 describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {

@@ -19,7 +19,7 @@ jest.mock('./rebase');
 jest.mock('./create');
 jest.mock('../../../../util/git');
 
-const migratedData = JSON.parse(Fixtures.get('./migrated-data.json'));
+const migratedData = Fixtures.getJson('./migrated-data.json');
 
 describe('workers/repository/config-migration/branch/index', () => {
   describe('checkConfigMigrationBranch', () => {

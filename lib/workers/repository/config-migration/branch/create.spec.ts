@@ -7,7 +7,7 @@ import { MigratedData } from './migrated-data';
 jest.mock('../../../../util/git');
 
 describe('workers/repository/config-migration/branch/create', () => {
-  const raw = JSON.parse(Fixtures.get('./renovate.json'));
+  const raw = Fixtures.getJson('./renovate.json');
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const fileName = 'renovate.json';
