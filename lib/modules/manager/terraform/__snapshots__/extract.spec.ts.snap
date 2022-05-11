@@ -460,6 +460,13 @@ Object {
     Object {
       "skipReason": "no-version",
     },
+    Object {
+      "currentValue": "1.1.9",
+      "datasource": "github-tags",
+      "depName": "hashicorp/terraform",
+      "depType": "tfe_workspace",
+      "extractVersion": "v(?<version>.*)$",
+    },
   ],
 }
 `;
