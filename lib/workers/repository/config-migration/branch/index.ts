@@ -5,18 +5,16 @@ import { platform } from '../../../../modules/platform';
 import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { createConfigMigrationBranch } from './create';
-import { MigratedDataFactory } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
-  config: RenovateConfig
+  config: RenovateConfig,
+  migratedConfigData: MigratedData
 ): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
-  const migratedConfigData = await MigratedDataFactory.getAsync();
   if (!migratedConfigData) {
-    logger.debug(
-      'checkConfigMigrationBranch() Config does not need migration\n'
-    );
+    logger.debug('checkConfigMigrationBranch() Config does not need migration');
     return null;
   }
   const configMigrationBranch = getMigrationBranchName(config);
@@ -40,7 +38,6 @@ export async function checkConfigMigrationBranch(
   if (!GlobalConfig.get('dryRun')) {
     await checkoutBranch(configMigrationBranch);
   }
-  MigratedDataFactory.reset();
   return configMigrationBranch;
 }
 

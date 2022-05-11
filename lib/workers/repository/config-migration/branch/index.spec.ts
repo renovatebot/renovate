@@ -8,9 +8,10 @@ import {
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { createConfigMigrationBranch } from './create';
-import { MigratedDataFactory } from './migrated-data';
+import { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
 
@@ -19,12 +20,14 @@ jest.mock('./rebase');
 jest.mock('./create');
 jest.mock('../../../../util/git');
 
-const migratedData = Fixtures.getJson('./migrated-data.json');
+const { configFileNames, migratedContent } = Fixtures.getJson(
+  './migrated-data.json'
+);
+const migratedData = new MigratedData(migratedContent, configFileNames);
 
 describe('workers/repository/config-migration/branch/index', () => {
   describe('checkConfigMigrationBranch', () => {
     let config: RenovateConfig;
-    const getAsyncSpy = jest.spyOn(MigratedDataFactory, 'getAsync');
 
     beforeEach(() => {
       GlobalConfig.set({
@@ -33,12 +36,15 @@ describe('workers/repository/config-migration/branch/index', () => {
       jest.resetAllMocks();
       config = getConfig();
       config.branchPrefix = 'some/';
-      getAsyncSpy.mockResolvedValue(migratedData);
     });
 
-    it('Exited due to error fetching migrated data', async () => {
-      getAsyncSpy.mockResolvedValue(undefined);
-      await expect(checkConfigMigrationBranch(config)).resolves.toBeNull();
+    it('Exits when Migration is not needed', async () => {
+      await expect(
+        checkConfigMigrationBranch(config, null)
+      ).resolves.toBeNull();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'checkConfigMigrationBranch() Config does not need migration'
+      );
     });
 
     it('Updates migration branch & refresh PR', async () => {
@@ -47,10 +53,13 @@ describe('workers/repository/config-migration/branch/index', () => {
       // declared as: refreshPr?(number: number): Promise<void>;
       platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(config);
+      const res = await checkConfigMigrationBranch(config, migratedData);
       expect(res).toBe(`${config.branchPrefix}migrate-config`);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config Migration PR already exists'
+      );
     });
 
     it('Dry runs update migration branch', async () => {
@@ -59,7 +68,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       });
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(config);
+      const res = await checkConfigMigrationBranch(config, migratedData);
       expect(res).toBe(`${config.branchPrefix}migrate-config`);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -69,10 +78,11 @@ describe('workers/repository/config-migration/branch/index', () => {
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
         'committed'
       );
-      const res = await checkConfigMigrationBranch(config);
+      const res = await checkConfigMigrationBranch(config, migratedData);
       expect(res).toBe(`${config.branchPrefix}migrate-config`);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
 
     it('Dry runs create migration PR', async () => {
@@ -82,7 +92,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
         'committed'
       );
-      const res = await checkConfigMigrationBranch(config);
+      const res = await checkConfigMigrationBranch(config, migratedData);
       expect(res).toBe(`${config.branchPrefix}migrate-config`);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);

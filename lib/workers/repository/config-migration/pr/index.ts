@@ -11,22 +11,34 @@ import * as template from '../../../../util/template';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import type { MigratedData } from '../branch/migrated-data';
 import { getMigrationBranchName } from '../common';
 import { getErrors, getWarnings } from './errors-warnings';
 
 export async function ensureConfigMigrationPr(
-  config: RenovateConfig
+  config: RenovateConfig,
+  migratedConfigData: MigratedData
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
   const branchName = getMigrationBranchName(config);
+  const prTitle = config.onboardingPrTitle ?? 'Config Migration';
   const existingPr = await platform.getBranchPr(branchName);
-  const closedPr = await platform.findPr({ branchName, state: PrState.Closed });
+  const closedPr = await platform.findPr({
+    branchName,
+    prTitle,
+    state: PrState.Closed,
+  });
+  const filename = migratedConfigData.fileName;
   logger.debug('Filling in config migration PR template');
   let prTemplate = `Config migration needed, merge this PR to update your Renovate configuration file.\n\n`;
   prTemplate += emojify(
     `
 
-
+${
+  filename.endsWith('.json5')
+    ? '#### PLEASE NOTE: JSON5 config file migrated! All comments & trailing commas were removed.'
+    : ''
+}
 ---
 {{#if hasWarningsErrors}}
 {{{warnings}}}
@@ -37,8 +49,12 @@ export async function ensureConfigMigrationPr(
 ---
 
 
-:question: Got questions? Check out Renovate's [Docs](${config.productLinks?.documentation}), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${config.productLinks?.help}).
+:question: Got questions? Check out Renovate's [Docs](${
+      config.productLinks?.documentation
+    }), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${
+      config.productLinks?.help
+    }).
 `
   );
   const warnings = getWarnings(config);
@@ -66,7 +82,7 @@ If you need any further assistance then you can also [request help here](${confi
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
       // Bitbucket strips trailing \n)//
-      logger.debug({ pr: existingPr.displayNumber }, `does not need updating`);
+      logger.debug({ pr: existingPr.displayNumber }, `Does not need updating`);
       return;
     }
     // PR must need updating
@@ -99,7 +115,7 @@ If you need any further assistance then you can also [request help here](${confi
         const pr = await platform.createPr({
           sourceBranch: branchName,
           targetBranch,
-          prTitle: config.onboardingPrTitle ?? 'Config Migration',
+          prTitle,
           prBody,
           labels,
           platformOptions: getPlatformPrOptions({
