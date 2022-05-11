@@ -8,7 +8,7 @@ description: Docker Package Manager Support in Renovate
 Renovate supports upgrading dependencies in various types of Docker definition files:
 
 - Docker's `Dockerfile` files
-- Docker Compose `docker-compose.yml` files
+- Docker Compose `docker-compose.yml`, `compose.yml` files
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
