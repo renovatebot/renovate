@@ -1,12 +1,12 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { TerraformModuleDatasource } from '.';
 
-const consulData = loadFixture('registry-consul.json');
-const consulVersionsData = loadFixture('registry-consul-versions.json');
-const serviceDiscoveryResult = loadFixture('service-discovery.json');
-const serviceDiscoveryCustomResult = loadFixture(
+const consulData = Fixtures.get('registry-consul.json');
+const consulVersionsData = Fixtures.get('registry-consul-versions.json');
+const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
+const serviceDiscoveryCustomResult = Fixtures.get(
   'service-custom-discovery.json'
 );
 

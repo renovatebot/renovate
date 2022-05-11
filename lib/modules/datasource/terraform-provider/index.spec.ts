@@ -1,13 +1,13 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { TerraformProviderDatasource } from '.';
 
-const azurermData = loadFixture('azurerm-provider.json');
-const azurermVersionsData = loadFixture('azurerm-provider-versions.json');
-const hashicorpReleases = loadFixture('releaseBackendIndex.json');
-const serviceDiscoveryResult = loadFixture('service-discovery.json');
-const telmateProxmocVersions = loadFixture(
+const azurermData = Fixtures.get('azurerm-provider.json');
+const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
+const hashicorpReleases = Fixtures.get('releaseBackendIndex.json');
+const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
+const telmateProxmocVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json'
 );
 
