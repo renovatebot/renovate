@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { PrState } from '../../../types';
+import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type { GhRestPr } from './types';
 
@@ -11,6 +12,7 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
     return null;
   }
 
+  const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
   const result: Pr = {
     displayNumber: `Pull Request #${pr.number}`,
     number: pr.number,
@@ -20,7 +22,7 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
       pr.state === PrState.Closed && is.string(pr.merged_at)
         ? PrState.Merged
         : pr.state,
-    body: pr.body ?? 'dummy body',
+    bodyStruct,
   };
 
   if (pr.head?.sha) {
