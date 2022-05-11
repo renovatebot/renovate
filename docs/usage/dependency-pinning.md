@@ -209,7 +209,7 @@ Don't forget that there is some form of transitive trust too.
 You need to pick your direct dependencies carefully, and which versions of them you use.
 Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, etc?).
 So the reality is that even if 90% of the entries in your lock file are indirect dependencies, those are ones you have somewhat "delegated" responsibility for to your dependencies.
-e.g. I'd hope that Express are even better at watching their deps for breaks than I am, to use the example above.
+e.g. I'd hope that Express are even better at watching their dependencies for breaks than I am, to use the example above.
 
 But certainly "does it give a false sense of security" is not a question we can really answer quantifiably.
 
