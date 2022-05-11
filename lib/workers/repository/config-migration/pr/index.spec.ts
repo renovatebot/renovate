@@ -8,6 +8,7 @@ import {
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { ensureConfigMigrationPr } from '.';
 
 describe('workers/repository/config-migration/pr/index', () => {
@@ -34,6 +35,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     let createPrBody: string;
+    let hash: string;
 
     it('creates PR', async () => {
       await ensureConfigMigrationPr(config);
@@ -50,10 +52,9 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('Founds an open PR and as it is up to date and returns', async () => {
+      hash = hashBody(createPrBody);
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({
-          body: createPrBody,
-        })
+        mock<Pr>({ bodyStruct: { hash } })
       );
       await ensureConfigMigrationPr(config);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -61,7 +62,9 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('Founds an open PR and updates it', async () => {
-      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ body: '' }));
+      platform.getBranchPr.mockResolvedValueOnce(
+        mock<Pr>({ bodyStruct: { hash: '' } })
+      );
       await ensureConfigMigrationPr(config);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -87,12 +90,15 @@ describe('workers/repository/config-migration/pr/index', () => {
         dryRun: 'full',
       });
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ body: createPrBody + 'extra' })
+        mock<Pr>({ bodyStruct: { hash: '' } })
       );
       await ensureConfigMigrationPr(config);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith('Found open migration PR');
+      expect(logger.debug).not.toHaveBeenLastCalledWith(
+        `does not need updating`
+      );
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would update migration PR'
       );

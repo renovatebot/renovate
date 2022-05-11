@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch } from '../../../../util/git';
@@ -62,7 +63,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (existingPr) {
     logger.debug('Found open migration PR');
     // Check if existing PR needs updating
-    if (existingPr.body?.trim() === prBody.trim()) {
+    const prBodyHash = hashBody(prBody);
+    if (existingPr.bodyStruct?.hash === prBodyHash) {
       // Bitbucket strips trailing \n)//
       logger.debug({ pr: existingPr.displayNumber }, `does not need updating`);
       return;

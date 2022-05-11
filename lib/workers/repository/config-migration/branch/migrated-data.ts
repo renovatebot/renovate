@@ -1,4 +1,5 @@
 import detectIndent from 'detect-indent';
+import JSON5 from 'json5';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
@@ -61,7 +62,14 @@ export class MigratedDataFactory {
 
       // indent defaults to 2 spaces
       const indent = detectIndent(raw).indent ?? '  ';
-      let content = JSON.stringify(migratedConfig, undefined, indent);
+      let content: string;
+
+      if (fileName.endsWith('.json5')) {
+        content = JSON5.stringify(migratedConfig, undefined, indent);
+      } else {
+        content = JSON.stringify(migratedConfig, undefined, indent);
+      }
+
       if (!content.endsWith('\n')) {
         content += '\n';
       }

@@ -28,7 +28,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     beforeEach(() => {
       GlobalConfig.set({
-        dryRun: false,
+        dryRun: null,
       });
       jest.resetAllMocks();
       config = getConfig();
