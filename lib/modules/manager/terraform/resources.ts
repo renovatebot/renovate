@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
@@ -26,7 +26,7 @@ export function extractTerraformResource(
   lines: string[]
 ): ExtractionResult {
   let lineNumber = startingLine;
-  let line = lines[lineNumber];
+  const line = lines[lineNumber];
   const deps: PackageDependency<ResourceManagerData>[] = [];
   const managerData: ResourceManagerData = {
     terraformDependencyType: TerraformDependencyTypes.resource,
