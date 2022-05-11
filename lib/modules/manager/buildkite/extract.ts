@@ -21,7 +21,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.trace('depLineMatch');
         let skipReason: SkipReason | undefined;
         let repo: string | undefined;
-
+        logger.debug({ depName }, 'Found BuildKite plugin');
         // Plugins may simply be git repos. If so, we need to parse out the registry.
         const gitPluginMatch = regEx(
           /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
