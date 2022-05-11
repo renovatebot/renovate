@@ -56,7 +56,7 @@ describe('modules/manager/buildkite/extract', () => {
         currentValue: 'v3.2.7',
         datasource: 'github-tags',
         depName: 'some-org/some-plugin',
-        registryUrls: ['https://github.company.com'],
+        registryUrls: ['https://github.some-domain.com'],
       };
       expect(res).toEqual([expectedPackageDependency]);
     });
