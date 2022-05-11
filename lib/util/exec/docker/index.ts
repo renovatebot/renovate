@@ -9,16 +9,27 @@ import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
-const prefetchedImages = new Set<string>();
+const prefetchedImages = new Map<string, string>();
+
+const digestRegex = regEx('Digest: (.*?)\n');
 
 export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
-    logger.debug(`Docker image is already prefetched: ${taggedImage}`);
+    logger.debug(
+      `Docker image is already prefetched: ${taggedImage}@${prefetchedImages.get(
+        taggedImage
+      )}`
+    );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    prefetchedImages.add(taggedImage);
-    await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
-    logger.debug(`Finished fetching Docker image`);
+    const res = await rawExec(`docker pull ${taggedImage}`, {
+      encoding: 'utf-8',
+    });
+    const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
+    logger.debug(
+      `Finished fetching Docker image ${taggedImage}@${imageDigest}`
+    );
+    prefetchedImages.set(taggedImage, imageDigest);
   }
 }
 

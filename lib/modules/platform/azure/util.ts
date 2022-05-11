@@ -9,6 +9,7 @@ import { HostRule, PrState } from '../../../types';
 import type { GitOptions } from '../../../types/git';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { toBase64 } from '../../../util/string';
+import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
 
 export function getNewBranchName(branchName?: string): string | undefined {
@@ -97,7 +98,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const targetBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.targetRefName
   );
-  const body = azurePr.description;
+  const bodyStruct = getPrBodyStruct(azurePr.description);
 
   const createdAt = azurePr.creationDate?.toISOString();
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -111,7 +112,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     state,
     number,
     displayNumber,
-    body,
+    bodyStruct,
     sourceRefName,
     targetBranch,
     createdAt,

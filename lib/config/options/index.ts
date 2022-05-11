@@ -3,7 +3,6 @@ import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import * as dockerVersioning from '../../modules/versioning/docker';
-import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -1827,6 +1826,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodNoMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
@@ -1892,9 +1892,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration object for Python.',
     stage: 'package',
     type: 'object',
-    default: {
-      versioning: pep440Versioning.id,
-    },
+    default: {},
     mergeable: true,
     cli: false,
   },
