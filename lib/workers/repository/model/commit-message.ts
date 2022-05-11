@@ -1,15 +1,22 @@
-export class CommitMessage {
-  public static readonly SEPARATOR: string = ':';
+import is from '@sindresorhus/is';
+import type { CommitMessageJSON } from '../../../types';
 
-  private message = '';
+/**
+ * @see https://git-scm.com/docs/git-commit#_discussion
+ *
+ * [optional prefix]: <suject>
+ * [optional body]
+ * [optional footer]
+ */
+export abstract class CommitMessage {
+  private static readonly SEPARATOR: string = ':';
+  private static readonly EXTRA_WHITESPACES = /\s+/g;
 
-  private prefix = '';
+  private _body = '';
+  private _footer = '';
+  private _subject = '';
 
-  constructor(message = '') {
-    this.setMessage(message);
-  }
-
-  public static formatPrefix(prefix: string): string {
+  static formatPrefix(prefix: string): string {
     if (!prefix) {
       return '';
     }
@@ -21,34 +28,61 @@ export class CommitMessage {
     return `${prefix}${CommitMessage.SEPARATOR}`;
   }
 
-  public setMessage(message: string): void {
-    this.message = (message || '').trim();
+  toJSON(): CommitMessageJSON {
+    return {
+      body: this._body,
+      footer: this._footer,
+      subject: this._subject,
+    };
   }
 
-  public setCustomPrefix(prefix?: string): void {
-    this.prefix = (prefix ?? '').trim();
+  toString(): string {
+    const parts: ReadonlyArray<string | undefined> = [
+      this.title,
+      this._body,
+      this._footer,
+    ];
+
+    return parts.filter(is.nonEmptyStringAndNotWhitespace).join('\n\n');
   }
 
-  public setSemanticPrefix(type?: string, scope?: string): void {
-    this.prefix = (type ?? '').trim();
+  get title(): string {
+    return [CommitMessage.formatPrefix(this.prefix), this.formatSubject()]
+      .join(' ')
+      .trim();
+  }
 
-    if (scope?.trim()) {
-      this.prefix += `(${scope.trim()})`;
+  set body(value: string) {
+    this._body = this.normalizeInput(value);
+  }
+
+  set footer(value: string) {
+    this._footer = this.normalizeInput(value);
+  }
+
+  set subject(value: string) {
+    this._subject = this.normalizeInput(value);
+    this._subject = this._subject?.replace(
+      CommitMessage.EXTRA_WHITESPACES,
+      ' '
+    );
+  }
+
+  formatSubject(): string {
+    if (!this._subject) {
+      return '';
     }
-  }
 
-  public toString(): string {
-    const prefix = CommitMessage.formatPrefix(this.prefix);
-    const message = this.formatMessage();
-
-    return [prefix, message].join(' ').trim();
-  }
-
-  private formatMessage(): string {
     if (this.prefix) {
-      return this.message;
+      return this._subject.charAt(0).toLowerCase() + this._subject.slice(1);
     }
 
-    return this.message.charAt(0).toUpperCase() + this.message.slice(1);
+    return this._subject.charAt(0).toUpperCase() + this._subject.slice(1);
+  }
+
+  protected abstract get prefix(): string;
+
+  protected normalizeInput(value: string | null | undefined): string {
+    return value?.trim() ?? '';
   }
 }

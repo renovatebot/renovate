@@ -349,6 +349,34 @@ function processLongFormDep({
   return null;
 }
 
+function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const { tokenMap } = input;
+
+  const varNameToken = tokenMap.varName;
+  const key = varNameToken.value;
+  const fileReplacePosition = varNameToken.offset;
+  const packageFile = input.packageFile;
+
+  const groupId = tokenMap.groupId?.value;
+  const artifactId = tokenMap.artifactId?.value;
+  const value = `${groupId}:${artifactId}`;
+  const res: SyntaxHandlerOutput = {};
+
+  if (groupId && artifactId) {
+    res.vars = { [key]: { key, value, fileReplacePosition, packageFile } };
+    const versionRefToken = tokenMap.version;
+    if (versionRefToken) {
+      const version: Token = { ...versionRefToken, type: TokenType.Word };
+      const depRes = processLongFormDep({
+        ...input,
+        tokenMap: { ...input.tokenMap, version },
+      });
+      return { ...depRes, ...res };
+    }
+  }
+  return res;
+}
+
 const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // foo.bar = 'baz'
@@ -375,7 +403,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // set('foo', 'bar')
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'set' },
+      { matchType: TokenType.Word, matchValue: ['set', 'version'] },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'keyToken' },
       { matchType: TokenType.Comma },
@@ -585,6 +613,39 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processCustomRegistryUrl,
   },
   {
+    // library("foobar", "foo", "bar").versionRef("foo.bar")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'library' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'varName' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.RightParen },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, matchValue: 'versionRef' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processLibraryDep,
+  },
+  {
+    // library("foobar", "foo", "bar")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'library' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'varName' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processLibraryDep,
+  },
+  {
     // group: "com.example", name: "my.dependency", version: "1.2.3"
     matchers: [
       { matchType: TokenType.Word, matchValue: 'group' },
@@ -618,6 +679,105 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Colon },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
       { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // group: "com.example", name: "my.dependency", version: "1.2.3", classifier:"class"
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'classifier' },
+      { matchType: TokenType.Colon },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // (group: "com.example", name: "my.dependency", version: "1.2.3", classifier:"class")
+    matchers: [
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'classifier' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'classifier' },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // group: "com.example", name: "my.dependency", version: "1.2.3"{
+    //        exclude module: 'exclude'
+    //     }
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.LeftBrace },
+      { matchType: TokenType.Word, matchValue: 'exclude' },
+      { matchType: TokenType.Word, matchValue: 'module' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'exclude' },
+      { matchType: TokenType.RightBrace },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // (group: "com.example", name: "my.dependency", version: "1.2.3"){
+    //        exclude module: 'exclude'
+    //     }
+    matchers: [
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
+      { matchType: TokenType.LeftBrace },
+      { matchType: TokenType.Word, matchValue: 'exclude' },
+      { matchType: TokenType.Word, matchValue: 'module' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'exclude' },
+      { matchType: TokenType.RightBrace },
       endOfInstruction,
     ],
     handler: processLongFormDep,

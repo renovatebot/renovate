@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { loadJsonFixture, mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
 import * as _local from './local';
@@ -23,7 +24,7 @@ npm.getPreset = jest.fn(({ repo, presetName }) => {
   if (repo === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
       'renovate-config'
-    ][presetName];
+    ][presetName!];
   }
   if (repo === 'renovate-config-notfound') {
     throw new Error(PRESET_DEP_NOT_FOUND);
@@ -59,71 +60,73 @@ describe('config/presets/index', () => {
     it('throws if invalid preset file', async () => {
       config.foo = 1;
       config.extends = ['notfound'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe("Cannot find preset's package (notfound)");
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
+        "Cannot find preset's package (notfound)"
+      );
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if invalid preset', async () => {
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if path + invalid syntax', async () => {
       config.foo = 1;
       config.extends = ['github>user/repo//'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe('Preset is invalid (github>user/repo//)');
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe('Preset is invalid (github>user/repo//)');
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if path + sub-preset', async () => {
       config.foo = 1;
       config.extends = ['github>user/repo//path:subpreset'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if invalid preset json', async () => {
       config.foo = 1;
       config.extends = ['org/repo'];
-      let e: Error;
+      let e: Error | undefined;
       local.getPreset.mockRejectedValueOnce(new Error(PRESET_INVALID_JSON));
       try {
         await presets.resolveConfigPresets(config);
@@ -131,43 +134,43 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe('Preset is invalid JSON (org/repo)');
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe('Preset is invalid JSON (org/repo)');
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws noconfig', async () => {
       config.foo = 1;
       config.extends = ['noconfig:base'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset package is missing a renovate-config entry (noconfig:base)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws throw', async () => {
       config.foo = 1;
       config.extends = ['throw:base'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset caused unexpected error (throw:base)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('works with valid', async () => {
@@ -186,18 +189,18 @@ describe('config/presets/index', () => {
     it('throws if valid and invalid', async () => {
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset', ':pinVersions'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('combines two package alls', async () => {
@@ -248,7 +251,7 @@ describe('config/presets/index', () => {
       config.extends = [':automergeLinters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      const rule = res.packageRules[0];
+      const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(4);
       expect(rule.matchPackagePatterns).toHaveLength(1);
@@ -260,7 +263,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).toBeUndefined();
-      expect(res.minor.automerge).toBeTrue();
+      expect(res.minor!.automerge).toBeTrue();
     });
 
     it('ignores presets', async () => {
@@ -385,6 +388,54 @@ describe('config/presets/index', () => {
         presetName: 'somefile/somepreset',
         presetPath: undefined,
         presetSource: 'github',
+      });
+    });
+
+    it('parses github file with preset name with .json extension', () => {
+      expect(presets.parsePreset('github>some/repo:somefile.json')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github file with preset name with .json5 extension', () => {
+      expect(presets.parsePreset('github>some/repo:somefile.json5')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json5',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github subfiles with preset name with .json extension', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile.json/somepreset')
+      ).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github subfiles with preset name with .json5 extension', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile.json5/somepreset')
+      ).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json5/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
       });
     });
 
@@ -832,55 +883,55 @@ Object {
     });
 
     it('handles 404 packages', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('notfound:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e!.validationSource).toMatchSnapshot();
+      expect(e!.validationError).toMatchSnapshot();
+      expect(e!.validationMessage).toMatchSnapshot();
     });
 
     it('handles no config', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('noconfig:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('handles throw errors', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('throw:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('handles preset not found', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('wrongpreset:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
   });
 });

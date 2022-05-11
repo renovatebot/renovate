@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { streamToString } from '../../../util/streams';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -9,7 +10,6 @@ import {
   getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
-  streamToString,
 } from './util';
 
 describe('modules/platform/azure/util', () => {
@@ -235,8 +235,9 @@ describe('modules/platform/azure/util', () => {
     });
 
     it('throws when repo name is invalid', () => {
-      expect(() => getRepoByName(undefined, [])).toThrow();
-      expect(() => getRepoByName(null, [])).toThrow();
+      // TODO: better error handling #7154
+      expect(() => getRepoByName(undefined as never, [])).toThrow();
+      expect(() => getRepoByName(null as never, [])).toThrow();
       expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
     });
   });

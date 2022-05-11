@@ -68,7 +68,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, JSON.parse(consulData))
+        .reply(200, consulData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -83,7 +83,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope('https://registry.company.com')
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, JSON.parse(consulData))
+        .reply(200, consulData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -108,7 +108,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(secondaryUrl)
         .get('/index.json')
-        .reply(200, JSON.parse(hashicorpReleases));
+        .reply(200, hashicorpReleases);
 
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,

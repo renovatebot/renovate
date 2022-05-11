@@ -41,6 +41,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ---
 
 ## addLabels
@@ -1380,7 +1384,7 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 }
 ```
 
-For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
+For Maven dependencies, the package name is `<groupId:artefactId>`, e.g. `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
 Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
 This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]` and hence much simpler.
@@ -1841,6 +1845,10 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
+## pinDigest
+
+Add to this object if you wish to define rules that apply only to PRs that pin digests.
+
 ## pinDigests
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
@@ -1873,6 +1881,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `gomodNoMassage`: Skip massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
@@ -2079,6 +2088,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## pruneBranchAfterAutomerge
+
+By default Renovate deletes, or "prunes", the branch after automerging.
+Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 ## pruneStaleBranches
 

@@ -22,6 +22,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -53,7 +54,6 @@ import {
   getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
-  streamToString,
 } from './util';
 
 interface Config {
@@ -159,12 +159,8 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return JSON5.parse(raw!);
-  }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  return JSON.parse(raw!);
+  return JSON5.parse(raw!);
 }
 
 export async function initRepo({

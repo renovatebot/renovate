@@ -1,3 +1,5 @@
+import { Blob } from 'buffer';
+import { Readable } from 'stream';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -6,9 +8,10 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { getS3Client, parseS3Url } from '../../../util/s3';
+import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
-
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type {
@@ -93,15 +96,60 @@ export async function downloadHttpProtocol(
       // istanbul ignore next
       logger.debug({ failedUrl }, 'Unsupported host');
     } else {
-      logger.info({ failedUrl, err }, 'Unknown error');
+      logger.info({ failedUrl, err }, 'Unknown HTTP download error');
     }
     return {};
   }
 }
 
-export async function checkHttpResource(
+function isS3NotFound(err: Error): boolean {
+  return err.message === 'NotFound' || err.message === 'NoSuchKey';
+}
+
+export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
+  logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
+  try {
+    const s3Url = parseS3Url(pkgUrl);
+    if (s3Url === null) {
+      return null;
+    }
+    const { Body: res } = await getS3Client().getObject(s3Url);
+
+    // istanbul ignore if
+    if (res instanceof Blob) {
+      return res.toString();
+    }
+
+    if (res instanceof Readable) {
+      return streamToString(res);
+    }
+  } catch (err) {
+    const failedUrl = pkgUrl.toString();
+    if (err.name === 'CredentialsProviderError') {
+      logger.debug(
+        { failedUrl },
+        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
+      );
+    } else if (err.message === 'Region is missing') {
+      logger.debug(
+        { failedUrl },
+        'Dependency lookup failed. Please a correct AWS_REGION env var'
+      );
+    } else if (isS3NotFound(err)) {
+      logger.trace({ failedUrl }, `S3 url not found`);
+    } else {
+      logger.debug(
+        { failedUrl, message: err.message },
+        'Unknown S3 download error'
+      );
+    }
+  }
+  return null;
+}
+
+async function checkHttpResource(
   http: Http,
-  pkgUrl: URL | string
+  pkgUrl: URL
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());
@@ -130,6 +178,58 @@ export async function checkHttpResource(
   }
 }
 
+export async function checkS3Resource(
+  pkgUrl: URL
+): Promise<HttpResourceCheckResult> {
+  try {
+    const s3Url = parseS3Url(pkgUrl);
+    if (s3Url === null) {
+      return 'error';
+    }
+    const response = await getS3Client().headObject(s3Url);
+    if (response.DeleteMarker) {
+      return 'not-found';
+    }
+    if (response.LastModified) {
+      return response.LastModified;
+    }
+    return 'found';
+  } catch (err) {
+    if (isS3NotFound(err)) {
+      return 'not-found';
+    } else {
+      logger.debug(
+        { pkgUrl, name: err.name, message: err.message },
+        `Can't check S3 resource existence`
+      );
+    }
+    return 'error';
+  }
+}
+
+export async function checkResource(
+  http: Http,
+  pkgUrl: URL | string
+): Promise<HttpResourceCheckResult> {
+  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
+  if (parsedUrl === null) {
+    return 'error';
+  }
+  switch (parsedUrl.protocol) {
+    case 'http:':
+    case 'https:':
+      return await checkHttpResource(http, parsedUrl);
+    case 's3:':
+      return await checkS3Resource(parsedUrl);
+    default:
+      logger.debug(
+        { url: pkgUrl.toString() },
+        `Unsupported Maven protocol in check resource`
+      );
+      return 'not-found';
+  }
+}
+
 function containsPlaceholder(str: string): boolean {
   return regEx(/\${.*?}/g).test(str);
 }
@@ -146,7 +246,6 @@ export async function downloadMavenXml(
   http: Http,
   pkgUrl: URL | null
 ): Promise<MavenXml> {
-  /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
@@ -166,8 +265,8 @@ export async function downloadMavenXml(
       } = await downloadHttpProtocol(http, pkgUrl));
       break;
     case 's3:':
-      logger.debug('Skipping s3 dependency');
-      return {};
+      rawContent = (await downloadS3Protocol(pkgUrl)) ?? undefined;
+      break;
     default:
       logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
       return {};
@@ -197,6 +296,84 @@ export function getDependencyParts(packageName: string): MavenDependency {
     name,
     dependencyUrl,
   };
+}
+
+function extractSnapshotVersion(metadata: XmlDocument): string | null {
+  // Parse the maven-metadata.xml for the snapshot version and determine
+  // the fixed version of the latest deployed snapshot.
+  // The metadata descriptor can be found at
+  // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
+  //
+  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
+  // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
+  const version = metadata
+    .descendantWithPath('version')
+    ?.val?.replace('-SNAPSHOT', '');
+
+  const snapshot = metadata.descendantWithPath('versioning.snapshot');
+  const timestamp = snapshot?.childNamed('timestamp')?.val;
+  const build = snapshot?.childNamed('buildNumber')?.val;
+
+  // If we weren't able to parse out the required 3 version elements,
+  // return null because we can't determine the fixed version of the latest snapshot.
+  if (!version || !timestamp || !build) {
+    return null;
+  }
+  return `${version}-${timestamp}-${build}`;
+}
+
+async function getSnapshotFullVersion(
+  http: Http,
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string | null> {
+  // To determine what actual files are available for the snapshot, first we have to fetch and parse
+  // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
+  const metadataUrl = getMavenUrl(
+    dependency,
+    repoUrl,
+    `${version}/maven-metadata.xml`
+  );
+
+  const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
+  if (!mavenMetadata) {
+    return null;
+  }
+
+  return extractSnapshotVersion(mavenMetadata);
+}
+
+function isSnapshotVersion(version: string): boolean {
+  if (version.endsWith('-SNAPSHOT')) {
+    return true;
+  }
+  return false;
+}
+
+export async function createUrlForDependencyPom(
+  http: Http,
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string> {
+  if (isSnapshotVersion(version)) {
+    // By default, Maven snapshots are deployed to the repository with fixed file names.
+    // Resolve the full, actual pom file name for the version.
+    const fullVersion = await getSnapshotFullVersion(
+      http,
+      version,
+      dependency,
+      repoUrl
+    );
+
+    // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
+    if (fullVersion !== null) {
+      return `${version}/${dependency.name}-${fullVersion}.pom`;
+    }
+  }
+
+  return `${version}/${dependency.name}-${version}.pom`;
 }
 
 export async function getDependencyInfo(
