@@ -2,57 +2,63 @@ import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
 describe('modules/manager/deps-edn/extract', () => {
-  it('extractPackageFile', () => {
-    const { deps } = extractPackageFile(Fixtures.get('deps.edn'));
-    expect(deps).toMatchSnapshot([
-      {
-        depName: 'persistent-sorted-set:persistent-sorted-set',
-        currentValue: '0.1.2',
-      },
-      {
-        depName: 'org.clojure:clojure',
-        currentValue: '1.9.0',
-      },
-      {
-        depName: 'org.clojure:clojure',
-        currentValue: '1.10.0',
-      },
-      {
-        depName: 'org.clojure:clojurescript',
-        currentValue: '1.10.520',
-      },
-      {
-        depName: 'org.clojure:tools.namespace',
-        currentValue: '0.2.11',
-      },
-      {
-        depName: 'org.clojure:clojurescript',
-        currentValue: '1.10.520',
-      },
-      {
-        depName: 'lambdaisland:kaocha',
-        currentValue: '0.0-389',
-      },
-      {
-        depName: 'lambdaisland:kaocha-cljs',
-        currentValue: '0.0-21',
-      },
-      {
-        depName: 'cider:cider-nrepl',
-        currentValue: '0.21.1',
-      },
-      {
-        depName: 'nrepl:nrepl',
-        currentValue: '0.6.0',
-      },
-      {
-        depName: 'org.clojure:tools.namespace',
-        currentValue: '0.2.11',
-      },
-      {
-        depName: 'com.datomic:datomic-free',
-        currentValue: '0.9.5703',
-      },
-    ]);
+  describe('extractPackageFile', () => {
+    it('returns null for invalid file', () => {
+      expect(extractPackageFile('123')).toBeNull();
+    });
+
+    it('extractPackageFile', () => {
+      const res = extractPackageFile(Fixtures.get('deps.edn'));
+      const deps = res?.deps;
+      expect(deps).toMatchSnapshot([
+        {
+          depName: 'persistent-sorted-set',
+          currentValue: '0.1.2',
+          registryUrls: [
+            'https://deps.com/foo/bar',
+            'https://my.auth.com/repo',
+            's3://my-bucket/maven/releases',
+          ],
+        },
+        { depName: 'org.clojure/clojure', currentValue: '1.9.0' },
+        { depName: 'org.clojure/clojure', currentValue: '1.10.0' },
+        { depName: 'org.clojure/clojurescript', currentValue: '1.10.520' },
+        { depName: 'org.clojure/tools.namespace', currentValue: '0.2.11' },
+        { depName: 'org.clojure/clojurescript', currentValue: '1.10.520' },
+        {
+          depName: 'lambdaisland/kaocha',
+          packageName: 'lambdaisland/kaocha',
+          currentValue: '0.0-389',
+        },
+        {
+          depName: 'io.github.lambdaisland/kaocha-cljs',
+          currentValue: '0.0-21',
+        },
+        {
+          depName: 'lambdaisland/kaocha',
+          currentValue: '0.0-389',
+          depType: 'test-gitlab',
+        },
+        {
+          depName: 'com.gitlab.lambdaisland/kaocha-cljs',
+          currentValue: '0.0-21',
+        },
+        {
+          depName: 'lambdaisland/kaocha',
+          currentValue: '0.0-389',
+          depType: 'test-bitbucket',
+        },
+        {
+          depName: 'org.bitbucket.lambdaisland/kaocha-cljs',
+          currentValue: '0.0-21',
+        },
+        { depName: 'foo/foo', currentDigest: '123', datasource: 'git-refs' },
+        { depName: 'bar/bar', sourceUrl: 'https://example.com/bar' },
+        { depName: 'cider/cider-nrepl', currentValue: '0.21.1' },
+        { depName: 'nrepl/nrepl', currentValue: '0.6.0' },
+        { depName: 'org.clojure/tools.namespace', currentValue: '0.2.11' },
+        { depName: 'com.datomic/datomic-free', currentValue: '0.9.5703' },
+      ]);
+    });
   });
 });
