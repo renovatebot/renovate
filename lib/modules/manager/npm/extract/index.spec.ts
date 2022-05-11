@@ -165,7 +165,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBeDefined();
+      expect(res?.npmrc).toBeDefined();
     });
 
     it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
@@ -180,7 +180,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'some-configured-npmrc' }
       );
-      expect(res.npmrc).toBeUndefined();
+      expect(res?.npmrc).toBeUndefined();
     });
 
     it('reads .npmrc when config.npmrc is merged', async () => {
@@ -195,7 +195,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'config-npmrc', npmrcMerge: true }
       );
-      expect(res.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
+      expect(res?.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
 
     it('finds and filters .npmrc with variables', async () => {
@@ -210,7 +210,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
+      expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
 
     it('finds lerna', async () => {
