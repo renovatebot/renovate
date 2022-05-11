@@ -19,6 +19,7 @@ Ansible
 Artifactory
 breejs
 Bundler
+codecov
 cron
 Dependabot
 Docker
