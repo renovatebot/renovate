@@ -288,6 +288,30 @@ describe('config/presets/index', () => {
       expect(local.getPreset.mock.calls[0][0].baseConfig).toBeDefined();
       expect(res).toMatchSnapshot();
     });
+
+    it('resolves self-hosted transitive presets without baseConfig', async () => {
+      config.platform = 'gitlab';
+      config.endpoint = 'https://dummy.example.com/api/v4';
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset = jest
+        .fn()
+        .mockImplementationOnce((repo, presetName, baseConfig) =>
+          Promise.resolve({
+            extends: ['local>username/preset-repo//subpreset'],
+          })
+        )
+        .mockImplementation((repo, presetName, baseConfig) =>
+          Promise.resolve({ labels: ['self-hosted resolved'] })
+        );
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['self-hosted resolved']);
+      expect(local.getPreset.mock.calls).toHaveLength(2);
+      expect(local.getPreset.mock.calls[0][0].baseConfig).toMatchSnapshot();
+      expect(local.getPreset.mock.calls[1][0].baseConfig).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
+    });
   });
 
   describe('replaceArgs', () => {
