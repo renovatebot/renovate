@@ -213,6 +213,7 @@ export interface RenovateConfig
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;
+  repoIsActivated?: boolean;
 
   updateType?: UpdateType;
 
