@@ -3,6 +3,11 @@ import { extractPackageFile } from './extract';
 
 describe('modules/manager/velaci/extract', () => {
   describe('extractPackageFile()', () => {
+    it('should handle invalid file', () => {
+      const res = extractPackageFile('\0');
+      expect(res).toBeNull();
+    });
+
     it('should handle invalid YAML', () => {
       const res = extractPackageFile(Fixtures.get('invalid.yml'));
       expect(res).toBeNull();
