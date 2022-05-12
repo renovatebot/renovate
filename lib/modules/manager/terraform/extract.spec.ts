@@ -146,7 +146,7 @@ describe('modules/manager/terraform/extract', () => {
         {}
       );
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res.deps).toHaveLength(3);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
     });
   });
