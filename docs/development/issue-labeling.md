@@ -18,10 +18,10 @@ These labels should also map approximately to our Conventional Commit scopes.
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
 
-- To learn about platforms, read the [Renovate docs on Platforms](https://docs.renovatebot.com/modules/platform/).
-- To learn about managers, read the [Renovate docs on Managers](https://docs.renovatebot.com/modules/manager/).
-- To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/).
-- To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/).
+- To learn about platforms, read the [Renovate docs on Platforms](../usage/modules/platform.md)
+- To learn about managers, read the [Renovate docs on Managers](../usage//modules/manager.md)
+- To learn about datasources, read the [Renovate docs on Datasources](../usage/modules/datasource.md)
+- To learn more about versioning, read the [Renovate docs on Versioning](../usage/modules/versioning.md)
 
 Most issues should have a label relating to either a platform, manager, datasource, versioning or worker topic.
 
