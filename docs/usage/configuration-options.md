@@ -425,6 +425,29 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 
 If enabled, Renovate will raise a pull request if config file migration is needed.
 
+As Renovate evolves and new feature are added, configuration options might evolve as well.
+For such cases, Renovate will raise config migration pull requests.
+
+Example:
+
+When [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) was introduced, such pull request would offer the following changes:
+
+From
+
+```json
+{
+  "baseBranch": "main"
+}
+```
+
+To
+
+```json
+{
+  "baseBranches": ["main"]
+}
+```
+
 <!-- prettier-ignore -->
 !!! info
     This feature writes plain JSON, any JSON5 content will be down leveled and all comments will be removed.

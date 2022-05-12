@@ -20,6 +20,9 @@ export async function ensureConfigMigrationPr(
   migratedConfigData: MigratedData
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
+  const docsLink =
+    config.productLinks?.documentation +
+    'configuration-options/#configmigration';
   const branchName = getMigrationBranchName(config);
   const prTitle = config.onboardingPrTitle ?? 'Config Migration';
   const existingPr = await platform.getBranchPr(branchName);
@@ -36,7 +39,8 @@ export async function ensureConfigMigrationPr(
 
 ${
   filename.endsWith('.json5')
-    ? '#### PLEASE NOTE: JSON5 config file migrated! All comments & trailing commas were removed.'
+    ? `#### [PLEASE NOTE](${docsLink}): ` +
+      `JSON5 config file migrated! All comments & trailing commas were removed.`
     : ''
 }
 ---
