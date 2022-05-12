@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import dataFiles, { DataFile } from '../../data-files.generated';
 
-interface DistroSchedule {
+export interface DistroSchedule {
   codename: string;
   series: string;
   created: string;

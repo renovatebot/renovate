@@ -4,7 +4,6 @@ import { DebianVersioningApi } from '.';
 describe('modules/versioning/debian/index', () => {
   const dt = DateTime.fromISO('2022-04-20');
 
-  // Debian constructor is dependent on dates (via DistroInfo)
   const spy = jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
   const debian = new DebianVersioningApi();
   spy.mockReset();
@@ -62,6 +61,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${true}
     ${'experimental'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
     expect(debian.isValid(version)).toBe(expected);
   });
 
@@ -346,6 +346,7 @@ describe('modules/versioning/debian/index', () => {
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
       expect(
         debian.getNewValue({
           currentValue,
