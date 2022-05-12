@@ -1,4 +1,4 @@
-import * as npmUpdater from '.';
+import * as npmUpdater from '../..';
 
 describe('modules/manager/npm/update/package-version/index', () => {
   describe('.bumpPackageVersion()', () => {

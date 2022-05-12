@@ -169,7 +169,7 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(500);
 
@@ -184,7 +184,7 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, {});
 
@@ -205,7 +205,7 @@ describe('modules/datasource/nuget/index', () => {
         .get(
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
-        .reply(200, null);
+        .reply(200);
       expect(
         await getPkgReleases({
           ...configV3V2,
@@ -299,7 +299,7 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
         .twice()
         .reply(200, pkgInfoV3FromNuget)
@@ -310,14 +310,14 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://myprivatefeed')
         .get('/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3));
+        .reply(200, nugetIndexV3);
 
       const res = await getPkgReleases({
         ...configV3Multiple,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(45);
+      expect(res?.releases).toHaveLength(45);
     });
 
     it('returns null for unknown error in getReleasesFromV3Feed (v3)', async () => {
@@ -336,7 +336,7 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .replyWithError('');
       expect(
@@ -365,7 +365,7 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, pkgListV3Registration)
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
@@ -375,7 +375,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeDefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) for several catalog pages', async () => {
@@ -383,7 +383,7 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3));
+        .reply(200, nugetIndexV3);
       nlogMocks.forEach(({ url, result }) => {
         scope.get(url).reply(200, result);
       });
@@ -393,7 +393,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeDefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) feed is not a nuget.org', async () => {
@@ -415,14 +415,14 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://myprivatefeed')
         .get('/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3));
+        .reply(200, nugetIndexV3);
 
       const res = await getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeDefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) nuspec fetch error', async () => {
@@ -430,7 +430,7 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, pkgListV3Registration)
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
@@ -440,7 +440,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeUndefined();
     });
 
     it('processes real data (v3) nuspec fetch 404 error', async () => {
@@ -448,7 +448,7 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .twice()
-        .reply(200, JSON.parse(nugetIndexV3))
+        .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, pkgListV3Registration)
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
@@ -458,7 +458,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeUndefined();
     });
 
     it('processes real data (v2)', async () => {
@@ -473,7 +473,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeDefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data no relase (v2)', async () => {
@@ -501,7 +501,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeUndefined();
     });
 
     it('processes real data with no github project url (v2)', async () => {
