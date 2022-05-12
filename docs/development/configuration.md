@@ -66,6 +66,6 @@ If you add configuration options to your `package.json` then these will override
 
 ## Configuration Options
 
-Please read [our list of user-facing configuration options](../usage/configuration-options.md).
+Please read [our list of user-facing configuration options](https://docs.renovatebot.com/configuration-options/).
 
 For further options when running your own instance of Renovate, please see the full config options file at `lib/config/options/index.ts`.
