@@ -227,7 +227,7 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get();
 
-    expect(res).toMatchObject({
+    expect(res).toEqual({
       display: 'org.example:package',
       group: 'org.example',
       homepage: 'https://package.example.org/about',
