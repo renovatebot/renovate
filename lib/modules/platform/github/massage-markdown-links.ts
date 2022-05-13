@@ -22,6 +22,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
   const transformer = (tree: Content): void => {
     const startOffset: number = tree.position?.start.offset ?? 0;
     const endOffset: number = tree.position?.end.offset ?? 0;
+
     if (tree.type === 'link') {
       const substr = input.slice(startOffset, endOffset);
       const url: string = tree.url;
