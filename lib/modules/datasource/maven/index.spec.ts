@@ -227,7 +227,19 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get();
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        {
+          releaseTimestamp: '2020-01-01T01:00:03.000Z',
+          version: '1.0.3-SNAPSHOT',
+        },
+      ],
+    });
   });
 
   it('returns html-based releases', async () => {
