@@ -62,6 +62,7 @@ describe('modules/platform/github/massage-markdown-links', () => {
     ${'github.com/foo/bar/discussions/1'}                                                     | ${'[github.com/foo/bar/discussions/1](togithub.com/foo/bar/discussions/1)'}
     ${'github.com/foo/bar/issues/1'}                                                          | ${'[github.com/foo/bar/issues/1](togithub.com/foo/bar/issues/1)'}
     ${'github.com/foo/bar/pull/1'}                                                            | ${'[github.com/foo/bar/pull/1](togithub.com/foo/bar/pull/1)'}
+    ${'github.com/Foo/bar/pull/1'}                                                            | ${'[github.com/Foo/bar/pull/1](togithub.com/Foo/bar/pull/1)'}
     ${'www.github.com/foo/bar/discussions/1'}                                                 | ${'[www.github.com/foo/bar/discussions/1](www.togithub.com/foo/bar/discussions/1)'}
     ${'www.github.com/foo/bar/issues/1'}                                                      | ${'[www.github.com/foo/bar/issues/1](www.togithub.com/foo/bar/issues/1)'}
     ${'www.github.com/foo/bar/pull/1'}                                                        | ${'[www.github.com/foo/bar/pull/1](www.togithub.com/foo/bar/pull/1)'}
