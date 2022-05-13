@@ -1,10 +1,6 @@
+import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
-import {
-  getConfig,
-  loadJsonFixture,
-  mocked,
-  partial,
-} from '../../../../../test/util';
+import { getConfig, mocked, partial } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
@@ -26,16 +22,16 @@ jest.mock('../../../../modules/datasource/docker');
 
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
-  ...loadJsonFixture('01.json', fixtureRoot),
+  ...Fixtures.getJson('01.json', fixtureRoot),
   latestVersion: '1.4.1',
 };
 
-const helmetJson = loadJsonFixture('02.json', fixtureRoot);
-const coffeelintJson = loadJsonFixture('coffeelint.json', fixtureRoot);
-const nextJson = loadJsonFixture('next.json', fixtureRoot);
-const typescriptJson = loadJsonFixture('typescript.json', fixtureRoot);
-const vueJson = loadJsonFixture('vue.json', fixtureRoot);
-const webpackJson = loadJsonFixture('webpack.json', fixtureRoot);
+const helmetJson = Fixtures.get('02.json', fixtureRoot);
+const coffeelintJson = Fixtures.get('coffeelint.json', fixtureRoot);
+const nextJson = Fixtures.get('next.json', fixtureRoot);
+const typescriptJson = Fixtures.get('typescript.json', fixtureRoot);
+const vueJson = Fixtures.get('vue.json', fixtureRoot);
+const webpackJson = Fixtures.get('webpack.json', fixtureRoot);
 
 const docker = mocked(DockerDatasource.prototype);
 
@@ -43,8 +39,8 @@ let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
   beforeEach(() => {
-    // TODO: fix types
-    config = partial<LookupUpdateConfig>(getConfig());
+    // TODO: fix types #7154
+    config = partial<LookupUpdateConfig>(getConfig() as never);
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';

@@ -1384,7 +1384,7 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 }
 ```
 
-For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
+For Maven dependencies, the package name is `<groupId:artefactId>`, e.g. `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
 Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
 This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]` and hence much simpler.
@@ -1881,6 +1881,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `gomodNoMassage`: Skip massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)

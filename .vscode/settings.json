@@ -8,6 +8,9 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[md]": {
+    "editor.wordBasedSuggestions": false
+  },
   "files.associations": {
     "Dockerfile.*": "dockerfile",
     ".releaserc": "json"

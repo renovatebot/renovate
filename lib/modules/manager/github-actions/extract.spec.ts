@@ -59,5 +59,87 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ]);
     });
+
+    it('maintains quotes', () => {
+      const yamlContent = `
+      jobs:
+        build:
+          steps:
+            - name: "test1"
+              uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
+            - name: "test2"
+              uses: 'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1
+            - name: "test3"
+              uses: "actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1
+            - name: "checkout repository"
+              uses: "actions/checkout@v2" # comment after
+            - name: "quoted, no comment, outdated"
+              uses: "actions/setup-java@v2"`;
+
+      const res = extractPackageFile(yamlContent);
+      expect(res.deps).toMatchObject([
+        {
+          depName: 'actions/setup-node',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
+          depType: 'action',
+          replaceString:
+            'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          currentValue: 'v3.1.1',
+          currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+        },
+        {
+          depName: 'actions/setup-node',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
+          depType: 'action',
+          replaceString:
+            "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
+          autoReplaceStringTemplate:
+            "'{{depName}}@{{#if newDigest}}{{newDigest}}'{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}'{{/unless}}",
+          currentValue: 'v3.1.1',
+          currentDigest: '1f8c6b94b26d0feae1e387ca63ccbdc44d27b561',
+        },
+        {
+          depName: 'actions/setup-node',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
+          depType: 'action',
+          replaceString:
+            '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
+          autoReplaceStringTemplate:
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          currentValue: 'v2.5.1',
+          currentDigest: '1f8c6b94b26d0feae1e387ca63ccbdc44d27b561',
+        },
+        {
+          depName: 'actions/checkout',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
+          depType: 'action',
+          replaceString: '"actions/checkout@v2"',
+          autoReplaceStringTemplate:
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          currentValue: 'v2',
+        },
+        {
+          depName: 'actions/setup-java',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
+          depType: 'action',
+          replaceString: '"actions/setup-java@v2"',
+          autoReplaceStringTemplate:
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          currentValue: 'v2',
+        },
+      ]);
+    });
   });
 });
