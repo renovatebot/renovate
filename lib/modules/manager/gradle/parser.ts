@@ -229,7 +229,10 @@ function processPlugin({
       const currentValue = varData.value;
       const fileReplacePosition = varData.fileReplacePosition;
       dep.currentValue = currentValue;
-      dep.managerData = { fileReplacePosition, packageFile };
+      dep.managerData = {
+        fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
     } else {
       const currentValue = pluginVersion.value;
       const fileReplacePosition = pluginVersion.offset;
