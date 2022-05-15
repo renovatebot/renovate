@@ -8,12 +8,14 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
+  config: RenovateConfig,
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
@@ -42,11 +44,25 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      dep = {
-        ...dep,
-        ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-      };
+      try {
+        dep = {
+          ...dep,
+          ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
+        };
+      } catch (err) {
+        if (config.repoIsOnboarded || !(err instanceof ExternalHostError)) {
+          throw err;
+        }
+
+        const cause = err.err;
+        dep.warnings ??= [];
+        dep.warnings.push({
+          topic: 'Lookup Error',
+          message: `${depName}: ${cause.message}`,
+        });
+      }
     }
+
     dep.updates = dep.updates || [];
   }
   return dep;
@@ -62,7 +78,7 @@ async function fetchManagerPackagerFileUpdates(
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(packageFileConfig, dep)
+      fetchDepUpdates(config, packageFileConfig, dep)
   );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },

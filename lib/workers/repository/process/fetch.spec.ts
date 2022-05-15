@@ -1,6 +1,7 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import { MavenDatasource } from '../../../modules/datasource/maven';
 import type { PackageFile } from '../../../modules/manager/types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
 
@@ -95,6 +96,71 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.docker[0].deps[4].skipReason).toBe('invalid-name');
       expect(packageFiles.docker[0].deps[5].skipReason).toBe('invalid-name');
       expect(packageFiles.docker[0].deps[6].skipReason).toBe('invalid-name');
+    });
+
+    it('throws lookup errors for onboarded repos', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+          },
+        ],
+      };
+      lookupUpdates.mockRejectedValueOnce(new Error('some error'));
+
+      await expect(
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles)
+      ).rejects.toThrow();
+    });
+
+    it('throws lookup errors for not onboarded repos', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+          },
+        ],
+      };
+      lookupUpdates.mockRejectedValueOnce(new Error('some error'));
+
+      await expect(
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles)
+      ).rejects.toThrow();
+    });
+
+    it('produces external host warnings for not onboarded repos', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+          },
+        ],
+      };
+      const err = new ExternalHostError(new Error('some error'));
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await fetchUpdates({ ...config, repoIsOnboarded: false }, packageFiles);
+
+      expect(packageFiles).toMatchObject({
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'bbb',
+                warnings: [
+                  { topic: 'Lookup Error', message: 'bbb: some error' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 });
