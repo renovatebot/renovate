@@ -148,8 +148,12 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
-    // istanbul ignore else
-    if (toVersions.length > 1 && toValues.size > 1 && !typesGroup) {
+    if (
+      toVersions.length > 1 &&
+      toValues.size > 1 &&
+      newValue.length > 1 &&
+      !typesGroup
+    ) {
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;

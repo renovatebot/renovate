@@ -190,6 +190,40 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
+    it('groups major updates with different versions but same newValue, no recreateClosed', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '5.1.2',
+          newVersion: '5.1.2',
+          isMajor: true,
+          newMajor: 5,
+        },
+        {
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '5.2.0',
+          newVersion: '5.2.0',
+          isMajor: true,
+          newMajor: 5,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeDefined();
+      expect(res.recreateClosed).toBeFalsy();
+    });
+
     it('groups multiple upgrades different version', () => {
       const branch = [
         {
