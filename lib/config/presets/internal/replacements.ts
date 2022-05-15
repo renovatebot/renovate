@@ -122,8 +122,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'xmldom-to-scoped': {
-    description:
-      'the xmldom package is now published as @xmldom/xmldom,',
+    description: 'the xmldom package is now published as @xmldom/xmldom',
     packageRules: [
       {
         matchDatasources: ['npm'],
