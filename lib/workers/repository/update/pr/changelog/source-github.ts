@@ -105,10 +105,12 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
-    const tagName = tags
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
+    const tagName: string = findTagOfRelease(
+      version,
+      depName,
+      release.version,
+      tags
+    );
     if (tagName) {
       return tagName;
     }
@@ -178,4 +180,26 @@ export async function getChangeLogJSON({
   res = await addReleaseNotes(res);
 
   return res;
+}
+
+function findTagOfRelease(
+  version: allVersioning.VersioningApi,
+  depName: string,
+  depVersion: string,
+  tags: string[]
+): string {
+  const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
+  const excactReleaseRegex = regEx(`${depName}[@-_]v?${depVersion}`);
+  const exactTagsList = tags.filter((tag) => excactReleaseRegex.test(tag));
+  let tagName: string = null;
+  if (exactTagsList) {
+    tagName = exactTagsList
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depVersion));
+  } else {
+    tagName = tags
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depVersion));
+  }
+  return tagName;
 }

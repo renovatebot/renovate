@@ -97,40 +97,78 @@ export async function getReleaseNotes(
   project: ChangeLogProject,
   version: string
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, depName, repository } = project;
+  const { depName, repository } = project;
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getCachedReleaseList(project);
   logger.trace({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
-  for (const release of releaseList) {
-    if (
-      release.tag === version ||
-      release.tag === `v${version}` ||
-      release.tag === `${depName}-${version}` ||
-      release.tag === `${depName}_v${version}` ||
-      release.tag === `${depName}@${version}`
-    ) {
-      releaseNotes = release;
-      releaseNotes.url = baseUrl.includes('gitlab')
-        ? `${baseUrl}${repository}/tags/${release.tag}`
-        : `${baseUrl}${repository}/releases/${release.tag}`;
-      releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
-      if (releaseNotes.body.length) {
-        try {
-          if (baseUrl !== 'https://gitlab.com/') {
-            releaseNotes.body = await linkify(releaseNotes.body, {
-              repository: `${baseUrl}${repository}`,
-            });
-          }
-        } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err, baseUrl, repository }, 'Error linkifying');
-        }
-      } else {
-        releaseNotes = null;
-      }
-    }
+  const candidateReleases = releaseList.filter((r) => {
+    return r.tag?.endsWith(version);
+  });
+
+  const exactReleaseReg = regEx(`${depName}[@-_]v?${version}`);
+  const extactReleaseMatch = findExactReleaseMatch(
+    candidateReleases,
+    exactReleaseReg
+  );
+  if (extactReleaseMatch) {
+    releaseNotes = await setReleaseNotesResult(extactReleaseMatch, project);
+  } else {
+    // no exact match of a release then check other cases
+    const matchedRelease = releaseList.find((r) => {
+      return (
+        r.tag === version ||
+        r.tag === `v${version}` ||
+        r.tag === `${depName}-${version}` ||
+        r.tag === `${depName}_v${version}` ||
+        r.tag === `${depName}@${version}`
+      );
+    });
+    releaseNotes = await setReleaseNotesResult(matchedRelease, project);
   }
   logger.trace({ releaseNotes });
+  return releaseNotes;
+}
+
+function findExactReleaseMatch(
+  releases: ChangeLogNotes[],
+  exactReleaseReg: RegExp
+): ChangeLogNotes {
+  return releases.find((r) => {
+    return exactReleaseReg.test(r.tag);
+  });
+}
+
+async function setReleaseNotesResult(
+  releaseMatch: ChangeLogNotes,
+  project: ChangeLogProject
+): Promise<ChangeLogNotes> {
+  if (!releaseMatch) {
+    return null;
+  }
+  const { baseUrl, repository } = project;
+  const releaseNotes: ChangeLogNotes = releaseMatch;
+  if (releaseMatch.url && !baseUrl.includes('gitlab')) {
+    releaseNotes.url = releaseMatch.url;
+  } else {
+    releaseNotes.url = baseUrl.includes('gitlab')
+      ? `${baseUrl}${repository}/tags/${releaseMatch.tag}`
+      : `${baseUrl}${repository}/releases/${releaseMatch.tag}`;
+    releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
+    if (releaseNotes.body.length) {
+      try {
+        if (baseUrl !== 'https://gitlab.com/') {
+          releaseNotes.body = await linkify(releaseNotes.body, {
+            repository: `${baseUrl}${repository}`,
+          });
+        }
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ err, baseUrl, repository }, 'Error linkifying');
+      }
+    } else {
+      return null;
+    }
+  }
   return releaseNotes;
 }
 
