@@ -10,7 +10,7 @@ export function extractPackageFile(file: string): PackageFile | null {
   try {
     doc = load(file, { json: true }) as VelaPipelineConfiguration;
   } catch (err) {
-    logger.warn({ err, file }, 'Failed to parse Vela file.');
+    logger.debug({ err, file }, 'Failed to parse Vela file.');
     return null;
   }
 
@@ -18,14 +18,14 @@ export function extractPackageFile(file: string): PackageFile | null {
 
   // iterate over steps
   for (const step of doc.steps ?? []) {
-    const dep: PackageDependency = getDep(step.image);
+    const dep = getDep(step.image);
 
     deps.push(dep);
   }
 
   // iterate over services
   for (const service of doc.services ?? []) {
-    const dep: PackageDependency = getDep(service.image);
+    const dep = getDep(service.image);
 
     deps.push(dep);
   }
@@ -33,7 +33,7 @@ export function extractPackageFile(file: string): PackageFile | null {
   // iterate over stages
   for (const stage of Object.values(doc.stages ?? {})) {
     for (const step of stage.steps ?? []) {
-      const dep: PackageDependency = getDep(step.image);
+      const dep = getDep(step.image);
 
       deps.push(dep);
     }
@@ -42,7 +42,7 @@ export function extractPackageFile(file: string): PackageFile | null {
   // check secrets
   for (const secret of Object.values(doc.secrets ?? {})) {
     if (secret.origin) {
-      const dep: PackageDependency = getDep(secret.origin.image);
+      const dep = getDep(secret.origin.image);
 
       deps.push(dep);
     }

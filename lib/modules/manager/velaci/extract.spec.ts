@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/velaci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -9,7 +9,7 @@ describe('modules/manager/velaci/extract', () => {
     });
 
     it('should handle invalid YAML', () => {
-      const res = extractPackageFile(Fixtures.get('invalid.yml'));
+      const res = extractPackageFile('foo:bar:invalid\n');
       expect(res).toBeNull();
     });
 
