@@ -14,11 +14,23 @@ export async function prAlreadyExisted(
   }
   logger.debug('recreateClosed is false');
   // Return if same PR already existed
-  const pr = await platform.findPr({
+  let pr = await platform.findPr({
     branchName: config.branchName,
     prTitle: config.prTitle,
     state: PrState.NotOpen,
   });
+
+  if (!pr && config.branchPrefix !== config.branchPrefixOld) {
+    pr = await platform.findPr({
+      branchName: config.branchName.replace(
+        config.branchPrefix,
+        config.branchPrefixOld
+      ),
+      prTitle: config.prTitle,
+      state: PrState.NotOpen,
+    });
+  }
+
   if (pr) {
     logger.debug('Found closed PR with current title');
     const prDetails = await platform.getPr(pr.number);

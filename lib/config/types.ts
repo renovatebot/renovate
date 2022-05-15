@@ -25,6 +25,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
+  branchPrefixOld?: string;
   branchName?: string;
   manager?: string | null;
   commitMessage?: string;
