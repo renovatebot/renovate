@@ -107,12 +107,11 @@ export async function getReleaseNotes(
   });
 
   const exactReleaseReg = regEx(`${depName}[@-_]v?${version}`);
-  const extactReleaseMatch = findExactReleaseMatch(
-    candidateReleases,
-    exactReleaseReg
-  );
-  if (extactReleaseMatch) {
-    releaseNotes = await setReleaseNotesResult(extactReleaseMatch, project);
+  const exactReleaseMatch = candidateReleases.find((r) => {
+    return exactReleaseReg.test(r.tag);
+  });
+  if (exactReleaseMatch) {
+    releaseNotes = await setReleaseNotesResult(exactReleaseMatch, project);
   } else {
     // no exact match of a release then check other cases
     const matchedRelease = releaseList.find((r) => {
@@ -130,15 +129,6 @@ export async function getReleaseNotes(
   return releaseNotes;
 }
 
-function findExactReleaseMatch(
-  releases: ChangeLogNotes[],
-  exactReleaseReg: RegExp
-): ChangeLogNotes {
-  return releases.find((r) => {
-    return exactReleaseReg.test(r.tag);
-  });
-}
-
 async function setReleaseNotesResult(
   releaseMatch: ChangeLogNotes,
   project: ChangeLogProject
@@ -149,26 +139,29 @@ async function setReleaseNotesResult(
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
   if (releaseMatch.url && !baseUrl.includes('gitlab')) {
+    // there is a ready link
     releaseNotes.url = releaseMatch.url;
   } else {
     releaseNotes.url = baseUrl.includes('gitlab')
       ? `${baseUrl}${repository}/tags/${releaseMatch.tag}`
       : `${baseUrl}${repository}/releases/${releaseMatch.tag}`;
-    releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
-    if (releaseNotes.body.length) {
-      try {
-        if (baseUrl !== 'https://gitlab.com/') {
-          releaseNotes.body = await linkify(releaseNotes.body, {
-            repository: `${baseUrl}${repository}`,
-          });
-        }
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ err, baseUrl, repository }, 'Error linkifying');
-      }
-    } else {
-      return null;
-    }
   }
+
+  releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
+  if (releaseNotes.body.length) {
+    try {
+      if (baseUrl !== 'https://gitlab.com/') {
+        releaseNotes.body = await linkify(releaseNotes.body, {
+          repository: `${baseUrl}${repository}`,
+        });
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ err, baseUrl, repository }, 'Error linkifying');
+    }
+  } else {
+    return null;
+  }
+
   return releaseNotes;
 }
 

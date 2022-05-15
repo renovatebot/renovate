@@ -544,6 +544,41 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
       expect(res).toBeNull();
     });
+
+    it('handles same version but different repo releases', async () => {
+      const depName = 'correctTagPrefix/exampleDep';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          {
+            tag_name: `${depName}@1.0.0`,
+            html_url: 'correct/url/tag.com',
+            body: 'some body',
+          },
+          { tag_name: `someOtherRelease1/exampleDep_1.0.0` },
+          {
+            tag_name: `someOtherRelease2/exampleDep-1.0.0`,
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'exampleDep',
+        },
+        '1.0.0'
+      );
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: undefined,
+        tag: 'correctTagPrefix/exampleDep@1.0.0',
+        name: undefined,
+        body: 'some body\n',
+      });
+    });
   });
 
   describe('getReleaseNotesMd()', () => {

@@ -190,9 +190,11 @@ function findTagOfRelease(
 ): string {
   const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
   const excactReleaseRegex = regEx(`${depName}[@-_]v?${depVersion}`);
-  const exactTagsList = tags.filter((tag) => excactReleaseRegex.test(tag));
+  const exactTagsList = tags.filter((tag) => {
+    return excactReleaseRegex.test(tag);
+  });
   let tagName: string = null;
-  if (exactTagsList) {
+  if (exactTagsList.length) {
     tagName = exactTagsList
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), depVersion));
