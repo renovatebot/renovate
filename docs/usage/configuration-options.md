@@ -313,6 +313,13 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
     This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
     If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
 
+## branchPrefixOld
+
+Renovate uses branch names to determine if an update PR was created before.
+If an old PR was closed by a User, it is ignored and will not be recreated.
+Use this option to ignore PR created with `branchPrefixOld`.
+Best Used with `branchPrefix`.
+
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
