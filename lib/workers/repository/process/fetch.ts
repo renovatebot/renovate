@@ -15,7 +15,6 @@ import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
-  config: RenovateConfig,
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
@@ -50,7 +49,10 @@ async function fetchDepUpdates(
           ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
         };
       } catch (err) {
-        if (config.repoIsOnboarded || !(err instanceof ExternalHostError)) {
+        if (
+          packageFileConfig.repoIsOnboarded ||
+          !(err instanceof ExternalHostError)
+        ) {
           throw err;
         }
 
@@ -78,7 +80,7 @@ async function fetchManagerPackagerFileUpdates(
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(config, packageFileConfig, dep)
+      fetchDepUpdates(packageFileConfig, dep)
   );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },
