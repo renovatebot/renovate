@@ -50,6 +50,7 @@ const repoGroups = {
   'react-apollo': 'https://github.com/apollographql/react-apollo',
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
+  'react-page': 'https://github.com/react-page/react-page',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
