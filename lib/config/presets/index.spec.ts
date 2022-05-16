@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { loadJsonFixture, mocked } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
+import { mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -18,9 +19,9 @@ jest.mock('./local');
 const npm = mocked(_npm);
 const local = mocked(_local);
 
-const presetIkatyang = loadJsonFixture('renovate-config-ikatyang.json');
+const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
-npm.getPreset = jest.fn(({ repo, presetName }) => {
+npm.getPreset.mockImplementation(({ repo, presetName }) => {
   if (repo === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
       'renovate-config'
@@ -47,6 +48,7 @@ describe('config/presets/index', () => {
 
     beforeEach(() => {
       config = {};
+      jest.clearAllMocks();
     });
 
     it('returns same if no presets', async () => {
@@ -277,9 +279,9 @@ describe('config/presets/index', () => {
 
     it('resolves self-hosted presets without baseConfig', async () => {
       config.extends = ['local>username/preset-repo'];
-      local.getPreset
-        .mockClear()
-        .mockResolvedValueOnce({ labels: ['self-hosted resolved'] });
+      local.getPreset.mockResolvedValueOnce({
+        labels: ['self-hosted resolved'],
+      });
 
       const res = await presets.resolveConfigPresets(config);
 

@@ -49,5 +49,16 @@ describe('modules/manager/buildkite/extract', () => {
       expect(res).toHaveLength(1);
       expect(res).toEqual([expectedPackageDependency]);
     });
+
+    it('extracts plugins outside plugins sections', () => {
+      const res = extractPackageFile(Fixtures.get('pipeline7.yml'))?.deps;
+      const expectedPackageDependency: PackageDependency = {
+        currentValue: 'v3.2.7',
+        datasource: 'github-tags',
+        depName: 'some-org/some-plugin',
+        registryUrls: ['https://github.some-domain.com'],
+      };
+      expect(res).toEqual([expectedPackageDependency]);
+    });
   });
 });

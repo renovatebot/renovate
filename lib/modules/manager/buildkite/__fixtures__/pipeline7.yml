@@ -1,0 +1,8 @@
+.docker-options: &some-options
+  propagate-environment: true
+  copy-checkout: true
+
+.python3-container: &python3-container
+  ssh://git@github.some-domain.com/some-org/some-plugin#v3.2.7:
+    some-config: some-value
+    <<: *some-options
