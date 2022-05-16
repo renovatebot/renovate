@@ -1,4 +1,4 @@
-import * as Diff from 'diff'; // = require('diff');
+import * as Diff from 'diff';
 import { loadFixture } from '../../../../../../../test/util';
 import { replaceConstraintVersion } from './replace';
 
