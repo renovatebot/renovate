@@ -105,12 +105,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const tagName: string = findTagOfRelease(
-      version,
-      depName,
-      release.version,
-      tags
-    );
+    const tagName = findTagOfRelease(version, depName, release.version, tags);
     if (tagName) {
       return tagName;
     }
@@ -187,13 +182,13 @@ function findTagOfRelease(
   depName: string,
   depNewVersion: string,
   tags: string[]
-): string {
+): string | null | undefined {
   const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
   const excactReleaseRegex = regEx(`${depName}[@-_]v?${depNewVersion}`);
   const exactTagsList = tags.filter((tag) => {
     return excactReleaseRegex.test(tag);
   });
-  let tagName: string = null;
+  let tagName: string | null | undefined = null;
   if (exactTagsList.length) {
     tagName = exactTagsList
       .filter((tag) => version.isVersion(tag.replace(regex, '')))

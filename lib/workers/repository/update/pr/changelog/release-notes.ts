@@ -102,37 +102,31 @@ export async function getReleaseNotes(
   const releaseList = await getCachedReleaseList(project);
   logger.trace({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
+  let matchedRelease: ChangeLogNotes | undefined | null = null;
+  const exactReleaseReg = regEx(`${depName}[@-_]v?${version}`);
+
   const candidateReleases = releaseList.filter((r) => {
     return r.tag?.endsWith(version);
   });
-
-  const exactReleaseReg = regEx(`${depName}[@-_]v?${version}`);
-  const exactReleaseMatch = candidateReleases.find((r) => {
+  matchedRelease = candidateReleases.find((r) => {
     return exactReleaseReg.test(r.tag);
   });
-  if (exactReleaseMatch) {
-    releaseNotes = await setReleaseNotesResult(exactReleaseMatch, project);
-  } else {
+
+  if (!matchedRelease) {
     // no exact match of a release then check other cases
-    const matchedRelease = releaseList.find((r) => {
-      return (
-        r.tag === version ||
-        r.tag === `v${version}` ||
-        r.tag === `${depName}-${version}` ||
-        r.tag === `${depName}_v${version}` ||
-        r.tag === `${depName}@${version}`
-      );
+    matchedRelease = releaseList.find((r) => {
+      return r.tag === version || r.tag === `v${version}`;
     });
-    releaseNotes = await setReleaseNotesResult(matchedRelease, project);
   }
+  releaseNotes = await releaseNotesResult(matchedRelease, project);
   logger.trace({ releaseNotes });
   return releaseNotes;
 }
 
-async function setReleaseNotesResult(
+async function releaseNotesResult(
   releaseMatch: ChangeLogNotes,
   project: ChangeLogProject
-): Promise<ChangeLogNotes> {
+): Promise<ChangeLogNotes | null> {
   if (!releaseMatch) {
     return null;
   }
