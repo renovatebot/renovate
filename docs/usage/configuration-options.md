@@ -450,7 +450,7 @@ To
 
 <!-- prettier-ignore -->
 !!! info
-    This feature writes plain JSON, any JSON5 content will be down leveled and all comments will be removed.
+    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files. JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
 
 ## configWarningReuseIssue
 
