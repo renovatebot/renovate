@@ -3,13 +3,13 @@ import { extractPackageFile } from '.';
 
 describe('modules/manager/velaci/extract', () => {
   describe('extractPackageFile()', () => {
-    it('should handle invalid file', () => {
-      const res = extractPackageFile('\0');
+    it('should handle invalid YAML', () => {
+      const res = extractPackageFile('foo: bar: invalid');
       expect(res).toBeNull();
     });
 
     it('should handle YAML without pipeline/images', () => {
-      const res = extractPackageFile('foo:bar');
+      const res = extractPackageFile('no: pipeline');
       expect(res).toBeNull();
     });
 
