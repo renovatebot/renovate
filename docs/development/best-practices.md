@@ -3,6 +3,18 @@
 ## General
 
 - Prefer full function declaration, as opposed to `const func = ():void => {}`, for readability and better stack traces
+- Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use union
+  or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
+- Always add unit tests for full code coverage
+  - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion.
+  - Use descriptive `istanbul` comments
+
+```js
+// istanbul ignore next: can never happen
+```
+
+### Logging
+
 - Use logger metadata:
 
 Use
@@ -16,15 +28,6 @@ instead of
 ```js
 logger.trace('title:\n' + obj);
 ```
-
-- Use descriptive `istanbul` comments
-
-```js
-// istanbul ignore next: can never happen
-```
-
-- Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use union
-  or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
 
 ### Array constructor
 
