@@ -7,6 +7,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
+import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -315,6 +316,8 @@ export async function ensureDependencyDashboard(
     issueBody +=
       'This repository currently has no open or pending branches.\n\n';
   }
+
+  issueBody += PackageFiles.getDashboardMarkdown(config);
 
   if (config.dependencyDashboardFooter?.length) {
     issueBody +=
