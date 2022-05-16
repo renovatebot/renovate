@@ -315,10 +315,10 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
 
 ## branchPrefixOld
 
-Renovate uses branch names to determine if an update PR was created before.
-If an old PR was closed by a User, it is ignored and will not be recreated.
+Renovate checks branch names to see if an update PR was created before.
+If you closed a PR, it is ignored and won't be recreated.
 Use this option to ignore PR created with `branchPrefixOld`.
-Best Used with `branchPrefix`.
+Best used with the `branchPrefix` setting.
 
 ## branchTopic
 
