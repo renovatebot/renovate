@@ -4,9 +4,12 @@ import { DebianVersioningApi } from '.';
 describe('modules/versioning/debian/index', () => {
   const dt = DateTime.fromISO('2022-04-20');
 
-  const spy = jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+  const spy = jest.spyOn(Settings, 'now');
   const debian = new DebianVersioningApi();
-  spy.mockReset();
+
+  beforeEach(() => {
+    spy.mockReturnValue(dt.valueOf());
+  });
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -61,7 +64,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${true}
     ${'experimental'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    spy.mockReturnValue(dt.valueOf());
     expect(debian.isValid(version)).toBe(expected);
   });
 
@@ -144,9 +147,38 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    spy.mockReturnValue(dt.valueOf());
     expect(debian.isStable(version)).toBe(expected);
   });
+
+  it.each`
+    version           | date            | expected
+    ${'7'}            | ${'2022-04-20'} | ${false}
+    ${'8'}            | ${'2022-04-20'} | ${false}
+    ${'9'}            | ${'2022-04-20'} | ${true}
+    ${'10'}           | ${'2022-04-20'} | ${true}
+    ${'11'}           | ${'2022-04-20'} | ${true}
+    ${'7'}            | ${'2022-04-20'} | ${false}
+    ${'8'}            | ${'2021-04-20'} | ${false}
+    ${'9'}            | ${'2021-04-20'} | ${true}
+    ${'10'}           | ${'2021-04-20'} | ${true}
+    ${'11'}           | ${'2021-04-20'} | ${false}
+    ${'7'}            | ${'2019-04-20'} | ${false}
+    ${'8'}            | ${'2019-04-20'} | ${true}
+    ${'9'}            | ${'2019-04-20'} | ${true}
+    ${'10'}           | ${'2019-04-20'} | ${false}
+    ${'11'}           | ${'2019-04-20'} | ${false}
+    ${'oldoldstable'} | ${'2019-04-20'} | ${false}
+    ${'oldstable'}    | ${'2019-04-20'} | ${true}
+    ${'stable'}       | ${'2019-04-20'} | ${true}
+  `(
+    'isStable("$version") @ "$date" === $expected',
+    ({ version, date, expected }) => {
+      const dt = DateTime.fromISO(date);
+      spy.mockReturnValue(dt.valueOf());
+      expect(debian.isStable(version)).toBe(expected);
+    }
+  );
 
   it.each`
     version           | expected
@@ -346,7 +378,7 @@ describe('modules/versioning/debian/index', () => {
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+      spy.mockReturnValue(dt.valueOf());
       expect(
         debian.getNewValue({
           currentValue,

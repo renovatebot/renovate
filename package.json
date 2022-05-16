@@ -50,7 +50,7 @@
     "test-schema": "run-s create-json-schema",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
-    "update:ubuntu-debian-distro-info": "node tools/distro-json-generate.mjs",
+    "update:distro-info": "node tools/distro-json-generate.mjs",
     "verify": "node tools/verify.mjs"
   },
   "repository": {

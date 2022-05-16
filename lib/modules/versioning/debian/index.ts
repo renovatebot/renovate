@@ -59,12 +59,9 @@ class RollingReleasesData {
   }
 
   private build(): void {
-    if (this.ltsToVer.size !== 0 || this.verToLts.size !== 0) {
-      return;
-    }
     for (let i = 0; i < 3; i++) {
       const di = this.distroInfo.getNLatest(i);
-      // istanbul ignore if: should never happen
+
       if (!di) {
         return;
       }
