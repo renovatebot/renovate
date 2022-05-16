@@ -1,5 +1,6 @@
 import { defaultConfig, partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
+import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import { prAlreadyExisted } from './check-existing';
@@ -42,11 +43,13 @@ describe('workers/repository/update/branch/check-existing', () => {
     it('returns true if second check hits', async () => {
       config.branchPrefixOld = 'deps/';
       platform.findPr.mockResolvedValueOnce(null);
-      platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
-      platform.getPr.mockResolvedValueOnce({
-        number: 12,
-        state: PrState.Closed,
-      } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ number: 12 }));
+      platform.getPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 12,
+          state: PrState.Closed,
+        })
+      );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenCalledWith(
