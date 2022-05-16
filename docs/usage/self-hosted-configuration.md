@@ -617,7 +617,7 @@ Also by default, Renovate will run on all repositories, even if any repository l
 
 You can use the `requireConfig` option to change this behavior:
 
-- `"required"`: a repository config file must be present, if there's no config file then Renovate will skip the repository gracefully.
+- `"required"`: a repository config file must be present, if there's no config file then Renovate will skip the repository gracefully
 - `"optional"`: it's optional for a repository to have a Renovate config file, if the config file exists, Renovate will use it when it runs
 - `"ignored"`: Renovate will run and ignore any repository config files
 
