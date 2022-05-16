@@ -5,7 +5,7 @@ exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() 
 
 
 
-#### [PLEASE NOTE](https://docs.renovatebot.com/configuration-options/#configmigration): JSON5 config file migrated! All comments & trailing commas were removed.
+#### [PLEASE NOTE](https://docs.renovatebot.com/configuration-options#configmigration): JSON5 config file migrated! All comments & trailing commas were removed.
 ---
 #### Migration completed successfully, No errors or warnings found.
 ---

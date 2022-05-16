@@ -5,19 +5,9 @@ import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { detectRepoFileConfig } from '../../init/merge';
 
-export class MigratedData {
-  constructor(
-    private readonly migratedContent: string,
-    private readonly configFileName: string
-  ) {}
-
-  get content(): string {
-    return this.migratedContent;
-  }
-
-  get fileName(): string {
-    return this.configFileName;
-  }
+export interface MigratedData {
+  content: string;
+  filename: string;
 }
 
 export class MigratedDataFactory {
@@ -34,7 +24,7 @@ export class MigratedDataFactory {
       return null;
     }
 
-    this.data = new MigratedData(migrated?.content, migrated?.fileName);
+    this.data = migrated;
     return this.data;
   }
 
@@ -57,14 +47,14 @@ export class MigratedDataFactory {
       delete migratedConfig.errors;
       delete migratedConfig.warnings;
 
-      const fileName = rc.configFileName ?? '';
-      const raw = await readLocalFile(fileName, 'utf8');
+      const filename = rc.configFileName ?? '';
+      const raw = await readLocalFile(filename, 'utf8');
 
       // indent defaults to 2 spaces
       const indent = detectIndent(raw).indent ?? '  ';
       let content: string;
 
-      if (fileName.endsWith('.json5')) {
+      if (filename.endsWith('.json5')) {
         content = JSON5.stringify(migratedConfig, undefined, indent);
       } else {
         content = JSON.stringify(migratedConfig, undefined, indent);
@@ -74,7 +64,7 @@ export class MigratedDataFactory {
         content += '\n';
       }
 
-      res = new MigratedData(content, fileName);
+      res = { content, filename };
     } catch (err) {
       logger.debug(
         err,

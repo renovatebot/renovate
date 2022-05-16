@@ -6,7 +6,7 @@ import {
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { MigratedData } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
 jest.mock('../../../../util/git');
@@ -22,7 +22,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     const raw = Fixtures.getJson('./renovate.json');
     const indent = '  ';
     const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
-    const fileName = 'renovate.json';
+    const filename = 'renovate.json';
 
     let config: RenovateConfig;
     let migratedConfigData: MigratedData;
@@ -30,7 +30,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       GlobalConfig.reset();
-      migratedConfigData = new MigratedData(renovateConfig, fileName);
+      migratedConfigData = { content: renovateConfig, filename };
       config = {
         ...defaultConfig,
         repository: 'some/repo',

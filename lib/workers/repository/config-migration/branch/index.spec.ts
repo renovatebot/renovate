@@ -11,7 +11,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { createConfigMigrationBranch } from './create';
-import { MigratedData } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
 
@@ -20,10 +20,7 @@ jest.mock('./rebase');
 jest.mock('./create');
 jest.mock('../../../../util/git');
 
-const { configFileNames, migratedContent } = Fixtures.getJson(
-  './migrated-data.json'
-);
-const migratedData = new MigratedData(migratedContent, configFileNames);
+const migratedData: MigratedData = Fixtures.getJson('./migrated-data.json');
 
 describe('workers/repository/config-migration/branch/index', () => {
   describe('checkConfigMigrationBranch', () => {

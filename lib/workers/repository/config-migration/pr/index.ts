@@ -8,6 +8,7 @@ import { PrState } from '../../../../types';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
+import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
@@ -20,9 +21,10 @@ export async function ensureConfigMigrationPr(
   migratedConfigData: MigratedData
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
-  const docsLink =
-    config.productLinks?.documentation +
-    'configuration-options/#configmigration';
+  const docsLink = joinUrlParts(
+    config.productLinks?.documentation ?? '',
+    'configuration-options/#configmigration'
+  );
   const branchName = getMigrationBranchName(config);
   const prTitle = config.onboardingPrTitle ?? 'Config Migration';
   const existingPr = await platform.getBranchPr(branchName);
@@ -31,7 +33,7 @@ export async function ensureConfigMigrationPr(
     prTitle,
     state: PrState.Closed,
   });
-  const filename = migratedConfigData.fileName;
+  const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
   let prTemplate = `Config migration needed, merge this PR to update your Renovate configuration file.\n\n`;
   prTemplate += emojify(
@@ -86,7 +88,7 @@ If you need any further assistance then you can also [request help here](${
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
       // Bitbucket strips trailing \n)//
-      logger.debug({ pr: existingPr.displayNumber }, `Does not need updating`);
+      logger.debug({ pr: existingPr.number }, `Does not need updating`);
       return;
     }
     // PR must need updating
@@ -127,7 +129,7 @@ If you need any further assistance then you can also [request help here](${
             automerge: false,
           }),
         });
-        logger.info({ pr: pr?.displayNumber }, 'Migration PR created');
+        logger.info({ pr: pr?.number }, 'Migration PR created');
         if (pr) {
           await addParticipants(config, pr);
         }

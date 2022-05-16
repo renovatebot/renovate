@@ -10,7 +10,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { MigratedData } from '../branch/migrated-data';
+import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
 
 describe('workers/repository/config-migration/pr/index', () => {
@@ -18,7 +18,10 @@ describe('workers/repository/config-migration/pr/index', () => {
     const { configFileName, migratedContent } = Fixtures.getJson(
       './migrated-data.json'
     );
-    const migratedData = new MigratedData(migratedContent, configFileName);
+    const migratedData: MigratedData = {
+      content: migratedContent,
+      filename: configFileName,
+    };
     let config: RenovateConfig;
 
     beforeEach(() => {
@@ -155,10 +158,10 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('creates PR for JSON5 config file', async () => {
-      await ensureConfigMigrationPr(
-        config,
-        new MigratedData(migratedContent, 'renovate.json5')
-      );
+      await ensureConfigMigrationPr(config, {
+        content: migratedContent,
+        filename: 'renovate.json5',
+      });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });

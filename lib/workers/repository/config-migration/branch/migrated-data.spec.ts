@@ -62,12 +62,12 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     describe('MigratedData class', () => {
       it('gets the filename from the class instance', async () => {
         const data = await MigratedDataFactory.getAsync();
-        expect(data.fileName).toBe('renovate.json');
+        expect(data.filename).toBe('renovate.json');
       });
 
       it('gets the content from the class instance', async () => {
         const data = await MigratedDataFactory.getAsync();
-        expect(data.content).toBe(migratedData.migratedContent);
+        expect(data.content).toBe(migratedData.content);
       });
     });
 

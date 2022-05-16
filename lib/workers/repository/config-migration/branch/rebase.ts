@@ -17,7 +17,7 @@ export async function rebaseMigrationBranch(
     logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
-  const configFileName = migratedConfigData.fileName;
+  const configFileName = migratedConfigData.filename;
   const contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
   if (contents === existingContents && !(await isBranchStale(branchName))) {

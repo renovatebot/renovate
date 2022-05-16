@@ -12,7 +12,7 @@ export function createConfigMigrationBranch(
 ): Promise<string | null> {
   logger.debug('createConfigMigrationBranch()');
   const contents = migratedConfigData.content;
-  const configFileName = migratedConfigData.fileName;
+  const configFileName = migratedConfigData.filename;
   logger.debug('Creating config migration branch');
 
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
