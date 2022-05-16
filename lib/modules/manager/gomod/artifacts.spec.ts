@@ -27,16 +27,16 @@ require github.com/davecgh/go-spew v1.0.0
 require golang.org/x/foo v1.0.0
 require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
+require go.uber.org/zap v1.20.0
 
 replace github.com/pkg/errors => ../errors
 
 replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
 
-replace
-(
-  go.uber.org/automaxprocs => go.uber.org/automaxprocs v1.4.0
+replace (
   // TODO: this comment breaks renovatebot (>v0.11.1)
-  go.uber.org/zap => go.uber.org/zap v1.21.0)
+  go.uber.org/zap => go.uber.org/zap v1.21.0
+)
 
 `;
 
