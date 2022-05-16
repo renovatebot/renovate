@@ -612,11 +612,14 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## requireConfig
 
-You can choose from the following behaviors for the `requireConfig` config option:
+By default, Renovate needs a Renovate config file in each repository where it runs.
+Also by default, Renovate will run on all repositories, even if any repository lacks a Renovate config file.
 
-- `"required"`: a repository config file required, if config file is missing Renovate will skip the repository gracefully.
-- `"optional"`: if it is optional for the repository to contain a config. if config files exists Renovate will run and use it.
-- `"ignored"`: Renovate will run and ignore any repository config files.
+You can use the `requireConfig` option to change this behavior:
+
+- `"required"`: a repository config file must be present, if there's no config file then Renovate will skip the repository gracefully.
+- `"optional"`: it's optional for a repository to have a Renovate config file, if the config file exists, Renovate will use it when it runs
+- `"ignored"`: Renovate will run and ignore any repository config files
 
 ## secrets
 
