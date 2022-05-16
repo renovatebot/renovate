@@ -55,8 +55,12 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   const title = `Action required: Add a Renovate config`;
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
-  if (config.requireConfig === false && config.onboarding === false) {
+  if (config.requireConfig === 'optional' && config.onboarding === false) {
     // Return early and avoid checking for config files
+    return true;
+  }
+  if (config.requireConfig === 'ignored') {
+    logger.debug('Config file will be ignored');
     return true;
   }
   const cache = getCache();
@@ -94,7 +98,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
 
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
-  if (config.requireConfig && config.onboarding === false) {
+  if (config.requireConfig === 'required' && config.onboarding === false) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
@@ -104,7 +108,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     return false;
   }
   logger.debug('Found closed onboarding PR');
-  if (!config.requireConfig) {
+  if (config.requireConfig === 'optional') {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
   }

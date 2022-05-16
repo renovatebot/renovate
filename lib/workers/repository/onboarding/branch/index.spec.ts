@@ -114,23 +114,30 @@ describe('workers/repository/onboarding/branch/index', () => {
       });
     });
 
-    it('handles skipped onboarding combined with requireConfig = false', async () => {
-      config.requireConfig = false;
+    it('handles skipped onboarding combined with requireConfig = optional', async () => {
+      config.requireConfig = 'optional';
       config.onboarding = false;
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
-    it('handles skipped onboarding, requireConfig=true, and a config file', async () => {
-      config.requireConfig = true;
+    it('handles skipped onboarding, requireConfig=required, and a config file', async () => {
+      config.requireConfig = 'required';
       config.onboarding = false;
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
+    it('handles skipped onboarding, requireConfig=ignored', async () => {
+      config.requireConfig = 'ignored';
+      config.onboarding = false;
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBeTrue();
+    });
+
     it('handles skipped onboarding, requireConfig=true, and no config file', async () => {
-      config.requireConfig = true;
+      config.requireConfig = 'required';
       config.onboarding = false;
       git.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -174,14 +181,14 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via PR', async () => {
-      config.requireConfig = false;
+      config.requireConfig = 'optional';
       platform.findPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('throws if no required config', async () => {
-      config.requireConfig = true;
+      config.requireConfig = 'required';
       platform.findPr.mockResolvedValue(mock<Pr>());
       platform.getPrList.mockResolvedValueOnce([
         {

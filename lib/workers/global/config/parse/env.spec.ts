@@ -298,5 +298,21 @@ describe('workers/global/config/parse/env', () => {
       const config = env.getConfig(envParam);
       expect(config.dryRun).toBeNull();
     });
+
+    it('requireConfig boolean true', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_REQUIRE_CONFIG: 'true',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.requireConfig).toBe('required');
+    });
+
+    it('requireConfig boolean false', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_REQUIRE_CONFIG: 'false',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.requireConfig).toBe('optional');
+    });
   });
 });
