@@ -182,7 +182,7 @@
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.1",
-    "luxon": "2.3.2",
+    "luxon": "2.4.0",
     "markdown-it": "13.0.1",
     "markdown-table": "2.0.0",
     "marshal": "0.5.4",
