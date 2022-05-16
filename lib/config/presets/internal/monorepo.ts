@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import type { Preset } from '../types';
 
 const repoGroups = {
+  acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
   'arcus.event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
   'arcus.security': 'https://github.com/arcus-azure/arcus.security',
@@ -49,6 +50,7 @@ const repoGroups = {
   'react-apollo': 'https://github.com/apollographql/react-apollo',
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
+  'react-page': 'https://github.com/react-page/react-page',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
