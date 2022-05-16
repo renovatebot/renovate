@@ -8,8 +8,8 @@ describe('modules/manager/velaci/extract', () => {
       expect(res).toBeNull();
     });
 
-    it('should handle invalid YAML', () => {
-      const res = extractPackageFile('foo:bar:invalid\n');
+    it('should handle pipeline without images', () => {
+      const res = extractPackageFile('foo:bar');
       expect(res).toBeNull();
     });
 
