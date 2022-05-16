@@ -10,12 +10,16 @@ This repository currently has no open or pending branches.
 <details><summary>Branch main
 </summary>
 
+
 <ul><details><summary>dockerfile</summary>
 
 <ul><details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
-</details></ul></details></ul><ul><details><summary>npm</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>npm</summary>
 
 <ul><details><summary>package.json</summary>
 
@@ -27,22 +31,32 @@ This repository currently has no open or pending branches.
  - \`redis 3.1.2-3.4.0\`
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
-</details></ul></details></ul><ul><details><summary>poetry</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>poetry</summary>
 
 <ul><details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
-</details></ul></details></ul></details>
+
+</details></ul>
+</details></ul>
+</details>
 
 <details><summary>Branch dev
 </summary>
 
+
 <ul><details><summary>dockerfile</summary>
 
 <ul><details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
-</details></ul></details></ul><ul><details><summary>npm</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>npm</summary>
 
 <ul><details><summary>package.json</summary>
 
@@ -54,12 +68,18 @@ This repository currently has no open or pending branches.
  - \`redis 3.1.2-3.4.0\`
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
-</details></ul></details></ul><ul><details><summary>poetry</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>poetry</summary>
 
 <ul><details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
-</details></ul></details></ul></details>
+
+</details></ul>
+</details></ul>
+</details>
 
 "
 `;
@@ -82,12 +102,16 @@ None detected
 <details><summary>Branch dev
 </summary>
 
+
 <ul><details><summary>dockerfile</summary>
 
 <ul><details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
-</details></ul></details></ul><ul><details><summary>npm</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>npm</summary>
 
 <ul><details><summary>package.json</summary>
 
@@ -99,12 +123,18 @@ None detected
  - \`redis 3.1.2-3.4.0\`
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
-</details></ul></details></ul><ul><details><summary>poetry</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>poetry</summary>
 
 <ul><details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
-</details></ul></details></ul></details>
+
+</details></ul>
+</details></ul>
+</details>
 
 "
 `;
@@ -127,12 +157,16 @@ None detected
 <details><summary>Branch dev
 </summary>
 
+
 <ul><details><summary>dockerfile</summary>
 
 <ul><details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
-</details></ul></details></ul><ul><details><summary>npm</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>npm</summary>
 
 <ul><details><summary>package.json</summary>
 
@@ -144,12 +178,18 @@ None detected
  - \`redis 3.1.2-3.4.0\`
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
-</details></ul></details></ul><ul><details><summary>poetry</summary>
+
+</details></ul>
+</details></ul>
+<ul><details><summary>poetry</summary>
 
 <ul><details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
-</details></ul></details></ul></details>
+
+</details></ul>
+</details></ul>
+</details>
 
 "
 `;
@@ -166,7 +206,9 @@ This repository currently has no open or pending branches.
 <ul><details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
-</details></ul></details><details><summary>npm</summary>
+
+</details></ul>
+</details><details><summary>npm</summary>
 
 <ul><details><summary>package.json</summary>
 
@@ -178,12 +220,16 @@ This repository currently has no open or pending branches.
  - \`redis 3.1.2-3.4.0\`
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
-</details></ul></details><details><summary>poetry</summary>
+
+</details></ul>
+</details><details><summary>poetry</summary>
 
 <ul><details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
-</details></ul></details>"
+
+</details></ul>
+</details>"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when packageFiles is empty 1`] = `
