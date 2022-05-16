@@ -75,7 +75,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
     repository: string
-  ): Promise<ReleaseResult> {
+  ): Promise<ReleaseResult | null> {
     let res: TerraformRelease;
     let pkgUrl: string;
 
@@ -119,7 +119,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
     repository: string
-  ): Promise<ReleaseResult> {
+  ): Promise<ReleaseResult | null> {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
