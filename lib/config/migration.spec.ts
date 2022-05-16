@@ -741,17 +741,4 @@ describe('config/migration', () => {
     res = configMigration.migrateConfig(config);
     expect(res.isMigrated).toBeTrue();
   });
-
-  it('it migrates requireConfig', () => {
-    let config: TestRenovateConfig;
-    let res: MigratedConfig;
-
-    config = { requireConfig: true };
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-
-    config = { requireConfig: false };
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-  });
 });

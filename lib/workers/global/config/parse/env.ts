@@ -122,12 +122,12 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
             }
           }
           if (option.name === 'requireConfig') {
-            if (config[option.name] === 'true') {
+            if ((config[option.name] as string) === 'true') {
               logger.warn(
                 'env config requireConfig property has been changed to required'
               );
               config[option.name] = 'required';
-            } else if (config[option.name] === 'false') {
+            } else if ((config[option.name] as string) === 'false') {
               logger.warn(
                 'env config requireConfig property has been changed to optional'
               );

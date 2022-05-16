@@ -12,12 +12,7 @@ export type RenovateConfigStage =
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
-export type RequiredConfig =
-  | 'required'
-  | 'optional'
-  | 'ignored'
-  | 'true'
-  | 'false';
+export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
