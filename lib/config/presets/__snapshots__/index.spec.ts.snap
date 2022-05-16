@@ -185,33 +185,3 @@ Object {
   ],
 }
 `;
-
-exports[`config/presets/index resolvePreset resolves self-hosted transitive presets without baseConfig 1`] = `
-Object {
-  "endpoint": "https://dummy.example.com/api/v4",
-  "extends": Array [
-    "local>username/preset-repo",
-  ],
-  "platform": "gitlab",
-}
-`;
-
-exports[`config/presets/index resolvePreset resolves self-hosted transitive presets without baseConfig 2`] = `
-Object {
-  "endpoint": "https://dummy.example.com/api/v4",
-  "extends": Array [
-    "local>username/preset-repo",
-  ],
-  "platform": "gitlab",
-}
-`;
-
-exports[`config/presets/index resolvePreset resolves self-hosted transitive presets without baseConfig 3`] = `
-Object {
-  "endpoint": "https://dummy.example.com/api/v4",
-  "labels": Array [
-    "self-hosted resolved",
-  ],
-  "platform": "gitlab",
-}
-`;
