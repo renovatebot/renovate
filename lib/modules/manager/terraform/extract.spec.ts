@@ -1,24 +1,25 @@
 import { join } from 'upath';
-import { fs, loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
 
-const modules = loadFixture('modules.tf');
-const bitbucketModules = loadFixture('bitbucketModules.tf');
-const azureDevOpsModules = loadFixture('azureDevOpsModules.tf');
-const providers = loadFixture('providers.tf');
-const docker = loadFixture('docker.tf');
+const modules = Fixtures.get('modules.tf');
+const bitbucketModules = Fixtures.get('bitbucketModules.tf');
+const azureDevOpsModules = Fixtures.get('azureDevOpsModules.tf');
+const providers = Fixtures.get('providers.tf');
+const docker = Fixtures.get('docker.tf');
 
 const tf2 = `module "relative" {
   source = "../fe"
 }
 `;
-const helm = loadFixture('helm.tf');
-const lockedVersion = loadFixture('lockedVersion.tf');
-const lockedVersionLockfile = loadFixture('rangeStrategy.hcl');
-const terraformBlock = loadFixture('terraformBlock.tf');
-const tfeWorkspaceBlock = loadFixture('tfeWorkspace.tf');
+const helm = Fixtures.get('helm.tf');
+const lockedVersion = Fixtures.get('lockedVersion.tf');
+const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
+const terraformBlock = Fixtures.get('terraformBlock.tf');
+const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
