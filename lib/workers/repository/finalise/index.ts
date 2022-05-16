@@ -6,6 +6,7 @@ import { clearRenovateRefs } from '../../../util/git';
 import { checkConfigMigrationBranch } from '../config-migration/branch';
 import { MigratedDataFactory } from '../config-migration/branch/migrated-data';
 import { ensureConfigMigrationPr } from '../config-migration/pr';
+import { PackageFiles } from '../package-files';
 import { pruneStaleBranches } from './prune';
 import { runRenovateRepoStats } from './repository-statistics';
 
@@ -32,6 +33,7 @@ export async function finaliseRepo(
     `Action Required: Fix Renovate Configuration`
   );
   await clearRenovateRefs();
+  PackageFiles.clear();
   const prList = await platform.getPrList();
   if (
     prList?.some(

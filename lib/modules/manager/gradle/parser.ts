@@ -229,7 +229,10 @@ function processPlugin({
       const currentValue = varData.value;
       const fileReplacePosition = varData.fileReplacePosition;
       dep.currentValue = currentValue;
-      dep.managerData = { fileReplacePosition, packageFile };
+      dep.managerData = {
+        fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
     } else {
       const currentValue = pluginVersion.value;
       const fileReplacePosition = pluginVersion.offset;
@@ -349,6 +352,34 @@ function processLongFormDep({
   return null;
 }
 
+function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const { tokenMap } = input;
+
+  const varNameToken = tokenMap.varName;
+  const key = varNameToken.value;
+  const fileReplacePosition = varNameToken.offset;
+  const packageFile = input.packageFile;
+
+  const groupId = tokenMap.groupId?.value;
+  const artifactId = tokenMap.artifactId?.value;
+  const value = `${groupId}:${artifactId}`;
+  const res: SyntaxHandlerOutput = {};
+
+  if (groupId && artifactId) {
+    res.vars = { [key]: { key, value, fileReplacePosition, packageFile } };
+    const versionRefToken = tokenMap.version;
+    if (versionRefToken) {
+      const version: Token = { ...versionRefToken, type: TokenType.Word };
+      const depRes = processLongFormDep({
+        ...input,
+        tokenMap: { ...input.tokenMap, version },
+      });
+      return { ...depRes, ...res };
+    }
+  }
+  return res;
+}
+
 const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // foo.bar = 'baz'
@@ -375,7 +406,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // set('foo', 'bar')
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'set' },
+      { matchType: TokenType.Word, matchValue: ['set', 'version'] },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'keyToken' },
       { matchType: TokenType.Comma },
@@ -583,6 +614,39 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
+  },
+  {
+    // library("foobar", "foo", "bar").versionRef("foo.bar")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'library' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'varName' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.RightParen },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, matchValue: 'versionRef' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processLibraryDep,
+  },
+  {
+    // library("foobar", "foo", "bar")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'library' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'varName' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processLibraryDep,
   },
   {
     // group: "com.example", name: "my.dependency", version: "1.2.3"
