@@ -177,6 +177,7 @@ export async function updateArtifacts({
     // replace (
     //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // )
+    // the regex will ignore commented lines with "//"
     const blockReplaceRegEx = regEx(
       /replace\s*\((?:(?:\s*\/\/.*)?(?:[^)])?)+\)/g
     );
