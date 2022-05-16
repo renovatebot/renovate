@@ -154,6 +154,7 @@ export function updateDependency({
         }
       }
     } else {
+      // eslint-disable @typescript-eslint/no-unnecessary-type-assertion
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
     if (oldVersion === newValue) {
@@ -279,7 +280,7 @@ function overrideDepPosition(
 
 function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
   return (
-    !is.undefined(upgrade.managerData?.parents) &&
+    is.array(upgrade.managerData?.parents, is.nonEmptyStringAndNotWhitespace) &&
     upgrade.depType === 'overrides'
   );
 }
