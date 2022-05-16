@@ -558,7 +558,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     describe('checks detected dependencies section', () => {
-      const packageFiles = JSON.parse(Fixtures.get('./package-files.json'));
+      const packageFiles = Fixtures.getJson('./package-files.json');
       let config: RenovateConfig;
 
       beforeAll(() => {

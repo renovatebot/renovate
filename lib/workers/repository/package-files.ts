@@ -3,15 +3,15 @@ import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 
 export class PackageFiles {
-  private static data: Map<string, Record<string, PackageFile[]> | null> =
-    new Map<string, Record<string, PackageFile[]>>();
+  private static data = new Map<string, Record<string, PackageFile[]> | null>();
 
   public static add(
     baseBranch: string,
     packageFiles: Record<string, PackageFile[]> | null
   ): void {
     logger.debug(
-      `PackageFiles.add() - Package file saved for branch=${baseBranch}`
+      { baseBranch },
+      `PackageFiles.add() - Package file saved for branch`
     );
     this.data.set(baseBranch, packageFiles);
   }
@@ -34,12 +34,14 @@ export class PackageFiles {
       deps += pad ? `<details><summary>Branch ${branch}\n</summary>\n\n` : '';
       if (packageFiles === null) {
         deps += none + '\n';
+        deps += pad ? '</details>\n\n' : '';
         continue;
       }
 
       const managers = Object.keys(packageFiles);
       if (managers.length === 0) {
         deps += none + '\n';
+        deps += pad ? '</details>\n\n' : '';
         continue;
       }
 
