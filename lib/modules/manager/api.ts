@@ -67,6 +67,7 @@ import * as terragrunt from './terragrunt';
 import * as terragruntVersion from './terragrunt-version';
 import * as travis from './travis';
 import type { ManagerApi } from './types';
+import * as velaci from './velaci';
 
 const api = new Map<string, ManagerApi>();
 export default api;
@@ -139,3 +140,4 @@ api.set('terraform-version', terraformVersion);
 api.set('terragrunt', terragrunt);
 api.set('terragrunt-version', terragruntVersion);
 api.set('travis', travis);
+api.set('velaci', velaci);
