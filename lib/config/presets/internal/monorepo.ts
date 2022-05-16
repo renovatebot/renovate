@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import type { Preset } from '../types';
 
 const repoGroups = {
+  acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
   'arcus.event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
   'arcus.security': 'https://github.com/arcus-azure/arcus.security',
@@ -184,6 +185,8 @@ const repoGroups = {
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
+  'rust-futures': 'https://github.com/rust-lang/futures-rs',
+  'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
@@ -198,6 +201,7 @@ const repoGroups = {
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
+  tauri: 'https://github.com/tauri-apps/tauri',
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
