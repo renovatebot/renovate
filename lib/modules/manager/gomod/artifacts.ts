@@ -178,7 +178,7 @@ export async function updateArtifacts({
     //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // )
     const blockReplaceRegEx = regEx(
-      /(\r?\n)replace\s*\((?:(?:\s*\/\/.*]*)?(?:[^)])?)+\)/g
+      /replace\s*\((?:(?:\s*\/\/.*)?(?:[^)])?)+\)/g
     );
 
     /**
