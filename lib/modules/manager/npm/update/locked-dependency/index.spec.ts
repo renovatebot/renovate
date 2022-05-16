@@ -16,7 +16,7 @@ const expressJson = Fixtures.get('express.json', './common');
 const mimeJson = Fixtures.get('mime.json', './package-lock');
 const serveStaticJson = Fixtures.get('serve-static.json', './package-lock');
 const sendJson = Fixtures.get('send.json', './package-lock');
-const typeIsJson = JSON.parse(Fixtures.get('type-is.json', './package-lock'));
+const typeIsJson = Fixtures.getJson('type-is.json', './package-lock');
 const bundledPackageJson = Fixtures.get(
   'bundled.package.json',
   './package-lock'
