@@ -123,10 +123,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    */
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
-    registryURL: string,
+    registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}/versions`;
+    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}/versions`;
     const res = (await this.http.getJson<TerraformProviderVersions>(backendURL))
       .body;
     const dep: ReleaseResult = {
