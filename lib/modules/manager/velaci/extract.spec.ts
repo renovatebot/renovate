@@ -8,7 +8,7 @@ describe('modules/manager/velaci/extract', () => {
       expect(res).toBeNull();
     });
 
-    it('should handle pipeline without images', () => {
+    it('should handle YAML without pipeline/images', () => {
       const res = extractPackageFile('foo:bar');
       expect(res).toBeNull();
     });
