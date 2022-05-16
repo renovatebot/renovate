@@ -51,7 +51,7 @@ describe('modules/manager/buildkite/extract', () => {
     });
 
     it('extracts plugins outside plugins sections', () => {
-      const res = extractPackageFile(Fixtures.get('pipeline7.yml')).deps;
+      const res = extractPackageFile(Fixtures.get('pipeline7.yml'))?.deps;
       const expectedPackageDependency: PackageDependency = {
         currentValue: 'v3.2.7',
         datasource: 'github-tags',
