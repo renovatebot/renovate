@@ -103,7 +103,7 @@ export async function getReleaseNotes(
   logger.trace({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
   let matchedRelease: ChangeLogNotes | undefined | null = null;
-  const exactReleaseReg = regEx(`${depName}[@-_]v?${version}`);
+  const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
 
   const candidateReleases = releaseList.filter((r) => {
     return r.tag?.endsWith(version);
