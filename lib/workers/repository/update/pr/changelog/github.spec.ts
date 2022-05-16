@@ -294,5 +294,61 @@ describe('workers/repository/update/pr/changelog/github', () => {
         ],
       });
     });
+
+    it('works without same version releases but different tags', async () => {
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/chalk/chalk/tags?per_page=100')
+        .reply(200, [
+          { name: 'v1.0.1' },
+          { name: '1.0.1' },
+          { name: 'correctPrefix/target@1.0.1' },
+          { name: 'wrongPrefix/target-1.0.1' },
+        ]);
+
+      const upgradeData: BranchUpgradeConfig = {
+        branchName: undefined,
+        depName: 'correctPrefix/target',
+        endpoint: 'https://api.github.com/',
+        versioning: 'npm',
+        currentVersion: '1.0.0',
+        newVersion: '1.0.1',
+        sourceUrl: 'https://github.com/chalk/chalk',
+        releases: [
+          { version: '1.0.1', gitRef: '123456' },
+          { version: '0.1.1', gitRef: 'npm_1.0.0' },
+        ],
+      };
+      expect(
+        await getChangeLogJSON({
+          ...upgradeData,
+        })
+      ).toMatchObject({
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          type: 'github',
+          repository: 'chalk/chalk',
+          sourceUrl: 'https://github.com/chalk/chalk',
+          sourceDirectory: undefined,
+          depName: 'correctPrefix/target',
+        },
+        versions: [
+          {
+            version: '1.0.1',
+            date: undefined,
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/npm_1.0.0...correctPrefix/target@1.0.1',
+            },
+            releaseNotes: {
+              url: 'https://github.com/chalk/chalk/compare/npm_1.0.0...correctPrefix/target@1.0.1',
+              notesSourceUrl: '',
+            },
+          },
+        ],
+        hasReleaseNotes: true,
+      });
+    });
   });
 });

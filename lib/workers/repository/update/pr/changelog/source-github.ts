@@ -185,11 +185,11 @@ export async function getChangeLogJSON({
 function findTagOfRelease(
   version: allVersioning.VersioningApi,
   depName: string,
-  depVersion: string,
+  depNewVersion: string,
   tags: string[]
 ): string {
   const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
-  const excactReleaseRegex = regEx(`${depName}[@-_]v?${depVersion}`);
+  const excactReleaseRegex = regEx(`${depName}[@-_]v?${depNewVersion}`);
   const exactTagsList = tags.filter((tag) => {
     return excactReleaseRegex.test(tag);
   });
@@ -197,11 +197,11 @@ function findTagOfRelease(
   if (exactTagsList.length) {
     tagName = exactTagsList
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), depVersion));
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
   } else {
     tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), depVersion));
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
   }
   return tagName;
 }
