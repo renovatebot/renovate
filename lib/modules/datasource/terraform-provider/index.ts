@@ -123,10 +123,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    */
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
-    registryURL: string,
+    registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}/versions`;
+    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}/versions`;
     const res = (await this.http.getJson<TerraformProviderVersions>(backendURL))
       .body;
     const dep: ReleaseResult = {
@@ -140,10 +140,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   // TODO: add long term cache (#9590)
   private async queryReleaseBackend(
     packageName: string,
-    registryURL: string
+    registryUrl: string
   ): Promise<ReleaseResult | null> {
     const backendLookUpName = `terraform-provider-${packageName}`;
-    const backendURL = registryURL + `/index.json`;
+    const backendURL = registryUrl + `/index.json`;
     const res = (
       await this.http.getJson<TerraformProviderReleaseBackend>(backendURL)
     ).body;
@@ -163,16 +163,16 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}-builds`,
-    key: (registryURL: string, repository: string, version: string) =>
-      `${registryURL}/${repository}/${version}`,
+    key: (registryUrl: string, repository: string, version: string) =>
+      `${registryUrl}/${repository}/${version}`,
   })
   async getBuilds(
-    registryURL: string,
+    registryUrl: string,
     repository: string,
     version: string
   ): Promise<TerraformBuild[] | null> {
-    if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
-      // check if registryURL === secondary backend
+    if (registryUrl === TerraformProviderDatasource.defaultRegistryUrls[1]) {
+      // check if registryUrl === secondary backend
       const repositoryRegexResult =
         TerraformProviderDatasource.repositoryRegex.exec(repository)?.groups;
       if (!repositoryRegexResult) {
@@ -203,13 +203,13 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
     // check public or private Terraform registry
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryURL
+      registryUrl
     );
     if (!serviceDiscovery) {
-      logger.trace(`Failed to retrieve service discovery from ${registryURL}`);
+      logger.trace(`Failed to retrieve service discovery from ${registryUrl}`);
       return null;
     }
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}`;
     const versionsResponse = (
       await this.http.getJson<TerraformRegistryVersions>(
         `${backendURL}/versions`
@@ -224,7 +224,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
     if (!builds) {
       logger.trace(
-        `No builds found for ${repository}:${version} on ${registryURL}`
+        `No builds found for ${repository}:${version} on ${registryUrl}`
       );
       return null;
     }
