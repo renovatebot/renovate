@@ -23,7 +23,7 @@
 
 ### What type of package files and names does it use?
 
-### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
+### What [fileMatch](../usage/configuration-options.md/#filematch) pattern(s) should be used?
 
 ### Is it likely that many users would need to extend this pattern for custom file names?
 

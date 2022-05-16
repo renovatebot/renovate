@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import type { Preset } from '../types';
 
 const repoGroups = {
+  acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
   'arcus.event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
   'arcus.security': 'https://github.com/arcus-azure/arcus.security',

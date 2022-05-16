@@ -35,7 +35,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         });
       }
     } else if (tree.type === 'text') {
-      const globalUrlReg = new RegExp(urlRegex, 'g');
+      const globalUrlReg = new RegExp(urlRegex, 'gi');
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
         const [url] = match;
