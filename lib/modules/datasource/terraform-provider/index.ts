@@ -134,7 +134,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         version,
       })),
     };
-    logger.trace({ dep }, 'dep');
     return dep;
   }
 
