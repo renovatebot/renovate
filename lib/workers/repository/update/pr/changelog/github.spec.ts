@@ -295,7 +295,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
       });
     });
 
-    it('works without same version releases but different tags', async () => {
+    it('works with same version releases but different prefix', async () => {
       httpMock
         .scope('https://api.github.com/')
         .get('/repos/chalk/chalk/tags?per_page=100')
