@@ -296,7 +296,6 @@ describe('config/presets/index', () => {
       config.endpoint = 'https://dummy.example.com/api/v4';
       config.extends = ['local>username/preset-repo'];
       local.getPreset
-        .mockClear()
         .mockResolvedValueOnce({
           extends: ['local>username/preset-repo//subpreset'],
         })
