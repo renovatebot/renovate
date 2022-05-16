@@ -612,14 +612,21 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## requireConfig
 
-By default, Renovate needs a Renovate config file in each repository where it runs.
-Also by default, Renovate will run on all repositories, even if any repository lacks a Renovate config file.
+By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
 
-You can use the `requireConfig` option to change this behavior:
+The configuration possibilities for this option are:
 
-- `"required"`: a repository config file must be present, if there's no config file then Renovate will skip the repository gracefully
-- `"optional"`: it's optional for a repository to have a Renovate config file, if the config file exists, Renovate will use it when it runs
-- `"ignored"`: Renovate will run and ignore any repository config files
+- `"required"` (default): a repository config file must be present.
+- `"optional"`: if a config file exists, Renovate will use it when it runs.
+- `"ignored"`: config files in the repo will be ignored, and have no effect
+
+This feature is closely related to the `onboarding` config option. The possible combinations of `requireConfig` and `onboarding` are described below:
+
+|                        | onboarding=true                                                                                                                                         | onboarding=false                                                   |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| requireConfig=required | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually.      |
+| requireConfig=optional | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence or not. |
+| requireConfig=ignored  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.               |
 
 ## secrets
 
