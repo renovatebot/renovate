@@ -1,3 +1,4 @@
+import type { RequiredConfig } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 import * as env from './env';
@@ -301,7 +302,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean true', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'true',
+        RENOVATE_REQUIRE_CONFIG: 'true' as RequiredConfig,
       };
       const config = env.getConfig(envParam);
       expect(config.requireConfig).toBe('required');
@@ -309,7 +310,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean false', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'false',
+        RENOVATE_REQUIRE_CONFIG: 'false' as RequiredConfig,
       };
       const config = env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');
