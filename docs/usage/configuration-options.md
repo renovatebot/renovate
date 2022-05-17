@@ -434,19 +434,10 @@ Example:
 
 When we created the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would look like this:
 
-From
-
-```json
+```diff
 {
-  "baseBranch": "main"
-}
-```
-
-To
-
-```json
-{
-  "baseBranches": ["main"]
+- "baseBranch": "main"
++ "baseBranches": ["main"]
 }
 ```
 
