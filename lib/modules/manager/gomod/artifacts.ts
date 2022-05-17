@@ -159,11 +159,21 @@ export async function updateArtifacts({
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   let massagedGoMod = newGoModContent;
-
   if (!config.postUpdateOptions?.includes('gomodNoMassage')) {
     // Regex match inline replace directive, example:
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
+
+    massagedGoMod = massagedGoMod
+      .split('\n')
+      .map((line) => {
+        if (line.trim().startsWith('//')) {
+          return line.replace(')', 'renovate-replace-bracket');
+        }
+        return line;
+      })
+      .join('\n');
+
     const inlineReplaceRegEx = regEx(
       /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
     );
@@ -177,10 +187,7 @@ export async function updateArtifacts({
     // replace (
     //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // )
-    // the regex will ignore commented lines with "//"
-    const blockReplaceRegEx = regEx(
-      /replace\s*\((?:(?:\s*\/\/.*)?(?:[^)])?)+\)/g
-    );
+    const blockReplaceRegEx = regEx(/(\r?\n)replace\s*\([^)]+\s*\)/g);
 
     /**
      * replacerFunction for commenting out replace blocks
@@ -191,12 +198,14 @@ export async function updateArtifacts({
       match.replace(/(\r?\n)/g, '$1// renovate-replace ');
 
     // Comment out golang replace directives
-    massagedGoMod = newGoModContent
+    massagedGoMod = massagedGoMod
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
     if (massagedGoMod !== newGoModContent) {
-      logger.debug('Removed some relative replace statements from go.mod');
+      logger.debug(
+        'Removed some relative replace statements and comments from go.mod'
+      );
     }
   }
   try {
@@ -339,9 +348,9 @@ export async function updateArtifacts({
       }
     }
 
-    const finalGoModContent = (
-      await readLocalFile(goModFileName, 'utf8')
-    ).replace(regEx(/\/\/ renovate-replace /g), '');
+    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))
+      .replace(regEx(/\/\/ renovate-replace /g), '')
+      .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
       logger.debug('Found updated go.mod after go.sum update');
       res.push({
