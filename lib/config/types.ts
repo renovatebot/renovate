@@ -135,7 +135,7 @@ export interface LegacyAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  requireConfig?: RequiredConfig;
+  requireConfig?: RequiredConfig | boolean;
 }
 export type ExecutionMode = 'branch' | 'update';
 
