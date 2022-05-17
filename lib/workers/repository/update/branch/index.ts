@@ -83,7 +83,19 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   await checkoutBranch(config.baseBranch);
-  const branchExists = gitBranchExists(config.branchName);
+  let branchExists = gitBranchExists(config.branchName);
+
+  if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
+    const branchName = config.branchName.replace(
+      config.branchPrefix,
+      config.branchPrefixOld
+    );
+    branchExists = gitBranchExists(branchName);
+    if (branchExists) {
+      config.branchName = branchName;
+    }
+  }
+
   let branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck =
