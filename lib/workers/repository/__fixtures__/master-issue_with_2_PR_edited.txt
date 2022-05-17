@@ -11,4 +11,3 @@ These updates have been manually edited so Renovate will no longer make changes.
 
 None detected
 
-
