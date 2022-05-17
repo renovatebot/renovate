@@ -164,6 +164,7 @@ export async function updateArtifacts({
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
 
+    // remove bracket close after comments, it will break the regex, doing a complex regex causes problems
     massagedGoMod = massagedGoMod
       .split('\n')
       .map((line) => {
