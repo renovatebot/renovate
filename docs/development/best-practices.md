@@ -14,18 +14,17 @@
 
 ### Logging
 
-- Use logger metadata, like this:
+Use logger metadata if logging for `WARN`, `ERROR`, `FATAL`, or if the result is a complex metadata object needing a multiple-line pretty stringification.
+Otherwise, inline metadata into the log message if logging at `INFO` or below, or if the metadata object is complex.
+
+`WARN` and above messages are often used in metrics or error catching services, and should have a consistent `msg` component so that they will be automatically grouped/associated together.
+Metadata which is separate from its message is harder for human readability, so try to combine it in the message unless it's too complex to do so.
+
+Good:
 
 ```js
-logger.trace({ obj }, 'title');
-```
-
-Avoid:
-
-```js
-logger.trace('title:\n' + obj);
-```
-
+logger.debug({ config }, 'Full config');
+logger.warn({ presetName }, 'Failed to look up preset');
 ### Array constructor
 
 Avoid the `Array()` constructor, with or without `new`, in your TypeScript code.
