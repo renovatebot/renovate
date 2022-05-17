@@ -173,6 +173,7 @@ export async function extractPackageFile(
     volta: 'volta',
     resolutions: 'resolutions',
     packageManager: 'packageManager',
+    overrides: 'overrides',
   };
 
   const constraints: Record<string, any> = {};
@@ -338,6 +339,47 @@ export async function extractPackageFile(
     return dep;
   }
 
+  /**
+   * Used when there is a json object as a value in overrides block.
+   * @param parents
+   * @param child
+   * @returns PackageDependency array
+   */
+  function extractOverrideDepsRec(
+    parents: string[],
+    child: NpmManagerData
+  ): PackageDependency[] {
+    const deps: PackageDependency[] = [];
+    if (!child || is.emptyObject(child)) {
+      return deps;
+    }
+    for (const [overrideName, versionValue] of Object.entries(child)) {
+      if (is.string(versionValue)) {
+        // special handling for "." override depenency name
+        // "." means the constraint is applied to the parent dep
+        const currDepName =
+          overrideName === '.' ? parents[parents.length - 1] : overrideName;
+        const dep: PackageDependency<NpmManagerData> = {
+          depName: currDepName,
+          depType: 'overrides',
+          managerData: { parents: parents.slice() }, // set parents for dependency
+        };
+        setNodeCommitTopic(dep);
+        deps.push({
+          ...dep,
+          ...extractDependency('overrides', currDepName, versionValue),
+        });
+      } else {
+        // versionValue is an object, run recursively.
+        parents.push(overrideName);
+        const depsOfObject = extractOverrideDepsRec(parents, versionValue);
+        deps.push(...depsOfObject);
+      }
+    }
+    parents.pop();
+    return deps;
+  }
+
   for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
     let dependencies = packageJson[depType];
     if (dependencies) {
@@ -363,13 +405,14 @@ export async function extractPackageFile(
           if (depName !== key) {
             dep.managerData = { key };
           }
-          dep = { ...dep, ...extractDependency(depType, depName, val) };
-          if (depName === 'node') {
-            // This is a special case for Node.js to group it together with other managers
-            dep.commitMessageTopic = 'Node.js';
+          if (depType === 'overrides' && !is.string(val)) {
+            deps.push(...extractOverrideDepsRec([depName], val));
+          } else {
+            dep = { ...dep, ...extractDependency(depType, depName, val) };
+            setNodeCommitTopic(dep);
+            dep.prettyDepType = depTypes[depType];
+            deps.push(dep);
           }
-          dep.prettyDepType = depTypes[depType];
-          deps.push(dep);
         }
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ fileName, depType, err }, 'Error parsing package.json');
@@ -459,4 +502,11 @@ export async function extractAllPackageFiles(
   }
   await postExtract(npmFiles, !!config.updateInternalDeps);
   return npmFiles;
+}
+
+function setNodeCommitTopic(dep: NpmManagerData): void {
+  // This is a special case for Node.js to group it together with other managers
+  if (dep.depName === 'node') {
+    dep.commitMessageTopic = 'Node.js';
+  }
 }
