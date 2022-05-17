@@ -347,7 +347,9 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!content) {
     return null;
   }
-  const lines = content.split(regEx(/\n/)).map(stripComment);
+  const equalsToNewLineRe = regEx(/=\s*\n/, 'gm');
+  const goodContentForParsing = content.replace(equalsToNewLineRe, '=');
+  const lines = goodContentForParsing.split(regEx(/\n/)).map(stripComment);
 
   const acc: PackageFile & ParseOptions = {
     registryUrls: [MAVEN_REPO],
