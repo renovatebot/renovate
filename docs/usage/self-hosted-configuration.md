@@ -616,8 +616,8 @@ By default, Renovate needs a Renovate config file in each repository where it ru
 
 You can choose any of these settings:
 
-- `"required"` (default): a repository config file must be present.
-- `"optional"`: if a config file exists, Renovate will use it when it runs.
+- `"required"` (default): a repository config file must be present
+- `"optional"`: if a config file exists, Renovate will use it when it runs
 - `"ignored"`: config files in the repo will be ignored, and have no effect
 
 This feature is closely related to the `onboarding` config option.
