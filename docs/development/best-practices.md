@@ -25,6 +25,15 @@ Good:
 ```js
 logger.debug({ config }, 'Full config');
 logger.warn({ presetName }, 'Failed to look up preset');
+```
+
+Avoid:
+
+```js
+logger.debug({ branchName }, 'Generated branchName');
+logger.warn(`Failed to look up preset ${presetName}`);
+```
+
 ### Array constructor
 
 Avoid the `Array()` constructor, with or without `new`, in your TypeScript code.
