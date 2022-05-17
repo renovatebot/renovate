@@ -2,7 +2,7 @@
 
 ## General
 
-- Prefer full function declaration, as opposed to `const func = ():void => {}`, for readability and better stack traces
+- Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
 - Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use union or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
@@ -51,8 +51,7 @@ Use `for ( ... of ...)` loops instead of `[Array|Set|Map].prototype.forEach` and
 
 - Using `for ( ... in ...)` for objects is error-prone. It will include enumerable properties from the prototype chain
 - Using `for ( ... in ...)` to iterate over arrays, will counterintuitively return the array's indices
-- Avoid `[Array|Set|Map].prototype.forEach`. It makes code harder to debug and defeats some useful compiler checks like
-  reachability
+- Avoid `[Array|Set|Map].prototype.forEach`. It makes code harder to debug and defeats some useful compiler checks like reachability
 
 Only use `Array.prototype.map()` when the return value is used, otherwise use `for ( ... of ...)`.
 
@@ -118,9 +117,9 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 
 ### Classes
 
-Use [Typescript getter setters (Accessors) when needed](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope)
-. getter must be a `pure function`.
+Use [Typescript getter setters (Accessors) when needed](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope).
+The getter must be a `pure function`.
 
 - Omit constructors when defining Static classes
-- [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields). instead, use TypeScript'svisibility annotations
+- [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields). instead, use TypeScript's visibility annotations
 - Avoid underscore suffixes or prefixes, for example: `_prop`, use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as suffix/prefix i.e. `internalProp`
