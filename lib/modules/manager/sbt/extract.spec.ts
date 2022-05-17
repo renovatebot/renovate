@@ -217,5 +217,46 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: undefined,
       });
     });
+
+    it('extract deps when they are defined in a new line', () => {
+      const content = `
+      name := "service"
+      scalaVersion := "2.13.8"
+
+      lazy val compileDependencies =
+        Seq(
+          "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
+          "ch.qos.logback" % "logback-classic" % "1.2.10"
+        )
+
+      libraryDependencies ++= compileDependencies`;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.8',
+            separateMinorPatch: true,
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'com.typesafe.scala-logging:scala-logging',
+            packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
+            currentValue: '3.9.4',
+            datasource: 'sbt-package',
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'ch.qos.logback:logback-classic',
+            packageName: 'ch.qos.logback:logback-classic',
+            currentValue: '1.2.10',
+            datasource: 'sbt-package',
+          },
+        ],
+        packageFileVersion: undefined,
+      });
+    });
   });
 });
