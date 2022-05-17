@@ -59,7 +59,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
     it('does not rebases migration branch when in dryRun is on', async () => {
       GlobalConfig.set({
-        dryRun: true,
+        dryRun: 'full',
       });
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);

@@ -61,7 +61,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('Dry runs update migration branch', async () => {
       GlobalConfig.set({
-        dryRun: true,
+        dryRun: 'full',
       });
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
@@ -84,7 +84,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('Dry runs create migration PR', async () => {
       GlobalConfig.set({
-        dryRun: true,
+        dryRun: 'full',
       });
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
         'committed'
