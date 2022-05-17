@@ -99,32 +99,37 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { depName, repository } = project;
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releaseList = await getCachedReleaseList(project);
-  logger.trace({ releaseList }, 'Release list from getReleaseList');
+  const releases = await getCachedReleaseList(project);
+  logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
-  let matchedRelease: ChangeLogNotes | undefined | null = null;
-  const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
 
-  const candidateReleases = releaseList.filter((r) => {
-    return r.tag?.endsWith(version);
-  });
-  matchedRelease = candidateReleases.find((r) => {
-    return exactReleaseReg.test(r.tag);
-  });
-
-  if (!matchedRelease) {
+  let matchedRelease = getExactReleaseMatch(depName, version, releases);
+  if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
-    matchedRelease = releaseList.find((r) => {
-      return r.tag === version || r.tag === `v${version}`;
-    });
+    matchedRelease = releases.find(
+      (r) => r.tag === version || r.tag === `v${version}`
+    );
   }
   releaseNotes = await releaseNotesResult(matchedRelease, project);
   logger.trace({ releaseNotes });
   return releaseNotes;
 }
 
+function getExactReleaseMatch(
+  depName: string,
+  version: string,
+  releases: ChangeLogNotes[]
+): ChangeLogNotes | undefined {
+  const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
+  const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
+  const matchedRelease: ChangeLogNotes | undefined = candidateReleases.find(
+    (r) => exactReleaseReg.test(r.tag)
+  );
+  return matchedRelease;
+}
+
 async function releaseNotesResult(
-  releaseMatch: ChangeLogNotes,
+  releaseMatch: ChangeLogNotes | undefined,
   project: ChangeLogProject
 ): Promise<ChangeLogNotes | null> {
   if (!releaseMatch) {
@@ -140,7 +145,7 @@ async function releaseNotesResult(
       ? `${baseUrl}${repository}/tags/${releaseMatch.tag}`
       : `${baseUrl}${repository}/releases/${releaseMatch.tag}`;
   }
-
+  // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
   if (releaseNotes.body.length) {
     try {
