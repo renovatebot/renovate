@@ -1,8 +1,13 @@
+import { DateTime } from 'luxon';
+import { logger } from '../../../logger';
 import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro';
+
+const refreshInterval = { days: 1 };
 
 export class RollingReleasesData {
   private ltsToVer = new Map<string, DistroInfoRecordWithVersion>();
   private verToLts = new Map<string, DistroInfoRecordWithVersion>();
+  private timestamp = DateTime.fromMillis(0).toUTC(); // start of epoch
   private distroInfo: DistroInfo;
 
   constructor(distroInfo: DistroInfo) {
@@ -10,7 +15,7 @@ export class RollingReleasesData {
   }
 
   getVersionByLts(input: string): string {
-    this.refresh();
+    this.build();
     const schedule = this.ltsToVer.get(input);
     if (schedule) {
       return schedule.version;
@@ -19,7 +24,7 @@ export class RollingReleasesData {
   }
 
   getLtsByVersion(input: string): string {
-    this.refresh();
+    this.build();
     const di = this.verToLts.get(input);
     if (di) {
       return di.series;
@@ -28,12 +33,12 @@ export class RollingReleasesData {
   }
 
   has(version: string): boolean {
-    this.refresh();
+    this.build();
     return this.ltsToVer.has(version);
   }
 
   schedule(version: string): DistroInfoRecordWithVersion | undefined {
-    this.refresh();
+    this.build();
     let schedule: DistroInfoRecordWithVersion | undefined = undefined;
     if (this.verToLts.has(version)) {
       schedule = this.verToLts.get(version);
@@ -44,7 +49,13 @@ export class RollingReleasesData {
     return schedule;
   }
 
-  private refresh(): void {
+  private build(): void {
+    const now = DateTime.now().toUTC();
+    if (now < this.timestamp.plus(refreshInterval)) {
+      return;
+    }
+    logger.debug('RollingReleasesData - data written');
+    this.timestamp = now;
     for (let i = 0; i < 3; i++) {
       const di = this.distroInfo.getNLatest(i);
 

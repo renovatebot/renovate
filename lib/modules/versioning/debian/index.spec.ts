@@ -1,4 +1,5 @@
 import { DateTime, Settings } from 'luxon';
+import { logger } from '../../../logger';
 import { DebianVersioningApi } from '.';
 
 describe('modules/versioning/debian/index', () => {
@@ -152,39 +153,36 @@ describe('modules/versioning/debian/index', () => {
   });
 
   it.each`
-    version           | date            | expected
-    ${'7'}            | ${'2022-04-20'} | ${false}
-    ${'8'}            | ${'2022-04-20'} | ${false}
-    ${'9'}            | ${'2022-04-20'} | ${true}
-    ${'10'}           | ${'2022-04-20'} | ${true}
-    ${'11'}           | ${'2022-04-20'} | ${true}
-    ${'oldoldstable'} | ${'2022-04-20'} | ${true}
-    ${'oldstable'}    | ${'2022-04-20'} | ${true}
-    ${'stable'}       | ${'2022-04-20'} | ${true}
-    ${'7'}            | ${'2021-04-20'} | ${false}
-    ${'8'}            | ${'2021-04-20'} | ${false}
-    ${'9'}            | ${'2021-04-20'} | ${true}
-    ${'10'}           | ${'2021-04-20'} | ${true}
-    ${'11'}           | ${'2021-04-20'} | ${false}
-    ${'oldoldstable'} | ${'2021-04-20'} | ${false}
-    ${'oldstable'}    | ${'2021-04-20'} | ${true}
-    ${'stable'}       | ${'2021-04-20'} | ${true}
-    ${'7'}            | ${'2019-04-20'} | ${false}
-    ${'8'}            | ${'2019-04-20'} | ${true}
-    ${'9'}            | ${'2019-04-20'} | ${true}
-    ${'10'}           | ${'2019-04-20'} | ${false}
-    ${'11'}           | ${'2019-04-20'} | ${false}
-    ${'oldoldstable'} | ${'2019-04-20'} | ${false}
-    ${'oldstable'}    | ${'2019-04-20'} | ${true}
-    ${'stable'}       | ${'2019-04-20'} | ${true}
+    version
+    ${'10'}
+    ${'11'}
+    ${'12'}
+    ${'13'}
+    ${'sid'}
+    ${'experimental'}
+    ${'stable'}
+    ${'oldstable'}
+    ${'oldoldstable'}
   `(
-    'isStable("$version") @ "$date" === $expected',
-    ({ version, date, expected }) => {
-      const dt = DateTime.fromISO(date);
-      spy.mockReturnValue(dt.valueOf());
-      expect(debian.isStable(version)).toBe(expected);
+    'ensures that rolling release is not refreshed within frame time window',
+    ({ version, expected }) => {
+      debian.isStable(version);
+      expect(logger.debug).toHaveBeenCalledTimes(0);
     }
   );
+
+  it('checks runtime date handling & refresh rolling release data', () => {
+    const future = DateTime.now().toUTC().plus({ year: 3 }).valueOf();
+    const past = DateTime.fromISO('2019-08-06', { zone: 'UTC' }).valueOf();
+    spy.mockReturnValue(past);
+    expect(debian.isStable('buster')).toBeTrue();
+    spy.mockReturnValue(future);
+    expect(debian.isStable('buster')).toBeFalse();
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'RollingReleasesData - data written'
+    );
+  });
 
   it.each`
     version           | expected
