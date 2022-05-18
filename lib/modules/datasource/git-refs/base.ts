@@ -16,7 +16,7 @@ const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);
 export abstract class GitDatasource extends Datasource {
   static id = 'git';
 
-  constructor(public override readonly id) {
+  constructor(public override readonly id: string) {
     super(id);
   }
 
