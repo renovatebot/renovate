@@ -290,6 +290,45 @@ describe('config/presets/index', () => {
       expect(local.getPreset.mock.calls[0][0].baseConfig).toBeDefined();
       expect(res).toMatchSnapshot();
     });
+
+    it('resolves self-hosted transitive presets without baseConfig', async () => {
+      config.platform = 'gitlab';
+      config.endpoint = 'https://dummy.example.com/api/v4';
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset
+        .mockResolvedValueOnce({
+          extends: ['local>username/preset-repo//subpreset'],
+        })
+        .mockResolvedValueOnce({ labels: ['self-hosted resolved'] });
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res).toEqual({
+        platform: 'gitlab',
+        endpoint: 'https://dummy.example.com/api/v4',
+        labels: ['self-hosted resolved'],
+      });
+      expect(local.getPreset.mock.calls).toMatchObject([
+        [
+          {
+            baseConfig: {
+              platform: 'gitlab',
+              endpoint: 'https://dummy.example.com/api/v4',
+              extends: ['local>username/preset-repo'],
+            },
+          },
+        ],
+        [
+          {
+            baseConfig: {
+              platform: 'gitlab',
+              endpoint: 'https://dummy.example.com/api/v4',
+              extends: ['local>username/preset-repo'],
+            },
+          },
+        ],
+      ]);
+    });
   });
 
   describe('replaceArgs', () => {
