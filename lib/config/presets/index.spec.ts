@@ -308,17 +308,26 @@ describe('config/presets/index', () => {
         endpoint: 'https://dummy.example.com/api/v4',
         labels: ['self-hosted resolved'],
       });
-      expect(local.getPreset.mock.calls).toHaveLength(2);
-      expect(local.getPreset.mock.calls[0][0].baseConfig).toEqual({
-        platform: 'gitlab',
-        endpoint: 'https://dummy.example.com/api/v4',
-        extends: ['local>username/preset-repo'],
-      });
-      expect(local.getPreset.mock.calls[1][0].baseConfig).toEqual({
-        platform: 'gitlab',
-        endpoint: 'https://dummy.example.com/api/v4',
-        extends: ['local>username/preset-repo'],
-      });
+      expect(local.getPreset.mock.calls).toMatchObject([
+        [
+          {
+            baseConfig: {
+              platform: 'gitlab',
+              endpoint: 'https://dummy.example.com/api/v4',
+              extends: ['local>username/preset-repo'],
+            },
+          },
+        ],
+        [
+          {
+            baseConfig: {
+              platform: 'gitlab',
+              endpoint: 'https://dummy.example.com/api/v4',
+              extends: ['local>username/preset-repo'],
+            },
+          },
+        ],
+      ]);
     });
   });
 
