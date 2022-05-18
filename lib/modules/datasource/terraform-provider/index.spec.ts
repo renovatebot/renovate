@@ -1,12 +1,13 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { TerraformProviderDatasource } from '.';
 
-const consulData: any = loadFixture('azurerm-provider.json');
-const hashicorpReleases: any = loadFixture('releaseBackendIndex.json');
-const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
-const telmateProxmocVersions: any = loadFixture(
+const azurermData = Fixtures.get('azurerm-provider.json');
+const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
+const hashicorpReleases = Fixtures.get('releaseBackendIndex.json');
+const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
+const telmateProxmocVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json'
 );
 
@@ -68,22 +69,83 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, consulData)
+        .reply(200, azurermData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
         depName: 'azurerm',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            version: '2.52.0',
+          },
+          {
+            releaseTimestamp: '2019-11-26T08:22:56.000Z',
+            version: '2.53.0',
+          },
+        ],
+        sourceUrl:
+          'https://github.com/terraform-providers/terraform-provider-azurerm',
+      });
     });
 
-    it('processes real data from packageName', async () => {
+    it('returns null for empty result from third party', async () => {
       httpMock
         .scope('https://registry.company.com')
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, consulData)
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          depName: 'azurerm',
+          registryUrls: ['https://registry.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null for 404 from third party', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(404)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          depName: 'azurerm',
+          registryUrls: ['https://registry.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null for unknown error from third party', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .replyWithError('')
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          depName: 'azurerm',
+          registryUrls: ['https://registry.company.com'],
+        })
+      ).toBeNull();
+    });
+
+    it('processes real data from third party', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, azurermVersionsData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -92,8 +154,20 @@ describe('modules/datasource/terraform-provider/index', () => {
         packageName: 'hashicorp/azurerm',
         registryUrls: ['https://registry.company.com'],
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '2.49.0',
+          },
+          {
+            version: '3.0.0',
+          },
+          {
+            version: '3.0.1',
+          },
+        ],
+      });
     });
 
     it('processes data with alternative backend', async () => {
@@ -114,8 +188,22 @@ describe('modules/datasource/terraform-provider/index', () => {
         datasource: TerraformProviderDatasource.id,
         depName: 'google-beta',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        registryUrl: 'https://releases.hashicorp.com',
+        releases: [
+          {
+            version: '1.19.0',
+          },
+          {
+            version: '1.20.0',
+          },
+          {
+            version: '2.0.0',
+          },
+        ],
+        sourceUrl:
+          'https://github.com/terraform-providers/terraform-provider-google-beta',
+      });
     });
 
     it('simulate failing secondary release source', async () => {
@@ -229,8 +317,44 @@ describe('modules/datasource/terraform-provider/index', () => {
         'Telmate/proxmox',
         '2.6.1'
       );
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toEqual([
+        {
+          arch: 'arm64',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'darwin',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+        {
+          arch: 'amd64',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'linux',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+        {
+          arch: 'arm',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'linux',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+        {
+          arch: 'amd64',
+          download_url: 'https://downloads.example.com/proxmox',
+          filename: 'aFileName.zip',
+          name: 'Telmate/proxmox',
+          os: 'windows',
+          url: 'https://downloads.example.com/proxmox',
+          version: '2.6.1',
+        },
+      ]);
     });
 
     it('return null if the retrieval of a single build fails', async () => {
