@@ -4,14 +4,15 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
+import type { ServiceDiscoveryResult } from '../terraform-module/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformBuild,
   TerraformProvider,
   TerraformProviderReleaseBackend,
+  TerraformProviderVersions,
   TerraformRegistryBuildResponse,
   TerraformRegistryVersions,
   VersionDetailResponse,
@@ -54,32 +55,47 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       return null;
     }
     logger.debug({ packageName }, 'terraform-provider.getDependencies()');
-    let dep: ReleaseResult | null = null;
-    const registryHost = parseUrl(registryUrl)?.host;
-    if (registryHost === 'releases.hashicorp.com') {
-      dep = await this.queryReleaseBackend(packageName, registryUrl);
-    } else {
-      const repository = TerraformProviderDatasource.getRepository({
-        packageName,
-      });
-      dep = await this.queryRegistry(registryUrl, repository);
+
+    if (registryUrl === this.defaultRegistryUrls[1]) {
+      return await this.queryReleaseBackend(packageName, registryUrl);
+    }
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+      registryUrl
+    );
+
+    if (registryUrl === this.defaultRegistryUrls[0]) {
+      return await this.queryRegistryExtendedApi(
+        serviceDiscovery,
+        registryUrl,
+        repository
+      );
     }
 
-    return dep;
+    return await this.queryRegistryVersions(
+      serviceDiscovery,
+      registryUrl,
+      repository
+    );
   }
 
   private static getRepository({ packageName }: GetReleasesConfig): string {
     return packageName.includes('/') ? packageName : `hashicorp/${packageName}`;
   }
 
-  private async queryRegistry(
-    registryURL: string,
+  /**
+   * this uses the api that terraform registry has in addition to the base api
+   * this endpoint provides more information, such as release date
+   * this api is undocumented.
+   */
+  private async queryRegistryExtendedApi(
+    serviceDiscovery: ServiceDiscoveryResult,
+    registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryURL
-    );
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}`;
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       releases: res.versions.map((version) => ({
@@ -97,8 +113,27 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
-    dep.homepage = `${registryURL}/providers/${repository}`;
-    logger.trace({ dep }, 'dep');
+    dep.homepage = `${registryUrl}/providers/${repository}`;
+    return dep;
+  }
+
+  /**
+   * this version uses the Provider Registry Protocol that all registries are required to implement
+   * https://www.terraform.io/internals/provider-registry-protocol
+   */
+  private async queryRegistryVersions(
+    serviceDiscovery: ServiceDiscoveryResult,
+    registryUrl: string,
+    repository: string
+  ): Promise<ReleaseResult> {
+    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}/versions`;
+    const res = (await this.http.getJson<TerraformProviderVersions>(backendURL))
+      .body;
+    const dep: ReleaseResult = {
+      releases: res.versions.map(({ version }) => ({
+        version,
+      })),
+    };
     return dep;
   }
 
@@ -123,7 +158,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       })),
       sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
     };
-    logger.trace({ dep }, 'dep');
     return dep;
   }
 

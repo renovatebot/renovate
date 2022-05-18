@@ -165,7 +165,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBeDefined();
+      expect(res?.npmrc).toBeDefined();
     });
 
     it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
@@ -180,7 +180,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'some-configured-npmrc' }
       );
-      expect(res.npmrc).toBeUndefined();
+      expect(res?.npmrc).toBeUndefined();
     });
 
     it('reads .npmrc when config.npmrc is merged', async () => {
@@ -195,7 +195,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'config-npmrc', npmrcMerge: true }
       );
-      expect(res.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
+      expect(res?.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
 
     it('finds and filters .npmrc with variables', async () => {
@@ -210,7 +210,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
+      expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
 
     it('finds lerna', async () => {
@@ -665,6 +665,85 @@ describe('modules/manager/npm/extract/index', () => {
             depType: 'packageManager',
             packageName: '@yarnpkg/cli',
             prettyDepType: 'packageManager',
+          },
+        ],
+      });
+    });
+
+    it('extracts dependencies from overrides', async () => {
+      const content = `{
+        "devDependencies": {
+          "@types/react": "18.0.5"
+        },
+        "overrides": {
+          "node": "8.9.2",
+          "@types/react": "18.0.5",
+          "baz": {
+            "node": "8.9.2",
+            "bar": {
+              "foo": "1.0.0"
+            }
+          },
+          "foo2": {
+            ".": "1.0.0",
+            "bar2": "1.0.0"
+          },
+          "emptyObject":{}
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depType: 'devDependencies',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'devDependency',
+          },
+          {
+            depType: 'overrides',
+            depName: 'node',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+            commitMessageTopic: 'Node.js',
+            prettyDepType: 'overrides',
+          },
+          {
+            depType: 'overrides',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'overrides',
+          },
+          {
+            depName: 'node',
+            managerData: { parents: ['baz'] },
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo',
+            managerData: { parents: ['baz', 'bar'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'bar2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
           },
         ],
       });

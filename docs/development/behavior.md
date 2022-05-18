@@ -12,7 +12,7 @@ You are welcome to make it better, and do not need to criticize the works of oth
 
 We ask that you respect the time of the contributors and maintainers who are helping you.
 This means accepting that sometimes a question might sit around for a bit before getting answered.
-This also means that features/bugfixes that you really want can take a long time to appear.
+This also means that features or bug fixes that you really want can take a long time to appear.
 
 ## Be respectful to competitors
 
