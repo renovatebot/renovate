@@ -7,58 +7,25 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main
-</summary>
+<details><summary>Branch main</summary>
+<blockquote>
 
+<details><summary>dockerfile</summary>
+<blockquote>
 
-<ul><details><summary>dockerfile</summary>
-
-<ul><details><summary>Dockerfile</summary>
+<details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
 
-</details></ul>
-</details></ul>
-<ul><details><summary>npm</summary>
-
-<ul><details><summary>package.json</summary>
-
- - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
- - \`express-handlebars >=5.3.4\`
- - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
-
-</details></ul>
-</details></ul>
-<ul><details><summary>poetry</summary>
-
-<ul><details><summary>pyproject.toml</summary>
-
- - \`six <=1.3.0\`
-
-</details></ul>
-</details></ul>
 </details>
 
-<details><summary>Branch dev
-</summary>
+</blockquote>
+</details>
 
+<details><summary>npm</summary>
+<blockquote>
 
-<ul><details><summary>dockerfile</summary>
-
-<ul><details><summary>Dockerfile</summary>
-
- - \`ubuntu 20.04\`
-
-</details></ul>
-</details></ul>
-<ul><details><summary>npm</summary>
-
-<ul><details><summary>package.json</summary>
+<details><summary>package.json</summary>
 
  - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
@@ -69,16 +36,73 @@ This repository currently has no open or pending branches.
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
 
-</details></ul>
-</details></ul>
-<ul><details><summary>poetry</summary>
+</details>
 
-<ul><details><summary>pyproject.toml</summary>
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
 
-</details></ul>
-</details></ul>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch dev</summary>
+<blockquote>
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
 </details>
 
 "
@@ -91,29 +115,33 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main
-</summary>
+<details><summary>Branch main</summary>
+<blockquote>
 
 None detected
 
-
+</blockquote>
 </details>
 
-<details><summary>Branch dev
-</summary>
+<details><summary>Branch dev</summary>
+<blockquote>
 
+<details><summary>dockerfile</summary>
+<blockquote>
 
-<ul><details><summary>dockerfile</summary>
-
-<ul><details><summary>Dockerfile</summary>
+<details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
 
-</details></ul>
-</details></ul>
-<ul><details><summary>npm</summary>
+</details>
 
-<ul><details><summary>package.json</summary>
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
 
  - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
@@ -124,16 +152,24 @@ None detected
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
 
-</details></ul>
-</details></ul>
-<ul><details><summary>poetry</summary>
+</details>
 
-<ul><details><summary>pyproject.toml</summary>
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
 
-</details></ul>
-</details></ul>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
 </details>
 
 "
@@ -146,29 +182,33 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main
-</summary>
+<details><summary>Branch main</summary>
+<blockquote>
 
 None detected
 
-
+</blockquote>
 </details>
 
-<details><summary>Branch dev
-</summary>
+<details><summary>Branch dev</summary>
+<blockquote>
 
+<details><summary>dockerfile</summary>
+<blockquote>
 
-<ul><details><summary>dockerfile</summary>
-
-<ul><details><summary>Dockerfile</summary>
+<details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
 
-</details></ul>
-</details></ul>
-<ul><details><summary>npm</summary>
+</details>
 
-<ul><details><summary>package.json</summary>
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
 
  - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
@@ -179,16 +219,24 @@ None detected
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
 
-</details></ul>
-</details></ul>
-<ul><details><summary>poetry</summary>
+</details>
 
-<ul><details><summary>pyproject.toml</summary>
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
 
-</details></ul>
-</details></ul>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
 </details>
 
 "
@@ -202,15 +250,21 @@ This repository currently has no open or pending branches.
 ## Detected dependencies
 
 <details><summary>dockerfile</summary>
+<blockquote>
 
-<ul><details><summary>Dockerfile</summary>
+<details><summary>Dockerfile</summary>
 
  - \`ubuntu 20.04\`
 
-</details></ul>
-</details><details><summary>npm</summary>
+</details>
 
-<ul><details><summary>package.json</summary>
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
 
  - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
@@ -221,15 +275,24 @@ This repository currently has no open or pending branches.
  - \`dotenv 10.0.0\`
  - \`nodemon 2.0.14\`
 
-</details></ul>
-</details><details><summary>poetry</summary>
+</details>
 
-<ul><details><summary>pyproject.toml</summary>
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
 
-</details></ul>
-</details>"
+</details>
+
+</blockquote>
+</details>
+
+"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when packageFiles is empty 1`] = `
@@ -240,7 +303,6 @@ This repository currently has no open or pending branches.
 ## Detected dependencies
 
 None detected
-
 
 "
 `;
@@ -253,7 +315,6 @@ This repository currently has no open or pending branches.
 ## Detected dependencies
 
 None detected
-
 
 "
 `;
@@ -281,7 +342,6 @@ These updates await pending status checks. To force their creation now, click th
 
 None detected
 
-
 "
 `;
 
@@ -293,7 +353,6 @@ This repository currently has no open or pending branches.
 ## Detected dependencies
 
 None detected
-
 
 ---
 And this is a footer
@@ -308,7 +367,6 @@ This repository currently has no open or pending branches.
 ## Detected dependencies
 
 None detected
-
 
 ---
 And this is a footer for repository:test
@@ -334,7 +392,6 @@ These updates are awaiting their schedule. Click on a checkbox to get an update 
 ## Detected dependencies
 
 None detected
-
 
 "
 `;
