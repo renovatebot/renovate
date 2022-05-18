@@ -432,7 +432,7 @@ To help you with this, Renovate will create config migration pull requests.
 
 Example:
 
-When we created the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would look like this:
+After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would make this change:
 
 ```diff
 {
