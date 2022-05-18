@@ -167,6 +167,12 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
+    it('creates PR (require config)', async () => {
+      config.requireConfig = 'required';
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
+
     it('dryrun of updates PR when modified', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.baseBranch = 'some-branch';
