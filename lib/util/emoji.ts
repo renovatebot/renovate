@@ -33,8 +33,8 @@ function lazyInitMappings(): void {
   }
 }
 
-export function setEmojiConfig(_config: RenovateConfig): void {
-  unicodeEmoji = !!_config.unicodeEmoji;
+export function setEmojiConfig(config: RenovateConfig): void {
+  unicodeEmoji = !!config.unicodeEmoji;
 }
 
 const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
