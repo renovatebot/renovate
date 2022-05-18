@@ -396,3 +396,31 @@ The logging level output is controlled by the Bunyan logging library.
 |    40 | warn    |
 |    50 | error   |
 |    60 | fatal   |
+
+## Self-signed TLS/SSL certificates
+
+Renovate and invoked helper programs (e.g. Git, npm) use a secure TLS connection (e.g. HTTPS) to connect to source code platforms and dependency hosts.
+If the systems use self-signed certificates or certificate authorities Renovate needs to manually trust these additional certificates in order to work.
+
+For the main Renovate NodeJS application set the environment variable [`NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt`](https://nodejs.org/api/cli.html#node_extra_ca_certsfile). This archives that the main Renovate application trusts the `self-signed-certificate.crt` and can establish secure connections to systems using that certificate or certificates signed by this certificate authority.
+
+The helper programs (e.g. Git, npm) use the system trust store. For them to trust the self-signed certificate add it to the systems trust store. On ubuntu/debian and many linux based systems, this can be archived with copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+
+If you leverage the [Renovate Docker image](#docker), the best way is to build an own Docker image with the self-signed certificate on top of the standard Renovate Docker image. Following Dockerfile does that:
+
+```dockerfile
+FROM renovate/renovate
+
+# Changes to the CA require root permissions
+USER root
+
+# Copy and install the self signed certificate
+COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+# Change back to the ubuntu user
+USER 1000
+
+# Node comes with an own CA store and thus needs to trust the self signed certificate explicitly
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
+```
