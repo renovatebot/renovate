@@ -2695,10 +2695,6 @@ When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediatio
 
 This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
 
-## unicodeEmoji
-
-If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
-
 ## updateInternalDeps
 
 Renovate defaults to skipping any internal package dependencies within monorepos.
