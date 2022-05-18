@@ -123,7 +123,8 @@ If you want to make config edits directly, follow these steps:
 1. Validate your config by running `renovate-config-validator`
 1. If the improved config passes the validation, merge the branch into your mainline branch
 
-You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically. Please see [github.com/renovatebot/pre-commit-hooks](https://github.com/renovatebot/pre-commit-hooks) for more.
+You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
+Please check out the [`renovatebot/pre-commit-hooks` repository ](https://github.com/renovatebot/pre-commit-hooks) for more information.
 
 ### Nuke config and re-onboard
 
