@@ -2095,6 +2095,7 @@ const options: RenovateOptions[] = [
     description: 'Enable or disable Unicode emoji.',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'gitLabIgnoreApprovals',
