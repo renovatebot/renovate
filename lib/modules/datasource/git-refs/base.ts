@@ -5,6 +5,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { simpleGitConfig } from '../../../util/git/config';
 import { getRemoteUrlWithToken } from '../../../util/git/url';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { Datasource } from '../datasource';
 import type { GetReleasesConfig } from '../types';
 import type { RawRefs } from './types';
 
@@ -12,22 +13,25 @@ const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
 const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);
 
 // TODO: extract to a separate directory structure (#10532)
-export class GitDatasource {
+export abstract class GitDatasource extends Datasource {
   static id = 'git';
+
+  constructor(id: string) {
+    super(id);
+  }
 
   @cache({
     namespace: `datasource-${GitDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
-  static async getRawRefs(
-    { packageName }: GetReleasesConfig,
-    hostType: string
-  ): Promise<RawRefs[] | null> {
+  async getRawRefs({
+    packageName,
+  }: GetReleasesConfig): Promise<RawRefs[] | null> {
     const git = simpleGit(simpleGitConfig());
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
-      getRemoteUrlWithToken(packageName, hostType),
+      getRemoteUrlWithToken(packageName, this.id),
     ]);
     if (!lsRemote) {
       return null;

@@ -665,6 +665,10 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## token
 
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
+
 ## username
 
 You might need to set a `username` if you use:

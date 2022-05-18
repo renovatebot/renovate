@@ -57,7 +57,7 @@ Object {
     Object {
       "fileMatch": Array [
         "(^|/|\\\\.)Dockerfile$",
-        "(^|/)Dockerfile\\\\.[^/]*$",
+        "(^|/)Dockerfile[^/]*$",
       ],
       "matchStrings": Array [
         "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<packageName>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
@@ -66,7 +66,7 @@ Object {
     Object {
       "fileMatch": Array [
         "(^|/|\\\\.)Dockerfile$",
-        "(^|/)Dockerfile\\\\.[^/]*$",
+        "(^|/)Dockerfile[^/]*$",
       ],
       "matchStrings": Array [
         "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\\\s]+?)(?: lookupName=(?<holder>[^\\\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\\\s(?:ENV|ARG) .+?_VERSION=\\"?(?<currentValue>.+?)\\"?\\\\s",
