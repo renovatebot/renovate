@@ -1,11 +1,10 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
 import { GitDatasource } from '../git-refs/base';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
-export class GitTagsDatasource extends Datasource {
-  static readonly id = 'git-tags';
+export class GitTagsDatasource extends GitDatasource {
+  static override readonly id = 'git-tags';
 
   constructor() {
     super(GitTagsDatasource.id);
@@ -20,7 +19,7 @@ export class GitTagsDatasource extends Datasource {
   async getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const rawRefs = await GitDatasource.getRawRefs({ packageName }, this.id);
+    const rawRefs = await this.getRawRefs({ packageName });
 
     if (rawRefs === null) {
       return null;
@@ -49,7 +48,7 @@ export class GitTagsDatasource extends Datasource {
     { packageName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    const rawRefs = await GitDatasource.getRawRefs({ packageName }, this.id);
+    const rawRefs = await this.getRawRefs({ packageName });
     const findValue = newValue || 'HEAD';
     const ref = rawRefs?.find((rawRef) => rawRef.value === findValue);
     if (ref) {
