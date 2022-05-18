@@ -4,7 +4,6 @@ import { getConfig, mocked, partial } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
-import { GitDatasource } from '../../../../modules/datasource/git-refs/base';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
@@ -1645,6 +1644,13 @@ describe('workers/repository/process/lookup/index', () => {
     it('handles git submodule update', async () => {
       jest.mock('../../../../modules/datasource/git-refs', () => ({
         GitRefsDatasource: jest.fn(() => ({
+          getRawRefs: jest.fn().mockResolvedValueOnce([
+            {
+              value: 'HEAD',
+              hash: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+              type: '',
+            },
+          ]),
           getReleases: jest.fn().mockResolvedValue({
             releases: [
               {
@@ -1657,14 +1663,6 @@ describe('workers/repository/process/lookup/index', () => {
             .mockResolvedValue('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
         })),
       }));
-
-      jest.spyOn(GitDatasource, 'getRawRefs').mockResolvedValueOnce([
-        {
-          value: 'HEAD',
-          hash: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
-          type: '',
-        },
-      ]);
 
       config.depName = 'some-path';
       config.versioning = gitVersioningId;
