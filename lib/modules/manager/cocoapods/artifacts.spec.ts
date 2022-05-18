@@ -3,6 +3,7 @@ import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
@@ -30,17 +31,17 @@ describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
+    // can't be mocked
+    docker.resetPrefetchedImages();
 
     GlobalConfig.set(adminConfig);
 
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
-        { version: '1.2.0' },
-        { version: '1.2.1' },
-        { version: '1.2.2' },
-        { version: '1.2.3' },
-        { version: '1.2.4' },
-        { version: '1.2.5' },
+        { version: '2.7.4' },
+        { version: '3.0.0' },
+        { version: '3.1.0' },
       ],
     });
   });
@@ -110,7 +111,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
     git.getRepoStatus.mockResolvedValueOnce({
-      modified: [],
+      modified: [] as string[],
     } as StatusResult);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
@@ -241,9 +242,20 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchSnapshot([
-      { cmd: 'docker pull renovate/cocoapods:1.2.4' },
-      {},
-      {},
+      { cmd: 'docker pull renovate/ruby:2.7.4' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_ruby --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/ruby:2.7.4' +
+          ' bash -l -c "' +
+          'install-tool cocoapods 1.2.4' +
+          ' && ' +
+          'pod install' +
+          '"',
+      },
     ]);
   });
 
@@ -272,9 +284,20 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchSnapshot([
-      { cmd: 'docker pull renovate/cocoapods:latest' },
-      {},
-      {},
+      { cmd: 'docker pull renovate/ruby:latest' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_ruby --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/ruby:latest' +
+          ' bash -l -c "' +
+          'install-tool cocoapods 1.2.4' +
+          ' && ' +
+          'pod install' +
+          '"',
+      },
     ]);
   });
 });

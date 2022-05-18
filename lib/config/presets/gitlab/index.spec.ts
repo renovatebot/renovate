@@ -93,6 +93,54 @@ describe('config/presets/gitlab/index', () => {
       });
       expect(content).toEqual({ foo: 'bar' });
     });
+
+    it('should query custom paths with .json extension', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`${basePath}/branches`)
+        .reply(200, [
+          {
+            name: 'devel',
+          },
+          {
+            name: 'master',
+            default: true,
+          },
+        ])
+        .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({
+        repo: 'some/repo',
+        presetPath: 'path',
+        presetName: 'custom.json',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
+    it('should query custom paths with .json5 extension', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(`${basePath}/branches`)
+        .reply(200, [
+          {
+            name: 'devel',
+          },
+          {
+            name: 'master',
+            default: true,
+          },
+        ])
+        .get(`${basePath}/files/path%2Fcustom.json5/raw?ref=master`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({
+        repo: 'some/repo',
+        presetPath: 'path',
+        presetName: 'custom.json5',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
   });
 
   describe('getPresetFromEndpoint()', () => {

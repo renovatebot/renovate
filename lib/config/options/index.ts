@@ -3,7 +3,6 @@ import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import * as dockerVersioning from '../../modules/versioning/docker';
-import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -405,10 +404,11 @@ const options: RenovateOptions[] = [
   {
     name: 'requireConfig',
     description:
-      'Set to `false` if it is optional for repositories to contain a config.',
+      "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
     stage: 'repository',
-    type: 'boolean',
-    default: true,
+    type: 'string',
+    default: 'required',
+    allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
   },
   {
@@ -1820,6 +1820,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodNoMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
@@ -1885,9 +1886,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration object for Python.',
     stage: 'package',
     type: 'object',
-    default: {
-      versioning: pep440Versioning.id,
-    },
+    default: {},
     mergeable: true,
     cli: false,
   },
@@ -2096,6 +2095,7 @@ const options: RenovateOptions[] = [
     description: 'Enable or disable Unicode emoji.',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'gitLabIgnoreApprovals',

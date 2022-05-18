@@ -14,7 +14,7 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
-  checkHttpResource,
+  checkResource,
   createUrlForDependencyPom,
   downloadHttpProtocol,
   downloadMavenXml,
@@ -249,7 +249,7 @@ export class MavenDatasource extends Datasource {
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
 
-        const res = await checkHttpResource(this.http, artifactUrl);
+        const res = await checkResource(this.http, artifactUrl);
 
         if (is.date(res)) {
           release.releaseTimestamp = res.toISOString();

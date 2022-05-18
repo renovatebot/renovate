@@ -1,5 +1,5 @@
 import { fs } from '../../../../test/util';
-import { detectGlobalConfig } from './detect';
+import { detectGlobalConfig } from '.';
 
 jest.mock('../../../util/fs');
 

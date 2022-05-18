@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -8,12 +9,12 @@ import {
 import { logger } from '../../../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { regEx } from '../../../../util/regex';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -25,10 +26,6 @@ import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
-
-function noWhitespaceOrHeadings(input: string): string {
-  return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
-}
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -72,7 +69,7 @@ export async function ensurePr(
 
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, ignoreTests, prTitle, upgrades } = config;
+  const { branchName, ignoreTests, prTitle = '', upgrades } = config;
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if existing PR exists
@@ -90,13 +87,14 @@ export async function ensurePr(
   // Only create a PR if a branch automerge has failed
   if (
     config.automerge === true &&
-    config.automergeType.startsWith('branch') &&
+    config.automergeType?.startsWith('branch') &&
     !config.forcePr
   ) {
     logger.debug(`Branch automerge is enabled`);
     if (
       config.stabilityStatus !== BranchStatus.yellow &&
-      (await getBranchStatus()) === BranchStatus.yellow
+      (await getBranchStatus()) === BranchStatus.yellow &&
+      is.number(config.prNotPendingHours)
     ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
@@ -148,7 +146,8 @@ export async function ensurePr(
         !dependencyDashboardCheck &&
         ((config.stabilityStatus &&
           config.stabilityStatus !== BranchStatus.yellow) ||
-          elapsedHours < config.prNotPendingHours)
+          (is.number(config.prNotPendingHours) &&
+            elapsedHours < config.prNotPendingHours))
       ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
@@ -204,13 +203,14 @@ export async function ensurePr(
           commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
-            logJSON.versions.forEach((version) => {
+            for (const version of logJSON.versions) {
               const release = { ...version };
               upgrade.releases.push(release);
-            });
+            }
           }
         }
       } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+        upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
           [
@@ -254,7 +254,6 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
-      // istanbul ignore if
       if (
         !existingPr.hasAssignees &&
         !existingPr.hasReviewers &&
@@ -266,21 +265,13 @@ export async function ensurePr(
         await addParticipants(config, existingPr);
       }
       // Check if existing PR needs updating
-      const reviewableIndex = existingPr.body.indexOf(
-        '<!-- Reviewable:start -->'
-      );
-      let existingPrBody = existingPr.body;
-      if (reviewableIndex > -1) {
-        logger.debug('Stripping Reviewable content');
-        existingPrBody = existingPrBody.slice(0, reviewableIndex);
-      }
       const existingPrTitle = stripEmojis(existingPr.title);
+      const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
-      existingPrBody = existingPrBody.trim();
+      const newPrBodyHash = hashBody(prBody);
       if (
         existingPrTitle === newPrTitle &&
-        noWhitespaceOrHeadings(stripEmojis(existingPrBody)) ===
-          noWhitespaceOrHeadings(stripEmojis(prBody))
+        existingPrBodyHash === newPrBodyHash
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
         return { type: 'with-pr', pr: existingPr };
@@ -303,7 +294,6 @@ export async function ensurePr(
           'PR body changed'
         );
       }
-      // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
@@ -318,17 +308,15 @@ export async function ensurePr(
       return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
-    // istanbul ignore if
     if (config.updateType === 'rollback') {
       logger.info('Creating Rollback PR');
     }
-    let pr: Pr;
-    try {
-      // istanbul ignore if
-      if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would create PR: ' + prTitle);
-        pr = { number: 0, displayNumber: 'Dry run PR' } as never;
-      } else {
+    let pr: Pr | null;
+    if (GlobalConfig.get('dryRun')) {
+      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      pr = { number: 0, displayNumber: 'Dry run PR' } as never;
+    } else {
+      try {
         if (
           !dependencyDashboardCheck &&
           isLimitReached(Limit.PullRequests) &&
@@ -339,7 +327,7 @@ export async function ensurePr(
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
-          targetBranch: config.baseBranch,
+          targetBranch: config.baseBranch ?? '',
           prTitle,
           prBody,
           labels: prepareLabels(config),
@@ -347,36 +335,33 @@ export async function ensurePr(
           draftPR: config.draftPR,
         });
         incLimitedValue(Limit.PullRequests);
-        logger.info({ pr: pr.number, prTitle }, 'PR created');
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'Pull request creation error');
-      if (
-        err.body?.message === 'Validation failed' &&
-        err.body.errors?.length &&
-        err.body.errors.some((error: { message?: string }) =>
-          error.message?.startsWith('A pull request already exists')
-        )
-      ) {
-        logger.warn('A pull requests already exists');
-        return { type: 'without-pr', prBlockedBy: 'Error' };
-      }
-      if (err.statusCode === 502) {
-        logger.warn(
-          { branch: branchName },
-          'Deleting branch due to server error'
-        );
-        if (GlobalConfig.get('dryRun')) {
-          logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
-        } else {
+        logger.info({ pr: pr?.number, prTitle }, 'PR created');
+      } catch (err) {
+        logger.debug({ err }, 'Pull request creation error');
+        if (
+          err.body?.message === 'Validation failed' &&
+          err.body.errors?.length &&
+          err.body.errors.some((error: { message?: string }) =>
+            error.message?.startsWith('A pull request already exists')
+          )
+        ) {
+          logger.warn('A pull requests already exists');
+          return { type: 'without-pr', prBlockedBy: 'Error' };
+        }
+        if (err.statusCode === 502) {
+          logger.warn(
+            { branch: branchName },
+            'Deleting branch due to server error'
+          );
           await deleteBranch(branchName);
         }
+        return { type: 'without-pr', prBlockedBy: 'Error' };
       }
-      return { type: 'without-pr', prBlockedBy: 'Error' };
     }
     if (
+      pr &&
       config.branchAutomergeFailureMessage &&
-      !config.suppressNotifications.includes('branchAutomergeFailure')
+      !config.suppressNotifications?.includes('branchAutomergeFailure')
     ) {
       const topic = 'Branch automerge failure';
       let content =
@@ -386,7 +371,6 @@ export async function ensurePr(
       }
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
-      // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
@@ -398,21 +382,22 @@ export async function ensurePr(
       }
     }
     // Skip assign and review if automerging PR
-    if (
-      config.automerge &&
-      !config.assignAutomerge &&
-      (await getBranchStatus()) !== BranchStatus.red
-    ) {
-      logger.debug(
-        `Skipping assignees and reviewers as automerge=${config.automerge}`
-      );
-    } else {
-      await addParticipants(config, pr);
+    if (pr) {
+      if (
+        config.automerge &&
+        !config.assignAutomerge &&
+        (await getBranchStatus()) !== BranchStatus.red
+      ) {
+        logger.debug(
+          `Skipping assignees and reviewers as automerge=${config.automerge}`
+        );
+      } else {
+        await addParticipants(config, pr);
+      }
+      logger.debug(`Created ${pr.displayNumber}`);
+      return { type: 'with-pr', pr };
     }
-    logger.debug(`Created ${pr.displayNumber}`);
-    return { type: 'with-pr', pr };
   } catch (err) {
-    // istanbul ignore if
     if (
       err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
@@ -427,6 +412,5 @@ export async function ensurePr(
   if (existingPr) {
     return { type: 'with-pr', pr: existingPr };
   }
-  // istanbul ignore next
   return { type: 'without-pr', prBlockedBy: 'Error' };
 }

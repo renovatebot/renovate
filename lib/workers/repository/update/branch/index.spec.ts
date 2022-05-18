@@ -14,6 +14,7 @@ import {
 } from '../../../../constants/error-messages';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
 import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
@@ -903,7 +904,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -936,7 +940,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -971,7 +978,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1004,7 +1014,7 @@ describe('workers/repository/update/branch/index', () => {
         title: 'rebase!',
         state: PrState.Open,
         labels: ['stop-updating'],
-        body: `- [ ] <!-- rebase-check -->`,
+        bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1039,7 +1049,10 @@ describe('workers/repository/update/branch/index', () => {
         title: 'Update dependency',
         state: PrState.Open,
         labels: ['stop-updating'],
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1084,7 +1097,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -1137,7 +1153,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
       });
       const errorMessage = expect.stringContaining(
-        "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
+        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand"
       );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1170,7 +1186,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -1247,7 +1266,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -1327,7 +1349,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus
@@ -1472,7 +1497,10 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        body: `- [x] <!-- rebase-check -->`,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({

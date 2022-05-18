@@ -43,11 +43,16 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
 }
 
+export interface PrBodyStruct {
+  hash: string;
+  rebaseRequested?: boolean;
+}
+
 /**
  *
  */
 export interface Pr {
-  body?: string;
+  bodyStruct?: PrBodyStruct;
   sourceBranch: string;
   cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;

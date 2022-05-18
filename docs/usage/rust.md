@@ -23,7 +23,7 @@ Renovate updates Rust crates by default.
 
 If any dependencies are hosted in private Git repositories, [Git Authentication for cargo](https://doc.rust-lang.org/cargo/appendix/git-authentication.html) must be set up.
 
-If any dependencies are hosted on private crate registries (ie., not on `crates.io`), then credentials should be set up in such a way that the Git command-line is able to clone the registry index.
+If any dependencies are hosted on private crate registries (i.e., not on `crates.io`), then credentials should be set up in such a way that the Git command-line is able to clone the registry index.
 Third-party crate registries usually provide instructions to achieve this.
 
 Both of these are currently only possible when running Renovate self-hosted.

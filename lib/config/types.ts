@@ -12,6 +12,7 @@ export type RenovateConfigStage =
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
@@ -134,7 +135,7 @@ export interface LegacyAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  requireConfig?: boolean;
+  requireConfig?: RequiredConfig;
 }
 export type ExecutionMode = 'branch' | 'update';
 
@@ -213,6 +214,7 @@ export interface RenovateConfig
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;
+  repoIsActivated?: boolean;
 
   updateType?: UpdateType;
 

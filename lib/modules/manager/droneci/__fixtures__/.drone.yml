@@ -29,3 +29,18 @@ services:
     image: redis:alpine
     ports:
       - 6379
+
+  - name: node
+    image: "amd64/node:10.0.0\
+            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201"
+    commands:
+      - npm install
+      - npm test
+
+  - name: node
+    image: 'amd64/node\
+            :10.0.0\
+            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201'
+    commands:
+      - npm install
+      - npm test
