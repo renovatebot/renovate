@@ -4,7 +4,6 @@ import { getConfig, mocked, partial } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
-import { GitDatasource } from '../../../../modules/datasource/git-refs/base';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
@@ -19,6 +18,22 @@ import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
 jest.mock('../../../../modules/datasource/docker');
+
+jest.mock('../../../../modules/datasource/git-refs', function () {
+  const { GitRefsDatasource: Orig } = jest.requireActual(
+    '../../../../modules/datasource/git-refs'
+  );
+  const Mocked = jest.fn().mockImplementation(() => ({
+    getReleases: () =>
+      Promise.resolve({
+        releases: [{ version: 'master' }],
+      }),
+    getDigest: () =>
+      Promise.resolve('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
+  }));
+  Mocked['id'] = Orig.id;
+  return { GitRefsDatasource: Mocked };
+});
 
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
@@ -1643,29 +1658,6 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles git submodule update', async () => {
-      jest.mock('../../../../modules/datasource/git-refs', () => ({
-        GitRefsDatasource: jest.fn(() => ({
-          getReleases: jest.fn().mockResolvedValue({
-            releases: [
-              {
-                version: 'master',
-              },
-            ],
-          }),
-          getDigest: jest
-            .fn()
-            .mockResolvedValue('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
-        })),
-      }));
-
-      jest.spyOn(GitDatasource, 'getRawRefs').mockResolvedValueOnce([
-        {
-          value: 'HEAD',
-          hash: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
-          type: '',
-        },
-      ]);
-
       config.depName = 'some-path';
       config.versioning = gitVersioningId;
       config.datasource = GitRefsDatasource.id;
