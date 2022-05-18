@@ -19,6 +19,22 @@ import * as lookup from '.';
 
 jest.mock('../../../../modules/datasource/docker');
 
+jest.mock('../../../../modules/datasource/git-refs', function () {
+  const { GitRefsDatasource: Orig } = jest.requireActual(
+    '../../../../modules/datasource/git-refs'
+  );
+  const Mocked = jest.fn().mockImplementation(() => ({
+    getReleases: () =>
+      Promise.resolve({
+        releases: [{ version: 'master' }],
+      }),
+    getDigest: () =>
+      Promise.resolve('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
+  }));
+  Mocked['id'] = Orig.id;
+  return { GitRefsDatasource: Mocked };
+});
+
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
   ...Fixtures.getJson('01.json', fixtureRoot),
@@ -1642,28 +1658,6 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles git submodule update', async () => {
-      jest.mock('../../../../modules/datasource/git-refs', () => ({
-        GitRefsDatasource: jest.fn(() => ({
-          getRawRefs: jest.fn().mockResolvedValueOnce([
-            {
-              value: 'HEAD',
-              hash: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
-              type: '',
-            },
-          ]),
-          getReleases: jest.fn().mockResolvedValue({
-            releases: [
-              {
-                version: 'master',
-              },
-            ],
-          }),
-          getDigest: jest
-            .fn()
-            .mockResolvedValue('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
-        })),
-      }));
-
       config.depName = 'some-path';
       config.versioning = gitVersioningId;
       config.datasource = GitRefsDatasource.id;
