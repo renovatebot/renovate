@@ -142,7 +142,7 @@ If you need any further assistance then you can also [request help here](${
         'A pull request already exists'
       )
     ) {
-      logger.debug('Migration PR already exists but cannot find it');
+      logger.warn({ err }, 'Migration PR already exists but cannot find it');
       await deleteBranch(branchName);
       return;
     }
