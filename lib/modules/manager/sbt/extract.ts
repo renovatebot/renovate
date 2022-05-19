@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
@@ -349,7 +349,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
   const equalsToNewLineRe = regEx(/=\s*\n/, 'gm');
   const goodContentForParsing = content.replace(equalsToNewLineRe, '=');
-  const lines = goodContentForParsing.split(regEx(/\n/)).map(stripComment);
+  const lines = goodContentForParsing.split(newlineRegex).map(stripComment);
 
   const acc: PackageFile & ParseOptions = {
     registryUrls: [MAVEN_REPO],
