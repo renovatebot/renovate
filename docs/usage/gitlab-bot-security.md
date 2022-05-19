@@ -83,7 +83,7 @@ Please see the [renovate-bot/renovate-runner README on GitLab](https://gitlab.co
 We're trying to find a workable design for the GitLab app, so we can enable it safely again.
 If you have any ideas, open a [discussion](https://github.com/renovatebot/renovate/discussions) and let us know!
 
-## Current status
+## Status of the Renovate app for GitLab
 
 **Update:** GitLab now introduced Group Access Tokens & API for paid & self-hosted instances, but a good permission setup/flow is still not possible.
 Check out [GitLab issue #346298](https://gitlab.com/gitlab-org/gitlab/-/issues/346298).
