@@ -13,7 +13,7 @@ Remember to set `platform=bitbucket-server` somewhere in your Renovate config fi
 
 If you're not using `@renovate-bot` as username then set your custom `username` for the bot account.
 
-If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
+If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
 ## Unsupported platform features/concepts
 

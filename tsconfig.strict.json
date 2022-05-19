@@ -32,7 +32,6 @@
     "lib/workers/global/initialize.ts",
     "lib/workers/repository/cache.ts",
     "lib/workers/repository/changelog/index.ts",
-    "lib/workers/repository/dependency-dashboard.ts",
     "lib/workers/repository/error-config.ts",
     "lib/workers/repository/error.ts",
     "lib/workers/repository/extract/file-match.ts",
