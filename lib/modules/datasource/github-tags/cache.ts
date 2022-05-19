@@ -1,4 +1,3 @@
-import { TargetGrant } from '@aws-sdk/client-s3';
 import type { GithubHttp } from '../../../util/http/github';
 import {
   AbstractGithubDatasourceCache,
@@ -11,10 +10,10 @@ const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
   repository(owner: $owner, name: $name) {
     payload: refs(
-      refPrefix: "refs/tags/"
       first: $count
-      before: $cursor
+      after: $cursor
       orderBy: {field: TAG_COMMIT_DATE, direction: DESC}
+      refPrefix: "refs/tags/"
     ) {
       nodes {
         version: name

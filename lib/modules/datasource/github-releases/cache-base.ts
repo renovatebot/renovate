@@ -106,12 +106,8 @@ export abstract class AbstractGithubDatasourceCache<
         GithubDatasourceCache<StoredItem>
       >(this.cacheNs, cacheKey);
 
-      let isCacheUpdated = false;
-
       if (cachedRes && !isExpired(now, cachedRes.cacheCreatedAt, hardReset)) {
         cache = cachedRes;
-      } else {
-        isCacheUpdated = true;
       }
 
       if (isExpired(now, cache.cacheUpdatedAt, softReset)) {
@@ -135,6 +131,7 @@ export abstract class AbstractGithubDatasourceCache<
               body: { query: this.graphqlQuery, variables },
             });
             pagesAllowed -= 1;
+            logger.info(this.cacheNs);
 
             const data = graphqlRes.body.data;
             if (data) {
@@ -161,7 +158,6 @@ export abstract class AbstractGithubDatasourceCache<
                     !this.isEquivalent(oldStoredItem, newStoredItem)
                   ) {
                     cache.items[version] = newStoredItem;
-                    isCacheUpdated = true;
                   } else if (
                     isExpired(now, releaseTimestamp, stabilityPeriod)
                   ) {
@@ -185,19 +181,16 @@ export abstract class AbstractGithubDatasourceCache<
             !checkedItems.has(version)
           ) {
             delete cache.items[version];
-            isCacheUpdated = true;
           }
         }
 
-        if (isCacheUpdated) {
-          const expiry = DateTime.fromISO(cache.cacheCreatedAt).plus(hardReset);
-          const { minutes: ttlMinutes } = expiry
-            .diff(now, ['minutes'])
-            .toObject();
-          if (ttlMinutes && ttlMinutes > 0) {
-            cache.cacheUpdatedAt = now.toISO();
-            await packageCache.set(this.cacheNs, cacheKey, cache, ttlMinutes);
-          }
+        const expiry = DateTime.fromISO(cache.cacheCreatedAt).plus(hardReset);
+        const { minutes: ttlMinutes } = expiry
+          .diff(now, ['minutes'])
+          .toObject();
+        if (ttlMinutes && ttlMinutes > 0) {
+          cache.cacheUpdatedAt = now.toISO();
+          await packageCache.set(this.cacheNs, cacheKey, cache, ttlMinutes);
         }
       }
     }

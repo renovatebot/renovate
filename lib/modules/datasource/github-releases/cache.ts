@@ -10,8 +10,8 @@ export const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
   repository(owner: $owner, name: $name) {
     payload: releases(
-      after: $cursor
       first: $count
+      after: $cursor
       orderBy: {field: CREATED_AT, direction: DESC}
     ) {
       nodes {
