@@ -80,15 +80,17 @@ Use [ES6 module](https://exploringjs.com/es6/ch_modules.html#sec_basics-of-es6-m
 
 ```js
 import { square, diag } from 'lib';
-```
 
-or
+// You may also use:
 
-```js
 import * as lib from 'lib';
 ```
 
-Avoid `require` `(as in import x = require('...');)` for imports.
+And avoid `require`:
+
+```js
+import x = require('...');
+```
 
 ### HTTP & RESTful API request handling
 
