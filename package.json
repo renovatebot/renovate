@@ -275,7 +275,7 @@
     "eslint-plugin-promise": "6.0.0",
     "eslint-plugin-typescript-enum": "2.1.0",
     "expect-more-jest": "5.4.0",
-    "glob": "8.0.1",
+    "glob": "8.0.2",
     "graphql": "16.5.0",
     "husky": "7.0.4",
     "jest": "27.5.1",
