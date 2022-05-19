@@ -4,7 +4,12 @@ import { regEx } from '../../../util/regex';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
-import type { RegistryRepository, TerraformRelease } from './types';
+import type {
+  RegistryRepository,
+  ServiceDiscoveryResult,
+  TerraformModuleVersions,
+  TerraformRelease,
+} from './types';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
@@ -36,21 +41,46 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       return null;
     }
 
-    const { registry, repository } =
+    const { registry: registryUrlNormalized, repository } =
       TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     logger.trace(
-      { registry, terraformRepository: repository },
+      { registryUrlNormalized, terraformRepository: repository },
       'terraform-module.getReleases()'
     );
 
+    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+      registryUrlNormalized
+    );
+    if (registryUrlNormalized === this.defaultRegistryUrls[0]) {
+      return await this.queryRegistryExtendedApi(
+        serviceDiscovery,
+        registryUrlNormalized,
+        repository
+      );
+    }
+
+    return await this.queryRegistryVersions(
+      serviceDiscovery,
+      registryUrlNormalized,
+      repository
+    );
+  }
+
+  /**
+   * this uses the api that terraform registry has in addition to the base api
+   * this endpoint provides more information, such as release date
+   * https://www.terraform.io/registry/api-docs#latest-version-for-a-specific-module-provider
+   */
+  private async queryRegistryExtendedApi(
+    serviceDiscovery: ServiceDiscoveryResult,
+    registryUrl: string,
+    repository: string
+  ): Promise<ReleaseResult | null> {
     let res: TerraformRelease;
     let pkgUrl: string;
 
     try {
-      const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-        registryUrl
-      );
-      pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
+      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}`;
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
@@ -70,9 +100,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-      dep.homepage = `https://registry.terraform.io/modules/${repository}`;
-    }
+    dep.homepage = `${registryUrl}/modules/${repository}`;
     // set published date for latest release
     const latestVersion = dep.releases.find(
       (release) => res.version === release.version
@@ -80,8 +108,37 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
+    return dep;
+  }
 
-    logger.trace({ dep }, 'dep');
+  /**
+   * this version uses the Module Registry Protocol that all registries are required to implement
+   * https://www.terraform.io/internals/module-registry-protocol
+   */
+  private async queryRegistryVersions(
+    serviceDiscovery: ServiceDiscoveryResult,
+    registryUrl: string,
+    repository: string
+  ): Promise<ReleaseResult | null> {
+    let res: TerraformModuleVersions;
+    let pkgUrl: string;
+    try {
+      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}/versions`;
+      res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
+      if (res.modules.length < 1) {
+        logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
+        return null;
+      }
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+
+    // Simplify response before caching and returning
+    const dep: ReleaseResult = {
+      releases: res.modules[0].versions.map(({ version }) => ({
+        version,
+      })),
+    };
     return dep;
   }
 
