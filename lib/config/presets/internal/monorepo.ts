@@ -94,7 +94,6 @@ const repoGroups = {
   'dotnet-azure-ad-identitymodel-extensions':
     'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
-  nswag: 'https://github.com/RicoSuter/NSwag',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
@@ -162,6 +161,7 @@ const repoGroups = {
   nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
+  nswag: 'https://github.com/RicoSuter/NSwag',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
   orleans: 'https://github.com/dotnet/orleans',
   feign: 'https://github.com/OpenFeign/feign',
