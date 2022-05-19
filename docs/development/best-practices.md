@@ -50,9 +50,9 @@ const b = new Array(2, 3); // [2, 3];
 
 Instead, always use bracket notation to initialize arrays, or `from` to initialize an Array with a certain size i.e.
 
-```js
+```ts
 // [0, 0, 0, 0, 0]
-Array.from < number > { length: 5 }.fill(0);
+Array.from<number>({ length: 5 }).fill(0);
 ```
 
 [Source](https://google.github.io/styleguide/tsguide.html#array-constructor)
@@ -91,7 +91,7 @@ import * as lib from 'lib';
 
 And avoid `require`:
 
-```js
+```ts
 import x = require('...');
 ```
 
@@ -109,6 +109,7 @@ Use `UTC` to be time zone independent.
 ### Unit testing
 
 - Use `it.each` rather than `test.each`
+  - Prefer  [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, prettier will help with format
 - Mock Date/Time when testing a Date/Time dependent module
   - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
 - Prefer `jest.spyOn` for mocking single functions, or mock entire modules
