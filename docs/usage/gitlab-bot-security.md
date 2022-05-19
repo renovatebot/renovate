@@ -86,7 +86,7 @@ If you have any ideas, open a [discussion](https://github.com/renovatebot/renova
 ## Current status
 
 **Update:** GitLab now introduced Group Access Tokens & API for paid & self-hosted instances, but a good permission setup/flow is still not possible.
-Check out the [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/346298) we created.
+Check out [GitLab issue #346298](https://gitlab.com/gitlab-org/gitlab/-/issues/346298).
 
 ## Acknowledgments
 
