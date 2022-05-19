@@ -28,7 +28,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
     if (
       !ignoredKeys.includes(el[0]) ||
-      (el[0] === 'default' && typeof el[1] !== 'object' && name !== 'prBody')
+      (el[0] === 'default' && typeof el[1] !== 'object' && name !== 'prBody') ||
+      // only show array and object defaults if they are not null and are not empty
+      (el[0] === 'default' &&
+        (type === 'array' || type === 'object') &&
+        el[1] !== null &&
+        Object.keys(el[1]).length > 0)
     ) {
       if (type === 'string' && el[0] === 'default') {
         el[1] = `\`"${el[1]}"\``;
@@ -42,6 +47,10 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       }
       if (type === 'string' && el[0] === 'default' && el[1].length > 200) {
         el[1] = `[template]`;
+      }
+      // objects and arrays should be printed in JSON notation
+      if ((type === 'object' || type === 'array') && el[0] === 'default') {
+        el[1] = `\`${JSON.stringify(el[1])}\``;
       }
       data.push(el);
     }
