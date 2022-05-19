@@ -5,7 +5,7 @@ import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { getCacheableReleases } from './cache';
+import { CacheableGithubReleases } from './cache';
 import { getApiBaseUrl, getSourceUrl } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
@@ -28,9 +28,12 @@ export class GithubReleasesDatasource extends Datasource {
 
   override http: GithubHttp;
 
+  private releasesCache: CacheableGithubReleases;
+
   constructor(id = GithubReleasesDatasource.id) {
     super(id);
     this.http = new GithubHttp(id);
+    this.releasesCache = new CacheableGithubReleases(this.http);
   }
 
   async findDigestFile(
@@ -230,7 +233,7 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Return a dependency object containing sourceUrl string and releases array
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const releases = await getCacheableReleases(this.http, config);
+    const releases = await this.releasesCache.getReleases(config);
     return releases.length
       ? {
           sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
