@@ -407,24 +407,24 @@ This ensures that the Renovate application itself trusts the `self-signed-certif
 
 The helper programs (e.g. Git, npm) use the system trust store.
 For them to trust a self-signed certificate you must add it to the systems trust store.
-On Ubuntu/Debian and many Linux-based systems, this can be achieved by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
 
 If you are using the official [Renovate Docker image](#docker) then the best way is to build your own Docker image with the self-signed certificate added to the standard Renovate Docker image.
-The following `Dockerfile` does that:
+For example, the following `Dockerfile` is set up to use a self-signed certificate:
 
 ```dockerfile
 FROM renovate/renovate
 
-# Changes to the CA require root permissions
+# Changes to the certificate authority require root permissions
 USER root
 
 # Copy and install the self signed certificate
 COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
-# Change back to the ubuntu user
+# Change back to the Ubuntu user
 USER 1000
 
-# Node comes with an own CA store and thus needs to trust the self signed certificate explicitly
+# Node comes with an own certificate authority store and thus needs to trust the self-signed certificate explicitly
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
 ```
