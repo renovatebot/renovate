@@ -93,14 +93,20 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchLanguages.length && language) {
+  if (matchLanguages.length) {
+    if (!language) {
+      return false;
+    }
     const isMatch = matchLanguages.includes(language);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (matchBaseBranches.length && baseBranch) {
+  if (matchBaseBranches.length) {
+    if (!baseBranch) {
+      return false;
+    }
     const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
       const isAllowedPred = configRegexPredicate(matchBaseBranch);
       if (isAllowedPred) {
@@ -114,14 +120,20 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchManagers.length && manager) {
+  if (matchManagers.length) {
+    if (!manager) {
+      return false;
+    }
     const isMatch = matchManagers.includes(manager);
     if (!isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (matchDatasources.length && datasource) {
+  if (matchDatasources.length) {
+    if (!datasource) {
+      return false;
+    }
     const isMatch = matchDatasources.includes(datasource);
     if (!isMatch) {
       return false;
@@ -138,11 +150,13 @@ function matchesRule(
     positiveMatch = true;
   }
   if (
-    depName &&
-    (matchPackageNames.length ||
-      matchPackagePatterns.length ||
-      matchPackagePrefixes.length)
+    matchPackageNames.length ||
+    matchPackagePatterns.length ||
+    matchPackagePrefixes.length
   ) {
+    if (!depName) {
+      return false;
+    }
     let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -169,8 +183,8 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (excludePackageNames.length && depName) {
-    const isMatch = excludePackageNames.includes(depName);
+  if (excludePackageNames.length) {
+    const isMatch = depName && excludePackageNames.includes(depName);
     if (isMatch) {
       return false;
     }
@@ -221,14 +235,17 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchCurrentVersion && currentValue) {
+  if (matchCurrentVersion) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
       matchCurrentVersionStr
     );
     if (matchCurrentVersionPred) {
-      if (!unconstrainedValue && !matchCurrentVersionPred(currentValue)) {
+      if (
+        !unconstrainedValue &&
+        (!currentValue || !matchCurrentVersionPred(currentValue))
+      ) {
         return false;
       }
       positiveMatch = true;
@@ -237,7 +254,10 @@ function matchesRule(
       try {
         isMatch =
           unconstrainedValue ||
-          version.matches(matchCurrentVersionStr, currentValue);
+          !!(
+            currentValue &&
+            version.matches(matchCurrentVersionStr, currentValue)
+          );
       } catch (err) {
         // Do nothing
       }

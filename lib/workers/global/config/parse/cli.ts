@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
@@ -29,6 +30,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
         .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
         .replace(/^--dry-run$/, '--dry-run=true')
+        .replace(/^--require-config$/, '--require-config=true')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -54,7 +56,7 @@ export function getConfig(input: string[]): AllConfig {
         return [];
       }
       try {
-        return JSON.parse(val);
+        return JSON5.parse(val);
       } catch (err) {
         return val.split(',').map((el) => el.trim());
       }
@@ -64,7 +66,7 @@ export function getConfig(input: string[]): AllConfig {
         return {};
       }
       try {
-        return JSON.parse(val);
+        return JSON5.parse(val);
       } catch (err) {
         throw new Error("Invalid JSON value: '" + val + "'");
       }
@@ -128,6 +130,19 @@ export function getConfig(input: string[]): AllConfig {
                 config[option.name] = null;
               } else if (config[option.name] === 'null') {
                 config[option.name] = null;
+              }
+            }
+            if (option.name === 'requireConfig') {
+              if (config[option.name] === 'true') {
+                logger.warn(
+                  'cli config requireConfig property has been changed to required'
+                );
+                config[option.name] = 'required';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config requireConfig property has been changed to optional'
+                );
+                config[option.name] = 'optional';
               }
             }
           }

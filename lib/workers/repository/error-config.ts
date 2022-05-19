@@ -41,6 +41,10 @@ export async function raiseConfigWarningIssue(
     }
   } else if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would ensure config error issue');
+  } else if (config.suppressNotifications?.includes('configErrorIssue')) {
+    logger.info(
+      'configErrorIssue - configuration failure, issues will be suppressed'
+    );
   } else {
     const once = false;
     const shouldReopen = config.configWarningReuseIssue;

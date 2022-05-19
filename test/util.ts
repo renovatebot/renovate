@@ -89,6 +89,9 @@ export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
 }
 
+/**
+ * @deprecated use Fixtures.getBinary
+ */
 export function loadBinaryFixture(
   fixtureFile: string,
   fixtureRoot = '.'
@@ -97,11 +100,17 @@ export function loadBinaryFixture(
   return readFileSync(fixtureAbsFile);
 }
 
+/**
+ * @deprecated use Fixtures.get
+ */
 export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
   const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
   return readFileSync(fixtureAbsFile, { encoding: 'utf8' });
 }
 
+/**
+ * @deprecated use Fixtures.getJson
+ */
 export function loadJsonFixture<T = any>(
   fixtureFile: string,
   fixtureRoot = '.'

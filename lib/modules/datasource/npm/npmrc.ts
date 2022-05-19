@@ -85,14 +85,14 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     rules.hostRules?.push(hostRule);
   }
   // Generate packageRules
-  const matchDataSources = ['npm'];
+  const matchDatasources = ['npm'];
   const { registry } = npmrc;
   // packageRules order matters, so look for a default registry first
   if (is.nonEmptyString(registry)) {
     if (validateUrl(registry)) {
       // Default registry
       rules.packageRules?.push({
-        matchDataSources,
+        matchDatasources,
         registryUrls: [registry],
       });
     } else {
@@ -110,7 +110,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
       const scope = keyParts.join(':');
       if (validateUrl(value)) {
         rules.packageRules?.push({
-          matchDataSources,
+          matchDatasources,
           matchPackagePrefixes: [scope + '/'],
           registryUrls: [value],
         });

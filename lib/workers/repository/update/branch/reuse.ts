@@ -36,7 +36,7 @@ export async function shouldReuseExistingBranch(
       logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
       return result;
     }
-    if (pr.body?.includes(`- [x] <!-- rebase-check -->`)) {
+    if (pr.bodyStruct?.rebaseRequested) {
       logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
       return result;
     }

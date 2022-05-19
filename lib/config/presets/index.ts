@@ -335,7 +335,7 @@ export async function resolveConfigPresets(
         }
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
-          baseConfig,
+          baseConfig ?? inputConfig,
           ignorePresets,
           existingPresets.concat([preset])
         );

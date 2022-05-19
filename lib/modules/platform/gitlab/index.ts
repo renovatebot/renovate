@@ -30,6 +30,7 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
+import { getPrBodyStruct } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -180,13 +181,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  // TODO null check #7154
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  return JSON5.parse(raw);
 }
 
 function getRepoUrl(
@@ -611,7 +608,7 @@ export async function getPr(iid: number): Promise<Pr> {
     targetBranch: mr.target_branch,
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
-    body: mr.description,
+    bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? PrState.Open : mr.state,
     hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,

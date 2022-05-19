@@ -2,7 +2,9 @@
 
 exports[`modules/platform/gitea/index createPr should use base branch by default 1`] = `
 Object {
-  "body": "pr-body",
+  "bodyStruct": Object {
+    "hash": "9d586a6aedc4e7cb205276933c9e474cd3c2b341d3340458c31eb750795f197d",
+  },
   "cannotMergeReason": undefined,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
@@ -19,7 +21,9 @@ Object {
 
 exports[`modules/platform/gitea/index createPr should use default branch if requested 1`] = `
 Object {
-  "body": "pr-body",
+  "bodyStruct": Object {
+    "hash": "9d586a6aedc4e7cb205276933c9e474cd3c2b341d3340458c31eb750795f197d",
+  },
   "cannotMergeReason": undefined,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
@@ -36,7 +40,9 @@ Object {
 
 exports[`modules/platform/gitea/index getPr should fallback to direct fetching if cache fails 1`] = `
 Object {
-  "body": "some random pull request",
+  "bodyStruct": Object {
+    "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
+  },
   "cannotMergeReason": "pr.mergeable=\\"false\\"",
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
@@ -53,7 +59,9 @@ Object {
 
 exports[`modules/platform/gitea/index getPr should return enriched pull request which exists if open 1`] = `
 Object {
-  "body": "some random pull request",
+  "bodyStruct": Object {
+    "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
+  },
   "cannotMergeReason": undefined,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
@@ -78,7 +86,9 @@ Object {
 exports[`modules/platform/gitea/index getPrList should filter list by creator 2`] = `
 Array [
   Object {
-    "body": "some random pull request",
+    "bodyStruct": Object {
+      "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
+    },
     "cannotMergeReason": undefined,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
@@ -92,7 +102,9 @@ Array [
     "title": "Some PR",
   },
   Object {
-    "body": "other random pull request",
+    "bodyStruct": Object {
+      "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
+    },
     "cannotMergeReason": undefined,
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",
@@ -111,7 +123,9 @@ Array [
 exports[`modules/platform/gitea/index getPrList should return list of pull requests 1`] = `
 Array [
   Object {
-    "body": "some random pull request",
+    "bodyStruct": Object {
+      "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
+    },
     "cannotMergeReason": undefined,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
@@ -125,7 +139,9 @@ Array [
     "title": "Some PR",
   },
   Object {
-    "body": "other random pull request",
+    "bodyStruct": Object {
+      "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
+    },
     "cannotMergeReason": undefined,
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",

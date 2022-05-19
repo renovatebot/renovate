@@ -158,7 +158,7 @@ If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](ht
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
-Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
 
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
@@ -249,7 +249,7 @@ Also replace `gitlab-token` value with the one created during the previous step.
 
 If running against GitHub Enterprise Server, change the above `gitlab` values to the equivalent GitHub ones.
 
-You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
+You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
 Most people will run Renovate via cron, e.g. once per hour.
 Here is an example Bash script that you can point `cron` to:
@@ -268,7 +268,7 @@ renovate
 
 <!-- prettier-ignore -->
 !!! note
-    The GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
+    The GitHub.com token as an environment variable is needed to fetch Release Notes that are usually hosted on github.com.
     You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.

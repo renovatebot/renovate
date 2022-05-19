@@ -21,7 +21,7 @@ Renovate will:
 ## Which Renovate versions are officially supported?
 
 The Renovate maintainers only support the latest version of Renovate.
-The Renovate team will only create bugfixes for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
+The Renovate team will only fix bugs for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
 
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
