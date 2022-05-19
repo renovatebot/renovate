@@ -409,7 +409,7 @@ The helper programs (e.g. Git, npm) use the system trust store.
 For them to trust a self-signed certificate you must add it to the systems trust store.
 On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
 
-If you are using the official [Renovate Docker image](#docker) then the best way is to build your own Docker image with the self-signed certificate added to the standard Renovate Docker image.
+If you're using the official [Renovate Docker image](#docker) then we recommend you to add the self-signed certificate and build your own modified Docker image.
 For example, the following `Dockerfile` is set up to use a self-signed certificate:
 
 ```dockerfile
