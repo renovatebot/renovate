@@ -5,6 +5,7 @@ import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { getCacheableReleases } from './cache';
 import { getApiBaseUrl, getSourceUrl } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
@@ -218,11 +219,6 @@ export class GithubReleasesDatasource extends Datasource {
     return newDigest;
   }
 
-  @cache({
-    namespace: 'datasource-github-releases',
-    key: ({ packageName: repo, registryUrl }: GetReleasesConfig) =>
-      `${registryUrl}:${repo}:tags`,
-  })
   /**
    * github.getReleases
    *
@@ -233,27 +229,13 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
-  async getReleases({
-    packageName: repo,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
-    const res = await this.http.getJson<GithubRelease[]>(url, {
-      paginate: true,
-    });
-    const githubReleases = res.body;
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: githubReleases
-        .filter(({ draft }) => draft !== true)
-        .map(({ tag_name, published_at, prerelease }) => ({
-          version: tag_name,
-          gitRef: tag_name,
-          releaseTimestamp: published_at,
-          isStable: prerelease ? false : undefined,
-        })),
-    };
-    return dependency;
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const releases = await getCacheableReleases(this.http, config);
+    return releases.length
+      ? {
+          sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+          releases,
+        }
+      : null;
   }
 }
