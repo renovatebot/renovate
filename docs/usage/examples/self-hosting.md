@@ -399,8 +399,8 @@ The logging level output is controlled by the Bunyan logging library.
 
 ## Self-signed TLS/SSL certificates
 
-Renovate and invoked helper programs (e.g. Git, npm) use a secure TLS connection (e.g. HTTPS) to connect to source code platforms and dependency hosts.
-If the systems use any self-signed certificates or certificate authorities then Renovate needs to be configured to trust these additional certificates.
+Renovate and invoked helper programs (e.g. Git, npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
+If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be configured to trust these additional certificates.
 
 For the main Renovate Node.js application set the environment variable [`NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt`](https://nodejs.org/api/cli.html#node_extra_ca_certsfile).
 This ensures that the Renovate application itself trusts the `self-signed-certificate.crt` and can establish secure connections to systems using that certificate or certificates signed by this certificate authority.
