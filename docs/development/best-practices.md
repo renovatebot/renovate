@@ -11,7 +11,7 @@ Follow these best practices when you're working on our code.
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
 
-```js
+```ts
 // istanbul ignore next: can never happen
 ```
 
@@ -25,14 +25,14 @@ Metadata which is separate from its message is harder for human readability, so 
 
 Good:
 
-```js
+```ts
 logger.debug({ config }, 'Full config');
 logger.warn({ presetName }, 'Failed to look up preset');
 ```
 
 Avoid:
 
-```js
+```ts
 logger.debug({ branchName }, 'Generated branchName');
 logger.warn(`Failed to look up preset ${presetName}`);
 ```
@@ -43,7 +43,7 @@ Avoid the `Array()` constructor, with or without `new`, in your TypeScript code.
 It has confusing and contradictory usage.
 So you should avoid:
 
-```js
+```ts
 const a = new Array(2); // [undefined, undefined]
 const b = new Array(2, 3); // [2, 3];
 ```
@@ -81,7 +81,7 @@ This way all `imports` follow the same pattern.
 
 Use [ES6 module](https://exploringjs.com/es6/ch_modules.html#sec_basics-of-es6-modules) syntax, i.e.
 
-```js
+```ts
 import { square, diag } from 'lib';
 
 // You may also use:
@@ -109,7 +109,7 @@ Use `UTC` to be time zone independent.
 ### Unit testing
 
 - Use `it.each` rather than `test.each`
-  - Prefer  [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, prettier will help with format
+- Prefer [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, Prettier will help with formatting
 - Mock Date/Time when testing a Date/Time dependent module
   - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
 - Prefer `jest.spyOn` for mocking single functions, or mock entire modules
@@ -119,7 +119,7 @@ Use `UTC` to be time zone independent.
 
 - Use `Fixture` class for loading fixtures
 
-```js
+```ts
 Fixture.get('./file.json'); // for loading raw data
 Fixture.getJson('./file.json'); // for loading and parsing objects
 ```
