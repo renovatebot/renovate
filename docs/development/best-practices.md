@@ -1,5 +1,8 @@
 # Best practices
 
+This document explains our best practices.
+Follow these best practices when you're working on our code.
+
 ## General
 
 - Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
