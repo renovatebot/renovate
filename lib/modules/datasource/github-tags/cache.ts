@@ -1,3 +1,4 @@
+import { TargetGrant } from '@aws-sdk/client-s3';
 import type { GithubHttp } from '../../../util/http/github';
 import {
   AbstractGithubDatasourceCache,
@@ -12,15 +13,24 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
     payload: refs(
       refPrefix: "refs/tags/"
       first: $count
-      after: $cursor
+      before: $cursor
       orderBy: {field: TAG_COMMIT_DATE, direction: DESC}
     ) {
       nodes {
         version: name
-        commit: target {
+        target {
+          type: __typename
           ... on Commit {
             hash: oid
             releaseTimestamp: committedDate
+          }
+          ... on Tag {
+            target {
+              ... on Commit {
+                hash: oid
+                releaseTimestamp: committedDate
+              }
+            }
           }
         }
       }
@@ -34,10 +44,19 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 `;
 
 interface FetchedTag extends FetchedItemBase {
-  commit: {
-    hash: string;
-    releaseTimestamp: string;
-  };
+  target:
+    | {
+        type: 'Commit';
+        hash: string;
+        releaseTimestamp: string;
+      }
+    | {
+        type: 'Tag';
+        target: {
+          hash: string;
+          releaseTimestamp: string;
+        };
+      };
 }
 
 interface StoredTag extends StoredItemBase {
@@ -56,9 +75,16 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
     super(http);
   }
 
-  coerceFetched(item: FetchedTag): StoredTag {
-    const { version, commit } = item;
-    return { version, ...commit };
+  coerceFetched(item: FetchedTag): StoredTag | null {
+    const { version, target } = item;
+    if (target.type === 'Commit') {
+      const { hash, releaseTimestamp } = target;
+      return { version, hash, releaseTimestamp };
+    } else if (target.type === 'Tag') {
+      const { hash, releaseTimestamp } = target.target;
+      return { version, hash, releaseTimestamp };
+    }
+    return null;
   }
 
   coerceStored(item: StoredTag): Release {

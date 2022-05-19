@@ -80,7 +80,7 @@ export abstract class AbstractGithubDatasourceCache<
 
   abstract readonly cacheNs: string;
   abstract readonly graphqlQuery: string;
-  abstract coerceFetched(fetchedItem: FetchedItem): StoredItem;
+  abstract coerceFetched(fetchedItem: FetchedItem): StoredItem | null;
   abstract isEquivalent(oldItem: StoredItem, newItem: StoredItem): boolean;
   abstract coerceStored(storedItem: StoredItem): Release;
 
@@ -150,23 +150,24 @@ export abstract class AbstractGithubDatasourceCache<
               }
 
               for (const item of fetchedItems) {
-                const { version } = item;
-                const oldStoredItem = cache.items[version];
-                const storedItem = this.coerceFetched(item);
+                const newStoredItem = this.coerceFetched(item);
+                if (newStoredItem) {
+                  const { version, releaseTimestamp } = newStoredItem;
+                  checkedItems.add(version);
 
-                checkedItems.add(version);
-
-                const { releaseTimestamp } = storedItem;
-
-                if (
-                  !oldStoredItem ||
-                  !this.isEquivalent(oldStoredItem, storedItem)
-                ) {
-                  cache.items[version] = storedItem;
-                  isCacheUpdated = true;
-                } else if (isExpired(now, releaseTimestamp, stabilityPeriod)) {
-                  isIterating = false;
-                  break;
+                  const oldStoredItem = cache.items[version];
+                  if (
+                    !oldStoredItem ||
+                    !this.isEquivalent(oldStoredItem, newStoredItem)
+                  ) {
+                    cache.items[version] = newStoredItem;
+                    isCacheUpdated = true;
+                  } else if (
+                    isExpired(now, releaseTimestamp, stabilityPeriod)
+                  ) {
+                    isIterating = false;
+                    break;
+                  }
                 }
               }
             }
