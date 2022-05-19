@@ -38,6 +38,7 @@ logger.warn(`Failed to look up preset ${presetName}`);
 
 Avoid the `Array()` constructor, with or without `new`, in your TypeScript code.
 It has confusing and contradictory usage.
+So you should avoid:
 
 ```js
 const a = new Array(2); // [undefined, undefined]
