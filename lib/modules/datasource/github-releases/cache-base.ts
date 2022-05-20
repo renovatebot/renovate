@@ -56,10 +56,11 @@ export abstract class AbstractGithubDatasourceCache<
 > {
   constructor(
     private http: GithubHttp,
-    private softResetMinutes = 30,
-    private hardResetDays = 7,
-    private stabilityPeriodDays = 31,
-    private perPage = 100,
+    private updateAfterMinutes = 30,
+    private resetAfterDays = 7,
+    private unstableDays = 30,
+    private itemsPerPage = 100,
+    private updatedItemsPerPage = 100,
     private maxPages = 10
   ) {}
 
@@ -71,15 +72,15 @@ export abstract class AbstractGithubDatasourceCache<
   async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
-    const softReset: DurationLike = { minutes: this.softResetMinutes };
-    const hardReset: DurationLike = { days: this.hardResetDays };
-    const stabilityPeriod: DurationLike = { days: this.stabilityPeriodDays };
+    const updateDuration: DurationLike = { minutes: this.updateAfterMinutes };
+    const resetDuration: DurationLike = { days: this.resetAfterDays };
+    const stabilityDuration: DurationLike = { days: this.unstableDays };
 
     const now = DateTime.now();
     let cache: GithubDatasourceCache<StoredItem> = {
       items: {},
       cacheCreatedAt: now.toISO(),
-      cacheUpdatedAt: now.minus(softReset).toISO(),
+      cacheUpdatedAt: now.minus(updateDuration).toISO(),
     };
 
     const baseUrl = getApiBaseUrl(registryUrl).replace('/v3/', '/');
@@ -90,21 +91,27 @@ export abstract class AbstractGithubDatasourceCache<
         GithubDatasourceCache<StoredItem>
       >(this.cacheNs, cacheKey);
 
-      if (cachedRes && !isExpired(now, cachedRes.cacheCreatedAt, hardReset)) {
+      if (
+        cachedRes &&
+        !isExpired(now, cachedRes.cacheCreatedAt, resetDuration)
+      ) {
         cache = cachedRes;
       }
 
-      if (isExpired(now, cache.cacheUpdatedAt, softReset)) {
-        const variables: GithubQueryParams = {
-          owner,
-          name,
-          cursor: null,
-          count: this.perPage,
-        };
+      try {
+        if (isExpired(now, cache.cacheUpdatedAt, updateDuration)) {
+          const variables: GithubQueryParams = {
+            owner,
+            name,
+            cursor: null,
+            count:
+              cache === cachedRes
+                ? this.updatedItemsPerPage
+                : this.itemsPerPage,
+          };
 
-        const checkedItems = new Set<string>();
+          const checkedItems = new Set<string>();
 
-        try {
           let pagesAllowed = this.maxPages;
           let isIterating = true;
           while (pagesAllowed > 0 && isIterating) {
@@ -142,7 +149,7 @@ export abstract class AbstractGithubDatasourceCache<
                   ) {
                     cache.items[version] = newStoredItem;
                   } else if (
-                    isExpired(now, releaseTimestamp, stabilityPeriod)
+                    isExpired(now, releaseTimestamp, stabilityDuration)
                   ) {
                     isIterating = false;
                     break;
@@ -151,30 +158,32 @@ export abstract class AbstractGithubDatasourceCache<
               }
             }
           }
-        } catch (err) {
-          logger.debug(
-            { err },
-            `GitHub datasource: error fetching cacheable GraphQL data`
-          );
-        }
 
-        for (const [version, item] of Object.entries(cache.items)) {
-          if (
-            !isExpired(now, item.releaseTimestamp, stabilityPeriod) &&
-            !checkedItems.has(version)
-          ) {
-            delete cache.items[version];
+          for (const [version, item] of Object.entries(cache.items)) {
+            if (
+              !isExpired(now, item.releaseTimestamp, stabilityDuration) &&
+              !checkedItems.has(version)
+            ) {
+              delete cache.items[version];
+            }
+          }
+
+          const expiry = DateTime.fromISO(cache.cacheCreatedAt).plus(
+            resetDuration
+          );
+          const { minutes: ttlMinutes } = expiry
+            .diff(now, ['minutes'])
+            .toObject();
+          if (ttlMinutes && ttlMinutes > 0) {
+            cache.cacheUpdatedAt = now.toISO();
+            await packageCache.set(this.cacheNs, cacheKey, cache, ttlMinutes);
           }
         }
-
-        const expiry = DateTime.fromISO(cache.cacheCreatedAt).plus(hardReset);
-        const { minutes: ttlMinutes } = expiry
-          .diff(now, ['minutes'])
-          .toObject();
-        if (ttlMinutes && ttlMinutes > 0) {
-          cache.cacheUpdatedAt = now.toISO();
-          await packageCache.set(this.cacheNs, cacheKey, cache, ttlMinutes);
-        }
+      } catch (err) {
+        logger.debug(
+          { err },
+          `GitHub datasource: error fetching cacheable GraphQL data`
+        );
       }
     }
 
