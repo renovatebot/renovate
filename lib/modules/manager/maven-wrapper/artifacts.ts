@@ -4,19 +4,17 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { chmod } from '../../../util/fs';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, stat } from '../../../util/fs';
+import { chmod, readLocalFile, stat } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { id as npmVersioning } from '../../versioning/npm';
-import mavenVersioning from '../../versioning/maven';
 import type { StatusResult } from '../../../util/git/types';
+import mavenVersioning from '../../versioning/maven';
+import { id as npmVersioning } from '../../versioning/npm';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-  PackageDependency,
 } from '../types';
 
 /**
@@ -69,7 +67,18 @@ export async function updateArtifacts({
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
-    let cmd = await createWrapperCommand(updatedDeps);
+    if (
+      !updatedDeps.some(
+        (dep) => dep.depName === 'org.apache.maven.wrapper:maven-wrapper'
+      )
+    ) {
+      logger.info(
+        'Maven wrapper version not updated - skipping Artifacts update'
+      );
+      return null;
+    }
+
+    const cmd = await createWrapperCommand();
     if (!cmd) {
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
@@ -97,11 +106,11 @@ export async function updateArtifacts({
     ).filter(Boolean);
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file.path) },
-      `Returning updated gradle-wrapper files`
+      `Returning updated maven-wrapper files`
     );
     return updateArtifactsResult;
   } catch (err) {
-    logger.debug({ err }, 'Error setting new Gradle Wrapper release value');
+    logger.debug({ err }, 'Error setting new Maven Wrapper release value');
     return [
       {
         artifactError: {
@@ -116,7 +125,7 @@ export async function updateArtifacts({
 async function executeWrapperCommand(
   cmd: string,
   config: UpdateArtifactsConfig
-) {
+): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const execOptions: ExecOptions = {
     docker: {
@@ -142,9 +151,7 @@ async function executeWrapperCommand(
   }
 }
 
-async function createWrapperCommand(
-  updatedDeps: PackageDependency<Record<string, any>>[]
-) {
+async function createWrapperCommand(): Promise<string> {
   const projectDir = GlobalConfig.get('localDir');
   const wrapperExecutableFileName = mavenWrapperFileName();
   const wrapperFullyQualifiedPath = upath.resolve(
