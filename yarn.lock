@@ -2930,7 +2930,15 @@
     "@types/emscripten" "^1.38.0"
     tslib "^1.13.0"
 
-"@yarnpkg/parsers@2.5.0", "@yarnpkg/parsers@^2.4.1", "@yarnpkg/parsers@^2.5.0":
+"@yarnpkg/parsers@2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/parsers/-/parsers-2.5.1.tgz#0e7c510977a410747fc6d3727c1a2a189e6cd6eb"
+  integrity sha512-KtYN6Ez3x753vPF9rETxNTPnPjeaHY11Exlpqb4eTII7WRlnGiZ5rvvQBau4R20Ik5KBv+vS3EJEcHyCunwzzw==
+  dependencies:
+    js-yaml "^3.10.0"
+    tslib "^1.13.0"
+
+"@yarnpkg/parsers@^2.4.1", "@yarnpkg/parsers@^2.5.0":
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/parsers/-/parsers-2.5.0.tgz#adcf364cd451d43145d0838c0d8b6844730896de"
   integrity sha512-LEf3Ex+yAXSTpJKx4CEuJD1ngwDGC3pqkgPuIStThjDWpEG+p3yMDDvzES/c+9ADFQJjBQJfC0TMleV4UTNZkw==
