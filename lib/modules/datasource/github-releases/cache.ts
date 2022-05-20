@@ -1,9 +1,5 @@
 import type { GithubHttp } from '../../../util/http/github';
-import {
-  AbstractGithubDatasourceCache,
-  FetchedItemBase,
-  StoredItemBase,
-} from './cache-base';
+import { AbstractGithubDatasourceCache, StoredItemBase } from './cache-base';
 
 export const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
@@ -33,7 +29,8 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 }
 `;
 
-interface FetchedRelease extends FetchedItemBase {
+interface FetchedRelease {
+  version: string;
   releaseTimestamp: string;
   isDraft: boolean;
   isPrerelease: boolean;
@@ -54,8 +51,8 @@ interface StoredRelease extends StoredItemBase {
 }
 
 export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
-  FetchedRelease,
-  StoredRelease
+  StoredRelease,
+  FetchedRelease
 > {
   cacheNs = 'github-datasource-graphql-releases';
   graphqlQuery = query;

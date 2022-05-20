@@ -15,7 +15,7 @@ export interface GithubQueryParams {
   count: number;
 }
 
-interface QueryResponse<T extends FetchedItemBase> {
+export interface QueryResponse<T = unknown> {
   repository: {
     payload: {
       nodes: T[];
@@ -27,11 +27,8 @@ interface QueryResponse<T extends FetchedItemBase> {
   };
 }
 
-export interface FetchedItemBase {
+export interface StoredItemBase {
   version: string;
-}
-
-export interface StoredItemBase extends FetchedItemBase {
   releaseTimestamp: string;
 }
 
@@ -40,6 +37,30 @@ export interface GithubDatasourceCache<StoredItem extends StoredItemBase> {
   cacheCreatedAt: string;
   cacheUpdatedAt: string;
 }
+
+export interface CacheOptions {
+  updateAfterMinutes?: number;
+  resetAfterDays?: number;
+  unstableDays?: number;
+
+  itemsPerPrefetchPage?: number;
+  maxPrefetchPages?: number;
+
+  itemsPerUpdatePage?: number;
+  maxUpdatePages?: number;
+}
+
+const cacheDefaults: Required<CacheOptions> = {
+  updateAfterMinutes: 30,
+  resetAfterDays: 7,
+  unstableDays: 30,
+
+  itemsPerPrefetchPage: 100,
+  maxPrefetchPages: 10,
+
+  itemsPerUpdatePage: 100,
+  maxUpdatePages: 10,
+};
 
 function isExpired(
   now: DateTime,
@@ -51,18 +72,42 @@ function isExpired(
 }
 
 export abstract class AbstractGithubDatasourceCache<
-  FetchedItem extends FetchedItemBase,
-  StoredItem extends StoredItemBase
+  StoredItem extends StoredItemBase,
+  FetchedItem = unknown
 > {
-  constructor(
-    private http: GithubHttp,
-    private updateAfterMinutes = 30,
-    private resetAfterDays = 7,
-    private unstableDays = 30,
-    private itemsPerPage = 100,
-    private updatedItemsPerPage = 100,
-    private maxPages = 10
-  ) {}
+  private updateDuration: DurationLike;
+  private resetDuration: DurationLike;
+  private stabilityDuration: DurationLike;
+
+  private maxPrefetchPages: number;
+  private itemsPerPrefetchPage: number;
+
+  private maxUpdatePages: number;
+  private itemsPerUpdatePage: number;
+
+  constructor(private http: GithubHttp, opts: CacheOptions = {}) {
+    const {
+      updateAfterMinutes,
+      resetAfterDays,
+      unstableDays,
+      maxPrefetchPages,
+      itemsPerPrefetchPage,
+      maxUpdatePages,
+      itemsPerUpdatePage,
+    } = {
+      ...cacheDefaults,
+      ...opts,
+    };
+
+    this.updateDuration = { minutes: updateAfterMinutes };
+    this.resetDuration = { days: resetAfterDays };
+    this.stabilityDuration = { days: unstableDays };
+
+    this.maxPrefetchPages = maxPrefetchPages;
+    this.itemsPerPrefetchPage = itemsPerPrefetchPage;
+    this.maxUpdatePages = maxUpdatePages;
+    this.itemsPerUpdatePage = itemsPerUpdatePage;
+  }
 
   abstract readonly cacheNs: string;
   abstract readonly graphqlQuery: string;
@@ -72,15 +117,11 @@ export abstract class AbstractGithubDatasourceCache<
   async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
-    const updateDuration: DurationLike = { minutes: this.updateAfterMinutes };
-    const resetDuration: DurationLike = { days: this.resetAfterDays };
-    const stabilityDuration: DurationLike = { days: this.unstableDays };
-
     const now = DateTime.now();
     let cache: GithubDatasourceCache<StoredItem> = {
       items: {},
       cacheCreatedAt: now.toISO(),
-      cacheUpdatedAt: now.minus(updateDuration).toISO(),
+      cacheUpdatedAt: now.minus(this.updateDuration).toISO(),
     };
 
     const baseUrl = getApiBaseUrl(registryUrl).replace('/v3/', '/');
@@ -91,28 +132,31 @@ export abstract class AbstractGithubDatasourceCache<
         GithubDatasourceCache<StoredItem>
       >(this.cacheNs, cacheKey);
 
+      let isUpdate = false;
       if (
         cachedRes &&
-        !isExpired(now, cachedRes.cacheCreatedAt, resetDuration)
+        !isExpired(now, cachedRes.cacheCreatedAt, this.resetDuration)
       ) {
         cache = cachedRes;
+        isUpdate = true;
       }
 
       try {
-        if (isExpired(now, cache.cacheUpdatedAt, updateDuration)) {
+        if (isExpired(now, cache.cacheUpdatedAt, this.updateDuration)) {
           const variables: GithubQueryParams = {
             owner,
             name,
             cursor: null,
-            count:
-              cache === cachedRes
-                ? this.updatedItemsPerPage
-                : this.itemsPerPage,
+            count: isUpdate
+              ? this.itemsPerUpdatePage
+              : this.itemsPerPrefetchPage,
           };
 
           const checkedItems = new Set<string>();
 
-          let pagesAllowed = this.maxPages;
+          let pagesAllowed = isUpdate
+            ? this.maxUpdatePages
+            : this.maxPrefetchPages;
           let isIterating = true;
           while (pagesAllowed > 0 && isIterating) {
             const graphqlRes = await this.http.postJson<
@@ -149,7 +193,7 @@ export abstract class AbstractGithubDatasourceCache<
                   ) {
                     cache.items[version] = newStoredItem;
                   } else if (
-                    isExpired(now, releaseTimestamp, stabilityDuration)
+                    isExpired(now, releaseTimestamp, this.stabilityDuration)
                   ) {
                     isIterating = false;
                     break;
@@ -161,7 +205,7 @@ export abstract class AbstractGithubDatasourceCache<
 
           for (const [version, item] of Object.entries(cache.items)) {
             if (
-              !isExpired(now, item.releaseTimestamp, stabilityDuration) &&
+              !isExpired(now, item.releaseTimestamp, this.stabilityDuration) &&
               !checkedItems.has(version)
             ) {
               delete cache.items[version];
@@ -169,7 +213,7 @@ export abstract class AbstractGithubDatasourceCache<
           }
 
           const expiry = DateTime.fromISO(cache.cacheCreatedAt).plus(
-            resetDuration
+            this.resetDuration
           );
           const { minutes: ttlMinutes } = expiry
             .diff(now, ['minutes'])

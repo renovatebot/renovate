@@ -1,7 +1,6 @@
 import type { GithubHttp } from '../../../util/http/github';
 import {
   AbstractGithubDatasourceCache,
-  FetchedItemBase,
   StoredItemBase,
 } from '../github-releases/cache-base';
 
@@ -41,7 +40,8 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 }
 `;
 
-interface FetchedTag extends FetchedItemBase {
+interface FetchedTag {
+  version: string;
   target:
     | {
         type: 'Commit';
@@ -63,8 +63,8 @@ interface StoredTag extends StoredItemBase {
 }
 
 export class CacheableGithubTags extends AbstractGithubDatasourceCache<
-  FetchedTag,
-  StoredTag
+  StoredTag,
+  FetchedTag
 > {
   readonly cacheNs = 'github-datasource-graphql-tags';
   readonly graphqlQuery = query;
