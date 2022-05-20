@@ -4,7 +4,12 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 import { CacheableGithubReleases } from './cache';
 import { getApiBaseUrl, getSourceUrl } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
@@ -233,11 +238,18 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Return a dependency object containing sourceUrl string and releases array
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const releases = await this.releasesCache.getReleases(config);
+    const releases = await this.releasesCache.getItems(config);
     return releases.length
       ? {
           sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-          releases,
+          releases: releases.map((item) => {
+            const { version, releaseTimestamp, isStable } = item;
+            const result: Release = { version, releaseTimestamp };
+            if (isStable !== undefined) {
+              result.isStable = isStable;
+            }
+            return result;
+          }),
         }
       : null;
   }

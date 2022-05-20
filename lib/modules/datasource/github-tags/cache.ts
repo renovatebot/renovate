@@ -4,7 +4,6 @@ import {
   FetchedItemBase,
   StoredItemBase,
 } from '../github-releases/cache-base';
-import type { Release } from '../types';
 
 const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
@@ -84,13 +83,6 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
       return { version, hash, releaseTimestamp };
     }
     return null;
-  }
-
-  coerceStored(item: StoredTag): Release {
-    return {
-      ...item,
-      gitRef: item.version,
-    };
   }
 
   isEquivalent(oldItem: StoredTag, newItem: StoredTag): boolean {

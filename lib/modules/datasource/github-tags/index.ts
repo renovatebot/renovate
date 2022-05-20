@@ -100,7 +100,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
-    const tagReleases = await this.tagsCache.getReleases(config);
+    const tagReleases = await this.tagsCache.getItems(config);
 
     // istanbul ignore if
     if (!tagReleases.length) {
@@ -109,7 +109,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
 
     const tagsResult: ReleaseResult = {
       sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-      releases: tagReleases,
+      releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
     };
 
     try {

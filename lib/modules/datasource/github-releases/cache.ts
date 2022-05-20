@@ -1,5 +1,4 @@
 import type { GithubHttp } from '../../../util/http/github';
-import type { Release } from '../types';
 import {
   AbstractGithubDatasourceCache,
   FetchedItemBase,
@@ -16,11 +15,14 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
     ) {
       nodes {
         version: tagName
-        gitRef: tagName
         releaseTimestamp: publishedAt
         isDraft
         isPrerelease
         updatedAt
+        url
+        id: databaseId
+        name
+        description
       }
       pageInfo {
         hasNextPage
@@ -32,15 +34,23 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 `;
 
 interface FetchedRelease extends FetchedItemBase {
+  releaseTimestamp: string;
   isDraft: boolean;
   isPrerelease: boolean;
   updatedAt: string;
-  releaseTimestamp: string;
+  url: string;
+  id: number;
+  name: string;
+  description: string;
 }
 
 interface StoredRelease extends StoredItemBase {
   isStable?: boolean;
   updatedAt: string;
+  url: string;
+  id: number;
+  name: string;
+  description: string;
 }
 
 export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
@@ -55,21 +65,32 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
   }
 
   coerceFetched(item: FetchedRelease): StoredRelease {
-    const { version, releaseTimestamp, isDraft, isPrerelease, updatedAt } =
-      item;
-    const result: StoredRelease = { version, releaseTimestamp, updatedAt };
+    const {
+      version,
+      releaseTimestamp,
+      isDraft,
+      isPrerelease,
+      updatedAt,
+      url,
+      id,
+      name,
+      description,
+    } = item;
+
+    const result: StoredRelease = {
+      version,
+      releaseTimestamp,
+      updatedAt,
+      url,
+      id,
+      name,
+      description,
+    };
+
     if (isPrerelease || isDraft) {
       result.isStable = false;
     }
-    return result;
-  }
 
-  coerceStored(item: StoredRelease): Release {
-    const { version, releaseTimestamp, isStable } = item;
-    const result: Release = { version, releaseTimestamp };
-    if (isStable !== undefined) {
-      result.isStable = isStable;
-    }
     return result;
   }
 

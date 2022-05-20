@@ -5,7 +5,7 @@ import type {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../util/http/github';
-import type { GetReleasesConfig, Release } from '../types';
+import type { GetReleasesConfig } from '../types';
 import { getApiBaseUrl } from './common';
 
 export interface GithubQueryParams {
@@ -41,21 +41,6 @@ export interface GithubDatasourceCache<StoredItem extends StoredItemBase> {
   cacheUpdatedAt: string;
 }
 
-export interface GithubDatasourceCacheConfig<
-  FetchedItem extends FetchedItemBase,
-  StoredItem extends StoredItemBase
-> {
-  type: string;
-  query: string;
-  coerceFetched: (x: FetchedItem) => StoredItem;
-  isEquivalent: (x: StoredItem, y: StoredItem) => boolean;
-  coerceStored: (x: StoredItem) => Release;
-  softResetMinutes?: number;
-  hardResetDays?: number;
-  stabilityPeriodDays?: number;
-  maxPages?: number;
-}
-
 function isExpired(
   now: DateTime,
   date: string,
@@ -82,9 +67,8 @@ export abstract class AbstractGithubDatasourceCache<
   abstract readonly graphqlQuery: string;
   abstract coerceFetched(fetchedItem: FetchedItem): StoredItem | null;
   abstract isEquivalent(oldItem: StoredItem, newItem: StoredItem): boolean;
-  abstract coerceStored(storedItem: StoredItem): Release;
 
-  async getReleases(releasesConfig: GetReleasesConfig): Promise<Release[]> {
+  async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
     const softReset: DurationLike = { minutes: this.softResetMinutes };
@@ -131,7 +115,6 @@ export abstract class AbstractGithubDatasourceCache<
               body: { query: this.graphqlQuery, variables },
             });
             pagesAllowed -= 1;
-            logger.info(this.cacheNs);
 
             const data = graphqlRes.body.data;
             if (data) {
@@ -196,6 +179,6 @@ export abstract class AbstractGithubDatasourceCache<
     }
 
     const storedItems = Object.values(cache.items);
-    return storedItems.map((item) => this.coerceStored(item));
+    return storedItems;
   }
 }

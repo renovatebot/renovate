@@ -1,7 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type { GithubRelease } from '../../../../../../modules/datasource/github-releases/types';
-import type { GitHubTag } from '../../../../../../modules/datasource/github-tags/types';
+import { CacheableGithubReleases } from '../../../../../../modules/datasource/github-releases/cache';
+import { CacheableGithubTags } from '../../../../../../modules/datasource/github-tags/cache';
 import type {
   GithubGitBlob,
   GithubGitTree,
@@ -14,25 +14,25 @@ import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
+const tagsCache = new CacheableGithubTags(http);
+const releasesCache = new CacheableGithubReleases(http);
 
 export async function getTags(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
   logger.trace('github.getTags()');
-  const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
-    const res = await http.getJson<GitHubTag[]>(url, {
-      paginate: true,
+    const tags = await tagsCache.getItems({
+      registryUrl: endpoint,
+      packageName: repository,
     });
-
-    const tags = res.body;
 
     if (!tags.length) {
       logger.debug({ repository }, 'repository has no Github tags');
     }
 
-    return tags.map((tag) => tag.name).filter(Boolean);
+    return tags.map(({ version }) => version).filter(Boolean);
   } catch (err) {
     logger.debug(
       { sourceRepo: repository, err },
@@ -110,16 +110,19 @@ export async function getReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
-  const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
-    paginate: true,
+  const notesSourceUrl = `${ensureTrailingSlash(
+    apiBaseUrl
+  )}repos/${repository}/releases`;
+  const items = await releasesCache.getItems({
+    registryUrl: apiBaseUrl,
+    packageName: repository,
   });
-  return res.body.map((release) => ({
-    url: release.html_url,
-    notesSourceUrl: url,
-    id: release.id,
-    tag: release.tag_name,
-    name: release.name,
-    body: release.body,
+  return items.map(({ url, id, version: tag, name, description: body }) => ({
+    url,
+    notesSourceUrl,
+    id,
+    tag,
+    name,
+    body,
   }));
 }
