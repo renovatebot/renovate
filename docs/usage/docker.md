@@ -132,10 +132,28 @@ For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 FROM ubuntu:yakkety
 ```
 
-To
+To:
 
 ```dockerfile
 FROM ubuntu:focal
+```
+
+### Debian codenames
+
+Renovate understands [Debian release code names and rolling updates schedule](https://wiki.debian.org/DebianReleases) and will offer upgrades to the latest stable release (e.g. from `debian:stretch` to `debian:bullseye`).
+
+For this to work the codename must be in lowercase.
+
+For example, Renovate will offer to upgrade the following `Dockerfile` layer:
+
+```dockerfile
+FROM debian:buster
+```
+
+To:
+
+```dockerfile
+FROM debian:bullseye
 ```
 
 ## Configuring/Disabling

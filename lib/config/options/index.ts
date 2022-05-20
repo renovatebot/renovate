@@ -404,10 +404,11 @@ const options: RenovateOptions[] = [
   {
     name: 'requireConfig',
     description:
-      'Set to `false` if it is optional for repositories to contain a config.',
+      "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
     stage: 'repository',
-    type: 'boolean',
-    default: true,
+    type: 'string',
+    default: 'required',
+    allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
   },
   {
@@ -2094,6 +2095,7 @@ const options: RenovateOptions[] = [
     description: 'Enable or disable Unicode emoji.',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'gitLabIgnoreApprovals',

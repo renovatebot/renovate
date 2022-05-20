@@ -2,7 +2,14 @@
 # yarn lockfile v1
 
 
-"@actions/core@1.8.0", "@actions/core@^1.2.0", "@actions/core@^1.2.6":
+"@actions/core@1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@actions/core/-/core-1.8.1.tgz#3cdde366654b98764e63633a08dba6703131e274"
+  integrity sha512-LuFg2O/+rRrYxrdafnqH9mx6ADszKzQAhDuEhhMQIh47tsXzWkW4wXY5zvscqJ4KDywyJX0LA0pAESPLUjZXvw==
+  dependencies:
+    "@actions/http-client" "^2.0.0"
+
+"@actions/core@^1.2.0", "@actions/core@^1.2.6":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@actions/core/-/core-1.8.0.tgz#5d98ff672b8ab73b718a939599c02f05c12755ad"
   integrity sha512-XirM+Zo/PFlA+1h+i4bkfvagujta+LIM2AOSzPbt8JqXbbuxb1HTB+FqIyaKmue9yiCx/JIJY6pXsOl3+T8JGw==
@@ -15,6 +22,13 @@
   integrity sha512-VRYHGQV1rqnROJqdMvGUbY/Kn8vriQe/F9HR2AlYHzmKuM/p3kjNuXhmdBfcVgsvRWTz5C5XW5xvndZrVBuAYg==
   dependencies:
     tunnel "0.0.6"
+
+"@actions/http-client@^2.0.0":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@actions/http-client/-/http-client-2.0.1.tgz#873f4ca98fe32f6839462a6f046332677322f99c"
+  integrity sha512-PIXiMVtz6VvyaRsGY268qvj57hXQEpsYogYOu2nrQhlf+XCGmZstmuZBbAybUl1nQGnvS1k1eEsQ69ZoD7xlSw==
+  dependencies:
+    tunnel "^0.0.6"
 
 "@ampproject/remapping@^2.1.0":
   version "2.2.0"
@@ -2473,10 +2487,10 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@27.5.0":
-  version "27.5.0"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-27.5.0.tgz#e04ed1824ca6b1dd0438997ba60f99a7405d4c7b"
-  integrity sha512-9RBFx7r4k+msyj/arpfaa0WOOEcaAZNmN+j80KFbFCoSqCJGHTz7YMAMGQW9Xmqm5w6l5c25vbSjMwlikJi5+g==
+"@types/jest@27.5.1":
+  version "27.5.1"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-27.5.1.tgz#2c8b6dc6ff85c33bcd07d0b62cb3d19ddfdb3ab9"
+  integrity sha512-fUy7YRpT+rHXto1YlL+J9rs0uLGyiqVt3ZOTQR+4ROc47yNl8WLdVLgUloBRhOxP1PZvguHl44T3H0wAWxahYQ==
   dependencies:
     jest-matcher-utils "^27.0.0"
     pretty-format "^27.0.0"
@@ -2587,10 +2601,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.31.tgz#a5bb84ecfa27eec5e1c802c6bbf8139bdb163a5d"
   integrity sha512-AR0x5HbXGqkEx9CadRH3EBYx/VkiUgZIhP4wvPn/+5KIsgpNoyFaRlVe0Zlx9gRtg8fA06a9tskE2MSN7TcG4Q==
 
-"@types/node@16.11.33":
-  version "16.11.33"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.33.tgz#566713b1b626f781c5c58fe3531307283e00720c"
-  integrity sha512-0PJ0vg+JyU0MIan58IOIFRtSvsb7Ri+7Wltx2qAg94eMOrpg4+uuP3aUHCpxXc1i0jCXiC+zIamSZh3l9AbcQA==
+"@types/node@16.11.35":
+  version "16.11.35"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.35.tgz#6642bdce5b5cee23314b91a7c069981c6bd68791"
+  integrity sha512-QXu45LyepgnhUfnIAj/FyT4uM87ug5KpIrgXfQtUPNAlx8w5hmd8z8emqCLNvG11QkpRSCG9Qg2buMxvqfjfsQ==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -5115,17 +5129,16 @@ glob-parent@^6.0.1:
   dependencies:
     is-glob "^4.0.3"
 
-glob@8.0.1, glob@^8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-8.0.1.tgz#00308f5c035aa0b2a447cd37ead267ddff1577d3"
-  integrity sha512-cF7FYZZ47YzmCu7dDy50xSRRfO3ErRfrXuLZcNIuyiJEco0XSrGtuilG19L5xp3NcwTx7Gn+X6Tv3fmsUPTbow==
+glob@8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-8.0.2.tgz#1b87a70413e702431b17d5fb4363a70e3a6e29de"
+  integrity sha512-0jzor6jfIKaDg/2FIN+9L8oDxzHTkI/+vwJimOmOZjaVjFVVZJFojOYbbWC0okXbBVSgYpbcuQ7xy6gDP9f8gw==
   dependencies:
     fs.realpath "^1.0.0"
     inflight "^1.0.4"
     inherits "2"
     minimatch "^5.0.1"
     once "^1.3.0"
-    path-is-absolute "^1.0.0"
 
 glob@^6.0.1:
   version "6.0.4"
@@ -5147,6 +5160,18 @@ glob@^7.0.0, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4, glob@^7.2.0:
     inflight "^1.0.4"
     inherits "2"
     minimatch "^3.0.4"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
+
+glob@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-8.0.1.tgz#00308f5c035aa0b2a447cd37ead267ddff1577d3"
+  integrity sha512-cF7FYZZ47YzmCu7dDy50xSRRfO3ErRfrXuLZcNIuyiJEco0XSrGtuilG19L5xp3NcwTx7Gn+X6Tv3fmsUPTbow==
+  dependencies:
+    fs.realpath "^1.0.0"
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "^5.0.1"
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
