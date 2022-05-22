@@ -10,7 +10,10 @@ export class GradleLiteMigration extends AbstractMigration {
     const gradle = this.get('gradle');
 
     if (is.nonEmptyObject(value)) {
-      const newGradle = mergeChildConfig(gradle ?? {}, value);
+      const newGradle = mergeChildConfig(
+        (gradle as Record<string, any>) ?? {},
+        value
+      );
 
       this.setHard('gradle', newGradle);
     }
