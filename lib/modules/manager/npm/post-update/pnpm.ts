@@ -13,7 +13,7 @@ import type {
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmPackage } from '../extract/types';
-import { getNodeConstraint } from './node-version';
+import { getNodeConstraint, getNodeUpdate } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 
 export async function generateLockFile(
@@ -34,7 +34,8 @@ export async function generateLockFile(
       constraint:
         config.constraints?.pnpm ?? (await getPnpmContraint(lockFileDir)),
     };
-    const tagConstraint = await getNodeConstraint(config);
+    const tagConstraint =
+      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,

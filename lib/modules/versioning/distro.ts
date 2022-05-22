@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import dataFiles, { DataFile } from '../../data-files.generated';
 
-interface DistroSchedule {
+export interface DistroSchedule {
   codename: string;
   series: string;
   created: string;
@@ -13,11 +13,16 @@ interface DistroSchedule {
   eol_elts?: string;
 }
 
-export type DistroDataFile = 'data/ubuntu-distro-info.json';
+export type DistroDataFile =
+  | 'data/ubuntu-distro-info.json'
+  | 'data/debian-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 
 export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
+
+// Days to delay new releases
+const delay = 1;
 
 export class DistroInfo {
   private readonly _codenameToVersion = new Map<
@@ -45,7 +50,7 @@ export class DistroInfo {
 
     for (const v of arr) {
       const obj = { version: v, ...this._distroInfo[v.toString()] };
-      if (!obj.eol) {
+      if (!obj.release) {
         // istanbul ignore next
         continue;
       }
@@ -127,13 +132,32 @@ export class DistroInfo {
     }
 
     if (end) {
-      const now = DateTime.now();
-      const eol = DateTime.fromISO(end);
+      const now = DateTime.now().toUTC();
+      const eol = DateTime.fromISO(end, { zone: 'utc' });
       return eol < now;
     }
 
     // istanbul ignore next
     return true;
+  }
+
+  /**
+   * Check if a given version has been released
+   * @param input A codename/semVer
+   * @returns false if unreleased or has no schedule, true otherwise
+   */
+  public isReleased(input: string): boolean {
+    const ver = this.getVersionByCodename(input);
+    const schedule = this.getSchedule(ver);
+
+    if (!schedule) {
+      return false;
+    }
+
+    const now = DateTime.now().minus({ day: delay }).toUTC();
+    const release = DateTime.fromISO(schedule.release, { zone: 'utc' });
+
+    return release < now;
   }
 
   /**
@@ -145,12 +169,25 @@ export class DistroInfo {
    */
   public getNLatest(n: number): DistroInfoRecordWithVersion | null {
     const len = this._sortedInfo.length - 1;
-    const i = len - Math.floor(n);
+    let idx = -1;
 
-    if (len >= i && i >= 0) {
-      return this._sortedInfo[i];
+    if (n < 0) {
+      return null;
     }
 
-    return null;
+    for (let i = len; i >= 0; i--) {
+      if (this.isReleased(this._sortedInfo[i].version)) {
+        // 'i' holds the latest released version index
+        // compensate for the requested 'n'
+        idx = i - Math.floor(n);
+        break;
+      }
+    }
+
+    if (idx > len || idx < 0) {
+      return null;
+    }
+
+    return this._sortedInfo[idx];
   }
 }

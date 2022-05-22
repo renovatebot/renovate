@@ -505,4 +505,46 @@ describe('modules/manager/gradle/extract', () => {
       },
     ]);
   });
+
+  it('should change the dependency version not the comment version', async () => {
+    const tomlFile = loadFixture('3/libs.versions.toml');
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'junit:junit',
+            groupName: 'junit',
+            currentValue: '1.4.9',
+            managerData: {
+              fileReplacePosition: 124,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            fileReplacePosition: 124,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            depName: 'mocha-junit:mocha-junit',
+            groupName: 'mocha-junit-reporter',
+            currentValue: '2.0.2',
+            managerData: {
+              fileReplacePosition: 82,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            fileReplacePosition: 82,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+    ]);
+  });
 });

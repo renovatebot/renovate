@@ -33,6 +33,7 @@ import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-wa
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
+import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
@@ -89,6 +90,7 @@ export class MigrationsService {
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
     DryRunMigration,
+    DryRunMigration,
     EnabledManagersMigration,
     ExtendsMigration,
     GoModTidyMigration,
@@ -106,6 +108,7 @@ export class MigrationsService {
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
     RenovateForkMigration,
+    RequireConfigMigration,
     RequiredStatusChecksMigration,
     ScheduleMigration,
     SemanticCommitsMigration,

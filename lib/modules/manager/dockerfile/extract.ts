@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
+import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -138,6 +139,10 @@ export function getDep(
 
   if (dep.depName === 'ubuntu') {
     dep.versioning = ubuntuVersioning.id;
+  }
+
+  if (dep.depName === 'debian') {
+    dep.versioning = debianVersioning.id;
   }
 
   // Don't display quay.io ports

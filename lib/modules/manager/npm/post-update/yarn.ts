@@ -26,7 +26,7 @@ import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmManagerData } from '../types';
-import { getNodeConstraint } from './node-version';
+import { getNodeConstraint, getNodeUpdate } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
@@ -175,7 +175,8 @@ export async function generateLockFile(
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
     }
-    const tagConstraint = await getNodeConstraint(config);
+    const tagConstraint =
+      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,

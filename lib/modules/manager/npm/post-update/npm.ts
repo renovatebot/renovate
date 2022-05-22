@@ -19,7 +19,7 @@ import {
 } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
-import { getNodeConstraint } from './node-version';
+import { getNodeConstraint, getNodeUpdate } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
@@ -55,7 +55,8 @@ export async function generateLockFile(
       cmdOptions += ' --ignore-scripts';
     }
 
-    const tagConstraint = await getNodeConstraint(config);
+    const tagConstraint =
+      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
