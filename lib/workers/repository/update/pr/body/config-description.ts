@@ -3,7 +3,10 @@ import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
 import { resolveBranchStatus } from '../../branch/status-checks';
 
-function scheduleToString(schedule: string[], timezone: string | null): string {
+function scheduleToString(
+  schedule: string[] | undefined,
+  timezone: string | undefined
+): string {
   let scheduleString = '';
   if (
     schedule &&
