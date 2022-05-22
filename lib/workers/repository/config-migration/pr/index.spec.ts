@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
   getConfig,
+  git,
   partial,
   platform,
 } from '../../../../../test/util';
@@ -10,33 +11,39 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import type { GotLegacyError } from '../../../../util/http/legacy';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
 
-describe('workers/repository/config-migration/pr/index', () => {
-  describe('ensureConfigMigrationPr()', () => {
-    const { configFileName, migratedContent } = Fixtures.getJson(
-      './migrated-data.json'
-    );
-    const migratedData: MigratedData = {
-      content: migratedContent,
-      filename: configFileName,
-    };
-    let config: RenovateConfig;
+jest.mock('../../../../util/git');
 
+describe('workers/repository/config-migration/pr/index', () => {
+  const { configFileName, migratedContent } = Fixtures.getJson(
+    './migrated-data.json'
+  );
+  const migratedData: MigratedData = {
+    content: migratedContent,
+    filename: configFileName,
+  };
+  let config: RenovateConfig;
+
+  beforeEach(() => {
+    GlobalConfig.set({
+      dryRun: null,
+    });
+    jest.resetAllMocks();
+    config = {
+      ...getConfig(),
+      configMigration: true,
+      defaultBranch: 'main',
+      errors: [],
+      warnings: [],
+      description: [],
+    };
+  });
+
+  describe('ensureConfigMigrationPr()', () => {
     beforeEach(() => {
-      GlobalConfig.set({
-        dryRun: null,
-      });
-      jest.resetAllMocks();
-      config = {
-        ...getConfig(),
-        configMigration: true,
-        defaultBranch: 'main',
-        errors: [],
-        warnings: [],
-        description: [],
-      };
       jest
         .spyOn(platform, 'massageMarkdown')
         .mockImplementation((input) => input);
@@ -203,6 +210,32 @@ describe('workers/repository/config-migration/pr/index', () => {
         /baseBranch:some-branch/
       );
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+  });
+
+  describe('ensureConfigMigrationPr() throws', () => {
+    const err = partial<GotLegacyError>({});
+
+    beforeEach(() => {
+      git.deleteBranch.mockResolvedValue();
+    });
+
+    it('throws when trying to create a new PR', async () => {
+      platform.createPr.mockRejectedValue(err);
+      await expect(ensureConfigMigrationPr(config, migratedData)).toReject();
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
+    it('deletes branch when PR already exists but cannot find it', async () => {
+      err.statusCode = 422;
+      err.body = { errors: [{ message: 'A pull request already exists' }] };
+      platform.createPr.mockRejectedValue(err);
+      await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'Migration PR already exists but cannot find it'
+      );
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
     });
   });
 });
