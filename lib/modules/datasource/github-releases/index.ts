@@ -238,19 +238,21 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Return a dependency object containing sourceUrl string and releases array
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    let result: ReleaseResult | null = null;
     const releases = await this.releasesCache.getItems(config);
-    return releases.length
-      ? {
-          sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-          releases: releases.map((item) => {
-            const { version, releaseTimestamp, isStable } = item;
-            const result: Release = { version, releaseTimestamp };
-            if (isStable !== undefined) {
-              result.isStable = isStable;
-            }
-            return result;
-          }),
-        }
-      : null;
+    if (releases.length) {
+      result = {
+        sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+        releases: releases.map((item) => {
+          const { version, releaseTimestamp, isStable } = item;
+          const result: Release = { version, releaseTimestamp };
+          if (isStable !== undefined) {
+            result.isStable = isStable;
+          }
+          return result;
+        }),
+      };
+    }
+    return result;
   }
 }

@@ -40,7 +40,7 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 }
 `;
 
-interface FetchedTag {
+export interface FetchedTag {
   version: string;
   target:
     | {
@@ -57,7 +57,7 @@ interface FetchedTag {
       };
 }
 
-interface StoredTag extends StoredItemBase {
+export interface StoredTag extends StoredItemBase {
   hash: string;
   releaseTimestamp: string;
 }

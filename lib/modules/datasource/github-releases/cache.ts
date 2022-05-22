@@ -29,7 +29,7 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 }
 `;
 
-interface FetchedRelease {
+export interface FetchedRelease {
   version: string;
   releaseTimestamp: string;
   isDraft: boolean;
@@ -41,7 +41,7 @@ interface FetchedRelease {
   description: string;
 }
 
-interface StoredRelease extends StoredItemBase {
+export interface StoredRelease extends StoredItemBase {
   isStable?: boolean;
   updatedAt: string;
   url: string;
@@ -61,7 +61,7 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
     super(http);
   }
 
-  coerceFetched(item: FetchedRelease): StoredRelease {
+  coerceFetched(item: FetchedRelease): StoredRelease | null {
     const {
       version,
       releaseTimestamp,
@@ -74,6 +74,10 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
       description,
     } = item;
 
+    if (isDraft) {
+      return null;
+    }
+
     const result: StoredRelease = {
       version,
       releaseTimestamp,
@@ -84,7 +88,7 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
       description,
     };
 
-    if (isPrerelease || isDraft) {
+    if (isPrerelease) {
       result.isStable = false;
     }
 
@@ -92,6 +96,6 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
   }
 
   isEquivalent(oldItem: StoredRelease, newItem: StoredRelease): boolean {
-    return oldItem.releaseTimestamp === newItem.releaseTimestamp;
+    return oldItem.updatedAt === newItem.updatedAt;
   }
 }

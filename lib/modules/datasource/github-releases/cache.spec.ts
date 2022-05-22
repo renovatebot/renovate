@@ -1,0 +1,83 @@
+import { GithubHttp } from '../../../util/http/github';
+import {
+  CacheableGithubReleases,
+  FetchedRelease,
+  StoredRelease,
+} from './cache';
+
+describe('modules/datasource/github-releases/cache', () => {
+  const http = new GithubHttp();
+  const cache = new CacheableGithubReleases(http);
+
+  const fetchedItem: FetchedRelease = {
+    version: '1.2.3',
+    releaseTimestamp: '2020-04-09T10:00:00.000Z',
+    isDraft: false,
+    isPrerelease: false,
+    updatedAt: '2020-04-09T10:00:00.000Z',
+    url: 'https://example.com/',
+    id: 123,
+    name: 'Some name',
+    description: 'Some description',
+  };
+
+  const storedItem: StoredRelease = {
+    description: 'Some description',
+    id: 123,
+    name: 'Some name',
+    releaseTimestamp: '2020-04-09T10:00:00.000Z',
+    updatedAt: '2020-04-09T10:00:00.000Z',
+    url: 'https://example.com/',
+    version: '1.2.3',
+  };
+
+  describe('coerceFetched', () => {
+    it('transforms GraphQL item', () => {
+      expect(cache.coerceFetched(fetchedItem)).toEqual({
+        description: 'Some description',
+        id: 123,
+        name: 'Some name',
+        releaseTimestamp: '2020-04-09T10:00:00.000Z',
+        updatedAt: '2020-04-09T10:00:00.000Z',
+        url: 'https://example.com/',
+        version: '1.2.3',
+      });
+    });
+
+    it('marks pre-release as unstable', () => {
+      expect(
+        cache.coerceFetched({ ...fetchedItem, isPrerelease: true })
+      ).toMatchObject({
+        isStable: false,
+      });
+    });
+
+    it('filters out drafts', () => {
+      expect(cache.coerceFetched({ ...fetchedItem, isDraft: true })).toBeNull();
+    });
+  });
+
+  describe('isEquivalent', () => {
+    it('considers same object equivalent', () => {
+      expect(cache.isEquivalent(storedItem, storedItem)).toBeTrue();
+
+      const otherItem = { ...storedItem, updatedAt: '2022-01-01' };
+      expect(cache.isEquivalent(otherItem, otherItem)).toBeTrue();
+      expect(
+        cache.isEquivalent(
+          { updatedAt: '2022-01-01' } as never,
+          { updatedAt: '2022-01-01' } as never
+        )
+      ).toBeTrue();
+    });
+
+    it('considers object with different `updatedAt` field as not equivalent', () => {
+      expect(
+        cache.isEquivalent(storedItem, {
+          ...storedItem,
+          updatedAt: '2022-01-01',
+        })
+      ).toBeFalse();
+    });
+  });
+});

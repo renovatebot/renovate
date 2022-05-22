@@ -34,8 +34,8 @@ export interface StoredItemBase {
 
 export interface GithubDatasourceCache<StoredItem extends StoredItemBase> {
   items: Record<string, StoredItem>;
-  cacheCreatedAt: string;
-  cacheUpdatedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CacheOptions {
@@ -68,7 +68,8 @@ function isExpired(
   duration: DurationLike
 ): boolean {
   const then = DateTime.fromISO(date);
-  return now >= then.plus(duration);
+  const expiry = then.plus(duration);
+  return now >= expiry;
 }
 
 export abstract class AbstractGithubDatasourceCache<
@@ -118,31 +119,30 @@ export abstract class AbstractGithubDatasourceCache<
     const { packageName, registryUrl } = releasesConfig;
 
     const now = DateTime.now();
-    let cache: GithubDatasourceCache<StoredItem> = {
-      items: {},
-      cacheCreatedAt: now.toISO(),
-      cacheUpdatedAt: now.minus(this.updateDuration).toISO(),
-    };
+
+    let cacheItems: Record<string, StoredItem> = {};
+    let cacheCreatedAt = now.toISO();
+    let cacheUpdatedAt = now.minus(this.updateDuration).toISO();
 
     const baseUrl = getApiBaseUrl(registryUrl).replace('/v3/', '/');
     const [owner, name] = packageName.split('/');
     if (owner && name) {
-      const cacheKey = `${baseUrl}:${owner}/${name}`;
-      const cachedRes = await packageCache.get<
-        GithubDatasourceCache<StoredItem>
-      >(this.cacheNs, cacheKey);
+      const cacheKey = `${baseUrl}:${owner}:${name}`;
+      const cache = await packageCache.get<GithubDatasourceCache<StoredItem>>(
+        this.cacheNs,
+        cacheKey
+      );
 
-      let isUpdate = false;
-      if (
-        cachedRes &&
-        !isExpired(now, cachedRes.cacheCreatedAt, this.resetDuration)
-      ) {
-        cache = cachedRes;
-        isUpdate = true;
+      const isUpdate =
+        cache && !isExpired(now, cache.createdAt, this.resetDuration);
+      if (isUpdate) {
+        cacheItems = { ...cache.items };
+        cacheCreatedAt = cache.createdAt;
+        cacheUpdatedAt = cache.updatedAt;
       }
 
       try {
-        if (isExpired(now, cache.cacheUpdatedAt, this.updateDuration)) {
+        if (isExpired(now, cacheUpdatedAt, this.updateDuration)) {
           const variables: GithubQueryParams = {
             owner,
             name,
@@ -157,8 +157,8 @@ export abstract class AbstractGithubDatasourceCache<
           let pagesAllowed = isUpdate
             ? this.maxUpdatePages
             : this.maxPrefetchPages;
-          let isIterating = true;
-          while (pagesAllowed > 0 && isIterating) {
+          let stopIteration = false;
+          while (pagesAllowed > 0 && !stopIteration) {
             const graphqlRes = await this.http.postJson<
               GithubGraphqlResponse<QueryResponse<FetchedItem>>
             >('/graphql', {
@@ -177,50 +177,52 @@ export abstract class AbstractGithubDatasourceCache<
               if (hasNextPage) {
                 variables.cursor = endCursor;
               } else {
-                isIterating = false;
+                stopIteration = true;
               }
 
               for (const item of fetchedItems) {
-                const newStoredItem = this.coerceFetched(item);
-                if (newStoredItem) {
-                  const { version, releaseTimestamp } = newStoredItem;
+                const storedItem = this.coerceFetched(item);
+                if (storedItem) {
+                  const { version, releaseTimestamp } = storedItem;
+                  cacheItems[version] = storedItem;
                   checkedItems.add(version);
-
-                  const oldStoredItem = cache.items[version];
-                  if (
-                    !oldStoredItem ||
-                    !this.isEquivalent(oldStoredItem, newStoredItem)
-                  ) {
-                    cache.items[version] = newStoredItem;
-                  } else if (
-                    isExpired(now, releaseTimestamp, this.stabilityDuration)
-                  ) {
-                    isIterating = false;
-                    break;
-                  }
+                  stopIteration ||= isExpired(
+                    now,
+                    releaseTimestamp,
+                    this.stabilityDuration
+                  );
                 }
               }
             }
           }
 
-          for (const [version, item] of Object.entries(cache.items)) {
+          for (const [version, item] of Object.entries(cacheItems)) {
             if (
               !isExpired(now, item.releaseTimestamp, this.stabilityDuration) &&
               !checkedItems.has(version)
             ) {
-              delete cache.items[version];
+              delete cacheItems[version];
             }
           }
 
-          const expiry = DateTime.fromISO(cache.cacheCreatedAt).plus(
+          const expiry = DateTime.fromISO(cacheCreatedAt).plus(
             this.resetDuration
           );
           const { minutes: ttlMinutes } = expiry
             .diff(now, ['minutes'])
             .toObject();
           if (ttlMinutes && ttlMinutes > 0) {
-            cache.cacheUpdatedAt = now.toISO();
-            await packageCache.set(this.cacheNs, cacheKey, cache, ttlMinutes);
+            const cacheValue: GithubDatasourceCache<StoredItem> = {
+              items: cacheItems,
+              createdAt: cacheCreatedAt,
+              updatedAt: now.toISO(),
+            };
+            await packageCache.set(
+              this.cacheNs,
+              cacheKey,
+              cacheValue,
+              ttlMinutes
+            );
           }
         }
       } catch (err) {
@@ -228,10 +230,14 @@ export abstract class AbstractGithubDatasourceCache<
           { err },
           `GitHub datasource: error fetching cacheable GraphQL data`
         );
+        if (isUpdate) {
+          const cachedItems = Object.values(cache.items);
+          return cachedItems;
+        }
       }
     }
 
-    const storedItems = Object.values(cache.items);
-    return storedItems;
+    const items = Object.values(cacheItems);
+    return items;
   }
 }
