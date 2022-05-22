@@ -1,8 +1,5 @@
-export interface CommitMessageJSON {
-  body?: string;
-  footer?: string;
-  subject?: string;
-}
+import is from '@sindresorhus/is';
+import type { CommitMessageJSON } from '../../../types';
 
 /**
  * @see https://git-scm.com/docs/git-commit#_discussion
@@ -12,71 +9,80 @@ export interface CommitMessageJSON {
  * [optional footer]
  */
 export abstract class CommitMessage {
-  static readonly SEPARATOR: string = ':';
+  private static readonly SEPARATOR: string = ':';
   private static readonly EXTRA_WHITESPACES = /\s+/g;
 
-  private body?: string;
-  private footer?: string;
-  private subject?: string;
+  private _body = '';
+  private _footer = '';
+  private _subject = '';
 
-  toString(): string {
-    const parts: ReadonlyArray<string | undefined> = [
-      this.title,
-      this.body,
-      this.footer,
-    ];
+  static formatPrefix(prefix: string): string {
+    if (!prefix) {
+      return '';
+    }
 
-    return parts.filter(Boolean).join('\n\n');
-  }
+    if (prefix.endsWith(CommitMessage.SEPARATOR)) {
+      return prefix;
+    }
 
-  get title(): string {
-    return [this.formatPrefix(), this.formatSubject()].join(' ').trim();
+    return `${prefix}${CommitMessage.SEPARATOR}`;
   }
 
   toJSON(): CommitMessageJSON {
     return {
-      body: this.body,
-      footer: this.footer,
-      subject: this.subject,
+      body: this._body,
+      footer: this._footer,
+      subject: this._subject,
     };
   }
 
-  setBody(body?: string): void {
-    this.body = body?.trim();
+  toString(): string {
+    const parts: ReadonlyArray<string | undefined> = [
+      this.title,
+      this._body,
+      this._footer,
+    ];
+
+    return parts.filter(is.nonEmptyStringAndNotWhitespace).join('\n\n');
   }
 
-  setFooter(footer?: string): void {
-    this.footer = footer?.trim();
+  get title(): string {
+    return [CommitMessage.formatPrefix(this.prefix), this.formatSubject()]
+      .join(' ')
+      .trim();
   }
 
-  setSubject(subject?: string): void {
-    this.subject = subject?.trim();
-    this.subject = this.subject?.replace(CommitMessage.EXTRA_WHITESPACES, ' ');
+  set body(value: string) {
+    this._body = this.normalizeInput(value);
   }
 
-  formatPrefix(): string {
-    if (!this.prefix) {
-      return '';
-    }
+  set footer(value: string) {
+    this._footer = this.normalizeInput(value);
+  }
 
-    if (this.prefix.endsWith(CommitMessage.SEPARATOR)) {
-      return this.prefix;
-    }
-
-    return `${this.prefix}${CommitMessage.SEPARATOR}`;
+  set subject(value: string) {
+    this._subject = this.normalizeInput(value);
+    this._subject = this._subject?.replace(
+      CommitMessage.EXTRA_WHITESPACES,
+      ' '
+    );
   }
 
   formatSubject(): string {
-    if (!this.subject) {
+    if (!this._subject) {
       return '';
     }
 
     if (this.prefix) {
-      return this.subject.charAt(0).toLowerCase() + this.subject.slice(1);
+      return this._subject.charAt(0).toLowerCase() + this._subject.slice(1);
     }
 
-    return this.subject.charAt(0).toUpperCase() + this.subject.slice(1);
+    return this._subject.charAt(0).toUpperCase() + this._subject.slice(1);
   }
 
   protected abstract get prefix(): string;
+
+  protected normalizeInput(value: string | null | undefined): string {
+    return value?.trim() ?? '';
+  }
 }

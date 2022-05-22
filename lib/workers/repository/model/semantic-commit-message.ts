@@ -1,4 +1,5 @@
-import { CommitMessage, CommitMessageJSON } from './commit-message';
+import type { CommitMessageJSON } from '../../../types';
+import { CommitMessage } from './commit-message';
 
 export interface SemanticCommitMessageJSON extends CommitMessageJSON {
   scope?: string;
@@ -16,20 +17,25 @@ export class SemanticCommitMessage extends CommitMessage {
   private static readonly REGEXP =
     /^(?<type>[\w]+)(\((?<scope>[\w-]+)\))?(?<breaking>!)?: ((?<issue>([A-Z]+-|#)[\d]+) )?(?<description>.*)/;
 
-  private scope?: string;
-  private type?: string;
+  private _scope = '';
+  private _type = '';
 
   static is(value: unknown): value is SemanticCommitMessage {
     return value instanceof SemanticCommitMessage;
   }
 
-  static fromString(value: string): SemanticCommitMessage {
-    const { groups } = value.match(SemanticCommitMessage.REGEXP);
+  static fromString(value: string): SemanticCommitMessage | undefined {
+    const match = value.match(SemanticCommitMessage.REGEXP);
 
+    if (!match) {
+      return undefined;
+    }
+
+    const { groups = {} } = match;
     const message = new SemanticCommitMessage();
-    message.setType(groups.type);
-    message.setScope(groups.scope);
-    message.setSubject(groups.description);
+    message.type = groups.type;
+    message.scope = groups.scope;
+    message.subject = groups.description;
 
     return message;
   }
@@ -39,24 +45,28 @@ export class SemanticCommitMessage extends CommitMessage {
 
     return {
       ...json,
-      scope: this.scope,
-      type: this.type,
+      scope: this._scope,
+      type: this._type,
     };
   }
 
-  setScope(scope?: string): void {
-    this.scope = scope?.trim();
+  set scope(value: string) {
+    this._scope = this.normalizeInput(value);
   }
 
-  setType(type?: string): void {
-    this.type = type?.trim();
+  set type(value: string) {
+    this._type = this.normalizeInput(value);
   }
 
   protected get prefix(): string {
-    if (!this.scope && !this.type) {
-      return '';
+    if (this._type && !this._scope) {
+      return this._type;
     }
 
-    return this.scope ? `${this.type}(${this.scope})` : this.type;
+    if (this._scope) {
+      return `${this._type}(${this._scope})`;
+    }
+
+    return '';
   }
 }
