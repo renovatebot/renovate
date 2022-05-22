@@ -8,6 +8,15 @@ import { ChangeLogError, getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
+const githubTagsMock = jest.fn();
+jest.mock('../../../../../modules/datasource/github-tags/cache', () => {
+  return {
+    CacheableGithubTags: jest.fn().mockImplementation(() => {
+      return { getItems: () => githubTagsMock() };
+    }),
+  };
+});
+
 const upgrade: BranchUpgradeConfig = {
   branchName: undefined,
   depName: 'renovate',
@@ -296,15 +305,12 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/chalk/chalk/tags?per_page=100')
-        .reply(200, [
-          { name: 'v1.0.1' },
-          { name: '1.0.1' },
-          { name: 'correctPrefix/target@1.0.1' },
-          { name: 'wrongPrefix/target-1.0.1' },
-        ]);
+      githubTagsMock.mockResolvedValue([
+        { version: 'v1.0.1' },
+        { version: '1.0.1' },
+        { version: 'correctPrefix/target@1.0.1' },
+        { version: 'wrongPrefix/target-1.0.1' },
+      ]);
 
       const upgradeData: BranchUpgradeConfig = {
         branchName: undefined,
