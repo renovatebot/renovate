@@ -1,9 +1,0 @@
-[
-  {
-    "project": "telegram-images",
-    "repositories": [
-      "https://repo.maven.apache.org/maven2/",
-      "https://jitpack.io"
-    ]
-  }
-]

@@ -8,7 +8,7 @@ Renovate, like any computer program has limitations.
 Sometimes these are functionality limitations - perhaps something is impossible or too complex to do, or we simply haven't implemented it yet.
 At other times it may be a "performance" limitation, because jobs neither start nor complete instantly, even if the user may start with that expectation.
 
-This document attempts to list out the most commonly seen limitations and describe whether they're permanent and if there's any plans to improving the situation.
+This document tries to list out the most commonly seen limitations and describe whether they're permanent and if there's any plans to improving the situation.
 
 ## Time/schedule based limitations
 
@@ -40,4 +40,4 @@ The limitation to only automerge branches which are up-to-date is a decision due
 - PRs exist for `alice@2.0.0` and `bob@2.0.0` and both pass tests
 - The PR for `alice@2.0.0` is automerged
 - The PR for `bob@2.0.0` remains open, does not have conflicts, and has all tests passing
-- However, `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
+- But `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch

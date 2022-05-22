@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'replacements:joi-to-unscoped',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:xmldom-to-scoped',
     ],
   },
   'babel-eslint-to-eslint-parser': {
@@ -85,6 +86,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'redux-devtools-extension-to-scope': {
+    description:
+      'the redux-devtools-extension package was renamed to @redux-devtools/extension',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['redux-devtools-extension'],
+        replacementName: '@redux-devtools/extension',
+        replacementVersion: '3.0.0',
+      },
+    ],
+  },
   'renovate-pep440-to-renovatebot-pep440': {
     description:
       'the @renovate/pep440 package was renamed to @renovatebot/pep440',
@@ -105,6 +118,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'xmldom-to-scoped': {
+    description: 'the xmldom package is now published as @xmldom/xmldom',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['xmldom', 'xmldom-alpha'],
+        replacementName: '@xmldom/xmldom',
+        replacementVersion: '0.7.5',
       },
     ],
   },

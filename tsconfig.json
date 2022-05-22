@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noImplicitAny": false /* required for js files */,
-    "strictNullChecks": false /* required for js files */,
+    "noImplicitAny": false /* TODO: fix me */,
+    "strictNullChecks": false /* TODO: fix me */,
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2020",
@@ -19,8 +19,10 @@
     "lib": ["es2020"],
     "types": ["node", "jest", "jest-extended", "expect-more-jest"],
     "allowJs": true,
-    "checkJs": true
+    "checkJs": true,
+    "importsNotUsedAsValues": "error"
   },
+  "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
     "node_modules",
     "./.cache",

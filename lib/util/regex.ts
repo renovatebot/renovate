@@ -49,6 +49,8 @@ export function escapeRegExp(input: string): string {
   return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string
 }
 
+export const newlineRegex = regEx(/\r?\n/);
+
 const configValStart = regEx(/^!?\//);
 const configValEnd = regEx(/\/$/);
 

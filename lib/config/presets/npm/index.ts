@@ -1,6 +1,12 @@
-import { resolvePackage } from '../../../datasource/npm/npmrc';
-import { NpmResponse } from '../../../datasource/npm/types';
 import { logger } from '../../../logger';
+import {
+  resolvePackageUrl,
+  resolveRegistryUrl,
+} from '../../../modules/datasource/npm/npmrc';
+import type {
+  NpmResponse,
+  NpmResponseVersion,
+} from '../../../modules/datasource/npm/types';
 import { Http } from '../../../util/http';
 import type { Preset, PresetConfig } from '../types';
 import {
@@ -14,19 +20,27 @@ const id = 'npm';
 const http = new Http(id);
 
 export async function getPreset({
-  packageName,
+  repo: pkg,
   presetName = 'default',
-}: PresetConfig): Promise<Preset> {
-  let dep;
+}: PresetConfig): Promise<Preset | undefined> {
+  let dep: (NpmResponseVersion & { 'renovate-config'?: any }) | undefined;
   try {
-    const { headers, packageUrl } = resolvePackage(packageName);
-    const body = (await http.getJson<NpmResponse>(packageUrl, { headers }))
-      .body;
-    dep = body.versions[body['dist-tags'].latest];
+    const registryUrl = resolveRegistryUrl(pkg);
+    const packageUrl = resolvePackageUrl(registryUrl, pkg);
+    // istanbul ignore if
+    if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
+      logger.warn(
+        'npm presets from non-default registries are now deprecated. Please migrate to repository-based presets instead.'
+      );
+    }
+    const body = (await http.getJson<NpmResponse>(packageUrl)).body;
+    // TODO: check null #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    dep = body.versions![body['dist-tags']!.latest];
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  if (!dep['renovate-config']) {
+  if (!dep?.['renovate-config']) {
     throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
   }
   const presetConfig = dep['renovate-config'][presetName];

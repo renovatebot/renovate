@@ -11,6 +11,8 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
@@ -22,9 +24,10 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
-  manager?: string;
+  manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -54,18 +57,20 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
-  semanticCommitScope?: string;
+  semanticCommitScope?: string | null;
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
+  platformCommit?: boolean;
 }
 
 // Config options used only within the global worker
@@ -79,6 +84,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
@@ -101,9 +107,11 @@ export interface RepoGlobalConfig {
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
-  dryRun?: boolean;
+  dryRun?: DryRunConfig;
   executionTimeout?: number;
+  gitTimeout?: number;
   exposeAllEnv?: boolean;
+  githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;
   privateKeyOld?: string;
@@ -127,7 +135,7 @@ export interface LegacyAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  requireConfig?: boolean;
+  requireConfig?: RequiredConfig;
 }
 export type ExecutionMode = 'branch' | 'update';
 
@@ -138,7 +146,7 @@ export type PostUpgradeTasks = {
 };
 
 type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
-  Partial<Record<UpdateType, T>>;
+  Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
   | string
@@ -153,10 +161,12 @@ export interface CustomManager {
   matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
-  lookupNameTemplate?: string;
+  packageNameTemplate?: string;
   versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
 }
+
+export type UseBaseBranchConfigType = 'merge' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -167,6 +177,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
+  useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];
@@ -199,9 +210,11 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;
+  repoIsActivated?: boolean;
 
   updateType?: UpdateType;
 
@@ -232,6 +245,7 @@ export type UpdateType =
   | 'patch'
   | 'pin'
   | 'digest'
+  | 'pinDigest'
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'
@@ -267,6 +281,7 @@ export interface PackageRule
   excludePackagePrefixes?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
+  matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
@@ -316,7 +331,7 @@ export interface RenovateOptionBase {
 export interface RenovateArrayOption<
   T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
-  default?: T[];
+  default?: T[] | null;
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
@@ -338,21 +353,21 @@ export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
-  default?: boolean;
+  default?: boolean | null;
   type: 'boolean';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
-  default?: number;
+  default?: number | null;
   type: 'integer';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
-  default?: string;
+  default?: string | null;
   format?: 'regex';
 
   // Not used
@@ -363,7 +378,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any;
+  default?: any | null;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
@@ -411,6 +426,7 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
   node?: RenovateConfig;
   travis?: RenovateConfig;
+  gradle?: RenovateConfig;
 }
 
 export interface ValidationResult {

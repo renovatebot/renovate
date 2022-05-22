@@ -4,7 +4,7 @@ import * as openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
-import { add } from '../util/sanitize';
+import { addSecretForSanitizing } from '../util/sanitize';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
@@ -49,7 +49,7 @@ export function tryDecryptPublicKeyDefault(
   privateKey: string,
   encryptedStr: string
 ): string | null {
-  let decryptedStr: string = null;
+  let decryptedStr: string | null = null;
   try {
     decryptedStr = crypto
       .privateDecrypt(privateKey, Buffer.from(encryptedStr, 'base64'))
@@ -65,7 +65,7 @@ export function tryDecryptPublicKeyPKCS1(
   privateKey: string,
   encryptedStr: string
 ): string | null {
-  let decryptedStr: string = null;
+  let decryptedStr: string | null = null;
   try {
     decryptedStr = crypto
       .privateDecrypt(
@@ -87,7 +87,7 @@ export async function tryDecrypt(
   encryptedStr: string,
   repository: string
 ): Promise<string | null> {
-  let decryptedStr: string = null;
+  let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
@@ -175,7 +175,7 @@ export async function decryptConfig(
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
-            add(token);
+            addSecretForSanitizing(token);
             logger.debug(
               { decryptedToken: maskToken(token) },
               'Migrating npmToken to npmrc'
@@ -202,7 +202,7 @@ export async function decryptConfig(
             }
           } else {
             decryptedConfig[eKey] = decryptedStr;
-            add(decryptedStr);
+            addSecretForSanitizing(decryptedStr);
           }
         }
       } else {

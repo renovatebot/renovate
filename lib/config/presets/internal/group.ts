@@ -64,6 +64,7 @@ const staticGroups = {
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
       'group:kubernetes',
+      'group:phpstan',
       'group:polymer',
       'group:resilience4j',
       'group:rubyOmniauth',
@@ -127,7 +128,7 @@ const staticGroups = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchPackagePrefixes: ['mcr.microsoft.com/dotnet/core/'],
+        matchPackagePrefixes: ['mcr.microsoft.com/dotnet/'],
         groupName: '.NET Core Docker containers',
       },
     ],
@@ -178,6 +179,16 @@ const staticGroups = {
         matchPackagePrefixes: ['symfony/'],
         groupName: 'symfony packages',
         groupSlug: 'symfony',
+      },
+    ],
+  },
+  phpstan: {
+    description: 'Group PHPStan packages together',
+    packageRules: [
+      {
+        matchDatasources: ['packagist'],
+        matchPackagePatterns: ['^phpstan\\/phpstan$', '\\/phpstan-'],
+        groupName: 'PHPStan packages',
       },
     ],
   },
@@ -642,6 +653,7 @@ const staticGroups = {
     packageRules: [
       {
         matchPackageNames: ['@types/jest'],
+        matchUpdateTypes: nonPinUpdateTypes,
         groupName: 'jest monorepo',
       },
     ],

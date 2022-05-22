@@ -72,8 +72,8 @@ describe('util/url', () => {
   });
 
   it('parses URL', () => {
-    expect(parseUrl(null as never)).toBeNull();
-    expect(parseUrl(undefined as never)).toBeNull();
+    expect(parseUrl(null)).toBeNull();
+    expect(parseUrl(undefined)).toBeNull();
 
     const url = parseUrl('https://github.com/renovatebot/renovate');
     expect(url?.protocol).toBe('https:');

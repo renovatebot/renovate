@@ -1,6 +1,6 @@
 import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
-import { add as addSecret } from '../util/sanitize';
+import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import {
   addMeta,
   addStream,
@@ -23,16 +23,20 @@ describe('logger/index', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
   });
+
   it('sets and gets context', () => {
     setContext('123test');
     expect(getContext()).toBe('123test');
   });
+
   it('supports logging with metadata', () => {
     expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
   });
+
   it('supports logging with only metadata', () => {
     expect(() => logger.debug({ some: 'meta' })).not.toThrow();
   });
+
   it('supports logging without metadata', () => {
     expect(() => logger.debug('some meta')).not.toThrow();
   });

@@ -1,0 +1,133 @@
+{
+  "v1.1": {
+    "codename": "Buzz",
+    "series": "buzz",
+    "created": "1993-08-16",
+    "release": "1996-06-17",
+    "eol": "1997-06-05"
+  },
+  "v1.2": {
+    "codename": "Rex",
+    "series": "rex",
+    "created": "1996-06-17",
+    "release": "1996-12-12",
+    "eol": "1998-06-05"
+  },
+  "v1.3": {
+    "codename": "Bo",
+    "series": "bo",
+    "created": "1996-12-12",
+    "release": "1997-06-05",
+    "eol": "1999-03-09"
+  },
+  "v2": {
+    "codename": "Hamm",
+    "series": "hamm",
+    "created": "1997-06-05",
+    "release": "1998-07-24",
+    "eol": "2000-03-09"
+  },
+  "v2.1": {
+    "codename": "Slink",
+    "series": "slink",
+    "created": "1998-07-24",
+    "release": "1999-03-09",
+    "eol": "2000-10-30"
+  },
+  "v2.2": {
+    "codename": "Potato",
+    "series": "potato",
+    "created": "1999-03-09",
+    "release": "2000-08-15",
+    "eol": "2003-07-30"
+  },
+  "v3": {
+    "codename": "Woody",
+    "series": "woody",
+    "created": "2000-08-15",
+    "release": "2002-07-19",
+    "eol": "2006-06-30"
+  },
+  "v3.1": {
+    "codename": "Sarge",
+    "series": "sarge",
+    "created": "2002-07-19",
+    "release": "2005-06-06",
+    "eol": "2008-03-30"
+  },
+  "v4": {
+    "codename": "Etch",
+    "series": "etch",
+    "created": "2005-06-06",
+    "release": "2007-04-08",
+    "eol": "2010-02-15"
+  },
+  "v5": {
+    "codename": "Lenny",
+    "series": "lenny",
+    "created": "2007-04-08",
+    "release": "2009-02-14",
+    "eol": "2012-02-06"
+  },
+  "v6": {
+    "codename": "Squeeze",
+    "series": "squeeze",
+    "created": "2009-02-14",
+    "release": "2011-02-06",
+    "eol": "2014-05-31",
+    "eol_lts": "2016-02-29"
+  },
+  "v7": {
+    "codename": "Wheezy",
+    "series": "wheezy",
+    "created": "2011-02-06",
+    "release": "2013-05-04",
+    "eol": "2016-04-26",
+    "eol_lts": "2018-05-31",
+    "eol_elts": "2020-06-30"
+  },
+  "v8": {
+    "codename": "Jessie",
+    "series": "jessie",
+    "created": "2013-05-04",
+    "release": "2015-04-25",
+    "eol": "2018-06-17",
+    "eol_lts": "2020-06-30",
+    "eol_elts": "2022-06-30"
+  },
+  "v9": {
+    "codename": "Stretch",
+    "series": "stretch",
+    "created": "2015-04-25",
+    "release": "2017-06-17",
+    "eol": "2020-07-06",
+    "eol_lts": "2022-06-30",
+    "eol_elts": "2024-06-30"
+  },
+  "v10": {
+    "codename": "Buster",
+    "series": "buster",
+    "created": "2017-06-17",
+    "release": "2019-07-06",
+    "eol": "2022-08-14",
+    "eol_lts": "2024-06-30",
+    "eol_elts": "2026-06-30"
+  },
+  "v11": {
+    "codename": "Bullseye",
+    "series": "bullseye",
+    "created": "2019-07-06",
+    "release": "2021-08-14",
+    "eol": "2024-08-14"
+  },
+  "v12": {
+    "codename": "Bookworm",
+    "series": "bookworm",
+    "created": "2021-08-14"
+  },
+  "v13": {
+    "codename": "Trixie",
+    "series": "trixie",
+    "created": "2023-08-01"
+  }
+}

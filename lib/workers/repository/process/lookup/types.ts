@@ -2,8 +2,11 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types';
-import type { Release } from '../../../../datasource/types';
-import type { LookupUpdate, RangeConfig } from '../../../../manager/types';
+import type { Release } from '../../../../modules/datasource/types';
+import type {
+  LookupUpdate,
+  RangeConfig,
+} from '../../../../modules/manager/types';
 import type { SkipReason } from '../../../../types';
 
 export interface FilterConfig {

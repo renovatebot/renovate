@@ -1,5 +1,5 @@
-import { RenovateConfig } from '../../../../config/types';
-import { CommitMessage } from '../../model/commit-message';
+import type { RenovateConfig } from '../../../../config/types';
+import type { CommitMessage } from '../../model/commit-message';
 import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class OnboardingCommitMessageFactory {
@@ -18,9 +18,9 @@ export class OnboardingCommitMessageFactory {
     const commitMessage = commitMessageFactory.create();
 
     if (onboardingCommitMessage) {
-      commitMessage.setSubject(onboardingCommitMessage);
+      commitMessage.subject = onboardingCommitMessage;
     } else {
-      commitMessage.setSubject(`add ${this.configFile}`);
+      commitMessage.subject = `add ${this.configFile}`;
     }
 
     return commitMessage;

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
 import semver from 'semver';
@@ -37,16 +38,16 @@ function getTableValues(
   if (!upgrade.commitBodyTable) {
     return null;
   }
-  const { datasource, lookupName, depName, currentVersion, newVersion } =
+  const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = lookupName || depName;
+  const name = packageName || depName;
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
   logger.debug(
     {
       datasource,
-      lookupName,
+      packageName,
       depName,
       currentVersion,
       newVersion,
@@ -74,6 +75,7 @@ export function generateBranchConfig(
   const depNames: string[] = [];
   const newValue: string[] = [];
   const toVersions: string[] = [];
+  const toValues = new Set<string>();
   branchUpgrades.forEach((upg) => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
@@ -81,6 +83,7 @@ export function generateBranchConfig(
     if (!toVersions.includes(upg.newVersion)) {
       toVersions.push(upg.newVersion);
     }
+    toValues.add(upg.newValue);
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
@@ -113,7 +116,7 @@ export function generateBranchConfig(
         upgrade.newDigestShort ||
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
-    if (upgrade.isDigest) {
+    if (upgrade.isDigest || upgrade.isPinDigest) {
       upgrade.displayFrom = upgrade.currentDigestShort;
       upgrade.displayTo = upgrade.newDigestShort;
     } else if (upgrade.isLockfileUpdate) {
@@ -125,6 +128,15 @@ export function generateBranchConfig(
     }
     upgrade.displayFrom ??= '';
     upgrade.displayTo ??= '';
+    const pendingVersionsLength = upgrade.pendingVersions?.length;
+    if (pendingVersionsLength) {
+      upgrade.displayPending = `\`${upgrade.pendingVersions.slice(-1).pop()}\``;
+      if (pendingVersionsLength > 1) {
+        upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
+      }
+    } else {
+      upgrade.displayPending = '';
+    }
     upgrade.prettyDepType =
       upgrade.prettyDepType || upgrade.depType || 'dependency';
     if (useGroupSettings) {
@@ -138,8 +150,9 @@ export function generateBranchConfig(
     delete upgrade.group;
 
     // istanbul ignore else
-    if (toVersions.length > 1 && !typesGroup) {
+    if (toVersions.length > 1 && toValues.size > 1 && !typesGroup) {
       logger.trace({ toVersions });
+      logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
     } else if (newValue.length > 1 && upgrade.isDigest) {
@@ -154,19 +167,23 @@ export function generateBranchConfig(
     // Use templates to generate strings
     if (SemanticCommitMessage.is(commitMessage)) {
       logger.trace('Upgrade has semantic commits enabled');
-      commitMessage.setScope(
-        template.compile(upgrade.semanticCommitScope, upgrade)
+      commitMessage.scope = template.compile(
+        upgrade.semanticCommitScope,
+        upgrade
       );
     }
     // Compile a few times in case there are nested templates
-    commitMessage.setSubject(
-      template.compile(upgrade.commitMessage || '', upgrade)
+    commitMessage.subject = template.compile(
+      upgrade.commitMessage || '',
+      upgrade
     );
-    commitMessage.setSubject(
-      template.compile(commitMessage.toJSON().subject, upgrade)
+    commitMessage.subject = template.compile(
+      commitMessage.toJSON().subject,
+      upgrade
     );
-    commitMessage.setSubject(
-      template.compile(commitMessage.toJSON().subject, upgrade)
+    commitMessage.subject = template.compile(
+      commitMessage.toJSON().subject,
+      upgrade
     );
     upgrade.commitMessage = commitMessage.formatSubject();
     // istanbul ignore if
@@ -182,7 +199,7 @@ export function generateBranchConfig(
       'to v$1'
     );
     if (upgrade.commitBody) {
-      commitMessage.setBody(template.compile(upgrade.commitBody, upgrade));
+      commitMessage.body = template.compile(upgrade.commitBody, upgrade);
       upgrade.commitMessage = commitMessage.toString();
     }
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
@@ -282,6 +299,14 @@ export function generateBranchConfig(
   config.dependencyDashboardPrApproval = config.upgrades.some(
     (upgrade) => upgrade.prCreation === 'approval'
   );
+  config.prBodyColumns = [
+    ...new Set(
+      config.upgrades.reduce(
+        (existing, upgrade) => existing.concat(upgrade.prBodyColumns),
+        []
+      )
+    ),
+  ].filter(is.nonEmptyString);
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   // combine all labels
   config.labels = [

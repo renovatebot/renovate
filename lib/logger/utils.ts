@@ -2,8 +2,8 @@ import { Stream } from 'stream';
 import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
+import { RequestError as HttpError } from 'got';
 import { clone } from '../util/clone';
-import { HttpError } from '../util/http/types';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -103,7 +103,7 @@ export function sanitizeValue(
   seen = new WeakMap<NestedValue, unknown>()
 ): any {
   if (is.string(value)) {
-    return sanitize(value);
+    return sanitize(sanitizeUrls(value));
   }
 
   if (is.date(value)) {
@@ -205,4 +205,51 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
   }
 
   throw new Error("Missing 'stream' or 'path' for bunyan stream");
+}
+
+/**
+ * A function that terminates exeution if the log level that was entered is
+ *  not a valid value for the Bunyan logger.
+ * @param logLevelToCheck
+ * @returns returns undefined when the logLevelToCheck is valid. Else it stops execution.
+ */
+export function validateLogLevel(logLevelToCheck: string | undefined): void {
+  const allowedValues: bunyan.LogLevel[] = [
+    'trace',
+    'debug',
+    'info',
+    'warn',
+    'error',
+    'fatal',
+  ];
+  if (
+    is.undefined(logLevelToCheck) ||
+    (is.string(logLevelToCheck) &&
+      allowedValues.includes(logLevelToCheck as bunyan.LogLevel))
+  ) {
+    // log level is in the allowed values or its undefined
+    return;
+  }
+
+  const logger = bunyan.createLogger({
+    name: 'renovate',
+    streams: [
+      {
+        level: 'fatal',
+        stream: process.stdout,
+      },
+    ],
+  });
+  logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
+  process.exit(1);
+}
+
+// Can't use `util/regex` because of circular reference to logger
+const urlRe = /[a-z]{3,9}:\/\/[-;:&=+$,\w]+@[a-z0-9.-]+/gi;
+const urlCredRe = /\/\/[^@]+@/g;
+
+export function sanitizeUrls(text: string): string {
+  return text.replace(urlRe, (url) => {
+    return url.replace(urlCredRe, '//**redacted**@');
+  });
 }

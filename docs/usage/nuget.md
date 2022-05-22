@@ -49,6 +49,8 @@ In this example we defined 3 NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the 3 feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged/joined together into a single dependency update.
 
+If your project uses lockfiles (a `package.lock.json` exists), alternate feed settings must be defined in a `NuGet.config` only, as `registryUrls` are not passed through to the NuGet commands used.
+
 ### Protocol versions
 
 NuGet supports two protocol versions, `v2` and `v3`, the NuGet client and server must use the same protocol version.
@@ -80,7 +82,9 @@ Credentials for authenticated/private feeds can be provided via host rules in th
 }
 ```
 
-At the moment only Basic HTTP authentication (via username and password) is supported.
+<!-- prettier-ignore -->
+!!! note
+    At the moment only Basic HTTP authentication (via username and password) is supported.
 
 ## Future work
 

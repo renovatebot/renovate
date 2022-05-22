@@ -1,9 +1,9 @@
 import * as httpMock from '../../../../test/http-mock';
-import { setPlatformApi } from '../../../platform';
+import { setPlatformApi } from '../../../modules/platform';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as bitbucket from '.';
 
-jest.unmock('../../../platform');
+jest.unmock('../../../modules/platform');
 
 const baseUrl = 'https://api.bitbucket.org';
 const basePath = '/2.0/repositories/some/repo/src/HEAD';
@@ -26,7 +26,6 @@ describe('config/presets/bitbucket/index', () => {
         'some-filename.json'
       );
       expect(res).toEqual(data);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws on error', async () => {
@@ -34,7 +33,6 @@ describe('config/presets/bitbucket/index', () => {
       await expect(
         bitbucket.fetchJSONFile('some/repo', 'some-filename.json')
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws on invalid json', async () => {
@@ -45,7 +43,6 @@ describe('config/presets/bitbucket/index', () => {
       await expect(
         bitbucket.fetchJSONFile('some/repo', 'some-filename.json')
       ).rejects.toThrow(PRESET_INVALID_JSON);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 

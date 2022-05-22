@@ -22,7 +22,7 @@ options.sort((a, b) => {
 const properties = schema.properties as Record<string, any>;
 
 function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
-  const temp = {} as Record<string, any> & RenovateOptions;
+  const temp: Record<string, any> & Partial<RenovateOptions> = {};
   if (option.description) {
     temp.description = option.description;
   }

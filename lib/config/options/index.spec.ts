@@ -1,12 +1,12 @@
-import * as manager from '../../manager';
-import * as platform from '../../platform';
+import * as manager from '../../modules/manager';
+import * as platform from '../../modules/platform';
 import { getOptions } from '.';
 
-jest.unmock('../../platform');
+jest.unmock('../../modules/platform');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
-    jest.mock('../../manager', () => ({
+    jest.mock('../../modules/manager', () => ({
       getManagers: jest.fn(() => new Map().set('testManager', {})),
     }));
 
@@ -15,7 +15,7 @@ describe('config/options/index', () => {
   });
 
   it('supportedManagers should have valid names', () => {
-    jest.unmock('../../manager');
+    jest.unmock('../../modules/manager');
     const opts = getOptions();
     const managerList = Array.from(manager.getManagers().keys());
 
@@ -23,14 +23,15 @@ describe('config/options/index', () => {
       .filter((option) => option.supportedManagers)
       .forEach((option) => {
         expect(option.supportedManagers).toBeNonEmptyArray();
-        for (const item of option.supportedManagers) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        for (const item of option.supportedManagers!) {
           expect(managerList).toContain(item);
         }
       });
   });
 
   it('supportedPlatforms should have valid names', () => {
-    jest.unmock('../../platform');
+    jest.unmock('../../modules/platform');
     const opts = getOptions();
     const platformList = Array.from(platform.getPlatforms().keys());
 
@@ -38,7 +39,8 @@ describe('config/options/index', () => {
       .filter((option) => option.supportedPlatforms)
       .forEach((option) => {
         expect(option.supportedPlatforms).toBeNonEmptyArray();
-        for (const item of option.supportedPlatforms) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        for (const item of option.supportedPlatforms!) {
           expect(platformList).toContain(item);
         }
       });

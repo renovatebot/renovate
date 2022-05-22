@@ -1,4 +1,4 @@
-import { CodeFormat } from './code-format';
+import type { CodeFormat } from './code-format';
 import { IndentationType } from './indentation-type';
 
 export class JSONWriter {

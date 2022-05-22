@@ -57,7 +57,7 @@ export function generateBranchName(update: RenovateConfig): void {
 
   if (update.hashedBranchLength) {
     let hashLength = update.hashedBranchLength - update.branchPrefix.length;
-    if (hashLength <= MIN_HASH_LENGTH) {
+    if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
         `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`
       );

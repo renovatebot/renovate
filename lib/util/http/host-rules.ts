@@ -1,4 +1,5 @@
 import {
+  BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
   PlatformId,
@@ -42,6 +43,21 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
     res = {
       ...hostRules.find({
         hostType: PlatformId.Gitlab,
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // Fallback to `bitbucket` hostType
+  if (
+    hostType &&
+    BITBUCKET_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== PlatformId.Bitbucket
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: PlatformId.Bitbucket,
         url,
       }),
       ...res,

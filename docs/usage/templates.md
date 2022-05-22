@@ -35,7 +35,7 @@ If you want to print pretty JSON with Handlebars you can use the built-in functi
 
 `{{{stringToPrettyJSON myvar}}}`
 
-In the example above `myvar` is a variable/field, that contains valid JSON.
+In the example above `myvar` is a variable/field, that has valid JSON.
 
 ### encodeURIComponent
 
@@ -52,11 +52,17 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 The `replace` helper replaces _all_ found strings with the replacement string.
 If you want to replace some characters in a string, use the built-in function `replace` like this:
 
-`{{{replace 'github.com', 'ghc', depName}}}`
+`{{{replace 'github.com' 'ghc' depName}}}`
 
 In the example above all matches of `github.com` will be replaced by `ghc` in `depName`.
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
+
+### lowercase
+
+The `lowercase` helper converts a given string to lower case.
+
+`{{{ lowercase depName }}}`
 
 ### containsString
 

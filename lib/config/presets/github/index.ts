@@ -2,12 +2,9 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { GithubHttp } from '../../../util/http/github';
+import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
-import {
-  PRESET_DEP_NOT_FOUND,
-  PRESET_INVALID_JSON,
-  fetchPreset,
-} from '../util';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
 export const Endpoint = 'https://api.github.com/';
 
@@ -17,11 +14,11 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  tag?: string | null
 ): Promise<Preset> {
   let ref = '';
-  if (is.nonEmptyString(packageTag)) {
-    ref = `?ref=${packageTag}`;
+  if (is.nonEmptyString(tag)) {
+    ref = `?ref=${tag}`;
   }
   const url = `${endpoint}repos/${repo}/contents/${fileName}${ref}`;
   logger.trace({ url }, `Preset URL`);
@@ -39,43 +36,32 @@ export async function fetchJSONFile(
     );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  try {
-    const content = Buffer.from(res.body.content, 'base64').toString();
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error(PRESET_INVALID_JSON);
-  }
+
+  return parsePreset(fromBase64(res.body.content));
 }
 
 export function getPresetFromEndpoint(
-  pkgName: string,
+  repo: string,
   filePreset: string,
-  presetPath: string,
+  presetPath?: string,
   endpoint = Endpoint,
-  packageTag?: string
-): Promise<Preset> {
+  tag?: string
+): Promise<Preset | undefined> {
   return fetchPreset({
-    pkgName,
+    repo,
     filePreset,
     presetPath,
     endpoint,
-    packageTag,
+    tag,
     fetch: fetchJSONFile,
   });
 }
 
 export function getPreset({
-  packageName: pkgName,
+  repo,
   presetName = 'default',
   presetPath,
-  packageTag = null,
-}: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(
-    pkgName,
-    presetName,
-    presetPath,
-    Endpoint,
-    packageTag
-  );
+  tag = undefined,
+}: PresetConfig): Promise<Preset | undefined> {
+  return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

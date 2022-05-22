@@ -9,15 +9,15 @@ const git = simpleGit();
   try {
     const regex = /\d+\.\d+\.\d+/;
     const stdout = await git.raw('--version');
-    const [gitVersion] = regex.exec(stdout);
-    if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
+    const [gitVersion] = regex.exec(stdout) ?? [];
+    if (!gitVersion || semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       if (process.env.CI) {
         shell.echo(
-          `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required`
+          `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
         );
       } else {
         throw new Error(
-          `Minimum Git version ${GIT_MINIMUM_VERSION} is required`
+          `Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
         );
       }
     }

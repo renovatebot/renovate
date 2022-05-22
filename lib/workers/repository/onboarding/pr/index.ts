@@ -1,16 +1,21 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../manager/types';
-import { platform } from '../../../../platform';
+import type { PackageFile } from '../../../../modules/manager/types';
+import { platform } from '../../../../modules/platform';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { emojify } from '../../../../util/emoji';
-import { deleteBranch, isBranchModified } from '../../../../util/git';
 import {
-  addAssigneesReviewers,
-  getPlatformPrOptions,
-  prepareLabels,
-} from '../../../pr';
+  deleteBranch,
+  isBranchConflicted,
+  isBranchModified,
+} from '../../../../util/git';
+import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
+import { getPlatformPrOptions } from '../../update/pr';
+import { prepareLabels } from '../../update/pr/labels';
+import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
@@ -29,13 +34,14 @@ export async function ensureOnboardingPr(
   const existingPr = await platform.getBranchPr(config.onboardingBranch);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${config.productLinks.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
-  prTemplate += config.requireConfig
-    ? emojify(
-        `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
-      )
-    : emojify(
-        `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
-      );
+  prTemplate +=
+    config.requireConfig === 'required'
+      ? emojify(
+          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
+        )
+      : emojify(
+          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+        );
   prTemplate += emojify(
     `
 
@@ -76,7 +82,11 @@ If you need any further assistance then you can also [request help here](${confi
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
-    if (existingPr?.isConflicted) {
+    const isConflicted = await isBranchConflicted(
+      config.baseBranch,
+      config.onboardingBranch
+    );
+    if (isConflicted) {
       configDesc += emojify(
         `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );
@@ -94,15 +104,11 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
-  // istanbul ignore if
-  if (config.prHeader) {
-    const prHeader = String(config.prHeader || '');
-    prBody = `${prHeader}\n\n${prBody}`;
+  if (is.string(config.prHeader)) {
+    prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
-  // istanbul ignore if
-  if (config.prFooter) {
-    const prFooter = String(config.prFooter);
-    prBody = `${prBody}\n---\n\n${prFooter}\n`;
+  if (is.string(config.prFooter)) {
+    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
   logger.trace('prBody:\n' + prBody);
 
@@ -111,9 +117,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (existingPr) {
     logger.debug('Found open onboarding PR');
     // Check if existing PR needs updating
-    if (
-      existingPr.body.trim() === prBody.trim() // Bitbucket strips trailing \n
-    ) {
+    const prBodyHash = hashBody(prBody);
+    if (existingPr.bodyStruct?.hash === prBodyHash) {
       logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
     }
@@ -145,7 +150,7 @@ If you need any further assistance then you can also [request help here](${confi
         platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
-      await addAssigneesReviewers(config, pr);
+      await addParticipants(config, pr);
     }
   } catch (err) /* istanbul ignore next */ {
     if (

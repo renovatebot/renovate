@@ -22,7 +22,7 @@ export async function branchifyUpgrades(
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map((u) => u.depName)
-      .filter((txt) => txt?.length)
+      .filter((txt) => txt?.trim().length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];

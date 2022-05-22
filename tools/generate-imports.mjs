@@ -1,6 +1,12 @@
+import util from 'util';
 import fs from 'fs-extra';
+import _glob from 'glob';
+import hasha from 'hasha';
+import minimatch from 'minimatch';
 import shell from 'shelljs';
 import upath from 'upath';
+
+const glob = util.promisify(_glob);
 
 shell.echo('generating imports');
 const newFiles = new Set();
@@ -32,6 +38,9 @@ const dataPaths = [
   'data',
   'node_modules/emojibase-data/en/shortcodes/github.json',
 ];
+const options = {
+  algorithm: 'sha256',
+};
 
 /**
  *
@@ -63,6 +72,43 @@ function expandPaths(paths) {
     .reduce((x, y) => x.concat(y));
 }
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<string>}
+ */
+async function getFileHash(filePath) {
+  try {
+    const hash = await hasha.fromFile(filePath, options);
+    return hash;
+  } catch (err) {
+    throw new Error(`ERROR: Unable to generate hash for ${filePath}`);
+  }
+}
+
+/**
+ *
+ * @param {string} managerName
+ * @returns {Promise<string>}
+ */
+export async function getManagerHash(managerName) {
+  /** @type {string[]} */
+  let hashes = [];
+  const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
+    (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+  );
+
+  for (const fileAddr of files) {
+    const hash = await getFileHash(fileAddr);
+    hashes.push(hash);
+  }
+
+  if (hashes.length) {
+    return hasha(hashes, options);
+  }
+
+  throw new Error(`Unable to generate hash for manager/${managerName}`);
+}
+
 async function generateData() {
   const files = expandPaths(dataPaths).sort();
 
@@ -85,7 +131,7 @@ async function generateData() {
   await updateFile(
     `lib/data-files.generated.ts`,
     [
-      `type DataFile =\n${importDataFileType};`,
+      `export type DataFile =\n${importDataFileType};`,
       contentMapDecl,
       contentMapAssignments.join('\n'),
       `export default data;\n`,
@@ -93,11 +139,46 @@ async function generateData() {
   );
 }
 
+async function generateHash() {
+  shell.echo('generating hashes');
+  try {
+    const hashMap = `export const hashMap = new Map<string, string>();`;
+    /** @type {string[]} */
+    let hashes = [];
+    // get managers list
+    const managers = (
+      await fs.readdir('lib/modules/manager', { withFileTypes: true })
+    )
+      .filter((file) => file.isDirectory())
+      .map((file) => file.name);
+
+    for (const manager of managers) {
+      const hash = await getManagerHash(manager);
+      hashes.push(hash);
+    }
+
+    //add manager hashes to hashMap {key->manager, value->hash}
+    hashes = (await Promise.all(hashes)).map(
+      (hash, index) => `hashMap.set('${managers[index]}','${hash}');`
+    );
+
+    //write hashMap to fingerprint.generated.ts
+    await updateFile(
+      'lib/modules/manager/fingerprint.generated.ts',
+      [hashMap, hashes.join('\n')].join('\n\n')
+    );
+  } catch (err) {
+    shell.echo('ERROR:', err.message);
+    process.exit(1);
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
     // data-files
     await generateData();
+    await generateHash();
     await Promise.all(
       shell
         .find('lib/**/*.generated.ts')

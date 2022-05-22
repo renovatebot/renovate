@@ -8,7 +8,7 @@ This document describes Renovate's scheduling.
 ## Default behavior
 
 By default, Renovate bot runs as often as its administrator has configured it to (e.g. hourly, daily, etc.).
-The exact frequency at which Renovate can process individual repositories depends on the combination of how often it runs, how many repositories are installed, and whether there's a lot of work to be done in each repository (e.g. if a commonly used dependency has recently received a new update, which triggers a lot of PRs to be created).
+The exact frequency at which Renovate can process individual repositories depends on the combination of how often it runs, how many repositories are installed, and whether there's a lot of work to be done in each repository (e.g. if a commonly used dependency has recently gotten a new update, which triggers a lot of PRs to be created).
 
 By default, Renovate schedules use the UTC timezone.
 You can override the default timezone by setting your own `timezone` config option.
@@ -76,8 +76,10 @@ before 5:00am
 on friday and saturday
 ```
 
-**Warning:** Renovate does not support scheduled minutes or "at an exact time" granularity.
-Granularity must be at least one hour.
+<!-- prettier-ignore -->
+!!! warning
+    Renovate does not support scheduled minutes or "at an exact time" granularity.
+    Granularity must be at least one hour.
 
 Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text, so Renovate is limited to that library's syntax support.
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text) for more details.

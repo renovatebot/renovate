@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
+import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
@@ -23,7 +24,9 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = GlobalConfig.set(repoConfig);
+  let config = GlobalConfig.set(
+    applySecretsToConfig(repoConfig, undefined, false)
+  );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');
@@ -39,29 +42,34 @@ export async function renovateRepository(
     const { branches, branchList, packageFiles } = await extractDependencies(
       config
     );
-    await ensureOnboardingPr(config, packageFiles, branches);
-    const res = await updateRepo(config, branches);
-    setMeta({ repository: config.repository });
-    addSplit('update');
-    await setBranchCache(branches);
-    if (res === 'automerged') {
-      if (canRetry) {
-        logger.info('Renovating repository again after automerge result');
-        const recursiveRes = await renovateRepository(repoConfig, false);
-        return recursiveRes;
+    if (
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
+    ) {
+      await ensureOnboardingPr(config, packageFiles, branches);
+      const res = await updateRepo(config, branches);
+      setMeta({ repository: config.repository });
+      addSplit('update');
+      await setBranchCache(branches);
+      if (res === 'automerged') {
+        if (canRetry) {
+          logger.info('Renovating repository again after automerge result');
+          const recursiveRes = await renovateRepository(repoConfig, false);
+          return recursiveRes;
+        }
+        logger.debug(`Automerged but already retried once`);
+      } else {
+        await ensureDependencyDashboard(config, branches);
       }
-      logger.debug(`Automerged but already retried once`);
-    } else {
-      await ensureDependencyDashboard(config, branches);
+      await finaliseRepo(config, branchList);
+      repoResult = processResult(config, res);
     }
-    await finaliseRepo(config, branchList);
-    repoResult = processResult(config, res);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (localDir && !config.persistRepoData) {
+  if (localDir && !repoConfig.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {

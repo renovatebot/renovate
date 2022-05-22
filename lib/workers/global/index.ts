@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
+import { mergeChildConfig } from '../../config';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
@@ -77,10 +78,25 @@ function checkEnv(): void {
 }
 
 export async function validatePresets(config: AllConfig): Promise<void> {
+  logger.debug('validatePresets()');
   try {
     await resolveConfigPresets(config);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, CONFIG_PRESETS_INVALID);
+    throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
+
+export async function resolveGlobalExtends(
+  globalExtends: string[]
+): Promise<AllConfig> {
+  try {
+    // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
+    const config = { extends: globalExtends };
+    const resolvedConfig = await resolveConfigPresets(config);
+    return resolvedConfig;
+  } catch (err) {
+    logger.error({ err }, 'Error resolving config preset');
     throw new Error(CONFIG_PRESETS_INVALID);
   }
 }
@@ -90,6 +106,13 @@ export async function start(): Promise<number> {
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
+    if (config?.globalExtends) {
+      // resolve global presets immediately
+      config = mergeChildConfig(
+        config,
+        await resolveGlobalExtends(config.globalExtends)
+      );
+    }
     // initialize all submodules
     config = await globalInitialize(config);
 
@@ -119,6 +142,7 @@ export async function start(): Promise<number> {
       }
       const repoConfig = await getRepositoryConfig(config, repository);
       if (repoConfig.hostRules) {
+        logger.debug('Reinitializing hostRules for repo');
         hostRules.clear();
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
         repoConfig.hostRules = [];

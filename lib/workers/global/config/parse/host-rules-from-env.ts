@@ -1,5 +1,5 @@
-import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
+import { getDatasourceList } from '../../../../modules/datasource';
 import type { HostRule } from '../../../../types';
 
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {

@@ -9,7 +9,7 @@ Where you can find the logs depends on how you're running Renovate.
 
 ### GitHub Hosted app
 
-Each pull request from Renovate contains a link to the WhiteSource Renovate Dashboard in the PR body text.
+Each pull request from Renovate has a link to the WhiteSource Renovate Dashboard in the PR body text.
 
 The text you're looking for is:
 

@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import { get, getLanguageList, getManagerList } from '../manager';
+import { get, getLanguageList, getManagerList } from '../modules/manager';
 import * as options from './options';
 import type { AllConfig, RenovateConfig, RenovateConfigStage } from './types';
 import { mergeChildConfig } from './utils';
@@ -17,9 +17,11 @@ export function getManagerConfig(
   };
   const language = get(manager, 'language');
   if (language) {
-    managerConfig = mergeChildConfig(managerConfig, config[language]);
+    // TODO: fix types #7154
+    managerConfig = mergeChildConfig(managerConfig, config[language] as any);
   }
-  managerConfig = mergeChildConfig(managerConfig, config[manager]);
+  // TODO: fix types #7154
+  managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
   for (const i of getLanguageList().concat(getManagerList())) {
     delete managerConfig[i];
   }
@@ -34,7 +36,13 @@ export function filterConfig(
 ): AllConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: RenovateConfig = { ...inputConfig };
-  const stages = ['global', 'repository', 'package', 'branch', 'pr'];
+  const stages: (string | undefined)[] = [
+    'global',
+    'repository',
+    'package',
+    'branch',
+    'pr',
+  ];
   const targetIndex = stages.indexOf(targetStage);
   for (const option of options.getOptions()) {
     const optionIndex = stages.indexOf(option.stage);

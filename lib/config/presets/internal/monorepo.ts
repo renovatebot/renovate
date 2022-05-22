@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import type { Preset } from '../types';
 
 const repoGroups = {
+  acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
   'arcus.event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
   'arcus.security': 'https://github.com/arcus-azure/arcus.security',
@@ -30,6 +31,7 @@ const repoGroups = {
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
+  'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
@@ -38,7 +40,9 @@ const repoGroups = {
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
+  groovy: 'https://github.com/apache/groovy',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
+  jsplumb: 'https://github.com/jsplumb/jsplumb',
   'mdc-react': 'material-components/material-components-web-react',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
@@ -47,6 +51,7 @@ const repoGroups = {
   'react-apollo': 'https://github.com/apollographql/react-apollo',
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
+  'react-page': 'https://github.com/react-page/react-page',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
@@ -86,11 +91,14 @@ const repoGroups = {
     'https://github.com/dotnet/runtime',
   ],
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
+  'dotnet-azure-ad-identitymodel-extensions':
+    'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
+  fela: 'https://github.com/robinweser/fela',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
   fontsource: 'https://github.com/fontsource/fontsource',
@@ -129,10 +137,17 @@ const repoGroups = {
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
-  'material-ui': 'https://github.com/mui-org/material-ui',
+  'material-ui': [
+    'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
+    'https://github.com/mui/material-ui',
+  ],
+  'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
-  nest: 'https://github.com/nestjs/nest',
+  nest: [
+    'https://github.com/nestjs/nest',
+    'https://github.com/nestjs/passport',
+  ],
   netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
@@ -146,6 +161,7 @@ const repoGroups = {
   nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
+  nswag: 'https://github.com/RicoSuter/NSwag',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
   orleans: 'https://github.com/dotnet/orleans',
   feign: 'https://github.com/OpenFeign/feign',
@@ -153,7 +169,10 @@ const repoGroups = {
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  parcel: 'https://github.com/parcel-bundler/parcel',
+  'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
+  pixijs: 'https://github.com/pixijs/pixi.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
   pollyjs: 'https://github.com/Netflix/pollyjs',
@@ -169,11 +188,15 @@ const repoGroups = {
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
+  'rust-futures': 'https://github.com/rust-lang/futures-rs',
+  'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  'sitecore-jss': 'https://github.com/Sitecore/jss',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
+  'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',
@@ -181,10 +204,11 @@ const repoGroups = {
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
+  tauri: 'https://github.com/tauri-apps/tauri',
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
-  vue: 'https://github.com/vuejs/vue',
+  vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
@@ -194,6 +218,7 @@ const repoGroups = {
 };
 
 const patternGroups = {
+  'apache-camel': '^org.apache.camel:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   wordpress: '^@wordpress/',

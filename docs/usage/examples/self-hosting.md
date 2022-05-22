@@ -15,7 +15,7 @@ If you want to use these package managers to update your lockfiles, you must ens
 npm install -g yarn pnpm
 ```
 
-The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the appropriate version before running Renovate.
+The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the correct version before running Renovate.
 
 ### Docker
 
@@ -30,8 +30,10 @@ docker run --rm renovate/renovate:31.14
 docker run --rm renovate/renovate:31
 ```
 
-Do not use the example tags listed above, as they will be out-of-date.
-Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
+<!-- prettier-ignore -->
+!!! warning
+    Do not use the example tags listed above, as they will be out-of-date.
+    Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
 If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
@@ -47,7 +49,7 @@ The following is an example manifest of running Renovate against a GitHub Enterp
 First the Kubernetes manifest:
 
 ```yaml
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: renovate
@@ -97,7 +99,7 @@ A `config.js` file can be added to the manifest using a `ConfigMap` as shown in 
 
 ```yaml
 ---
- apiVersion: v1
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: renovate-config
@@ -109,7 +111,7 @@ data:
     }
 
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: renovate-bot
@@ -156,7 +158,7 @@ If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](ht
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
-Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
 
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
@@ -245,9 +247,9 @@ module.exports = {
 Here change the `logFile` and `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
-If running against GitHub Enterprise, change the above `gitlab` values to the equivalent GitHub ones.
+If running against GitHub Enterprise Server, change the above `gitlab` values to the equivalent GitHub ones.
 
-You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
+You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
 Most people will run Renovate via cron, e.g. once per hour.
 Here is an example Bash script that you can point `cron` to:
@@ -264,8 +266,10 @@ export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 renovate
 ```
 
-Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
-You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
+<!-- prettier-ignore -->
+!!! note
+    The GitHub.com token as an environment variable is needed to fetch Release Notes that are usually hosted on github.com.
+    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
@@ -392,3 +396,35 @@ The logging level output is controlled by the Bunyan logging library.
 |    40 | warn    |
 |    50 | error   |
 |    60 | fatal   |
+
+## Self-signed TLS/SSL certificates
+
+Renovate and invoked helper programs (e.g. Git, npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
+If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be configured to trust these additional certificates.
+
+For the main Renovate Node.js application set the environment variable [`NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt`](https://nodejs.org/api/cli.html#node_extra_ca_certsfile).
+This ensures that the Renovate application itself trusts the `self-signed-certificate.crt` and can establish secure connections to systems using that certificate or certificates signed by this certificate authority.
+
+The helper programs (e.g. Git, npm) use the system trust store.
+For them to trust a self-signed certificate you must add it to the systems trust store.
+On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+
+If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
+For example, the following `Dockerfile` is set up to use a self-signed certificate:
+
+```dockerfile
+FROM renovate/renovate
+
+# Changes to the certificate authority require root permissions
+USER root
+
+# Copy and install the self signed certificate
+COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+# Change back to the Ubuntu user
+USER 1000
+
+# Node comes with an own certificate authority store and thus needs to trust the self-signed certificate explicitly
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
+```

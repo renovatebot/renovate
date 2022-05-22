@@ -4,8 +4,8 @@ import {
   mergeChildConfig,
 } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
-import { getDefaultConfig } from '../../../datasource';
-import { get } from '../../../manager';
+import { getDefaultConfig } from '../../../modules/datasource';
+import { get } from '../../../modules/manager';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -42,6 +42,18 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(regEx(/^\//), '') // remove leading slash
         .replace(regEx(/\//g), '-') // change slashes to hyphens
         .replace(regEx(/-+/g), '-'); // remove multiple hyphens
+      updateConfig.sourceRepo = parsedSourceUrl.pathname.replace(
+        regEx(/^\//),
+        ''
+      ); // remove leading slash
+      updateConfig.sourceRepoOrg = updateConfig.sourceRepo.replace(
+        regEx(/\/.*/g),
+        ''
+      ); // remove everything after first slash
+      updateConfig.sourceRepoName = updateConfig.sourceRepo.replace(
+        regEx(/.*\//g),
+        ''
+      ); // remove everything up to the last slash
     }
   }
   generateBranchName(updateConfig);
@@ -85,8 +97,6 @@ export async function flattenUpdates(
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
-            updateConfig.newVersion =
-              updateConfig.newVersion || updateConfig.newValue;
             if (updateConfig.updateType) {
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
@@ -128,6 +138,7 @@ export async function flattenUpdates(
           packageFileConfig.lockFileMaintenance
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
+        lockFileConfig.isLockFileMaintenance = true;
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(

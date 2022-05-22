@@ -10,13 +10,19 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../../util/cache/repository';
+import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { parseLinkHeader } from '../url';
-import { GotLegacyError } from './legacy';
-import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
+import type { GotLegacyError } from './legacy';
+import type {
+  GraphqlOptions,
+  HttpPostOptions,
+  HttpResponse,
+  InternalHttpOptions,
+} from './types';
+import { Http } from '.';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -154,15 +160,6 @@ function handleGotError(
   return err;
 }
 
-interface GraphqlOptions {
-  variables?: Record<string, string | number | null>;
-  paginate?: boolean;
-  count?: number;
-  limit?: number;
-  cursor?: string | null;
-  acceptHeader?: string;
-}
-
 interface GraphqlPaginatedContent<T = unknown> {
   nodes: T[];
   edges: T[];
@@ -184,12 +181,20 @@ function constructAcceptString(input?: any): string {
 
 const MAX_GRAPHQL_PAGE_SIZE = 100;
 
+interface GraphqlPageCacheItem {
+  pageLastResizedAt: string;
+  pageSize: number;
+}
+
+type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
+
 function getGraphqlPageSize(
   fieldName: string,
   defaultPageSize = MAX_GRAPHQL_PAGE_SIZE
 ): number {
   const cache = getCache();
-  const graphqlPageCache = cache?.platform?.github?.graphqlPageCache;
+  const graphqlPageCache = cache?.platform?.github
+    ?.graphqlPageCache as GraphqlPageCache;
   const cachedRecord = graphqlPageCache?.[fieldName];
 
   if (graphqlPageCache && cachedRecord) {
@@ -246,7 +251,9 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
     cache.platform ??= {};
     cache.platform.github ??= {};
     cache.platform.github.graphqlPageCache ??= {};
-    cache.platform.github.graphqlPageCache[fieldName] = {
+    const graphqlPageCache = cache.platform.github
+      .graphqlPageCache as GraphqlPageCache;
+    graphqlPageCache[fieldName] = {
       pageLastResizedAt,
       pageSize: newPageSize,
     };

@@ -2,27 +2,27 @@ import { CustomCommitMessage } from './custom-commit-message';
 
 describe('workers/repository/model/custom-commit-message', () => {
   describe('CustomCommitMessage', () => {
-    const TEST_CASES: ReadonlyArray<
-      [message: string, prefix: string | undefined, result: string]
-    > = [
-      ['test', undefined, 'Test'],
-      ['test', '', 'Test'],
-      ['  test  ', '  ', 'Test'],
-      ['test', 'fix', 'fix: test'],
-      ['test', 'fix:', 'fix: test'],
-      [
-        'Message    With   Extra  Whitespaces   ',
-        '  refactor   ',
-        'refactor: message With Extra Whitespaces',
-      ],
-    ];
-
-    it.each(TEST_CASES)(
-      'given %p and %p as arguments, returns %p',
-      (subject, prefix, result) => {
+    it.each`
+      subject                                      | prefix             | result
+      ${'test'}                                    | ${''}              | ${'Test'}
+      ${'  test  '}                                | ${'  '}            | ${'Test'}
+      ${'test'}                                    | ${'fix'}           | ${'fix: test'}
+      ${'test'}                                    | ${'fix:'}          | ${'fix: test'}
+      ${'Message    With   Extra  Whitespaces   '} | ${'  refactor   '} | ${'refactor: message With Extra Whitespaces'}
+    `(
+      'given subject $subject and prefix $prefix as arguments, returns $result',
+      ({
+        subject,
+        prefix,
+        result,
+      }: {
+        subject: string;
+        prefix: string;
+        result: string;
+      }) => {
         const commitMessage = new CustomCommitMessage();
-        commitMessage.setSubject(subject);
-        commitMessage.setPrefix(prefix);
+        commitMessage.subject = subject;
+        commitMessage.prefix = prefix;
 
         expect(commitMessage.toString()).toEqual(result);
       }
@@ -30,11 +30,23 @@ describe('workers/repository/model/custom-commit-message', () => {
 
     it('should provide ability to set body and footer', () => {
       const commitMessage = new CustomCommitMessage();
-      commitMessage.setSubject('subject');
-      commitMessage.setBody('body');
-      commitMessage.setFooter('footer');
+      commitMessage.subject = 'subject';
+      commitMessage.body = 'body';
+      commitMessage.footer = 'footer';
 
+      expect(commitMessage.toJSON()).toEqual({
+        body: 'body',
+        footer: 'footer',
+        prefix: '',
+        subject: 'subject',
+      });
       expect(commitMessage.toString()).toBe('Subject\n\nbody\n\nfooter');
+    });
+
+    it('should remove empty subject by default', () => {
+      const commitMessage = new CustomCommitMessage();
+
+      expect(commitMessage.formatSubject()).toBe('');
     });
   });
 });
