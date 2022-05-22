@@ -13,7 +13,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (const line of lines) {
       // Search each line for plugin names
       const depLineMatch = regEx(
-        /^[\s-]*(?<depName>[^#\s]+)#(?<currentValue>[^:]+)/
+        /^\s*(?:-\s+(?:\?\s+)?)?(?<depName>[^#\s]+)#(?<currentValue>[^:]+)/
       ).exec(line);
 
       if (depLineMatch?.groups) {
