@@ -112,8 +112,11 @@ function cronMatches(cron: string, now: DateTime): boolean {
   return true;
 }
 
-export function isScheduledNow(config: RenovateConfig): boolean {
-  let configSchedule = config.schedule;
+export function isScheduledNow(
+  config: RenovateConfig,
+  schedule: string[]
+): boolean {
+  let configSchedule: string[] = schedule;
   logger.debug(
     `Checking schedule(${String(configSchedule)}, ${config.timezone})`
   );

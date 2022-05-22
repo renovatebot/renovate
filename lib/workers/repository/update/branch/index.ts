@@ -236,7 +236,7 @@ export async function processBranch(
     }
 
     // Check schedule
-    config.isScheduledNow = isScheduledNow(config);
+    config.isScheduledNow = isScheduledNow(config, config.schedule);
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
@@ -522,6 +522,13 @@ export async function processBranch(
       ) {
         logger.warn(
           'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
+        );
+        config.forcePr = true;
+        config.branchAutomergeFailureMessage = mergeStatus;
+      }
+      if (mergeStatus === 'off schedule') {
+        logger.warn(
+          'Branch cannot automerge now because it is off schedule - raising a PR instead'
         );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;

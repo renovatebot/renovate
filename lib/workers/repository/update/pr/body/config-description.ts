@@ -3,25 +3,36 @@ import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
 import { resolveBranchStatus } from '../../branch/status-checks';
 
+function scheduleToString(schedule: string[], timezone: string | null): string {
+  let scheduleString = '';
+  if (
+    schedule &&
+    (schedule as never) !== 'at any time' &&
+    schedule[0] !== 'at any time'
+  ) {
+    scheduleString += `"${String(schedule)}"`;
+    if (timezone) {
+      scheduleString += ` in timezone ${timezone}`;
+    } else {
+      scheduleString += ` (UTC)`;
+    }
+  } else {
+    scheduleString += 'At any time (no schedule defined)';
+  }
+  return scheduleString;
+}
+
 export async function getPrConfigDescription(
   config: BranchConfig
 ): Promise<string> {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
-  if (
-    config.schedule &&
-    (config.schedule as never) !== 'at any time' &&
-    config.schedule[0] !== 'at any time'
-  ) {
-    prBody += `"${String(config.schedule)}"`;
-    if (config.timezone) {
-      prBody += ` in timezone ${config.timezone}.`;
-    } else {
-      prBody += ` (UTC).`;
-    }
-  } else {
-    prBody += 'At any time (no schedule defined).';
-  }
+  prBody +=
+    'Branch creation - ' + scheduleToString(config.schedule, config.timezone);
+  prBody +=
+    ', Automerge - ' +
+    scheduleToString(config.automergeSchedule, config.timezone) +
+    '.';
 
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
