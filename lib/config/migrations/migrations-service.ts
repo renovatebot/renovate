@@ -90,7 +90,6 @@ export class MigrationsService {
     CompatibilityMigration,
     ComposerIgnorePlatformReqsMigration,
     DryRunMigration,
-    DryRunMigration,
     EnabledManagersMigration,
     ExtendsMigration,
     GoModTidyMigration,
