@@ -9,20 +9,44 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const match = regEx(/^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
-      if (match) {
-        const currentFrom = match[1];
-        const dep = getDep(currentFrom);
-        logger.debug(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'DroneCI docker image'
-        );
-        dep.depType = 'docker';
-        deps.push(dep);
+
+      const first_line_match = regEx(/^\s* image:\s*(['"]([^\s'"]+)\\)$/).exec(
+        line
+      );
+      if (first_line_match) {
+        let currentFrom = first_line_match[2];
+        let replaceString = first_line_match[1];
+
+        for (let i = lineNumber + 1; i < lines.length; i += 1) {
+          const internal_line = lines[i];
+          const middle_line_match =
+            regEx(/^(\s*([^\s'"]+)\\)$/).exec(internal_line);
+          if (middle_line_match) {
+            currentFrom += middle_line_match[2];
+            replaceString += '\n' + middle_line_match[1];
+          } else {
+            const final_line_match = regEx(/^(\s*([^\s'"]+)['"])$/).exec(
+              internal_line
+            );
+            if (final_line_match) {
+              currentFrom += final_line_match[2];
+              replaceString += '\n' + final_line_match[1];
+
+              const dep = getDep(currentFrom);
+              dep.depType = 'docker';
+              dep.replaceString = replaceString;
+              deps.push(dep);
+            }
+            break;
+          }
+        }
+      } else {
+        const match = regEx(/^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
+        if (match) {
+          const dep = getDep(match[1]);
+          dep.depType = 'docker';
+          deps.push(dep);
+        }
       }
     }
   } catch (err) /* istanbul ignore next */ {

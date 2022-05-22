@@ -162,7 +162,13 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('creates PR (no require config)', async () => {
-      config.requireConfig = false;
+      config.requireConfig = 'optional';
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates PR (require config)', async () => {
+      config.requireConfig = 'required';
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });

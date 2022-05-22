@@ -25,9 +25,7 @@ function get(
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
-const meta = Readable.from(
-  Buffer.from(Fixtures.get('metadata-s3.xml'), 'utf-8')
-);
+const meta = Readable.from(Fixtures.getBinary('metadata-s3.xml'));
 
 describe('modules/datasource/maven/s3', () => {
   const s3mock = mockClient(S3Client);

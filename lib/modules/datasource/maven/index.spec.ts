@@ -83,9 +83,25 @@ function mockGenericPackage(opts: MockOpts = {}) {
   }
 
   if (pom) {
-    scope
-      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
-      .reply(200, pom);
+    if (latest.endsWith('-SNAPSHOT')) {
+      const [major, minor, patch] = latest
+        .replace('-SNAPSHOT', '')
+        .split('.')
+        .map((x) => parseInt(x, 10))
+        .map((x) => (x < 10 ? `0${x}` : `${x}`));
+      scope
+        .get(
+          `/${packagePath}/${latest}/${artifact}-${latest.replace(
+            '-SNAPSHOT',
+            ''
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+        )
+        .reply(200, pom);
+    } else {
+      scope
+        .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
+        .reply(200, pom);
+    }
   }
 
   if (jars) {
@@ -187,6 +203,43 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res).toMatchSnapshot();
+  });
+
+  it('returns releases when only snapshot', async () => {
+    const meta = loadFixture('metadata-snapshot-version.xml');
+    mockGenericPackage({
+      meta: loadFixture('metadata-snapshot-only.xml'),
+      jars: null,
+      html: null,
+      latest: '1.0.3-SNAPSHOT',
+      snapshots: [
+        {
+          version: '1.0.3-SNAPSHOT',
+          meta: meta,
+          jarStatus: 200,
+        },
+      ],
+    });
+    httpMock
+      .scope(baseUrl)
+      .get('/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml')
+      .reply(200, meta);
+
+    const res = await get();
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        {
+          releaseTimestamp: '2020-01-01T01:00:03.000Z',
+          version: '1.0.3-SNAPSHOT',
+        },
+      ],
+    });
   });
 
   it('returns html-based releases', async () => {
