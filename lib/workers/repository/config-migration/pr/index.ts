@@ -87,7 +87,6 @@ If you need any further assistance then you can also [request help here](${
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
-      // Bitbucket strips trailing \n)//
       logger.debug({ pr: existingPr.number }, `Does not need updating`);
       return;
     }
