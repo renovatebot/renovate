@@ -2,10 +2,7 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { id as versioning } from '../../versioning/maven';
-import type {
-  /*PackageDependency, */ PackageDependency,
-  PackageFile,
-} from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 import type { MavenVersionExtract } from './types';
 
 // https://regex101.com/r/IcOs7P/1
