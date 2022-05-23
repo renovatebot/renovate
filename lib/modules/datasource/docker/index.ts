@@ -136,7 +136,11 @@ export async function getAuthHeaders(
     }
 
     let scope = `repository:${dockerRepository}:pull`;
-    if (is.string(authenticateHeader.params.scope)) {
+    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
+    if (
+      is.string(authenticateHeader.params.scope) &&
+      !apiCheckUrl.endsWith('/v2/')
+    ) {
       scope = authenticateHeader.params.scope;
     }
 
