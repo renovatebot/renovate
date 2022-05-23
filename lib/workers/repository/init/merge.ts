@@ -168,7 +168,10 @@ export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const repoConfig = await detectRepoFileConfig();
+  let repoConfig: RepoFileConfig = {};
+  if (config.requireConfig !== 'ignored') {
+    repoConfig = await detectRepoFileConfig();
+  }
   const configFileParsed = repoConfig?.configFileParsed || {};
   if (is.nonEmptyArray(returnConfig.extends)) {
     configFileParsed.extends = [
