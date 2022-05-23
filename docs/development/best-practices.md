@@ -136,6 +136,7 @@ Use `UTC` to be time zone independent.
 ```ts
 Fixture.get('./file.json'); // for loading string data
 Fixture.getJson('./file.json'); // for loading and parsing objects
+Fixture.getBinary('./file.json'); // for retrieving a buffer
 ```
 
 ### Working with vanilla JS files (renovate/tools only)
