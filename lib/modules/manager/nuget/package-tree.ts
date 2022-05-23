@@ -6,7 +6,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 
-export const Central_FILE = 'Directory.Packages.props';
+export const CENTRAL_FILE = 'Directory.Packages.props';
 /**
  * Get all package files at any level of ancestry that depend on packageFileName
  */
@@ -21,7 +21,8 @@ export async function getDependentPackageFiles(
     graph.addNode(packageFileName);
   }
 
-  const parentDir = upath.dirname(packageFileName);
+  const parentDir =
+    packageFileName === CENTRAL_FILE ? '' : upath.dirname(packageFileName);
 
   for (const f of packageFiles) {
     graph.addNode(f);
@@ -35,11 +36,9 @@ export async function getDependentPackageFiles(
     const packageFileContent = await readLocalFile(f, 'utf8');
 
     const doc = new xmldoc.XmlDocument(packageFileContent);
-    const projectReferenceAttributes = (
-      doc
-        .childrenNamed('ItemGroup')
-        .map((ig) => ig.childrenNamed('ProjectReference')) ?? []
-    )
+    const projectReferenceAttributes = doc
+      .childrenNamed('ItemGroup')
+      .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
       .map((pf) => pf.attr['Include']);
 
@@ -63,6 +62,7 @@ export async function getDependentPackageFiles(
     packageFileName,
     graph
   );
+
   // deduplicate
   return Array.from(new Set(dependents.reverse())).reverse();
 }

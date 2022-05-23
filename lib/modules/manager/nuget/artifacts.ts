@@ -22,7 +22,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { Central_FILE, getDependentPackageFiles } from './package-tree';
+import { CENTRAL_FILE, getDependentPackageFiles } from './package-tree';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
@@ -118,8 +118,8 @@ export async function updateArtifacts({
 
   // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
   const isCentralManament =
-    packageFileName === Central_FILE ||
-    packageFileName.endsWith(`/${Central_FILE}`);
+    packageFileName === CENTRAL_FILE ||
+    packageFileName.endsWith(`/${CENTRAL_FILE}`);
 
   if (
     !isCentralManament &&
