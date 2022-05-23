@@ -18,6 +18,10 @@ describe('workers/repository/update/branch/automerge', () => {
       GlobalConfig.reset();
     });
 
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('returns false if not configured for automerge', async () => {
       config.automerge = false;
       expect(await tryBranchAutomerge(config)).toBe('no automerge');

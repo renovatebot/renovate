@@ -136,7 +136,7 @@ describe('workers/repository/update/branch/schedule', () => {
     });
   });
 
-  describe('isScheduledNow(config, config.schedule)', () => {
+  describe('isScheduledNow(config)', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
@@ -146,96 +146,96 @@ describe('workers/repository/update/branch/schedule', () => {
     });
 
     it('returns true if no schedule', () => {
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('returns true if at any time', () => {
       config.schedule = 'at any time' as never;
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('returns true if at any time array', () => {
       config.schedule = ['at any time'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('returns true if invalid schedule', () => {
       config.schedule = ['every 15 minutes'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('returns true if invalid timezone', () => {
       config.schedule = ['after 4:00pm'];
       config.timezone = 'Asia';
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('supports before hours true', () => {
       config.schedule = ['before 4:00pm'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('supports before hours false', () => {
       config.schedule = ['before 4:00am'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('massages string', () => {
       config.schedule = 'before 4:00am' as never;
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports outside hours', () => {
       config.schedule = ['after 4:00pm'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports cron syntax with hours', () => {
       config.schedule = ['* 10 * * *'];
-      let res = schedule.isScheduledNow(config, config.schedule);
+      let res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
 
       config.schedule = ['* 11 * * *'];
-      res = schedule.isScheduledNow(config, config.schedule);
+      res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports cron syntax with days', () => {
       config.schedule = ['* * 30 * *'];
-      let res = schedule.isScheduledNow(config, config.schedule);
+      let res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
 
       config.schedule = ['* * 1 * *'];
-      res = schedule.isScheduledNow(config, config.schedule);
+      res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports cron syntax with months', () => {
       config.schedule = ['* * * 6 *'];
-      let res = schedule.isScheduledNow(config, config.schedule);
+      let res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
 
       config.schedule = ['* * * 7 *'];
-      res = schedule.isScheduledNow(config, config.schedule);
+      res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports cron syntax with weekdays', () => {
       config.schedule = ['* * * * 5'];
-      let res = schedule.isScheduledNow(config, config.schedule);
+      let res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
 
       config.schedule = ['* * * * 6'];
-      res = schedule.isScheduledNow(config, config.schedule);
+      res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
@@ -261,118 +261,118 @@ describe('workers/repository/update/branch/schedule', () => {
         config.schedule = [sched];
         config.timezone = tz;
         mockDate.set(datetime);
-        expect(schedule.isScheduledNow(config, config.schedule)).toBe(expected);
+        expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });
 
     it('supports multiple schedules', () => {
       config.schedule = ['after 4:00pm', 'before 11:00am'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('supports day match', () => {
       config.schedule = ['on friday and saturday'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('supports day mismatch', () => {
       config.schedule = ['on monday and tuesday'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports every weekday', () => {
       config.schedule = ['every weekday'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('supports every weekend', () => {
       config.schedule = ['every weekend'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('supports every weekday with time', () => {
       config.schedule = ['before 11:00am every weekday'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('supports o every weekday', () => {
       config.schedule = ['before 11:00am on inevery weekday'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
       mockDate.set('2017-10-01T05:26:06.000'); // Locally Sunday, 1 October 2017 05:26:06
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('approves valid weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
       mockDate.set('2017-01-02T06:00:00.000'); // Locally Monday, 2 January 2017 6am (first Monday of the year)
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
       mockDate.set('2017-01-09T06:00:00.000'); // Locally Monday, 2 January 2017 6am (second Monday of the year)
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves on months of year', () => {
       config.schedule = ['of January'];
       mockDate.set('2017-01-02T06:00:00.000'); // Locally Monday, 2 January 2017 6am
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on months of year', () => {
       config.schedule = ['of January'];
       mockDate.set('2017-02-02T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month', () => {
       config.schedule = ['every 3 months'];
       mockDate.set('2017-07-01T06:00:00.000'); // Locally Saturday, 1 July 2017 6am
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month', () => {
       config.schedule = ['every 6 months'];
       mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
       mockDate.set('2017-07-01T06:00:00.000'); // Locally Saturday, 1 July 2017 6am
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
       mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
-      const res = schedule.isScheduledNow(config, config.schedule);
+      const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
@@ -387,7 +387,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
       cases.forEach(([datetime, expected]) => {
         mockDate.set(datetime);
-        expect(schedule.isScheduledNow(config, config.schedule)).toBe(expected);
+        expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });
   });
