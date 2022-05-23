@@ -22,7 +22,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { getDependentPackageFiles } from './package-tree';
+import { Central_FILE, getDependentPackageFiles } from './package-tree';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
@@ -116,7 +116,15 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  if (!regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)) {
+  // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
+  const isCentralManament =
+    packageFileName === Central_FILE ||
+    packageFileName.endsWith(`/${Central_FILE}`);
+
+  if (
+    !isCentralManament &&
+    !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
+  ) {
     // This could be implemented in the future if necessary.
     // It's not that easy though because the questions which
     // project file to restore how to determine which lock files
@@ -129,9 +137,12 @@ export async function updateArtifacts({
   }
 
   const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName)),
-    packageFileName,
+    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
   ];
+
+  if (!isCentralManament) {
+    packageFiles.push(packageFileName);
+  }
 
   logger.trace(
     { packageFiles },
