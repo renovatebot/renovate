@@ -15,7 +15,7 @@ If you or others keep committing to the default branch then Renovate cannot find
 Once a branch is automerged, the "Git state" needs to be recalculated for every remaining branch.
 At times, merging one branch could result in another branch's updates being changed or even removed as unnecessary.
 Renovate's approach is to ensure that automerging branches are up-to-date with their target branch before automerging.
-Therefore merging multiple branches in a row won't reliably work, we prefer not to do that.
+This means merging multiple branches in a row won't work reliably, so we prefer not to do that.
 What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
 
 As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just click "merge" anyway.
@@ -66,7 +66,7 @@ But in many cases the new version(s) will pass tests, and if so then there's rea
 
 ### Automerge non-major updates
 
-Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), therefore many users enable automerge for these too:
+Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), so many users enable automerge for these too:
 
 ```json
 {
