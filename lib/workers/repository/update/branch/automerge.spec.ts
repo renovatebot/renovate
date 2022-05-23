@@ -9,6 +9,7 @@ jest.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
+    const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
     let config: RenovateConfig;
 
     beforeEach(() => {
@@ -36,7 +37,7 @@ describe('workers/repository/update/branch/automerge', () => {
     it('returns false if off schedule', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      jest.spyOn(schedule, 'isScheduledNow').mockReturnValueOnce(false);
+      isScheduledSpy.mockReturnValueOnce(false);
       expect(await tryBranchAutomerge(config)).toBe('off schedule');
     });
 

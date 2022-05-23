@@ -1,6 +1,6 @@
-import { getConfig, git, mocked, partial } from '../../../../../test/util';
+import { getConfig, git, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { Pr, platform as _platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import * as schedule from '../branch/schedule';
@@ -8,11 +8,11 @@ import * as prAutomerge from './automerge';
 
 jest.mock('../../../../util/git');
 
-const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
+    const spy = jest.spyOn(schedule, 'isScheduledNow');
     let config: BranchConfig;
     let pr: Pr;
 
@@ -33,7 +33,7 @@ describe('workers/repository/update/pr/automerge', () => {
     });
 
     it('should not automerge if off schedule', async () => {
-      jest.spyOn(schedule, 'isScheduledNow').mockReturnValueOnce(false);
+      spy.mockReturnValueOnce(false);
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
