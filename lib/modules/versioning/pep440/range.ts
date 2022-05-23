@@ -368,7 +368,7 @@ function trimTrailingZeros(numbers: number[]): number[] {
 function divideCompatibleReleaseRange(currentRange: Range): Range[] {
   const currentVersionUpperBound = currentRange.version
     .split('.')
-    .map((digit) => parseInt(digit));
+    .map((num) => parseInt(num));
   if (currentVersionUpperBound.length > 1) {
     currentVersionUpperBound.splice(-1);
     currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
