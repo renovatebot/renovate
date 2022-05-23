@@ -103,7 +103,7 @@ Example:
 ```ts
 import { Http } from '../../../util/http';
 
-const http = new Http('some alias');
+const http = new Http('some-host-type');
 
 try {
     const body = (await http.getJson<Response>(url)).body;
@@ -134,7 +134,7 @@ Use `UTC` to be time zone independent.
 - Use `Fixture` class for loading fixtures
 
 ```ts
-Fixture.get('./file.json'); // for loading raw data
+Fixture.get('./file.json'); // for loading string data
 Fixture.getJson('./file.json'); // for loading and parsing objects
 ```
 
