@@ -25,9 +25,9 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:32.64.4
-docker run --rm renovate/renovate:32.64
 docker run --rm renovate/renovate:32
+docker run --rm renovate/renovate:32.64
+docker run --rm renovate/renovate:32.64.4
 ```
 
 <!-- prettier-ignore -->
