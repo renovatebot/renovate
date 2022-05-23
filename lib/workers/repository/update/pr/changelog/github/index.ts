@@ -28,6 +28,7 @@ export async function getTags(
       packageName: repository,
     });
 
+    // istanbul ignore if
     if (!tags.length) {
       logger.debug({ repository }, 'repository has no Github tags');
     }
