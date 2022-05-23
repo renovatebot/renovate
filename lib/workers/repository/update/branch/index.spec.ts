@@ -12,6 +12,7 @@ import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
 import { hashBody } from '../../../../modules/platform/pr-body';
@@ -26,6 +27,7 @@ import { BranchResult } from '../../../types';
 import type { Pr } from '../../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
+import type { AutomergePrResult } from '../pr/automerge';
 import * as _prAutomerge from '../pr/automerge';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -698,6 +700,38 @@ describe('workers/repository/update/branch/index', () => {
         automerge: true,
         rebaseWhen: 'conflicted',
       });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+    });
+
+    it('ensures PR when automerge is off schedule', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({})
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce(
+        partial<WriteExistingFilesResult>({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
+      git.branchExists.mockReturnValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('off schedule');
+      prWorker.ensurePr.mockResolvedValueOnce(
+        partial<ResultWithPr>({ type: 'with-pr' })
+      );
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce(
+        partial<AutomergePrResult>({ automerged: false })
+      );
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+        rebaseWhen: 'conflicted',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Branch cannot automerge now because it is off schedule - raising a PR instead'
+      );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);

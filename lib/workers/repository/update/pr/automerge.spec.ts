@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { Pr, platform as _platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
+import * as schedule from '../branch/schedule';
 import * as prAutomerge from './automerge';
 
 jest.mock('../../../../util/git');
@@ -27,6 +28,12 @@ describe('workers/repository/update/pr/automerge', () => {
     });
 
     it('should not automerge if not configured', async () => {
+      await prAutomerge.checkAutoMerge(pr, config);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('should not automerge if off schedule', async () => {
+      jest.spyOn(schedule, 'isScheduledNow').mockReturnValueOnce(false);
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });

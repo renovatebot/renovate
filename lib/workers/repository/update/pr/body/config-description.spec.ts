@@ -63,7 +63,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
         ...config,
         schedule: ['* 1 * * * *'],
       });
-      expect(res).toContain(`**Schedule**: "* 1 * * * *" (UTC).`);
+      expect(res).toContain(`"* 1 * * * *" (UTC)`);
     });
 
     it('renders undefined schedule', async () => {
