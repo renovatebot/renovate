@@ -236,7 +236,7 @@ export async function processBranch(
     }
 
     // Check schedule
-    config.isScheduledNow = isScheduledNow(config, config.schedule);
+    config.isScheduledNow = isScheduledNow(config, 'schedule');
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');

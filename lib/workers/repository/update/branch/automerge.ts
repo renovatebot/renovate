@@ -24,7 +24,7 @@ export async function tryBranchAutomerge(
   if (!(config.automerge && config.automergeType === 'branch')) {
     return 'no automerge';
   }
-  if (!isScheduledNow(config, config.automergeSchedule)) {
+  if (!isScheduledNow(config, 'automergeSchedule')) {
     return 'off schedule';
   }
   const existingPr = await platform.getBranchPr(config.branchName);

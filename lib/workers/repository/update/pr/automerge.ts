@@ -47,7 +47,7 @@ export async function checkAutoMerge(
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
-  if (!isScheduledNow(config, config.automergeSchedule)) {
+  if (!isScheduledNow(config, 'automergeSchedule')) {
     logger.debug(`PR automerge is off schedule`);
     return {
       automerged: false,

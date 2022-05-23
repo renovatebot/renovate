@@ -114,7 +114,7 @@ function cronMatches(cron: string, now: DateTime): boolean {
 
 export function isScheduledNow(
   config: RenovateConfig,
-  scheduleKey: 'schedule' | ' automergeSchedule' = 'schedule'
+  scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule'
 ): boolean {
   let configSchedule = config[scheduleKey];
   logger.debug(
