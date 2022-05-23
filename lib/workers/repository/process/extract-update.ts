@@ -60,24 +60,23 @@ export async function extract(
   const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
   let managerList = getManagerList();
+  let fingerprint = '';
   if (is.nonEmptyArray(config.enabledManagers)) {
     managerList = managerList.filter((manager) =>
       config.enabledManagers.includes(manager)
     );
+
+    const options = { algorithm: 'sha256' };
+    fingerprint = hasha(
+      managerList.reduce(
+        (acc, manager) => hasha([acc, hashMap.get(manager)], options),
+        configHash + baseBranchSha
+      ),
+      options
+    );
   }
-  const options = { algorithm: 'sha256' };
-  const fingerprint = hasha(
-    managerList.reduce(
-      (acc, manager) => hasha([acc, hashMap.get(manager)], options),
-      configHash + baseBranchSha
-    ),
-    options
-  );
   // istanbul ignore if
-  if (
-    cachedExtract?.fingerprint &&
-    cachedExtract?.fingerprint === fingerprint
-  ) {
+  if (cachedExtract?.fingerprint === fingerprint) {
     logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
     packageFiles = cachedExtract.packageFiles;
     try {
@@ -99,7 +98,6 @@ export async function extract(
       sha: baseBranchSha,
       configHash,
       packageFiles,
-      fingerprint,
     };
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
