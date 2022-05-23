@@ -114,9 +114,9 @@ function cronMatches(cron: string, now: DateTime): boolean {
 
 export function isScheduledNow(
   config: RenovateConfig,
-  schedule: string[]
+  scheduleKey: 'schedule' | ' automergeSchedule' = 'schedule'
 ): boolean {
-  let configSchedule: string[] = schedule;
+  let configSchedule = config[scheduleKey];
   logger.debug(
     `Checking schedule(${String(configSchedule)}, ${config.timezone})`
   );
