@@ -182,14 +182,8 @@ export function generateBranchConfig(
       upgrade.commitMessage || '',
       upgrade
     );
-    commitMessage.subject = template.compile(
-      commitMessage.toJSON().subject,
-      upgrade
-    );
-    commitMessage.subject = template.compile(
-      commitMessage.toJSON().subject,
-      upgrade
-    );
+    commitMessage.subject = template.compile(commitMessage.subject, upgrade);
+    commitMessage.subject = template.compile(commitMessage.subject, upgrade);
     upgrade.commitMessage = commitMessage.formatSubject();
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
