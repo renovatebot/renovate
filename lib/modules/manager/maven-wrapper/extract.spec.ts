@@ -32,6 +32,7 @@ describe('modules/manager/maven-wrapper/extract', () => {
         },
       ]);
     });
+
     // takari or maven wrapper ??
     it('extracts version for property file with only a wrapper url', () => {
       const res = extractPackageFile(onlyWrapperProperties);
