@@ -3,28 +3,6 @@ import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
 import { resolveBranchStatus } from '../../branch/status-checks';
 
-function scheduleToString(
-  schedule: string[] | undefined,
-  timezone: string | undefined
-): string {
-  let scheduleString = '';
-  if (
-    schedule &&
-    (schedule as never) !== 'at any time' &&
-    schedule[0] !== 'at any time'
-  ) {
-    scheduleString += `"${String(schedule)}"`;
-    if (timezone) {
-      scheduleString += ` in timezone ${timezone}`;
-    } else {
-      scheduleString += ` (UTC)`;
-    }
-  } else {
-    scheduleString += 'At any time (no schedule defined)';
-  }
-  return scheduleString;
-}
-
 export async function getPrConfigDescription(
   config: BranchConfig
 ): Promise<string> {
@@ -75,4 +53,26 @@ export async function getPrConfigDescription(
     );
   }
   return prBody;
+}
+
+function scheduleToString(
+  schedule: string[] | undefined,
+  timezone: string | undefined
+): string {
+  let scheduleString = '';
+  if (
+    schedule &&
+    (schedule as never) !== 'at any time' &&
+    schedule[0] !== 'at any time'
+  ) {
+    scheduleString += `"${String(schedule)}"`;
+    if (timezone) {
+      scheduleString += ` in timezone ${timezone}`;
+    } else {
+      scheduleString += ` (UTC)`;
+    }
+  } else {
+    scheduleString += 'At any time (no schedule defined)';
+  }
+  return scheduleString;
 }
