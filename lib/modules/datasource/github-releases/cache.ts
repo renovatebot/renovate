@@ -94,8 +94,4 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
 
     return result;
   }
-
-  isEquivalent(oldItem: StoredRelease, newItem: StoredRelease): boolean {
-    return oldItem.updatedAt === newItem.updatedAt;
-  }
 }

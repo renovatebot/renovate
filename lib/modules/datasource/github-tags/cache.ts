@@ -84,8 +84,4 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
     }
     return null;
   }
-
-  isEquivalent(oldItem: StoredTag, newItem: StoredTag): boolean {
-    return oldItem.hash === newItem.hash;
-  }
 }
