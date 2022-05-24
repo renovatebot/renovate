@@ -730,7 +730,7 @@ describe('workers/repository/update/branch/index', () => {
         rebaseWhen: 'conflicted',
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Branch cannot automerge now because it is off schedule - raising a PR instead'
+        'Branch cannot automerge now because it is off schedule - skipping'
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
