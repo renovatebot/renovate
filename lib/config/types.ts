@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { ExtractConfig } from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -432,6 +433,12 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
   language: string | null;
+}
+
+export interface WorkerExtractConfig extends ExtractConfig {
+  manager: string;
+  enabled?: boolean;
+  fileList: string[];
 }
 
 export interface ValidationResult {
