@@ -18,6 +18,7 @@ jest.mock('../../../../../modules/datasource/github-tags/cache', () => {
 });
 
 const upgrade: BranchUpgradeConfig = {
+  manager: 'some-manager',
   branchName: undefined,
   depName: 'renovate',
   endpoint: 'https://api.github.com/',
@@ -313,6 +314,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
       ]);
 
       const upgradeData: BranchUpgradeConfig = {
+        manager: 'some-manager',
         branchName: undefined,
         depName: 'correctPrefix/target',
         endpoint: 'https://api.github.com/',

@@ -169,6 +169,7 @@ export default async function executePostUpgradeCommands(
 
   const branchUpgradeCommands: BranchUpgradeConfig[] = [
     {
+      manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       postUpgradeTasks:
