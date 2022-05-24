@@ -371,8 +371,8 @@ function divideCompatibleReleaseRange(currentRange: Range): Range[] {
     .map((num) => parseInt(num));
   if (currentVersionUpperBound.length > 1) {
     currentVersionUpperBound.splice(-1);
-    currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
   }
+  currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
   return [
     { operator: '>=', version: currentRange.version },
     {
