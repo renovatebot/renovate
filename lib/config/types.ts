@@ -432,7 +432,7 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
-  language: string | null;
+  language?: string | null;
 }
 
 export interface WorkerExtractConfig extends ExtractConfig {
