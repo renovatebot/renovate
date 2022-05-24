@@ -429,6 +429,11 @@ export interface MigratedRenovateConfig extends RenovateConfig {
   gradle?: RenovateConfig;
 }
 
+export interface ManagerConfig extends RenovateConfig {
+  manager: string;
+  language: string | null;
+}
+
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
