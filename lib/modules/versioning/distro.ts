@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import dataFiles, { DataFile } from '../../data-files.generated';
 
-interface DistroSchedule {
+export interface DistroSchedule {
   codename: string;
   series: string;
   created: string;
@@ -13,7 +13,9 @@ interface DistroSchedule {
   eol_elts?: string;
 }
 
-export type DistroDataFile = 'data/ubuntu-distro-info.json';
+export type DistroDataFile =
+  | 'data/ubuntu-distro-info.json'
+  | 'data/debian-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 
@@ -48,7 +50,7 @@ export class DistroInfo {
 
     for (const v of arr) {
       const obj = { version: v, ...this._distroInfo[v.toString()] };
-      if (!obj.eol) {
+      if (!obj.release) {
         // istanbul ignore next
         continue;
       }

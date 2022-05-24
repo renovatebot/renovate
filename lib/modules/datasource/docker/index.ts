@@ -53,17 +53,19 @@ function isDockerHost(host: string): boolean {
 export async function getAuthHeaders(
   http: Http,
   registryHost: string,
-  dockerRepository: string
+  dockerRepository: string,
+  apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckUrl = `${registryHost}/v2/`;
-    const apiCheckResponse = await http.get(apiCheckUrl, {
+    // use json request, as this will be cached for tags, so it returns json
+    // TODO: add cache test
+    const apiCheckResponse = await http.getJson(apiCheckUrl, {
       throwHttpErrors: false,
       noAuth: true,
     });
 
     if (apiCheckResponse.statusCode === 200) {
-      logger.debug({ registryHost }, 'No registry auth required');
+      logger.debug({ apiCheckUrl }, 'No registry auth required');
       return {};
     }
     if (
@@ -71,7 +73,7 @@ export async function getAuthHeaders(
       !is.nonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(
-        { registryHost, res: apiCheckResponse },
+        { apiCheckUrl, res: apiCheckResponse },
         'Invalid registry response'
       );
       return null;
@@ -135,7 +137,16 @@ export async function getAuthHeaders(
       return opts.headers ?? null;
     }
 
-    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
+    let scope = `repository:${dockerRepository}:pull`;
+    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
+    if (
+      is.string(authenticateHeader.params.scope) &&
+      !apiCheckUrl.endsWith('/v2/')
+    ) {
+      scope = authenticateHeader.params.scope;
+    }
+
+    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=${scope}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -691,7 +702,8 @@ export class DockerDatasource extends Datasource {
     const headers = await getAuthHeaders(
       this.http,
       registryHost,
-      dockerRepository
+      dockerRepository,
+      url
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');

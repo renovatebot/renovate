@@ -265,5 +265,12 @@
     "eol": "2027-04-21",
     "eol_server": "2027-04-21",
     "eol_esm": "2032-04-21"
+  },
+  "v22.10": {
+    "codename": "Kinetic Kudu",
+    "series": "kinetic",
+    "created": "2022-04-21",
+    "release": "2022-10-20",
+    "eol": "2023-07-20"
   }
 }
