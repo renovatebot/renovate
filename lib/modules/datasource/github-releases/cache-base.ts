@@ -107,14 +107,40 @@ export interface CacheOptions {
  * The options that are meant to be used in production.
  */
 const cacheDefaults: Required<CacheOptions> = {
+  /**
+   * How many minutes to wait until next cache update
+   */
   updateAfterMinutes: 30,
+
+  /**
+   * How many days to wait until full cache reset (for single package).
+   */
   resetAfterDays: 7,
+
+  /**
+   * How many days ago the package should be published to be considered as stable.
+   * Since this period is expired, it won't be refreshed via soft updates anymore.
+   */
   unstableDays: 30,
 
+  /**
+   * How many items per page to obtain per page during initial fetch (i.e. pre-fetch)
+   */
   itemsPerPrefetchPage: 100,
+
+  /**
+   * How many pages to fetch (at most) during the initial fetch (i.e. pre-fetch)
+   */
   maxPrefetchPages: 10,
 
+  /**
+   * How many items per page to obtain per page during the soft update
+   */
   itemsPerUpdatePage: 100,
+
+  /**
+   * How many pages to fetch (at most) during the soft update
+   */
   maxUpdatePages: 10,
 };
 
