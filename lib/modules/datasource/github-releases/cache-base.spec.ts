@@ -213,7 +213,7 @@ describe('modules/datasource/github-releases/cache-base', () => {
       resp([{ name: 'v2', createdAt: t2, foo: 'yyy' }], true),
       resp([{ name: 'v1', createdAt: t1, foo: 'xxx' }]),
     ];
-    const cache = new TestCache(http, { unstableDays: 1 });
+    const cache = new TestCache(http, { unstableDays: 1.5 });
 
     const res = await cache.getItems({ packageName: 'foo/bar' });
 

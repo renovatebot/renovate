@@ -292,16 +292,27 @@ export abstract class AbstractGithubDatasourceCache<
               }
 
               for (const item of fetchedItems) {
-                const storedItem = this.coerceFetched(item);
-                if (storedItem) {
-                  const { version, releaseTimestamp } = storedItem;
-                  cacheItems[version] = storedItem;
+                const newStoredItem = this.coerceFetched(item);
+                if (newStoredItem) {
+                  const { version } = newStoredItem;
+
+                  // Stop earlier if the stored item have reached stability,
+                  // which means `unstableDays` period have passed
+                  const oldStoredItem = cacheItems[version];
+                  if (
+                    oldStoredItem &&
+                    isExpired(
+                      now,
+                      oldStoredItem.releaseTimestamp,
+                      this.stabilityDuration
+                    )
+                  ) {
+                    stopIteration = true;
+                    break;
+                  }
+
+                  cacheItems[version] = newStoredItem;
                   checkedVersions.add(version);
-                  stopIteration ||= isExpired(
-                    now,
-                    releaseTimestamp,
-                    this.stabilityDuration
-                  );
                 }
               }
             }
