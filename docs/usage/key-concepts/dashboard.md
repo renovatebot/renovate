@@ -73,7 +73,7 @@ You can mix and match these options as well.
 
 We do not recommend that you require approval for _all_ updates.
 When you require prior approval, you need to check the dashboard issue regularly to check for important updates.
-You'll probably forgot to check often enough, and out of sight means out of mind!
+You'll probably forget to check often enough, and out of sight means out of mind!
 
 Maybe you find Renovate too noisy, and want to opt-out of getting automatic updates whenever they're ready.
 
