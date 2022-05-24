@@ -17,7 +17,9 @@ const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
 branchify.branchifyUpgrades.mockResolvedValueOnce({
-  branches: [{ branchName: 'some-branch', upgrades: [] }],
+  branches: [
+    { manager: 'some-manager', branchName: 'some-branch', upgrades: [] },
+  ],
   branchList: ['branchName'],
 });
 
@@ -37,6 +39,7 @@ describe('workers/repository/process/extract-update', () => {
         branches: [
           {
             branchName: 'some-branch',
+            manager: 'some-manager',
             upgrades: [],
           },
         ],

@@ -109,8 +109,12 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(manager.extractPackageFile('unknown', null)).toBeNull();
-      expect(manager.extractPackageFile('dummy', null)).toBeNull();
+      expect(
+        manager.extractPackageFile('unknown', null, 'filename', {})
+      ).toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', null, 'filename', {})
+      ).toBeNull();
     });
 
     it('returns non-null', () => {
@@ -120,7 +124,9 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
 
-      expect(manager.extractPackageFile('dummy', null)).not.toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', null, 'filename', {})
+      ).not.toBeNull();
     });
 
     afterEach(() => {
