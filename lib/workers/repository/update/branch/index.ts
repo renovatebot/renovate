@@ -530,7 +530,6 @@ export async function processBranch(
         logger.warn(
           'Branch cannot automerge now because it is off schedule - raising a PR instead'
         );
-        config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (
