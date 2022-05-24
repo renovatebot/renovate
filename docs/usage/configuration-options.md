@@ -187,10 +187,9 @@ Example use:
 
 ## automergeSchedule
 
-The `automergeSchedule` option allows you to define times of week or month for automerging Renovate updates.
-The default value for `automergeSchedule` is "at any time", which is functionally the same as declaring a `null` schedule.
-i.e. Renovate will auto merge any merge-able update requests available.
-To configure this option refer to [`schedule`](https://docs.renovatebot.com/configuration-options/#schedule) as the syntax is the same.
+Use the `automergeSchedule` option to define times of week or month during which Renovate may automerge its PRs.
+The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
+To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
 
 ## automergeStrategy
 
