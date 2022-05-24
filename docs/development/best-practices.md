@@ -147,8 +147,12 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 
 ### Classes
 
-Use [Typescript getter setters (Accessors) when needed](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope).
-The getter must be a `pure function`.
+- Use [Typescript getter setters (Accessors) when needed](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope).
+  The getter must be a `pure function` i.e.
+  - The function return values are identical for identical arguments
+  - The function has no side effects
+
+[Source](https://en.wikipedia.org/wiki/Pure_function)
 
 - Omit constructors when defining Static classes
 - [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields). instead, use TypeScript's visibility annotations
