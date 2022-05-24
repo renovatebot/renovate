@@ -39,6 +39,7 @@ describe('workers/repository/process/extract-update', () => {
         branches: [
           {
             branchName: 'some-branch',
+            manager: 'some-manager',
             upgrades: [],
           },
         ],
