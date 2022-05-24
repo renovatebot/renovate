@@ -1,5 +1,29 @@
 # GitLab
 
+## Authentication
+
+First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account.
+
+For real runs, give the PAT these scopes:
+
+- `read_user`
+- `api`
+- `write_repository`
+
+For dry runs, give the PAT these scopes:
+
+- `read_user`
+- `read_api`
+- `read_repository`
+
+Let Renovate use your PAT by doing _one_ of the following:
+
+- Set your PAT as a `token` in your `config.js` file
+- Set your PAT as an environment variable `RENOVATE_TOKEN`
+- Set your PAT when you run Renovate in the CLI with `--token=`
+
+Remember to set `platform=gitlab` somewhere in your Renovate config file.
+
 ## Features awaiting implementation
 
 - The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will accept the Merge Request without further configuration, and respect the strategy defined in the Merge Request, and this cannot be overridden yet

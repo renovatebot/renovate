@@ -12,6 +12,7 @@ describe('modules/manager/gitlabci-include/extract', () => {
         extractPackageFile('nothing here', '.gitlab-ci.yml', {})
       ).toBeNull();
     });
+
     it('returns null for include block without any actual includes', () => {
       const res = extractPackageFile(
         yamlWithEmptyIncludeConfig,
@@ -20,6 +21,7 @@ describe('modules/manager/gitlabci-include/extract', () => {
       );
       expect(res).toBeNull();
     });
+
     it('extracts single include block', () => {
       const res = extractPackageFile(
         yamlFileSingleConfig,
@@ -29,11 +31,13 @@ describe('modules/manager/gitlabci-include/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
+
     it('extracts multiple include blocks', () => {
       const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {});
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
+
     it('normalizes configured endpoints', () => {
       const endpoints = [
         'http://gitlab.test/api/v4',

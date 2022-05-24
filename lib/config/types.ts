@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { ExtractConfig } from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -11,6 +12,8 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
@@ -22,9 +25,10 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
-  manager?: string;
+  manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -104,9 +108,11 @@ export interface RepoGlobalConfig {
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
-  dryRun?: boolean;
+  dryRun?: DryRunConfig;
   executionTimeout?: number;
+  gitTimeout?: number;
   exposeAllEnv?: boolean;
+  githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;
   privateKeyOld?: string;
@@ -130,7 +136,7 @@ export interface LegacyAdminConfig {
   onboardingConfigFileName?: string;
 
   platform?: string;
-  requireConfig?: boolean;
+  requireConfig?: RequiredConfig;
 }
 export type ExecutionMode = 'branch' | 'update';
 
@@ -141,7 +147,7 @@ export type PostUpgradeTasks = {
 };
 
 type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
-  Partial<Record<UpdateType, T>>;
+  Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
   | string
@@ -209,6 +215,7 @@ export interface RenovateConfig
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;
+  repoIsActivated?: boolean;
 
   updateType?: UpdateType;
 
@@ -239,6 +246,7 @@ export type UpdateType =
   | 'patch'
   | 'pin'
   | 'digest'
+  | 'pinDigest'
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'
@@ -324,7 +332,7 @@ export interface RenovateOptionBase {
 export interface RenovateArrayOption<
   T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
-  default?: T[];
+  default?: T[] | null;
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
@@ -346,21 +354,21 @@ export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
-  default?: boolean;
+  default?: boolean | null;
   type: 'boolean';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
-  default?: number;
+  default?: number | null;
   type: 'integer';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
-  default?: string;
+  default?: string | null;
   format?: 'regex';
 
   // Not used
@@ -371,7 +379,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any;
+  default?: any | null;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
@@ -419,6 +427,18 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
   node?: RenovateConfig;
   travis?: RenovateConfig;
+  gradle?: RenovateConfig;
+}
+
+export interface ManagerConfig extends RenovateConfig {
+  manager: string;
+  language?: string | null;
+}
+
+export interface WorkerExtractConfig extends ExtractConfig {
+  manager: string;
+  enabled?: boolean;
+  fileList: string[];
 }
 
 export interface ValidationResult {

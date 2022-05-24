@@ -1,4 +1,5 @@
 import URL from 'url';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -54,6 +55,13 @@ export async function getChangeLogJSON({
   // istanbul ignore if
   if (!config.token) {
     if (host.endsWith('github.com')) {
+      if (!GlobalConfig.get().githubTokenWarn) {
+        logger.debug(
+          { manager, depName, sourceUrl },
+          'GitHub token warning has been suppressed. Skipping release notes retrieval'
+        );
+        return null;
+      }
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
@@ -97,10 +105,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
-    const tagName = tags
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
+    const tagName = findTagOfRelease(version, depName, release.version, tags);
     if (tagName) {
       return tagName;
     }
@@ -170,4 +175,28 @@ export async function getChangeLogJSON({
   res = await addReleaseNotes(res);
 
   return res;
+}
+
+function findTagOfRelease(
+  version: allVersioning.VersioningApi,
+  depName: string,
+  depNewVersion: string,
+  tags: string[]
+): string | undefined {
+  const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
+  const excactReleaseRegex = regEx(`${depName}[@-_]v?${depNewVersion}`);
+  const exactTagsList = tags.filter((tag) => {
+    return excactReleaseRegex.test(tag);
+  });
+  let tagName: string | undefined;
+  if (exactTagsList.length) {
+    tagName = exactTagsList
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  } else {
+    tagName = tags
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  }
+  return tagName;
 }

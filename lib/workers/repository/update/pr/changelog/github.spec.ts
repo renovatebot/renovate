@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../../../test/http-mock';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
@@ -8,6 +9,7 @@ import { ChangeLogError, getChangeLogJSON } from '.';
 jest.mock('../../../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
+  manager: 'some-manager',
   branchName: undefined,
   depName: 'renovate',
   endpoint: 'https://api.github.com/',
@@ -203,6 +205,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('handles missing Github token', async () => {
+      GlobalConfig.set({ githubTokenWarn: true });
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -290,6 +293,63 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '2.3.0' },
           { version: '2.2.2' },
         ],
+      });
+    });
+
+    it('works with same version releases but different prefix', async () => {
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/chalk/chalk/tags?per_page=100')
+        .reply(200, [
+          { name: 'v1.0.1' },
+          { name: '1.0.1' },
+          { name: 'correctPrefix/target@1.0.1' },
+          { name: 'wrongPrefix/target-1.0.1' },
+        ]);
+
+      const upgradeData: BranchUpgradeConfig = {
+        manager: 'some-manager',
+        branchName: undefined,
+        depName: 'correctPrefix/target',
+        endpoint: 'https://api.github.com/',
+        versioning: 'npm',
+        currentVersion: '1.0.0',
+        newVersion: '1.0.1',
+        sourceUrl: 'https://github.com/chalk/chalk',
+        releases: [
+          { version: '1.0.1', gitRef: '123456' },
+          { version: '0.1.1', gitRef: 'npm_1.0.0' },
+        ],
+      };
+      expect(
+        await getChangeLogJSON({
+          ...upgradeData,
+        })
+      ).toMatchObject({
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          type: 'github',
+          repository: 'chalk/chalk',
+          sourceUrl: 'https://github.com/chalk/chalk',
+          sourceDirectory: undefined,
+          depName: 'correctPrefix/target',
+        },
+        versions: [
+          {
+            version: '1.0.1',
+            date: undefined,
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/npm_1.0.0...correctPrefix/target@1.0.1',
+            },
+            releaseNotes: {
+              url: 'https://github.com/chalk/chalk/compare/npm_1.0.0...correctPrefix/target@1.0.1',
+              notesSourceUrl: '',
+            },
+          },
+        ],
+        hasReleaseNotes: true,
       });
     });
   });

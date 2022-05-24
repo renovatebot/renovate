@@ -89,21 +89,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/hex/index getReleases process public repo without auth 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/certifi",
-  },
-]
-`;
-
 exports[`modules/datasource/hex/index getReleases processes a private repo with auth 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/renovate_test/private_package",
@@ -119,22 +104,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/hex/index getReleases processes a private repo with auth 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "abc",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/repos/renovate_test/packages/private_package",
-  },
-]
 `;
 
 exports[`modules/datasource/hex/index getReleases processes real data 1`] = `
@@ -224,140 +193,4 @@ Object {
   ],
   "sourceUrl": "https://github.com/certifi/erlang-certifi",
 }
-`;
-
-exports[`modules/datasource/hex/index getReleases processes real data 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/certifi",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases returns null for 401 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/some_package",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases returns null for 404 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/some_package",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases returns null for empty result 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/non_existent_package",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases returns null for missing fields 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/non_existent_package",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases returns null for unknown error 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/some_package",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases returns null with wrong auth token 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "abc",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/certifi",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases throws for 5xx 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/some_crate",
-  },
-]
-`;
-
-exports[`modules/datasource/hex/index getReleases throws for 429 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "hex.pm",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://hex.pm/api/packages/some_crate",
-  },
-]
 `;

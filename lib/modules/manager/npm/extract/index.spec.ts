@@ -24,6 +24,7 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile = jest.fn(() => null);
       fs.localPathExists = jest.fn(() => false);
     });
+
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractPackageFile(
         'not json',
@@ -32,6 +33,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('catches invalid names', async () => {
       const res = await npmExtract.extractPackageFile(
         invalidNameContent,
@@ -42,6 +44,7 @@ describe('modules/manager/npm/extract/index', () => {
         deps: [{ skipReason: 'invalid-name' }],
       });
     });
+
     it('ignores vendorised package.json', async () => {
       const res = await npmExtract.extractPackageFile(
         vendorisedContent,
@@ -50,6 +53,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('throws error if non-root renovate config', async () => {
       await expect(
         npmExtract.extractPackageFile(
@@ -59,6 +63,7 @@ describe('modules/manager/npm/extract/index', () => {
         )
       ).rejects.toThrow();
     });
+
     it('returns null if no deps', async () => {
       const res = await npmExtract.extractPackageFile(
         '{ "renovate": {} }',
@@ -67,6 +72,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('handles invalid', async () => {
       const res = await npmExtract.extractPackageFile(
         '{"dependencies": true, "devDependencies": []}',
@@ -75,6 +81,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toBeNull();
     });
+
     it('returns an array of dependencies', async () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -101,6 +108,7 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
     it('returns an array of dependencies with resolution comments', async () => {
       const res = await npmExtract.extractPackageFile(
         input01GlobContent,
@@ -129,6 +137,7 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
     it('finds a lock file', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'yarn.lock') {
@@ -143,6 +152,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({ yarnLock: 'yarn.lock' });
     });
+
     it('finds and filters .npmrc', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
@@ -155,8 +165,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBeDefined();
+      expect(res?.npmrc).toBeDefined();
     });
+
     it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
@@ -169,8 +180,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'some-configured-npmrc' }
       );
-      expect(res.npmrc).toBeUndefined();
+      expect(res?.npmrc).toBeUndefined();
     });
+
     it('reads .npmrc when config.npmrc is merged', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
@@ -183,8 +195,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'config-npmrc', npmrcMerge: true }
       );
-      expect(res.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
+      expect(res?.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
+
     it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
@@ -197,8 +210,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
+      expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
+
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
@@ -217,6 +231,7 @@ describe('modules/manager/npm/extract/index', () => {
         managerData: { lernaJsonFile: 'lerna.json' },
       });
     });
+
     it('finds "npmClient":"npm" in lerna.json', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
@@ -235,6 +250,7 @@ describe('modules/manager/npm/extract/index', () => {
         managerData: { lernaJsonFile: 'lerna.json' },
       });
     });
+
     it('finds "npmClient":"yarn" in lerna.json', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
@@ -253,6 +269,7 @@ describe('modules/manager/npm/extract/index', () => {
         managerData: { lernaJsonFile: 'lerna.json' },
       });
     });
+
     it('finds simple yarn workspaces', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
@@ -267,6 +284,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
     });
+
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
@@ -281,6 +299,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
     });
+
     it('finds complex yarn workspaces', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
@@ -295,6 +314,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
     });
+
     it('extracts engines', async () => {
       const pJson = {
         dependencies: {
@@ -327,7 +347,6 @@ describe('modules/manager/npm/extract/index', () => {
         constraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
-          pnpm: '^1.2.0',
           vscode: '>=1.49.3',
           yarn: 'disabled',
         },
@@ -387,6 +406,7 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
     it('extracts volta', async () => {
       const pJson = {
         main: 'index.js',
@@ -462,6 +482,7 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
     it('extracts non-npmjs', async () => {
       const pJson = {
         dependencies: {
@@ -574,6 +595,7 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
     it('extracts npm package alias', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'package-lock.json') {
@@ -647,7 +669,87 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
+    it('extracts dependencies from overrides', async () => {
+      const content = `{
+        "devDependencies": {
+          "@types/react": "18.0.5"
+        },
+        "overrides": {
+          "node": "8.9.2",
+          "@types/react": "18.0.5",
+          "baz": {
+            "node": "8.9.2",
+            "bar": {
+              "foo": "1.0.0"
+            }
+          },
+          "foo2": {
+            ".": "1.0.0",
+            "bar2": "1.0.0"
+          },
+          "emptyObject":{}
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depType: 'devDependencies',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'devDependency',
+          },
+          {
+            depType: 'overrides',
+            depName: 'node',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+            commitMessageTopic: 'Node.js',
+            prettyDepType: 'overrides',
+          },
+          {
+            depType: 'overrides',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'overrides',
+          },
+          {
+            depName: 'node',
+            managerData: { parents: ['baz'] },
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo',
+            managerData: { parents: ['baz', 'bar'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'bar2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+        ],
+      });
+    });
   });
+
   describe('.postExtract()', () => {
     it('runs', async () => {
       await expect(npmExtract.postExtract([], false)).resolves.not.toThrow();

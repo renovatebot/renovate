@@ -23,6 +23,7 @@ export function getSiblingFileName(
   return upath.join(subDirectory, otherFileName);
 }
 
+// TODO: can return null #7154
 export async function readLocalFile(fileName: string): Promise<Buffer>;
 export async function readLocalFile(
   fileName: string,
@@ -47,7 +48,7 @@ export async function readLocalFile(
 
 export async function writeLocalFile(
   fileName: string,
-  fileContent: string
+  fileContent: string | Buffer
 ): Promise<void> {
   const { localDir } = GlobalConfig.get();
   const localFileName = upath.join(localDir, fileName);

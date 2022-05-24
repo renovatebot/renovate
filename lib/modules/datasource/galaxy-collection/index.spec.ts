@@ -32,7 +32,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: 'foo.bar',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for remote host error', async () => {
@@ -43,7 +42,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: 'foo.bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for unexpected data at base', async () => {
@@ -57,7 +55,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: 'community.kubernetes',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for unexpected data at versions', async () => {
@@ -73,7 +70,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: 'community.kubernetes',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws error for remote host versions error', async () => {
@@ -89,7 +85,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: 'community.kubernetes',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns only valid versions if a version detail fails', async () => {
@@ -114,7 +109,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
       expect(res.releases).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for empty lookup', async () => {
@@ -124,7 +118,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: '',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for null packageName ', async () => {
@@ -134,7 +127,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: null,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for unknown error', async () => {
@@ -148,7 +140,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           depName: 'foo.bar',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real data', async () => {
@@ -172,7 +163,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
       expect(res.releases).toHaveLength(3);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -9,6 +9,10 @@ The configuration options listed in this document are applicable to self-hosted 
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ## allowCustomCrateRegistries
 
 ## allowPlugins
@@ -143,13 +147,13 @@ Unsupported tools will fall back to `binarySource=global`.
 
 ## cacheDir
 
-By default Renovate uses a temporary directory like `/tmp/renovate/cache` to store cache data.
+By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
 Use the `cacheDir` option to override this default.
 
-The `baseDir` and `cacheDir` option do not need to point to the same directory.
-You can use one directory for the repo data, and another for the the cache data.
+The `baseDir` and `cacheDir` option may point to different directories.
+You can use one directory for the repo data, and another for the cache data.
 
-e.g.
+For example:
 
 ```json
 {
@@ -292,6 +296,17 @@ Like this:
 
 ## dryRun
 
+Use `dryRun` to preview the behavior of Renovate in logs, without making any changes to the repository files.
+
+You can choose from the following behaviors for the `dryRun` config option:
+
+- `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
+- `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
+- `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
+- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
+
+Information provided mainly in debug log level.
+
 ## endpoint
 
 ## executionTimeout
@@ -352,6 +367,10 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitTimeout
+
+To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
+
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
@@ -362,6 +381,12 @@ Possible values:
 - `default`: use HTTPS URLs provided by the platform for Git
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
+## githubTokenWarn
+
+By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
+Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
 ## globalExtends
 
@@ -587,7 +612,22 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## requireConfig
 
-If this is set to `false`, it means that Renovate won't require a config file such as `renovate.json` to be present in each repository and will run even if one is missing.
+By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
+
+You can choose any of these settings:
+
+- `"required"` (default): a repository config file must be present
+- `"optional"`: if a config file exists, Renovate will use it when it runs
+- `"ignored"`: config files in the repo will be ignored, and have no effect
+
+This feature is closely related to the `onboarding` config option.
+The combinations of `requireConfig` and `onboarding` are:
+
+|                          | `onboarding=true`                                                                                                                                       | `onboarding=false`                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
+| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
+| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
 
 ## secrets
 
@@ -639,6 +679,10 @@ If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
+
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## username
 

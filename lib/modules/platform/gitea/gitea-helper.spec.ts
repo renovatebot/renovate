@@ -5,7 +5,8 @@ import { toBase64 } from '../../../util/string';
 import * as ght from './gitea-helper';
 
 describe('modules/platform/gitea/gitea-helper', () => {
-  const baseUrl = 'https://gitea.renovatebot.com/api/v1';
+  const giteaApiHost = 'https://gitea.renovatebot.com/';
+  const baseUrl = `${giteaApiHost}api/v1`;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -16,7 +17,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     email: 'admin@example.com',
   };
 
-  const otherMockUser: ght.User = {
+  const otherMockUser: ght.User & Required<Pick<ght.User, 'full_name'>> = {
     ...mockUser,
     username: 'renovate',
     full_name: 'Renovate Bot',
@@ -142,7 +143,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    setBaseUrl(baseUrl);
+    setBaseUrl(giteaApiHost);
   });
 
   describe('getCurrentUser', () => {
@@ -151,7 +152,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getCurrentUser();
       expect(res).toEqual(mockUser);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -161,7 +161,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
       httpMock.scope(baseUrl).get('/version').reply(200, { version });
 
       const res = await ght.getVersion();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(res).toEqual(version);
     });
   });
@@ -178,7 +178,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.searchRepos({});
       expect(res).toEqual([mockRepo, otherMockRepo]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should construct proper query parameters', async () => {
@@ -195,7 +194,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         archived: false,
       });
       expect(res).toEqual([otherMockRepo]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should abort if ok flag was not set', async () => {
@@ -205,7 +203,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
       });
 
       await expect(ght.searchRepos({})).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -218,7 +215,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getRepo(mockRepo.full_name);
       expect(res).toEqual(mockRepo);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -236,7 +232,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         mockContents.path
       );
       expect(res).toEqual(mockContents);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should support passing reference by query', async () => {
@@ -253,7 +248,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         mockCommitHash
       );
       expect(res).toEqual(mockContents);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should properly escape paths', async () => {
@@ -269,7 +263,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         otherMockContents.path
       );
       expect(res).toEqual(otherMockContents);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should not fail if no content is returned', async () => {
@@ -305,13 +298,12 @@ describe('modules/platform/gitea/gitea-helper', () => {
         state: mockPR.state,
         title: mockPR.title,
         body: mockPR.body,
-        base: mockPR.base.ref,
-        head: mockPR.head.label,
+        base: mockPR.base?.ref,
+        head: mockPR.head?.label,
         assignees: [mockUser.username],
         labels: [mockLabel.id],
       });
       expect(res).toEqual(mockPR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -337,7 +329,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         labels: [otherMockLabel.id],
       });
       expect(res).toEqual(updatedMockPR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -350,7 +341,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.closePR(mockRepo.full_name, mockPR.number);
       expect(res).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -367,7 +357,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         'rebase'
       );
       expect(res).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -380,7 +369,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getPR(mockRepo.full_name, mockPR.number);
       expect(res).toEqual(mockPR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -393,8 +381,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         )
         .reply(200);
 
-      await ght.requestPrReviewers(mockRepo.full_name, mockPR.number, {});
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      await expect(
+        ght.requestPrReviewers(mockRepo.full_name, mockPR.number, {})
+      ).toResolve();
     });
   });
 
@@ -407,7 +396,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.searchPRs(mockRepo.full_name, {});
       expect(res).toEqual([mockPR]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should construct proper query parameters', async () => {
@@ -423,7 +411,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         labels: [mockLabel.id, otherMockLabel.id],
       });
       expect(res).toEqual([mockPR]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -441,7 +428,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         assignees: [mockUser.username],
       });
       expect(res).toEqual(mockIssue);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -467,7 +453,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         assignees: [otherMockUser.username],
       });
       expect(res).toEqual(updatedMockIssue);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -491,7 +476,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         }
       );
       expect(res).toEqual(updatedMockLabels);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -504,7 +488,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.closeIssue(mockRepo.full_name, mockIssue.number);
       expect(res).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -517,7 +500,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.searchIssues(mockRepo.full_name, {});
       expect(res).toEqual([mockIssue]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should construct proper query parameters', async () => {
@@ -530,7 +512,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         state: 'open',
       });
       expect(res).toEqual([mockIssue]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -543,7 +524,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getIssue(mockRepo.full_name, mockIssue.number);
       expect(res).toEqual(mockIssue);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -556,7 +536,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getRepoLabels(mockRepo.full_name);
       expect(res).toEqual([mockLabel, otherMockLabel]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -569,7 +548,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getOrgLabels(mockRepo.owner.username);
       expect(res).toEqual([mockLabel, otherMockLabel]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -588,7 +566,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         mockLabel.id
       );
       expect(res).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -607,7 +584,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         mockComment.body
       );
       expect(res).toEqual(mockComment);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -629,7 +605,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         'new-body'
       );
       expect(res).toEqual(updatedMockComment);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -644,7 +619,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.deleteComment(mockRepo.full_name, mockComment.id);
       expect(res).toBeUndefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -657,7 +631,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getComments(mockRepo.full_name, mockIssue.number);
       expect(res).toEqual([mockComment]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -679,7 +652,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
         }
       );
       expect(res).toEqual(mockCommitStatus);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -696,7 +668,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
       );
       expect(res.worstStatus).not.toBe('unknown');
       expect(res.statuses).toEqual([mockCommitStatus, otherMockCommitStatus]);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should properly determine worst commit status', async () => {
@@ -763,7 +734,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
           mockBranch.name
         );
         expect(res.worstStatus).toEqual(expected);
-        expect(httpMock.getTrace()).toMatchSnapshot();
       }
     });
   });
@@ -777,7 +747,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getBranch(mockRepo.full_name, mockBranch.name);
       expect(res).toEqual(mockBranch);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should properly escape branch names', async () => {
@@ -790,7 +759,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await ght.getBranch(mockRepo.full_name, otherMockBranch.name);
       expect(res).toEqual(otherMockBranch);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

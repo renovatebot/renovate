@@ -2,7 +2,9 @@
 
 exports[`modules/platform/azure/index createPr() should create and return a PR object 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #456",
   "number": 456,
@@ -16,7 +18,9 @@ Object {
 
 exports[`modules/platform/azure/index createPr() should create and return a PR object from base branch 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #456",
   "number": 456,
@@ -33,7 +37,9 @@ Object {
   "autoCompleteSetBy": Object {
     "id": 123,
   },
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "completionOptions": Object {
     "deleteSourceBranch": true,
     "mergeCommitMessage": "The Title",
@@ -56,7 +62,9 @@ Object {
 
 exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "createdBy": Object {
     "id": 123,
@@ -133,7 +141,9 @@ content",
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1",
   "number": 1,
@@ -150,7 +160,9 @@ Object {
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1",
   "number": 1,
@@ -167,7 +179,9 @@ Object {
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1",
   "number": 1,
@@ -184,7 +198,9 @@ Object {
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1",
   "number": 1,
@@ -198,8 +214,6 @@ Object {
   "title": "branch a pr",
 }
 `;
-
-exports[`modules/platform/azure/index getBranchPr(branchName) should return the pr 1`] = `null`;
 
 exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
 Array [
@@ -219,7 +233,9 @@ Array [
 
 exports[`modules/platform/azure/index getPr(prNo) should return a pr in the right format 1`] = `
 Object {
-  "body": undefined,
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1234",
   "hasReviewers": false,

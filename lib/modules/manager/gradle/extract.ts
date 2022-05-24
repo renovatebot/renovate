@@ -12,7 +12,6 @@ import type {
 } from './types';
 import {
   getVars,
-  isGradleFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -43,7 +42,7 @@ export async function extractAllPackageFiles(
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
-  const registryUrls = [];
+  const registryUrls: string[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
@@ -68,7 +67,7 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else if (isGradleFile(packageFile)) {
+      } else {
         const vars = getVars(registry, dir);
         const {
           deps,

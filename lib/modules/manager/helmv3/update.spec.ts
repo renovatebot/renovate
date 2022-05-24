@@ -8,6 +8,7 @@ describe('modules/manager/helmv3/update', () => {
       name: 'test',
       version: '0.0.2',
     });
+
     it('increments', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
@@ -17,6 +18,7 @@ describe('modules/manager/helmv3/update', () => {
       const expected = content.replace('0.0.2', '0.0.3');
       expect(bumpedContent).toEqual(expected);
     });
+
     it('no ops', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
@@ -25,6 +27,7 @@ describe('modules/manager/helmv3/update', () => {
       );
       expect(bumpedContent).toEqual(content);
     });
+
     it('updates', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
@@ -34,6 +37,7 @@ describe('modules/manager/helmv3/update', () => {
       const expected = content.replace('0.0.2', '0.1.0');
       expect(bumpedContent).toEqual(expected);
     });
+
     it('returns content if bumping errors', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,

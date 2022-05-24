@@ -14,6 +14,7 @@ describe('modules/manager/git-submodules/artifact', () => {
         { file: { type: 'addition', path: '', contents: '' } },
       ]);
     });
+
     it('returns two modules', () => {
       expect(
         updateArtifacts({

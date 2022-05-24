@@ -39,6 +39,7 @@ export async function checkAutoMerge(
     branchName,
     automergeType,
     automergeStrategy,
+    pruneBranchAfterAutomerge,
     automergeComment,
     ignoreTests,
     rebaseRequested,
@@ -129,6 +130,10 @@ export async function checkAutoMerge(
   });
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
+    if (!pruneBranchAfterAutomerge) {
+      logger.info('Skipping pruning of merged branch');
+      return { automerged: true, branchRemoved: false };
+    }
     let branchRemoved = false;
     try {
       await deleteBranch(branchName);

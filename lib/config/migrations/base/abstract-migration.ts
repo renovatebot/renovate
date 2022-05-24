@@ -4,7 +4,7 @@ import type { Migration } from '../types';
 
 export abstract class AbstractMigration implements Migration {
   readonly deprecated: boolean = false;
-  abstract readonly propertyName: string;
+  abstract readonly propertyName: string | RegExp;
   private readonly originalConfig: RenovateConfig;
   private readonly migratedConfig: RenovateConfig;
 
@@ -13,7 +13,7 @@ export abstract class AbstractMigration implements Migration {
     this.migratedConfig = migratedConfig;
   }
 
-  abstract run(value: unknown): void;
+  abstract run(value: unknown, key: string): void;
 
   protected get<Key extends keyof RenovateConfig>(
     key: Key
@@ -45,10 +45,18 @@ export abstract class AbstractMigration implements Migration {
   }
 
   protected rewrite(value: unknown): void {
+    if (!is.string(this.propertyName)) {
+      throw new Error();
+    }
+
     this.setHard(this.propertyName, value);
   }
 
   protected delete(property = this.propertyName): void {
+    if (!is.string(property)) {
+      throw new Error();
+    }
+
     delete this.migratedConfig[property];
   }
 }

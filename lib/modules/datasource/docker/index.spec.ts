@@ -69,6 +69,7 @@ describe('modules/datasource/docker/index', () => {
         registryHost: 'https://registry:5000',
       });
     });
+
     it('supports registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
@@ -79,6 +80,7 @@ describe('modules/datasource/docker/index', () => {
         registryHost: 'https://my.local.registry',
       });
     });
+
     it('supports http registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
@@ -89,6 +91,7 @@ describe('modules/datasource/docker/index', () => {
         registryHost: 'http://my.local.registry',
       });
     });
+
     it('supports schemeless registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
@@ -100,6 +103,7 @@ describe('modules/datasource/docker/index', () => {
       });
     });
   });
+
   describe('getAuthHeaders', () => {
     it('returns "authType token" if both provided', async () => {
       httpMock
@@ -172,10 +176,10 @@ describe('modules/datasource/docker/index', () => {
       expect(headers).toBeNull();
     });
 
-    it('use a HEAD request to the real resource and use the auth header values to get a token', async () => {
+    it('use resources URL and resolve scope in www-authenticate header', async () => {
       httpMock
         .scope('https://my.local.registry')
-        .head('/v2/my/node/resource')
+        .get('/v2/my/node/resource')
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry",scope="repository:my/node:whatever"',
@@ -189,7 +193,6 @@ describe('modules/datasource/docker/index', () => {
         http,
         'https://my.local.registry',
         'my/node/prefix',
-        'head',
         'https://my.local.registry/v2/my/node/resource'
       );
 
@@ -565,7 +568,7 @@ describe('modules/datasource/docker/index', () => {
     it('returns null if no token', async () => {
       httpMock
         .scope(baseUrl)
-        .head('/library/node/tags/list?n=10000')
+        .get('/library/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/library/node/tags/list?n=10000')
         .reply(403);
@@ -581,7 +584,7 @@ describe('modules/datasource/docker/index', () => {
       const tags = ['1.0.0'];
       httpMock
         .scope('https://registry.company.com/v2')
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/node/tags/list?n=10000')
         .reply(
@@ -605,14 +608,14 @@ describe('modules/datasource/docker/index', () => {
         registryUrls: ['https://registry.company.com'],
       };
       const res = await getPkgReleases(config);
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('uses custom registry in depName', async () => {
       const tags = ['1.0.0'];
       httpMock
         .scope('https://registry.company.com/v2')
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/node/tags/list?n=10000')
         .reply(200, { tags }, {})
@@ -624,7 +627,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('uses quay api', async () => {
@@ -649,7 +652,7 @@ describe('modules/datasource/docker/index', () => {
         registryUrls: ['https://quay.io'],
       };
       const res = await getPkgReleases(config);
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('uses quay api and test error', async () => {
@@ -670,7 +673,7 @@ describe('modules/datasource/docker/index', () => {
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
-        .head('/node/tags/list?n=1000')
+        .get('/node/tags/list?n=1000')
         .reply(200, '', {})
         // The  tag limit parameter `n` needs to be limited to 1000 for ECR
         // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
@@ -695,7 +698,7 @@ describe('modules/datasource/docker/index', () => {
       it('resolves requests to ECR proxy', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -759,7 +762,7 @@ describe('modules/datasource/docker/index', () => {
 
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(405, maxResultsErrorBody, {
@@ -780,7 +783,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when the response code is not 405', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -811,7 +814,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when no response headers are present', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(405, {
@@ -834,7 +837,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when the expected docker header is missing', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -863,7 +866,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when the response body does not contain an errors object', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -884,7 +887,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when the response body does not contain errors', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -907,7 +910,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when the the response errors does not have a message property', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -934,7 +937,7 @@ describe('modules/datasource/docker/index', () => {
       it('returns null when the the error message does not have the expected max results error', async () => {
         httpMock
           .scope('https://ecr-proxy.company.com/v2')
-          .head('/node/tags/list?n=10000')
+          .get('/node/tags/list?n=10000')
           .reply(200, '', {})
           .get('/node/tags/list?n=10000')
           .reply(
@@ -964,7 +967,7 @@ describe('modules/datasource/docker/index', () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(baseUrl)
-        .head('/library/node/tags/list?n=10000')
+        .get('/library/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
@@ -985,14 +988,14 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'node',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(baseUrl)
-        .head('/library/node/tags/list?n=10000')
+        .get('/library/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
@@ -1013,14 +1016,14 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'docker.io/node',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('adds no library/ prefix for other registries', async () => {
       const tags = ['1.0.0'];
       httpMock
         .scope('https://k8s.gcr.io/v2/')
-        .head('/kubernetes-dashboard-amd64/tags/list?n=10000')
+        .get('/kubernetes-dashboard-amd64/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://k8s.gcr.io/v2/token",service="k8s.gcr.io"',
@@ -1039,14 +1042,14 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('returns null on error', async () => {
       httpMock
         .scope(baseUrl)
-        .head('/my/node/tags/list?n=10000')
-        .reply(200, null)
+        .get('/my/node/tags/list?n=10000')
+        .reply(200)
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
       const res = await getPkgReleases({
@@ -1059,7 +1062,7 @@ describe('modules/datasource/docker/index', () => {
     it('strips trailing slash from registry', async () => {
       httpMock
         .scope(baseUrl)
-        .head('/my/node/tags/list?n=10000')
+        .get('/my/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull  "',
@@ -1086,7 +1089,7 @@ describe('modules/datasource/docker/index', () => {
       hostRules.find.mockReturnValue({});
       httpMock
         .scope(baseUrl)
-        .head('/library/node/tags/list?n=10000')
+        .get('/library/node/tags/list?n=10000')
         .reply(401, undefined, {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         });
@@ -1103,7 +1106,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .times(2)
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, {
@@ -1168,7 +1171,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .times(3)
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['abc'] })
@@ -1209,7 +1212,7 @@ describe('modules/datasource/docker/index', () => {
         .scope('https://registry.company.com/v2')
         .get('/')
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['latest'] })
@@ -1234,7 +1237,7 @@ describe('modules/datasource/docker/index', () => {
         .scope('https://registry.company.com/v2')
         .get('/')
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['latest'] })
@@ -1258,7 +1261,7 @@ describe('modules/datasource/docker/index', () => {
         .scope('https://registry.company.com/v2')
         .get('/')
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['latest'] })
@@ -1280,7 +1283,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .times(3)
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['1'] })
@@ -1326,7 +1329,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .times(3)
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['1'] })
@@ -1370,7 +1373,7 @@ describe('modules/datasource/docker/index', () => {
         .scope('https://registry.company.com/v2')
         .get('/')
         .reply(200)
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(200)
         .get('/node/tags/list?n=10000')
         .reply(200, { tags: ['latest'] })
@@ -1400,7 +1403,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/node/tags/list?n=10000')
+        .get('/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         });
@@ -1437,6 +1440,63 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toStrictEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
+      });
+    });
+
+    it('supports ghcr', async () => {
+      hostRules.find.mockResolvedValue({} as never);
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          badheaders: ['authorization'],
+        })
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull',
+        })
+        .get('/visualon/drone-git/tags/list?n=10000')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:visualon/drone-git:pull"',
+        });
+      httpMock
+        .scope('https://ghcr.io')
+        .get('/token?service=ghcr.io&scope=repository:visualon/drone-git:pull')
+        .times(3)
+        .reply(200, { token: 'abc' });
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          reqheaders: {
+            authorization: 'Bearer abc',
+          },
+        })
+        .get('/visualon/drone-git/tags/list?n=10000')
+        .reply(200, { tags: ['latest', '1.0.0'] })
+        .get('/visualon/drone-git/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/visualon/drone-git/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/visualon/drone-git',
+            },
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'ghcr.io/visualon/drone-git',
+      });
+      expect(res).toStrictEqual({
+        registryUrl: 'https://ghcr.io',
+        sourceUrl: 'https://github.com/visualon/drone-git',
+        releases: [{ version: '1.0.0' }],
       });
     });
   });

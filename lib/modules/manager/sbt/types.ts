@@ -1,11 +1,11 @@
 export interface ParseContext {
-  scalaVersion: string;
-  variables: any;
+  scalaVersion?: string | null;
+  variables: Record<string, any>;
   depType?: string;
 }
 
 export interface ParseOptions {
   isMultiDeps?: boolean;
-  scalaVersion?: string;
+  scalaVersion?: string | null;
   variables?: Record<string, any>;
 }

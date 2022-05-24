@@ -2,7 +2,12 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubReleasesDatasource } from '../github-releases';
 import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 import type { GitHubTag, TagResponse } from './types';
 
 export class GithubTagsDatasource extends GithubReleasesDatasource {
@@ -19,7 +24,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       `${registryUrl}:${githubRepo}:tag-${tag}`,
   })
   async getTagCommit(
-    registryUrl: string,
+    registryUrl: string | undefined,
     githubRepo: string,
     tag: string
   ): Promise<string | null> {
@@ -52,7 +57,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       `${registryUrl}:${githubRepo}:commit`,
   })
   async getCommit(
-    registryUrl: string,
+    registryUrl: string | undefined,
     githubRepo: string
   ): Promise<string | null> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
@@ -82,8 +87,10 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     newValue?: string
   ): Promise<string | null> {
     return newValue
-      ? this.getTagCommit(registryUrl, repo, newValue)
-      : this.getCommit(registryUrl, repo);
+      ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        this.getTagCommit(registryUrl, repo!, newValue)
+      : // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        this.getCommit(registryUrl, repo!);
   }
 
   @cache({
@@ -120,18 +127,23 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
   ): Promise<ReleaseResult | null> {
     const tagsResult = await this.getTags(config);
 
+    // istanbul ignore if
+    if (!tagsResult) {
+      return null;
+    }
+
     try {
       // Fetch additional data from releases endpoint when possible
       const releasesResult = await super.getReleases(config);
-      const releaseByVersion = {};
+      type PartialRelease = Omit<Release, 'version'>;
+
+      const releaseByVersion: Record<string, PartialRelease> = {};
       releasesResult?.releases?.forEach((release) => {
-        const key = release.version;
-        const value = { ...release };
-        delete value.version;
-        releaseByVersion[key] = value;
+        const { version, ...value } = release;
+        releaseByVersion[version] = value;
       });
 
-      const mergedReleases = [];
+      const mergedReleases: Release[] = [];
       tagsResult.releases.forEach((tag) => {
         const release = releaseByVersion[tag.version];
         mergedReleases.push({ ...release, ...tag });

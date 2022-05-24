@@ -23,7 +23,7 @@ export interface PoetryDependency {
 }
 
 export interface PoetrySource {
-  name?: string;
+  name: string;
   url?: string;
 }
 
@@ -33,5 +33,8 @@ export interface PoetryLockSection {
 }
 
 export interface PoetryLock {
+  metadata?: {
+    'python-versions'?: string;
+  };
   package?: PoetryLockSection[];
 }

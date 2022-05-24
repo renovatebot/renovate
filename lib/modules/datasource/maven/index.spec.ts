@@ -83,9 +83,25 @@ function mockGenericPackage(opts: MockOpts = {}) {
   }
 
   if (pom) {
-    scope
-      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
-      .reply(200, pom);
+    if (latest.endsWith('-SNAPSHOT')) {
+      const [major, minor, patch] = latest
+        .replace('-SNAPSHOT', '')
+        .split('.')
+        .map((x) => parseInt(x, 10))
+        .map((x) => (x < 10 ? `0${x}` : `${x}`));
+      scope
+        .get(
+          `/${packagePath}/${latest}/${artifact}-${latest.replace(
+            '-SNAPSHOT',
+            ''
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+        )
+        .reply(200, pom);
+    } else {
+      scope
+        .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
+        .reply(200, pom);
+    }
   }
 
   if (jars) {
@@ -96,7 +112,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
         .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
-      const headers = version.startsWith('0.')
+      const headers: httpMock.ReplyHeaders = version.startsWith('0.')
         ? {}
         : { 'Last-Modified': timestamp };
       scope
@@ -179,7 +195,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns releases', async () => {
@@ -188,7 +203,43 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('returns releases when only snapshot', async () => {
+    const meta = loadFixture('metadata-snapshot-version.xml');
+    mockGenericPackage({
+      meta: loadFixture('metadata-snapshot-only.xml'),
+      jars: null,
+      html: null,
+      latest: '1.0.3-SNAPSHOT',
+      snapshots: [
+        {
+          version: '1.0.3-SNAPSHOT',
+          meta: meta,
+          jarStatus: 200,
+        },
+      ],
+    });
+    httpMock
+      .scope(baseUrl)
+      .get('/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml')
+      .reply(200, meta);
+
+    const res = await get();
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        {
+          releaseTimestamp: '2020-01-01T01:00:03.000Z',
+          version: '1.0.3-SNAPSHOT',
+        },
+      ],
+    });
   });
 
   it('returns html-based releases', async () => {
@@ -217,7 +268,6 @@ describe('modules/datasource/maven/index', () => {
         { version: '2.0.0', releaseTimestamp: '2021-06-18T16:24:00.000Z' },
       ],
     });
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns releases from custom repository', async () => {
@@ -226,7 +276,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', baseUrlCustom);
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('collects releases from all registry urls', async () => {
@@ -252,7 +301,6 @@ describe('modules/datasource/maven/index', () => {
       { version: '2.0.0' },
       { version: '3.0.0' },
     ]);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('falls back to next registry url', async () => {
@@ -284,7 +332,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('throws EXTERNAL_HOST_ERROR for 50x', async () => {
@@ -294,8 +341,6 @@ describe('modules/datasource/maven/index', () => {
       .reply(503);
 
     await expect(get()).rejects.toThrow(EXTERNAL_HOST_ERROR);
-
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('ignores unsupported protocols', async () => {
@@ -305,12 +350,10 @@ describe('modules/datasource/maven/index', () => {
     const { releases } = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      's3://protocol_error_repo',
       base
     );
 
     expect(releases).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips registry with invalid metadata structure', async () => {
@@ -327,7 +370,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips registry with invalid XML', async () => {
@@ -344,7 +386,6 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('handles optional slash at the end of registry url', async () => {
@@ -355,7 +396,6 @@ describe('modules/datasource/maven/index', () => {
     expect(resA).not.toBeNull();
     expect(resB).not.toBeNull();
     expect(resA.releases).toEqual(resB.releases);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('returns null for invalid registryUrls', async () => {
@@ -416,7 +456,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', frontendUrl);
 
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   describe('fetching parent info', () => {
@@ -446,7 +485,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/parent-scm/parent',
         homepage: 'https://parent-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should deal with missing parent fields', async () => {
@@ -468,7 +506,6 @@ describe('modules/datasource/maven/index', () => {
       });
       expect(res).not.toHaveProperty('homepage');
       expect(res).not.toHaveProperty('sourceUrl');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should deal with circular hierarchy', async () => {
@@ -511,7 +548,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         homepage: 'https://parent-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should get source from own pom and homepage from parent', async () => {
@@ -531,7 +567,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/child-scm/child',
         homepage: 'https://parent-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should get homepage from own pom and source from parent', async () => {
@@ -551,7 +586,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/parent-scm/parent',
         homepage: 'https://child-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should get homepage and source from own pom', async () => {
@@ -570,7 +604,6 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/child-scm/child',
         homepage: 'https://child-home.example.com',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should be able to detect git@github.com:child-scm as valid sourceUrl', async () => {
@@ -588,7 +621,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should be able to detect git@github.com/child-scm as valid sourceUrl', async () => {
@@ -606,8 +638,8 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should be able to detect git://@github.com/child-scm as valid sourceUrl', async () => {
       mockGenericPackage({
         meta: loadFixture('child-scm-gitprotocol/meta.xml'),
@@ -623,7 +655,6 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

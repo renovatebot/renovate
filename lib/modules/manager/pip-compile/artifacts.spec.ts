@@ -182,7 +182,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'subdir/requirements.txt'
         )
       ).toBe(
-        'pip-compile --allow-unsafe --generate-hashes --output-file=requirements.txt requirements.in'
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --output-file=requirements.txt requirements.in'
       );
     });
 

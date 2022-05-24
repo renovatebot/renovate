@@ -34,7 +34,6 @@ describe('modules/datasource/gradle-version/index', () => {
       expect(
         res.releases.filter(({ isDeprecated }) => isDeprecated)
       ).toHaveLength(1);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('calls configured registryUrls', async () => {
@@ -54,7 +53,6 @@ describe('modules/datasource/gradle-version/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles empty releases', async () => {
@@ -65,11 +63,10 @@ describe('modules/datasource/gradle-version/index', () => {
 
       const res = await getPkgReleases(config);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles errors', async () => {
-      expect.assertions(3);
+      expect.assertions(2);
       httpMock
         .scope('https://services.gradle.org/')
         .get('/versions/all')
@@ -94,7 +91,6 @@ describe('modules/datasource/gradle-version/index', () => {
           })
         )
       ).rejects.toThrow(ExternalHostError);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

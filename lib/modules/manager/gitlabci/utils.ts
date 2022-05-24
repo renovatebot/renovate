@@ -1,3 +1,7 @@
+import { regEx } from '../../../util/regex';
+import { getDep } from '../dockerfile/extract';
+import type { PackageDependency } from '../types';
+
 const re = /!reference \[(.*?)\]/g;
 
 /**
@@ -9,4 +13,25 @@ const re = /!reference \[(.*?)\]/g;
 export function replaceReferenceTags(content: string): string {
   const res = content.replace(re, '');
   return res;
+}
+
+const depProxyRe = regEx(
+  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)(?<depName>.+)`
+);
+
+/**
+ * Get image dependencies respecting Gitlab Dependency Proxy
+ * @param imageName as used in .gitlab-ci.yml file
+ * @return package dependency for the image
+ */
+export function getGitlabDep(imageName: string): PackageDependency {
+  const match = depProxyRe.exec(imageName);
+  if (match?.groups) {
+    const dep = { ...getDep(match.groups.depName), replaceString: imageName };
+    dep.autoReplaceStringTemplate =
+      match.groups.prefix + dep.autoReplaceStringTemplate;
+    return dep;
+  } else {
+    return getDep(imageName);
+  }
 }

@@ -6,7 +6,7 @@ import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import type { PackageDependency } from '../types';
 import { TerragruntDependencyTypes } from './common';
 import { extractTerragruntProvider } from './providers';
-import type { ExtractionResult } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
@@ -23,17 +23,22 @@ export function extractTerragruntModule(
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    dep.managerData.terragruntDependencyType =
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    dep.managerData!.terragruntDependencyType =
       TerragruntDependencyTypes.terragrunt;
   });
   return result;
 }
 
-export function analyseTerragruntModule(dep: PackageDependency): void {
-  const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
-  const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
+export function analyseTerragruntModule(
+  dep: PackageDependency<TerraformManagerData>
+): void {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const source = dep.managerData!.source;
+  const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
+  const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');
 
-  if (githubRefMatch) {
+  if (githubRefMatch?.groups) {
     dep.depType = 'github';
     dep.packageName = githubRefMatch.groups.project.replace(
       regEx(/\.git$/),
@@ -42,7 +47,7 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
     dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = GithubTagsDatasource.id;
-  } else if (gitTagsRefMatch) {
+  } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'gitTags';
     if (gitTagsRefMatch.groups.path.includes('//')) {
       logger.debug('Terragrunt module contains subdirectory');
@@ -55,13 +60,13 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;
-  } else if (dep.managerData.source) {
-    const moduleParts = dep.managerData.source.split('//')[0].split('/');
+  } else if (source) {
+    const moduleParts = source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
       dep.skipReason = 'local';
     } else if (moduleParts.length >= 3) {
-      const hostnameMatch = hostnameMatchRegex.exec(dep.managerData.source);
-      if (hostnameMatch) {
+      const hostnameMatch = hostnameMatchRegex.exec(source);
+      if (hostnameMatch?.groups) {
         dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
       }
       dep.depType = 'terragrunt';

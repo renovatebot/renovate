@@ -6,6 +6,7 @@ describe('modules/manager/cloudbuild/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(Fixtures.get('cloudbuild.yml'));
       expect(res.deps).toMatchSnapshot();

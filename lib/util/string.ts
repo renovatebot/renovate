@@ -37,3 +37,11 @@ export function toBase64(input: string): string {
 export function fromBase64(input: string): string {
   return Buffer.from(input, 'base64').toString();
 }
+
+export function uniqueStrings(
+  element: string,
+  index: number,
+  elements: string[]
+): boolean {
+  return elements.indexOf(element) === index;
+}

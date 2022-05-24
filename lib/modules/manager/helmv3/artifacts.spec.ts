@@ -42,6 +42,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     docker.resetPrefetchedImages();
     hostRules.clear();
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });

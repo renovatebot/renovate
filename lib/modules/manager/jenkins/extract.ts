@@ -77,7 +77,7 @@ function extractText(content: string): PackageDependency[] {
 
   for (const line of content.split(newlineRegex)) {
     const match = regex.exec(line);
-    if (match) {
+    if (match?.groups) {
       const { depName, currentValue, comment } = match.groups;
       const plugin: JenkinsPlugin = {
         artifactId: depName,

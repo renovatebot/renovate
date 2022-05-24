@@ -181,12 +181,20 @@ function constructAcceptString(input?: any): string {
 
 const MAX_GRAPHQL_PAGE_SIZE = 100;
 
+interface GraphqlPageCacheItem {
+  pageLastResizedAt: string;
+  pageSize: number;
+}
+
+type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
+
 function getGraphqlPageSize(
   fieldName: string,
   defaultPageSize = MAX_GRAPHQL_PAGE_SIZE
 ): number {
   const cache = getCache();
-  const graphqlPageCache = cache?.platform?.github?.graphqlPageCache;
+  const graphqlPageCache = cache?.platform?.github
+    ?.graphqlPageCache as GraphqlPageCache;
   const cachedRecord = graphqlPageCache?.[fieldName];
 
   if (graphqlPageCache && cachedRecord) {
@@ -243,7 +251,9 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
     cache.platform ??= {};
     cache.platform.github ??= {};
     cache.platform.github.graphqlPageCache ??= {};
-    cache.platform.github.graphqlPageCache[fieldName] = {
+    const graphqlPageCache = cache.platform.github
+      .graphqlPageCache as GraphqlPageCache;
+    graphqlPageCache[fieldName] = {
       pageLastResizedAt,
       pageSize: newPageSize,
     };

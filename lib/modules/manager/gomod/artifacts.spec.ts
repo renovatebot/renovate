@@ -62,6 +62,7 @@ describe('modules/manager/gomod/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });

@@ -38,7 +38,7 @@ export interface SyntaxMatcher {
 export type TokenMap = Record<string, Token>;
 
 export interface SyntaxHandlerInput {
-  packageFile: string;
+  packageFile?: string;
   variables: PackageVariables;
   tokenMap: TokenMap;
 }
@@ -57,7 +57,7 @@ export interface SyntaxMatchConfig {
 export interface MatchConfig {
   tokens: Token[];
   variables: PackageVariables;
-  packageFile: string;
+  packageFile?: string;
 }
 
 export interface ParseGradleResult {

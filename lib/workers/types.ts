@@ -45,7 +45,7 @@ export interface BranchUpgradeConfig
   groupName?: string;
   groupSlug?: string;
   language?: string;
-  manager?: string;
+  manager: string;
   packageFile?: string;
   lockFile?: string;
   lockFiles?: string[];

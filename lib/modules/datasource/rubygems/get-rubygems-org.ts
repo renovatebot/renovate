@@ -63,9 +63,8 @@ export class RubyGemsOrgDatasource extends Datasource {
       if (err.statusCode !== 416) {
         contentLength = 0;
         packageReleases = Object.create(null); // Because we might need a "constructor" key
-        throw new ExternalHostError(
-          new Error('Rubygems fetch error - need to reset cache')
-        );
+        logger.debug({ err }, 'Rubygems fetch error');
+        throw new ExternalHostError(new Error('Rubygems fetch error'));
       }
       logger.debug('Rubygems: No update');
       lastSync = new Date();
@@ -79,9 +78,9 @@ export class RubyGemsOrgDatasource extends Datasource {
   }
 
   private static processLine(line: string): void {
-    let split: string[];
-    let pkg: string;
-    let versions: string;
+    let split: string[] | undefined;
+    let pkg: string | undefined;
+    let versions: string | undefined;
     try {
       const l = line.trim();
       if (!l.length || l.startsWith('created_at:') || l === '---') {
@@ -115,7 +114,7 @@ export class RubyGemsOrgDatasource extends Datasource {
     return getElapsedMinutes(lastSync) >= 5;
   }
 
-  updateRubyGemsVersionsPromise: Promise<void> | undefined;
+  private updateRubyGemsVersionsPromise: Promise<void> | null = null;
 
   async syncVersions(): Promise<void> {
     if (RubyGemsOrgDatasource.isDataStale()) {

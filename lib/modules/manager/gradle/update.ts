@@ -12,7 +12,8 @@ export function updateDependency({
     logger.warn('gradle manager does not support replacement updates yet');
     return null;
   }
-  const offset = managerData.fileReplacePosition;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const offset = managerData!.fileReplacePosition;
   const leftPart = fileContent.slice(0, offset);
   const rightPart = fileContent.slice(offset);
   const version = versionLikeSubstring(rightPart);

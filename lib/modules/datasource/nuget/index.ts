@@ -25,8 +25,12 @@ export class NugetDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult> {
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`nuget.getReleases(${packageName})`);
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
     const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
     if (protocolVersion === 2) {
       return v2.getReleases(this.http, feedUrl, packageName);

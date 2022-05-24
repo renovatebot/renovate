@@ -307,6 +307,7 @@ describe('modules/manager/maven/index', () => {
 
       expect(updatedContent).toBeNull();
     });
+
     it('should update ranges', () => {
       const newValue = '[1.2.3]';
       const select = (depSet: PackageFile) =>
@@ -320,6 +321,7 @@ describe('modules/manager/maven/index', () => {
       const newDep = select(newContent);
       expect(newDep.currentValue).toEqual(newValue);
     });
+
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
       const select = (depSet: PackageFile) =>
@@ -332,6 +334,7 @@ describe('modules/manager/maven/index', () => {
         pomContent
       );
     });
+
     it('should return null for replacement', () => {
       const res = updateDependency({
         fileContent: undefined,

@@ -7,6 +7,7 @@ describe('modules/manager/metadata', () => {
     .map((dirent) => dirent.name)
     .filter((name) => !name.startsWith('__'))
     .sort();
+
   test.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
     let readme: string;
     try {

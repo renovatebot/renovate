@@ -15,6 +15,7 @@ describe('modules/manager/index', () => {
         continue;
       }
       const supportedDatasources = manager.get(m, 'supportedDatasources');
+
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
         supportedDatasources.every((d) => {
@@ -23,16 +24,19 @@ describe('modules/manager/index', () => {
       });
     }
   });
+
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
     });
   });
+
   describe('getLanguageList()', () => {
     it('gets', () => {
       expect(manager.getLanguageList()).not.toBeNull();
     });
   });
+
   describe('getManagerList()', () => {
     it('gets', () => {
       expect(manager.getManagerList()).not.toBeNull();
@@ -82,6 +86,7 @@ describe('modules/manager/index', () => {
         await manager.extractAllPackageFiles('dummy', {} as any, [])
       ).toBeNull();
     });
+
     it('returns non-null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
@@ -92,6 +97,7 @@ describe('modules/manager/index', () => {
         await manager.extractAllPackageFiles('dummy', {} as any, [])
       ).not.toBeNull();
     });
+
     afterEach(() => {
       manager.getManagers().delete('dummy');
     });
@@ -103,9 +109,14 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(manager.extractPackageFile('unknown', null)).toBeNull();
-      expect(manager.extractPackageFile('dummy', null)).toBeNull();
+      expect(
+        manager.extractPackageFile('unknown', null, 'filename', {})
+      ).toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', null, 'filename', {})
+      ).toBeNull();
     });
+
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
@@ -113,8 +124,11 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
 
-      expect(manager.extractPackageFile('dummy', null)).not.toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', null, 'filename', {})
+      ).not.toBeNull();
     });
+
     afterEach(() => {
       manager.getManagers().delete('dummy');
     });
@@ -130,6 +144,7 @@ describe('modules/manager/index', () => {
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' })
       ).toBeNull();
     });
+
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},

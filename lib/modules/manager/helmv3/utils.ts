@@ -58,6 +58,7 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
     .flatMap((value) => value.dependencies)
     .filter((dependency) => dependency.repository) // only keep non-local references --> if no repository is defined the chart will be searched in charts/<name>
     .filter((dependency) => !isAlias(dependency.repository)) // do not add aliases
+    .filter((dependency) => !dependency.repository.startsWith('file:')) // skip repositories which are locally referenced
     .map((dependency) => {
       // remove additional keys to prevent interference at deduplication
       return {

@@ -12,7 +12,9 @@ export enum GoproxyFallback {
   Always = '|',
 }
 
-export function getSourceUrl(dataSource?: DataSource): string | undefined {
+export function getSourceUrl(
+  dataSource?: DataSource | null
+): string | undefined {
   if (dataSource) {
     const { datasource, registryUrl, packageName } = dataSource;
 

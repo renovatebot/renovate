@@ -1,7 +1,9 @@
+import is from '@sindresorhus/is';
 import type {
   CustomExtractConfig,
   PackageDependency,
   PackageFile,
+  RegexManagerTemplates,
   Result,
 } from '../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
@@ -33,14 +35,19 @@ export function extractPackageFile(
   }
 
   // filter all null values
-  deps = deps.filter(Boolean);
+  deps = deps.filter(is.truthy);
   if (deps.length) {
-    const res: PackageFile = { deps, matchStrings: config.matchStrings };
+    const res: PackageFile & RegexManagerTemplates = {
+      deps,
+      matchStrings: config.matchStrings,
+    };
     if (config.matchStringsStrategy) {
       res.matchStringsStrategy = config.matchStringsStrategy;
     }
     // copy over templates for autoreplace
-    for (const field of validMatchFields.map((f) => `${f}Template`)) {
+    for (const field of validMatchFields.map(
+      (f) => `${f}Template` as keyof RegexManagerTemplates
+    )) {
       if (config[field]) {
         res[field] = config[field];
       }

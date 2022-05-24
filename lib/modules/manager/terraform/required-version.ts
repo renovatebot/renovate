@@ -3,14 +3,14 @@ import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
-import type { ExtractionResult } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
 export function extractTerraformRequiredVersion(
   startingLine: number,
   lines: string[]
-): ExtractionResult {
-  const deps: PackageDependency[] = [];
+): ExtractionResult | null {
+  const deps: PackageDependency<TerraformManagerData>[] = [];
   let lineNumber = startingLine;
   let braceCounter = 0;
   do {
@@ -26,8 +26,8 @@ export function extractTerraformRequiredVersion(
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
     const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch && kvMatch.groups.key === 'required_version') {
-      const dep: PackageDependency = {
+    if (kvMatch?.groups && kvMatch.groups.key === 'required_version') {
+      const dep: PackageDependency<TerraformManagerData> = {
         currentValue: kvMatch.groups.value,
         lineNumber,
         managerData: {

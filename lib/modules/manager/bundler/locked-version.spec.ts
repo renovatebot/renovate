@@ -13,21 +13,25 @@ describe('modules/manager/bundler/locked-version', () => {
     expect(parsedLockEntries.size).toBe(185);
     expect(parsedLockEntries).toMatchSnapshot();
   });
+
   test('Parse WebPacker Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(webPackerGemfileLock);
     expect(parsedLockEntries.size).toBe(53);
     expect(parsedLockEntries).toMatchSnapshot();
   });
+
   test('Parse Mastodon Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(mastodonGemfileLock);
     expect(parsedLockEntries.size).toBe(266);
     expect(parsedLockEntries).toMatchSnapshot();
   });
+
   test('Parse Ruby CI Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(rubyCIGemfileLock);
     expect(parsedLockEntries.size).toBe(64);
     expect(parsedLockEntries).toMatchSnapshot();
   });
+
   test('Parse Gitlab Foss Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(gitlabFossGemfileLock);
     expect(parsedLockEntries.size).toBe(478);

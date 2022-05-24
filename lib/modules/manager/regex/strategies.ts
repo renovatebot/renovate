@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { CustomExtractConfig, PackageDependency } from '../types';
 import {
@@ -17,10 +18,11 @@ export function handleAny(
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
-        { groups: matchResult.groups, replaceString: matchResult[0] },
+        { groups: matchResult.groups ?? {}, replaceString: matchResult[0] },
         config
       )
-    );
+    )
+    .filter(is.truthy);
 }
 
 export function handleCombination(
@@ -38,11 +40,11 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups,
+      groups: match.groups ?? {},
       replaceString: match?.groups?.currentValue ? match[0] : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config)];
+  return [createDependency(extraction, config)].filter(is.truthy);
 }
 
 export function handleRecursive(
@@ -59,24 +61,26 @@ export function handleRecursive(
   if (!regexes[index]) {
     return [];
   }
-  return regexMatchAll(regexes[index], content).flatMap((match) => {
-    // if we have a depName and a currentValue which have the minimal viable definition
-    if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(
-        {
-          groups: mergeGroups(combinedGroups, match.groups),
-          replaceString: match[0],
-        },
-        config
-      );
-    }
+  return regexMatchAll(regexes[index], content)
+    .flatMap((match) => {
+      // if we have a depName and a currentValue which have the minimal viable definition
+      if (match?.groups?.depName && match?.groups?.currentValue) {
+        return createDependency(
+          {
+            groups: mergeGroups(combinedGroups, match.groups),
+            replaceString: match[0],
+          },
+          config
+        );
+      }
 
-    return handleRecursive(
-      match[0],
-      packageFile,
-      config,
-      index + 1,
-      mergeGroups(combinedGroups, match.groups || {})
-    );
-  });
+      return handleRecursive(
+        match[0],
+        packageFile,
+        config,
+        index + 1,
+        mergeGroups(combinedGroups, match.groups || {})
+      );
+    })
+    .filter(is.truthy);
 }

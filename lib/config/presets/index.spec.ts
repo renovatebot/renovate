@@ -1,4 +1,6 @@
-import { loadJsonFixture, mocked } from '../../../test/util';
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+import { Fixtures } from '../../../test/fixtures';
+import { mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -17,13 +19,13 @@ jest.mock('./local');
 const npm = mocked(_npm);
 const local = mocked(_local);
 
-const presetIkatyang = loadJsonFixture('renovate-config-ikatyang.json');
+const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
-npm.getPreset = jest.fn(({ repo, presetName }) => {
+npm.getPreset.mockImplementation(({ repo, presetName }) => {
   if (repo === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
       'renovate-config'
-    ][presetName];
+    ][presetName!];
   }
   if (repo === 'renovate-config-notfound') {
     throw new Error(PRESET_DEP_NOT_FOUND);
@@ -43,9 +45,12 @@ npm.getPreset = jest.fn(({ repo, presetName }) => {
 describe('config/presets/index', () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       config = {};
+      jest.clearAllMocks();
     });
+
     it('returns same if no presets', async () => {
       config.foo = 1;
       config.extends = [];
@@ -53,73 +58,77 @@ describe('config/presets/index', () => {
       expect(config).toMatchObject(res);
       expect(res).toEqual({ foo: 1 });
     });
+
     it('throws if invalid preset file', async () => {
       config.foo = 1;
       config.extends = ['notfound'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe("Cannot find preset's package (notfound)");
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
+        "Cannot find preset's package (notfound)"
+      );
+      expect(e!.validationMessage).toBeUndefined();
     });
+
     it('throws if invalid preset', async () => {
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if path + invalid syntax', async () => {
       config.foo = 1;
       config.extends = ['github>user/repo//'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe('Preset is invalid (github>user/repo//)');
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe('Preset is invalid (github>user/repo//)');
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if path + sub-preset', async () => {
       config.foo = 1;
       config.extends = ['github>user/repo//path:subpreset'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws if invalid preset json', async () => {
       config.foo = 1;
       config.extends = ['org/repo'];
-      let e: Error;
+      let e: Error | undefined;
       local.getPreset.mockRejectedValueOnce(new Error(PRESET_INVALID_JSON));
       try {
         await presets.resolveConfigPresets(config);
@@ -127,43 +136,43 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe('Preset is invalid JSON (org/repo)');
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe('Preset is invalid JSON (org/repo)');
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws noconfig', async () => {
       config.foo = 1;
       config.extends = ['noconfig:base'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset package is missing a renovate-config entry (noconfig:base)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('throws throw', async () => {
       config.foo = 1;
       config.extends = ['throw:base'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset caused unexpected error (throw:base)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('works with valid', async () => {
@@ -178,22 +187,24 @@ describe('config/presets/index', () => {
       });
       expect(res.rangeStrategy).toBe('pin');
     });
+
     it('throws if valid and invalid', async () => {
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset', ':pinVersions'];
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBe(
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
+
     it('combines two package alls', async () => {
       config.extends = ['packages:eslint', 'packages:stylelint'];
       const res = await presets.resolveConfigPresets(config);
@@ -202,6 +213,7 @@ describe('config/presets/index', () => {
         matchPackagePrefixes: ['@typescript-eslint/', 'eslint', 'stylelint'],
       });
     });
+
     it('resolves packageRule', async () => {
       config.packageRules = [
         {
@@ -220,12 +232,14 @@ describe('config/presets/index', () => {
         ],
       });
     });
+
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.matchPackagePrefixes).toHaveLength(2);
     });
+
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
@@ -234,22 +248,24 @@ describe('config/presets/index', () => {
       expect(res.matchPackagePatterns).toHaveLength(1);
       expect(res.matchPackagePrefixes).toHaveLength(4);
     });
+
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      const rule = res.packageRules[0];
+      const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(4);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
     });
+
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).toBeUndefined();
-      expect(res.minor.automerge).toBeTrue();
+      expect(res.minor!.automerge).toBeTrue();
     });
 
     it('ignores presets', async () => {
@@ -263,9 +279,9 @@ describe('config/presets/index', () => {
 
     it('resolves self-hosted presets without baseConfig', async () => {
       config.extends = ['local>username/preset-repo'];
-      local.getPreset = jest.fn(({ repo, presetName, baseConfig }) =>
-        Promise.resolve({ labels: ['self-hosted resolved'] })
-      );
+      local.getPreset.mockResolvedValueOnce({
+        labels: ['self-hosted resolved'],
+      });
 
       const res = await presets.resolveConfigPresets(config);
 
@@ -274,23 +290,66 @@ describe('config/presets/index', () => {
       expect(local.getPreset.mock.calls[0][0].baseConfig).toBeDefined();
       expect(res).toMatchSnapshot();
     });
+
+    it('resolves self-hosted transitive presets without baseConfig', async () => {
+      config.platform = 'gitlab';
+      config.endpoint = 'https://dummy.example.com/api/v4';
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset
+        .mockResolvedValueOnce({
+          extends: ['local>username/preset-repo//subpreset'],
+        })
+        .mockResolvedValueOnce({ labels: ['self-hosted resolved'] });
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res).toEqual({
+        platform: 'gitlab',
+        endpoint: 'https://dummy.example.com/api/v4',
+        labels: ['self-hosted resolved'],
+      });
+      expect(local.getPreset.mock.calls).toMatchObject([
+        [
+          {
+            baseConfig: {
+              platform: 'gitlab',
+              endpoint: 'https://dummy.example.com/api/v4',
+              extends: ['local>username/preset-repo'],
+            },
+          },
+        ],
+        [
+          {
+            baseConfig: {
+              platform: 'gitlab',
+              endpoint: 'https://dummy.example.com/api/v4',
+              extends: ['local>username/preset-repo'],
+            },
+          },
+        ],
+      ]);
+    });
   });
+
   describe('replaceArgs', () => {
     const argMappings = {
       arg0: 'a',
       arg1: 'b',
       arg2: 'c',
     };
+
     it('replaces args in strings', () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
       expect(res).toBe('c foo ab');
     });
+
     it('replaces args twice in same string', () => {
       const str = '{{arg2}}{{arg0}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
       expect(res).toBe('ca foo ab');
     });
+
     it('replaces objects', () => {
       const obj = {
         foo: 'ha {{arg0}}',
@@ -307,6 +366,7 @@ describe('config/presets/index', () => {
         foo: 'ha a',
       });
     });
+
     it('replaces arrays', () => {
       const obj = {
         foo: ['{{arg0}}', { bar: '{{arg1}}', baz: 5 }],
@@ -317,6 +377,7 @@ describe('config/presets/index', () => {
       });
     });
   });
+
   describe('parsePreset', () => {
     // default namespace
     it('returns default package name', () => {
@@ -328,6 +389,7 @@ describe('config/presets/index', () => {
         presetSource: 'internal',
       });
     });
+
     it('parses github', () => {
       expect(presets.parsePreset('github>some/repo')).toEqual({
         repo: 'some/repo',
@@ -337,6 +399,7 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
     it('handles special chars', () => {
       expect(presets.parsePreset('github>some/repo:foo+bar')).toEqual({
         repo: 'some/repo',
@@ -346,6 +409,7 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
     it('parses github subfiles', () => {
       expect(presets.parsePreset('github>some/repo:somefile')).toEqual({
         repo: 'some/repo',
@@ -355,6 +419,7 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
     it('parses github subfiles with preset name', () => {
       expect(
         presets.parsePreset('github>some/repo:somefile/somepreset')
@@ -366,6 +431,55 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
+    it('parses github file with preset name with .json extension', () => {
+      expect(presets.parsePreset('github>some/repo:somefile.json')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github file with preset name with .json5 extension', () => {
+      expect(presets.parsePreset('github>some/repo:somefile.json5')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json5',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github subfiles with preset name with .json extension', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile.json/somepreset')
+      ).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
+    it('parses github subfiles with preset name with .json5 extension', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile.json5/somepreset')
+      ).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        presetName: 'somefile.json5/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+        tag: undefined,
+      });
+    });
+
     it('parses github subfiles with preset and sub-preset name', () => {
       expect(
         presets.parsePreset(
@@ -379,6 +493,7 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
     it('parses github subdirectories', () => {
       expect(
         presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
@@ -390,6 +505,7 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
     it('parses github toplevel file using subdirectory syntax', () => {
       expect(presets.parsePreset('github>some/repo//somefile')).toEqual({
         repo: 'some/repo',
@@ -399,6 +515,7 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toEqual({
         repo: 'some/repo',
@@ -408,6 +525,7 @@ describe('config/presets/index', () => {
         presetSource: 'gitlab',
       });
     });
+
     it('parses gitea', () => {
       expect(presets.parsePreset('gitea>some/repo')).toEqual({
         repo: 'some/repo',
@@ -417,6 +535,7 @@ describe('config/presets/index', () => {
         presetSource: 'gitea',
       });
     });
+
     it('parses local', () => {
       expect(presets.parsePreset('local>some/repo')).toEqual({
         repo: 'some/repo',
@@ -426,6 +545,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('parses local with spaces', () => {
       expect(presets.parsePreset('local>A2B CD/A2B_Renovate')).toEqual({
         repo: 'A2B CD/A2B_Renovate',
@@ -435,6 +555,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('parses local with subdirectory', () => {
       expect(
         presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
@@ -446,6 +567,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('parses local with spaces and subdirectory', () => {
       expect(
         presets.parsePreset('local>A2B CD/A2B_Renovate//some-dir/some-file')
@@ -457,6 +579,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('parses local with sub preset and tag', () => {
       expect(
         presets.parsePreset(
@@ -471,6 +594,7 @@ describe('config/presets/index', () => {
         tag: '1.2.3',
       });
     });
+
     it('parses local with subdirectory and tag', () => {
       expect(
         presets.parsePreset(
@@ -525,6 +649,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('parses local Bitbucket user repo with preset name', () => {
       expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
         repo: '~john_doe/repo',
@@ -534,6 +659,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('parses local Bitbucket user repo', () => {
       expect(presets.parsePreset('local>~john_doe/renovate-config')).toEqual({
         repo: '~john_doe/renovate-config',
@@ -543,6 +669,7 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+
     it('returns default package name with params', () => {
       expect(presets.parsePreset(':group(packages/eslint, eslint)')).toEqual({
         repo: 'default',
@@ -552,6 +679,7 @@ describe('config/presets/index', () => {
         presetSource: 'internal',
       });
     });
+
     // scoped namespace
     it('returns simple scope', () => {
       expect(presets.parsePreset('@somescope')).toEqual({
@@ -562,6 +690,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns simple scope and params', () => {
       expect(presets.parsePreset('@somescope(param1)')).toEqual({
         repo: '@somescope/renovate-config',
@@ -571,6 +700,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns scope with repo and default', () => {
       expect(presets.parsePreset('@somescope/somepackagename')).toEqual({
         repo: '@somescope/somepackagename',
@@ -580,6 +710,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns scope with repo and params and default', () => {
       expect(
         presets.parsePreset(
@@ -593,6 +724,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns scope with presetName', () => {
       expect(presets.parsePreset('@somescope:somePresetName')).toEqual({
         repo: '@somescope/renovate-config',
@@ -602,6 +734,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns scope with presetName and params', () => {
       expect(presets.parsePreset('@somescope:somePresetName(param1)')).toEqual({
         repo: '@somescope/renovate-config',
@@ -611,6 +744,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns scope with repo and presetName', () => {
       expect(
         presets.parsePreset('@somescope/somepackagename:somePresetName')
@@ -622,6 +756,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns scope with repo and presetName and params', () => {
       expect(
         presets.parsePreset(
@@ -635,6 +770,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     // non-scoped namespace
     it('returns non-scoped default', () => {
       expect(presets.parsePreset('somepackage')).toEqual({
@@ -645,6 +781,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns non-scoped package name', () => {
       expect(presets.parsePreset('somepackage:webapp')).toEqual({
         repo: 'renovate-config-somepackage',
@@ -654,6 +791,7 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
     it('returns non-scoped package name full', () => {
       expect(presets.parsePreset('renovate-config-somepackage:webapp')).toEqual(
         {
@@ -665,6 +803,7 @@ describe('config/presets/index', () => {
         }
       );
     });
+
     it('returns non-scoped package name with params', () => {
       expect(presets.parsePreset('somepackage:webapp(param1)')).toEqual({
         repo: 'renovate-config-somepackage',
@@ -675,6 +814,7 @@ describe('config/presets/index', () => {
       });
     });
   });
+
   describe('getPreset', () => {
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
@@ -692,10 +832,12 @@ describe('config/presets/index', () => {
         ],
       });
     });
+
     it('handles removed presets with no migration', async () => {
       const res = await presets.getPreset('helpers:oddIsUnstable', {});
       expect(res).toEqual({});
     });
+
     it('handles renamed monorepos', async () => {
       const res = await presets.getPreset('monorepo:opentelemetry', {});
       expect(res).toMatchInlineSnapshot(`
@@ -709,6 +851,7 @@ Object {
 }
 `);
     });
+
     it('handles renamed monorepo groups', async () => {
       const res = await presets.getPreset('group:opentelemetryMonorepo', {});
       expect(res).toMatchInlineSnapshot(`
@@ -733,12 +876,14 @@ Object {
 }
 `);
     });
+
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       expect(res.matchPackageNames).toHaveLength(1);
       expect(res.extends).toHaveLength(4);
     });
+
     it('gets parameterised configs', async () => {
       const res = await presets.getPreset(
         ':group(packages:eslint, eslint)',
@@ -754,6 +899,7 @@ Object {
         ],
       });
     });
+
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', {});
       expect(res).toEqual({
@@ -766,6 +912,7 @@ Object {
         ],
       });
     });
+
     it('ignores irrelevant params', async () => {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
@@ -775,53 +922,57 @@ Object {
         rangeStrategy: 'pin',
       });
     });
+
     it('handles 404 packages', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('notfound:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e!.validationSource).toMatchSnapshot();
+      expect(e!.validationError).toMatchSnapshot();
+      expect(e!.validationMessage).toMatchSnapshot();
     });
+
     it('handles no config', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('noconfig:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
+
     it('handles throw errors', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('throw:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
+
     it('handles preset not found', async () => {
-      let e: Error;
+      let e: Error | undefined;
       try {
         await presets.getPreset('wrongpreset:foo', {});
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toBeUndefined();
-      expect(e.validationMessage).toBeUndefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
   });
 });

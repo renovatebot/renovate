@@ -54,10 +54,10 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
   const platformMatch = regEx(
     /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/
-  ).exec(git);
+  ).exec(git ?? '');
 
-  if (platformMatch) {
-    const { account, repo, platform } = platformMatch?.groups || {};
+  if (platformMatch?.groups) {
+    const { account, repo, platform } = platformMatch.groups;
     if (account && repo) {
       const datasource =
         platform === 'github'

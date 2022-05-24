@@ -10,27 +10,32 @@ const repository = 'abc/def';
 describe('config/decrypt', () => {
   describe('decryptConfig()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
     });
+
     it('returns empty with no privateKey', async () => {
       delete config.encrypted;
       const res = await decryptConfig(config, repository);
       expect(res).toMatchObject(config);
     });
+
     it('warns if no privateKey found', async () => {
       config.encrypted = { a: '1' };
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
       expect(res.a).toBeUndefined();
     });
+
     it('handles invalid encrypted type', async () => {
       config.encrypted = 1;
       GlobalConfig.set({ privateKey });
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
     });
+
     it('handles invalid encrypted value', async () => {
       config.encrypted = { a: 1 };
       GlobalConfig.set({ privateKey, privateKeyOld: 'invalid-key' });
@@ -38,6 +43,7 @@ describe('config/decrypt', () => {
         'config-validation'
       );
     });
+
     it('replaces npm token placeholder in npmrc', async () => {
       GlobalConfig.set({
         privateKey: 'invalid-key',
@@ -56,6 +62,7 @@ describe('config/decrypt', () => {
         '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
       );
     });
+
     it('appends npm token in npmrc', async () => {
       GlobalConfig.set({ privateKey });
       config.npmrc = 'foo=bar\n';
@@ -68,6 +75,7 @@ describe('config/decrypt', () => {
       expect(res.npmToken).toBeUndefined();
       expect(res.npmrc).toMatchSnapshot();
     });
+
     it('decrypts nested', async () => {
       GlobalConfig.set({ privateKey });
       config.packageFiles = [
@@ -84,7 +92,8 @@ describe('config/decrypt', () => {
         },
         'backend/package.json',
       ];
-      const res = await decryptConfig(config, repository);
+      // TODO: fix types #7154
+      const res = (await decryptConfig(config, repository)) as any;
       expect(res.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(
@@ -95,6 +104,7 @@ describe('config/decrypt', () => {
         '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
       );
     });
+
     it('rejects invalid PGP message', async () => {
       GlobalConfig.set({ privateKey: privateKeyPgp });
       config.encrypted = {
@@ -135,6 +145,7 @@ describe('config/decrypt', () => {
         'config-validation'
       );
     });
+
     it('handles PGP org constraint', async () => {
       GlobalConfig.set({ privateKey: privateKeyPgp });
       config.encrypted = {
@@ -148,6 +159,7 @@ describe('config/decrypt', () => {
         'config-validation'
       );
     });
+
     it('handles PGP org/repo constraint', async () => {
       GlobalConfig.set({ privateKey: privateKeyPgp });
       config.encrypted = {

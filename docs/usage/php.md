@@ -54,7 +54,7 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
       "matchHost": "some.vendor.com",
       "hostType": "packagist",
       "encrypted": {
-        "username": "<your-encrypted-password>",
+        "username": "<your-encrypted-username>",
         "password": "<your-encrypted-password>"
       }
     },

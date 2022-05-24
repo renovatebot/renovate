@@ -56,7 +56,9 @@ function extractUrl(content: string): string | null {
   return parseUrl(i, content);
 }
 
-export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
+export function parseUrlPath(
+  urlStr: string | null | undefined
+): UrlPathParsedResult | null {
   if (!urlStr) {
     return null;
   }
@@ -69,7 +71,7 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
     s = s.filter((val) => val);
     const ownerName = s[0];
     const repoName = s[1];
-    let currentValue: string;
+    let currentValue: string | undefined;
     if (s[2] === 'archive') {
       currentValue = s[3];
       const targz = currentValue.slice(
@@ -146,10 +148,10 @@ export function extractPackageFile(content: string): PackageFile | null {
     logger.debug('Invalid URL field');
   }
   const urlPathResult = parseUrlPath(url);
-  let skipReason: SkipReason;
-  let currentValue: string = null;
-  let ownerName: string = null;
-  let repoName: string = null;
+  let skipReason: SkipReason | undefined;
+  let currentValue: string | null = null;
+  let ownerName: string | null = null;
+  let repoName: string | null = null;
   if (urlPathResult) {
     currentValue = urlPathResult.currentValue;
     ownerName = urlPathResult.ownerName;
@@ -173,7 +175,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     dep.skipReason = skipReason;
     if (skipReason === 'unsupported-url') {
       dep.depName = className;
-      dep.datasource = null;
+      dep.datasource = undefined;
     }
   }
   const deps = [dep];
