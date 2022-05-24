@@ -61,6 +61,7 @@ export async function extract(
   const configHash = hasha(JSON.stringify(config));
   let managerList = getManagerList();
   let fingerprint = '';
+  // istanbul ugnore if
   if (is.nonEmptyArray(config.enabledManagers)) {
     managerList = managerList.filter((manager) =>
       config.enabledManagers.includes(manager)
