@@ -388,7 +388,7 @@ describe('modules/platform/gitea/index', () => {
     it('should abort when gitUrl has value ssh but ssh_url is empty', async () => {
       expect.assertions(1);
 
-      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ssh_url: null });
+      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ssh_url: '' });
       const repoCfg: RepoParams = {
         repository: mockRepo.full_name,
         gitUrl: 'ssh',
@@ -419,7 +419,7 @@ describe('modules/platform/gitea/index', () => {
     it('should use generated url of repo if clone_url of repo is empty', async () => {
       expect.assertions(1);
 
-      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, clone_url: null });
+      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, clone_url: '' });
       const repoCfg: RepoParams = {
         repository: mockRepo.full_name,
         gitUrl: 'endpoint',

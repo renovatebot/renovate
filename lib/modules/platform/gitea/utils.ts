@@ -42,12 +42,11 @@ export function getRepoUrl(
     }
 
     const { protocol, host, pathname } = parseUrl(endpoint) ?? {};
-    const newPathname = pathname?.slice(0, pathname?.indexOf('/api'));
     const url = URL.format({
       protocol: protocol?.slice(0, -1) || 'https',
       auth: opts.token,
       host,
-      pathname: newPathname + '/' + repo.full_name + '.git',
+      pathname: pathname + repo.full_name + '.git',
     });
     logger.debug({ url }, 'using URL based on configured endpoint');
     return url;
