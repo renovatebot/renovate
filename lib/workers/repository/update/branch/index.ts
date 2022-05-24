@@ -516,6 +516,12 @@ export async function processBranch(
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
       }
+      if (mergeStatus === 'off schedule') {
+        logger.info(
+          'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
+        );
+        return { branchExists, result: BranchResult.NotScheduled };
+      }
       if (
         mergeStatus === 'stale' &&
         ['conflicted', 'never'].includes(config.rebaseWhen)
@@ -524,12 +530,6 @@ export async function processBranch(
           'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
         );
         config.forcePr = true;
-        config.branchAutomergeFailureMessage = mergeStatus;
-      }
-      if (mergeStatus === 'off schedule') {
-        logger.warn(
-          'Branch cannot automerge now because it is off schedule - raising a PR instead'
-        );
         config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (

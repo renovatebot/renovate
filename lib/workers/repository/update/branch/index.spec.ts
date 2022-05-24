@@ -705,7 +705,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
 
-    it('ensures PR when automerge is off schedule', async () => {
+    it('skips when automerge is off schedule', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({})
       );
@@ -724,17 +724,22 @@ describe('workers/repository/update/branch/index', () => {
         partial<AutomergePrResult>({ automerged: false })
       );
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch({
-        ...config,
-        automerge: true,
-        rebaseWhen: 'conflicted',
+      await expect(
+        branchWorker.processBranch({
+          ...config,
+          automerge: true,
+          rebaseWhen: 'conflicted',
+        })
+      ).resolves.toEqual({
+        branchExists: true,
+        result: BranchResult.NotScheduled,
       });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Branch cannot automerge now because it is off schedule - skipping'
+      expect(logger.info).toHaveBeenCalledWith(
+        'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
       );
-      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
-      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
 
     it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {
