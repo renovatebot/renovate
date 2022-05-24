@@ -22,7 +22,11 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { CENTRAL_FILE, getDependentPackageFiles } from './package-tree';
+import {
+  MSBUILD_CENTRAL_FILE,
+  NUGET_CENTRAL_FILE,
+  getDependentPackageFiles,
+} from './package-tree';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
@@ -117,9 +121,12 @@ export async function updateArtifacts({
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
   // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
+  // https://github.com/microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions
   const isCentralManament =
-    packageFileName === CENTRAL_FILE ||
-    packageFileName.endsWith(`/${CENTRAL_FILE}`);
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE ||
+    packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
+    packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
 
   if (
     !isCentralManament &&

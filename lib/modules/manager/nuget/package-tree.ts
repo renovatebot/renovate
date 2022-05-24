@@ -6,7 +6,9 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 
-export const CENTRAL_FILE = 'Directory.Packages.props';
+export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
+export const MSBUILD_CENTRAL_FILE = 'Packages.props';
+
 /**
  * Get all package files at any level of ancestry that depend on packageFileName
  */
@@ -22,7 +24,10 @@ export async function getDependentPackageFiles(
   }
 
   const parentDir =
-    packageFileName === CENTRAL_FILE ? '' : upath.dirname(packageFileName);
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE
+      ? ''
+      : upath.dirname(packageFileName);
 
   for (const f of packageFiles) {
     graph.addNode(f);
