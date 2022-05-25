@@ -27,6 +27,7 @@ Good:
 
 ```ts
 logger.debug({ config }, 'Full config');
+logger.debug(`Generated branchName: ${branchName}`);
 logger.warn({ presetName }, 'Failed to look up preset');
 ```
 
