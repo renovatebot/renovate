@@ -1,6 +1,6 @@
 # About us
 
-Renovate was created by [WhiteSource](https://www.whitesourcesoftware.com/) staff and they continue to work on Renovate.
+Renovate was created by [Mend](https://www.mend.io/) staff and they continue to work on Renovate.
 
 More than 600 outside contributors helped improve Renovate.
 
