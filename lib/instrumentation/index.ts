@@ -26,7 +26,7 @@ let traceProvider: NodeTracerProvider;
 
 init();
 
-export function init() {
+export function init(): void {
   traceProvider = new NodeTracerProvider({
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
