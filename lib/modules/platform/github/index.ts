@@ -656,9 +656,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     autoclosedPr?.title?.endsWith(' - autoclosed') &&
     autoclosedPr?.closedAt
   ) {
-    const closedMillisAgo = DateTime.fromISO(autoclosedPr.closedAt, {
-      zone: 'utc',
-    })
+    const closedMillisAgo = DateTime.fromISO(autoclosedPr.closedAt)
       .diffNow()
       .negate()
       .toMillis();
