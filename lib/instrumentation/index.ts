@@ -61,7 +61,11 @@ export function init(): void {
   registerInstrumentations({
     instrumentations: [
       new HttpInstrumentation({
-        applyCustomAttributesOnSpan: (span, request, response) => {
+        applyCustomAttributesOnSpan: /* istanbul ignore next */ (
+          span,
+          request,
+          response
+        ) => {
           // ignore 404 error when branch protection of Github could not be found. This is expected when no rules are configured
           if (
             !(request instanceof ClientRequest) ||
