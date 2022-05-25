@@ -131,7 +131,7 @@ const cacheDefaults: Required<CacheOptions> = {
   /**
    * How many pages to fetch (at most) during the initial fetch (i.e. pre-fetch)
    */
-  maxPrefetchPages: 1000,
+  maxPrefetchPages: 100,
 
   /**
    * How many items per page to obtain per page during the soft update
@@ -141,7 +141,7 @@ const cacheDefaults: Required<CacheOptions> = {
   /**
    * How many pages to fetch (at most) during the soft update
    */
-  maxUpdatePages: 1000,
+  maxUpdatePages: 100,
 };
 
 /**
