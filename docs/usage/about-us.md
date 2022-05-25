@@ -43,5 +43,5 @@ This is where we do most of the development.
 
 ## About these docs
 
-The Renovate docs are built from Markdown files in our [`renovatebot/renovate` repository](https://github.com/renovatebot/).
+The Renovate docs are built from Markdown files in our [`renovatebot/renovate` repository](https://github.com/renovatebot/renovate).
 Most of the source files can be found in the [`docs/usage/` directory](https://github.com/renovatebot/renovate/tree/main/docs/usage).
