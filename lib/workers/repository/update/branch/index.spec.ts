@@ -27,7 +27,6 @@ import { BranchResult } from '../../../types';
 import type { Pr } from '../../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
-import type { AutomergePrResult } from '../pr/automerge';
 import * as _prAutomerge from '../pr/automerge';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -721,7 +720,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<ResultWithPr>({ type: 'with-pr' })
       );
       prAutomerge.checkAutoMerge.mockResolvedValueOnce(
-        partial<AutomergePrResult>({ automerged: false })
+        { automerged: false }
       );
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await expect(

@@ -517,7 +517,7 @@ export async function processBranch(
         return { branchExists: false, result: BranchResult.Automerged };
       }
       if (mergeStatus === 'off schedule') {
-        logger.info(
+        logger.debug(
           'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
         );
         return { branchExists, result: BranchResult.NotScheduled };

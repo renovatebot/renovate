@@ -62,7 +62,6 @@ function scheduleToString(
   let scheduleString = '';
   if (
     schedule &&
-    (schedule as never) !== 'at any time' &&
     schedule[0] !== 'at any time'
   ) {
     scheduleString += `"${String(schedule)}"`;
