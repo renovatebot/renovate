@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
+import { logger, mocked, partial } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -12,7 +13,7 @@ import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
-import type { CreatePRConfig, UpdatePrConfig } from '../types';
+import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
 
@@ -777,6 +778,10 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getBranchPr(branchName)', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('should return null if no PR exists', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -866,6 +871,32 @@ describe('modules/platform/github/index', () => {
 
       expect(pr).toMatchSnapshot({ number: 91 });
       expect(pr2).toEqual(pr);
+    });
+
+    it('dryrun - skip autoclosed PR reopening', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      GlobalConfig.set({ dryRun: 'full' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            title: 'old title - autoclosed',
+            state: PrState.Closed,
+            closed_at: DateTime.now().minus({ days: 6 }).toISO(),
+          },
+        ]);
+
+      await github.initRepo(partial<RepoParams>({ repository: 'some/repo' }));
+
+      await expect(github.getBranchPr('somebranch')).resolves.toBeNull();
+      expect(logger.logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would try to reopened autoclosed PR'
+      );
     });
 
     it('aborts reopen if PR is too old', async () => {
