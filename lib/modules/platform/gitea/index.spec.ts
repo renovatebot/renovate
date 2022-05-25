@@ -417,7 +417,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should use generated url of repo if clone_url of repo is empty', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       helper.getRepo.mockResolvedValueOnce({ ...mockRepo, clone_url: '' });
       const repoCfg: RepoParams = {
@@ -430,6 +430,9 @@ describe('modules/platform/gitea/index', () => {
         expect.objectContaining({
           url: `https://gitea.com/${mockRepo.full_name}.git`,
         })
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'No clone_url found. Falling back to old behaviour.'
       );
     });
   });
