@@ -895,7 +895,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.getBranchPr('somebranch')).resolves.toBeNull();
       expect(logger.logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would try to reopened autoclosed PR'
+        'DRY-RUN: Would try to reopen autoclosed PR'
       );
     });
 
