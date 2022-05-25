@@ -201,14 +201,6 @@ export async function mergeRenovateConfig(
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
-  // Copy packageRules in for "extends" expansion post-validation to allow for undocumented settings to skip validation (#14827).
-  if (is.nonEmptyArray(returnConfig.packageRules)) {
-    migratedConfig.packageRules = [
-      ...returnConfig.packageRules,
-      ...(migratedConfig.packageRules || []),
-    ];
-    delete returnConfig.packageRules;
-  }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
@@ -257,6 +249,7 @@ export async function mergeRenovateConfig(
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
+  returnConfig = await presets.resolveConfigPresets(returnConfig, config);
   returnConfig.renovateJsonPresent = true;
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {
