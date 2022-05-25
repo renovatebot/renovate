@@ -163,11 +163,12 @@ export abstract class AbstractGithubDatasourceCache<
         cacheKey
       );
 
+      const randomDelta = this.getRandomDeltaMinutes();
       const cacheDoesExist =
         cache &&
         !isExpired(now, cache.createdAt, {
           ...this.resetDuration,
-          minutes: this.getRandomDeltaMinutes(),
+          minutes: randomDelta,
         });
       if (cacheDoesExist) {
         // Keeping the the original `cache` value intact
