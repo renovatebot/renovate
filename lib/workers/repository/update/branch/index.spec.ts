@@ -719,9 +719,7 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce(
         partial<ResultWithPr>({ type: 'with-pr' })
       );
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce(
-        { automerged: false }
-      );
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await expect(
         branchWorker.processBranch({
@@ -733,7 +731,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         result: BranchResult.NotScheduled,
       });
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);

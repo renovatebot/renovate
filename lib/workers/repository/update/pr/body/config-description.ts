@@ -60,10 +60,7 @@ function scheduleToString(
   timezone: string | undefined
 ): string {
   let scheduleString = '';
-  if (
-    schedule &&
-    schedule[0] !== 'at any time'
-  ) {
+  if (schedule && schedule[0] !== 'at any time') {
     scheduleString += `"${String(schedule)}"`;
     if (timezone) {
       scheduleString += ` in timezone ${timezone}`;
