@@ -8,7 +8,7 @@ import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
-export const Endpoint = 'https://gitea.com/api/v1/';
+export const Endpoint = 'https://gitea.com/';
 
 export async function fetchJSONFile(
   repo: string,

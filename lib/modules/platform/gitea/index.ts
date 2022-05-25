@@ -38,7 +38,7 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { smartLinks } from './utils';
+import { smartLinks, trimTrailingApiPath } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -53,7 +53,7 @@ interface GiteaRepoConfig {
 
 const defaults = {
   hostType: PlatformId.Gitea,
-  endpoint: 'https://gitea.com/api/v1/',
+  endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
 
@@ -184,7 +184,9 @@ const platform: Platform = {
     }
 
     if (endpoint) {
-      defaults.endpoint = ensureTrailingSlash(endpoint);
+      let baseEndpoint = trimTrailingApiPath(endpoint);
+      baseEndpoint = ensureTrailingSlash(baseEndpoint);
+      defaults.endpoint = baseEndpoint;
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
