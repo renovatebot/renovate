@@ -38,10 +38,10 @@ Some features made a lot of people happy, and efficient!
 
 ## Renovate development
 
-The source code for Renovate is available on GitHub ([renovatebot/renovate](https://github.com/renovatebot/renovate)).
+The source code for Renovate is available on [GitHub at `renovatebot/renovate`](https://github.com/renovatebot/renovate).
 This is where we do most of the development.
 
 ## About these docs
 
-The Renovate docs are built from Markdown files in [Renovate's Open Source repos](https://github.com/renovatebot/).
-Most of the source files can be found in the [main Renovate repository](https://github.com/renovatebot/renovate/tree/main/docs/usage).
+The Renovate docs are built from Markdown files in our [`renovatebot/renovate` repository](https://github.com/renovatebot/).
+Most of the source files can be found in the [`docs/usage/` directory](https://github.com/renovatebot/renovate/tree/main/docs/usage).
