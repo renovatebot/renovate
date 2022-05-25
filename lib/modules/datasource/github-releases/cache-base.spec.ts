@@ -1,4 +1,4 @@
-import { DateTime, Settings } from 'luxon';
+import { DateTime } from 'luxon';
 import { mocked } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
 import { GithubGraphqlResponse, GithubHttp } from '../../../util/http/github';
@@ -79,7 +79,6 @@ const sortItems = (items: StoredItem[]) =>
   );
 
 describe('modules/datasource/github-releases/cache-base', () => {
-  const luxonNowFn = Settings.now;
   const http = new GithubHttp();
 
   const now = DateTime.local(2022, 6, 15, 18, 30, 30);
@@ -89,23 +88,16 @@ describe('modules/datasource/github-releases/cache-base', () => {
 
   let responses: GraphqlResponse[] = [];
 
-  beforeAll(() => {
-    Settings.now = () => now.toMillis();
-  });
-
   beforeEach(() => {
+    responses = [];
     jest.resetAllMocks();
+    jest.spyOn(DateTime, 'now').mockReturnValueOnce(now);
     httpPostJson.mockImplementation(() => {
       const resp = responses.shift();
       return resp instanceof Error
         ? Promise.reject(resp)
         : Promise.resolve(resp);
     });
-  });
-
-  afterAll(() => {
-    Settings.now = luxonNowFn;
-    responses = [];
   });
 
   it('performs pre-fetch', async () => {
