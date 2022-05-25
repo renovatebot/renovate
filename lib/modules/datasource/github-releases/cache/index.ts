@@ -1,6 +1,6 @@
 import type { GithubHttp } from '../../../../util/http/github';
 import { AbstractGithubDatasourceCache } from './cache-base';
-import type { StoredItemBase } from './types';
+import type { CacheOptions, StoredItemBase } from './types';
 
 export const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
@@ -55,8 +55,8 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
   cacheNs = 'github-datasource-graphql-releases';
   graphqlQuery = query;
 
-  constructor(http: GithubHttp) {
-    super(http);
+  constructor(http: GithubHttp, opts: CacheOptions = {}) {
+    super(http, opts);
   }
 
   coerceFetched(item: FetchedRelease): StoredRelease | null {

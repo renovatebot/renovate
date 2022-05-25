@@ -3,7 +3,7 @@ import { CacheableGithubReleases, FetchedRelease } from '.';
 
 describe('modules/datasource/github-releases/cache/index', () => {
   const http = new GithubHttp();
-  const cache = new CacheableGithubReleases(http);
+  const cache = new CacheableGithubReleases(http, { resetDeltaMinutes: 0 });
 
   const fetchedItem: FetchedRelease = {
     version: '1.2.3',
@@ -23,7 +23,6 @@ describe('modules/datasource/github-releases/cache/index', () => {
         id: 123,
         name: 'Some name',
         releaseTimestamp: '2020-04-09T10:00:00.000Z',
-        updatedAt: '2020-04-09T10:00:00.000Z',
         url: 'https://example.com/',
         version: '1.2.3',
       });

@@ -1,6 +1,9 @@
 import type { GithubHttp } from '../../../util/http/github';
 import { AbstractGithubDatasourceCache } from '../github-releases/cache/cache-base';
-import type { StoredItemBase } from '../github-releases/cache/types';
+import type {
+  CacheOptions,
+  StoredItemBase,
+} from '../github-releases/cache/types';
 
 const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
@@ -67,8 +70,8 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
   readonly cacheNs = 'github-datasource-graphql-tags';
   readonly graphqlQuery = query;
 
-  constructor(http: GithubHttp) {
-    super(http);
+  constructor(http: GithubHttp, opts: CacheOptions = {}) {
+    super(http, opts);
   }
 
   coerceFetched(item: FetchedTag): StoredTag | null {

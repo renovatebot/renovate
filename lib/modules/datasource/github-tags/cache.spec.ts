@@ -3,7 +3,7 @@ import { CacheableGithubTags, FetchedTag } from './cache';
 
 describe('modules/datasource/github-tags/cache', () => {
   const http = new GithubHttp();
-  const cache = new CacheableGithubTags(http);
+  const cache = new CacheableGithubTags(http, { resetDeltaMinutes: 0 });
 
   const fetchedItem: FetchedTag = {
     version: '1.2.3',

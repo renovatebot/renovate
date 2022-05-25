@@ -67,6 +67,12 @@ export interface CacheOptions {
   resetAfterDays?: number;
 
   /**
+   * Delays cache reset by some random amount of minutes,
+   * in order to stabilize load during mass cache reset.
+   */
+  resetDeltaMinutes?: number;
+
+  /**
    * How many days ago the package should be published to be considered as stable.
    * Since this period is expired, it won't be refreshed via soft updates anymore.
    */

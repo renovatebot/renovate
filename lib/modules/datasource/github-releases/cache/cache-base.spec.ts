@@ -100,7 +100,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       resp([{ name: 'v2', createdAt: t2, foo: 'bbb' }], true),
       resp([{ name: 'v1', createdAt: t1, foo: 'aaa' }]),
     ];
-    const cache = new TestCache(http);
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     const res = await cache.getItems({ packageName: 'foo/bar' });
 
@@ -132,7 +132,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       resp([{ name: 'v2', createdAt: t2, foo: 'bbb' }], true),
       resp([{ name: 'v1', createdAt: t1, foo: 'aaa' }]),
     ];
-    const cache = new TestCache(http);
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     const res = await cache.getItems({ packageName: 'foo/bar' });
 
@@ -159,7 +159,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       resp([{ name: 'v2', createdAt: t2, foo: 'bbb' }], true),
       resp([{ name: 'v1', createdAt: t1, foo: 'aaa' }]),
     ];
-    const cache = new TestCache(http);
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     const res = await cache.getItems({ packageName: 'foo/bar' });
 
@@ -224,7 +224,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       resp([{ name: 'v3', createdAt: t3, foo: 'ccc' }], true),
       resp([{ name: 'v1', createdAt: t1, foo: 'aaa' }]),
     ];
-    const cache = new TestCache(http);
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     const res = await cache.getItems({ packageName: 'foo/bar' });
 
@@ -249,7 +249,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       new Error('Unknown error'),
       resp([{ name: 'v1', createdAt: t1, foo: 'xxx' }]),
     ];
-    const cache = new TestCache(http);
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     const res = await cache.getItems({ packageName: 'foo/bar' });
 

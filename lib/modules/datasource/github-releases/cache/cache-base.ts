@@ -1,4 +1,4 @@
-import { DateTime, DurationLike } from 'luxon';
+import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
 import * as packageCache from '../../../../util/cache/package';
 import type {
@@ -28,6 +28,12 @@ const cacheDefaults: Required<CacheOptions> = {
    * How many days to wait until full cache reset (for single package).
    */
   resetAfterDays: 7,
+
+  /**
+   * Delays cache reset by some random amount of minutes,
+   * in order to stabilize load during mass cache reset.
+   */
+  resetDeltaMinutes: 3 * 60,
 
   /**
    * How many days ago the package should be published to be considered as stable.
@@ -63,7 +69,7 @@ const cacheDefaults: Required<CacheOptions> = {
 function isExpired(
   now: DateTime,
   date: string,
-  duration: DurationLike
+  duration: DurationLikeObject
 ): boolean {
   const then = DateTime.fromISO(date);
   const expiry = then.plus(duration);
@@ -74,15 +80,17 @@ export abstract class AbstractGithubDatasourceCache<
   StoredItem extends StoredItemBase,
   FetchedItem = unknown
 > {
-  private updateDuration: DurationLike;
-  private resetDuration: DurationLike;
-  private stabilityDuration: DurationLike;
+  private updateDuration: DurationLikeObject;
+  private resetDuration: DurationLikeObject;
+  private stabilityDuration: DurationLikeObject;
 
   private maxPrefetchPages: number;
   private itemsPerPrefetchPage: number;
 
   private maxUpdatePages: number;
   private itemsPerUpdatePage: number;
+
+  private resetDeltaMinutes: number;
 
   constructor(private http: GithubHttp, opts: CacheOptions = {}) {
     const {
@@ -93,6 +101,7 @@ export abstract class AbstractGithubDatasourceCache<
       itemsPerPrefetchPage,
       maxUpdatePages,
       itemsPerUpdatePage,
+      resetDeltaMinutes,
     } = {
       ...cacheDefaults,
       ...opts,
@@ -106,6 +115,8 @@ export abstract class AbstractGithubDatasourceCache<
     this.itemsPerPrefetchPage = itemsPerPrefetchPage;
     this.maxUpdatePages = maxUpdatePages;
     this.itemsPerUpdatePage = itemsPerUpdatePage;
+
+    this.resetDeltaMinutes = resetDeltaMinutes;
   }
 
   /**
@@ -153,7 +164,11 @@ export abstract class AbstractGithubDatasourceCache<
       );
 
       const cacheDoesExist =
-        cache && !isExpired(now, cache.createdAt, this.resetDuration);
+        cache &&
+        !isExpired(now, cache.createdAt, {
+          ...this.resetDuration,
+          minutes: this.getRandomDeltaMinutes(),
+        });
       if (cacheDoesExist) {
         // Keeping the the original `cache` value intact
         // in order to be used in exception handler
@@ -277,5 +292,10 @@ export abstract class AbstractGithubDatasourceCache<
 
     const items = Object.values(cacheItems);
     return items;
+  }
+
+  getRandomDeltaMinutes(): number {
+    const rnd = Math.random();
+    return Math.floor(rnd * this.resetDeltaMinutes);
   }
 }
