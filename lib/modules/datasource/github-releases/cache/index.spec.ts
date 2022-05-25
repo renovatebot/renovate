@@ -1,7 +1,7 @@
-import { GithubHttp } from '../../../util/http/github';
-import { CacheableGithubReleases, FetchedRelease } from './cache';
+import { GithubHttp } from '../../../../util/http/github';
+import { CacheableGithubReleases, FetchedRelease } from '.';
 
-describe('modules/datasource/github-releases/cache', () => {
+describe('modules/datasource/github-releases/cache/index', () => {
   const http = new GithubHttp();
   const cache = new CacheableGithubReleases(http);
 
@@ -10,7 +10,6 @@ describe('modules/datasource/github-releases/cache', () => {
     releaseTimestamp: '2020-04-09T10:00:00.000Z',
     isDraft: false,
     isPrerelease: false,
-    updatedAt: '2020-04-09T10:00:00.000Z',
     url: 'https://example.com/',
     id: 123,
     name: 'Some name',

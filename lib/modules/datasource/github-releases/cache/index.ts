@@ -1,5 +1,6 @@
-import type { GithubHttp } from '../../../util/http/github';
-import { AbstractGithubDatasourceCache, StoredItemBase } from './cache-base';
+import type { GithubHttp } from '../../../../util/http/github';
+import { AbstractGithubDatasourceCache } from './cache-base';
+import type { StoredItemBase } from './types';
 
 export const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {

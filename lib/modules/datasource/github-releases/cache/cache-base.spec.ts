@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon';
-import { mocked } from '../../../../test/util';
-import * as _packageCache from '../../../util/cache/package';
-import { GithubGraphqlResponse, GithubHttp } from '../../../util/http/github';
+import { mocked } from '../../../../../test/util';
+import * as _packageCache from '../../../../util/cache/package';
 import {
-  AbstractGithubDatasourceCache,
-  QueryResponse,
-  StoredItemBase,
-} from './cache-base';
+  GithubGraphqlResponse,
+  GithubHttp,
+} from '../../../../util/http/github';
+import { AbstractGithubDatasourceCache } from './cache-base';
+import type { QueryResponse, StoredItemBase } from './types';
 
 jest.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
@@ -71,7 +71,7 @@ const sortItems = (items: StoredItem[]) =>
     x.localeCompare(y)
   );
 
-describe('modules/datasource/github-releases/cache-base', () => {
+describe('modules/datasource/github-releases/cache/cache-base', () => {
   const http = new GithubHttp();
   const httpPostJson = jest.spyOn(GithubHttp.prototype, 'postJson');
 
