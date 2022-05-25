@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
@@ -12,6 +11,7 @@ import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
+import { hashBody } from '../pr-body';
 import type { CreatePRConfig, UpdatePrConfig } from '../types';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
@@ -559,25 +559,31 @@ describe('modules/platform/github/index', () => {
     const t3 = t.plus({ minutes: 3 }).toISO();
     const t4 = t.plus({ minutes: 4 }).toISO();
 
-    const pr1 = {
+    const pr1: GhRestPr = {
       number: 1,
-      head: { ref: 'branch-1', repo: { full_name: 'some/repo' } },
+      head: { ref: 'branch-1', sha: '111', repo: { full_name: 'some/repo' } },
+      base: { repo: { pushed_at: '' } },
       state: PrState.Open,
       title: 'PR #1',
+      created_at: t1,
       updated_at: t1,
+      mergeable_state: 'clean',
+      node_id: '12345',
     };
 
-    const pr2 = {
+    const pr2: GhRestPr = {
+      ...pr1,
       number: 2,
-      head: { ref: 'branch-2', repo: { full_name: 'some/repo' } },
+      head: { ref: 'branch-2', sha: '222', repo: { full_name: 'some/repo' } },
       state: PrState.Open,
       title: 'PR #2',
       updated_at: t2,
     };
 
-    const pr3 = {
+    const pr3: GhRestPr = {
+      ...pr1,
       number: 3,
-      head: { ref: 'branch-3', repo: { full_name: 'some/repo' } },
+      head: { ref: 'branch-3', sha: '333', repo: { full_name: 'some/repo' } },
       state: PrState.Open,
       title: 'PR #3',
       updated_at: t3,
@@ -663,65 +669,110 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    it('removes url data from response', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope.get(pagePath(1)).reply(200, [
-        {
-          ...pr1,
-          url: 'https://example.com',
-          example_url: 'https://example.com',
-          _links: { foo: { href: 'https:/example.com' } },
-          repo: { example_url: 'https://example.com' },
-        },
-      ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
+    describe('Url cleanup', () => {
+      type GhRestPrWithUrls = GhRestPr & {
+        url: string;
+        example_url: string;
+        repo: {
+          example_url: string;
+        };
+      };
 
-      await github.getPrList();
-      const cache = repository.getCache().platform!.github!
-        .prCache as ApiPageCache<GhRestPr>;
-      const item = cache.items['1'];
+      type PrCache = ApiPageCache<GhRestPrWithUrls>;
 
-      expect(item['_links']).toBeUndefined();
-      // TODO: fix types #7154
-      expect((item as any)['url']).toBeUndefined();
-      expect((item as any)['example_url']).toBeUndefined();
-      expect((item as any)['repo']['example_url']).toBeUndefined();
+      const prWithUrls = (): GhRestPrWithUrls => ({
+        ...pr1,
+        url: 'https://example.com',
+        example_url: 'https://example.com',
+        _links: { foo: { href: 'https://example.com' } },
+        repo: { example_url: 'https://example.com' },
+      });
+
+      it('removes url data from response', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [prWithUrls()]);
+        await github.initRepo({ repository: 'some/repo' } as never);
+
+        await github.getPrList();
+
+        const repoCache = repository.getCache();
+        const prCache = repoCache.platform?.github?.prCache as PrCache;
+        expect(prCache).toMatchObject({ items: {} });
+
+        const item = prCache.items[1];
+        expect(item).toBeDefined();
+        expect(item._links).toBeUndefined();
+        expect(item.url).toBeUndefined();
+        expect(item.example_url).toBeUndefined();
+        expect(item.repo.example_url).toBeUndefined();
+      });
+
+      it('removes url data from existing cache', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(200, []);
+        await github.initRepo({ repository: 'some/repo' } as never);
+        const repoCache = repository.getCache();
+        const prCache: PrCache = { items: { 1: prWithUrls() } };
+        repoCache.platform = { github: { prCache } };
+
+        await github.getPrList();
+
+        const item = prCache.items[1];
+        expect(item._links).toBeUndefined();
+        expect(item.url).toBeUndefined();
+        expect(item.example_url).toBeUndefined();
+        expect(item.repo.example_url).toBeUndefined();
+      });
     });
 
-    it('removes url data from existing cache', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope.get(pagePath(1, 20)).reply(200, [
-        {
-          ...pr1,
-          url: 'https://example.com',
-          example_url: 'https://example.com',
-          _links: { foo: { href: 'https:/example.com' } },
-          repo: { example_url: 'https://example.com' },
-        },
-      ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
-      const repoCache = repository.getCache();
-      const item = {
-        head: { ref: 'branch-1', repo: { full_name: 'some/repo' } },
-        number: 1,
-        repo: { example_url: 'https://example.com' },
-        state: 'open',
-        title: 'PR #1',
-        updated_at: '2000-01-01T02:01:00.000+02:00',
-        _links: { foo: { href: 'https:/example.com' } },
-        url: 'https://example.com',
-      };
-      repoCache.platform = { github: { prCache: { items: { '1': item } } } };
+    describe('Body compaction', () => {
+      type PrCache = ApiPageCache<GhRestPr>;
 
-      await github.getPrList();
+      const prWithBody = (body: string): GhRestPr => ({
+        ...pr1,
+        body,
+      });
 
-      expect(item['_links']).toBeUndefined();
-      expect(item['url']).toBeUndefined();
-      // TODO: fix types #7154
-      expect((item as any)['example_url']).toBeUndefined();
-      expect(item['repo']['example_url']).toBeUndefined();
+      it('compacts body from response', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
+        await github.initRepo({ repository: 'some/repo' } as never);
+
+        await github.getPrList();
+
+        const repoCache = repository.getCache();
+        const prCache = repoCache.platform?.github?.prCache as PrCache;
+        expect(prCache).toMatchObject({ items: {} });
+
+        const item = prCache.items[1];
+        expect(item).toBeDefined();
+        expect(item.body).toBeUndefined();
+        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
+      });
+
+      it('removes url data from existing cache', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
+        await github.initRepo({ repository: 'some/repo' } as never);
+        const repoCache = repository.getCache();
+        const prCache: PrCache = {
+          items: { 1: prWithBody('bar'), 2: prWithBody('baz') },
+        };
+        repoCache.platform = { github: { prCache } };
+
+        await github.getPrList();
+
+        expect(prCache.items[2]).toBeUndefined();
+
+        const item = prCache.items[1];
+        expect(item).toBeDefined();
+        expect(item.body).toBeUndefined();
+        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
+      });
     });
   });
 

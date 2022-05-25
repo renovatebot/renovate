@@ -18,6 +18,7 @@ describe('workers/repository/update/branch/reuse', () => {
 
     beforeEach(() => {
       config = {
+        manager: 'some-manager',
         branchName: 'renovate/some-branch',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
@@ -50,16 +51,19 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns false if does not need rebasing but has upgrades that need lockfile maintenance along with upgrades that do not', async () => {
       config.upgrades = [
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'replace',
           branchName: 'current',
         },
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
         },
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'in-range-only',
           branchName: 'current',
@@ -75,11 +79,13 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns true if does not need rebasing and lockfile update is on different packages', async () => {
       config.upgrades = [
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'replace',
           branchName: 'current',
         },
         {
+          manager: 'some-manager',
           packageFile: 'subpackage/package.json',
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
@@ -126,7 +132,10 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         title: 'Update foo to v4',
-        body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
+        bodyStruct: {
+          hash: '123',
+          rebaseRequested: true,
+        },
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();

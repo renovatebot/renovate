@@ -1,3 +1,4 @@
+import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 export { extractPackageFile } from './extract';
 
@@ -9,4 +10,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)helmfile.yaml$'],
 };
 
-export const supportedDatasources = [HelmDatasource.id];
+export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];

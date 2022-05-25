@@ -271,6 +271,23 @@ describe('modules/datasource/go/base', () => {
           packageName: 'fyne-io/fyne',
         });
       });
+
+      it('handles fyne.io - go-import no quotes', async () => {
+        const meta =
+          '<meta name=go-import content="fyne.io/fyne git https://github.com/fyne-io/fyne">';
+        httpMock
+          .scope('https://fyne.io')
+          .get('/fyne?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource('fyne.io/fyne');
+
+        expect(res).toEqual({
+          datasource: 'github-tags',
+          registryUrl: 'https://github.com',
+          packageName: 'fyne-io/fyne',
+        });
+      });
     });
   });
 });

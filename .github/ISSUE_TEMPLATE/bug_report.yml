@@ -14,7 +14,7 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
-        - 'WhiteSource Renovate hosted app on github.com'
+        - 'Mend Renovate hosted app on github.com'
         - 'Self-hosted'
     validations:
       required: true

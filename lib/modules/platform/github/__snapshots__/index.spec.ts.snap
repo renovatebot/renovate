@@ -2,7 +2,9 @@
 
 exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "displayNumber": "Pull Request #91",
   "number": 91,
   "sourceBranch": "somebranch",
@@ -14,7 +16,9 @@ Object {
 
 exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object in fork mode 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "displayNumber": "Pull Request #90",
   "number": 90,
   "sourceBranch": "somebranch",
@@ -26,7 +30,9 @@ Object {
 
 exports[`modules/platform/github/index getBranchPr(branchName) should reopen and cache autoclosed PR 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "displayNumber": "Pull Request #91",
   "number": 91,
   "sourceBranch": "somebranch",
@@ -38,7 +44,9 @@ Object {
 
 exports[`modules/platform/github/index getPr(prNo) should return PR 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "displayNumber": "Pull Request #2500",
   "number": 2500,
   "sourceBranch": "renovate/jest-monorepo",
@@ -50,7 +58,9 @@ Object {
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "createdAt": "01-01-2022",
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
@@ -68,7 +78,9 @@ Object {
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
   "hasReviewers": true,
@@ -81,7 +93,9 @@ Object {
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
 Object {
-  "body": "dummy body",
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "displayNumber": "Pull Request #1234",
   "number": 1234,
   "sourceBranch": "some/branch",

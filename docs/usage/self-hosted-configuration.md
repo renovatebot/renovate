@@ -147,13 +147,13 @@ Unsupported tools will fall back to `binarySource=global`.
 
 ## cacheDir
 
-By default Renovate uses a temporary directory like `/tmp/renovate/cache` to store cache data.
+By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
 Use the `cacheDir` option to override this default.
 
-The `baseDir` and `cacheDir` option do not need to point to the same directory.
-You can use one directory for the repo data, and another for the the cache data.
+The `baseDir` and `cacheDir` option may point to different directories.
+You can use one directory for the repo data, and another for the cache data.
 
-e.g.
+For example:
 
 ```json
 {
@@ -612,7 +612,22 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## requireConfig
 
-If this is set to `false`, it means that Renovate won't require a config file such as `renovate.json` to be present in each repository and will run even if one is missing.
+By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
+
+You can choose any of these settings:
+
+- `"required"` (default): a repository config file must be present
+- `"optional"`: if a config file exists, Renovate will use it when it runs
+- `"ignored"`: config files in the repo will be ignored, and have no effect
+
+This feature is closely related to the `onboarding` config option.
+The combinations of `requireConfig` and `onboarding` are:
+
+|                          | `onboarding=true`                                                                                                                                       | `onboarding=false`                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
+| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
+| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
 
 ## secrets
 
@@ -664,6 +679,10 @@ If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
+
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## username
 

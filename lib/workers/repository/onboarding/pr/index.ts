@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { emojify } from '../../../../util/emoji';
 import {
   deleteBranch,
@@ -33,13 +34,14 @@ export async function ensureOnboardingPr(
   const existingPr = await platform.getBranchPr(config.onboardingBranch);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${config.productLinks.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
-  prTemplate += config.requireConfig
-    ? emojify(
-        `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
-      )
-    : emojify(
-        `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
-      );
+  prTemplate +=
+    config.requireConfig === 'required'
+      ? emojify(
+          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
+        )
+      : emojify(
+          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+        );
   prTemplate += emojify(
     `
 
@@ -115,9 +117,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (existingPr) {
     logger.debug('Found open onboarding PR');
     // Check if existing PR needs updating
-    if (
-      existingPr.body.trim() === prBody.trim() // Bitbucket strips trailing \n
-    ) {
+    const prBodyHash = hashBody(prBody);
+    if (existingPr.bodyStruct?.hash === prBodyHash) {
       logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
     }
