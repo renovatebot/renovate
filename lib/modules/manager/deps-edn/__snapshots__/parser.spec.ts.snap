@@ -123,6 +123,9 @@ Object {
       "mvn/version": "1.2.3",
     },
     "invalid/version": "nil",
+    "io.github.nextjournal/clerk": Object {
+      "mvn/version": "0.7.418",
+    },
     "persistent-sorted-set": Object {
       "mvn/version": "0.1.2",
     },

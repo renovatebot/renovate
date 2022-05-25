@@ -151,6 +151,15 @@ function extractDependency(
     dep.depType = depType;
   }
 
+  const mvnVersion = val['mvn/version'];
+  if (is.string(mvnVersion)) {
+    dep.datasource = ClojureDatasource.id;
+    dep.currentValue = mvnVersion;
+    dep.packageName = packageName.replace('/', ':');
+    dep.registryUrls = [...mavenRegistries];
+    return dep;
+  }
+
   resolveGitPackageFromEdnVal(dep, val);
   resolveGitPackageFromEdnKey(dep, key);
 
@@ -166,15 +175,6 @@ function extractDependency(
       dep.currentDigestShort = gitSha.slice(0, 7);
     }
 
-    return dep;
-  }
-
-  const mvnVersion = val['mvn/version'];
-  if (is.string(mvnVersion)) {
-    dep.datasource = ClojureDatasource.id;
-    dep.currentValue = mvnVersion;
-    dep.packageName = packageName.replace('/', ':');
-    dep.registryUrls = [...mavenRegistries];
     return dep;
   }
 
