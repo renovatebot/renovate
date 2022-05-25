@@ -665,7 +665,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     }
     logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would try to reopened autoclosed PR');
+      logger.info('DRY-RUN: Would try to reopen autoclosed PR');
       return null;
     }
     const { sha, number } = autoclosedPr;
