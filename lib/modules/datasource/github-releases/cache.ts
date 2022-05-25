@@ -14,7 +14,6 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
         releaseTimestamp: publishedAt
         isDraft
         isPrerelease
-        updatedAt
         url
         id: databaseId
         name
@@ -34,7 +33,6 @@ export interface FetchedRelease {
   releaseTimestamp: string;
   isDraft: boolean;
   isPrerelease: boolean;
-  updatedAt: string;
   url: string;
   id: number;
   name: string;
@@ -43,7 +41,6 @@ export interface FetchedRelease {
 
 export interface StoredRelease extends StoredItemBase {
   isStable?: boolean;
-  updatedAt: string;
   url: string;
   id: number;
   name: string;
@@ -67,7 +64,6 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
       releaseTimestamp,
       isDraft,
       isPrerelease,
-      updatedAt,
       url,
       id,
       name,
@@ -81,7 +77,6 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
     const result: StoredRelease = {
       version,
       releaseTimestamp,
-      updatedAt,
       url,
       id,
       name,
