@@ -147,7 +147,11 @@ export abstract class AbstractGithubDatasourceCache<
 
     // Initialize items and timestamps for the new cache
     let cacheItems: Record<string, StoredItem> = {};
-    let cacheCreatedAt = now.toISO();
+
+    // Add random minutes to the creation date in order to
+    // provide back-off time during mass cache invalidation.
+    const randomDelta = this.getRandomDeltaMinutes();
+    let cacheCreatedAt = now.plus(randomDelta).toISO();
 
     // We have to initialize `updatedAt` value as already expired,
     // so that soft update mechanics is immediately starting.
@@ -163,13 +167,8 @@ export abstract class AbstractGithubDatasourceCache<
         cacheKey
       );
 
-      const randomDelta = this.getRandomDeltaMinutes();
       const cacheDoesExist =
-        cache &&
-        !isExpired(now, cache.createdAt, {
-          ...this.resetDuration,
-          minutes: randomDelta,
-        });
+        cache && !isExpired(now, cache.createdAt, this.resetDuration);
       if (cacheDoesExist) {
         // Keeping the the original `cache` value intact
         // in order to be used in exception handler
