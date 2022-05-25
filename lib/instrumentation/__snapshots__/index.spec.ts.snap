@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Test instrumentation init activate and remote logger 1`] = `
+exports[`instrumentation/index activate and remote logger 1`] = `
 MultiSpanProcessor {
   "_spanProcessors": Array [
     SimpleSpanProcessor {
@@ -58,7 +58,7 @@ MultiSpanProcessor {
 }
 `;
 
-exports[`Test instrumentation init activate console logger 1`] = `
+exports[`instrumentation/index activate console logger 1`] = `
 MultiSpanProcessor {
   "_spanProcessors": Array [
     SimpleSpanProcessor {
@@ -78,7 +78,7 @@ MultiSpanProcessor {
 }
 `;
 
-exports[`Test instrumentation init activate console logger and remote logger 1`] = `
+exports[`instrumentation/index activate console logger and remote logger 1`] = `
 MultiSpanProcessor {
   "_spanProcessors": Array [
     SimpleSpanProcessor {
