@@ -10,7 +10,7 @@ That said, we will try to fix security problems in a reasonable timeframe if pos
 ### No certifications
 
 Renovate the Open Source project does **not** have ISO 27001 or SOC2 certifications.
-WhiteSource the company, which maintains Renovate and operates the hosted Renovate App for GitHub, does have ISO 27001 and SOC2 certifications.
+Mend the company, which maintains Renovate and operates the hosted Renovate App for GitHub, does have ISO 27001 and SOC2 certifications.
 
 ### Security / Disclosure
 

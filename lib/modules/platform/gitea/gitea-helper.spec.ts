@@ -5,7 +5,8 @@ import { toBase64 } from '../../../util/string';
 import * as ght from './gitea-helper';
 
 describe('modules/platform/gitea/gitea-helper', () => {
-  const baseUrl = 'https://gitea.renovatebot.com/api/v1';
+  const giteaApiHost = 'https://gitea.renovatebot.com/';
+  const baseUrl = `${giteaApiHost}api/v1`;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -141,7 +142,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    setBaseUrl(baseUrl);
+    setBaseUrl(giteaApiHost);
   });
 
   describe('getCurrentUser', () => {

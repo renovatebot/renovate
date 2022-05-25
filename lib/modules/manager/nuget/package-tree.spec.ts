@@ -63,6 +63,25 @@ describe('modules/manager/nuget/package-tree', () => {
       ]);
     });
 
+    it('returns projects for two projects with one reference and central versions', async () => {
+      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
+      Fixtures.mock({
+        '/tmp/repo/one/one.csproj': Fixtures.get(
+          'two-one-reference-with-central-versions/one/one.csproj'
+        ),
+        '/tmp/repo/two/two.csproj': Fixtures.get(
+          'two-one-reference-with-central-versions/two/two.csproj'
+        ),
+        '/tmp/repo/Directory.Packages.props': Fixtures.get(
+          'two-one-reference-with-central-versions/Directory.Packages.props'
+        ),
+      });
+
+      expect(
+        await getDependentPackageFiles('Directory.Packages.props', true)
+      ).toEqual(['one/one.csproj', 'two/two.csproj']);
+    });
+
     it('returns two projects for three projects with two linear references', async () => {
       git.getFileList.mockResolvedValue([
         'one/one.csproj',

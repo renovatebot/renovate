@@ -11,13 +11,24 @@ describe('workers/repository/update/pr/body/footer', () => {
   });
 
   it('renders empty footer', () => {
-    expect(getPrFooter({ branchName: 'branch', upgrades: [] })).toBe('');
+    expect(
+      getPrFooter({
+        manager: 'some-manager',
+        branchName: 'branch',
+        upgrades: [],
+      })
+    ).toBe('');
   });
 
   it('renders prFooter', () => {
     template.compile.mockImplementation((x) => x);
     expect(
-      getPrFooter({ branchName: 'branch', upgrades: [], prFooter: 'FOOTER' })
+      getPrFooter({
+        manager: 'some-manager',
+        branchName: 'branch',
+        upgrades: [],
+        prFooter: 'FOOTER',
+      })
     ).toMatchInlineSnapshot(`
       "
       ---
