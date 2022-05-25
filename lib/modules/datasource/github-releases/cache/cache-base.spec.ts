@@ -8,7 +8,7 @@ import {
 import { AbstractGithubDatasourceCache } from './cache-base';
 import type { QueryResponse, StoredItemBase } from './types';
 
-jest.mock('../../../util/cache/package');
+jest.mock('../../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 interface FetchedItem {
