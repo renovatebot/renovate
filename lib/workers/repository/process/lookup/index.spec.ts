@@ -19,34 +19,6 @@ import * as lookup from '.';
 
 jest.mock('../../../../modules/datasource/docker');
 
-jest.mock('../../../../modules/datasource/git-refs', function () {
-  const { GitRefsDatasource: Orig } = jest.requireActual(
-    '../../../../modules/datasource/git-refs'
-  );
-  const Mocked = jest.fn().mockImplementation(() => ({
-    getReleases: () =>
-      Promise.resolve({
-        releases: [{ version: 'master' }],
-      }),
-    getDigest: () =>
-      Promise.resolve('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
-  }));
-  Mocked['id'] = Orig.id;
-  return { GitRefsDatasource: Mocked };
-});
-
-const getGithubReleases = jest.fn();
-jest.mock('../../../../modules/datasource/github-releases', function () {
-  const { GithubReleasesDatasource: Orig } = jest.requireActual(
-    '../../../../modules/datasource/github-releases'
-  );
-  const Mocked = jest.fn().mockImplementation(() => ({
-    getReleases: () => getGithubReleases(),
-  }));
-  Mocked['id'] = Orig.id;
-  return { GithubReleasesDatasource: Mocked };
-});
-
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
   ...Fixtures.getJson('01.json', fixtureRoot),
@@ -65,6 +37,11 @@ const docker = mocked(DockerDatasource.prototype);
 let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
+  const getGithubReleases = jest.spyOn(
+    GithubReleasesDatasource.prototype,
+    'getReleases'
+  );
+
   beforeEach(() => {
     // TODO: fix types #7154
     config = partial<LookupUpdateConfig>(getConfig() as never);
@@ -72,6 +49,14 @@ describe('workers/repository/process/lookup/index', () => {
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
     jest.resetAllMocks();
+    jest
+      .spyOn(GitRefsDatasource.prototype, 'getReleases')
+      .mockResolvedValueOnce({
+        releases: [{ version: 'master' }],
+      });
+    jest
+      .spyOn(GitRefsDatasource.prototype, 'getDigest')
+      .mockResolvedValueOnce('4b825dc642cb6eb9a060e54bf8d69288fbee4904');
   });
 
   // TODO: fix mocks

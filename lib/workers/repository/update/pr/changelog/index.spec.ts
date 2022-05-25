@@ -2,30 +2,14 @@ import * as httpMock from '../../../../../../test/http-mock';
 import { partial } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
+import { CacheableGithubReleases } from '../../../../../modules/datasource/github-releases/cache';
+import { CacheableGithubTags } from '../../../../../modules/datasource/github-tags/cache';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchConfig } from '../../../../types';
 import { ChangeLogError, getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
-
-const githubReleasesMock = jest.fn();
-jest.mock('../../../../../modules/datasource/github-releases/cache', () => {
-  return {
-    CacheableGithubReleases: jest.fn().mockImplementation(() => {
-      return { getItems: () => githubReleasesMock() };
-    }),
-  };
-});
-
-const githubTagsMock = jest.fn();
-jest.mock('../../../../../modules/datasource/github-tags/cache', () => {
-  return {
-    CacheableGithubTags: jest.fn().mockImplementation(() => {
-      return { getItems: () => githubTagsMock() };
-    }),
-  };
-});
 
 const githubApiHost = 'https://api.github.com';
 
@@ -52,7 +36,17 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
+    const githubReleasesMock = jest.spyOn(
+      CacheableGithubReleases.prototype,
+      'getItems'
+    );
+    const githubTagsMock = jest.spyOn(
+      CacheableGithubTags.prototype,
+      'getItems'
+    );
+
     beforeEach(() => {
+      jest.resetAllMocks();
       hostRules.clear();
       hostRules.add({
         hostType: PlatformId.Github,
@@ -139,7 +133,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         { version: 'v2.3.0' },
         { version: '2.2.2' },
         { version: 'v2.4.2' },
-      ]);
+      ] as never);
       githubReleasesMock.mockResolvedValue([]);
       expect(
         await getChangeLogJSON({

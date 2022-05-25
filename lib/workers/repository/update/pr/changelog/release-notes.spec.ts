@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../../../test/http-mock';
 import { loadFixture, mocked } from '../../../../../../test/util';
+import { CacheableGithubReleases } from '../../../../../modules/datasource/github-releases/cache';
 import { clone } from '../../../../../util/clone';
 import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
@@ -19,15 +20,6 @@ import type {
 } from './types';
 
 jest.mock('../../../../../util/host-rules');
-
-const githubReleasesMock = jest.fn();
-jest.mock('../../../../../modules/datasource/github-releases/cache', () => {
-  return {
-    CacheableGithubReleases: jest.fn().mockImplementation(() => {
-      return { getItems: () => githubReleasesMock() };
-    }),
-  };
-});
 
 const hostRules = mocked(_hostRules);
 
@@ -65,6 +57,11 @@ const gitlabProject = {
 } as ChangeLogProject;
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
+  const githubReleasesMock = jest.spyOn(
+    CacheableGithubReleases.prototype,
+    'getItems'
+  );
+
   beforeEach(() => {
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
@@ -177,7 +174,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           description:
             'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
         },
-      ]);
+      ] as never);
 
       const res = await getReleaseList({
         ...githubProject,
@@ -273,7 +270,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       githubReleasesMock.mockResolvedValueOnce([
         { version: 'v1.0.0' },
         { version: 'v1.0.1' },
-      ]);
+      ] as never);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -293,7 +290,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           description:
             'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
         },
-      ]);
+      ] as never);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -321,7 +318,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           description:
             'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
         },
-      ]);
+      ] as never);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -349,7 +346,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           description:
             'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
         },
-      ]);
+      ] as never);
 
       const res = await getReleaseNotes(
         {
@@ -378,7 +375,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           description:
             'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
         },
-      ]);
+      ] as never);
 
       const res = await getReleaseNotes(
         {
@@ -407,7 +404,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           description:
             'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
         },
-      ]);
+      ] as never);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -551,7 +548,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: `someOtherRelease2/exampleDep-1.0.0`,
         },
-      ]);
+      ] as never);
       const res = await getReleaseNotes(
         {
           ...githubProject,

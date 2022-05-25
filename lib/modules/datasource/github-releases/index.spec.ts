@@ -1,5 +1,6 @@
 import { getDigest, getPkgReleases } from '..';
 import * as _hostRules from '../../../util/host-rules';
+import { CacheableGithubReleases } from './cache';
 import { GitHubReleaseMocker } from './test';
 import { GithubReleasesDatasource } from '.';
 
@@ -8,16 +9,12 @@ const hostRules: any = _hostRules;
 
 const githubApiHost = 'https://api.github.com';
 
-const cacheGetItems = jest.fn();
-jest.mock('./cache', () => {
-  return {
-    CacheableGithubReleases: jest.fn().mockImplementation(() => {
-      return { getItems: () => cacheGetItems() };
-    }),
-  };
-});
-
 describe('modules/datasource/github-releases/index', () => {
+  const cacheGetItems = jest.spyOn(
+    CacheableGithubReleases.prototype,
+    'getItems'
+  );
+
   beforeEach(() => {
     jest.resetAllMocks();
     hostRules.hosts.mockReturnValue([]);
@@ -38,7 +35,7 @@ describe('modules/datasource/github-releases/index', () => {
           releaseTimestamp: '2020-04-09T10:00:00Z',
           isStable: false,
         },
-      ]);
+      ] as never);
 
       const res = await getPkgReleases({
         datasource: GithubReleasesDatasource.id,

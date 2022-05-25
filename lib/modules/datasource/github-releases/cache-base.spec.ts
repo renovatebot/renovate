@@ -11,17 +11,6 @@ import {
 jest.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
-const httpPostJson = jest.fn();
-jest.mock('../../../util/http/github', () => {
-  return {
-    GithubHttp: jest.fn().mockImplementation(() => {
-      return {
-        postJson: () => httpPostJson(),
-      };
-    }),
-  };
-});
-
 interface FetchedItem {
   name: string;
   createdAt: string;
@@ -33,6 +22,8 @@ interface StoredItem extends StoredItemBase {
 }
 
 type GraphqlDataResponse = {
+  statusCode: 200;
+  headers: Record<string, string>;
   body: GithubGraphqlResponse<QueryResponse<FetchedItem>>;
 };
 
@@ -57,6 +48,8 @@ class TestCache extends AbstractGithubDatasourceCache<StoredItem, FetchedItem> {
 
 function resp(items: FetchedItem[], hasNextPage = false): GraphqlDataResponse {
   return {
+    statusCode: 200,
+    headers: {},
     body: {
       data: {
         repository: {
@@ -80,6 +73,7 @@ const sortItems = (items: StoredItem[]) =>
 
 describe('modules/datasource/github-releases/cache-base', () => {
   const http = new GithubHttp();
+  const httpPostJson = jest.spyOn(GithubHttp.prototype, 'postJson');
 
   const now = DateTime.local(2022, 6, 15, 18, 30, 30);
   const t1 = now.minus({ days: 3 }).toISO();
@@ -91,7 +85,7 @@ describe('modules/datasource/github-releases/cache-base', () => {
   beforeEach(() => {
     responses = [];
     jest.resetAllMocks();
-    jest.spyOn(DateTime, 'now').mockReturnValueOnce(now);
+    jest.spyOn(DateTime, 'now').mockReturnValue(now);
     httpPostJson.mockImplementation(() => {
       const resp = responses.shift();
       return resp instanceof Error

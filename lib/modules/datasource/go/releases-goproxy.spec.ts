@@ -1,28 +1,22 @@
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
+import { GithubReleasesDatasource } from '../github-releases';
+import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
 
 const datasource = new GoProxyDatasource();
 
-const githubGetReleases = jest.fn();
-jest.mock('../github-releases', () => {
-  return {
-    GithubReleasesDatasource: jest.fn().mockImplementation(() => {
-      return { getReleases: () => githubGetReleases() };
-    }),
-  };
-});
-
-const githubGetTags = jest.fn();
-jest.mock('../github-tags', () => {
-  return {
-    GithubTagsDatasource: jest.fn().mockImplementation(() => {
-      return { getReleases: () => githubGetTags() };
-    }),
-  };
-});
-
 describe('modules/datasource/go/releases-goproxy', () => {
+  const githubGetReleases = jest.spyOn(
+    GithubReleasesDatasource.prototype,
+    'getReleases'
+  );
+
+  const githubGetTags = jest.spyOn(
+    GithubTagsDatasource.prototype,
+    'getReleases'
+  );
+
   it('encodeCase', () => {
     expect(datasource.encodeCase('foo')).toBe('foo');
     expect(datasource.encodeCase('Foo')).toBe('!foo');

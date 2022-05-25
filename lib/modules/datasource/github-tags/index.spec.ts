@@ -1,6 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import * as _hostRules from '../../../util/host-rules';
+import { CacheableGithubReleases } from '../github-releases/cache';
+import { CacheableGithubTags } from './cache';
 import { GithubTagsDatasource } from '.';
 
 jest.mock('../../../util/host-rules');
@@ -9,25 +11,16 @@ const hostRules: any = _hostRules;
 const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
-const releasesCacheGetItems = jest.fn();
-jest.mock('../github-releases/cache', () => {
-  return {
-    CacheableGithubReleases: jest.fn().mockImplementation(() => {
-      return { getItems: () => releasesCacheGetItems() };
-    }),
-  };
-});
-
-const tagsCacheGetItems = jest.fn();
-jest.mock('./cache', () => {
-  return {
-    CacheableGithubTags: jest.fn().mockImplementation(() => {
-      return { getItems: () => tagsCacheGetItems() };
-    }),
-  };
-});
-
 describe('modules/datasource/github-tags/index', () => {
+  const releasesCacheGetItems = jest.spyOn(
+    CacheableGithubReleases.prototype,
+    'getItems'
+  );
+  const tagsCacheGetItems = jest.spyOn(
+    CacheableGithubTags.prototype,
+    'getItems'
+  );
+
   const github = new GithubTagsDatasource();
 
   beforeEach(() => {
@@ -141,7 +134,7 @@ describe('modules/datasource/github-tags/index', () => {
       releasesCacheGetItems.mockResolvedValueOnce([
         { version: 'v1.0.0', releaseTimestamp: '2021-01-01', isStable: true },
         { version: 'v2.0.0', releaseTimestamp: '2022-01-01', isStable: false },
-      ]);
+      ] as never);
 
       const res = await getPkgReleases({ datasource: github.id, depName });
 
