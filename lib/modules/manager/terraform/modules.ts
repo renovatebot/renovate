@@ -16,7 +16,7 @@ export const bitbucketRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
+  /(?:git::)?(?<url>(?:(?:http|https|ssh)(:\/\/))?(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
 );
 export const azureDevOpsSshRefMatchRegex = regEx(
   /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?ref=(?<tag>.*)$/
