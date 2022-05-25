@@ -18,6 +18,7 @@ import { ensureConfigMigrationPr } from '.';
 jest.mock('../../../../util/git');
 
 describe('workers/repository/config-migration/pr/index', () => {
+  const spy = jest.spyOn(platform, 'massageMarkdown');
   const { configFileName, migratedContent } = Fixtures.getJson(
     './migrated-data.json'
   );
@@ -44,9 +45,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
   describe('ensureConfigMigrationPr()', () => {
     beforeEach(() => {
-      jest
-        .spyOn(platform, 'massageMarkdown')
-        .mockImplementation((input) => input);
+      spy.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
     });
 
