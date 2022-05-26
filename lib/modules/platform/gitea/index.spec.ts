@@ -419,7 +419,10 @@ describe('modules/platform/gitea/index', () => {
     it('should use generated url of repo if clone_url of repo is empty', async () => {
       expect.assertions(2);
 
-      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, clone_url: undefined });
+      helper.getRepo.mockResolvedValueOnce({
+        ...mockRepo,
+        clone_url: undefined,
+      });
       const repoCfg: RepoParams = {
         repository: mockRepo.full_name,
         gitUrl: 'endpoint',
