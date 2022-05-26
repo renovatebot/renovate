@@ -35,6 +35,7 @@ Some features made a lot of people happy, and efficient!
 - [@ikesyo](https://github.com/ikesyo) regularly helpful
 - [@astellingwerf](https://github.com/astellingwerf) reviews PRs
 - [@danports](https://github.com/danports) worked on the Flux manager, and other managers. Feel free to ping `@danports` for any Flux-related issue or PR
+- [@shegox](https://github.com/shegox) worked on the Go manager, and improved our docs
 
 ## Renovate development
 
