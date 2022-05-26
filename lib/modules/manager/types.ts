@@ -21,7 +21,6 @@ export interface ExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-  updateInternalDeps?: boolean;
 }
 
 export interface RegexManagerTemplates {
