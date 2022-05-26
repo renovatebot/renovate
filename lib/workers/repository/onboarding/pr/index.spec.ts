@@ -9,6 +9,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
+import type { GotLegacyError } from '../../../../util/http/legacy';
 import type { BranchConfig } from '../../../types';
 import { ensureOnboardingPr } from '.';
 
@@ -202,6 +203,37 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would create onboarding PR'
       );
+    });
+
+    describe('ensureOnboardingPr() throws', () => {
+      const err = partial<GotLegacyError>({});
+
+      beforeEach(() => {
+        jest.resetAllMocks();
+        GlobalConfig.reset();
+        git.deleteBranch.mockResolvedValue();
+      });
+
+      it('throws when trying to create a new PR', async () => {
+        platform.createPr.mockRejectedValueOnce(err);
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).toReject();
+        expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      });
+
+      it('deletes branch when PR already exists but cannot find it', async () => {
+        err.statusCode = 422;
+        err.body = { errors: [{ message: 'A pull request already exists' }] };
+        platform.createPr.mockRejectedValueOnce(err);
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).toResolve();
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+        );
+        expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });
