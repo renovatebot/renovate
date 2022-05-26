@@ -608,7 +608,7 @@ describe('modules/datasource/docker/index', () => {
         registryUrls: ['https://registry.company.com'],
       };
       const res = await getPkgReleases(config);
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('uses custom registry in depName', async () => {
@@ -627,7 +627,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'registry.company.com/node',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('uses quay api', async () => {
@@ -652,7 +652,7 @@ describe('modules/datasource/docker/index', () => {
         registryUrls: ['https://quay.io'],
       };
       const res = await getPkgReleases(config);
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('uses quay api and test error', async () => {
@@ -988,7 +988,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'node',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
@@ -1016,7 +1016,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'docker.io/node',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('adds no library/ prefix for other registries', async () => {
@@ -1042,14 +1042,14 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
     });
 
     it('returns null on error', async () => {
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
-        .reply(200, null)
+        .reply(200)
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
       const res = await getPkgReleases({
@@ -1440,6 +1440,63 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toStrictEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
+      });
+    });
+
+    it('supports ghcr', async () => {
+      hostRules.find.mockResolvedValue({} as never);
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          badheaders: ['authorization'],
+        })
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull',
+        })
+        .get('/visualon/drone-git/tags/list?n=10000')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:visualon/drone-git:pull"',
+        });
+      httpMock
+        .scope('https://ghcr.io')
+        .get('/token?service=ghcr.io&scope=repository:visualon/drone-git:pull')
+        .times(3)
+        .reply(200, { token: 'abc' });
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          reqheaders: {
+            authorization: 'Bearer abc',
+          },
+        })
+        .get('/visualon/drone-git/tags/list?n=10000')
+        .reply(200, { tags: ['latest', '1.0.0'] })
+        .get('/visualon/drone-git/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/visualon/drone-git/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/visualon/drone-git',
+            },
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'ghcr.io/visualon/drone-git',
+      });
+      expect(res).toStrictEqual({
+        registryUrl: 'https://ghcr.io',
+        sourceUrl: 'https://github.com/visualon/drone-git',
+        releases: [{ version: '1.0.0' }],
       });
     });
   });
