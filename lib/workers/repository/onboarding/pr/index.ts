@@ -159,7 +159,7 @@ If you need any further assistance then you can also [request help here](${confi
         'A pull request already exists'
       )
     ) {
-      logger.warn('Onboarding PR already exists but cannot find it');
+      logger.warn('Onboarding PR already exists but cannot find it. It was probably created by a different user.');
       await deleteBranch(config.onboardingBranch);
       return;
     }
