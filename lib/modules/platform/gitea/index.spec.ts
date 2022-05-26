@@ -435,7 +435,7 @@ describe('modules/platform/gitea/index', () => {
         })
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'No clone_url found. Falling back to old behaviour.'
+        'No clone_url found. Falling back to endpoint behaviour.'
       );
     });
   });
