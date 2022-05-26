@@ -38,7 +38,7 @@ export function getRepoUrl(
 
   if (gitUrl === 'endpoint' || !repo.clone_url) {
     if (!repo.clone_url) {
-      logger.debug('No clone_url found. Falling back to old behaviour.');
+      logger.debug('No clone_url found. Falling back to endpoint behaviour.');
     }
 
     const { protocol, host, pathname } = parseUrl(endpoint) ?? {};
