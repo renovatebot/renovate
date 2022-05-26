@@ -1380,6 +1380,37 @@ describe('modules/manager/dockerfile/extract', () => {
         ]
       `);
     });
+
+    it('handles FROM with version in ARG default value and quotes', () => {
+      const res = extractPackageFile(
+        'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}\nfrom ${REF_NAME}'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": "sha256:abc",
+            "currentValue": "nonroot",
+            "datasource": "docker",
+            "depName": "gcr.io/distroless/static-debian11",
+            "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
+            "replaceString": "gcr.io/distroless/static-debian11:nonroot@sha256:abc",
+          },
+        ]
+      `);
+    });
   });
 
   describe('getDep()', () => {
@@ -1390,37 +1421,63 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles default environment variable values', () => {
       const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "sha256:abcd",
-  "currentValue": "5.0.0",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis:5.0.0@sha256:abcd",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abcd",
+          "currentValue": "5.0.0",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis:5.0.0@sha256:abcd",
+        }
+      `);
 
       const res2 = getDep('${REDIS_IMAGE:-redis:5.0.0}');
       expect(res2).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentValue": "5.0.0",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis:5.0.0",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentValue": "5.0.0",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis:5.0.0",
+        }
+      `);
 
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "sha256:abcd",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis@sha256:abcd",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abcd",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis@sha256:abcd",
+        }
+      `);
+
+      const res4 = getDep(
+        '${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}'
+      );
+      expect(res4).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abc",
+          "currentValue": "nonroot",
+          "datasource": "docker",
+          "depName": "gcr.io/distroless/static-debian11",
+          "replaceString": "gcr.io/distroless/static-debian11:nonroot@sha256:abc",
+        }
+      `);
+
+      const res5 = getDep(
+        '${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}'
+      );
+      expect(res5).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "\${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}",
+          "skipReason": "contains-variable",
+        }
+      `);
     });
 
     it('skips tag containing a variable', () => {

@@ -51,14 +51,21 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       };
     }
 
-    cleanedCurrentFrom = currentFrom.substr(
+    cleanedCurrentFrom = currentFrom.slice(
       variableOpen.length,
-      currentFrom.length - (variableClose.length + 2)
+      currentFrom.length - variableClose.length
     );
-    cleanedCurrentFrom = cleanedCurrentFrom.substr(
+    cleanedCurrentFrom = cleanedCurrentFrom.slice(
       cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
         variableDefaultValueSplit.length
     );
+
+    if (
+      cleanedCurrentFrom.charAt(0) === '"' &&
+      cleanedCurrentFrom.charAt(cleanedCurrentFrom.length - 1) === '"'
+    ) {
+      cleanedCurrentFrom = cleanedCurrentFrom.slice(1, -1);
+    }
   }
 
   const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
