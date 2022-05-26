@@ -24,6 +24,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node",
           },
         ]
@@ -41,6 +49,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node",
           },
         ]
@@ -58,6 +74,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:8.9.0-alpine",
           },
         ]
@@ -77,6 +101,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
           },
         ]
@@ -96,6 +128,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
           },
         ]
@@ -113,6 +153,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:8.9.0-alpine",
           },
         ]
@@ -132,6 +180,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  3,
+                  3,
+                ],
+              ],
+            },
             "replaceString": "node",
           },
         ]
@@ -151,6 +207,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "registry2.something.info/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "registry2.something.info/node:8",
           },
         ]
@@ -170,6 +234,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "registry2.something.info/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "registry2.something.info/node:8-alpine",
           },
         ]
@@ -189,6 +261,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "registry2.something.info:5005/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "registry2.something.info:5005/node:8",
           },
         ]
@@ -210,6 +290,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "registry2.something.info:5005/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "registry2.something.info:5005/node",
           },
         ]
@@ -227,6 +315,14 @@ describe('modules/manager/dockerfile/extract', () => {
           "datasource": "docker",
           "depName": "quay.io/node",
           "depType": "final",
+          "managerData": Object {
+            "lineNumberRanges": Array [
+              Array [
+                0,
+                0,
+              ],
+            ],
+          },
           "packageName": "quay.io:1234/node",
           "replaceString": "quay.io:1234/node",
         }
@@ -244,6 +340,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "mynamespace/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "mynamespace/node:8",
           },
         ]
@@ -263,6 +367,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "registry2.something.info/someaccount/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "registry2.something.info/someaccount/node:8",
           },
         ]
@@ -282,6 +394,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "registry.allmine.info:5005/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "registry.allmine.info:5005/node:8.7.0",
           },
         ]
@@ -301,6 +421,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:6.12.3",
           },
           Object {
@@ -310,6 +438,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "python",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  4,
+                  4,
+                ],
+              ],
+            },
             "replaceString": "python:3.6-slim",
           },
         ]
@@ -335,6 +471,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:6.12.3",
           },
         ]
@@ -355,6 +499,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "gcr.io/k8s-skaffold/skaffold",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
           },
         ]
@@ -374,6 +526,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:6.12.3",
           },
         ]
@@ -394,6 +554,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:6.12.3",
           },
         ]
@@ -414,6 +582,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "node:8.15.1-alpine",
           },
           Object {
@@ -423,6 +599,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "golang",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "golang:1.7.3",
           },
           Object {
@@ -432,6 +616,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "alpine",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  9,
+                  9,
+                ],
+              ],
+            },
             "replaceString": "alpine:latest",
           },
         ]
@@ -455,6 +647,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "node",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  2,
+                  2,
+                ],
+              ],
+            },
             "replaceString": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
           },
           Object {
@@ -464,6 +664,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "buildkite/puppeteer",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  3,
+                  3,
+                ],
+              ],
+            },
             "replaceString": "buildkite/puppeteer:1.1.1",
           },
         ]
@@ -482,6 +690,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image1",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "image1",
           },
           Object {
@@ -491,6 +707,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image2",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  3,
+                  4,
+                ],
+              ],
+            },
             "replaceString": "image2:1.0.0@sha256:abcdef",
           },
           Object {
@@ -500,6 +724,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image4",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  8,
+                  11,
+                ],
+              ],
+            },
             "replaceString": "image4",
           },
           Object {
@@ -509,6 +741,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image5",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  13,
+                  17,
+                ],
+              ],
+            },
             "replaceString": "image5",
           },
           Object {
@@ -518,6 +758,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image6",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  20,
+                  20,
+                ],
+              ],
+            },
             "replaceString": "image6",
           },
           Object {
@@ -527,6 +775,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image7",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  22,
+                  26,
+                ],
+              ],
+            },
             "replaceString": "image7:1.0.0@sha256:abcdef",
           },
           Object {
@@ -536,6 +792,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image11",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  30,
+                  30,
+                ],
+              ],
+            },
             "replaceString": "image11",
           },
           Object {
@@ -545,6 +809,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image12",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  32,
+                  36,
+                ],
+              ],
+            },
             "replaceString": "image12",
           },
           Object {
@@ -554,6 +826,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image13",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  38,
+                  38,
+                ],
+              ],
+            },
             "replaceString": "image13",
           },
         ]
@@ -572,6 +852,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "calico/node",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "calico/node",
           },
         ]
@@ -589,6 +877,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "ubuntu",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "ubuntu:18.04",
             "versioning": "ubuntu",
           },
@@ -607,6 +903,7 @@ describe('modules/manager/dockerfile/extract', () => {
           datasource: 'docker',
           depName: 'debian',
           depType: 'final',
+          managerData: { lineNumberRanges: [[0, 0]] },
           replaceString: 'debian:buster',
           versioning: 'debian',
         },
@@ -624,6 +921,7 @@ describe('modules/manager/dockerfile/extract', () => {
           datasource: 'docker',
           depName: 'debian',
           depType: 'final',
+          managerData: { lineNumberRanges: [[0, 0]] },
           packageName: 'amd64/debian',
           replaceString: 'amd64/debian:10',
           versioning: 'debian',
@@ -642,6 +940,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "ubuntu",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "packageName": "amd64/ubuntu",
             "replaceString": "amd64/ubuntu:18.04",
             "versioning": "ubuntu",
@@ -663,6 +969,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "alpine",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "alpine:3.5",
           },
         ]
@@ -680,6 +994,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  0,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "nginx:1.20",
           },
         ]
@@ -694,6 +1016,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "datasource": "docker",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "$img_base",
             "skipReason": "contains-variable",
           },
@@ -714,6 +1044,22 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  2,
+                  2,
+                ],
+                Array [
+                  0,
+                  0,
+                ],
+                Array [
+                  1,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "nginx:1.20",
           },
         ]
@@ -733,6 +1079,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "rust",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "rust:1.60.0-bullseye",
           },
         ]
@@ -751,6 +1109,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "ubuntu",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "ubuntu:xenial",
             "versioning": "ubuntu",
           },
@@ -771,6 +1141,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  1,
+                  1,
+                ],
+                Array [
+                  0,
+                  0,
+                ],
+              ],
+            },
             "replaceString": "nginx:1.19",
           },
           Object {
@@ -780,6 +1162,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  3,
+                  3,
+                ],
+                Array [
+                  2,
+                  2,
+                ],
+              ],
+            },
             "replaceString": "nginx:1.20",
           },
         ]
@@ -799,6 +1193,22 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nvidia/cuda",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  2,
+                  2,
+                ],
+                Array [
+                  0,
+                  0,
+                ],
+                Array [
+                  1,
+                  1,
+                ],
+              ],
+            },
             "replaceString": "nvidia/cuda:9.2-devel-ubuntu16.04",
           },
         ]
@@ -821,6 +1231,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "alpine",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  4,
+                  5,
+                ],
+                Array [
+                  0,
+                  2,
+                ],
+              ],
+            },
             "replaceString": "alpine:3.15.4",
           },
           Object {
@@ -830,6 +1252,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  13,
+                  13,
+                ],
+                Array [
+                  7,
+                  11,
+                ],
+              ],
+            },
             "replaceString": "nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd",
           },
         ]
@@ -849,6 +1283,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  3,
+                  4,
+                ],
+              ],
+            },
             "replaceString": "nginx:1.20",
           },
         ]
@@ -866,6 +1308,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "alpine",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  6,
+                  7,
+                ],
+                Array [
+                  2,
+                  4,
+                ],
+              ],
+            },
             "replaceString": "alpine:3.15.4",
           },
           Object {
@@ -875,6 +1329,18 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "nginx",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  15,
+                  15,
+                ],
+                Array [
+                  9,
+                  13,
+                ],
+              ],
+            },
             "replaceString": "nginx:18.04@sha256:abcdef",
           },
           Object {
@@ -884,6 +1350,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image5",
             "depType": "stage",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  17,
+                  21,
+                ],
+              ],
+            },
             "replaceString": "image5",
           },
           Object {
@@ -893,6 +1367,14 @@ describe('modules/manager/dockerfile/extract', () => {
             "datasource": "docker",
             "depName": "image12",
             "depType": "final",
+            "managerData": Object {
+              "lineNumberRanges": Array [
+                Array [
+                  23,
+                  27,
+                ],
+              ],
+            },
             "replaceString": "image12",
           },
         ]

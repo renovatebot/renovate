@@ -248,6 +248,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const fromMatch = instruction.match(fromRegex);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
+      const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
 
       if (fromImage.includes(variableMarker)) {
         const variables = extractVariables(fromImage);
@@ -255,6 +256,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           const resolvedArgValue = args[argName];
           if (resolvedArgValue || resolvedArgValue === '') {
             fromImage = fromImage.replace(fullVariable, resolvedArgValue);
+            lineNumberRanges.push(argsLines[argName]);
           }
         }
       }
@@ -269,6 +271,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug({ image: fromImage }, 'Skipping alias FROM');
       } else {
         const dep = getDep(fromImage);
+        dep.managerData = { lineNumberRanges };
         logger.trace(
           {
             depName: dep.depName,
@@ -296,6 +299,10 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
         const dep = getDep(copyFromMatch.groups.image);
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        dep.managerData = { lineNumberRanges };
         logger.debug(
           {
             depName: dep.depName,
