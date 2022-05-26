@@ -145,7 +145,7 @@ If you have configured your project to require Pull Requests before merging, it 
 
 If you have mandatory Pull Request reviews then it means Renovate can't automerge its own PR until such a review has happened.
 
-If you are running the hosted WhiteSource Renovate App on `github.com`, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
+If you are running the hosted Mend Renovate App on `github.com`, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
 These approval helper apps are only available for GitHub.
 
 ### Codeowners
