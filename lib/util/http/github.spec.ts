@@ -77,6 +77,24 @@ describe('util/http/github', () => {
       expect(req.headers.authorization).toBe('token 123test');
     });
 
+    it('supports fetching asset with octet-stream header', async () => {
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/some-owner/some-repo/releases/tags/some-tag')
+        .reply(200);
+      await githubApi.get(
+        '/repos/some-owner/some-repo/releases/tags/some-tag',
+        {
+          headers: { accept: 'application/octet-stream' },
+        }
+      );
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.headers.accept).toBe('application/octet-stream');
+      expect(req.headers.authorization).toBe('token 123test');
+    });
+
     it('supports different datasources', async () => {
       const githubApiDatasource = new GithubHttp(GithubReleasesDatasource.id);
       hostRules.add({ hostType: 'github', token: 'abc' });

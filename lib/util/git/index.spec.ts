@@ -68,6 +68,14 @@ describe('util/git/index', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/nested_files', defaultBranch);
+    await fs.mkdirp(base.path + '/bin/');
+    await fs.writeFile(base.path + '/bin/nested', 'nested');
+    await fs.writeFile(base.path + '/root', 'root');
+    await repo.add(['root', 'bin/nested']);
+    await repo.addConfig('user.email', 'custom@example.com');
+    await repo.commit('nested message');
+
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
     await repo.checkout(defaultBranch);
@@ -369,6 +377,21 @@ describe('util/git/index', () => {
         branchName: 'renovate/past_branch',
         files: [file],
         message: 'Create something',
+      });
+      expect(commit).not.toBeNull();
+    });
+
+    it('link file', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'link-to-future',
+        contents: 'future_file',
+        isSymlink: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/future_branch',
+        files: [file],
+        message: 'Create a link',
       });
       expect(commit).not.toBeNull();
     });
@@ -938,6 +961,18 @@ describe('util/git/index', () => {
           type: 'blob',
         },
       ]);
+    });
+  });
+
+  describe('getRepoStatus', () => {
+    it('should pass options into git status', async () => {
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      const resp = await git.getRepoStatus(['bin']);
+
+      expect(resp.modified).toStrictEqual(['bin/nested']);
     });
   });
 });

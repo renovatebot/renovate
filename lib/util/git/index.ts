@@ -418,9 +418,11 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(
+  options?: TaskOptions
+): Promise<StatusResult> {
   await syncGit();
-  return git.status();
+  return git.status(options);
 }
 
 export function branchExists(branchName: string): boolean {
@@ -862,9 +864,13 @@ export async function prepareCommit({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.isExecutable ? 0o777 : 0o666,
-          });
+          if (file.isSymlink) {
+            await fs.symlink(file.contents, upath.join(localDir, fileName));
+          } else {
+            await fs.outputFile(upath.join(localDir, fileName), contents, {
+              mode: file.isExecutable ? 0o777 : 0o666,
+            });
+          }
         }
         try {
           // istanbul ignore next
