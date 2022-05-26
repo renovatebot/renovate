@@ -1,6 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "updateInternalDeps":"true",
   "extends": ["github>renovatebot/.github"],
   "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
