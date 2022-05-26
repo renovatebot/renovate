@@ -384,7 +384,7 @@ Object {
     },
     Object {
       "currentValue": ">= 0.13",
-      "datasource": "github-tags",
+      "datasource": "github-releases",
       "depName": "hashicorp/terraform",
       "depType": "required_version",
       "extractVersion": "v(?<version>.*)$",
@@ -452,7 +452,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "1.1.6",
-      "datasource": "github-tags",
+      "datasource": "github-releases",
       "depName": "hashicorp/terraform",
       "depType": "tfe_workspace",
       "extractVersion": "v(?<version>.*)$",
@@ -462,7 +462,7 @@ Object {
     },
     Object {
       "currentValue": "1.1.9",
-      "datasource": "github-tags",
+      "datasource": "github-releases",
       "depName": "hashicorp/terraform",
       "depType": "tfe_workspace",
       "extractVersion": "v(?<version>.*)$",
@@ -476,7 +476,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "1.0.0",
-      "datasource": "github-tags",
+      "datasource": "github-releases",
       "depName": "hashicorp/terraform",
       "depType": "required_version",
       "extractVersion": "v(?<version>.*)$",
