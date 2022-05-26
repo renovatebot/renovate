@@ -1,4 +1,3 @@
-import * as opentelemetry from '@opentelemetry/api';
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
@@ -107,30 +106,28 @@ export async function start(): Promise<number> {
   const tracer = getTracer();
   let config: AllConfig;
   try {
-    const configSpan = tracer.startSpan(
-      'load config',
-      {},
-      opentelemetry.context.active()
-    );
-    // read global config from file, env and cli args
-    config = await getGlobalConfig();
-    if (config?.globalExtends) {
-      // resolve global presets immediately
-      config = mergeChildConfig(
-        config,
-        await resolveGlobalExtends(config.globalExtends)
-      );
-    }
-    // initialize all submodules
-    config = await globalInitialize(config);
+    await tracer.startActiveSpan('load config', async (span) => {
+      // read global config from file, env and cli args
+      config = await getGlobalConfig();
+      if (config?.globalExtends) {
+        // resolve global presets immediately
+        config = mergeChildConfig(
+          config,
+          await resolveGlobalExtends(config.globalExtends)
+        );
+      }
+      // initialize all submodules
+      config = await globalInitialize(config);
 
-    await validatePresets(config);
+      await validatePresets(config);
 
-    checkEnv();
+      checkEnv();
 
-    // validate secrets. Will throw and abort if invalid
-    validateConfigSecrets(config);
-    configSpan.end();
+      // validate secrets. Will throw and abort if invalid
+      validateConfigSecrets(config);
+
+      span.end();
+    });
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await tracer.startActiveSpan(
