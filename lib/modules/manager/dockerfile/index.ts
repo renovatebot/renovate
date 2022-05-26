@@ -5,6 +5,7 @@ import { extractPackageFile } from './extract';
 const language = ProgrammingLanguage.Docker;
 
 export { extractPackageFile, language };
+export { updateDependency } from './update';
 
 export const defaultConfig = {
   fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
