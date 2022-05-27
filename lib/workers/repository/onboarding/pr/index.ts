@@ -154,8 +154,8 @@ If you need any further assistance then you can also [request help here](${confi
     }
   } catch (err) {
     if (
-      err.statusCode === 422 &&
-      err.body?.errors?.[0]?.message?.startsWith(
+      err.response?.statusCode === 422 &&
+      err.response?.body?.errors?.[0]?.message?.startsWith(
         'A pull request already exists'
       )
     ) {

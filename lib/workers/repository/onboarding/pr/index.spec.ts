@@ -1,3 +1,4 @@
+import type { RequestError, Response } from 'got';
 import {
   RenovateConfig,
   defaultConfig,
@@ -9,7 +10,6 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
-import type { GotLegacyError } from '../../../../util/http/legacy';
 import type { BranchConfig } from '../../../types';
 import { ensureOnboardingPr } from '.';
 
@@ -206,7 +206,8 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     describe('ensureOnboardingPr() throws', () => {
-      const err = partial<GotLegacyError>({});
+      const response = partial<Response>({ statusCode: 422 });
+      const err = partial<RequestError>({ response });
 
       beforeEach(() => {
         jest.resetAllMocks();
@@ -223,8 +224,9 @@ describe('workers/repository/onboarding/pr/index', () => {
       });
 
       it('deletes branch when PR already exists but cannot find it', async () => {
-        err.statusCode = 422;
-        err.body = { errors: [{ message: 'A pull request already exists' }] };
+        err.response.body = {
+          errors: [{ message: 'A pull request already exists' }],
+        };
         platform.createPr.mockRejectedValueOnce(err);
         await expect(
           ensureOnboardingPr(config, packageFiles, branches)
