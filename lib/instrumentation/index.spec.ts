@@ -11,7 +11,7 @@ describe('instrumentation/index', () => {
   });
 
   it('activate console logger', () => {
-    process.env.RENOVATE_DEBUG_TRACEING = 'true';
+    process.env.RENOVATE_DEBUG_TRACING = 'true';
 
     init();
     const traceProvider = getTracerProvider();
@@ -31,7 +31,7 @@ describe('instrumentation/index', () => {
   });
 
   it('activate console logger and remote logger', () => {
-    process.env.RENOVATE_DEBUG_TRACEING = 'true';
+    process.env.RENOVATE_DEBUG_TRACING = 'true';
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'https://collector.example.com';
 
     init();
