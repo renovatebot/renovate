@@ -6,11 +6,9 @@ Array [
     "deps": Array [
       Object {
         "depName": "@org/a",
-        "isInternal": true,
       },
       Object {
         "depName": "@org/b",
-        "isInternal": true,
       },
       Object {
         "depName": "@org/c",
@@ -34,7 +32,6 @@ Array [
     "deps": Array [
       Object {
         "depName": "@org/b",
-        "isInternal": true,
       },
       Object {
         "depName": "@org/c",
@@ -75,11 +72,11 @@ Array [
     "deps": Array [
       Object {
         "depName": "@org/a",
-        "isInternal": true,
+        "skipReason": "internal-package",
       },
       Object {
         "depName": "@org/b",
-        "isInternal": true,
+        "skipReason": "internal-package",
       },
       Object {
         "depName": "@org/c",
@@ -103,7 +100,7 @@ Array [
     "deps": Array [
       Object {
         "depName": "@org/b",
-        "isInternal": true,
+        "skipReason": "internal-package",
       },
       Object {
         "depName": "@org/c",

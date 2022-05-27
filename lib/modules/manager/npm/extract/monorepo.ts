@@ -6,7 +6,8 @@ import { detectPnpmWorkspaces } from './pnpm';
 import { matchesAnyPattern } from './utils';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile>[]
+  packageFiles: Partial<PackageFile>[],
+  updateInternalDeps: boolean
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting Lerna and Yarn Workspaces');
@@ -40,13 +41,13 @@ export async function detectMonorepos(
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.packageJsonName)
         .filter(Boolean);
-
-      p.deps?.forEach((dep) => {
-        if (internalPackageNames.includes(dep.depName)) {
-          dep.isInternal = true;
-        }
-      });
-
+      if (!updateInternalDeps) {
+        p.deps?.forEach((dep) => {
+          if (internalPackageNames.includes(dep.depName)) {
+            dep.skipReason = 'internal-package';
+          }
+        });
+      }
       for (const subPackage of internalPackageFiles) {
         subPackage.managerData = subPackage.managerData || {};
         subPackage.managerData.lernaJsonFile = lernaJsonFile;
@@ -59,12 +60,13 @@ export async function detectMonorepos(
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
           subPackage.npmrc = subPackage.npmrc || npmrc;
         }
-
-        subPackage.deps?.forEach((dep) => {
-          if (internalPackageNames.includes(dep.depName)) {
-            dep.isInternal = true;
-          }
-        });
+        if (!updateInternalDeps) {
+          subPackage.deps?.forEach((dep) => {
+            if (internalPackageNames.includes(dep.depName)) {
+              dep.skipReason = 'internal-package';
+            }
+          });
+        }
       }
     }
   }
