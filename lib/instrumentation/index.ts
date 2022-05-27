@@ -31,7 +31,7 @@ export function init(): void {
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
       [SemanticResourceAttributes.SERVICE_NAME]: 'renovate',
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'renovate.com',
+      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'renovatebot.com',
       [SemanticResourceAttributes.SERVICE_VERSION]: pkg.version,
     }),
   });
