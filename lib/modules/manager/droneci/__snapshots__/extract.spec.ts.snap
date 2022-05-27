@@ -40,7 +40,7 @@ Array [
     "replaceString": "redis:alpine",
   },
   Object {
-    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "\\"{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}\\\\\n            @{{newDigest}}{{/if}}\\"",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",
@@ -51,7 +51,7 @@ Array [
             @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201\\\"",
   },
   Object {
-    "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "\\"{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}\\\\\n            @{{newDigest}}{{/if}}\\"",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",

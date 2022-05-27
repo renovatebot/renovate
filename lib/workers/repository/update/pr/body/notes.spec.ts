@@ -13,8 +13,15 @@ describe('workers/repository/update/pr/body/notes', () => {
   it('renders notes', () => {
     template.compile.mockImplementation((x) => x);
     const res = getPrNotes({
+      manager: 'some-manager',
       branchName: 'branch',
-      upgrades: [{ branchName: 'branch', prBodyNotes: ['NOTE'] }],
+      upgrades: [
+        {
+          manager: 'some-manager',
+          branchName: 'branch',
+          prBodyNotes: ['NOTE'],
+        },
+      ],
     });
     expect(res).toContain('NOTE');
   });
@@ -24,16 +31,26 @@ describe('workers/repository/update/pr/body/notes', () => {
       throw new Error('unknown');
     });
     const res = getPrNotes({
+      manager: 'some-manager',
       branchName: 'branch',
-      upgrades: [{ branchName: 'branch', prBodyNotes: ['NOTE'] }],
+      upgrades: [
+        {
+          manager: 'some-manager',
+          branchName: 'branch',
+          prBodyNotes: ['NOTE'],
+        },
+      ],
     });
     expect(res).not.toContain('NOTE');
   });
 
   it('handles extra notes', () => {
     const res = getPrExtraNotes({
+      manager: 'some-manager',
       branchName: 'branch',
-      upgrades: [{ branchName: 'branch', gitRef: true }],
+      upgrades: [
+        { manager: 'some-manager', branchName: 'branch', gitRef: true },
+      ],
       updateType: 'lockFileMaintenance',
       isPin: true,
     });
