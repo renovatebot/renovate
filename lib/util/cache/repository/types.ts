@@ -6,6 +6,7 @@ export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
   packageFiles: Record<string, PackageFile[]>; // extract result
+  fingerprint?: string; // combined hash {branch commit sha + configHash + manager's fingerprint}
 }
 
 export interface BranchUpgradeCache {

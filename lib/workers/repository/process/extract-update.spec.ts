@@ -73,6 +73,7 @@ describe('workers/repository/process/extract-update', () => {
             sha: '123test',
             configHash: hasha(JSON.stringify(config)),
             packageFiles,
+            fingerprint: '',
           },
         },
       });

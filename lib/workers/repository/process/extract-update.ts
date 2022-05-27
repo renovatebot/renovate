@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { getManagerList, hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
@@ -58,11 +59,26 @@ export async function extract(
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
+  let managerList = getManagerList();
+  let fingerprint = '';
+
   // istanbul ignore if
-  if (
-    cachedExtract?.sha === baseBranchSha &&
-    cachedExtract?.configHash === configHash
-  ) {
+  if (is.nonEmptyArray(config.enabledManagers)) {
+    managerList = managerList.filter((manager) =>
+      config.enabledManagers.includes(manager)
+    );
+
+    const options = { algorithm: 'sha256' };
+    fingerprint = hasha(
+      managerList.reduce(
+        (acc, manager) => hasha([acc, hashMap.get(manager)], options),
+        configHash + baseBranchSha
+      ),
+      options
+    );
+  }
+  // istanbul ignore if
+  if (cachedExtract?.fingerprint === fingerprint) {
     logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
     packageFiles = cachedExtract.packageFiles;
     try {
