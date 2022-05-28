@@ -59,8 +59,8 @@ export async function extractAllPackageFiles(
 export function extractPackageFile(
   manager: string,
   content: string,
-  fileName?: string,
-  config?: ExtractConfig
+  fileName: string,
+  config: ExtractConfig
 ): Result<PackageFile | null> {
   if (!managers.has(manager)) {
     return null;

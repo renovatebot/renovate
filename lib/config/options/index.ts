@@ -1216,6 +1216,13 @@ const options: RenovateOptions[] = [
     default: `renovate/`,
   },
   {
+    name: 'branchPrefixOld',
+    description: 'Old Prefix to check for existing PRs.',
+    stage: 'branch',
+    type: 'string',
+    default: `renovate/`,
+  },
+  {
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
@@ -1820,7 +1827,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
-      'gomodNoMassage',
+      'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',

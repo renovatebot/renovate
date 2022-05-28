@@ -29,8 +29,10 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
           branchName: 'renovate/lock-file-maintenance',
+          manager: 'some-manager',
           upgrades: [
             {
+              manager: 'some-manager',
               updateType: 'lockFileMaintenance',
             } as never,
           ],
@@ -62,8 +64,10 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           prTitle: 'Pin dependencies',
           baseBranch: 'some-other',
           branchName: 'renovate/pin-dependencies',
+          manager: 'some-manager',
           upgrades: [
             {
+              manager: 'some-manager',
               updateType: 'pin',
               sourceUrl: 'https://a',
               depName: 'a',
@@ -71,6 +75,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.1.0',
             },
             {
+              manager: 'some-manager',
               updateType: 'pin',
               depName: 'b',
               newValue: '1.5.3',
@@ -80,8 +85,10 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
+          manager: 'some-manager',
           upgrades: [
             {
+              manager: 'some-manager',
               sourceUrl: 'https://a',
               depName: 'a',
               currentValue: '^1.0.0',

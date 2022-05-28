@@ -9,6 +9,7 @@ import { ChangeLogError, getChangeLogJSON } from '.';
 jest.mock('../../../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
+  manager: 'some-manager',
   branchName: undefined,
   depName: 'renovate',
   endpoint: 'https://api.github.com/',
@@ -307,6 +308,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         ]);
 
       const upgradeData: BranchUpgradeConfig = {
+        manager: 'some-manager',
         branchName: undefined,
         depName: 'correctPrefix/target',
         endpoint: 'https://api.github.com/',
