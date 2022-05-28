@@ -29,6 +29,9 @@ export async function prAlreadyExisted(
       prTitle: config.prTitle,
       state: PrState.NotOpen,
     });
+    if (pr) {
+      logger.debug('Found closed PR with branchPrefixOld');
+    }
   }
 
   if (pr) {

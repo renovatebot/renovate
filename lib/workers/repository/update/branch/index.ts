@@ -93,6 +93,7 @@ export async function processBranch(
     branchExists = gitBranchExists(branchName);
     if (branchExists) {
       config.branchName = branchName;
+      logger.debug('Found existing branch with branchPrefixOld');
     }
   }
 
