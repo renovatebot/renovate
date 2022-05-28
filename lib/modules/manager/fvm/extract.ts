@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFile } from '../types';
 
 interface FvmConfig {
@@ -33,7 +33,7 @@ export function extractPackageFile(
   const dep: PackageDependency = {
     depName: 'flutter',
     currentValue: fvmConfig.flutterSdkVersion,
-    datasource: GithubTagsDatasource.id,
+    datasource: FlutterVersionDatasource.id,
     packageName: 'flutter/flutter',
   };
   return { deps: [dep] };
