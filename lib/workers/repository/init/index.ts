@@ -5,6 +5,7 @@ import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
+import { PackageFiles } from '../package-files';
 import { initApis } from './apis';
 import { initializeCaches, resetCaches } from './cache';
 import { getRepoConfig } from './config';
@@ -25,6 +26,7 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
 export async function initRepo(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
+  PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
   config = await initApis(config);

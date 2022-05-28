@@ -15,6 +15,18 @@ Array [
     "replaceString": "{:mvn/version,\\"0.1.2\\"}",
   },
   Object {
+    "currentValue": "0.7.418",
+    "datasource": "clojure",
+    "depName": "io.github.nextjournal/clerk",
+    "packageName": "io.github.nextjournal:clerk",
+    "registryUrls": Array [
+      "https://deps.com/foo/bar",
+      "https://my.auth.com/repo",
+      "s3://my-bucket/maven/releases",
+    ],
+    "replaceString": "{:mvn/version \\"0.7.418\\"}",
+  },
+  Object {
     "currentValue": "1.9.0",
     "datasource": "clojure",
     "depName": "org.clojure/clojure",

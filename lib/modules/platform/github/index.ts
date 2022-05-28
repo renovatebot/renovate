@@ -4,6 +4,7 @@ import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -663,6 +664,10 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       return null;
     }
     logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
+    if (GlobalConfig.get('dryRun')) {
+      logger.info('DRY-RUN: Would try to reopen autoclosed PR');
+      return null;
+    }
     const { sha, number } = autoclosedPr;
     try {
       await githubApi.postJson(`repos/${config.repository}/git/refs`, {

@@ -1,9 +1,9 @@
 import { ERROR, WARN } from 'bunyan';
 import { mock } from 'jest-mock-extended';
+import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
   getConfig,
-  loadFixture,
   logger,
   platform,
 } from '../../../test/util';
@@ -12,6 +12,7 @@ import { PlatformId } from '../../constants';
 import type { Platform } from '../../modules/platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
+import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -27,7 +28,6 @@ beforeEach(() => {
 
 async function dryRun(
   branches: BranchConfig[],
-
   platform: jest.Mocked<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0
@@ -50,7 +50,7 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          loadFixture('master-issue_with_8_PR.txt').replace('- [ ]', '- [x]') +
+          Fixtures.get('master-issue_with_8_PR.txt').replace('- [ ]', '- [x]') +
           '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -68,6 +68,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
+      PackageFiles.add('main', null);
       GlobalConfig.reset();
     });
 
@@ -266,7 +267,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture('master-issue_with_8_PR.txt')
+        Fixtures.get('master-issue_with_8_PR.txt')
       );
 
       // same with dry run
@@ -303,7 +304,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture('master-issue_with_2_PR_edited.txt')
+        Fixtures.get('master-issue_with_2_PR_edited.txt')
       );
 
       // same with dry run
@@ -348,7 +349,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture('master-issue_with_3_PR_in_progress.txt')
+        Fixtures.get('master-issue_with_3_PR_in_progress.txt')
       );
 
       // same with dry run
@@ -383,7 +384,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture('master-issue_with_2_PR_closed_ignored.txt')
+        Fixtures.get('master-issue_with_2_PR_closed_ignored.txt')
       );
 
       // same with dry run
@@ -433,7 +434,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture('master-issue_with_3_PR_in_approval.txt')
+        Fixtures.get('master-issue_with_3_PR_in_approval.txt')
       );
 
       // same with dry run
@@ -553,6 +554,104 @@ describe('workers/repository/dependency-dashboard', () => {
 
       // same with dry run
       await dryRun(branches, platform);
+    });
+
+    describe('checks detected dependencies section', () => {
+      const packageFiles = Fixtures.getJson('./package-files.json');
+      let config: RenovateConfig;
+
+      beforeAll(() => {
+        GlobalConfig.reset();
+        config = getConfig();
+        config.dependencyDashboard = true;
+      });
+
+      describe('single base branch repo', () => {
+        beforeEach(() => {
+          PackageFiles.add('main', packageFiles);
+        });
+
+        afterEach(() => {
+          PackageFiles.clear();
+        });
+
+        it('add detected dependencies to the Dependency Dashboard body', async () => {
+          const branches: BranchConfig[] = [];
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('show default message in issues body when packageFiles is empty', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.clear();
+          PackageFiles.add('main', {});
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('show default message in issues body when when packageFiles is null', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.clear();
+          PackageFiles.add('main', null);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+      });
+
+      describe('multi base branch repo', () => {
+        beforeEach(() => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFiles);
+        });
+
+        afterEach(() => {
+          PackageFiles.clear();
+        });
+
+        it('add detected dependencies to the Dependency Dashboard body', async () => {
+          const branches: BranchConfig[] = [];
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('show default message in issues body when packageFiles is empty', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', {});
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('show default message in issues body when when packageFiles is null', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', null);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+      });
     });
   });
 });
