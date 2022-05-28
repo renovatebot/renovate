@@ -416,8 +416,8 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('should use generated url of repo if clone_url of repo is empty', async () => {
-      expect.assertions(2);
+    it('should abort when clone_url is empty', async () => {
+      expect.assertions(1);
 
       helper.getRepo.mockResolvedValueOnce({
         ...mockRepo,
@@ -425,17 +425,10 @@ describe('modules/platform/gitea/index', () => {
       });
       const repoCfg: RepoParams = {
         repository: mockRepo.full_name,
-        gitUrl: 'endpoint',
       };
-      await gitea.initRepo(repoCfg);
 
-      expect(gitvcs.initRepo).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: `https://gitea.com/${mockRepo.full_name}.git`,
-        })
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        'No clone_url found. Falling back to endpoint behaviour.'
+      await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE
       );
     });
   });
