@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../config/types';
+import type { WorkerExtractConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -10,7 +10,7 @@ import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(
-  config: RenovateConfig
+  config: WorkerExtractConfig
 ): Promise<PackageFile[]> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);

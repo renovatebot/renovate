@@ -167,8 +167,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       };
       const queue = getQueue(url);
       resPromise = queue?.add(queueTask) ?? queueTask();
-      if (options.method === 'get') {
-        memCache.set(cacheKey, resPromise); // always set if it's a get
+      if (options.method === 'get' || options.method === 'head') {
+        memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
     }
 
