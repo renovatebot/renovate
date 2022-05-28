@@ -29,6 +29,7 @@ import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { PostUpdateOptionsMigration } from './custom/post-update-options-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
@@ -102,6 +103,7 @@ export class MigrationsService {
     PackagesMigration,
     PathRulesMigration,
     PinVersionsMigration,
+    PostUpdateOptionsMigration,
     RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,

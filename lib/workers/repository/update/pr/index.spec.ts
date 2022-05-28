@@ -57,6 +57,7 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     const config: BranchConfig = {
+      manager: 'some-manager',
       branchName: sourceBranch,
       upgrades: [],
       prTitle,
