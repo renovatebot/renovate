@@ -28,10 +28,12 @@ import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { PostUpdateOptionsMigration } from './custom/post-update-options-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
+import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
@@ -99,6 +101,7 @@ export class MigrationsService {
     PackagesMigration,
     PathRulesMigration,
     PinVersionsMigration,
+    PostUpdateOptionsMigration,
     RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
@@ -114,6 +117,7 @@ export class MigrationsService {
     UpgradeInRangeMigration,
     VersionStrategyMigration,
     DryRunMigration,
+    RequireConfigMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

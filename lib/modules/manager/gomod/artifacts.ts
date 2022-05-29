@@ -159,7 +159,8 @@ export async function updateArtifacts({
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   let massagedGoMod = newGoModContent;
-  if (!config.postUpdateOptions?.includes('gomodNoMassage')) {
+
+  if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace

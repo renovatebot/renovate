@@ -48,6 +48,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {
   constraints: { go: '1.14' },
+  postUpdateOptions: ['gomodMassage'],
 };
 
 const goEnv = {

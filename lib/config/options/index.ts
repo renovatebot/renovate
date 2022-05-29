@@ -404,10 +404,11 @@ const options: RenovateOptions[] = [
   {
     name: 'requireConfig',
     description:
-      'Set to `false` if it is optional for repositories to contain a config.',
+      "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
     stage: 'repository',
-    type: 'boolean',
-    default: true,
+    type: 'string',
+    default: 'required',
+    allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
   },
   {
@@ -1215,6 +1216,13 @@ const options: RenovateOptions[] = [
     default: `renovate/`,
   },
   {
+    name: 'branchPrefixOld',
+    description: 'Old Prefix to check for existing PRs.',
+    stage: 'branch',
+    type: 'string',
+    default: `renovate/`,
+  },
+  {
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
@@ -1601,7 +1609,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}',
+      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1819,7 +1827,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
-      'gomodNoMassage',
+      'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
@@ -2094,6 +2102,7 @@ const options: RenovateOptions[] = [
     description: 'Enable or disable Unicode emoji.',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'gitLabIgnoreApprovals',

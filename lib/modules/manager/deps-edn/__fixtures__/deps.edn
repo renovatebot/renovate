@@ -3,6 +3,7 @@
 ,,,,persistent-sorted-set,{:mvn/version,"0.1.2"}
     invalid/package! {:mvn/version "1.2.3"}
     invalid/version nil
+    io.github.nextjournal/clerk {:mvn/version "0.7.418"}
   }
 
   :aliases {
