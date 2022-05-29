@@ -7,7 +7,7 @@ import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption } from '../types';
-import type * as helper from './gitea-helper';
+import type { Repo } from './gitea-helper';
 
 export function smartLinks(body: string): string {
   return body?.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
@@ -18,7 +18,7 @@ export function trimTrailingApiPath(url: string): string {
 }
 
 export function getRepoUrl(
-  repo: helper.Repo,
+  repo: Repo,
   gitUrl: GitUrlOption | undefined,
   endpoint: string
 ): string {
@@ -53,7 +53,7 @@ export function getRepoUrl(
   }
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
-  const repoUrl = URL.parse(`${repo.clone_url}`);
+  const repoUrl = URL.parse(repo.clone_url);
   repoUrl.auth = opts.token || null;
   return URL.format(repoUrl);
 }
