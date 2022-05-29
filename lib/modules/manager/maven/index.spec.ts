@@ -105,6 +105,10 @@ describe('modules/manager/maven/index', () => {
             },
             { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
             {
+              depName: 'org.example:optional',
+              currentValue: '1.0.0',
+            },
+            {
               depName: 'org.example:relocation-artifact',
               currentValue: '1.0',
             },

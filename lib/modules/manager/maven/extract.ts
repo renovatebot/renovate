@@ -79,6 +79,9 @@ function depFromNode(
           depType = 'build';
         } else {
           depType = node.valueWithPath('scope')?.trim() ?? 'compile'; // maven default scope is compile
+          if (node.valueWithPath('optional')?.trim() === 'true') {
+            depType = 'optional';
+          }
         }
         break;
     }
