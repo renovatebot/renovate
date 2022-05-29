@@ -36,11 +36,7 @@ export function getRepoUrl(
     url: endpoint,
   });
 
-  if (gitUrl === 'endpoint' || !repo.clone_url) {
-    if (!repo.clone_url) {
-      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-    }
-
+  if (gitUrl === 'endpoint') {
     const { protocol, host, pathname } = parseUrl(endpoint) ?? {};
     const url = URL.format({
       protocol: protocol?.slice(0, -1) || 'https',
@@ -50,6 +46,10 @@ export function getRepoUrl(
     });
     logger.debug({ url }, 'using URL based on configured endpoint');
     return url;
+  }
+
+  if (!repo.clone_url) {
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
