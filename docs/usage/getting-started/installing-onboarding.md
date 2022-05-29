@@ -9,11 +9,11 @@ If the administrator has configured a fixed list of repositories then the only w
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
 - Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
-- If using a GitHub App (including WhiteSource Renovate on `github.com`) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
+- If using a GitHub App (including Mend Renovate on `github.com`) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
 
 ### Hosted GitHub.com App
 
-Installing/enabling WhiteSource's Renovate GitHub App is simple.
+Installing/enabling Mend's Renovate GitHub App is simple.
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
 
@@ -31,12 +31,12 @@ Once you're done selecting repositories for Renovate to run on, click the green 
 
 <!-- prettier-ignore -->
 !!! note
-    If you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
+    If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
     If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
 
 ### Hosted GitLab.com App
 
-Unfortunately WhiteSource's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
+Unfortunately Mend's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
 For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
 
 ## Repository onboarding
@@ -137,4 +137,4 @@ Any existing Renovate PRs will be closed after you've completed these steps.
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the hosted WhiteSource Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you're using the hosted Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

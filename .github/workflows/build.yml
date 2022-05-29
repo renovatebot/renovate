@@ -24,6 +24,7 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 14
   DRY_RUN: true
+  SKIP_JAVA_TESTS: true
 
 jobs:
   test:
@@ -37,25 +38,20 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node-version: [14, 16]
-        java-version: [11]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
             "os": "macos-latest",
-            "node-version": 14,
-            "java-version": 11
+            "node-version": 14
           }, {
             "os": "windows-latest",
-            "node-version": 14,
-            "java-version": 11
+            "node-version": 14
           }]' || '[]') }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
-      # skip Java tests on pull requests without 'ci:fulltest' label
-      SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
 
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
@@ -67,15 +63,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
-
-      - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.SKIP_JAVA_TESTS == 'false'
-        uses: actions/setup-java@860f60056505705214d223b91ed7a30f173f6142 # tag=v3.3.0
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'adopt'
-          java-package: jre
-          check-latest: false
 
       - name: Init platform
         shell: bash
