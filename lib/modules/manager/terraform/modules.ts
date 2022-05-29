@@ -64,7 +64,10 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.datasource = BitBucketTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'module';
-    if (gitTagsRefMatch.groups.path.includes('//')) {
+    if (azureDevOpsSshRefMatch?.groups) {
+      dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
+      dep.packageName = azureDevOpsSshRefMatch.groups.url;
+    } else if (gitTagsRefMatch.groups.path.includes('//')) {
       logger.debug('Terraform module contains subdirectory');
       dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
       const tempLookupName = gitTagsRefMatch.groups.url.split('//');
@@ -74,12 +77,6 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       dep.packageName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = GitTagsDatasource.id;
-  } else if (azureDevOpsSshRefMatch?.groups) {
-    dep.depType = 'module';
-    dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
-    dep.packageName = azureDevOpsSshRefMatch.groups.url;
-    dep.currentValue = azureDevOpsSshRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;
   } else if (source) {
     const moduleParts = source.split('//')[0].split('/');
