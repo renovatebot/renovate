@@ -29,6 +29,52 @@ export function extractVariables(image: string): Record<string, string> {
   return variables;
 }
 
+function processDepForAutoReplace(
+  dep: PackageDependency,
+  lineNumberRanges: number[][],
+  lines: string[],
+  linefeed: string
+): string | undefined {
+  const lineNumberRangesToReplace: number[][] = [];
+  for (const lineNumberRange of lineNumberRanges) {
+    for (const lineNumber of lineNumberRange) {
+      if (
+        (dep.currentValue && lines[lineNumber].includes(dep.currentValue)) ||
+        (dep.currentDigest && lines[lineNumber].includes(dep.currentDigest))
+      ) {
+        lineNumberRangesToReplace.push(lineNumberRange);
+      }
+    }
+  }
+
+  lineNumberRangesToReplace.sort((a, b) => {
+    return a[0] - b[0];
+  });
+
+  const minLine = lineNumberRangesToReplace.at(0)?.at(0);
+  const maxLine = lineNumberRangesToReplace.at(-1)?.at(1);
+  if (
+    lineNumberRanges.length === 1 ||
+    minLine === undefined ||
+    maxLine === undefined
+  ) {
+    return dep.replaceString;
+  }
+
+  if (dep.autoReplaceStringTemplate) {
+    delete dep.autoReplaceStringTemplate;
+  }
+
+  const unfoldedLineNumbers = Array.from(
+    { length: maxLine - minLine + 1 },
+    (_v, k) => k + minLine
+  );
+
+  return unfoldedLineNumbers
+    .map((lineNumber) => lines[lineNumber])
+    .join(linefeed);
+}
+
 export function splitImageParts(currentFrom: string): PackageDependency {
   // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
   // If so, remove everything except the image, defaultVal and digest.
@@ -193,6 +239,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   let escapeChar = '\\\\';
   let lookForEscapeChar = true;
 
+  const lineFeed = content.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
   const lines = content.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; ) {
     const lineNumberInstrStart = lineNumber;
@@ -255,6 +302,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const fromMatch = instruction.match(fromRegex);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
+      const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
 
       if (fromImage.includes(variableMarker)) {
         const variables = extractVariables(fromImage);
@@ -262,6 +310,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           const resolvedArgValue = args[argName];
           if (resolvedArgValue || resolvedArgValue === '') {
             fromImage = fromImage.replace(fullVariable, resolvedArgValue);
+            lineNumberRanges.push(argsLines[argName]);
           }
         }
       }
@@ -276,6 +325,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug({ image: fromImage }, 'Skipping alias FROM');
       } else {
         const dep = getDep(fromImage);
+        dep.replaceString = processDepForAutoReplace(
+          dep,
+          lineNumberRanges,
+          lines,
+          lineFeed
+        );
         logger.trace(
           {
             depName: dep.depName,
@@ -303,6 +358,15 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
         const dep = getDep(copyFromMatch.groups.image);
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        dep.replaceString = processDepForAutoReplace(
+          dep,
+          lineNumberRanges,
+          lines,
+          lineFeed
+        );
         logger.debug(
           {
             depName: dep.depName,
