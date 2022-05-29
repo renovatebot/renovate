@@ -708,13 +708,12 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.20",
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
-            "replaceString": "nginx:1.20",
+            "replaceString": "FROM nginx:1.20\${patch1}$patch2",
           },
         ]
       `);
@@ -727,13 +726,12 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.60.0-bullseye",
             "datasource": "docker",
             "depName": "rust",
             "depType": "final",
-            "replaceString": "rust:1.60.0-bullseye",
+            "replaceString": "ARG\tVARIANT=\\"1.60.0-bullseye\\"",
           },
         ]
       `);
@@ -746,13 +744,31 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentValue": "xenial",
             "datasource": "docker",
             "depName": "ubuntu",
             "depType": "final",
-            "replaceString": "ubuntu:xenial",
+            "replaceString": "ARG IMAGE_VERSION=\${IMAGE_VERSION:-ubuntu:xenial}",
             "versioning": "ubuntu",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with digest in ARG default value', () => {
+      const res = extractPackageFile(
+        'ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f\n' +
+          '      FROM gcr.io/distroless/java17@$sha_digest'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "currentDigest": "sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f",
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "gcr.io/distroless/java17",
+            "depType": "final",
+            "replaceString": "ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f",
           },
         ]
       `);
@@ -765,22 +781,20 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.19",
             "datasource": "docker",
             "depName": "nginx",
             "depType": "stage",
-            "replaceString": "nginx:1.19",
+            "replaceString": "ARG base=nginx:1.19",
           },
           Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.20",
             "datasource": "docker",
             "depName": "nginx",
             "depType": "final",
-            "replaceString": "nginx:1.20",
+            "replaceString": "ARG base=nginx:1.20",
           },
         ]
       `);
@@ -812,28 +826,33 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('extracts images from multi-line ARG statements', () => {
       const res = extractPackageFile(d3).deps;
-      expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": undefined,
-            "currentValue": "3.15.4",
-            "datasource": "docker",
-            "depName": "alpine",
-            "depType": "stage",
-            "replaceString": "alpine:3.15.4",
-          },
-          Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": "sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd",
-            "currentValue": "1.18.0-alpine",
-            "datasource": "docker",
-            "depName": "nginx",
-            "depType": "final",
-            "replaceString": "nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd",
-          },
-        ]
-      `);
+      expect(res).toEqual([
+        {
+          currentDigest: undefined,
+          currentValue: '3.15.4',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'stage',
+          replaceString:
+            ' ARG \\\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:3.15.4',
+        },
+        {
+          currentDigest:
+            'sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd',
+          currentValue: '1.18.0-alpine',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'final',
+          replaceString:
+            'ARG   \\\n' +
+            '  \\\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd"',
+        },
+      ]);
     });
 
     it('ignores parser directives in wrong order', () => {
@@ -857,46 +876,52 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles an alternative escape character', () => {
       const res = extractPackageFile(d4).deps;
-      expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": undefined,
-            "currentValue": "3.15.4",
-            "datasource": "docker",
-            "depName": "alpine",
-            "depType": "stage",
-            "replaceString": "alpine:3.15.4",
-          },
-          Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": "sha256:abcdef",
-            "currentValue": "18.04",
-            "datasource": "docker",
-            "depName": "nginx",
-            "depType": "stage",
-            "replaceString": "nginx:18.04@sha256:abcdef",
-          },
-          Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": undefined,
-            "currentValue": undefined,
-            "datasource": "docker",
-            "depName": "image5",
-            "depType": "stage",
-            "replaceString": "image5",
-          },
-          Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": undefined,
-            "currentValue": undefined,
-            "datasource": "docker",
-            "depName": "image12",
-            "depType": "final",
-            "replaceString": "image12",
-          },
-        ]
-      `);
+      expect(res).toEqual([
+        {
+          currentDigest: undefined,
+          currentValue: '3.15.4',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'stage',
+          replaceString:
+            ' ARG `\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:3.15.4',
+        },
+        {
+          currentDigest: 'sha256:abcdef',
+          currentValue: '18.04',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'stage',
+          replaceString:
+            'ARG   `\n' +
+            '  `\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:18.04@sha256:abcdef"',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'image5',
+          depType: 'stage',
+          replaceString: 'image5',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'image12',
+          depType: 'final',
+          replaceString: 'image12',
+        },
+      ]);
     });
 
     it('handles FROM with version in ARG default value and quotes', () => {
@@ -906,16 +931,60 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:abc",
             "currentValue": "nonroot",
             "datasource": "docker",
             "depName": "gcr.io/distroless/static-debian11",
             "depType": "final",
-            "replaceString": "gcr.io/distroless/static-debian11:nonroot@sha256:abc",
+            "replaceString": "ARG REF_NAME=\${REF_NAME:-\\"gcr.io/distroless/static-debian11:nonroot@sha256:abc\\"}",
           },
         ]
       `);
+    });
+
+    it('handles version in ARG and digest in FROM with CRLF linefeed', () => {
+      const res = extractPackageFile(
+        'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n'
+      ).deps;
+      expect(res).toEqual([
+        {
+          currentDigest: 'sha256:abc',
+          currentValue: '14.04',
+          datasource: 'docker',
+          depName: 'ubuntu',
+          depType: 'final',
+          replaceString:
+            'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc',
+          versioning: 'ubuntu',
+        },
+      ]);
+    });
+
+    it('handles updates of multiple ARG values', () => {
+      const res = extractPackageFile(
+        '# random comment\n\n' +
+          'ARG NODE_IMAGE_HASH="@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4"\n' +
+          'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
+          'ARG NODE_IMAGE_NAME=node\n' +
+          'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"\n' +
+          'ARG DUMMY_PREFIX=\n' +
+          'FROM ${DUMMY_PREFIX}${NODE_IMAGE_HOST}${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}${NODE_IMAGE_HASH} as yarn\n'
+      ).deps;
+      expect(res).toEqual([
+        {
+          currentDigest:
+            'sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4',
+          currentValue: '16.14.2-alpine3.14',
+          datasource: 'docker',
+          depName: 'docker.io/library/node',
+          depType: 'final',
+          replaceString:
+            'ARG NODE_IMAGE_HASH="@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4"\n' +
+            'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
+            'ARG NODE_IMAGE_NAME=node\n' +
+            'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"',
+        },
+      ]);
     });
   });
 
