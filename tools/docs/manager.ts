@@ -1,7 +1,13 @@
+import got from 'got';
 import type { RenovateConfig } from '../../lib/config/types';
+import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
+import { getQueryString } from '../../lib/util/url';
 import { readFile, updateFile } from '../utils';
+import type { GithubApiQueryResponse } from './github-query-items';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
+
+const gitHubApi = 'https://api.github.com/search/issues?';
 
 function getTitle(manager: string, displayName: string): string {
   if (manager === 'regex') {
@@ -14,6 +20,26 @@ function getManagerLink(manager: string): string {
   return `[\`${manager}\`](${manager}/)`;
 }
 
+export async function getManagerGitHubIssues(
+  ty: 'bug' | 'feature',
+  manager: string
+): Promise<string> {
+  const q = `repo:renovatebot/renovate type:issue is:open label:type:${ty} -label:priority-5-triage label:manager:${manager}`;
+  const query = getQueryString({ q, per_page: 30 });
+  let ret = '';
+  try {
+    const res = await got(gitHubApi + query).json<GithubApiQueryResponse>();
+    const items = res.items ?? [];
+    for (const item of items) {
+      ret += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Error getting query results');
+    throw err;
+  }
+  return ret;
+}
+
 export async function generateManagers(dist: string): Promise<void> {
   const managers = getManagers();
   const allLanguages: Record<string, string[]> = {};
@@ -24,6 +50,9 @@ export async function generateManagers(dist: string): Promise<void> {
     const { defaultConfig, supportedDatasources } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
+    // if (manager !== 'npm') {
+    //   continue
+    // }
     let md = `---
 title: ${getTitle(manager, displayName)}
 sidebar_label: ${displayName}
@@ -72,6 +101,20 @@ sidebar_label: ${displayName}
       md += '\n## Additional Information\n\n';
     }
     md += managerReadmeContent + '\n\n';
+
+    const bugList = await getManagerGitHubIssues('bug', manager);
+    if (bugList) {
+      md += '## Known open bugs\n\n';
+      md += await getManagerGitHubIssues('bug', manager);
+      md += '\n';
+    }
+
+    const featureList = await getManagerGitHubIssues('feature', manager);
+    if (featureList) {
+      md += '## Upcoming features\n\n';
+      md += featureList;
+      md += '\n';
+    }
 
     await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
   }
