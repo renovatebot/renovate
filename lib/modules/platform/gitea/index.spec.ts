@@ -476,6 +476,22 @@ describe('modules/platform/gitea/index', () => {
         expect.objectContaining({ url: url.toString() })
       );
     });
+
+    it('should abort when clone_url is not valid', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce({
+        ...mockRepo,
+        clone_url: 'abc',
+      });
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+
+      await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE
+      );
+    });
   });
 
   describe('setBranchStatus', () => {
