@@ -1,13 +1,13 @@
-import got from 'got';
 import type { RenovateConfig } from '../../lib/config/types';
 import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
+import { GithubHttp } from '../../lib/util/http/github';
 import { getQueryString } from '../../lib/util/url';
 import { readFile, updateFile } from '../utils';
 import type { GithubApiQueryResponse, ItemsEntity } from './github-query-items';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
-const gitHubApi = 'https://api.github.com/search/issues?';
+const gitHubApiUrl = 'https://api.github.com/search/issues?';
 
 interface ManagerIssues {
   bugs: ItemsEntity[];
@@ -78,15 +78,18 @@ export async function getManagersGitHubIssues(): Promise<
   const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
   const per_page = 100;
   const managerIssuesMap: Record<string, ManagerIssues> = {};
+  const githubApi = new GithubHttp('manager-issues');
   try {
-    let previouslyFound = per_page;
-    for (let page = 1; previouslyFound === per_page; page++) {
-      const query = getQueryString({ q, per_page, page });
-      const res = await got(gitHubApi + query).json<GithubApiQueryResponse>();
-      const items = res.items ?? [];
-      previouslyFound = items.length;
-      extractIssues(managerIssuesMap, items);
-    }
+    const query = getQueryString({ q, per_page });
+    const res = await githubApi.getJson<GithubApiQueryResponse>(
+      gitHubApiUrl + query,
+      {
+        paginationField: 'items',
+        paginate: true,
+      }
+    );
+    const items = res.body?.items ?? [];
+    extractIssues(managerIssuesMap, items);
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
     throw err;
