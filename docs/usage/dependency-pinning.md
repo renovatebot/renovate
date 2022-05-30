@@ -17,7 +17,7 @@ To ensure we're all talking about the same thing, it's important to define exact
 Historically, projects use SemVer ranges in their `package.json`.
 For instance, if you run `npm install foobar` you will see an entry like `"foobar": "^1.1.0"` added to your `package.json`.
 Verbosely, this means "any foobar version greater than or equal to 1.1.0 but less than 2".
-So the project will automatically use 1.1.1 if it's released, or 1.2.0, or 1.2.1, etc - meaning you will get not only patch updates but also feature (minor) releases too.
+The project will automatically use `1.1.1` if it's released, or `1.2.0`, or `1.2.1`, etc - meaning you will get not only patch updates but also feature (minor) releases too.
 
 Another alternative is ranges like `"foobar": "~1.1.0"` which means "any foobar version greater than or equal to 1.1.0 but less than 1.2".
 This narrows the range to only patch updates to the 1.1 range.
@@ -67,7 +67,7 @@ You would need to manually check and work out which dependency caused the failur
 Consider the same situation if instead you were _pinning_ dependency versions.
 Your `main` branch would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
 You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed.
-So you know exactly what you're running and you know exactly what failed - you have great "visibility".
+By pinning dependencies you know exactly what you're running and you know exactly what failed.
 
 Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty but it is _not_ caught by any of your automated tests.
 This is more common and more dangerous.
@@ -100,8 +100,9 @@ To some extent this is simply a trade-off for having your dependencies pinned an
 
 There are some dependencies that either (a) don't have the potential to break something in production, or (b) are fully tested by your tests.
 
-For example, it's very hard for `eslint` to break anything in production. If your build/tests pass, then you are fine.
-So you should consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
+For example, it's very hard for `eslint` to break anything in production.
+If your build/tests pass, then you are fine.
+Consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API.
