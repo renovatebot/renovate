@@ -708,6 +708,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "autoReplaceStringTemplate": "FROM nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\${patch1}$patch2",
             "currentDigest": undefined,
             "currentValue": "1.20",
             "datasource": "docker",
@@ -726,6 +727,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "autoReplaceStringTemplate": "ARG\tVARIANT=\\"{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\\"",
             "currentDigest": undefined,
             "currentValue": "1.60.0-bullseye",
             "datasource": "docker",
@@ -744,6 +746,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "autoReplaceStringTemplate": "ARG IMAGE_VERSION=\${IMAGE_VERSION:-ubuntu:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}}",
             "currentValue": "xenial",
             "datasource": "docker",
             "depName": "ubuntu",
@@ -763,6 +766,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "autoReplaceStringTemplate": "ARG sha_digest={{#if newDigest}}{{newDigest}}{{/if}}",
             "currentDigest": "sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f",
             "currentValue": undefined,
             "datasource": "docker",
@@ -781,6 +785,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "autoReplaceStringTemplate": "ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.19",
             "datasource": "docker",
@@ -789,6 +794,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "replaceString": "ARG base=nginx:1.19",
           },
           Object {
+            "autoReplaceStringTemplate": "ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.20",
             "datasource": "docker",
@@ -828,6 +834,10 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(d3).deps;
       expect(res).toEqual([
         {
+          autoReplaceStringTemplate:
+            ' ARG \\\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '3.15.4',
           datasource: 'docker',
@@ -839,6 +849,12 @@ describe('modules/manager/dockerfile/extract', () => {
             '   ALPINE_VERSION=alpine:3.15.4',
         },
         {
+          autoReplaceStringTemplate:
+            'ARG   \\\n' +
+            '  \\\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"',
           currentDigest:
             'sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd',
           currentValue: '1.18.0-alpine',
@@ -878,6 +894,10 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(d4).deps;
       expect(res).toEqual([
         {
+          autoReplaceStringTemplate:
+            ' ARG `\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '3.15.4',
           datasource: 'docker',
@@ -889,6 +909,12 @@ describe('modules/manager/dockerfile/extract', () => {
             '   ALPINE_VERSION=alpine:3.15.4',
         },
         {
+          autoReplaceStringTemplate:
+            'ARG   `\n' +
+            '  `\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"',
           currentDigest: 'sha256:abcdef',
           currentValue: '18.04',
           datasource: 'docker',
@@ -931,6 +957,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "autoReplaceStringTemplate": "ARG REF_NAME=\${REF_NAME:-\\"gcr.io/distroless/static-debian11:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}\\"}",
             "currentDigest": "sha256:abc",
             "currentValue": "nonroot",
             "datasource": "docker",
@@ -948,6 +975,8 @@ describe('modules/manager/dockerfile/extract', () => {
       ).deps;
       expect(res).toEqual([
         {
+          autoReplaceStringTemplate:
+            'ARG IMAGE_TAG={{#if newValue}}{{newValue}}{{/if}}\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@{{#if newDigest}}{{newDigest}}{{/if}}',
           currentDigest: 'sha256:abc',
           currentValue: '14.04',
           datasource: 'docker',
@@ -972,6 +1001,11 @@ describe('modules/manager/dockerfile/extract', () => {
       ).deps;
       expect(res).toEqual([
         {
+          autoReplaceStringTemplate:
+            'ARG NODE_IMAGE_HASH="@{{#if newDigest}}{{newDigest}}{{/if}}"\n' +
+            'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
+            'ARG NODE_IMAGE_NAME=node\n' +
+            'ARG NODE_IMAGE_TAG="{{#if newValue}}{{newValue}}{{/if}}"',
           currentDigest:
             'sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4',
           currentValue: '16.14.2-alpine3.14',

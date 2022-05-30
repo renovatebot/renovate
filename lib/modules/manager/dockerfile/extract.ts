@@ -29,12 +29,33 @@ export function extractVariables(image: string): Record<string, string> {
   return variables;
 }
 
+function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
+  let template = dep.replaceString;
+
+  if (dep.currentValue) {
+    let placeholder = '{{#if newValue}}{{newValue}}{{/if}}';
+    if (!dep.currentDigest) {
+      placeholder += '{{#if newDigest}}@{{newDigest}}{{/if}}';
+    }
+    template = template?.replace(dep.currentValue, placeholder);
+  }
+
+  if (dep.currentDigest) {
+    template = template?.replace(
+      dep.currentDigest,
+      '{{#if newDigest}}{{newDigest}}{{/if}}'
+    );
+  }
+
+  return template;
+}
+
 function processDepForAutoReplace(
   dep: PackageDependency,
   lineNumberRanges: number[][],
   lines: string[],
   linefeed: string
-): string | undefined {
+): void {
   const lineNumberRangesToReplace: number[][] = [];
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
@@ -58,11 +79,7 @@ function processDepForAutoReplace(
     minLine === undefined ||
     maxLine === undefined
   ) {
-    return dep.replaceString;
-  }
-
-  if (dep.autoReplaceStringTemplate) {
-    delete dep.autoReplaceStringTemplate;
+    return;
   }
 
   const unfoldedLineNumbers = Array.from(
@@ -70,9 +87,11 @@ function processDepForAutoReplace(
     (_v, k) => k + minLine
   );
 
-  return unfoldedLineNumbers
+  dep.replaceString = unfoldedLineNumbers
     .map((lineNumber) => lines[lineNumber])
     .join(linefeed);
+
+  dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
 
 export function splitImageParts(currentFrom: string): PackageDependency {
@@ -319,12 +338,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug({ image: fromImage }, 'Skipping alias FROM');
       } else {
         const dep = getDep(fromImage);
-        dep.replaceString = processDepForAutoReplace(
-          dep,
-          lineNumberRanges,
-          lines,
-          lineFeed
-        );
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
             depName: dep.depName,
@@ -355,12 +369,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
-        dep.replaceString = processDepForAutoReplace(
-          dep,
-          lineNumberRanges,
-          lines,
-          lineFeed
-        );
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.debug(
           {
             depName: dep.depName,
