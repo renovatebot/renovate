@@ -258,8 +258,10 @@ export class InternalRubyGemsDatasource extends Datasource {
   ): string {
     const registryArray = registry.split('/');
     const repository = registryArray[registryArray.indexOf('repository') + 1];
-    const { endPoint } = registry.match(/^(?<endPoint>.*:\d{1,5})\//)
-      ?.groups || { endPoint: '' };
+    const endPointRe = regEx(`^(?<endPoint>.*:\\d{1,5})\\/`);
+    const { endPoint } = registry.match(endPointRe.source)?.groups || {
+      endPoint: '',
+    };
     const nexusSearchPoint = '/service/rest/v1/search';
     const query = `${nexusSearchPoint}?repository=${repository}&name=${dependencyName}&sort=version`;
     const gemReleasesEndPoint = endPoint.concat(query);
