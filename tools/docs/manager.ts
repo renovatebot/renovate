@@ -25,15 +25,15 @@ function getManagerLink(manager: string): string {
   return `[\`${manager}\`](${manager}/)`;
 }
 
-function stringifyIssues(items: ItemsEntity[]): string {
+function stringifyIssues(items: ItemsEntity[]): [string, number] {
   if (!items) {
-    return '';
+    return ['', 0];
   }
   let list = '';
   for (const item of items) {
     list += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
   }
-  return list;
+  return [list, items.length];
 }
 
 function extractIssues(
@@ -89,7 +89,10 @@ export async function getManagersGitHubIssues(): Promise<
       }
     );
     const items = res.body?.items ?? [];
-    extractIssues(managerIssuesMap, items);
+    extractIssues(
+      managerIssuesMap,
+      items.sort((a, b) => a.number - b.number)
+    );
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
     throw err;
@@ -157,18 +160,20 @@ sidebar_label: ${displayName}
     }
     md += managerReadmeContent + '\n\n';
 
-    const bugList = stringifyIssues(managerIssuesMap[manager]?.bugs);
+    const [bugList, bugsLen] = stringifyIssues(managerIssuesMap[manager]?.bugs);
     if (bugList) {
       md += '<!-- prettier-ignore -->\n';
-      md += '??? note "Click me to see the list of open bug reports"\n';
+      md += `??? note "Click me to see the list of ${bugsLen} open bug reports"\n`;
       md += bugList;
       md += '\n';
     }
 
-    const featureList = stringifyIssues(managerIssuesMap[manager]?.features);
+    const [featureList, featureLen] = stringifyIssues(
+      managerIssuesMap[manager]?.features
+    );
     if (featureList) {
       md += '<!-- prettier-ignore -->\n';
-      md += '??? note "Click me to see the list of upcoming features"\n';
+      md += `??? note "Click me to see the list of ${featureLen} upcoming features"\n`;
       md += featureList;
       md += '\n';
     }
