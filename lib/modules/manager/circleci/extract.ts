@@ -64,7 +64,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         if (
           !dep.depName?.startsWith('ubuntu-') &&
           !dep.depName?.startsWith('windows-server-') &&
-          !dep.depName?.startsWith('android')
+          dep.depName !== 'android'
         ) {
           deps.push(dep);
         }
