@@ -4,10 +4,15 @@ import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
 import { getQueryString } from '../../lib/util/url';
 import { readFile, updateFile } from '../utils';
-import type { GithubApiQueryResponse } from './github-query-items';
+import type { GithubApiQueryResponse, ItemsEntity } from './github-query-items';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
 const gitHubApi = 'https://api.github.com/search/issues?';
+
+interface ManagerIssues {
+  bugs: ItemsEntity[];
+  features: ItemsEntity[];
+}
 
 function getTitle(manager: string, displayName: string): string {
   if (manager === 'regex') {
@@ -20,28 +25,78 @@ function getManagerLink(manager: string): string {
   return `[\`${manager}\`](${manager}/)`;
 }
 
-export async function getManagerGitHubIssues(
-  ty: 'bug' | 'feature',
-  manager: string
-): Promise<string> {
-  const q = `repo:renovatebot/renovate type:issue is:open label:type:${ty} -label:priority-5-triage label:manager:${manager}`;
-  const query = getQueryString({ q, per_page: 30 });
-  let ret = '';
+function stringifyIssues(items: ItemsEntity[]): string {
+  if (!items) {
+    return '';
+  }
+  let list = '';
+  for (const item of items) {
+    list += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
+  }
+  return list;
+}
+
+function extractIssues(
+  managerIssuesMap: Record<string, ManagerIssues>,
+  items: ItemsEntity[]
+): void {
+  if (!items || !managerIssuesMap) {
+    return;
+  }
+  for (const item of items) {
+    const type = item.labels
+      .find((l) => l.name.startsWith('type'))
+      ?.name.split(':')[1];
+    if (!type) {
+      continue;
+    }
+    const manager = item.labels
+      .find((l) => l.name.startsWith('manager'))
+      ?.name.split(':')[1];
+    if (!manager) {
+      continue;
+    }
+    if (!managerIssuesMap[manager]) {
+      managerIssuesMap[manager] = { bugs: [], features: [] };
+    }
+    switch (type) {
+      case 'bug':
+        managerIssuesMap[manager].bugs.push(item);
+        break;
+      case 'feature':
+        managerIssuesMap[manager].features.push(item);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+export async function getManagersGitHubIssues(): Promise<
+  Record<string, ManagerIssues>
+> {
+  const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
+  const per_page = 100;
+  const managerIssuesMap: Record<string, ManagerIssues> = {};
   try {
-    const res = await got(gitHubApi + query).json<GithubApiQueryResponse>();
-    const items = res.items ?? [];
-    for (const item of items) {
-      ret += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
+    let previouslyFound = per_page;
+    for (let page = 1; previouslyFound === per_page; page++) {
+      const query = getQueryString({ q, per_page, page });
+      const res = await got(gitHubApi + query).json<GithubApiQueryResponse>();
+      const items = res.items ?? [];
+      previouslyFound = items.length;
+      extractIssues(managerIssuesMap, items);
     }
   } catch (err) {
-    logger.warn({ err }, 'Error getting query results');
+    logger.error({ err }, 'Error getting query results');
     throw err;
   }
-  return ret;
+  return managerIssuesMap;
 }
 
 export async function generateManagers(dist: string): Promise<void> {
   const managers = getManagers();
+  const managerIssuesMap = await getManagersGitHubIssues();
   const allLanguages: Record<string, string[]> = {};
   for (const [manager, definition] of managers) {
     const language = definition.language ?? 'other';
@@ -50,9 +105,6 @@ export async function generateManagers(dist: string): Promise<void> {
     const { defaultConfig, supportedDatasources } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
-    // if (manager !== 'npm') {
-    //   continue
-    // }
     let md = `---
 title: ${getTitle(manager, displayName)}
 sidebar_label: ${displayName}
@@ -102,16 +154,18 @@ sidebar_label: ${displayName}
     }
     md += managerReadmeContent + '\n\n';
 
-    const bugList = await getManagerGitHubIssues('bug', manager);
+    const bugList = stringifyIssues(managerIssuesMap[manager]?.bugs);
     if (bugList) {
-      md += '## Known open bugs\n\n';
-      md += await getManagerGitHubIssues('bug', manager);
+      md += '<!-- prettier-ignore -->\n';
+      md += '??? note "Click me to see the list of open bug reports"\n';
+      md += bugList;
       md += '\n';
     }
 
-    const featureList = await getManagerGitHubIssues('feature', manager);
+    const featureList = stringifyIssues(managerIssuesMap[manager]?.features);
     if (featureList) {
-      md += '## Upcoming features\n\n';
+      md += '<!-- prettier-ignore -->\n';
+      md += '??? note "Click me to see the list of upcoming features"\n';
       md += featureList;
       md += '\n';
     }

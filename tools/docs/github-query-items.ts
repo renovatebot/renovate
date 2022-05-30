@@ -1,7 +1,7 @@
 export type GithubApiQueryResponse = {
   total_count: number;
   incomplete_results: boolean;
-  items?: ItemsEntity[] | null;
+  items: ItemsEntity[];
 };
 
 export type ItemsEntity = {
@@ -16,23 +16,23 @@ export type ItemsEntity = {
   number: number;
   title: string;
   user: User;
-  labels?: LabelsEntity[] | null;
+  labels: LabelsEntity[];
   state: string;
   locked: boolean;
-  assignee?: null;
-  assignees?: null[] | null;
-  milestone?: null;
+  assignee: User;
+  assignees: User[];
+  milestone: string;
   comments: number;
   created_at: string;
   updated_at: string;
-  closed_at?: null;
+  closed_at: string;
   author_association: string;
-  active_lock_reason?: null;
+  active_lock_reason?: string;
   body: string;
   reactions: Reactions;
   timeline_url: string;
-  performed_via_github_app?: null;
-  state_reason?: null;
+  performed_via_github_app: boolean;
+  state_reason: string;
   score: number;
 };
 
