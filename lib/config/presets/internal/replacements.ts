@@ -91,6 +91,7 @@ export const presets: Record<string, Preset> = {
     description: 'the @material-ui/core monorepo was renamed to @mui/material',
     packageRules: [
       {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['@material-ui/core'],
         replacementName: '@mui/material',
