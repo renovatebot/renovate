@@ -6,6 +6,7 @@ import type {
   RepoResult,
 } from '..';
 import { partial } from '../../../../test/util';
+import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -173,7 +174,6 @@ describe('modules/platform/gitea/index', () => {
     jest.mock('./gitea-helper');
     jest.mock('../../../util/git');
     jest.mock('../../../logger');
-    jest.mock('../../../util/host-rules');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
@@ -182,7 +182,7 @@ describe('modules/platform/gitea/index', () => {
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = (await import('../../../util/host-rules')) as any;
-    hostRules.find.mockReturnValue({});
+    hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
   });
@@ -440,7 +440,11 @@ describe('modules/platform/gitea/index', () => {
       expect.assertions(1);
 
       const token = 'abc';
-      hostRules.find.mockReturnValue({ token });
+      hostRules.add({
+        hostType: PlatformId.Gitea,
+        matchHost: 'https://gitea.com/',
+        token,
+      });
 
       helper.getRepo.mockResolvedValueOnce(mockRepo);
       const repoCfg: RepoParams = {
@@ -462,7 +466,11 @@ describe('modules/platform/gitea/index', () => {
       expect.assertions(1);
 
       const token = 'abc';
-      hostRules.find.mockReturnValue({ token });
+      hostRules.add({
+        hostType: PlatformId.Gitea,
+        matchHost: 'https://gitea.com/',
+        token,
+      });
 
       helper.getRepo.mockResolvedValueOnce(mockRepo);
       const repoCfg: RepoParams = {
