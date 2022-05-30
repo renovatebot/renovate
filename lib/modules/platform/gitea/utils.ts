@@ -1,4 +1,3 @@
-import URL from 'url';
 import { PlatformId } from '../../../constants';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -37,15 +36,15 @@ export function getRepoUrl(
   });
 
   if (gitUrl === 'endpoint') {
-    const { protocol, host, pathname } = parseUrl(endpoint) ?? {};
-    const url = URL.format({
-      protocol: protocol?.slice(0, -1) || 'https',
-      auth: opts.token,
-      host,
-      pathname: pathname + repo.full_name + '.git',
-    });
-    logger.debug({ url }, 'using URL based on configured endpoint');
-    return url;
+    const url = parseUrl(endpoint);
+    url.protocol = url.protocol?.slice(0, -1) || 'https';
+    url.username = opts.token || '';
+    url.pathname = url.pathname + repo.full_name + '.git';
+    logger.debug(
+      { url: url.toString() },
+      'using URL based on configured endpoint'
+    );
+    return url.toString();
   }
 
   if (!repo.clone_url) {
@@ -53,7 +52,7 @@ export function getRepoUrl(
   }
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
-  const repoUrl = URL.parse(repo.clone_url);
-  repoUrl.auth = opts.token || null;
-  return URL.format(repoUrl);
+  const repoUrl = parseUrl(repo.clone_url);
+  repoUrl.username = opts.token || '';
+  return repoUrl.toString();
 }
