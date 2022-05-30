@@ -105,7 +105,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
         variableDefaultValueSplit.length
     );
-  cleanedCurrentFrom = cleanedCurrentFrom.replace(regEx(/^"(.*)"$/), '$1');
+    cleanedCurrentFrom = cleanedCurrentFrom.replace(regEx(/^"(.*)"$/), '$1');
+  }
 
   const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
   const depTagSplit = currentDepTag.split(':');
