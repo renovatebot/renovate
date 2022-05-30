@@ -19,6 +19,7 @@ import type { logger as _logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
+import { parseUrl } from '../../../util/url';
 import type { PlatformResult } from '../types';
 import type * as ght from './gitea-helper';
 
@@ -32,6 +33,7 @@ describe('modules/platform/gitea/index', () => {
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
   let gitvcs: jest.Mocked<typeof _git>;
+  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -172,6 +174,7 @@ describe('modules/platform/gitea/index', () => {
     jest.mock('./gitea-helper');
     jest.mock('../../../util/git');
     jest.mock('../../../logger');
+    jest.mock('../../../util/host-rules');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
@@ -179,6 +182,8 @@ describe('modules/platform/gitea/index', () => {
     gitvcs = require('../../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
+    hostRules = (await import('../../../util/host-rules')) as any;
+    hostRules.find.mockReturnValue({});
 
     setBaseUrl('https://gitea.renovatebot.com/');
   });
@@ -429,6 +434,47 @@ describe('modules/platform/gitea/index', () => {
 
       await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
         CONFIG_GIT_URL_UNAVAILABLE
+      );
+    });
+
+    it('should use given access token if gitUrl has value endpoint', async () => {
+      expect.assertions(1);
+
+      const token = 'abc';
+      hostRules.find.mockReturnValue({ token });
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'endpoint',
+      };
+      await gitea.initRepo(repoCfg);
+
+      const url = parseUrl(mockRepo.clone_url);
+      url.username = token;
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://${token}@gitea.com/${mockRepo.full_name}.git`,
+        })
+      );
+    });
+
+    it('should use given access token if gitUrl is not specified', async () => {
+      expect.assertions(1);
+
+      const token = 'abc';
+      hostRules.find.mockReturnValue({ token });
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+      await gitea.initRepo(repoCfg);
+
+      const url = parseUrl(mockRepo.clone_url);
+      url.username = token;
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: url.toString() })
       );
     });
   });
