@@ -37,6 +37,9 @@ export function getRepoUrl(
 
   if (gitUrl === 'endpoint') {
     const url = parseUrl(endpoint);
+    if (!url) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
     url.protocol = url.protocol?.slice(0, -1) || 'https';
     url.username = opts.token || '';
     url.pathname = url.pathname + repo.full_name + '.git';
@@ -53,6 +56,9 @@ export function getRepoUrl(
 
   logger.debug({ url: repo.clone_url }, `using HTTP URL`);
   const repoUrl = parseUrl(repo.clone_url);
+  if (!repoUrl) {
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
   repoUrl.username = opts.token || '';
   return repoUrl.toString();
 }

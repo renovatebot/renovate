@@ -19,7 +19,6 @@ import type { logger as _logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
-import { parseUrl } from '../../../util/url';
 import type { PlatformResult } from '../types';
 import type * as ght from './gitea-helper';
 
@@ -450,7 +449,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      const url = parseUrl(mockRepo.clone_url);
+      const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -471,7 +470,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      const url = parseUrl(mockRepo.clone_url);
+      const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
         expect.objectContaining({ url: url.toString() })
