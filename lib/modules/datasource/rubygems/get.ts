@@ -213,7 +213,7 @@ export class InternalRubyGemsDatasource extends Datasource {
       const response = await this.http.getJson<HttpResponse>(nexusUrl); // fix here
       isNexus = response.headers?.server!.includes('Nexus');
     } catch (err) {
-      logger.info({ err }, 'Not a nexus datasource');
+      logger.debug({ err }, 'Not a nexus datasource');
     }
     return isNexus;
   }
