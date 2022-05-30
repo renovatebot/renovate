@@ -45,13 +45,13 @@ function extractIssues(
   }
   for (const item of items) {
     const type = item.labels
-      .find((l) => l.name.startsWith('type'))
+      .find((l) => l.name.startsWith('type:'))
       ?.name.split(':')[1];
     if (!type) {
       continue;
     }
     const manager = item.labels
-      .find((l) => l.name.startsWith('manager'))
+      .find((l) => l.name.startsWith('manager:'))
       ?.name.split(':')[1];
     if (!manager) {
       continue;
