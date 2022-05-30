@@ -13,6 +13,7 @@
 [Cc]onfig
 [Dd]atasource
 [Ff]unction
+[Mm]aintain
 [yaml, YAML]
 AdBlock
 Ansible
