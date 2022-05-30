@@ -12,6 +12,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     jest.resetAllMocks();
     config = {
       ...getConfig(),
+      manager: 'some-manager',
       branchName: 'renovate/pin',
       upgrades: [],
       artifactErrors: [{ lockFile: 'some' }],

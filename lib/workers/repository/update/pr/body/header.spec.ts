@@ -11,13 +11,24 @@ describe('workers/repository/update/pr/body/header', () => {
   });
 
   it('renders empty header', () => {
-    expect(getPrHeader({ branchName: 'branch', upgrades: [] })).toBe('');
+    expect(
+      getPrHeader({
+        manager: 'some-manager',
+        branchName: 'branch',
+        upgrades: [],
+      })
+    ).toBe('');
   });
 
   it('renders prHeader', () => {
     template.compile.mockImplementation((x) => x);
     expect(
-      getPrHeader({ branchName: 'branch', upgrades: [], prHeader: 'HEADER' })
+      getPrHeader({
+        manager: 'some-manager',
+        branchName: 'branch',
+        upgrades: [],
+        prHeader: 'HEADER',
+      })
     ).toMatchInlineSnapshot(`
       "HEADER
 

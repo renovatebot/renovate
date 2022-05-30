@@ -12,6 +12,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
     it('handles an artifact which is a directory', async () => {
       const commands: BranchUpgradeConfig[] = [
         {
+          manager: 'some-manager',
           branchName: 'main',
           postUpgradeTasks: {
             executionMode: 'update',
@@ -20,6 +21,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         },
       ];
       const config: BranchConfig = {
+        manager: 'some-manager',
         updatedPackageFiles: [],
         updatedArtifacts: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
