@@ -42,3 +42,19 @@ export interface JsonGemVersions {
   rubygems_version: string;
   ruby_version: string;
 }
+
+export interface NexusGems {
+  continuationToken: string | null;
+  items: JsonNexusGemsItems[];
+}
+export interface JsonNexusGemsItems {
+  name: string;
+  version: string;
+  assets: NexusGemAsset[];
+}
+
+export interface NexusGemAsset {
+  downloadUrl: string;
+  repository: string;
+  id: string;
+}

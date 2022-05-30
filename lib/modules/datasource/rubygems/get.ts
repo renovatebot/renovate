@@ -1,13 +1,17 @@
 import Marshal from 'marshal';
 import { logger } from '../../../logger';
 import { HttpError } from '../../../util/http';
+import type { HttpResponse } from '../../../util/http/types';
+import { regEx } from '../../../util/regex';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
   JsonGemVersions,
   JsonGemsInfo,
+  JsonNexusGemsItems,
   MarshalledVersionInfo,
+  NexusGems,
 } from './types';
 
 const INFO_PATH = '/api/v1/gems';
@@ -40,6 +44,20 @@ export class InternalRubyGemsDatasource extends Datasource {
     dependency: string,
     registry: string
   ): Promise<ReleaseResult | null> {
+    if (await this.isNexusDataSource(registry)) {
+      logger.debug(
+        { dependency, api: DEPENDENCIES_PATH },
+        'RubyGems lookup for dependency'
+      );
+      const gemReleases: Release[] = await this.getReleasesFromNexus(
+        registry,
+        dependency
+      );
+      return {
+        releases: gemReleases,
+      };
+    }
+
     logger.debug(
       { dependency, api: DEPENDENCIES_PATH },
       'RubyGems lookup for dependency'
@@ -181,5 +199,86 @@ export class InternalRubyGemsDatasource extends Datasource {
     }
 
     return new Marshal(response.body).parsed as T;
+  }
+
+  private async isNexusDataSource(registry: string): Promise<boolean> {
+    const statsEndPoint = '/service/rest/v1/status';
+    const endPointRe = regEx(`^(?<endPoint>.*:\\d{1,5})\\/`);
+    const { endPoint } = registry.match(endPointRe.source)?.groups || {
+      endPoint: '',
+    };
+    const nexusUrl = endPoint.concat(statsEndPoint);
+    let isNexus = false;
+    try {
+      const response = await this.http.getJson<HttpResponse>(nexusUrl); // fix here
+      isNexus = response.headers?.server!.includes('Nexus');
+    } catch (err) {
+      logger.info({ err }, 'Not a nexus datasource');
+    }
+    return isNexus;
+  }
+
+  private async getReleasesFromNexus(
+    registry: string,
+    dependencyName: string
+  ): Promise<Release[]> {
+    const result: Release[] = [];
+    try {
+      const url = this.getNexusGemReleasesEndPoint(registry, dependencyName);
+      const nexusResponse = (await this.http.getJson<NexusGems>(url))?.body || {
+        continuationToken: null,
+        items: [],
+      };
+      const gemItems: JsonNexusGemsItems[] = [...nexusResponse.items];
+
+      let continuationToken: string | null = nexusResponse.continuationToken;
+      while (continuationToken) {
+        const gemsOfPage: NexusGems = await this.pageOfNexusGems(
+          url,
+          continuationToken
+        );
+        gemItems.push(...gemsOfPage.items.filter(Boolean));
+        continuationToken = gemsOfPage.continuationToken;
+      }
+      result.push(
+        ...gemItems.map((item) => {
+          return { version: item.version, rubyPlatform: 'nexus' };
+        })
+      );
+    } catch (error) {
+      logger.debug({ error }, 'Failed to retreive gems from nexus');
+      throw error;
+    }
+    return result;
+  }
+
+  private getNexusGemReleasesEndPoint(
+    registry: string,
+    dependencyName: string
+  ): string {
+    const registryArray = registry.split('/');
+    const repository = registryArray[registryArray.indexOf('repository') + 1];
+    const { endPoint } = registry.match(/^(?<endPoint>.*:\d{1,5})\//)
+      ?.groups || { endPoint: '' };
+    const nexusSearchPoint = '/service/rest/v1/search';
+    const query = `${nexusSearchPoint}?repository=${repository}&name=${dependencyName}&sort=version`;
+    const gemReleasesEndPoint = endPoint.concat(query);
+    return gemReleasesEndPoint;
+  }
+
+  private async pageOfNexusGems(
+    url: string,
+    pageToken: string
+  ): Promise<NexusGems> {
+    let nexusPage: NexusGems = { continuationToken: null, items: [] };
+    try {
+      const paginateUrl = url.concat(`&continuationToken=${pageToken}`);
+      const response = await this.http.getJson<NexusGems>(paginateUrl);
+      nexusPage = response.body;
+    } catch (error) {
+      logger.debug({ error }, 'Failed to retreive gems page from nexus');
+      throw error;
+    }
+    return nexusPage;
   }
 }

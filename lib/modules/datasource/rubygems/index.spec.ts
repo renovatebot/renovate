@@ -208,5 +208,141 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
+
+    it('it fetches gem from nexus', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(200, {}, { server: 'Nexus/3.39.0-01 (OSS)' })
+        .get('/service/rest/v1/search?repository=gems&name=rails&sort=version')
+        .reply(200, {
+          continuationToken: null,
+          items: [
+            {
+              repository: 'gems',
+              format: 'rubygems',
+              name: 'rails',
+              version: '1.29.1',
+            },
+          ],
+        });
+      const res = await getPkgReleases(newparams);
+      expect(res.releases).toHaveLength(1);
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '1.29.1',
+            rubyPlatform: 'nexus',
+          },
+        ],
+        registryUrl: 'http://localhost:8081/repository/gems',
+      });
+    });
+
+    it('it paginates from nexus', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(200, {}, { server: 'Nexus/3.39.0-01 (OSS)' })
+        .get('/service/rest/v1/search?repository=gems&name=rails&sort=version')
+        .reply(200, {
+          continuationToken: 12345,
+          items: [
+            {
+              repository: 'gems',
+              format: 'rubygems',
+              name: 'rails',
+              version: '1.29.1',
+            },
+          ],
+        })
+        .get(
+          '/service/rest/v1/search?repository=gems&name=rails&sort=version&continuationToken=12345'
+        )
+        .reply(200, {
+          continuationToken: null,
+          items: [
+            {
+              repository: 'gems',
+              format: 'rubygems',
+              name: 'rails',
+              version: '1.22.1',
+            },
+          ],
+        });
+      const res = await getPkgReleases(newparams);
+      expect(res.releases).toHaveLength(2);
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '1.22.1',
+            rubyPlatform: 'nexus',
+          },
+          {
+            version: '1.29.1',
+            rubyPlatform: 'nexus',
+          },
+        ],
+        registryUrl: 'http://localhost:8081/repository/gems',
+      });
+    });
+
+    it('errors when fails to retreive gems from nexus', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(200, {}, { server: 'Nexus/3.39.0-01 (OSS)' })
+        .get('/service/rest/v1/search?repository=gems&name=rails&sort=version')
+        .reply(500, {});
+      expect(await getPkgReleases(newparams)).toBeNull();
+    });
+
+    it('errors when fails on nexus pagination', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(200, {}, { server: 'Nexus/3.39.0-01 (OSS)' })
+        .get('/service/rest/v1/search?repository=gems&name=rails&sort=version')
+        .reply(200, {
+          continuationToken: 12345,
+          items: [
+            {
+              repository: 'gems',
+              format: 'rubygems',
+              name: 'rails',
+              version: '1.29.1',
+            },
+          ],
+        })
+        .get(
+          '/service/rest/v1/search?repository=gems&name=rails&sort=version&continuationToken=12345'
+        )
+        .reply(500, {});
+      expect(await getPkgReleases(newparams)).toBeNull();
+    });
   });
 });
