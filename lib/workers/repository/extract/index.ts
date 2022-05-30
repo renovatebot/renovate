@@ -47,17 +47,16 @@ export async function extractAllDependencies(
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
-      if (packageFiles) {
-        for (const p of packageFiles) {
-          if (p.deps) {
-            for (const dep of p.deps) {
-              if (!config.updateInternalDeps && dep.isInternal) {
-                dep.skipReason = 'internal-package';
-              }
+      for (const p of packageFiles ?? []) {
+        if (p.deps) {
+          for (const dep of p.deps) {
+            if (!config.updateInternalDeps && dep.isInternal) {
+              dep.skipReason = 'internal-package';
             }
           }
         }
       }
+
       return { manager: managerConfig.manager, packageFiles };
     })
   );
