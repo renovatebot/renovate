@@ -124,7 +124,6 @@ export function isScheduledNow(
     !configSchedule ||
     configSchedule.length === 0 ||
     configSchedule[0] === '' ||
-    configSchedule === ('at any time' as never) ||
     configSchedule[0] === 'at any time'
   ) {
     logger.debug('No schedule defined');

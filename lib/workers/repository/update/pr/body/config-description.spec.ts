@@ -10,6 +10,7 @@ const checks = mocked(_checks);
 describe('workers/repository/update/pr/body/config-description', () => {
   describe('getPrConfigDescription', () => {
     const config: BranchConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
       upgrades: [],
     };

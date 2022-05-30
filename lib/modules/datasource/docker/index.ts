@@ -57,7 +57,9 @@ export async function getAuthHeaders(
   apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckResponse = await http.get(apiCheckUrl, {
+    // use json request, as this will be cached for tags, so it returns json
+    // TODO: add cache test
+    const apiCheckResponse = await http.getJson(apiCheckUrl, {
       throwHttpErrors: false,
       noAuth: true,
     });
@@ -136,7 +138,11 @@ export async function getAuthHeaders(
     }
 
     let scope = `repository:${dockerRepository}:pull`;
-    if (is.string(authenticateHeader.params.scope)) {
+    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
+    if (
+      is.string(authenticateHeader.params.scope) &&
+      !apiCheckUrl.endsWith('/v2/')
+    ) {
       scope = authenticateHeader.params.scope;
     }
 

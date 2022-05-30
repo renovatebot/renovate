@@ -178,7 +178,7 @@ describe('modules/platform/gitea/index', () => {
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 
-    setBaseUrl('https://gitea.renovatebot.com/api/v1');
+    setBaseUrl('https://gitea.renovatebot.com/');
   });
 
   function initFakePlatform(version = GITEA_VERSION): Promise<PlatformResult> {
@@ -229,6 +229,19 @@ describe('modules/platform/gitea/index', () => {
           endpoint: 'https://gitea.renovatebot.com',
         })
       ).toMatchSnapshot();
+    });
+
+    it('should support custom endpoint including api path', async () => {
+      helper.getCurrentUser.mockResolvedValueOnce(mockUser);
+
+      expect(
+        await gitea.initPlatform({
+          token: 'some-token',
+          endpoint: 'https://gitea.renovatebot.com/api/v1',
+        })
+      ).toMatchObject({
+        endpoint: 'https://gitea.renovatebot.com/',
+      });
     });
 
     it('should use username as author name if full name is missing', async () => {
