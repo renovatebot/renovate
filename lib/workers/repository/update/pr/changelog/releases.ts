@@ -29,38 +29,43 @@ export async function getInRangeReleases(
   const { versioning, currentVersion, newVersion, depName, datasource } =
     config;
   // istanbul ignore if
-  if (!isGetPkgReleasesConfig(config)) {
+  if (!currentVersion || !newVersion || !isGetPkgReleasesConfig(config)) {
     return null;
   }
   try {
-    const pkgReleases = (await getPkgReleases(config)).releases;
+    const releaseResult = await getPkgReleases(config);
+    const pkgReleases = releaseResult?.releases;
     const version = get(versioning);
 
-    const releases = pkgReleases
-      .filter((release) =>
-        version.isCompatible(release.version, currentVersion)
-      )
-      .filter(
-        (release) =>
-          version.equals(release.version, currentVersion) ||
-          version.isGreaterThan(release.version, currentVersion)
-      )
-      .filter((release) => !version.isGreaterThan(release.version, newVersion))
-      .filter(
-        (release) =>
-          version.isStable(release.version) ||
-          matchesUnstable(version, currentVersion, release.version) ||
-          matchesUnstable(version, newVersion, release.version)
-      );
-    if (version.valueToVersion) {
-      for (const release of releases || []) {
-        release.version = version.valueToVersion(release.version);
+    if (pkgReleases) {
+      const releases = pkgReleases
+        .filter((release) =>
+          version.isCompatible(release.version, currentVersion)
+        )
+        .filter(
+          (release) =>
+            version.equals(release.version, currentVersion) ||
+            version.isGreaterThan(release.version, currentVersion)
+        )
+        .filter(
+          (release) => !version.isGreaterThan(release.version, newVersion)
+        )
+        .filter(
+          (release) =>
+            version.isStable(release.version) ||
+            matchesUnstable(version, currentVersion, release.version) ||
+            matchesUnstable(version, newVersion, release.version)
+        );
+      if (version.valueToVersion) {
+        for (const release of releases || []) {
+          release.version = version.valueToVersion(release.version);
+        }
       }
+      return releases;
     }
-    return releases;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getInRangeReleases err');
     logger.debug({ datasource, depName }, 'Error getting releases');
-    return null;
   }
+  return null;
 }

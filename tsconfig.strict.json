@@ -90,13 +90,6 @@
     "lib/workers/repository/update/branch/schedule.ts",
     "lib/workers/repository/update/pr/automerge.ts",
     "lib/workers/repository/update/pr/body/controls.ts",
-    "lib/workers/repository/update/pr/changelog/github/index.ts",
-    "lib/workers/repository/update/pr/changelog/gitlab/index.ts",
-    "lib/workers/repository/update/pr/changelog/index.ts",
-    "lib/workers/repository/update/pr/changelog/release-notes.ts",
-    "lib/workers/repository/update/pr/changelog/releases.ts",
-    "lib/workers/repository/update/pr/changelog/source-github.ts",
-    "lib/workers/repository/update/pr/changelog/source-gitlab.ts",
     "lib/workers/repository/update/pr/code-owners.ts"
   ]
 }

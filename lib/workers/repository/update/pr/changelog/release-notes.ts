@@ -13,6 +13,7 @@ import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
+  ChangeLogRelease,
   ChangeLogResult,
 } from './types';
 
@@ -25,15 +26,17 @@ export async function getReleaseList(
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
-    switch (type) {
-      case 'gitlab':
-        return await gitlab.getReleaseList(apiBaseUrl, repository);
-      case 'github':
-        return await github.getReleaseList(apiBaseUrl, repository);
+    if (apiBaseUrl) {
+      switch (type) {
+        case 'gitlab':
+          return await gitlab.getReleaseList(apiBaseUrl, repository);
+        case 'github':
+          return await github.getReleaseList(apiBaseUrl, repository);
 
-      default:
-        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-        return [];
+        default:
+          logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
+          return [];
+      }
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
@@ -103,7 +106,8 @@ export async function getReleaseNotes(
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(depName, version, releases);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  let matchedRelease = getExactReleaseMatch(depName!, version, releases);
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
@@ -122,8 +126,8 @@ function getExactReleaseMatch(
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
-  const matchedRelease = candidateReleases.find((r) =>
-    exactReleaseReg.test(r.tag)
+  const matchedRelease = candidateReleases.find(
+    (r) => r.tag && exactReleaseReg.test(r.tag)
   );
   return matchedRelease;
 }
@@ -169,7 +173,7 @@ function sectionize(text: string, level: number): string[] {
   const lines = text.split(newlineRegex);
   const tokens = markdown.parse(text, undefined);
   tokens.forEach((token) => {
-    if (token.type === 'heading_open') {
+    if (token.type === 'heading_open' && token.map) {
       const lev = +token.tag.substr(1);
       if (lev <= level) {
         sections.push([lev, token.map[0]]);
@@ -201,26 +205,27 @@ function isUrl(url: string): boolean {
 
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   const { apiBaseUrl, repository, sourceDirectory, type } = project;
   try {
-    switch (type) {
-      case 'gitlab':
-        return await gitlab.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory
-        );
-      case 'github':
-        return await github.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory
-        );
-
-      default:
-        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-        return null;
+    if (apiBaseUrl) {
+      switch (type) {
+        case 'gitlab':
+          return await gitlab.getReleaseNotesMd(
+            repository,
+            apiBaseUrl,
+            sourceDirectory
+          );
+        case 'github':
+          return await github.getReleaseNotesMd(
+            repository,
+            apiBaseUrl,
+            sourceDirectory
+          );
+        default:
+          logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
+          return null;
+      }
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
@@ -334,7 +339,7 @@ export async function getReleaseNotesMd(
  * so only cache for about an hour when the release is less than a week old. Otherwise,
  * cache for days.
  */
-export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
+export function releaseNotesCacheMinutes(releaseDate: string | Date): number {
   const dt = is.date(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
     : DateTime.fromISO(releaseDate);
@@ -368,7 +373,7 @@ export async function addReleaseNotes(
     }${version}`;
   }
   for (const v of input.versions) {
-    let releaseNotes: ChangeLogNotes;
+    let releaseNotes: ChangeLogNotes | undefined | null;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
@@ -390,10 +395,10 @@ export async function addReleaseNotes(
         cacheMinutes
       );
     }
-    output.versions.push({
-      ...v,
-      releaseNotes,
-    });
+    const changelogRelease: ChangeLogRelease = { ...v };
+    // istanbul ignore next
+    changelogRelease.releaseNotes = releaseNotes ?? (null as never);
+    output.versions?.push(changelogRelease);
     output.hasReleaseNotes = output.hasReleaseNotes || !!releaseNotes;
   }
   return output;

@@ -50,7 +50,7 @@ export async function getTags(
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory: string
+  sourceDirectory?: string
 ): Promise<ChangeLogFile | null> {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;

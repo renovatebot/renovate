@@ -1,4 +1,3 @@
-import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
@@ -8,6 +7,7 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
+import { parseUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
@@ -41,12 +41,16 @@ export async function getChangeLogJSON(
     depName,
     manager,
   } = config;
-  if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
-    logger.trace('No release notes for @types');
+  const parsedUrl = parseUrl(sourceUrl);
+  if (
+    !parsedUrl ||
+    !sourceUrl ||
+    sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped'
+  ) {
     return null;
   }
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = URL.parse(sourceUrl);
+  const { protocol, host, pathname } = parsedUrl;
   const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
@@ -57,7 +61,7 @@ export async function getChangeLogJSON(
   });
   // istanbul ignore if
   if (!token) {
-    if (host.endsWith('github.com')) {
+    if (host?.endsWith('github.com')) {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },
@@ -81,13 +85,14 @@ export async function getChangeLogJSON(
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
   const repository = pathname
-    .slice(1)
-    .replace(regEx(/\/$/), '')
-    .replace(regEx(/\.git$/), '');
-  if (repository.split('/').length !== 2) {
+    ?.slice(1)
+    ?.replace(regEx(/\/$/), '')
+    ?.replace(regEx(/\.git$/), '');
+  if (!repository || repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
+  repository;
   const releases = config.releases || (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
@@ -105,19 +110,21 @@ export async function getChangeLogJSON(
 
   let tags: string[];
 
-  async function getRef(release: Release): Promise<string | null> {
+  const getRef = async (release: Release): Promise<string | null> => {
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const tagName = findTagOfRelease(version, depName, release.version, tags);
-    if (tagName) {
-      return tagName;
+    if (depName) {
+      const tagName = findTagOfRelease(version, depName, release.version, tags);
+      if (tagName) {
+        return tagName;
+      }
     }
     if (release.gitRef) {
       return release.gitRef;
     }
     return null;
-  }
+  };
 
   const cacheNamespace = 'changelog-github-release';
   function getCacheKey(prev: string, next: string): string {
@@ -125,14 +132,15 @@ export async function getChangeLogJSON(
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
-  // compare versions
-  const include = (v: string): boolean =>
-    version.isGreaterThan(v, currentVersion) &&
-    !version.isGreaterThan(v, newVersion);
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
-    if (include(next.version)) {
+    if (
+      currentVersion &&
+      newVersion &&
+      version.isGreaterThan(next.version, currentVersion) &&
+      !version.isGreaterThan(next.version, newVersion)
+    ) {
       let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
