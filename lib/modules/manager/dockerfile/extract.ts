@@ -72,8 +72,9 @@ function processDepForAutoReplace(
     return a[0] - b[0];
   });
 
-  const minLine = lineNumberRangesToReplace.at(0)?.at(0);
-  const maxLine = lineNumberRangesToReplace.at(-1)?.at(1);
+  const minLine = lineNumberRangesToReplace[0]?.[0];
+  const maxLine =
+    lineNumberRangesToReplace[lineNumberRangesToReplace.length - 1]?.[1];
   if (
     lineNumberRanges.length === 1 ||
     minLine === undefined ||
