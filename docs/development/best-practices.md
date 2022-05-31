@@ -130,7 +130,8 @@ Use `UTC` to be time zone independent.
 - Prefer `jest.spyOn` for mocking single functions, or mock entire modules
   - Avoid overwriting functions, for example: (`func = jest.fn();`)
 - Prefer `toEqual` or `toDeepEqual`
-- Avoid `toMatchObject`, only use it for:
+- Use `toMatchObject` for huge objects when only parts need to be tested.
+- Avoid `toMatchSnapshot`, only use it for:
   - huge strings like the Renovate PR body text
   - huge complex objects where you only need to test parts
 
