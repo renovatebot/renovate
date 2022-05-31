@@ -9,6 +9,7 @@ Multi-platform and multi-language.
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
+![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
 
 ## Why Use Renovate?
 
