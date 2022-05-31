@@ -202,16 +202,16 @@ export class InternalRubyGemsDatasource extends Datasource {
   }
 
   private async isNexusDataSource(registry: string): Promise<boolean> {
-    const statsEndPoint = '/service/rest/v1/status';
+    const statusEndPoint = '/service/rest/v1/status';
     const endPointRe = regEx(`^(?<endPoint>.*:\\d{1,5})\\/`);
-    const { endPoint } = registry.match(endPointRe.source)?.groups || {
+    const { endPoint } = registry.match(endPointRe)?.groups ?? {
       endPoint: '',
     };
-    const nexusUrl = endPoint.concat(statsEndPoint);
+    const nexusUrl = endPoint.concat(statusEndPoint);
     let isNexus = false;
     try {
-      const response = await this.http.getJson<HttpResponse>(nexusUrl); // fix here
-      isNexus = response.headers?.server!.includes('Nexus');
+      const response = await this.http.getJson<HttpResponse>(nexusUrl);
+      isNexus = response.headers?.server?.includes('Nexus') ?? false;
     } catch (err) {
       logger.debug({ err }, 'Not a nexus datasource');
     }
