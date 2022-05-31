@@ -1,7 +1,6 @@
 import { PlatformId } from '../../../constants';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { HostRuleSearchResult } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -30,7 +29,7 @@ export function getRepoUrl(
   }
 
   // Find options for current host and determine Git endpoint
-  const opts: HostRuleSearchResult = hostRules.find({
+  const opts = hostRules.find({
     hostType: PlatformId.Gitea,
     url: endpoint,
   });
