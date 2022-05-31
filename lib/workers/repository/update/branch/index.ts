@@ -249,7 +249,7 @@ export async function processBranch(
     }
 
     // Check schedule
-    config.isScheduledNow = isScheduledNow(config);
+    config.isScheduledNow = isScheduledNow(config, 'schedule');
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
@@ -528,6 +528,12 @@ export async function processBranch(
         }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
+      }
+      if (mergeStatus === 'off schedule') {
+        logger.debug(
+          'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
+        );
+        return { branchExists, result: BranchResult.NotScheduled };
       }
       if (
         mergeStatus === 'stale' &&
