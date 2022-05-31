@@ -47,5 +47,43 @@ describe('modules/manager/helm-values/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps).toHaveLength(5);
     });
+
+    it('extracts from values.yaml image tag"', () => {
+      const input = `
+      replicaCount: 1
+      firstImage:
+        registry: docker.io
+        repository: mjnagel/postgresql12
+        tag: 12.10
+      secondImage:
+        registry: docker.io
+        repository: bitnami/postgres-exporter
+        tag: "10.70"`;
+      const result = extractPackageFile(input);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'docker.io/mjnagel/postgresql12',
+            currentValue: '12.10',
+            datasource: 'docker',
+            replaceString: '12.10',
+            versioning: 'docker',
+            currentDigest: undefined,
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+          {
+            depName: 'docker.io/bitnami/postgres-exporter',
+            currentValue: '10.70',
+            datasource: 'docker',
+            replaceString: '10.70',
+            versioning: 'docker',
+            currentDigest: undefined,
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+        ],
+      });
+    });
   });
 });
