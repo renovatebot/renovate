@@ -92,7 +92,6 @@ export async function getChangeLogJSON(
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
-  repository;
   const releases = config.releases || (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');

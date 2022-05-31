@@ -46,7 +46,7 @@ export async function getChangeLogJSON(
 
     return res;
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ config: config, err }, 'getChangeLogJSON error');
+    logger.error({ config, err }, 'getChangeLogJSON error');
     return null;
   }
 }
