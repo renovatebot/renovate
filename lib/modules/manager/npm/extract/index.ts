@@ -472,11 +472,8 @@ export async function extractPackageFile(
   };
 }
 
-export async function postExtract(
-  packageFiles: PackageFile[],
-  updateInternalDeps: boolean
-): Promise<void> {
-  await detectMonorepos(packageFiles, updateInternalDeps);
+export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
+  await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
 
@@ -500,7 +497,8 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  await postExtract(npmFiles, !!config.updateInternalDeps);
+
+  await postExtract(npmFiles);
   return npmFiles;
 }
 
