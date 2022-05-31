@@ -132,7 +132,7 @@ Use `UTC` to be time zone independent.
 - Prefer `toEqual` or `toDeepEqual`
 - Avoid `toMatchObject`, only use it for:
   - huge strings like the Renovate PR body text
-  - for huge complex objects where you only need to test parts
+  - huge complex objects where you only need to test parts
 
 ### Fixtures
 
