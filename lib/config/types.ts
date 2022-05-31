@@ -27,6 +27,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
+  branchPrefixOld?: string;
   branchName?: string;
   manager?: string | null;
   commitMessage?: string;
@@ -217,6 +218,7 @@ export interface RenovateConfig
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
+  updateInternalDeps?: boolean;
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];

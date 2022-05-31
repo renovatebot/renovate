@@ -313,6 +313,12 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
     This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
     If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
 
+## branchPrefixOld
+
+Renovate uses branch names as part of its checks to see if an update PR was created previously, and already merged or ignored.
+If you change `branchPrefix`, then no previously closed PRs will match, which could lead to Renovate recreating PRs in such cases.
+Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate to look for those branches too, and avoid this happening.
+
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
@@ -1881,7 +1887,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `gomodNoMassage`: Skip massaging `replace` directives before calling `go` commands
+- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
