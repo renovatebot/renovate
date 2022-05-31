@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
 import type { BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
+import { doAutoReplace, doReplacementAutoReplace } from './auto-replace';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
@@ -15,15 +15,15 @@ const sampleHtml = Fixtures.get(
 jest.mock('fs-extra', () => Fixtures.fsExtra());
 
 describe('workers/repository/update/branch/auto-replace', () => {
+  beforeAll(() => {
+    GlobalConfig.set({
+      localDir: '/temp',
+    });
+  });
+
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
-
-    beforeAll(() => {
-      GlobalConfig.set({
-        localDir: '/temp',
-      });
-    });
 
     beforeEach(() => {
       upgrade = {
@@ -181,6 +181,96 @@ describe('workers/repository/update/branch/auto-replace', () => {
       ];
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+  });
+
+  describe('doReplacementAutoReplace', () => {
+    let reuseExistingBranch: boolean;
+    let upgrade: BranchUpgradeConfig;
+
+    beforeEach(() => {
+      upgrade = {
+        ...JSON.parse(JSON.stringify(defaultConfig)),
+      };
+      reuseExistingBranch = false;
+    });
+
+    it('updates with docker replacement', async () => {
+      const dockerfile = 'FROM bitnami/redis:6.0.8';
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'bitnami/redis';
+      upgrade.newName = 'mcr.microsoft.com/oss/bitnami/redis';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doReplacementAutoReplace(
+        upgrade,
+        dockerfile,
+        reuseExistingBranch
+      );
+      expect(res).toBe(dockerfile.replace(upgrade.depName, upgrade.newName));
+    });
+
+    it('handles already replaced', async () => {
+      const dockerfile = 'FROM library/ubuntu:20.04';
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'library/alpine';
+      upgrade.newName = 'library/ubuntu';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doReplacementAutoReplace(
+        upgrade,
+        dockerfile,
+        reuseExistingBranch
+      );
+      expect(res).toBe(dockerfile);
+    });
+
+    it('updates with terraform replacement', async () => {
+      const hcl =
+        'module "foo" {\nsource = "github.com/hashicorp/example?ref=v1.0.0"\n}';
+      upgrade.manager = 'terraform';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'github.com/hashicorp/example';
+      upgrade.newName = 'github.com/hashicorp/new-example';
+      upgrade.packageFile = 'modules.tf';
+      const res = await doReplacementAutoReplace(
+        upgrade,
+        hcl,
+        reuseExistingBranch
+      );
+      expect(res).toBe(hcl.replace(upgrade.depName, upgrade.newName));
+    });
+
+    it('fails with old name in depname', async () => {
+      const yml =
+        'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.manager = 'regex';
+      upgrade.updateType = 'replacement';
+      upgrade.depName =
+        '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
+      upgrade.currentValue = '1';
+      upgrade.newName =
+        '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.matchStrings = [
+        'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
+      ];
+      const res = doReplacementAutoReplace(upgrade, yml, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('rebases if the deps list has changed', async () => {
+      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
+      reuseExistingBranch = true;
+      const res = await doReplacementAutoReplace(
+        upgrade,
+        'existing content',
+        reuseExistingBranch
+      );
+      expect(res).toBeNull();
     });
   });
 });

@@ -500,5 +500,25 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
+    it('handles replacement', async () => {
+      config.upgrades.push({
+        packageFile: 'index.html',
+        manager: 'html',
+        updateType: 'replacement',
+        branchName: undefined,
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('my-dep:1.0.0');
+      autoReplace.doReplacementAutoReplace.mockResolvedValueOnce(
+        'my-new-dep:1.0.0'
+      );
+
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          { path: 'index.html', contents: 'my-new-dep:1.0.0' },
+        ],
+      });
+    });
   });
 });
