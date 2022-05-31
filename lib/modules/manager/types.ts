@@ -21,7 +21,6 @@ export interface ExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-  updateInternalDeps?: boolean;
 }
 
 export interface RegexManagerTemplates {
@@ -172,6 +171,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  isInternal?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>>
