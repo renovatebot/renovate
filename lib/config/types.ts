@@ -219,6 +219,7 @@ export interface RenovateConfig
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
+  updateInternalDeps?: boolean;
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];
