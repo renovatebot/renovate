@@ -160,14 +160,6 @@ sidebar_label: ${displayName}
     }
     md += managerReadmeContent + '\n\n';
 
-    const [bugList, bugsLen] = stringifyIssues(managerIssuesMap[manager]?.bugs);
-    if (bugList) {
-      md += '<!-- prettier-ignore -->\n';
-      md += `??? note "Click me to see the list of ${bugsLen} open bug reports"\n`;
-      md += bugList;
-      md += '\n';
-    }
-
     const [featureList, featureLen] = stringifyIssues(
       managerIssuesMap[manager]?.features
     );
@@ -175,6 +167,14 @@ sidebar_label: ${displayName}
       md += '<!-- prettier-ignore -->\n';
       md += `??? note "Click me to see the list of ${featureLen} upcoming features"\n`;
       md += featureList;
+      md += '\n';
+    }
+
+    const [bugList, bugsLen] = stringifyIssues(managerIssuesMap[manager]?.bugs);
+    if (bugList) {
+      md += '<!-- prettier-ignore -->\n';
+      md += `??? note "Click me to see the list of ${bugsLen} open bug reports"\n`;
+      md += bugList;
       md += '\n';
     }
 
