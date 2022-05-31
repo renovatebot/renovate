@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { Fixtures } from '../../../../../test/fixtures';
 import { git, logger, mocked, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -71,6 +72,25 @@ describe('workers/repository/update/pr/index', () => {
 
     describe('Create', () => {
       it('creates PR', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(limits.incLimitedValue).toHaveBeenCalledOnce();
+        expect(limits.incLimitedValue).toHaveBeenCalledWith(
+          limits.Limit.PullRequests
+        );
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { pr: pr.number, prTitle },
+          'PR created'
+        );
+      });
+
+      it('creates PR with html comment', async () => {
+        const prbodyContent = Fixtures.get('prbody1');
+        prBody.getPrBody.mockResolvedValueOnce(prbodyContent);
+
         platform.createPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr(config);
@@ -263,6 +283,40 @@ describe('workers/repository/update/pr/index', () => {
           bodyStruct: getPrBodyStruct(`${body} updated`),
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
+
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
+      it('updates PR due to body change with html comment', async () => {
+        const changedPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(`${body} updated`),
+        };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+
+        const prbodyContent = Fixtures.get('prbody2');
+        prBody.getPrBody.mockResolvedValueOnce(prbodyContent);
+
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
+      it('updates PR due to body change without html comment', async () => {
+        const changedPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(`${body} updated`),
+        };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+
+        const prbodyContent = Fixtures.get('prbody1');
+        prBody.getPrBody.mockResolvedValueOnce(prbodyContent);
 
         const res = await ensurePr(config);
 
