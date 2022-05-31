@@ -31,34 +31,33 @@ export class PackageFiles {
     let deps = '';
 
     for (const [branch, packageFiles] of this.data) {
-      deps += pad ? `<details><summary>Branch ${branch}\n</summary>\n\n` : '';
+      deps += pad
+        ? `<details><summary>Branch ${branch}</summary>\n<blockquote>\n\n`
+        : '';
       if (packageFiles === null) {
         deps += none;
-        deps += pad ? '\n</details>\n\n' : '\n';
+        deps += pad ? '</blockquote>\n</details>\n\n' : '';
         continue;
       }
 
       const managers = Object.keys(packageFiles);
       if (managers.length === 0) {
         deps += none;
-        deps += pad ? '\n</details>\n\n' : '\n';
+        deps += pad ? '</blockquote>\n</details>\n\n' : '';
         continue;
       }
-
       for (const manager of managers) {
-        deps += `${
-          pad ? '\n<ul>' : ''
-        }<details><summary>${manager}</summary>\n\n`;
+        deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
-          deps += `<ul><details><summary>${packageFile.packageFile}</summary>\n\n`;
+          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             deps += ` - \`${dep.depName} ${dep.currentValue}\`\n`;
           }
-          deps += '\n</details></ul>';
+          deps += '\n</details>\n\n';
         }
-        deps += `\n</details>${pad ? '</ul>' : ''}`;
+        deps += `</blockquote>\n</details>\n\n`;
       }
-      deps += pad ? '\n</details>\n\n' : '';
+      deps += pad ? '</blockquote>\n</details>\n\n' : '';
     }
 
     return title + deps;

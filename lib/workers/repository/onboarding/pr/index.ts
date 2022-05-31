@@ -34,13 +34,14 @@ export async function ensureOnboardingPr(
   const existingPr = await platform.getBranchPr(config.onboardingBranch);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${config.productLinks.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
-  prTemplate += config.requireConfig
-    ? emojify(
-        `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
-      )
-    : emojify(
-        `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
-      );
+  prTemplate +=
+    config.requireConfig === 'required'
+      ? emojify(
+          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
+        )
+      : emojify(
+          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+        );
   prTemplate += emojify(
     `
 
@@ -151,14 +152,16 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addParticipants(config, pr);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (
-      err.statusCode === 422 &&
+      err.response?.statusCode === 422 &&
       err.response?.body?.errors?.[0]?.message?.startsWith(
         'A pull request already exists'
       )
     ) {
-      logger.debug('Onboarding PR already exists but cannot find it');
+      logger.warn(
+        'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+      );
       await deleteBranch(config.onboardingBranch);
       return;
     }

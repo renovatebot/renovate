@@ -25,9 +25,9 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:31.14.0
-docker run --rm renovate/renovate:31.14
-docker run --rm renovate/renovate:31
+docker run --rm renovate/renovate:32
+docker run --rm renovate/renovate:32.64
+docker run --rm renovate/renovate:32.64.4
 ```
 
 <!-- prettier-ignore -->
@@ -396,3 +396,35 @@ The logging level output is controlled by the Bunyan logging library.
 |    40 | warn    |
 |    50 | error   |
 |    60 | fatal   |
+
+## Self-signed TLS/SSL certificates
+
+Renovate and invoked helper programs (e.g. Git, npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
+If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be configured to trust these additional certificates.
+
+For the main Renovate Node.js application set the environment variable [`NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt`](https://nodejs.org/api/cli.html#node_extra_ca_certsfile).
+This ensures that the Renovate application itself trusts the `self-signed-certificate.crt` and can establish secure connections to systems using that certificate or certificates signed by this certificate authority.
+
+The helper programs (e.g. Git, npm) use the system trust store.
+For them to trust a self-signed certificate you must add it to the systems trust store.
+On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+
+If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
+For example, the following `Dockerfile` is set up to use a self-signed certificate:
+
+```dockerfile
+FROM renovate/renovate
+
+# Changes to the certificate authority require root permissions
+USER root
+
+# Copy and install the self signed certificate
+COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+# Change back to the Ubuntu user
+USER 1000
+
+# Node comes with an own certificate authority store and thus needs to trust the self-signed certificate explicitly
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
+```

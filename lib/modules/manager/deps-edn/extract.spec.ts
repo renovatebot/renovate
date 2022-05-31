@@ -20,6 +20,11 @@ describe('modules/manager/deps-edn/extract', () => {
             's3://my-bucket/maven/releases',
           ],
         },
+        {
+          depName: 'io.github.nextjournal/clerk',
+          currentValue: '0.7.418',
+          datasource: 'clojure',
+        },
         { depName: 'org.clojure/clojure', currentValue: '1.9.0' },
         { depName: 'org.clojure/clojure', currentValue: '1.10.0' },
         { depName: 'org.clojure/clojurescript', currentValue: '1.10.520' },

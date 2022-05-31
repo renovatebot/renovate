@@ -12,6 +12,7 @@ import {
   remove,
   writeLocalFile,
 } from '../../../util/fs';
+import { getFile } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -21,7 +22,11 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { getDependentPackageFiles } from './package-tree';
+import {
+  MSBUILD_CENTRAL_FILE,
+  NUGET_CENTRAL_FILE,
+  getDependentPackageFiles,
+} from './package-tree';
 import {
   getConfiguredRegistries,
   getDefaultRegistries,
@@ -30,7 +35,7 @@ import {
 
 async function addSourceCmds(
   packageFileName: string,
-  config: UpdateArtifactsConfig,
+  _config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
   const registries =
@@ -93,15 +98,15 @@ async function runDotnetRestore(
 }
 
 async function getLockFileContentMap(
-  lockFileNames: string[]
-): Promise<Record<string, string>> {
-  const lockFileContentMap: Record<string, string> = {};
+  lockFileNames: string[],
+  local = false
+): Promise<Record<string, string | null>> {
+  const lockFileContentMap: Record<string, string | null> = {};
 
   for (const lockFileName of lockFileNames) {
-    lockFileContentMap[lockFileName] = await readLocalFile(
-      lockFileName,
-      'utf8'
-    );
+    lockFileContentMap[lockFileName] = local
+      ? await readLocalFile(lockFileName, 'utf8')
+      : await getFile(lockFileName);
   }
 
   return lockFileContentMap;
@@ -115,7 +120,18 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  if (!regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)) {
+  // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
+  // https://github.com/microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions
+  const isCentralManament =
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE ||
+    packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
+    packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
+
+  if (
+    !isCentralManament &&
+    !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
+  ) {
     // This could be implemented in the future if necessary.
     // It's not that easy though because the questions which
     // project file to restore how to determine which lock files
@@ -128,9 +144,12 @@ export async function updateArtifacts({
   }
 
   const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName)),
-    packageFileName,
+    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
   ];
+
+  if (!isCentralManament) {
+    packageFiles.push(packageFileName);
+  }
 
   logger.trace(
     { packageFiles },
@@ -166,7 +185,10 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getLockFileContentMap(lockFileNames);
+    const newLockFileContentMap = await getLockFileContentMap(
+      lockFileNames,
+      true
+    );
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {
@@ -175,15 +197,16 @@ export async function updateArtifacts({
         newLockFileContentMap[lockFileName]
       ) {
         logger.trace(`Lock file ${lockFileName} is unchanged`);
-      } else {
+      } else if (newLockFileContentMap[lockFileName]) {
         retArray.push({
           file: {
             type: 'addition',
             path: lockFileName,
-            contents: newLockFileContentMap[lockFileName],
+            contents: newLockFileContentMap[lockFileName]!,
           },
         });
       }
+      // TODO: else should we return an artifact error if new content is missing?
     }
 
     return retArray.length > 0 ? retArray : null;

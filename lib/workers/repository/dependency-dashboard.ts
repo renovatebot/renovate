@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
@@ -21,7 +22,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   if (checked?.length) {
     const re = regEx(checkMatch);
     checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check);
+      const [, type, branchName] = re.exec(check)!;
       dependencyDashboardChecks[branchName] = type;
     });
   }
@@ -48,7 +49,7 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      Object.assign(config, parseDashboardIssue(issue.body));
+      Object.assign(config, parseDashboardIssue(issue.body!));
     }
   }
 }
@@ -125,7 +126,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
     return;
   }
@@ -144,7 +145,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
     return;
   }
@@ -266,7 +267,7 @@ export async function ensureDependencyDashboard(
   ];
   let inProgress = branches.filter(
     (branch) =>
-      !otherRes.includes(branch.result) &&
+      !otherRes.includes(branch.result!) &&
       branch.prBlockedBy !== 'BranchAutomerge'
   );
   const otherBranches = inProgress.filter(
@@ -333,9 +334,9 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body
+        updatedIssue.body!
       );
-      for (const branchName of Object.keys(config.dependencyDashboardChecks)) {
+      for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
@@ -355,7 +356,7 @@ export async function ensureDependencyDashboard(
     );
   } else {
     await platform.ensureIssue({
-      title: config.dependencyDashboardTitle,
+      title: config.dependencyDashboardTitle!,
       reuseTitle,
       body: issueBody,
       labels: config.dependencyDashboardLabels,

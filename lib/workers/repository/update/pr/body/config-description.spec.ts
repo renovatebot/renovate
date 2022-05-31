@@ -10,6 +10,7 @@ const checks = mocked(_checks);
 describe('workers/repository/update/pr/body/config-description', () => {
   describe('getPrConfigDescription', () => {
     const config: BranchConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
       upgrades: [],
     };
@@ -63,7 +64,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
         ...config,
         schedule: ['* 1 * * * *'],
       });
-      expect(res).toContain(`**Schedule**: "* 1 * * * *" (UTC).`);
+      expect(res).toContain(`"* 1 * * * *" (UTC)`);
     });
 
     it('renders undefined schedule', async () => {

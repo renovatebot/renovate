@@ -15,15 +15,12 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
-  constraints?: Record<string, string>;
   registryUrls?: string[];
   endpoint?: string;
-  gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-  updateInternalDeps?: boolean;
 }
 
 export interface RegexManagerTemplates {
@@ -174,6 +171,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  isInternal?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>>

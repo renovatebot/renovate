@@ -38,7 +38,7 @@ export class ConanDatasource extends Datasource {
     }
     const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
     const res = await this.githubHttp.get(url, {
-      headers: { Accept: 'application/vnd.github.v3.raw' },
+      headers: { accept: 'application/vnd.github.v3.raw' },
     });
     const doc = load(res.body, {
       json: true,
