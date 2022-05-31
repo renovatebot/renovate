@@ -62,6 +62,8 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.packageName = dep.depName;
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
+  } else if (azureDevOpsSshRefMatch?.groups) {
+...
   } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'module';
     if (azureDevOpsSshRefMatch?.groups) {
