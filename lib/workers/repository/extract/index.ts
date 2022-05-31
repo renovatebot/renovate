@@ -19,7 +19,7 @@ export async function extractAllDependencies(
   if (is.nonEmptyArray(config.enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>
-      config.enabledManagers.includes(manager)
+      config.enabledManagers?.includes(manager)
     );
   }
   const extractList: WorkerExtractConfig[] = [];
@@ -36,7 +36,7 @@ export async function extractAllDependencies(
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
     if (manager === 'regex') {
-      for (const regexManager of config.regexManagers) {
+      for (const regexManager of config.regexManagers ?? []) {
         tryConfig(mergeChildConfig(managerConfig, regexManager));
       }
     } else {

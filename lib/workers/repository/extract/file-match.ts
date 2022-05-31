@@ -39,7 +39,7 @@ export function getFilteredFileList(
   config: RenovateConfig,
   fileList: string[]
 ): string[] {
-  const { includePaths, ignorePaths } = config;
+  const { includePaths = [], ignorePaths = [] } = config;
   let filteredList = getIncludedFiles(fileList, includePaths);
   filteredList = filterIgnoredFiles(filteredList, ignorePaths);
   return filteredList;
@@ -50,7 +50,7 @@ export function getMatchingFiles(
   allFiles: string[]
 ): string[] {
   const fileList = getFilteredFileList(config, allFiles);
-  const { fileMatch, manager } = config;
+  const { fileMatch = [], manager } = config;
   let matchedFiles: string[] = [];
   for (const match of fileMatch) {
     logger.debug(`Using file match: ${match} for manager ${manager}`);

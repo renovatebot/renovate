@@ -42,7 +42,7 @@ export async function getManagerPackageFiles(
         }
       }
     }
-    return allPackageFiles;
+    return allPackageFiles ?? [];
   }
   const packageFiles: PackageFile[] = [];
   for (const packageFile of fileList) {
