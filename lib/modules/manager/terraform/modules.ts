@@ -63,13 +63,14 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
   } else if (azureDevOpsSshRefMatch?.groups) {
-...
+    dep.depType = 'module';
+    dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
+    dep.packageName = azureDevOpsSshRefMatch.groups.url;
+    dep.currentValue = azureDevOpsSshRefMatch.groups.tag;
+    dep.datasource = GitTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'module';
-    if (azureDevOpsSshRefMatch?.groups) {
-      dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
-      dep.packageName = azureDevOpsSshRefMatch.groups.url;
-    } else if (gitTagsRefMatch.groups.path.includes('//')) {
+    if (gitTagsRefMatch.groups.path.includes('//')) {
       logger.debug('Terraform module contains subdirectory');
       dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
       const tempLookupName = gitTagsRefMatch.groups.url.split('//');
