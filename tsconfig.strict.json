@@ -15,7 +15,17 @@
     "tmp",
 
     // TODO: fixme
-    "lib/util/**/*.spec.ts",
+    // "lib/util/**/*.spec.ts",
+    "lib/util/cache/package/decorator.spec.ts",
+    "lib/util/exec/docker/index.spec.ts",
+    "lib/util/exec/index.spec.ts",
+    "lib/util/git/author.spec.ts",
+    "lib/util/git/index.spec.ts",
+    "lib/util/http/github.spec.ts",
+    "lib/util/index.spec.ts",
+    "lib/util/merge-confidence/index.spec.ts",
+    "lib/util/package-rules.spec.ts",
+    "lib/util/template/index.spec.ts",
     "lib/workers/**/*.spec.ts",
     "lib/modules/datasource/**/*.spec.ts",
     "lib/modules/manager/**/*.spec.ts",
