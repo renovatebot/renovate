@@ -42,6 +42,7 @@ export async function getChangeLogJSON(
     sourceDirectory,
   } = config;
   const parsedUrl = parseUrl(sourceUrl);
+  // istanbul ignore if
   if (!versioning || !sourceUrl || !parsedUrl) {
     return null;
   }

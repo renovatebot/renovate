@@ -61,7 +61,7 @@ export async function getChangeLogJSON(
   });
   // istanbul ignore if
   if (!token) {
-    if (host?.endsWith('github.com')) {
+    if (host === 'github.com' || host?.endsWith('.github.com')) {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },
