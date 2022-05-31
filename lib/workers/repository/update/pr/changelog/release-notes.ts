@@ -209,23 +209,22 @@ export async function getReleaseNotesMdFileInner(
   const { apiBaseUrl, repository, sourceDirectory, type } = project;
   try {
     if (apiBaseUrl) {
-      switch (type) {
-        case 'gitlab':
-          return await gitlab.getReleaseNotesMd(
-            repository,
-            apiBaseUrl,
-            sourceDirectory
-          );
-        case 'github':
-          return await github.getReleaseNotesMd(
-            repository,
-            apiBaseUrl,
-            sourceDirectory
-          );
-        default:
-          logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-          return null;
+      if (type === 'gitlab') {
+        return await gitlab.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       }
+      if (type === 'github') {
+        return await github.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
+      }
+      // istanbul ignore next
+      logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
