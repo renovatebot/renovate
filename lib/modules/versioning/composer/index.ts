@@ -216,7 +216,7 @@ function getNewValue({
     newValue = npm.getNewValue({
       currentValue: normalizeVersion(currentValue),
       rangeStrategy,
-      currentVersion: normalizeVersion(currentVersion),
+      currentVersion: padZeroes(normalizeVersion(currentVersion)),
       newVersion: padZeroes(normalizeVersion(newVersion)),
     });
   }

@@ -2,12 +2,14 @@ import { defaultConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { BranchStatus } from '../../../../types';
+import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
 jest.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
+    const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
     let config: RenovateConfig;
 
     beforeEach(() => {
@@ -15,6 +17,10 @@ describe('workers/repository/update/branch/automerge', () => {
         ...defaultConfig,
       };
       GlobalConfig.reset();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
     });
 
     it('returns false if not configured for automerge', async () => {
@@ -26,6 +32,13 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automerge = true;
       config.automergeType = 'pr';
       expect(await tryBranchAutomerge(config)).toBe('no automerge');
+    });
+
+    it('returns false if off schedule', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      isScheduledSpy.mockReturnValueOnce(false);
+      expect(await tryBranchAutomerge(config)).toBe('off schedule');
     });
 
     it('returns false if branch status is not success', async () => {

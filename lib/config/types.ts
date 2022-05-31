@@ -65,6 +65,7 @@ export interface RenovateSharedConfig {
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
+  automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
@@ -218,6 +219,7 @@ export interface RenovateConfig
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
+  updateInternalDeps?: boolean;
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];
