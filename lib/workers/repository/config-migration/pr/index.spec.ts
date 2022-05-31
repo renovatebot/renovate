@@ -1,3 +1,4 @@
+import type { RequestError, Response } from 'got';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
@@ -11,7 +12,6 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import type { GotLegacyError } from '../../../../util/http/legacy';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
 
@@ -213,26 +213,30 @@ describe('workers/repository/config-migration/pr/index', () => {
   });
 
   describe('ensureConfigMigrationPr() throws', () => {
-    const err = partial<GotLegacyError>({});
+    const response = partial<Response>({ statusCode: 422 });
+    const err = partial<RequestError>({ response });
 
     beforeEach(() => {
+      jest.resetAllMocks();
+      GlobalConfig.reset();
       git.deleteBranch.mockResolvedValue();
     });
 
     it('throws when trying to create a new PR', async () => {
-      platform.createPr.mockRejectedValue(err);
+      platform.createPr.mockRejectedValueOnce(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toReject();
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
     });
 
     it('deletes branch when PR already exists but cannot find it', async () => {
-      err.statusCode = 422;
-      err.body = { errors: [{ message: 'A pull request already exists' }] };
+      err.response.body = {
+        errors: [{ message: 'A pull request already exists' }],
+      };
       platform.createPr.mockRejectedValue(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
-        'Migration PR already exists but cannot find it'
+        'Migration PR already exists but cannot find it. It was probably created by a different user.'
       );
       expect(git.deleteBranch).toHaveBeenCalledTimes(1);
     });

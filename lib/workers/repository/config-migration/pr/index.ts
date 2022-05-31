@@ -136,12 +136,15 @@ If you need any further assistance then you can also [request help here](${
     }
   } catch (err) {
     if (
-      err.statusCode === 422 &&
-      err.body?.errors?.[0]?.message?.startsWith(
+      err.response?.statusCode === 422 &&
+      err.response?.body?.errors?.[0]?.message?.startsWith(
         'A pull request already exists'
       )
     ) {
-      logger.warn({ err }, 'Migration PR already exists but cannot find it');
+      logger.warn(
+        { err },
+        'Migration PR already exists but cannot find it. It was probably created by a different user.'
+      );
       await deleteBranch(branchName);
       return;
     }
