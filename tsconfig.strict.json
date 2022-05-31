@@ -15,7 +15,6 @@
     "tmp",
 
     // TODO: fixme
-    // "lib/util/**/*.spec.ts",
     "lib/util/cache/package/decorator.spec.ts",
     "lib/util/exec/docker/index.spec.ts",
     "lib/util/exec/index.spec.ts",
