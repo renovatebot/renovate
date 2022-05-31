@@ -77,11 +77,10 @@ function depFromNode(
       case 'dependency':
         if (underBuildSettingsElement) {
           depType = 'build';
+        } else if (node.valueWithPath('optional')?.trim() === 'true') {
+          depType = 'optional';
         } else {
           depType = node.valueWithPath('scope')?.trim() ?? 'compile'; // maven default scope is compile
-          if (node.valueWithPath('optional')?.trim() === 'true') {
-            depType = 'optional';
-          }
         }
         break;
     }
