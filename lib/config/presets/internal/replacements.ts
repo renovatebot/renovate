@@ -11,7 +11,17 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
-      'replacements:material-ui-to-mui',
+      'material-ui/codemod-to-mui/codemod',
+      'material-ui/core-to-mui/material',
+      'material-ui/icons-to-mui/icons-material',
+      'material-ui/lab-to-mui/lab',
+      'material-ui/private-theming-to-mui/private-theming',
+      'material-ui/styled-engine-sc-to-mui/styled-engine-sc',
+      'material-ui/styled-engine-to-mui/styled-engine',
+      'material-ui/styles-to-mui/styles',
+      'material-ui/system-to-mui/system',
+      'material-ui/types-ui-to-mui/types',
+      'material-ui/unstyled-to-mui/core',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:xmldom-to-scoped',
@@ -87,14 +97,134 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  'material-ui-to-mui': {
-    description: 'the @material-ui/core monorepo was renamed to @mui/material',
+  'material-ui/codemod-to-mui/codemod': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/codemod'],
+        replacementName: '@mui/codemod',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/core-to-mui/material': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
     packageRules: [
       {
         matchCurrentVersion: '>=4.0.0 <5.0.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['@material-ui/core'],
         replacementName: '@mui/material',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/icons-to-mui/icons-material': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/icons'],
+        replacementName: '@mui/icons-material',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/lab-to-mui/lab': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/lab'],
+        replacementName: '@mui/lab ',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/private-theming-to-mui/private-theming': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/private-theming'],
+        replacementName: '@mui/private-theming',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/styled-engine-sc-to-mui/styled-engine-sc': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/styled-engine-sc'],
+        replacementName: '@mui/styled-engine-sc',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/styled-engine-to-mui/styled-engine': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/styled-engine'],
+        replacementName: '@mui/styled-engine',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/styles-to-mui/styles': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/styles'],
+        replacementName: '@mui/styles',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/system-to-mui/system': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/system'],
+        replacementName: '@mui/system',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/types-ui-to-mui/types': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/types'],
+        replacementName: '@mui/types',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'material-ui/unstyled-to-mui/core': {
+    description: 'the @material-ui/ monorepo org was renamed to @mui/',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/unstyled'],
+        replacementName: '@mui/core',
         replacementVersion: '5.0.0',
       },
     ],
