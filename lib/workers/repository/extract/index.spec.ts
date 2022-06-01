@@ -40,6 +40,36 @@ describe('workers/repository/extract/index', () => {
       expect(logger.debug).toHaveBeenCalled();
     });
 
+    it('warns if packageFiles is null', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue(null);
+      expect(await extractAllDependencies(config)).toEqual({});
+    });
+
+    it('adds skipReason to internal deps when updateInternalDeps is false/undefined', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue([
+        {
+          deps: [{ depName: 'a', isInternal: true }, { depName: 'b' }],
+        },
+      ]);
+      expect(await extractAllDependencies(config)).toEqual({
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'a',
+                isInternal: true,
+                skipReason: 'internal-package',
+              },
+              { depName: 'b' },
+            ],
+          },
+        ],
+      });
+      expect(logger.debug).toHaveBeenCalled();
+    });
+
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
