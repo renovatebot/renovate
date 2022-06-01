@@ -21,7 +21,7 @@ services:
       - '14250'
 
   otel-collector:
-    image: otel/opentelemetry-collector:0.52.0
+    image: otel/opentelemetry-collector-contrib:0.52.0
     command: ['--config=/etc/otel-collector-config.yml']
     volumes:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml
@@ -31,6 +31,7 @@ services:
       - '55679:55679' # zpages extension
       - '4318:4318' # OTLP HTTP
       - '4317:4317' # OTLP GRPC
+      - '9123:9123' # Prometheus exporter
     depends_on:
       - jaeger
 ```
@@ -43,7 +44,6 @@ receivers:
     protocols:
       grpc:
       http:
-  zipkin:
 
 exporters:
   jaeger:
@@ -51,9 +51,20 @@ exporters:
     tls:
       insecure: true
   logging:
+  prometheus:
+    endpoint: '0.0.0.0:9123'
 
 processors:
   batch:
+  spanmetrics:
+    metrics_exporter: prometheus
+    latency_histogram_buckets: [10ms, 100ms, 250ms, 1s, 30s, 1m, 5m]
+    dimensions:
+      - name: http.method
+      - name: http.status_code
+      - name: http.host
+    dimensions_cache_size: 1000
+    aggregation_temporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE'
 
 extensions:
   health_check:
@@ -66,7 +77,11 @@ service:
     traces:
       receivers: [otlp]
       exporters: [jaeger, logging]
-      processors: [batch]
+      processors: [spanmetrics, batch]
+
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheus]
 ```
 
 Start setup using this command inside the folder containing the files created in the earlier steps:
@@ -100,6 +115,8 @@ You should now see `trace_id` and `span_id` fields in the logs
        "span_id": "4ac1323eeaee
 ```
 
+### Traces
+
 Open now Jaeger under [http://localhost:16686](http://localhost:16686)
 
 You should now be able to pick `renovate` under in the field `service` field
@@ -113,3 +130,149 @@ Press `Find Traces` to search for all Renovate traces and then click on one of t
 You should able to see now the full trace view which shows each HTTP request and internal spans
 
 ![trace view](../assets/images/opentelemetry_trace_viewer.png)
+
+### Metrics
+
+Additional to the received traces some metrics are calculated.
+This is achieved using the [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/spanmetricsprocessor).
+The previous implemented setup will produce following metrics, which are exposed under [http://localhost:9123/metrics](http://localhost:9123/metrics):
+
+```
+# HELP calls_total
+# TYPE calls_total counter
+calls_total{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+calls_total{operation="ensure onboarding PR",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
+calls_total{operation="extractDependencies",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
+calls_total{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+calls_total{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
+calls_total{operation="run",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+calls_total{operation="update repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
+calls_total{http_host="api.github.com:443",http_method="GET",http_status_code="200",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 14
+calls_total{http_host="api.github.com:443",http_method="GET",http_status_code="404",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_OK"} 3
+calls_total{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 9
+calls_total{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 1
+# HELP latency
+# TYPE latency histogram
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="0.1"} 0
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="1"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="2"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="6"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="10"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="100"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="250"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 1
+latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="+Inf"} 1
+latency_sum{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 0.2212
+latency_count{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+
+...
+
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="0.1"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="1"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="2"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="6"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="10"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="100"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="250"} 0
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 1
+latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="+Inf"} 1
+latency_sum{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 508.1901
+latency_count{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="0.1"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="1"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="2"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="6"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="10"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="100"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="250"} 0
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 3
+latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="+Inf"} 3
+latency_sum{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 30947.4689
+latency_count{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
+
+...
+
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="0.1"} 0
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="1"} 0
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="2"} 0
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="6"} 0
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="10"} 0
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="100"} 0
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="250"} 3
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 9
+latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="+Inf"} 9
+latency_sum{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 2306.1385999999998
+latency_count{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 9
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="0.1"} 0
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="1"} 0
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="2"} 0
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="6"} 0
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="10"} 0
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="100"} 0
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="250"} 1
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="9.223372036854775e+12"} 1
+latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="+Inf"} 1
+latency_sum{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 232.9222
+latency_count{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 1
+```
+
+The [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/spanmetricsprocessor) creates two sets of metrics.
+
+#### Calls metric
+
+At first there are the `calls_total` metrics which display how often specific trace spans have been observed.
+
+For example:
+`calls_total{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3` signals that 3 repositories have been renovated.
+`calls_total{operation="run",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1` represents how often Renovate has been run.
+
+If we combine this using the PrometheusQueryLanguage ( PromQL ), we can calculate the average count of repositories each Renovate run handles.
+
+```
+calls_total{operation="renovate repository",service_name="renovate"} / calls_total{operation="run",service_name="renovate"}
+```
+
+This metrics is also for spans generated by http calls:
+
+```yaml
+calls_total{http_host="registry.terraform.io:443",http_method="GET",http_status_code="200",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 5
+```
+
+#### Latency buckets
+
+The second class of metrics exposed are the latency focused latency buckets which allow to create [heatmaps](https://grafana.com/docs/grafana/latest/basics/intro-histograms/#heatmaps).
+A request is added to a backed if the latency is bigger than the bucket value (`le`). `request_duration => le`
+
+As an example if we receive a request which need `1.533s` to complete get following metrics:
+
+```
+latency_bucket{http_host="api.github.com:443",le="0.1"} 0
+latency_bucket{http_host="api.github.com:443",le="1"} 0
+latency_bucket{http_host="api.github.com:443",le="2"} 1
+latency_bucket{http_host="api.github.com:443",le="6"} 1
+latency_bucket{http_host="api.github.com:443",le="10"} 1
+latency_bucket{http_host="api.github.com:443",le="100"} 1
+latency_bucket{http_host="api.github.com:443",le="250"} 1
+latency_bucket{http_host="api.github.com:443",le="9.223372036854775e+12"} 1
+latency_bucket{http_host="api.github.com:443",le="+Inf"} 1
+latency_sum{http_host="api.github.com:443"} 1.533
+latency_count{http_host="api.github.com:443"} 1
+```
+
+Now we have another request which this time takes 10s to complete:
+
+```
+latency_bucket{http_host="api.github.com:443",le="0.1"} 0
+latency_bucket{http_host="api.github.com:443",le="1"} 0
+latency_bucket{http_host="api.github.com:443",le="2"} 1
+latency_bucket{http_host="api.github.com:443",le="6"} 1
+latency_bucket{http_host="api.github.com:443",le="10"} 2
+latency_bucket{http_host="api.github.com:443",le="100"} 2
+latency_bucket{http_host="api.github.com:443",le="250"} 2
+latency_bucket{http_host="api.github.com:443",le="9.223372036854775e+12"} 2
+latency_bucket{http_host="api.github.com:443",le="+Inf"} 2
+latency_sum{http_host="api.github.com:443"} 11.533
+latency_count{http_host="api.github.com:443"} 2
+```
+
+More about the functionality can be found on the Prometheus page for [metric types](https://prometheus.io/docs/concepts/metric_types/#histogram).
