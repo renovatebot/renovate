@@ -164,7 +164,7 @@ for (const pack of mui) {
       },
     ],
   };
-  presets.all.extends.push(`replacements:${title}`);
+  presets.all?.extends?.push(`replacements:${title}`);
 }
 
-presets.all.extends.sort((a, b) => a.localeCompare(b));
+presets.all?.extends?.sort((a, b) => a.localeCompare(b));
