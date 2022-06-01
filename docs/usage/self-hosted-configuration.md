@@ -265,7 +265,7 @@ By default Renovate pulls the sidecar Docker containers from `docker.io/renovate
 You can use the `dockerImagePrefix` option to override this default.
 
 Say you want to pull your images from `ghcr.io/renovatebot`.
-You would use put this in your configuration file:
+You would put this in your configuration file:
 
 ```json
 {
