@@ -30,7 +30,7 @@ import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 
 const prRenovateVersionsRe = regEx(
-  /<!--\s*(?<json>{\s*"prCreationVer":.*\s*"prUpdateVer":\s*".*"\s*})\s*-->/
+  /<!--\s*renovate-pr-data\s*(?<json>{(?:\s*.*)+})\s*-->/
 );
 
 export function getPlatformPrOptions(
@@ -314,15 +314,15 @@ export async function ensurePr(
           parsed.prUpdateVer = pkg.version;
           prBody = prBody.replace(
             prRenovateVersionsRe,
-            `\n<!-- ${JSON.stringify(parsed, null, 2)} -->`
+            `\n<!-- renovate-pr-data ${JSON.stringify(parsed, null, 2)} \n-->\n`
           );
           logger.debug(`PR Renovate Version :${JSON.stringify(parsed)}`);
         } else {
-          prBody += `\n<!-- ${JSON.stringify(
+          prBody += `\n<!-- renovate-pr-data ${JSON.stringify(
             { prCreationVer: null, prUpdateVer: pkg.version },
             null,
             2
-          )} -->`;
+          )} \n-->\n`;
           logger.debug(
             `PR Renovate Version :${JSON.stringify({
               prCreationVer: null,
@@ -359,11 +359,11 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        prBody += `\n<!-- ${JSON.stringify(
+        prBody += `\n<!-- renovate-pr-data ${JSON.stringify(
           { prCreationVer: pkg.version, prUpdateVer: pkg.version },
           null,
           2
-        )} -->`;
+        )} \\n-->\\n`;
         logger.debug(
           `PR Renovate Version : ${JSON.stringify({
             prCreationVer: pkg.version,
