@@ -6,7 +6,7 @@ Requirements:
 
 ## Prepare setup
 
-Create a `docker-compose.yaml` and `otel-collector-config.yml` file as seen below in a folder
+Create a `docker-compose.yaml` and `otel-collector-config.yml` file as seen below in a folder.
 
 `docker-compose.yaml`:
 
@@ -90,9 +90,9 @@ Start setup using this command inside the folder containing the files created in
 docker-compose up
 ```
 
-This command will start an [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib) and an instance of [Jaeger](https://www.jaegertracing.io/)
+This command will start an [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib) and an instance of [Jaeger](https://www.jaegertracing.io/).
 
-Jaeger will be now reachable under [http://localhost:16686](http://localhost:16686)
+Jaeger will be now reachable under [http://localhost:16686](http://localhost:16686).
 
 ## Run Renovate with OpenTelemetry
 
@@ -106,7 +106,7 @@ docker run \
   renovate/renovate:latest
 ```
 
-You should now see `trace_id` and `span_id` fields in the logs
+You should now see `trace_id` and `span_id` fields in the logs.
 
 ```
  INFO: Repository finished (repository=org/example)
@@ -117,9 +117,9 @@ You should now see `trace_id` and `span_id` fields in the logs
 
 ### Traces
 
-Open now Jaeger under [http://localhost:16686](http://localhost:16686)
+Open now Jaeger under [http://localhost:16686](http://localhost:16686).
 
-You should now be able to pick `renovate` under in the field `service` field
+You should now be able to pick `renovate` under in the field `service` field.
 
 ![service picker](../assets/images/opentelemetry_pick_service.png)
 
@@ -127,7 +127,7 @@ Press `Find Traces` to search for all Renovate traces and then click on one of t
 
 ![pick trace](../assets/images/opentelemetry_choose_trace.png)
 
-You should able to see now the full trace view which shows each HTTP request and internal spans
+You should be able to see now the full trace view which shows each HTTP request and internal spans.
 
 ![trace view](../assets/images/opentelemetry_trace_viewer.png)
 
