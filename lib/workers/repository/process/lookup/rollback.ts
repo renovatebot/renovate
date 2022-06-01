@@ -45,7 +45,10 @@ export function getRollbackUpdate(
     logger.debug('No newVersion to roll back to');
     return null;
   }
-  while (!isVersionStable(newVersion, lessThanVersions, version)) {
+  while (
+    lessThanVersions.length !== 0 &&
+    !isVersionStable(newVersion, lessThanVersions, version)
+  ) {
     newVersion = lessThanVersions.pop()?.version;
   }
   const newValue = version.getNewValue({
