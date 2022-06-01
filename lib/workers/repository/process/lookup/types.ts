@@ -25,6 +25,7 @@ export interface RollbackConfig {
   depName?: string;
   packageFile?: string;
   versioning: string;
+  ignoreUnstable?: boolean;
 }
 
 export interface LookupUpdateConfig

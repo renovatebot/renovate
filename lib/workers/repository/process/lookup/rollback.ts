@@ -10,7 +10,8 @@ export function getRollbackUpdate(
   versions: Release[],
   version: VersioningApi
 ): LookupUpdate {
-  const { packageFile, versioning, depName, currentValue } = config;
+  const { packageFile, versioning, depName, currentValue, ignoreUnstable } =
+    config;
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
     logger.debug(
@@ -39,17 +40,20 @@ export function getRollbackUpdate(
     'Versions found before rolling back'
   );
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
-  let newVersion = lessThanVersions.pop()?.version;
+  let stableVersions;
+  let newVersion;
+  if (ignoreUnstable) {
+    stableVersions = lessThanVersions.filter((v) =>
+      isVersionStable(v.version, lessThanVersions, version)
+    );
+    newVersion = stableVersions.pop()?.version;
+  } else {
+    newVersion = lessThanVersions.pop()?.version;
+  }
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
     return null;
-  }
-  while (
-    lessThanVersions.length !== 0 &&
-    !isVersionStable(newVersion, lessThanVersions, version)
-  ) {
-    newVersion = lessThanVersions.pop()?.version;
   }
   const newValue = version.getNewValue({
     currentValue,

@@ -1038,6 +1038,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       config.followTag = 'insiders';
       config.rollbackPrs = true;
+      config.ignoreUnstable = false;
       httpMock
         .scope('https://registry.npmjs.org')
         .get('/typescript')
@@ -1706,7 +1707,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rollback for invalid version to last stable version', async () => {
-      config.currentValue = '2.5.160';
+      config.currentValue = '2.5.17';
       config.depName = 'vue';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
