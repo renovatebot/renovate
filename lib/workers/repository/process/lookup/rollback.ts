@@ -2,6 +2,7 @@ import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource/types';
 import type { LookupUpdate } from '../../../../modules/manager/types';
 import type { VersioningApi } from '../../../../modules/versioning';
+import { isVersionStable } from './filter';
 import type { RollbackConfig } from './types';
 
 export function getRollbackUpdate(
@@ -38,11 +39,14 @@ export function getRollbackUpdate(
     'Versions found before rolling back'
   );
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
-  const newVersion = lessThanVersions.pop()?.version;
+  let newVersion = lessThanVersions.pop()?.version;
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
     return null;
+  }
+  while (!isVersionStable(newVersion, lessThanVersions, version)) {
+    newVersion = lessThanVersions.pop()?.version;
   }
   const newValue = version.getNewValue({
     currentValue,

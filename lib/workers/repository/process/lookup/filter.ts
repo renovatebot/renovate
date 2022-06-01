@@ -18,17 +18,6 @@ export function filterVersions(
 ): Release[] {
   const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
     config;
-  function isVersionStable(version: string): boolean {
-    if (!versioning.isStable(version)) {
-      return false;
-    }
-    // Check if the datasource returned isStable = false
-    const release = releases.find((r) => r.version === version);
-    if (release?.isStable === false) {
-      return false;
-    }
-    return true;
-  }
   // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
     return [];
@@ -121,18 +110,35 @@ export function filterVersions(
     return filteredVersions;
   }
 
-  if (isVersionStable(currentVersion)) {
-    return filteredVersions.filter((v) => isVersionStable(v.version));
+  if (isVersionStable(currentVersion, releases, versioning)) {
+    return filteredVersions.filter((v) =>
+      isVersionStable(v.version, releases, versioning)
+    );
   }
 
   // if current is unstable then allow unstable in the current major only
   // Allow unstable only in current major
   return filteredVersions.filter(
     (v) =>
-      isVersionStable(v.version) ||
+      isVersionStable(v.version, releases, versioning) ||
       (versioning.getMajor(v.version) === versioning.getMajor(currentVersion) &&
         versioning.getMinor(v.version) ===
           versioning.getMinor(currentVersion) &&
         versioning.getPatch(v.version) === versioning.getPatch(currentVersion))
   );
+}
+export function isVersionStable(
+  version: string,
+  releases: Release[],
+  versioning: VersioningApi
+): boolean {
+  if (!versioning.isStable(version)) {
+    return false;
+  }
+  // Check if the datasource returned isStable = false
+  const release = releases.find((r) => r.version === version);
+  if (release?.isStable === false) {
+    return false;
+  }
+  return true;
 }
