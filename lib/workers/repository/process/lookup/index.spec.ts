@@ -1706,19 +1706,22 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rollback for invalid version to last stable version', async () => {
-      config.currentValue = '2.9.99';
-      config.depName = 'q';
+      config.currentValue = '2.5.160';
+      config.depName = 'vue';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       config.ignoreUnstable = true;
-      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/vue')
+        .reply(200, vueJson);
       const res = (await lookup.lookupUpdates(config)).updates;
       expect(res).toEqual([
         {
           bucket: `rollback`,
           newMajor: 2,
-          newValue: `2.0.3`,
-          newVersion: `2.0.3`,
+          newValue: `2.5.16`,
+          newVersion: `2.5.16`,
           updateType: `rollback`,
         },
       ]);
