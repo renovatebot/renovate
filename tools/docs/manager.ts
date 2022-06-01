@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../lib/config/types';
 import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
@@ -160,22 +161,27 @@ sidebar_label: ${displayName}
     }
     md += managerReadmeContent + '\n\n';
 
-    const [featureList, featureLen] = stringifyIssues(
-      managerIssuesMap[manager]?.features
-    );
+    const [featureList] = stringifyIssues(managerIssuesMap[manager]?.features);
     if (featureList) {
-      md += '<!-- prettier-ignore -->\n';
-      md += `??? note "Click me to see the list of ${featureLen} upcoming features"\n`;
+      md += '## Upcoming features\n\n';
       md += featureList;
       md += '\n';
     }
 
-    const [bugList, bugsLen] = stringifyIssues(managerIssuesMap[manager]?.bugs);
+    const [bugList] = stringifyIssues(managerIssuesMap[manager]?.bugs);
     if (bugList) {
-      md += '<!-- prettier-ignore -->\n';
-      md += `??? note "Click me to see the list of ${bugsLen} open bug reports"\n`;
+      md += '## Open bug reports\n\n';
       md += bugList;
       md += '\n';
+    }
+
+    if (featureList || bugList) {
+      const now = DateTime.utc().toFormat('MMMM dd, yyyy');
+      const lists = `list of ${featureList ? 'features' : ''}${
+        featureList && bugList ? ' and ' : ''
+      }${bugList ? 'bugs' : ''}`;
+      md += '\n\n';
+      md += `The above ${lists} were current at time of page generation on ${now}.\n`;
     }
 
     await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
