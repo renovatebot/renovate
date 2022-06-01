@@ -163,7 +163,7 @@ sidebar_label: ${displayName}
 
     const [featureList] = stringifyIssues(managerIssuesMap[manager]?.features);
     if (featureList) {
-      md += '## Upcoming features\n\n';
+      md += '## Related feature requests awaiting implementation\n\n';
       md += featureList;
       md += '\n';
     }
