@@ -69,3 +69,10 @@ A full log dump takes a lot of time to scroll through, and it is next to impossi
 
 Instead, please select the logs relevant to your problem and paste just those.
 If it turns out there's a need for the full dump, someone can ask you for it later.
+
+## Do not twist feature requests into bug reports
+
+"I don't like this" or "I didn't expect this to happen" is not the same thing as a bug.
+Some people file bug reports because they think it will get them more attention.
+Instead, you may be just wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you are much less likely to get the attention you're hoping for.
+If in doubt, start a discussion instead.
