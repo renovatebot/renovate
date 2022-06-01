@@ -1,4 +1,9 @@
 import type { Preset } from '../types';
+import {
+  PresetTemplate,
+  Replacement,
+  addPresets,
+} from './auto-generate-replacement';
 
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
@@ -134,37 +139,30 @@ export const presets: Record<string, Preset> = {
   },
 };
 
-const mui = [
-  ['unstyled', 'core'],
-  ['icons', 'icons-material'],
-  ['core', 'material'],
-  ['system'],
-  ['styles'],
-  ['lab'],
-  ['types'],
-  ['styled-engine'],
-  ['styled-engine-sc'],
-  ['private-theming'],
-  ['codemod'],
+const muiReplacement: Replacement[] = [
+  [['@material-ui/unstyled'], '@mui/core'],
+  [['@material-ui/icons'], '@mui/icons-material'],
+  [['@material-ui/core'], '@mui/material'],
+  [['@material-ui/system'], '@mui/system'],
+  [['@material-ui/styles'], '@mui/styles'],
+  [['@material-ui/lab'], '@mui/labs'],
+  [['@material-ui/types'], '@mui/types'],
+  [['@material-ui/styled-engine'], '@mui/styled-engine'],
+  [['@material-ui/styled-engine-sc'], '@mui/styled-engine-sc'],
+  [['@material-ui/private-theming'], '@mui/private-theming'],
+  [['@material-ui/codemod'], '@mui/codemod'],
 ];
 
-for (const pack of mui) {
-  const from = pack[0];
-  const to = pack[1] ? pack[1] : pack[0];
-  const title = `material-ui/${from}-to-mui/${to}`;
-  presets[title] = {
-    description: 'the @material-ui/ monorepo org was renamed to @mui/',
-    packageRules: [
-      {
-        matchCurrentVersion: '>=4.0.0 <5.0.0',
-        matchDatasources: ['npm'],
-        matchPackageNames: [`@material-ui/${from}`],
-        replacementName: `@mui/${to}`,
-        replacementVersion: '5.0.0',
-      },
-    ],
-  };
-  presets.all?.extends?.push(`replacements:${title}`);
-}
+const mui: PresetTemplate = {
+  description:
+    'the material-ui monorepo org was renamed from @material-ui to @mui/',
+  packageRules: {
+    matchCurrentVersion: '>=4.0.0 <5.0.0',
+    matchDatasources: ['npm'],
+    replacements: muiReplacement,
+    replacementVersion: '5.0.0',
+  },
+  title: 'material-ui-to-mui',
+};
 
-presets.all?.extends?.sort((a, b) => a.localeCompare(b));
+addPresets(presets, mui);
