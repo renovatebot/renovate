@@ -2,7 +2,6 @@ import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource/types';
 import type { LookupUpdate } from '../../../../modules/manager/types';
 import type { VersioningApi } from '../../../../modules/versioning';
-import { isVersionStable } from './filter';
 import type { RollbackConfig } from './types';
 
 export function getRollbackUpdate(
@@ -44,7 +43,7 @@ export function getRollbackUpdate(
   let newVersion;
   if (ignoreUnstable) {
     stableVersions = lessThanVersions.filter((v) =>
-      isVersionStable(v.version, lessThanVersions, version)
+      version.isStable(v.version)
     );
     newVersion = stableVersions.pop()?.version;
   } else {
