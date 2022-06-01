@@ -87,5 +87,5 @@ export function getTracerProvider(): NodeTracerProvider {
 }
 
 export function getTracer(): Tracer {
-  return api.trace.getTracer('renovate');
+  return traceProvider.getTracer('renovate');
 }

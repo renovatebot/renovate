@@ -2,6 +2,8 @@ import { NoopSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { MultiSpanProcessor } from '@opentelemetry/sdk-trace-base/build/src/MultiSpanProcessor';
 import { getTracerProvider, init } from './index';
 
+jest.unmock('.');
+
 describe('instrumentation/index', () => {
   it('should use NoopSpanProcessor if not activated', () => {
     init();
