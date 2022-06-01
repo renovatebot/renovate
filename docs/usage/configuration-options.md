@@ -185,6 +185,12 @@ Example use:
 }
 ```
 
+## automergeSchedule
+
+Use the `automergeSchedule` option to define times of week or month during which Renovate may automerge its PRs.
+The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
+To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
+
 ## automergeStrategy
 
 This setting is only applicable if you opt-in by configuring `automerge` to `true` and `automergeType` to `pr` for any of your dependencies.
@@ -312,6 +318,12 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
 !!! note
     This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
     If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
+
+## branchPrefixOld
+
+Renovate uses branch names as part of its checks to see if an update PR was created previously, and already merged or ignored.
+If you change `branchPrefix`, then no previously closed PRs will match, which could lead to Renovate recreating PRs in such cases.
+Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate to look for those branches too, and avoid this happening.
 
 ## branchTopic
 
@@ -1240,7 +1252,7 @@ By default, Renovate will skip over any repositories that are forked.
 This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
 
-If you are using the hosted WhiteSource Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
+If you are using the hosted Mend Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
 
 ## includePaths
 
@@ -1881,7 +1893,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `gomodNoMassage`: Skip massaging `replace` directives before calling `go` commands
+- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
@@ -2483,8 +2495,6 @@ If enabled Renovate tries to determine PR reviewers by matching rules defined in
 See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
 ## reviewersSampleSize
-
-Take a random sample of given size from reviewers.
 
 ## rollback
 
