@@ -51,7 +51,6 @@ export function getRollbackUpdate(
   if (!newVersion) {
     newVersion = lessThanVersions.pop()?.version;
   }
-
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
