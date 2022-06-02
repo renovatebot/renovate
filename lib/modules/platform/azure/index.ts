@@ -406,7 +406,7 @@ export async function getBranchStatus(
 export async function createWi(
   title: string,
   description: string
-): Promise<string> {
+): Promise<number> {
   const azureApiworkItemTracking = await azureApi.workItemTrackingApi();
 
   const patchDoc = [
@@ -433,7 +433,7 @@ export async function createWi(
     throw new Error('Work item was not created.');
   }
 
-  return workItem.id.toString();
+  return workItem.id;
 }
 
 export async function createPr({
@@ -452,7 +452,7 @@ export async function createPr({
   let wiId = platformOptions?.azureWorkItemId?.toString();
 
   if (platformOptions?.azureAutoWi) {
-    wiId = await createWi(title, description);
+    wiId = (await createWi(title, description)).toString();
   }
 
   const workItemRefs = [
