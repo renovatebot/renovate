@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import Marshal from 'marshal';
 import { logger } from '../../../logger';
 import { HttpError } from '../../../util/http';
@@ -44,13 +45,19 @@ export class InternalRubyGemsDatasource extends Datasource {
     dependency: string,
     registry: string
   ): Promise<ReleaseResult | null> {
-    if (await this.isNexusDataSource(registry)) {
+    const { endPoint, repository } = this.nexusEndPointRepoFrom(registry);
+    if (
+      is.nonEmptyString(endPoint) &&
+      is.nonEmptyString(repository) &&
+      (await this.isNexusDataSource(endPoint))
+    ) {
       logger.debug(
-        { dependency, api: DEPENDENCIES_PATH },
+        { dependency, api: 'Nexus' },
         'RubyGems lookup for dependency'
       );
       const gemReleases: Release[] = await this.getReleasesFromNexus(
-        registry,
+        repository,
+        endPoint,
         dependency
       );
       return {
@@ -201,71 +208,95 @@ export class InternalRubyGemsDatasource extends Datasource {
     return new Marshal(response.body).parsed as T;
   }
 
-  private async isNexusDataSource(registry: string): Promise<boolean> {
-    const statusEndPoint = '/service/rest/v1/status';
-    const endPointRe = regEx(`^(?<endPoint>.*:\\d{1,5})\\/`);
-    const { endPoint } = registry.match(endPointRe)?.groups ?? {
+  private nexusEndPointRepoFrom(registry: string): {
+    endPoint: string;
+    repository: string;
+  } {
+    const endPointRe = regEx(
+      `^(?<endPoint>.*:\\d{1,5}).*\\/repository\\/(?<repository>\\w+)\\/?`
+    );
+    const { endPoint, repository } = registry.match(endPointRe)?.groups ?? {
       endPoint: '',
+      repository: '',
     };
-    const nexusUrl = endPoint.concat(statusEndPoint);
+    return { endPoint, repository };
+  }
+
+  private async isNexusDataSource(nexusEndPoint: string): Promise<boolean> {
+    const statusEndPoint = '/service/rest/v1/status';
+    const nexusUrl = nexusEndPoint.concat(statusEndPoint);
     let isNexus = false;
     try {
       const response = await this.http.getJson<HttpResponse>(nexusUrl);
       isNexus = response.headers?.server?.includes('Nexus') ?? false;
     } catch (err) {
-      logger.debug({ err }, 'Not a nexus datasource');
+      logger.debug(`${nexusEndPoint} is not a nexus datasource`);
     }
     return isNexus;
   }
 
   private async getReleasesFromNexus(
-    registry: string,
+    repository: string,
+    endPoint: string,
     dependencyName: string
   ): Promise<Release[]> {
     const result: Release[] = [];
+    const gemItems: JsonNexusGemsItems[] = [];
+    const url = this.getNexusGemReleasesEndPoint(
+      repository,
+      endPoint,
+      dependencyName
+    );
     try {
-      const url = this.getNexusGemReleasesEndPoint(registry, dependencyName);
       const nexusResponse = (await this.http.getJson<NexusGems>(url))?.body || {
         continuationToken: null,
         items: [],
       };
-      const gemItems: JsonNexusGemsItems[] = [...nexusResponse.items];
-
-      let continuationToken: string | null = nexusResponse.continuationToken;
-      while (continuationToken) {
-        const gemsOfPage: NexusGems = await this.pageOfNexusGems(
+      gemItems.push(...nexusResponse.items);
+      const continuationToken: string | null = nexusResponse.continuationToken;
+      if (continuationToken) {
+        const paginationGems = await this.paginationResult(
           url,
           continuationToken
         );
-        gemItems.push(...gemsOfPage.items.filter(Boolean));
-        continuationToken = gemsOfPage.continuationToken;
+        gemItems.push(...paginationGems);
       }
-      result.push(
-        ...gemItems.map((item) => {
-          return { version: item.version, rubyPlatform: 'nexus' };
-        })
-      );
     } catch (error) {
       logger.debug({ error }, 'Failed to retreive gems from nexus');
       throw error;
     }
+
+    result.push(
+      ...gemItems.map((item) => {
+        return { version: item.version, rubyPlatform: 'nexus' };
+      })
+    );
     return result;
   }
 
   private getNexusGemReleasesEndPoint(
-    registry: string,
-    dependencyName: string
+    repository: string,
+    endPoint: string,
+    depName: string
   ): string {
-    const registryArray = registry.split('/');
-    const repository = registryArray[registryArray.indexOf('repository') + 1];
-    const endPointRe = regEx(`^(?<endPoint>.*:\\d{1,5})\\/`);
-    const { endPoint } = registry.match(endPointRe.source)?.groups || {
-      endPoint: '',
-    };
     const nexusSearchPoint = '/service/rest/v1/search';
-    const query = `${nexusSearchPoint}?repository=${repository}&name=${dependencyName}&sort=version`;
+    const query = `${nexusSearchPoint}?repository=${repository}&name=${depName}&sort=version`;
     const gemReleasesEndPoint = endPoint.concat(query);
     return gemReleasesEndPoint;
+  }
+
+  private async paginationResult(
+    url: string,
+    continuationToken: string
+  ): Promise<JsonNexusGemsItems[]> {
+    const gemItems: JsonNexusGemsItems[] = [];
+    let pageToken: string | null = continuationToken;
+    while (pageToken) {
+      const gemsOfPage: NexusGems = await this.pageOfNexusGems(url, pageToken);
+      gemItems.push(...gemsOfPage.items.filter(Boolean));
+      pageToken = gemsOfPage.continuationToken;
+    }
+    return gemItems;
   }
 
   private async pageOfNexusGems(

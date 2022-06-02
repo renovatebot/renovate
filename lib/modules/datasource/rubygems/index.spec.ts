@@ -344,5 +344,21 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(500, {});
       expect(await getPkgReleases(newparams)).toBeNull();
     });
+
+    it('returns empty relases when nexus datasource fails', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(404)
+        .get('/repository/gems/api/v1/dependencies?gems=rails')
+        .reply(404);
+      expect(await getPkgReleases(newparams)).toBeNull();
+    });
   });
 });
