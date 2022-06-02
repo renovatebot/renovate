@@ -21,15 +21,19 @@ export function generateUpdate(
     newValue: null!,
   };
 
+  // istanbul ignore if
   if (release.checksumUrl !== undefined) {
     update.checksumUrl = release.checksumUrl;
   }
+  // istanbul ignore if
   if (release.downloadUrl !== undefined) {
     update.downloadUrl = release.downloadUrl;
   }
+  // istanbul ignore if
   if (release.newDigest !== undefined) {
     update.newDigest = release.newDigest;
   }
+  // istanbul ignore if
   if (release.releaseTimestamp !== undefined) {
     update.releaseTimestamp = release.releaseTimestamp;
   }
