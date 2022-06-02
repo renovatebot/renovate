@@ -8,6 +8,7 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { JsonPatchDocument } from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { PlatformId } from '../../../constants';
@@ -402,6 +403,39 @@ export async function getBranchStatus(
   return BranchStatus.green;
 }
 
+export async function createWi(
+  title: string,
+  description: string
+): Promise<string> {
+  const azureApiworkItemTracking = await azureApi.workItemTrackingApi();
+
+  const patchDoc = [
+    {
+      op: 'add',
+      path: '/fields/System.Title',
+      value: title,
+    },
+    {
+      op: 'add',
+      path: '/fields/System.Description',
+      value: description,
+    },
+  ] as JsonPatchDocument;
+
+  const workItem = await azureApiworkItemTracking.createWorkItem(
+    null,
+    patchDoc,
+    config.project,
+    'User Story'
+  );
+
+  if (workItem?.id === undefined) {
+    throw new Error('Work item was not created.');
+  }
+
+  return workItem.id.toString();
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -415,9 +449,15 @@ export async function createPr({
   const targetRefName = getNewBranchName(targetBranch);
   const description = max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
+  let wiId = platformOptions?.azureWorkItemId?.toString();
+
+  if (platformOptions?.azureAutoWi) {
+    wiId = await createWi(title, description);
+  }
+
   const workItemRefs = [
     {
-      id: platformOptions?.azureWorkItemId?.toString(),
+      id: wiId,
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
