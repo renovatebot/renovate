@@ -140,17 +140,17 @@ export const presets: Record<string, Preset> = {
 };
 
 const muiReplacement: Replacement[] = [
-  [['@material-ui/unstyled'], '@mui/core'],
-  [['@material-ui/icons'], '@mui/icons-material'],
+  [['@material-ui/codemod'], '@mui/codemod'],
   [['@material-ui/core'], '@mui/material'],
-  [['@material-ui/system'], '@mui/system'],
-  [['@material-ui/styles'], '@mui/styles'],
+  [['@material-ui/icons'], '@mui/icons-material'],
   [['@material-ui/lab'], '@mui/labs'],
-  [['@material-ui/types'], '@mui/types'],
+  [['@material-ui/private-theming'], '@mui/private-theming'],
   [['@material-ui/styled-engine'], '@mui/styled-engine'],
   [['@material-ui/styled-engine-sc'], '@mui/styled-engine-sc'],
-  [['@material-ui/private-theming'], '@mui/private-theming'],
-  [['@material-ui/codemod'], '@mui/codemod'],
+  [['@material-ui/styles'], '@mui/styles'],
+  [['@material-ui/system'], '@mui/system'],
+  [['@material-ui/types'], '@mui/types'],
+  [['@material-ui/unstyled'], '@mui/core'],
 ];
 
 const mui: PresetTemplate = {
