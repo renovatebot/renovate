@@ -16,10 +16,11 @@ export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   let managerList = getManagerList();
-  if (is.nonEmptyArray(config.enabledManagers)) {
+  const { enabledManagers } = config;
+  if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>
-      config.enabledManagers?.includes(manager)
+      enabledManagers.includes(manager)
     );
   }
   const extractList: WorkerExtractConfig[] = [];
