@@ -71,7 +71,7 @@ The NuGet client and server must use the same version.
 Renovate as a NuGet client supports both `v2` and `v3` protocols, and will use `v2` unless the configured feed URL ends with `index.json`.
 This mirrors the behavior of the official NuGet client.
 
-If you have a `v3` feed that doesn't match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
+If you have a `v3` feed that doesn't end with `index.json`, like for example on the JFrog Artifactory, then you must append `#protocolVersion=3` to the registry URL:
 
 ```json
 {
