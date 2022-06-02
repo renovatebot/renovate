@@ -146,7 +146,7 @@ Supported tools for dynamic install are:
 - `jb`
 - `npm`
 
-Tools not on this list fall back to using `binarySource=global`.
+Tools not on this list fall back to `binarySource=global`.
 
 ## cacheDir
 
