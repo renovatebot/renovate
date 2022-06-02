@@ -42,7 +42,8 @@ export async function getManagerPackageFiles(
         }
       }
     }
-    return allPackageFiles;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    return allPackageFiles!;
   }
   const packageFiles: PackageFile[] = [];
   for (const packageFile of fileList) {

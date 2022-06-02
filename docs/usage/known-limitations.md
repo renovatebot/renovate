@@ -26,9 +26,9 @@ For this reason, it's best to allow for a minimum 2-3 hours schedule window per 
 
 ## Automerge limitations
 
-Renovate automerges at most one branch per run.
-Renovate will only automerge a branch when it is up-to-date with the target branch.
-Therefore, Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time.
+- Renovate automerges at most one branch per run
+- Renovate will only automerge a branch when it is up-to-date with the target branch
+- Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
 
 The limitation to only merge one branch per run is because Renovate's dependency and branch state is based on what was present in the base branch at the start of the run.
 If a branch is merged into the base branch during Renovate's run - including by other users - it means that remaining Renovate branches may have Git conflicts.
