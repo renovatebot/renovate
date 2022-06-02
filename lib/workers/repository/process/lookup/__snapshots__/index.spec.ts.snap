@@ -776,6 +776,42 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() should roll back to unstable 1`] = `
+Array [
+  Object {
+    "bucket": "rollback",
+    "newMajor": 3,
+    "newValue": "3.0.1-insiders.20180726",
+    "newVersion": "3.0.1-insiders.20180726",
+    "updateType": "rollback",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() should roll back to unstable version 1`] = `
+Array [
+  Object {
+    "bucket": "rollback",
+    "newMajor": 3,
+    "newValue": "3.0.1-insiders.20180726",
+    "newVersion": "3.0.1-insiders.20180726",
+    "updateType": "rollback",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() should roll back to unstable version current 1`] = `
+Array [
+  Object {
+    "bucket": "rollback",
+    "newMajor": 3,
+    "newValue": "3.0.1-insiders.20180726",
+    "newVersion": "3.0.1-insiders.20180726",
+    "updateType": "rollback",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
