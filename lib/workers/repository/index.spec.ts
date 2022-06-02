@@ -1,6 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, mocked } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import * as _process from './process';
 import type { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
@@ -23,6 +24,16 @@ describe('workers/repository/index', () => {
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);
+      expect(res).toBeUndefined();
+    });
+
+    it('shows endpoint', async () => {
+      process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
+      const res = await renovateRepository({
+        ...config,
+        endpoint: 'https://github.com',
+      });
+      expect(GlobalConfig.get().endpoint).toBe('https://github.com');
       expect(res).toBeUndefined();
     });
   });
