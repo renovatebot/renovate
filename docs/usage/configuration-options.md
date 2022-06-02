@@ -2205,7 +2205,7 @@ Use named capture group matching _or_ set a corresponding template.
 We recommend you use only one of these methods, or you'll get confused.
 
 We recommend that you also tell Renovate what `versioning` to use.
-If the `versioning` field is missing, then Renovaet defaults to using `semver` versioning.
+If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
