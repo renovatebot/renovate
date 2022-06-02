@@ -1,7 +1,6 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, mocked } from '../../../test/util';
-import { GlobalConfig } from '../../config/global';
 import * as _process from './process';
 import type { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
@@ -19,7 +18,6 @@ describe('workers/repository/index', () => {
 
     beforeEach(() => {
       config = getConfig();
-      GlobalConfig.set({ localDir: '' });
     });
 
     it('runs', async () => {
