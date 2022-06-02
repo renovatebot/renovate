@@ -11,6 +11,7 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:material-ui-to-mui',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:xmldom-to-scoped',
@@ -83,6 +84,18 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@hapi/joi'],
         replacementName: 'joi',
         replacementVersion: '17.1.1',
+      },
+    ],
+  },
+  'material-ui-to-mui': {
+    description: 'the @material-ui/core monorepo was renamed to @mui/material',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@material-ui/core'],
+        replacementName: '@mui/material',
+        replacementVersion: '5.0.0',
       },
     ],
   },

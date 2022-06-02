@@ -92,7 +92,7 @@ The `node` images use these tag formats:
 
 Renovate understands both formats and raises updates like these:
 
-- From `14.17.4` to `14.7.5`
+- From `14.17.4` to `14.17.5`
 - From `14.17.4-alpine3.11` to `14.17.5-alpine3.11`
 
 #### Docker digests
