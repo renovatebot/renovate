@@ -83,6 +83,7 @@ export interface Issue {
 export type PlatformPrOptions = {
   azureAutoApprove?: boolean;
   azureWorkItemId?: number;
+  azureAutoWi?: boolean;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
