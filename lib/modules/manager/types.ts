@@ -21,7 +21,6 @@ export interface ExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-  updateInternalDeps?: boolean;
 }
 
 export interface RegexManagerTemplates {
@@ -59,7 +58,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
-  manager?: string;
+  manager?: string | null;
   packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
@@ -146,6 +145,9 @@ export interface LookupUpdate {
   newVersion?: string;
   updateType?: UpdateType;
   userStrings?: Record<string, string>;
+  checksumUrl?: string;
+  downloadUrl?: string;
+  releaseTimestamp?: any;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -172,6 +174,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  isInternal?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>>

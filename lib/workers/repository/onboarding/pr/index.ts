@@ -152,14 +152,16 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addParticipants(config, pr);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (
-      err.statusCode === 422 &&
+      err.response?.statusCode === 422 &&
       err.response?.body?.errors?.[0]?.message?.startsWith(
         'A pull request already exists'
       )
     ) {
-      logger.debug('Onboarding PR already exists but cannot find it');
+      logger.warn(
+        'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+      );
       await deleteBranch(config.onboardingBranch);
       return;
     }

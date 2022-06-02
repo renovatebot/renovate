@@ -534,6 +534,16 @@ const options: RenovateOptions[] = [
     default: ['at any time'],
   },
   {
+    name: 'automergeSchedule',
+    description: 'Limit automerge to these times of day or week.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    cli: true,
+    env: false,
+    default: ['at any time'],
+  },
+  {
     name: 'updateNotScheduled',
     description:
       'Whether to update branches when not scheduled. Renovate will not create branches outside of the schedule.',
@@ -1215,6 +1225,13 @@ const options: RenovateOptions[] = [
     default: `renovate/`,
   },
   {
+    name: 'branchPrefixOld',
+    description: 'Old Prefix to check for existing PRs.',
+    stage: 'branch',
+    type: 'string',
+    default: `renovate/`,
+  },
+  {
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
@@ -1819,7 +1836,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
-      'gomodNoMassage',
+      'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',

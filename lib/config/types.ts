@@ -27,6 +27,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
+  branchPrefixOld?: string;
   branchName?: string;
   manager?: string | null;
   commitMessage?: string;
@@ -64,6 +65,7 @@ export interface RenovateSharedConfig {
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
+  automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
@@ -93,6 +95,7 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
+  endpoint?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -118,6 +121,7 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
+  endpoint?: string;
 }
 
 export interface LegacyAdminConfig {
@@ -217,6 +221,7 @@ export interface RenovateConfig
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
+  updateInternalDeps?: boolean;
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];
@@ -407,10 +412,10 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string;
+  manager?: string | null;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
