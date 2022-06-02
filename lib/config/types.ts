@@ -410,10 +410,10 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string;
+  manager?: string | null;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
