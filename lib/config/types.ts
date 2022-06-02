@@ -95,7 +95,6 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
-  endpoint?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -122,6 +121,7 @@ export interface RepoGlobalConfig {
   localDir?: string;
   cacheDir?: string;
   endpoint?: string;
+  platform?: string;
 }
 
 export interface LegacyAdminConfig {
