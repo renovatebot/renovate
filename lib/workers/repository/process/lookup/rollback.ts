@@ -45,6 +45,9 @@ export function getRollbackUpdate(
   if (version.isStable(currentValue)) {
     newVersion = stableVersions.pop()?.version;
   }
+  if (!version.isStable(currentValue)) {
+    newVersion = lessThanVersions.pop()?.version;
+  }
   if (!newVersion) {
     newVersion = lessThanVersions.pop()?.version;
   }
