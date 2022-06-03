@@ -644,6 +644,56 @@ describe('modules/platform/azure/index', () => {
       expect(pr).toMatchSnapshot();
     });
 
+    it('should create work item and return a PR object', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            createPullRequest: jest.fn(() => ({
+              pullRequestId: 456,
+              displayNumber: `Pull Request #456`,
+            })),
+            createPullRequestLabel: jest.fn(() => ({})),
+          } as any)
+      );
+      azureApi.workItemTrackingApi.mockImplementationOnce(
+        () =>
+          ({
+            createWorkItem: jest.fn(() => ({
+              id: 123,
+            })),
+          } as any)
+      );
+      const pr = await azure.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformOptions: { azureAutoWi: true },
+      });
+      expect(pr).toMatchSnapshot();
+    });
+
+    it('throws on work item not created', async () => {
+      azureApi.workItemTrackingApi.mockImplementationOnce(
+        () =>
+          ({
+            createWorkItem: jest.fn(() => ({})),
+          } as any)
+      );
+      await expect(
+        azure.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'The Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: { azureAutoWi: true },
+        })
+      ).rejects.toThrow();
+    });
+
     it('should create and return a PR object from base branch', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(

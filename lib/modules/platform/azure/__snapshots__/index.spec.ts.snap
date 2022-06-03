@@ -16,6 +16,22 @@ Object {
 }
 `;
 
+exports[`modules/platform/azure/index createPr() should create work item and return a PR object 1`] = `
+Object {
+  "bodyStruct": Object {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
 exports[`modules/platform/azure/index createPr() should create and return a PR object from base branch 1`] = `
 Object {
   "bodyStruct": Object {

@@ -403,39 +403,6 @@ export async function getBranchStatus(
   return BranchStatus.green;
 }
 
-export async function createWi(
-  title: string,
-  description: string
-): Promise<number> {
-  const azureApiworkItemTracking = await azureApi.workItemTrackingApi();
-
-  const patchDoc = [
-    {
-      op: 'add',
-      path: '/fields/System.Title',
-      value: title,
-    },
-    {
-      op: 'add',
-      path: '/fields/System.Description',
-      value: description,
-    },
-  ] as JsonPatchDocument;
-
-  const workItem = await azureApiworkItemTracking.createWorkItem(
-    null,
-    patchDoc,
-    config.project,
-    'User Story'
-  );
-
-  if (workItem?.id === undefined) {
-    throw new Error('Work item was not created.');
-  }
-
-  return workItem.id;
-}
-
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -804,6 +771,36 @@ export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation (#9592)
   return Promise.resolve([]);
+}
+
+async function createWi(title: string, description: string): Promise<number> {
+  const azureApiworkItemTracking = await azureApi.workItemTrackingApi();
+
+  const patchDoc = [
+    {
+      op: 'add',
+      path: '/fields/System.Title',
+      value: title,
+    },
+    {
+      op: 'add',
+      path: '/fields/System.Description',
+      value: description,
+    },
+  ] as JsonPatchDocument;
+
+  const workItem = await azureApiworkItemTracking.createWorkItem(
+    null,
+    patchDoc,
+    config.project,
+    'User Story'
+  );
+
+  if (workItem?.id === undefined) {
+    throw new Error('Work item was not created.');
+  }
+
+  return workItem.id;
 }
 
 async function getUserIds(users: string[]): Promise<User[]> {

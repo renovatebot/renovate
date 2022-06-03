@@ -17,6 +17,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(azure.gitApi).toThrow('No config found for azure');
       expect(azure.coreApi).toThrow('No config found for azure');
       expect(azure.policyApi).toThrow('No config found for azure');
+      expect(azure.workItemTrackingApi).toThrow('No config found for azure');
     });
 
     it('should set personal access token and endpoint', () => {
