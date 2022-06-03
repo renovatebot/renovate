@@ -94,16 +94,16 @@ You normally don't need to configure this, but one example where it can be usefu
 In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
 This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
 
-## aliases
+## registryAliases
 
-The `aliases` object is used for configuring registry aliases.
+The `registryAliases` object is used for configuring registry registryAliases.
 Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
 
-The above managers include this default alias:
+The above managers include this default registryAlias:
 
 ```json
 {
-  "aliases": {
+  "registryAliases": {
     "stable": "https://charts.helm.sh/stable"
   }
 }

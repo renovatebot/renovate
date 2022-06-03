@@ -17,7 +17,7 @@ export interface ManagerData<T> {
 export interface ExtractConfig {
   registryUrls?: string[];
   endpoint?: string;
-  aliases?: Record<string, string>;
+  registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
@@ -51,7 +51,7 @@ export interface UpdateArtifactsConfig {
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
-  aliases?: Record<string, string>;
+  registryAliases?: Record<string, string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
