@@ -269,7 +269,7 @@ export async function writeUpdatedPackageFiles(
     const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
-        hostType: config.platform,
+        hostType: 'github',
         url: 'https://api.github.com/',
       });
       for (const upgrade of config.upgrades) {
@@ -507,7 +507,7 @@ export async function getAdditionalFiles(
   let token: string | undefined;
   try {
     ({ token } = hostRules.find({
-      hostType: config.platform,
+      hostType: 'github',
       url: 'https://api.github.com/',
     }));
     token = token ? /* istanbul ignore next */ `${token}@` : token;

@@ -14,6 +14,7 @@ describe('workers/repository/onboarding/branch/config', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      platform: 'github',
     });
   });
 
