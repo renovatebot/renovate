@@ -60,7 +60,7 @@ export async function getChangeLogJSON(
   // istanbul ignore if
   if (!token) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    if (host!.endsWith('github.com')) {
+    if (host === 'github.com' || host!.endsWith('.github.com')) {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },
