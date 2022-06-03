@@ -6,8 +6,7 @@ import { detectPnpmWorkspaces } from './pnpm';
 import { matchesAnyPattern } from './utils';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile>[],
-  updateInternalDeps: boolean
+  packageFiles: Partial<PackageFile>[]
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting Lerna and Yarn Workspaces');
@@ -28,23 +27,26 @@ export async function detectMonorepos(
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
-      ).map((pattern) => getSiblingFileName(packageFile, pattern));
+      )
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        .map((pattern) => getSiblingFileName(packageFile!, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          getSubDirectory(sp.packageFile),
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          getSubDirectory(sp.packageFile!),
           internalPackagePatterns
         )
       );
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.packageJsonName)
         .filter(Boolean);
-      if (!updateInternalDeps) {
-        p.deps?.forEach((dep) => {
-          if (internalPackageNames.includes(dep.depName)) {
-            dep.skipReason = 'internal-package';
-          }
-        });
-      }
+
+      p.deps?.forEach((dep) => {
+        if (internalPackageNames.includes(dep.depName)) {
+          dep.isInternal = true;
+        }
+      });
+
       for (const subPackage of internalPackageFiles) {
         subPackage.managerData = subPackage.managerData || {};
         subPackage.managerData.lernaJsonFile = lernaJsonFile;
@@ -57,13 +59,12 @@ export async function detectMonorepos(
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
           subPackage.npmrc = subPackage.npmrc || npmrc;
         }
-        if (!updateInternalDeps) {
-          subPackage.deps?.forEach((dep) => {
-            if (internalPackageNames.includes(dep.depName)) {
-              dep.skipReason = 'internal-package';
-            }
-          });
-        }
+
+        subPackage.deps?.forEach((dep) => {
+          if (internalPackageNames.includes(dep.depName)) {
+            dep.isInternal = true;
+          }
+        });
       }
     }
   }

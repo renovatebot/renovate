@@ -1,10 +1,11 @@
 import semver from 'semver';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
-import type { ExecOptions } from '../../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -21,12 +22,13 @@ export function getLernaVersion(
     );
     return 'latest';
   }
-  return lernaDep.currentValue;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return lernaDep.currentValue!;
 }
 
 export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
-  cwd: string,
+  lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
@@ -37,8 +39,8 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  const preCommands = [];
-  const cmd = [];
+  const preCommands: string[] = [];
+  const cmd: string[] = [];
   let cmdOptions = '';
   try {
     if (lernaClient === 'yarn') {
@@ -74,12 +76,13 @@ export async function generateLockFiles(
     }
     lernaCommand += cmdOptions;
     const tagConstraint = await getNodeConstraint(config);
+    const extraEnv: ExtraEnv = {
+      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+      npm_config_store: env.npm_config_store,
+    };
     const execOptions: ExecOptions = {
-      cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      cwdFile: upath.join(lockFileDir, 'package.json'),
+      extraEnv,
       docker: {
         image: 'node',
         tagScheme: 'node',
@@ -89,8 +92,8 @@ export async function generateLockFiles(
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      extraEnv.NPM_AUTH = env.NPM_AUTH;
+      extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);

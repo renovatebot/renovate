@@ -6,6 +6,7 @@ describe('modules/manager/pip_requirements/range', () => {
     const config: RangeConfig = { rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('pins if auto', () => {
     const config: RangeConfig = { rangeStrategy: 'auto' };
     expect(getRangeStrategy(config)).toBe('pin');

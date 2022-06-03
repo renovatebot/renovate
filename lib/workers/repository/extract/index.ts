@@ -1,6 +1,10 @@
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
+import type {
+  ManagerConfig,
+  RenovateConfig,
+  WorkerExtractConfig,
+} from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -12,19 +16,20 @@ export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   let managerList = getManagerList();
-  if (is.nonEmptyArray(config.enabledManagers)) {
+  const { enabledManagers } = config;
+  if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>
-      config.enabledManagers.includes(manager)
+      enabledManagers.includes(manager)
     );
   }
-  const extractList: RenovateConfig[] = [];
+  const extractList: WorkerExtractConfig[] = [];
   const fileList = await getFileList();
 
-  const tryConfig = (extractConfig: RenovateConfig): void => {
-    const matchingFileList = getMatchingFiles(extractConfig, fileList);
+  const tryConfig = (managerConfig: ManagerConfig): void => {
+    const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push({ ...extractConfig, fileList: matchingFileList });
+      extractList.push({ ...managerConfig, fileList: matchingFileList });
     }
   };
 
@@ -32,7 +37,7 @@ export async function extractAllDependencies(
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
     if (manager === 'regex') {
-      for (const regexManager of config.regexManagers) {
+      for (const regexManager of config.regexManagers ?? []) {
         tryConfig(mergeChildConfig(managerConfig, regexManager));
       }
     } else {
@@ -43,6 +48,14 @@ export async function extractAllDependencies(
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
+      for (const p of packageFiles ?? []) {
+        for (const dep of p.deps ?? []) {
+          if (!config.updateInternalDeps && dep.isInternal) {
+            dep.skipReason = 'internal-package';
+          }
+        }
+      }
+
       return { manager: managerConfig.manager, packageFiles };
     })
   );

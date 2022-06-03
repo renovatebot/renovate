@@ -11,6 +11,7 @@ describe('util/http/host-rules', () => {
   const options = {
     hostType: PlatformId.Github,
   };
+
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();
@@ -32,6 +33,7 @@ describe('util/http/host-rules', () => {
       hostType: 'npm',
       authType: 'Basic',
       token: 'XXX',
+      timeout: 5000,
     });
 
     hostRules.add({
@@ -79,6 +81,7 @@ describe('util/http/host-rules', () => {
           "authType": "Basic",
         },
         "hostType": "npm",
+        "timeout": 5000,
         "token": "XXX",
       }
     `);

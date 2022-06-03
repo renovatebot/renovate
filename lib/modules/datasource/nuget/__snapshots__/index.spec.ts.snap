@@ -1,70 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/datasource/nuget/index getReleases can't get packages list (v3) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases empty packages list (v3) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases extracts feed version from registry URL hash 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "my-registry",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://my-registry/",
-  },
-]
-`;
-
 exports[`modules/datasource/nuget/index getReleases handles paginated results (v2) 1`] = `
 Object {
   "registryUrl": "https://www.nuget.org/api/v2",
@@ -77,29 +12,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases handles paginated results (v2) 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "example.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://example.org/",
-  },
-]
 `;
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v2) 1`] = `
@@ -289,20 +201,6 @@ Object {
   ],
   "sourceUrl": "https://nunit.org/",
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases processes real data (v2) 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
 `;
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is a nuget.org 1`] = `
@@ -496,50 +394,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is a nuget.org 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
-  },
-]
-`;
-
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
   "homepage": "https://nunit.org/",
@@ -728,50 +582,6 @@ Object {
   ],
   "sourceUrl": "https://nunit.org/",
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "myprivatefeed",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://myprivatefeed/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "myprivatefeed",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://myprivatefeed/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
-  },
-]
 `;
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) for several catalog pages 1`] = `
@@ -1496,80 +1306,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) for several catalog pages 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/1.0.0.505/4.4.0-beta5.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.4.0-beta6/4.6.0-rc2.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.6.0-rc3/5.0.0-beta11.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nlog/4.7.3/nlog.nuspec",
-  },
-]
-`;
-
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) nuspec fetch 404 error 1`] = `
 Object {
   "registryUrl": "https://api.nuget.org/v3/index.json",
@@ -1757,50 +1493,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) nuspec fetch 404 error 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
-  },
-]
 `;
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) nuspec fetch error 1`] = `
@@ -1992,64 +1684,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) nuspec fetch error 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases processes real data no relase (v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
 exports[`modules/datasource/nuget/index getReleases processes real data with no github project url (v2) 1`] = `
 Object {
   "registryUrl": "https://www.nuget.org/api/v2",
@@ -2060,20 +1694,6 @@ Object {
   ],
   "sourceUrl": "https://nunit.org",
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases processes real data with no github project url (v2) 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
 `;
 
 exports[`modules/datasource/nuget/index getReleases processes real data without project url (v2) 1`] = `
@@ -2211,20 +1831,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases processes real data without project url (v2) 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
 `;
 
 exports[`modules/datasource/nuget/index getReleases returns deduplicated results 1`] = `
@@ -2460,271 +2066,4 @@ Object {
   ],
   "sourceUrl": "https://github.com/nunit/nunit",
 }
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns deduplicated results 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "myprivatefeed",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://myprivatefeed/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "myprivatefeed",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://myprivatefeed/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for empty result (v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for empty result (v3) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for empty result (v3v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for non 200 (v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for non 200 (v3) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for non 200 (v3v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for unknown error (v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for unknown error (v3v2) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "www.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for unknown error in getQueryUrlForV3Feed  (v3) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
-  },
-]
-`;
-
-exports[`modules/datasource/nuget/index getReleases returns null for unknown error in getReleasesFromV3Feed (v3) 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.nuget.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.nuget.org/v3/index.json",
-  },
-]
 `;

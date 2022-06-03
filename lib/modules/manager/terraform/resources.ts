@@ -1,3 +1,6 @@
+import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
@@ -23,54 +26,80 @@ export function extractTerraformResource(
   lines: string[]
 ): ExtractionResult {
   let lineNumber = startingLine;
-  let line = lines[lineNumber];
-  const deps: PackageDependency[] = [];
+  const line = lines[lineNumber];
+  const deps: PackageDependency<ResourceManagerData>[] = [];
+  const managerData: ResourceManagerData = {
+    terraformDependencyType: TerraformDependencyTypes.resource,
+  };
   const dep: PackageDependency<ResourceManagerData> = {
-    managerData: {
-      terraformDependencyType: TerraformDependencyTypes.resource,
-    },
+    managerData,
   };
 
   const typeMatch = resourceTypeExtractionRegex.exec(line);
 
   // Sets the resourceType, e.g. "helm_release" 'resource "helm_release" "test_release"'
-  dep.managerData.resourceType =
-    TerraformResourceTypes[typeMatch?.groups?.type] ??
+  managerData.resourceType =
+    TerraformResourceTypes[typeMatch?.groups?.type as TerraformResourceTypes] ??
     TerraformResourceTypes.unknown;
 
   /**
    * Iterates over all lines of the resource to extract the relevant key value pairs,
    * e.g. the chart name for helm charts or the terraform_version for tfe_workspace
    */
+  let braceCounter = 0;
   do {
-    lineNumber += 1;
-    line = lines[lineNumber];
-    const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
-      switch (kvMatch.groups.key) {
-        case 'chart':
-        case 'image':
-        case 'name':
-        case 'repository':
-          dep.managerData[kvMatch.groups.key] = kvMatch.groups.value;
-          break;
-        case 'version':
-        case 'terraform_version':
-          dep.currentValue = kvMatch.groups.value;
-          break;
-        default:
-          /* istanbul ignore next */
-          break;
-      }
+    // istanbul ignore if
+    if (lineNumber > lines.length - 1) {
+      logger.debug(`Malformed Terraform file detected.`);
     }
-  } while (line.trim() !== '}');
+
+    const line = lines[lineNumber];
+
+    // istanbul ignore else
+    if (is.string(line)) {
+      // `{` will be counted with +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
+      const openBrackets = (line.match(regEx(/\{/g)) || []).length;
+      const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
+      braceCounter = braceCounter + openBrackets - closedBrackets;
+
+      const kvMatch = keyValueExtractionRegex.exec(line);
+      if (kvMatch?.groups) {
+        switch (kvMatch.groups.key) {
+          case 'chart':
+          case 'image':
+          case 'name':
+          case 'repository':
+            managerData[kvMatch.groups.key] = kvMatch.groups.value;
+            break;
+          case 'version':
+          case 'terraform_version':
+            dep.currentValue = kvMatch.groups.value;
+            break;
+          default:
+            /* istanbul ignore next */
+            break;
+        }
+      }
+    } else {
+      // stop - something went wrong
+      braceCounter = 0;
+    }
+    lineNumber += 1;
+  } while (braceCounter !== 0);
   deps.push(dep);
+
+  // remove last lineNumber addition to not skip a line after the last bracket
+  lineNumber -= 1;
   return { lineNumber, dependencies: deps };
 }
 
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
+  // istanbul ignore if: should tested?
+  if (!dep.managerData) {
+    return;
+  }
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
@@ -106,7 +135,8 @@ export function analyseTerraformResource(
         dep.skipReason = 'local-chart';
       }
       dep.depType = 'helm_release';
-      dep.registryUrls = [dep.managerData.repository];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      dep.registryUrls = [dep.managerData.repository!];
       dep.depName = dep.managerData.chart;
       dep.datasource = HelmDatasource.id;
       break;

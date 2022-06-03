@@ -11,16 +11,19 @@ describe('modules/manager/kubernetes/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();
     });
+
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(kubernetesImagesFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
+
     it('extracts image line in a YAML array', () => {
       const res = extractPackageFile(kubernetesArraySyntaxFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
+
     it('ignores non-Kubernetes YAML files', () => {
       expect(extractPackageFile(otherYamlFile)).toBeNull();
     });

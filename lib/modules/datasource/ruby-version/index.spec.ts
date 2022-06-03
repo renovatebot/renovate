@@ -17,8 +17,8 @@ describe('modules/datasource/ruby-version/index', () => {
         depName: 'ruby',
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for empty result', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')
@@ -27,7 +27,6 @@ describe('modules/datasource/ruby-version/index', () => {
       await expect(
         getPkgReleases({ datasource, depName: 'ruby' })
       ).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for 404', async () => {
@@ -38,7 +37,6 @@ describe('modules/datasource/ruby-version/index', () => {
       await expect(
         getPkgReleases({ datasource, depName: 'ruby' })
       ).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

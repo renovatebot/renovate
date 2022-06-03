@@ -1,4 +1,5 @@
 import {
+  azureDevOpsSshRefMatchRegex,
   bitbucketRefMatchRegex,
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
@@ -21,6 +22,7 @@ describe('modules/manager/terraform/modules', () => {
       expect(project).toBe('hashicorp/example.repo-123');
     });
   });
+
   describe('gitTagsRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(
@@ -54,6 +56,10 @@ describe('modules/manager/terraform/modules', () => {
         'ssh://github.com/hashicorp/example.repo-123?ref=v1.0.0'
       ).groups;
 
+      const withoutSshHttpHttps = gitTagsRefMatchRegex.exec(
+        'git@my-gitlab-instance.local:devops/terraform/instance.git?ref=v5.0.0'
+      ).groups;
+
       expect(http.project).toBe('hashicorp/example.repo-123');
       expect(http.tag).toBe('v1.0.0');
 
@@ -62,8 +68,12 @@ describe('modules/manager/terraform/modules', () => {
 
       expect(ssh.project).toBe('hashicorp/example.repo-123');
       expect(ssh.tag).toBe('v1.0.0');
+
+      expect(withoutSshHttpHttps.project).toBe('terraform/instance.git');
+      expect(withoutSshHttpHttps.tag).toBe('v5.0.0');
     });
   });
+
   describe('bitbucketRefMatchRegex', () => {
     it('should split workspace, project and tag from source', () => {
       const ssh = bitbucketRefMatchRegex.exec(
@@ -111,6 +121,68 @@ describe('modules/manager/terraform/modules', () => {
       expect(dots.workspace).toBe('hashicorp');
       expect(dots.project).toBe('example.repo-123');
       expect(dots.tag).toBe('v1.0.0');
+    });
+  });
+
+  describe('azureDevOpsSshRefMatchRegex', () => {
+    it('should split organization, project, repository and tag from source url', () => {
+      const ssh = azureDevOpsSshRefMatchRegex.exec(
+        'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
+      )?.groups;
+
+      expect(ssh).toEqual({
+        modulepath: '',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
+    });
+
+    it('should split organization, project, repository and tag from source url with git prefix', () => {
+      const sshGit = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0'
+      )?.groups;
+
+      expect(sshGit).toEqual({
+        modulepath: '',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
+    });
+
+    it('should split organization, project, repository and tag from source url with subfolder', () => {
+      const subfolder = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0'
+      )?.groups;
+
+      expect(subfolder).toEqual({
+        modulepath: '//some-module/path',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
+    });
+
+    it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
+      const dots = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=v1.0.0'
+      )?.groups;
+
+      expect(dots).toEqual({
+        modulepath: '//some-module/path',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: 'v1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
     });
   });
 });

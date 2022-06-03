@@ -11,7 +11,7 @@ describe('modules/manager/droneci/extract', () => {
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(Fixtures.get('.drone.yml'));
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(4);
+      expect(res.deps).toHaveLength(6);
     });
   });
 });

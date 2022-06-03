@@ -13,9 +13,11 @@ let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
+// istanbul ignore if: not easily testable
 if (is.string(process.env.LOG_LEVEL)) {
   process.env.LOG_LEVEL = process.env.LOG_LEVEL.toLowerCase().trim();
 }
+
 validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',

@@ -29,13 +29,15 @@ describe('modules/manager/gradle/parser', () => {
   describe('dependencies', () => {
     describe('simple cases', () => {
       test.each`
-        input                                                                     | output
-        ${'group: "foo", name: "bar", version: "1.2.3"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'group: "foo", name: "bar", version: depVersion'}                       | ${null}
-        ${'("foo", "bar", "1.2.3")'}                                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'(group = "foo", name = "bar", version = "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
+        input                                                                             | output
+        ${'group: "foo", name: "bar", version: "1.2.3"'}                                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'group: "foo", name: "bar", version: depVersion'}                               | ${null}
+        ${'("foo", "bar", "1.2.3")'}                                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'(group = "foo", name = "bar", version = "1.2.3")'}                             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'"foo:bar:1.2.3@zip"'}                                                          | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
+        ${'(group: "foo", name: "bar", version: "1.2.3", classifier: "sources")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'(group: "foo", name: "bar", version: "1.2.3") {exclude module: "spring-jcl"}'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$input', ({ input, output }) => {
         const { deps } = parseGradle(input);
         expect(deps).toMatchObject([output].filter(Boolean));
@@ -61,14 +63,16 @@ describe('modules/manager/gradle/parser', () => {
 
     describe('variable substitutions', () => {
       test.each`
-        def                    | str                                          | output
-        ${'foo = "1.2.3"'}     | ${'"foo:bar:$foo@@@"'}                       | ${null}
-        ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'foo.bar = "1.2.3"'} | ${'"foo:bar:$foo.bar"'}                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
-        ${'foo = "1.2.3"'}     | ${'"foo:bar_$foo:4.5.6"'}                    | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
-        ${''}                  | ${'foo.bar = "foo:bar:1.2.3"'}               | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}     | ${'foobar = "foo:bar:$baz"'}                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'baz = "1.2.3"'}     | ${'group: "foo", name: "bar", version: baz'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        def                                   | str                                                     | output
+        ${'foo = "1.2.3"'}                    | ${'"foo:bar:$foo@@@"'}                                  | ${null}
+        ${'baz = "1.2.3"'}                    | ${'"foo:bar:$baz"'}                                     | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'foo.bar = "1.2.3"'}                | ${'"foo:bar:$foo.bar"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
+        ${'foo = "1.2.3"'}                    | ${'"foo:bar_$foo:4.5.6"'}                               | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
+        ${''}                                 | ${'foo.bar = "foo:bar:1.2.3"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'baz = "1.2.3"'}                    | ${'foobar = "foo:bar:$baz"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'}                    | ${'group: "foo", name: "bar", version: baz'}            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'}                    | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'library("foo.bar", "foo", "bar")'} | ${'"${foo.bar}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', ({ def, str, output }) => {
         const input = [def, str].join('\n');
         const { deps } = parseGradle(input);

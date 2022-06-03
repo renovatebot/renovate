@@ -9,6 +9,7 @@ Multi-platform and multi-language.
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
+![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
 
 ## Why Use Renovate?
 
@@ -30,7 +31,7 @@ Multi-platform and multi-language.
 
 Renovate works on the following platforms:
 
-- GitHub (.com and Enterprise)
+- GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 - Bitbucket Cloud
 - Bitbucket Server
@@ -105,6 +106,7 @@ To run your own instance of Renovate you have several options:
 ## Contributing
 
 If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
+To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
 
 ## Security / Disclosure
 

@@ -10,7 +10,7 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
-    sharp: 'https://github.com/lovell/sharp/blob/master/docs/changelog.md',
+    sharp: 'https://github.com/lovell/sharp/blob/main/docs/changelog.md',
     'tailwindcss-classnames':
       'https://github.com/muhammadsammy/tailwindcss-classnames/blob/master/CHANGELOG.md',
     'zone.js':

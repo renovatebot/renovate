@@ -1,4 +1,5 @@
 import { ProgrammingLanguage } from '../../../constants';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
@@ -27,4 +28,7 @@ export const defaultConfig = {
   versioning: rubyVersioning.id,
 };
 
-export const supportedDatasources = [RubyGemsDatasource.id];
+export const supportedDatasources = [
+  RubyGemsDatasource.id,
+  RubyVersionDatasource.id,
+];

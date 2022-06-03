@@ -17,6 +17,7 @@ describe('modules/manager/sbt/update', () => {
       expect(bumpedContent).toEqual(content.replace('0.0.2', '0.0.3'));
       expect(bumpedContent).not.toEqual(content);
     });
+
     it('no ops', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,
@@ -26,6 +27,7 @@ describe('modules/manager/sbt/update', () => {
 
       expect(bumpedContent).toEqual(content);
     });
+
     it('updates', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,
@@ -35,6 +37,7 @@ describe('modules/manager/sbt/update', () => {
       expect(bumpedContent).toEqual(content.replace('0.0.2', '0.1.0'));
       expect(bumpedContent).not.toEqual(content);
     });
+
     it('returns content if bumping errors', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,

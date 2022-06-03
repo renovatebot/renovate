@@ -58,6 +58,12 @@ In the example above all matches of `github.com` will be replaced by `ghc` in `d
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
 
+### lowercase
+
+The `lowercase` helper converts a given string to lower case.
+
+`{{{ lowercase depName }}}`
+
 ### containsString
 
 Returns `true` if a given string is a substring.

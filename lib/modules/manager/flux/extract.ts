@@ -68,16 +68,17 @@ function readManifest(content: string, file: string): FluxManifest | null {
 function resolveManifest(
   manifest: FluxManifest,
   context: FluxManifest[]
-): PackageDependency[] {
+): PackageDependency[] | null {
   const resourceManifests = context.filter(
     (manifest) => manifest.kind === 'resource'
   ) as ResourceFluxManifest[];
   const repositories = resourceManifests.flatMap(
     (manifest) => manifest.repositories
   );
+  let res: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
-      return [
+      res = [
         {
           depName: 'fluxcd/flux2',
           datasource: GithubReleasesDatasource.id,
@@ -87,9 +88,10 @@ function resolveManifest(
           },
         },
       ];
+      break;
     case 'resource':
-      return manifest.releases.map((release) => {
-        const res: PackageDependency = {
+      res = manifest.releases.map((release) => {
+        const dep: PackageDependency = {
           depName: release.spec.chart.spec.chart,
           currentValue: release.spec.chart.spec.version,
           datasource: HelmDatasource.id,
@@ -104,16 +106,17 @@ function resolveManifest(
                 release.metadata?.namespace)
         );
         if (matchingRepositories.length) {
-          res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
         } else {
-          res.skipReason = 'unknown-registry';
+          dep.skipReason = 'unknown-registry';
         }
 
-        return res;
+        return dep;
       });
+      break;
   }
-  // istanbul ignore next: unreachable code
-  return null;
+
+  return res;
 }
 
 export function extractPackageFile(
@@ -125,7 +128,7 @@ export function extractPackageFile(
     return null;
   }
   const deps = resolveManifest(manifest, [manifest]);
-  return deps.length ? { deps: deps } : null;
+  return deps?.length ? { deps: deps } : null;
 }
 
 export async function extractAllPackageFiles(
@@ -145,7 +148,7 @@ export async function extractAllPackageFiles(
 
   for (const manifest of manifests) {
     const deps = resolveManifest(manifest, manifests);
-    if (deps.length) {
+    if (deps?.length) {
       results.push({
         packageFile: manifest.file,
         deps: deps,

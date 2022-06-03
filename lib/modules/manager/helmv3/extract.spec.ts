@@ -10,6 +10,7 @@ describe('modules/manager/helmv3/extract', () => {
       jest.resetAllMocks();
       fs.readLocalFile = jest.fn();
     });
+
     it('skips invalid registry urls', async () => {
       const content = `
       apiVersion: v2
@@ -37,6 +38,7 @@ describe('modules/manager/helmv3/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
     });
+
     it('parses simple Chart.yaml correctly', async () => {
       const content = `
       apiVersion: v2
@@ -135,6 +137,7 @@ describe('modules/manager/helmv3/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
     });
+
     it("doesn't fail if Chart.yaml is invalid", async () => {
       const content = `
       Invalid Chart.yaml content.
@@ -149,6 +152,7 @@ describe('modules/manager/helmv3/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('skips local dependencies', async () => {
       const content = `
       apiVersion: v2
@@ -177,6 +181,7 @@ describe('modules/manager/helmv3/extract', () => {
         ],
       });
     });
+
     it('returns null if no dependencies key', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       `);
@@ -196,6 +201,7 @@ describe('modules/manager/helmv3/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if dependencies are an empty list', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       `);
@@ -215,6 +221,7 @@ describe('modules/manager/helmv3/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if dependencies key is invalid', async () => {
       const content = `
       apiVersion: v2
@@ -234,6 +241,7 @@ describe('modules/manager/helmv3/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if Chart.yaml is empty', async () => {
       const content = '';
       const fileName = 'Chart.yaml';
@@ -244,6 +252,7 @@ describe('modules/manager/helmv3/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if Chart.yaml uses an unsupported apiVersion', async () => {
       const content = `
       apiVersion: v1
@@ -260,6 +269,7 @@ describe('modules/manager/helmv3/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if name and version are missing for all dependencies', async () => {
       const content = `
       apiVersion: v2

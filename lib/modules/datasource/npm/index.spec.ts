@@ -59,7 +59,6 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, missingVersions);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should fetch package info from npm', async () => {
@@ -69,7 +68,6 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should parse repo url', async () => {
@@ -95,7 +93,6 @@ describe('modules/datasource/npm/index', () => {
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should parse repo url (string)', async () => {
@@ -117,7 +114,6 @@ describe('modules/datasource/npm/index', () => {
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should return deprecated', async () => {
@@ -151,7 +147,6 @@ describe('modules/datasource/npm/index', () => {
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res.deprecationMessage).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should handle foobar', async () => {
@@ -161,7 +156,6 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should handle no time', async () => {
@@ -172,21 +166,18 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should return null if lookup fails 401', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(401);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should return null if lookup fails', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(404);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should throw error for unparseable', async () => {
@@ -197,7 +188,6 @@ describe('modules/datasource/npm/index', () => {
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
     ).rejects.toThrow();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should throw error for 429', async () => {
@@ -205,7 +195,6 @@ describe('modules/datasource/npm/index', () => {
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
     ).rejects.toThrow();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should throw error for 5xx', async () => {
@@ -213,7 +202,6 @@ describe('modules/datasource/npm/index', () => {
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should throw error for 408', async () => {
@@ -221,7 +209,6 @@ describe('modules/datasource/npm/index', () => {
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should throw error for others', async () => {
@@ -229,7 +216,6 @@ describe('modules/datasource/npm/index', () => {
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
     ).rejects.toThrow();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should not send an authorization header if public package', async () => {
@@ -241,7 +227,6 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should send an authorization header if provided', async () => {
@@ -257,7 +242,6 @@ describe('modules/datasource/npm/index', () => {
       npmrc: '_auth = 1234',
     });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should use host rules by hostName if provided', async () => {
@@ -275,7 +259,6 @@ describe('modules/datasource/npm/index', () => {
     const npmrc = 'registry=https://npm.mycustomregistry.com/';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should use host rules by baseUrl if provided', async () => {
@@ -298,7 +281,6 @@ describe('modules/datasource/npm/index', () => {
       'registry=https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('resets npmrc', () => {
@@ -316,7 +298,6 @@ describe('modules/datasource/npm/index', () => {
     const npmrc = 'foo=bar';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should cache package info from npm', async () => {
@@ -329,7 +310,6 @@ describe('modules/datasource/npm/index', () => {
     const res2 = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res1).not.toBeNull();
     expect(res1).toEqual(res2);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should fetch package info from custom registry', async () => {
@@ -340,7 +320,6 @@ describe('modules/datasource/npm/index', () => {
     const npmrc = `registry=https://npm.mycustomregistry.com/`;
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should replace any environment variable in npmrc', async () => {
@@ -355,7 +334,6 @@ describe('modules/datasource/npm/index', () => {
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('should throw error if necessary env var is not present', () => {

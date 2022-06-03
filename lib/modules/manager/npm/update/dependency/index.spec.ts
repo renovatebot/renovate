@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+import * as npmUpdater from '../..';
 import { Fixtures } from '../../../../../../test/fixtures';
-import * as npmUpdater from '.';
 
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
@@ -22,6 +23,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(outputContent);
     });
+
     it('replaces a github dependency value', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -40,10 +42,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeJsonString();
-      expect(JSON.parse(res)).toEqual({
+      expect(JSON.parse(res!)).toEqual({
         dependencies: { gulp: 'gulpjs/gulp#v4.0.0' },
       });
     });
+
     it('replaces a npm package alias', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -63,10 +66,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeJsonString();
-      expect(JSON.parse(res)).toEqual({
+      expect(JSON.parse(res!)).toEqual({
         dependencies: { hapi: 'npm:@hapi/hapi@18.3.1' },
       });
     });
+
     it('replaces a github short hash', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -85,10 +89,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeJsonString();
-      expect(JSON.parse(res)).toEqual({
+      expect(JSON.parse(res!)).toEqual({
         dependencies: { gulp: 'gulpjs/gulp#0000000' },
       });
     });
+
     it('replaces a github fully specified version', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -109,6 +114,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).toContain('v1.1.0');
     });
+
     it('updates resolutions too', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -119,9 +125,10 @@ describe('modules/manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
-      expect(JSON.parse(testContent).resolutions.config).toBe('1.22.0');
+      expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent!).resolutions.config).toBe('1.22.0');
     });
+
     it('updates glob resolutions', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -132,9 +139,10 @@ describe('modules/manager/npm/update/dependency/index', () => {
         fileContent: input01GlobContent,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
-      expect(JSON.parse(testContent).resolutions['**/config']).toBe('1.22.0');
+      expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent!).resolutions['**/config']).toBe('1.22.0');
     });
+
     it('updates glob resolutions without dep', () => {
       const upgrade = {
         depType: 'resolutions',
@@ -146,10 +154,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toBe(
+      expect(JSON.parse(testContent!).resolutions['**/@angular/cli']).toBe(
         '8.1.0'
       );
     });
+
     it('replaces only the first instance of a value', () => {
       const upgrade = {
         depType: 'devDependencies',
@@ -163,6 +172,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(outputContent);
     });
+
     it('replaces only the second instance of a value', () => {
       const upgrade = {
         depType: 'devDependencies',
@@ -176,6 +186,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(outputContent);
     });
+
     it('handles the case where the desired version is already supported', () => {
       const upgrade = {
         depType: 'devDependencies',
@@ -188,6 +199,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(input01Content);
     });
+
     it('returns null if throws error', () => {
       const upgrade = {
         depType: 'blah',
@@ -222,7 +234,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency({
-        fileContent: null,
+        fileContent: null as never,
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -239,8 +251,8 @@ describe('modules/manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toBeUndefined();
-      expect(JSON.parse(testContent).dependencies.abc).toBe('2.0.0');
+      expect(JSON.parse(testContent!).dependencies.config).toBeUndefined();
+      expect(JSON.parse(testContent!).dependencies.abc).toBe('2.0.0');
     });
 
     it('replaces glob package resolutions', () => {
@@ -254,9 +266,10 @@ describe('modules/manager/npm/update/dependency/index', () => {
         fileContent: input01GlobContent,
         upgrade,
       });
-      expect(JSON.parse(testContent).resolutions.config).toBeUndefined();
-      expect(JSON.parse(testContent).resolutions['**/abc']).toBe('2.0.0');
+      expect(JSON.parse(testContent!).resolutions.config).toBeUndefined();
+      expect(JSON.parse(testContent!).resolutions['**/abc']).toBe('2.0.0');
     });
+
     it('pins also the version in patch with npm protocol in resolutions', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -270,6 +283,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(outputContent);
     });
+
     it('replaces also the version in patch with range in resolutions', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -282,6 +296,57 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
+    });
+
+    it('handles override dependency', () => {
+      const upgrade = {
+        depType: 'overrides',
+        depName: 'typescript',
+        newValue: '0.60.0',
+      };
+      const overrideDependencies = `{
+        "overrides": {
+          "typescript": "0.0.5"
+        }
+      }`;
+      const expected = `{
+        "overrides": {
+          "typescript": "0.60.0"
+        }
+      }`;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: overrideDependencies,
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
+
+    it('handles override dependency object', () => {
+      const upgrade = {
+        depType: 'overrides',
+        depName: 'typescript',
+        newValue: '0.60.0',
+        managerData: { parents: ['awesome-typescript-loader'] },
+      };
+      const overrideDependencies = `{
+        "overrides": {
+          "awesome-typescript-loader": {
+           "typescript": "3.0.0"
+         }
+        }
+      }`;
+      const expected = `{
+        "overrides": {
+          "awesome-typescript-loader": {
+           "typescript": "0.60.0"
+         }
+        }
+      }`;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: overrideDependencies,
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
     });
   });
 });

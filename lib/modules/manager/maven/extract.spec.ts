@@ -87,6 +87,11 @@ describe('modules/manager/maven/extract', () => {
             depType: 'compile',
           },
           {
+            depName: 'org.example:optional',
+            currentValue: '1.0.0',
+            depType: 'optional',
+          },
+          {
             depName: 'org.example:relocation-artifact',
             currentValue: '1.0',
           },
@@ -123,6 +128,7 @@ describe('modules/manager/maven/extract', () => {
         packageFile: null,
       });
     });
+
     it('tries minimum manifests', () => {
       const res = extractPackage(minimumContent);
       expect(res).toEqual({
@@ -134,6 +140,7 @@ describe('modules/manager/maven/extract', () => {
       });
     });
   });
+
   describe('extractRegistries', () => {
     it('returns null for invalid XML', () => {
       expect(extractRegistries(undefined)).toBeEmptyArray();

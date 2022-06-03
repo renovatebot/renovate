@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
+import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
@@ -17,18 +18,19 @@ export function getCliName(option: ParseConfigOptions): string {
 export function getConfig(input: string[]): AllConfig {
   // massage migrated configuration keys
   const argv = input
-    .map(
-      (a) =>
-        a
-          .replace('--endpoints=', '--host-rules=')
-          .replace('--expose-env=true', '--trust-level=high')
-          .replace('--expose-env', '--trust-level=high')
-          .replace('--renovate-fork', '--include-forks')
-          .replace('"platform":"', '"hostType":"')
-          .replace('"endpoint":"', '"matchHost":"')
-          .replace('"host":"', '"matchHost":"')
-          .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
-          .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
+    .map((a) =>
+      a
+        .replace('--endpoints=', '--host-rules=')
+        .replace('--expose-env=true', '--trust-level=high')
+        .replace('--expose-env', '--trust-level=high')
+        .replace('--renovate-fork', '--include-forks')
+        .replace('"platform":"', '"hostType":"')
+        .replace('"endpoint":"', '"matchHost":"')
+        .replace('"host":"', '"matchHost":"')
+        .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
+        .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
+        .replace(/^--dry-run$/, '--dry-run=true')
+        .replace(/^--require-config$/, '--require-config=true')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -77,6 +79,34 @@ export function getConfig(input: string[]): AllConfig {
         if (option.cli !== false) {
           if (opts[option.name] !== undefined) {
             config[option.name] = opts[option.name];
+            if (option.name === 'dryRun') {
+              if (config[option.name] === 'true') {
+                logger.warn(
+                  'cli config dryRun property has been changed to full'
+                );
+                config[option.name] = 'full';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config dryRun property has been changed to null'
+                );
+                config[option.name] = null;
+              } else if (config[option.name] === 'null') {
+                config[option.name] = null;
+              }
+            }
+            if (option.name === 'requireConfig') {
+              if (config[option.name] === 'true') {
+                logger.warn(
+                  'cli config requireConfig property has been changed to required'
+                );
+                config[option.name] = 'required';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config requireConfig property has been changed to optional'
+                );
+                config[option.name] = 'optional';
+              }
+            }
           }
         }
       }

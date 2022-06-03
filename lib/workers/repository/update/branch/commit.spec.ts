@@ -13,6 +13,7 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {
     let config: BranchConfig;
+
     beforeEach(() => {
       config = partial<BranchConfig>({
         ...defaultConfig,
@@ -29,10 +30,12 @@ describe('workers/repository/update/branch/commit', () => {
       platform.commitFiles = jest.fn();
       GlobalConfig.reset();
     });
+
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
+
     it('commits files', async () => {
       config.updatedPackageFiles.push({
         type: 'addition',
@@ -43,6 +46,7 @@ describe('workers/repository/update/branch/commit', () => {
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
       expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
+
     it('commits via platform', async () => {
       config.updatedPackageFiles.push({
         type: 'addition',
@@ -54,8 +58,9 @@ describe('workers/repository/update/branch/commit', () => {
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
       expect(platform.commitFiles.mock.calls).toMatchSnapshot();
     });
+
     it('dry runs', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       config.updatedPackageFiles.push({
         type: 'addition',
         path: 'package.json',

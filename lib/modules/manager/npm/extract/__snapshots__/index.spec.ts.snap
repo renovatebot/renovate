@@ -14,6 +14,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -136,6 +137,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -308,10 +310,24 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/o",
     },
+    Object {
+      "currentRawValue": "Owner/P.git#v2.0.0",
+      "currentValue": "v2.0.0",
+      "datasource": "github-tags",
+      "depName": "p",
+      "depType": "dependencies",
+      "gitRef": true,
+      "githubRepo": "Owner/P",
+      "packageName": "Owner/P",
+      "pinDigests": false,
+      "prettyDepType": "dependency",
+      "sourceUrl": "https://github.com/Owner/P",
+    },
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -361,6 +377,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -395,6 +412,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": true,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -462,6 +480,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -516,6 +535,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -652,6 +672,7 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -788,6 +809,7 @@ Object {
   "lernaClient": "yarn",
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -924,6 +946,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -946,6 +969,7 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -1084,6 +1108,7 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -1106,6 +1131,7 @@ Object {
   "lernaClient": "npm",
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
   },
@@ -1130,6 +1156,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -1268,6 +1295,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -1386,6 +1414,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
   },
@@ -1522,6 +1551,7 @@ Object {
   "lernaClient": undefined,
   "lernaPackages": undefined,
   "managerData": Object {
+    "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": true,
   },

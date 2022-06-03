@@ -1,3 +1,5 @@
+import JSON5 from 'json5';
+
 export const coersions: Record<string, (arg: string) => unknown> = {
   boolean: (val: string): boolean => {
     if (val === 'true' || val === '') {
@@ -15,7 +17,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return [];
     }
     try {
-      return JSON.parse(val);
+      return JSON5.parse(val);
     } catch (err) {
       return val.split(',').map((el) => el.trim());
     }
@@ -25,7 +27,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return {};
     }
     try {
-      return JSON.parse(val);
+      return JSON5.parse(val);
     } catch (err) {
       throw new Error("Invalid JSON value: '" + val + "'");
     }

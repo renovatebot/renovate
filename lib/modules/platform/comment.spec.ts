@@ -1,6 +1,6 @@
 import { mocked, platform } from '../../../test/util';
 import * as _cache from '../../util/cache/repository';
-import type { Cache } from '../../util/cache/repository/types';
+import type { RepoCacheData } from '../../util/cache/repository/types';
 import { ensureComment, ensureCommentRemoval } from './comment';
 
 jest.mock('.');
@@ -9,7 +9,8 @@ jest.mock('../../util/cache/repository');
 const cache = mocked(_cache);
 
 describe('modules/platform/comment', () => {
-  let repoCache: Cache = {};
+  let repoCache: RepoCacheData = {};
+
   beforeEach(() => {
     repoCache = {};
     jest.resetAllMocks();

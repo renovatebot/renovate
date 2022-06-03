@@ -36,6 +36,7 @@ describe('modules/manager/sbt/extract', () => {
         extractPackageFile('libraryDependencies += "foo" % "bar" % "baz" %%')
       ).toBeNull();
     });
+
     it('extracts deps for generic use-cases', () => {
       expect(extractPackageFile(sbt)).toMatchSnapshot({
         deps: [
@@ -61,6 +62,7 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: '1.0',
       });
     });
+
     it('extracts deps when scala version is defined in a variable', () => {
       expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
         deps: [
@@ -78,6 +80,7 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: '3.2.1',
       });
     });
+
     it('skips deps when scala version is missing', () => {
       expect(extractPackageFile(sbtMissingScalaVersion)).toEqual({
         deps: [
@@ -104,6 +107,7 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: '1.0.1',
       });
     });
+
     it('extract deps from native scala file with variables', () => {
       expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot({
         deps: [
@@ -122,6 +126,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extracts deps when scala version is defined with a trailing comma', () => {
       const content = `
         lazy val commonSettings = Seq(
@@ -142,6 +147,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extracts deps when scala version is defined in a variable with a trailing comma', () => {
       const content = `
         val ScalaVersion = "2.12.10"
@@ -154,6 +160,7 @@ describe('modules/manager/sbt/extract', () => {
         deps: [{ packageName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
       });
     });
+
     it('extracts deps when scala version is defined with ThisBuild scope', () => {
       const content = `
         ThisBuild / scalaVersion := "2.12.10"
@@ -172,6 +179,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
       const content = `
         val ScalaVersion = "2.12.10"
@@ -187,6 +195,7 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
+
     it('extract deps from native scala file with private variables', () => {
       expect(
         extractPackageFile(sbtPrivateVariableDependencyFile)
@@ -203,6 +212,47 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'com.abc:abc',
             currentValue: '1.2.3',
+          },
+        ],
+        packageFileVersion: undefined,
+      });
+    });
+
+    it('extract deps when they are defined in a new line', () => {
+      const content = `
+      name := "service"
+      scalaVersion := "2.13.8"
+
+      lazy val compileDependencies =
+        Seq(
+          "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
+          "ch.qos.logback" % "logback-classic" % "1.2.10"
+        )
+
+      libraryDependencies ++= compileDependencies`;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.8',
+            separateMinorPatch: true,
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'com.typesafe.scala-logging:scala-logging',
+            packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
+            currentValue: '3.9.4',
+            datasource: 'sbt-package',
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'ch.qos.logback:logback-classic',
+            packageName: 'ch.qos.logback:logback-classic',
+            currentValue: '1.2.10',
+            datasource: 'sbt-package',
           },
         ],
         packageFileVersion: undefined,

@@ -25,7 +25,12 @@ export class InternalRubyGemsDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (this.knownFallbackHosts.includes(parseUrl(registryUrl)?.hostname)) {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return Promise.resolve(null);
+    }
+    const hostname = parseUrl(registryUrl)?.hostname;
+    if (hostname && this.knownFallbackHosts.includes(hostname)) {
       return this.getDependencyFallback(packageName, registryUrl);
     }
     return this.getDependency(packageName, registryUrl);
@@ -55,9 +60,7 @@ export class InternalRubyGemsDatasource extends Datasource {
     );
     return {
       releases,
-      homepage: null,
       sourceUrl: null,
-      changelogUrl: null,
     };
   }
 
@@ -164,13 +167,18 @@ export class InternalRubyGemsDatasource extends Datasource {
     dependency: string,
     registry: string,
     path: string
-  ): Promise<T> {
+  ): Promise<T | null> {
     const url = `${joinUrlParts(registry, path)}?${getQueryString({
       gems: dependency,
     })}`;
 
     logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
     const response = await this.http.getBuffer(url);
+
+    // istanbul ignore if: needs tests
+    if (!response) {
+      return null;
+    }
 
     return new Marshal(response.body).parsed as T;
   }

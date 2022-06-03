@@ -12,7 +12,12 @@ import { parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { CrateRecord, RegistryFlavor, RegistryInfo } from './types';
+import {
+  CrateMetadata,
+  CrateRecord,
+  RegistryFlavor,
+  RegistryInfo,
+} from './types';
 
 export class CrateDatasource extends Datasource {
   static readonly id = 'crate';
@@ -27,6 +32,8 @@ export class CrateDatasource extends Datasource {
 
   static readonly CRATES_IO_BASE_URL =
     'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
+
+  static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
 
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
@@ -70,10 +77,22 @@ export class CrateDatasource extends Datasource {
       .map((line) => line.trim()) // remove whitespace
       .filter((line) => line.length !== 0) // remove empty lines
       .map((line) => JSON.parse(line) as CrateRecord); // parse
+
+    const metadata = await this.getCrateMetadata(registryInfo, packageName);
+
     const result: ReleaseResult = {
       dependencyUrl,
       releases: [],
     };
+
+    if (metadata?.homepage) {
+      result.homepage = metadata.homepage;
+    }
+
+    if (metadata?.repository) {
+      result.sourceUrl = metadata.repository;
+    }
+
     result.releases = lines
       .map((version) => {
         const release: Release = {
@@ -90,6 +109,46 @@ export class CrateDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  @cache({
+    namespace: `datasource-${CrateDatasource.id}-metadata`,
+    key: (info: RegistryInfo, packageName: string) =>
+      `${info.rawUrl}/${packageName}`,
+    cacheable: (info: RegistryInfo) =>
+      CrateDatasource.areReleasesCacheable(info.rawUrl),
+    ttlMinutes: 24 * 60, // 24 hours
+  })
+  public async getCrateMetadata(
+    info: RegistryInfo,
+    packageName: string
+  ): Promise<CrateMetadata | null> {
+    if (info.flavor !== RegistryFlavor.CratesIo) {
+      return null;
+    }
+
+    // The `?include=` suffix is required to avoid unnecessary database queries
+    // on the crates.io server. This lets us work around the regular request
+    // throttling of one request per second.
+    const crateUrl = `${CrateDatasource.CRATES_IO_API_BASE_URL}crates/${packageName}?include=`;
+
+    logger.debug(
+      { crateUrl, packageName, registryUrl: info.rawUrl },
+      'downloading crate metadata'
+    );
+
+    try {
+      type Response = { crate: CrateMetadata };
+      const response = await this.http.getJson<Response>(crateUrl);
+      return response.body.crate;
+    } catch (err) {
+      logger.warn(
+        { err, packageName, registryUrl: info.rawUrl },
+        'failed to download crate metadata'
+      );
+    }
+
+    return null;
   }
 
   public async fetchCrateRecordsPayload(

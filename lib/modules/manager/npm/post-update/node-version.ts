@@ -2,9 +2,9 @@ import semver from 'semver';
 import { logger } from '../../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
-import type { PostUpdateConfig } from '../../types';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 
-async function getNodeFile(filename: string): Promise<string> | null {
+async function getNodeFile(filename: string): Promise<string | null> {
   try {
     const constraint = (await readLocalFile(filename, 'utf8'))
       .split(newlineRegex)[0]
@@ -19,7 +19,9 @@ async function getNodeFile(filename: string): Promise<string> | null {
   return null;
 }
 
-function getPackageJsonConstraint(config: PostUpdateConfig): string | null {
+function getPackageJsonConstraint(
+  config: Partial<PostUpdateConfig>
+): string | null {
   const constraint: string = config.constraints?.node;
   if (constraint && semver.validRange(constraint)) {
     logger.debug(`Using node constraint "${constraint}" from package.json`);
@@ -29,8 +31,8 @@ function getPackageJsonConstraint(config: PostUpdateConfig): string | null {
 }
 
 export async function getNodeConstraint(
-  config: PostUpdateConfig
-): Promise<string> | null {
+  config: Partial<PostUpdateConfig>
+): Promise<string | null> {
   const { packageFile } = config;
   const constraint =
     (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ||
@@ -40,4 +42,8 @@ export async function getNodeConstraint(
     logger.debug('No node constraint found - using latest');
   }
   return constraint;
+}
+
+export function getNodeUpdate(upgrades: Upgrade[]): string | undefined {
+  return upgrades.find((u) => u.depName === 'node')?.newValue;
 }

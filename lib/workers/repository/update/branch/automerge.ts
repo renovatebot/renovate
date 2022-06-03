@@ -4,6 +4,7 @@ import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import { mergeBranch } from '../../../../util/git';
+import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
 export type AutomergeResult =
@@ -13,6 +14,7 @@ export type AutomergeResult =
   | 'failed'
   | 'no automerge'
   | 'stale'
+  | 'off schedule'
   | 'not ready';
 
 export async function tryBranchAutomerge(
@@ -21,6 +23,9 @@ export async function tryBranchAutomerge(
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
     return 'no automerge';
+  }
+  if (!isScheduledNow(config, 'automergeSchedule')) {
+    return 'off schedule';
   }
   const existingPr = await platform.getBranchPr(config.branchName);
   if (existingPr) {

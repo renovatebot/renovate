@@ -15,7 +15,9 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
     return getBasicHandler(config.username, config.password, true);
   }
-  return getHandlerFromToken(config.token, true);
+  // TODO: token can be undefined here
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return getHandlerFromToken(config.token!, true);
 }
 
 export function azureObj(): azure.WebApi {

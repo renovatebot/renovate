@@ -1,5 +1,5 @@
 import type fs from 'fs';
-import type { PathLike } from 'fs';
+import type { PathLike, Stats } from 'fs';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
@@ -23,6 +23,35 @@ export class Fixtures {
         encoding: 'utf-8',
       }
     );
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder as `Buffer`
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getBinary(name: string, fixturesRoot = '.'): Buffer {
+    return realFs.readFileSync(
+      upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name)
+    );
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder and parses as JSON
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getJson<T = any>(name: string, fixturesRoot = '.'): T {
+    return JSON.parse(
+      realFs.readFileSync(
+        upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
+        {
+          encoding: 'utf-8',
+        }
+      )
+    ) as T;
   }
 
   /**
@@ -65,6 +94,7 @@ export class Fixtures {
       readFile: jest.fn().mockImplementation(memfs.promises.readFile),
       writeFile: jest.fn().mockImplementation(memfs.promises.writeFile),
       outputFile: jest.fn().mockImplementation(outputFile),
+      stat: jest.fn().mockImplementation(stat),
     };
   }
 
@@ -98,4 +128,9 @@ async function pathExists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function stat(path: string): Promise<Stats> {
+  // memfs type mismatch
+  return (await memfs.promises.stat(path)) as Stats;
 }

@@ -158,6 +158,7 @@ describe('modules/datasource/conan/index', () => {
         ],
       });
     });
+
     it('rejects userAndChannel for Conan Center', async () => {
       expect(
         await getPkgReleases({

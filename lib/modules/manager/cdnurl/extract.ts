@@ -12,7 +12,7 @@ export function extractPackageFile(content: string): PackageFile {
   let rest = content;
   let match = cloudflareUrlRegex.exec(rest);
   let offset = 0;
-  while (match) {
+  while (match?.groups) {
     const [wholeSubstr] = match;
     const { depName, currentValue, asset } = match.groups;
     offset += match.index + wholeSubstr.length;

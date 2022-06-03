@@ -54,6 +54,10 @@ Array [
     "topic": "Configuration Error",
   },
   Object {
+    "message": "Configuration option \`prCommitsPerRunLimit\` should be an integer. Found: false (boolean)",
+    "topic": "Configuration Error",
+  },
+  Object {
     "message": "Configuration option \`semanticCommitType\` should be a string",
     "topic": "Configuration Error",
   },

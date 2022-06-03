@@ -111,6 +111,7 @@ describe('workers/global/index', () => {
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
   });
+
   it('exits with non-zero when errors are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -126,6 +127,7 @@ describe('workers/global/index', () => {
     ]);
     await expect(globalWorker.start()).resolves.not.toBe(0);
   });
+
   it('exits with zero when warnings are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -141,6 +143,7 @@ describe('workers/global/index', () => {
     ]);
     await expect(globalWorker.start()).resolves.toBe(0);
   });
+
   describe('processes platforms', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
@@ -152,6 +155,7 @@ describe('workers/global/index', () => {
       expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
     });
+
     it('gitlab', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],

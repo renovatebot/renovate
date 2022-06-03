@@ -8,7 +8,8 @@ export default function updateArtifacts({
   updatedDeps.forEach((dep) => {
     logger.info('Updating submodule ' + dep.depName);
     res.push({
-      file: { type: 'addition', path: dep.depName, contents: '' },
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      file: { type: 'addition', path: dep.depName!, contents: '' },
     });
   });
   return res;

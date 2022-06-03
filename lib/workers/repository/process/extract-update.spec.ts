@@ -17,7 +17,9 @@ const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
 branchify.branchifyUpgrades.mockResolvedValueOnce({
-  branches: [{ branchName: 'some-branch', upgrades: [] }],
+  branches: [
+    { manager: 'some-manager', branchName: 'some-branch', upgrades: [] },
+  ],
   branchList: ['branchName'],
 });
 
@@ -37,6 +39,7 @@ describe('workers/repository/process/extract-update', () => {
         branches: [
           {
             branchName: 'some-branch',
+            manager: 'some-manager',
             upgrades: [],
           },
         ],
@@ -44,6 +47,7 @@ describe('workers/repository/process/extract-update', () => {
       });
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });
+
     it('runs with baseBranches', async () => {
       const config = {
         baseBranches: ['master', 'dev'],
@@ -55,6 +59,7 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
     });
+
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const config = {

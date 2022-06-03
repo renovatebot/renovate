@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
@@ -63,7 +64,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
 
   if (env.RENOVATE_CONFIG) {
     try {
-      config = JSON.parse(env.RENOVATE_CONFIG);
+      config = JSON5.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
@@ -80,7 +81,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
       if (envVal) {
         if (option.type === 'array' && option.subType === 'object') {
           try {
-            const parsed = JSON.parse(envVal);
+            const parsed = JSON5.parse(envVal);
             if (is.array(parsed)) {
               config[option.name] = parsed;
             } else {
@@ -98,6 +99,34 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
         } else {
           const coerce = coersions[option.type];
           config[option.name] = coerce(envVal);
+          if (option.name === 'dryRun') {
+            if (config[option.name] === 'true') {
+              logger.warn(
+                'env config dryRun property has been changed to full'
+              );
+              config[option.name] = 'full';
+            } else if (config[option.name] === 'false') {
+              logger.warn(
+                'env config dryRun property has been changed to null'
+              );
+              config[option.name] = null;
+            } else if (config[option.name] === 'null') {
+              config[option.name] = null;
+            }
+          }
+          if (option.name === 'requireConfig') {
+            if ((config[option.name] as string) === 'true') {
+              logger.warn(
+                'env config requireConfig property has been changed to required'
+              );
+              config[option.name] = 'required';
+            } else if ((config[option.name] as string) === 'false') {
+              logger.warn(
+                'env config requireConfig property has been changed to optional'
+              );
+              config[option.name] = 'optional';
+            }
+          }
         }
       }
     }

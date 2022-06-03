@@ -6,6 +6,7 @@ describe('modules/manager/setup-cfg/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts dependencies', () => {
       const res = extractPackageFile(Fixtures.get('setup-cfg-1.txt'));
       expect(res).toMatchSnapshot({

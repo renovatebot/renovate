@@ -10,6 +10,7 @@ import type {
   ComposerConfig,
   ComposerLock,
   ComposerManagerData,
+  ComposerRepositories,
   Repo,
 } from './types';
 
@@ -31,7 +32,7 @@ function transformRegUrl(url: string): string {
  * other entries will be added to registryUrls
  */
 function parseRepositories(
-  repoJson: ComposerConfig['repositories'],
+  repoJson: ComposerRepositories,
   repositories: Record<string, Repo>,
   registryUrls: string[]
 ): void {
@@ -44,7 +45,8 @@ function parseRepositories(
         switch (repo.type) {
           case 'vcs':
           case 'git':
-            repositories[name] = repo;
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            repositories[name!] = repo;
             break;
           case 'composer':
             registryUrls.push(transformRegUrl(repo.url));
@@ -95,7 +97,7 @@ export async function extractPackageFile(
   // handle lockfile
   const lockfilePath = fileName.replace(regEx(/\.json$/), '.lock');
   const lockContents = await readLocalFile(lockfilePath, 'utf8');
-  let lockParsed: ComposerLock;
+  let lockParsed: ComposerLock | undefined;
   if (lockContents) {
     logger.debug({ packageFile: fileName }, 'Found composer lock file');
     res.lockFiles = [lockfilePath];
@@ -114,13 +116,13 @@ export async function extractPackageFile(
     res.registryUrls = registryUrls;
   }
 
-  const deps = [];
-  const depTypes = ['require', 'require-dev'];
+  const deps: PackageDependency[] = [];
+  const depTypes: ('require' | 'require-dev')[] = ['require', 'require-dev'];
   for (const depType of depTypes) {
     if (composerJson[depType]) {
       try {
         for (const [depName, version] of Object.entries(
-          composerJson[depType] as Record<string, string>
+          composerJson[depType]!
         )) {
           const currentValue = version.trim();
           // Default datasource and packageName

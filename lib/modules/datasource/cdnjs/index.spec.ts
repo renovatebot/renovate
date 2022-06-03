@@ -23,8 +23,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
@@ -33,8 +33,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(404);
       expect(
@@ -43,8 +43,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for empty 200 OK', async () => {
       httpMock
         .scope(baseUrl)
@@ -56,8 +56,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'doesnotexist/doesnotexist',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for 401', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(401);
       await expect(
@@ -66,8 +66,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(429);
       await expect(
@@ -76,8 +76,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(502);
       await expect(
@@ -86,8 +86,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for unknown error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
@@ -96,8 +96,8 @@ describe('modules/datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -108,8 +108,8 @@ describe('modules/datasource/cdnjs/index', () => {
         depName: 'd3-force/d3-force.js',
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('filters releases by asset presence', async () => {
       httpMock
         .scope(baseUrl)
@@ -120,7 +120,6 @@ describe('modules/datasource/cdnjs/index', () => {
         depName: 'bulma/only/0.7.5/style.css',
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

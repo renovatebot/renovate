@@ -356,9 +356,9 @@ module.exports = {
 };
 ```
 
-## WhiteSource Renovate Hosted App Encryption
+## Mend Renovate Hosted App Encryption
 
-The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by WhiteSource.
+The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by Mend.
 If you are a user of this app, and have private modules, then the following is applicable.
 
 ### Private presets with public repositories
@@ -371,8 +371,8 @@ The solution to this is that you should break your presets into public and priva
 
 ### Encrypting secrets
 
-It is strongly recommended that you don't commit secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
-Therefore the preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
+It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
+The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
 If you need to provide credentials to the hosted Renovate App, please do this:
 
@@ -401,7 +401,7 @@ If you need to provide credentials to the hosted Renovate App, please do this:
 
 ### Access to GitHub Actions Secrets
 
-The WhiteSource Renovate App does not run using GitHub Actions, but such secrets would be a bad fit for the app anyway for the following reasons:
+The Mend Renovate App does not run using GitHub Actions, but such secrets would be a bad fit for the app anyway for the following reasons:
 
 - The app would be granted access to _all_ the repository/org secrets, not just the ones you want
 - If Renovate wants access to such secrets, it would need to ask for them from every user, not just the ones who want to use this approach (GitHub does not support the concept of optional permissions for Apps, so people do not have the option to decline)
@@ -414,7 +414,7 @@ User/Repository config refers to the in-repository config file which defaults to
 If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
 
 If per-repository config must be done within the repository, it is still recommended against committing secrets directly (including e.g. `.npmrc` files with tokens) and instead encrypting them with a custom public key first.
-For instructions on this, see the above section on encrypting secrets for the WhiteSource Renovate App but instead:
+For instructions on this, see the above section on encrypting secrets for the Mend Renovate App but instead:
 
 - Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
 - Generate a public/private key pair for the app using the instructions in [privateKey](https://docs.renovatebot.com/self-hosted-configuration/#privatekey)

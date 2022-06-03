@@ -1,8 +1,10 @@
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFile } from '../types';
+import { delimiters, extractRubyVersion } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
@@ -18,10 +20,9 @@ export async function extractPackageFile(
     deps: [],
   };
   const lines = content.split(newlineRegex);
-  const delimiters = ['"', "'"];
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
-    let sourceMatch: RegExpMatchArray;
+    let sourceMatch: RegExpMatchArray | null = null;
     for (const delimiter of delimiters) {
       sourceMatch =
         sourceMatch ||
@@ -30,27 +31,29 @@ export async function extractPackageFile(
         );
     }
     if (sourceMatch) {
-      res.registryUrls.push(sourceMatch[1]);
+      res.registryUrls?.push(sourceMatch[1]);
     }
-    let rubyMatch: RegExpMatchArray;
-    for (const delimiter of delimiters) {
-      rubyMatch =
-        rubyMatch ||
-        regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
-    }
+
+    const rubyMatch = extractRubyVersion(line);
     if (rubyMatch) {
-      res.constraints = { ruby: rubyMatch[1] };
+      res.deps.push({
+        depName: 'ruby',
+        currentValue: rubyMatch,
+        datasource: RubyVersionDatasource.id,
+        registryUrls: null,
+      });
     }
+
     const gemMatchRegex = regEx(
       `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
     );
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
       const dep: PackageDependency = {
-        depName: gemMatch.groups.depName,
+        depName: gemMatch.groups?.depName,
         managerData: { lineNumber },
       };
-      if (gemMatch.groups.currentValue) {
+      if (gemMatch.groups?.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
         dep.currentValue = regEx(/\s*,\s*/).test(currentValue)
           ? currentValue
@@ -83,7 +86,7 @@ export async function extractPackageFile(
             depTypes,
             managerData: {
               lineNumber:
-                Number(dep.managerData.lineNumber) + groupLineNumber + 1,
+                Number(dep.managerData?.lineNumber) + groupLineNumber + 1,
             },
           }))
         );
@@ -118,7 +121,7 @@ export async function extractPackageFile(
               registryUrls: [repositoryUrl],
               managerData: {
                 lineNumber:
-                  Number(dep.managerData.lineNumber) + sourceLineNumber + 1,
+                  Number(dep.managerData?.lineNumber) + sourceLineNumber + 1,
               },
             }))
           );
@@ -144,7 +147,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData.lineNumber) + platformsLineNumber + 1,
+                Number(dep.managerData?.lineNumber) + platformsLineNumber + 1,
             },
           }))
         );
@@ -168,14 +171,15 @@ export async function extractPackageFile(
           ifRes.deps.map((dep) => ({
             ...dep,
             managerData: {
-              lineNumber: Number(dep.managerData.lineNumber) + ifLineNumber + 1,
+              lineNumber:
+                Number(dep.managerData?.lineNumber) + ifLineNumber + 1,
             },
           }))
         );
       }
     }
   }
-  if (!res.deps.length && !res.registryUrls.length) {
+  if (!res.deps.length && !res.registryUrls?.length) {
     return null;
   }
 
@@ -187,17 +191,10 @@ export async function extractPackageFile(
       res.lockFiles = [gemfileLock];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
-        const lockedDepValue = lockedEntries.get(dep.depName);
+        const lockedDepValue = lockedEntries.get(`${dep.depName}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;
         }
-      }
-      const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
-        lockContent
-      );
-      if (bundledWith) {
-        res.constraints = res.constraints || {};
-        res.constraints.bundler = bundledWith[1];
       }
     }
   }

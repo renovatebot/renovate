@@ -41,6 +41,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
+<!-- prettier-ignore -->
+!!! note
+    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
 ---
 
 ## addLabels
@@ -129,7 +133,8 @@ If configured, Renovate will take a random sample of given size from assignees a
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone or something else to merge them.
-By configuring this setting, you can enable Renovate to automerge PRs or even branches itself, therefore reducing the amount of human intervention required.
+By configuring this setting, you allow Renovate to automerge PRs or even branches.
+Using automerge reduces the amount of human intervention required.
 
 Usually you won't want to automerge _all_ PRs, for example most people would want to leave major dependency updates to a human to review first.
 You could configure Renovate to automerge all but major this way:
@@ -180,6 +185,12 @@ Example use:
   "automergeComment": "bors: r+"
 }
 ```
+
+## automergeSchedule
+
+Use the `automergeSchedule` option to define times of week or month during which Renovate may automerge its PRs.
+The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
+To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
 
 ## automergeStrategy
 
@@ -308,6 +319,12 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
 !!! note
     This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
     If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
+
+## branchPrefixOld
+
+Renovate uses branch names as part of its checks to see if an update PR was created previously, and already merged or ignored.
+If you change `branchPrefix`, then no previously closed PRs will match, which could lead to Renovate recreating PRs in such cases.
+Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate to look for those branches too, and avoid this happening.
 
 ## branchTopic
 
@@ -494,8 +511,9 @@ Examples of what having a Dependency Dashboard will allow you to do:
 
 <!-- prettier-ignore -->
 !!! tip
-    Enabling the Dependency Dashboard does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting.
-    The Dependency Dashboard therefore provides visibility as well as additional control.
+    Just enabling the Dependency Dashboard doesn't change the "control flow" of Renovate.
+    Renovate still creates and manages PRs, and still follows your schedules and rate limits.
+    The Dependency Dashboard gives you extra visibility and control over your updates.
 
 ## dependencyDashboardApproval
 
@@ -605,7 +623,7 @@ This option is evaluated at PR/MR creation time and is only supported on the fol
 <!-- prettier-ignore -->
 !!! note
     GitLab implements draft status by checking whether the PR's title starts with certain strings.
-    Therefore, `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    This means that `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -742,6 +760,17 @@ A similar one could strip leading `v` prefixes:
 
 Set this to `false` if you want to disable release notes fetching.
 
+Renovate can fetch release notes when they are hosted on one of these platforms:
+
+- GitHub (.com and Enterprise Server)
+- GitLab (.com and CE/EE)
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate can only show release notes from some platforms and some package managers.
+    We're planning improvements so that Renovate can show more release notes.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
@@ -752,8 +781,8 @@ At other times, the possible files is too vague for Renovate to have any default
 For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
 Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about.
-For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`.
-This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
+For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$']`.
+This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
 ```json
@@ -1225,7 +1254,7 @@ By default, Renovate will skip over any repositories that are forked.
 This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
 
-If you are using the hosted WhiteSource Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
+If you are using the hosted Mend Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
 
 ## includePaths
 
@@ -1334,7 +1363,7 @@ This option exists to provide flexibility about whether `npmrc` strings in confi
 In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
 A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
-If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
+If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
 
 ## packageRules
@@ -1369,7 +1398,7 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 }
 ```
 
-For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
+For Maven dependencies, the package name is `<groupId:artefactId>`, e.g. `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
 Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
 This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]` and hence much simpler.
@@ -1419,7 +1448,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 ```
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-Therefore, you should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if necessary.
+You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
 
 ### allowedVersions
 
@@ -1830,6 +1859,10 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
+## pinDigest
+
+Add to this object if you wish to define rules that apply only to PRs that pin digests.
+
 ## pinDigests
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
@@ -1862,6 +1895,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
@@ -2035,7 +2069,7 @@ This limit is enforced on a per-repository basis.
 
 If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs.
 However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely.
-Therefore we configure an upper limit for how long we wait until creating a PR.
+This is why we configured an upper limit for how long we wait until creating a PR.
 
 <!-- prettier-ignore -->
 !!! note
@@ -2046,7 +2080,7 @@ Therefore we configure an upper limit for how long we wait until creating a PR.
 Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
 In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major).
 If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
-The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
+The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
 
 Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
 
@@ -2068,6 +2102,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## pruneBranchAfterAutomerge
+
+By default Renovate deletes, or "prunes", the branch after automerging.
+Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 ## pruneStaleBranches
 
@@ -2099,7 +2138,7 @@ Renovate's `"auto"` strategy works like this for npm:
 5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
-Therefore, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
+Renovate won't deliberately "narrow" any range by increasing the semver value inside.
 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range.
 If instead you'd prefer to be updated to `^1.2.0` in cases like this, then configure `rangeStrategy` to `bump` in your Renovate config.
@@ -2149,25 +2188,33 @@ Typically you shouldn't need to modify this setting.
 
 ## regexManagers
 
-`regexManagers` entries are used to configure the `regex` Manager in Renovate.
+Use `regexManagers` entries to configure the `regex` manager in Renovate.
 
-Users can define custom managers for cases such as:
+You can define custom managers for cases such as:
 
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
 The custom manager concept is based on using Regular Expression named capture groups.
-For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`).
-It's not recommended to do both, due to the potential for confusion.
-It is recommended to also include `versioning` but if it is missing then it will default to `semver`.
 
-For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
+You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure it's corresponding template (e.g. `depNameTemplate`) for these fields:
+
+- `datasource`
+- `depName`
+- `currentValue`
+
+Use named capture group matching _or_ set a corresponding template.
+We recommend you use only one of these methods, or you'll get confused.
+
+We recommend that you also tell Renovate what `versioning` to use.
+If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
+
+For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
-Currently only a length of one `matchString` is supported.
 
 Example:
 
@@ -2459,8 +2506,6 @@ See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-re
 
 ## reviewersSampleSize
 
-Take a random sample of given size from reviewers.
-
 ## rollback
 
 Add to this object if you wish to define rules that apply only to PRs that roll back versions.
@@ -2669,10 +2714,6 @@ Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm
 When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
 
 This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
-
-## unicodeEmoji
-
-If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
 
 ## updateInternalDeps
 

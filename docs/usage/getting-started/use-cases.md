@@ -8,7 +8,7 @@ The original use case, and the most popular one, is for developers to automate d
 
 ### Updating of package files
 
-The term "package file" is used to describe files which have references to dependencies.
+We use the term "package file" to describe files which have references to dependencies.
 Package files are managed by a "package manager".
 
 Example package files include:
@@ -39,7 +39,7 @@ npm, Yarn, Bundler, Composer, Poetry, Pipenv, and Cargo all support or use lock 
 
 If you use a lock file then changes to your package file must come with a compatible change to the lock file.
 Renovate can patch/update package files directly, but a lock file is too complex to "reverse engineer".
-Therefore Renovate lets the package manager do the lock file update.
+This is why Renovate lets the package manager do the lock file update.
 A simplified example:
 
 1. The repository has a `package.json` and `package-lock.json` with version `1.0.0` of a dependency
@@ -80,19 +80,29 @@ Renovate handles IaC files as "package managers" and "package files" and can det
 
 Docker-compatible images are a key building block of modern software.
 These images are commonly found in CI/CD pipeline configs or referenced in IaC files.
-Renovate detects these IaC files and then queries Docker registries to determine if newer tags or digests exists.
+Renovate finds these IaC files and then searches Docker registries to see if there are newer tags or digests.
 
 #### Tag-based updating
 
-An example of tag-based updating would be `node` images from Docker Hub.
-These are typically tagged using their version, like `14.17.4` but can also have more elaborate tags like `14.17.4-alpine3.11`.
-Renovate handles both these tag scenarios and will propose updates such as from `14.17.4` to `14.7.5`, or from `14.17.4-alpine3.11` to `14.17.5-alpine3.11`.
+An example of tag-based updating are `node` images from Docker Hub.
+The `node` images use these tag formats:
+
+- `14.17.4`
+- `14.17.4-alpine3.11`
+
+Renovate understands both formats and raises updates like these:
+
+- From `14.17.4` to `14.17.5`
+- From `14.17.4-alpine3.11` to `14.17.5-alpine3.11`
 
 #### Docker digests
 
-A better example of Renovate's power is when updating Docker digests.
-While humans could be reasonably expected to check and update versions like `14.17.4`, looking up image digests and updating them manually is impractical to do at scale.
-Renovate can not only keep Docker digests updated, but it can even be configured to "pin" digests from being tag-based to being tag+digest based to get immutable builds.
+You can check and update versions like `14.17.4` yourself.
+But looking up image digests like `341976f40d963a425d627a349a9b0034e1eafffbf4c82a173c1465ee403878d9` and updating them yourself doesn't scale.
+So let Renovate update your Docker digests.
+
+You can even configure Renovate to "pin" your Docker digests.
+When you're using tag+digest based images, you'll have immutable builds.
 
 ### Internal package updates
 
@@ -103,8 +113,8 @@ In such cases, it is best practice to:
 - Update downstream links as soon as possible, and
 - Keep internal version use as consistent as possible
 
-You can use Renovate to achieve this best practice.
-Renovate detects and updates internal dependencies just like external or Open Source dependencies.
+You can use Renovate to follow this best practice.
+Renovate finds and updates internal dependencies just like external or Open Source dependencies.
 
 #### Example of internal package update
 
@@ -138,7 +148,7 @@ You can configure batched updates by setting a `groupName` as part of `packageRu
 ### Scheduled updates
 
 You may want to limit the times when Renovate is allowed to raise updates.
-This can help to reduce "noise" during your working hours, and reduce the chance of CI contention.
+This reduces "noise" during your working hours, and reduces the chance of CI contention.
 You can tell Renovate to "not bother you" during times when you're using the CI resources, or want to focus on your work.
 
 You can set the time ranges during which Renovate creates updates in the `schedule` field.
@@ -151,7 +161,7 @@ You can use Renovate's "Dependency Dashboard" on platforms which support dynamic
 - GitLab
 - Gitea
 
-When you enable the Dependency Dashboard, an issue titled "Dependency Dashboard" will be created.
+When you enable the Dependency Dashboard, Renovate creates a "Dependency Dashboard" issue.
 This issue lists all updates which are pending, in progress, or were previously closed ignored.
 
 If you want to get an update ahead of schedule, or want to retry a previously closed update, you can click on the update's checkbox in the Dependency Dashboard.

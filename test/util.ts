@@ -51,7 +51,7 @@ export const defaultConfig = getConfig();
 export { getConfig };
 
 function getCallerFileName(): string | null {
-  let result = null;
+  let result: string | null = null;
 
   const prepareStackTrace = Error.prepareStackTrace;
   const stackTraceLimit = Error.stackTraceLimit;
@@ -64,7 +64,7 @@ function getCallerFileName(): string | null {
 
     const stack = err.stack as unknown as NodeJS.CallSite[];
 
-    let currentFile = null;
+    let currentFile: string | null = null;
     for (const frame of stack) {
       const fileName = frame.getFileName();
       if (!currentFile) {
@@ -85,10 +85,13 @@ function getCallerFileName(): string | null {
 }
 
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
-  const callerDir = upath.dirname(getCallerFileName());
+  const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
 }
 
+/**
+ * @deprecated use Fixtures.getBinary
+ */
 export function loadBinaryFixture(
   fixtureFile: string,
   fixtureRoot = '.'
@@ -97,11 +100,17 @@ export function loadBinaryFixture(
   return readFileSync(fixtureAbsFile);
 }
 
+/**
+ * @deprecated use Fixtures.get
+ */
 export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
   const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
   return readFileSync(fixtureAbsFile, { encoding: 'utf8' });
 }
 
+/**
+ * @deprecated use Fixtures.getJson
+ */
 export function loadJsonFixture<T = any>(
   fixtureFile: string,
   fixtureRoot = '.'

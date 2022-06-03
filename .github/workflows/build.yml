@@ -24,6 +24,7 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 14
   DRY_RUN: true
+  SKIP_JAVA_TESTS: true
 
 jobs:
   test:
@@ -31,51 +32,37 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     strategy:
       matrix:
         os: [ubuntu-latest]
         node-version: [14, 16]
-        java-version: [11]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
             "os": "macos-latest",
-            "node-version": 14,
-            "java-version": 11
+            "node-version": 14
           }, {
             "os": "windows-latest",
-            "node-version": 14,
-            "java-version": 11
+            "node-version": 14
           }]' || '[]') }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
-      # skip Java tests on pull requests without 'ci:fulltest' label
-      SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
 
     steps:
-      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # tag=v3.1.0
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
-
-      - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.SKIP_JAVA_TESTS == 'false'
-        uses: actions/setup-java@0aa6f2a84f8634ac1a1bd81dfdf6d5aab98c70f1 # tag=v3.1.0
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'adopt'
-          java-package: jre
-          check-latest: false
 
       - name: Init platform
         shell: bash
@@ -97,10 +84,10 @@ jobs:
         run: yarn build
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        run: yarn jest:${{ env.NODE_VERSION }} --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
+        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # tag=v3.1.0
         if: always() && env.coverage == 'true'
 
       - name: E2E Test
@@ -113,12 +100,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # tag=v3.1.0
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -163,12 +150,12 @@ jobs:
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # tag=v3.1.0
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -205,7 +192,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Upload docs
-        uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535 # tag=v3.0.0
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
         with:
           name: docs
           path: tmp/docs/

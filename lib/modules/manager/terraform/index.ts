@@ -1,5 +1,6 @@
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
@@ -13,6 +14,7 @@ export const supportedDatasources = [
   BitBucketTagsDatasource.id,
   GitTagsDatasource.id,
   GithubTagsDatasource.id,
+  GithubReleasesDatasource.id,
   HelmDatasource.id,
   TerraformModuleDatasource.id,
   TerraformProviderDatasource.id,
@@ -24,4 +26,5 @@ export const defaultConfig = {
     'Terraform {{managerData.terraformDependencyType}} {{depName}}',
   fileMatch: ['\\.tf$'],
   versioning: hashicorpVersioning.id,
+  pinDigests: false,
 };

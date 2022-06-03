@@ -33,6 +33,7 @@ Object {
 exports[`modules/datasource/crate/index getReleases processes real data: amethyst 1`] = `
 Object {
   "dependencyUrl": "https://crates.io/crates/amethyst",
+  "homepage": "https://amethyst.rs/",
   "registryUrl": "https://crates.io",
   "releases": Array [
     Object {
@@ -94,21 +95,8 @@ Object {
       "version": "0.10.1",
     },
   ],
+  "sourceUrl": "https://github.com/amethyst/amethyst",
 }
-`;
-
-exports[`modules/datasource/crate/index getReleases processes real data: amethyst 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/am/et/amethyst",
-  },
-]
 `;
 
 exports[`modules/datasource/crate/index getReleases processes real data: libc 1`] = `
@@ -314,107 +302,8 @@ Object {
       "version": "0.2.51",
     },
   ],
+  "sourceUrl": "https://github.com/rust-lang/libc",
 }
 `;
 
-exports[`modules/datasource/crate/index getReleases processes real data: libc 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/li/bc/libc",
-  },
-]
-`;
-
-exports[`modules/datasource/crate/index getReleases refuses to clone if allowCustomCrateRegistries is not true 1`] = `null`;
-
-exports[`modules/datasource/crate/index getReleases returns null for 404 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/so/me/some_crate",
-  },
-]
-`;
-
-exports[`modules/datasource/crate/index getReleases returns null for empty list 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/no/n_/non_existent_crate",
-  },
-]
-`;
-
-exports[`modules/datasource/crate/index getReleases returns null for empty result 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/no/n_/non_existent_crate",
-  },
-]
-`;
-
-exports[`modules/datasource/crate/index getReleases returns null for missing fields 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/no/n_/non_existent_crate",
-  },
-]
-`;
-
-exports[`modules/datasource/crate/index getReleases returns null for unknown error 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/so/me/some_crate",
-  },
-]
-`;
-
 exports[`modules/datasource/crate/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
-
-exports[`modules/datasource/crate/index getReleases throws for 5xx 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "raw.githubusercontent.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://raw.githubusercontent.com/rust-lang/crates.io-index/master/so/me/some_crate",
-  },
-]
-`;

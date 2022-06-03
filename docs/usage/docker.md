@@ -8,7 +8,7 @@ description: Docker Package Manager Support in Renovate
 Renovate supports upgrading dependencies in various types of Docker definition files:
 
 - Docker's `Dockerfile` files
-- Docker Compose `docker-compose.yml` files
+- Docker Compose `docker-compose.yml`, `compose.yml` files
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
@@ -132,10 +132,28 @@ For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 FROM ubuntu:yakkety
 ```
 
-To
+To:
 
 ```dockerfile
 FROM ubuntu:focal
+```
+
+### Debian codenames
+
+Renovate understands [Debian release code names and rolling updates schedule](https://wiki.debian.org/DebianReleases) and will offer upgrades to the latest stable release (e.g. from `debian:stretch` to `debian:bullseye`).
+
+For this to work the codename must be in lowercase.
+
+For example, Renovate will offer to upgrade the following `Dockerfile` layer:
+
+```dockerfile
+FROM debian:buster
+```
+
+To:
+
+```dockerfile
+FROM debian:bullseye
 ```
 
 ## Configuring/Disabling
@@ -250,7 +268,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:32.7.5
+FROM renovate/renovate:32.64.2
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

@@ -177,6 +177,7 @@ describe('modules/versioning/poetry/index', () => {
       expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
     }
   );
+
   test.each`
     currentValue        | rangeStrategy | currentVersion     | newVersion         | expected
     ${'1.0.0'}          | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'1.1.0'}
