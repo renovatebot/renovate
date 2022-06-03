@@ -182,10 +182,14 @@ export class PypiDatasource extends Datasource {
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
     const wheelText = text.toLowerCase();
-    const wheelPrefix = packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
+    const wheelPrefixWithPeriod =
+      packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
+    const wheelPrefixWithoutPeriod =
+      packageName.replace(regEx(/[^\w\d]+/g), '_') + '-';
     const wheelSuffix = '.whl';
     if (
-      wheelText.startsWith(wheelPrefix) &&
+      (wheelText.startsWith(wheelPrefixWithPeriod) ||
+        wheelText.startsWith(wheelPrefixWithoutPeriod)) &&
       wheelText.endsWith(wheelSuffix) &&
       wheelText.split('-').length > 2
     ) {
