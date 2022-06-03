@@ -1391,16 +1391,16 @@
   dependencies:
     "@seald-io/nedb" "3.0.0"
 
-"@jamiemagee/osv-offline@1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.6.tgz#387d3e6a251ff9858f5bf2ff75920c65e35c8eb9"
-  integrity sha512-PPIKlgCzHbKKtg4uzkwMeS9UjylFK4FMuQXeXDuPiAgJRj9Aphw+9US7a4kf0yaxgebHjOFCex7WG08MMx0hnw==
+"@jamiemagee/osv-offline@1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.7.tgz#c0fa075c1bdd155d76b9d94bb73628ccb43efef7"
+  integrity sha512-5EquMiMtWNowdEEZDyV6idf5UZNpp9s2EjVvqtTohr/4C+UXM/8GSuRuqZ8a+MyUHKdZeHSO5eFrd5CeU1puRA==
   dependencies:
     "@jamiemagee/osv-offline-db" "1.1.4"
     "@octokit/rest" "18.12.0"
     adm-zip "^0.5.9"
     fs-extra "10.0.0"
-    got "11.8.3"
+    got "11.8.5"
     luxon "2.4.0"
 
 "@jest/console@^27.5.1":
@@ -5357,7 +5357,24 @@ good-enough-parser@1.1.7:
     klona "2.0.5"
     moo "0.5.1"
 
-got@11.8.3, got@^11.7.0:
+got@11.8.5:
+  version "11.8.5"
+  resolved "https://registry.yarnpkg.com/got/-/got-11.8.5.tgz#ce77d045136de56e8f024bebb82ea349bc730046"
+  integrity sha512-o0Je4NvQObAuZPHLFoRSkdG2lTgtcynqymzg2Vupdx6PorhaT5MCbIyXG6d4D94kk8ZG57QeosgdiqfJWhEhlQ==
+  dependencies:
+    "@sindresorhus/is" "^4.0.0"
+    "@szmarczak/http-timer" "^4.0.5"
+    "@types/cacheable-request" "^6.0.1"
+    "@types/responselike" "^1.0.0"
+    cacheable-lookup "^5.0.3"
+    cacheable-request "^7.0.2"
+    decompress-response "^6.0.0"
+    http2-wrapper "^1.0.0-beta.5.2"
+    lowercase-keys "^2.0.0"
+    p-cancelable "^2.0.0"
+    responselike "^2.0.0"
+
+got@^11.7.0:
   version "11.8.3"
   resolved "https://registry.yarnpkg.com/got/-/got-11.8.3.tgz#f496c8fdda5d729a90b4905d2b07dbd148170770"
   integrity sha512-7gtQ5KiPh1RtGS9/Jbv1ofDpBFuq42gyfEib+ejaRBJuj/3tQFeR5+gw57e4ipaU8c/rCjvX6fkQz2lyDlGAOg==
