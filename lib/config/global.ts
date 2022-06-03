@@ -23,7 +23,6 @@ export class GlobalConfig {
     'privateKey',
     'privateKeyOld',
     'gitTimeout',
-    'platform',
   ];
 
   private static config: RepoGlobalConfig = {};
