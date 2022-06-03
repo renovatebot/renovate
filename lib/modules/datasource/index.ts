@@ -210,8 +210,8 @@ function resolveRegistryUrls(
       );
     }
     return is.function_(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : datasource.defaultRegistryUrls;
+      ? datasource.defaultRegistryUrls() ?? []
+      : datasource.defaultRegistryUrls ?? [];
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
