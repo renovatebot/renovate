@@ -1,4 +1,4 @@
-import { posix } from 'path';
+import { join } from 'upath';
 import { URL } from 'url';
 
 import { logger } from '../../../logger';
@@ -45,7 +45,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
 
   const gitRemote = new URL(dependency.source.git.remote);
 
-  const depName = posix.join(
+  const depName = join(
     gitRemote.host,
     gitRemote.pathname.replace(/\.git$/, ''),
     dependency.source.git.subdir
