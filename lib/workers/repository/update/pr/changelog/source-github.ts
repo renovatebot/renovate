@@ -141,6 +141,7 @@ export async function getChangeLogJSON(
       if (!release) {
         release = {
           version: next.version,
+          gitRef: next.gitRef,
           date: next.releaseTimestamp,
           // put empty changes so that existing templates won't break
           changes: [],
