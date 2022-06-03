@@ -39,11 +39,10 @@ export function getRollbackUpdate(
   );
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
   let newVersion;
-  const stableVersions = lessThanVersions.filter((v) =>
-    version.isStable(v.version)
-  );
   if (version.isStable(currentValue)) {
-    newVersion = stableVersions.pop()?.version;
+    newVersion = lessThanVersions.filter((v) =>
+      version.isStable(v.version)
+    ).pop()?.version;
   }
   if (!newVersion) {
     newVersion = lessThanVersions.pop()?.version;
