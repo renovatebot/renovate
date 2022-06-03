@@ -63,6 +63,6 @@ export async function getInRangeReleases(
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getInRangeReleases err');
     logger.debug({ datasource, depName }, 'Error getting releases');
+    return null;
   }
-  return null;
 }
