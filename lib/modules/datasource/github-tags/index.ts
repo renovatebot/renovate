@@ -8,17 +8,13 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import { CacheableGithubTags } from './cache';
-import type { TagResponse } from './types';
+import type { GitHubTag, TagResponse } from './types';
 
 export class GithubTagsDatasource extends GithubReleasesDatasource {
   static override readonly id = 'github-tags';
 
-  private tagsCache: CacheableGithubTags;
-
   constructor() {
     super(GithubTagsDatasource.id);
-    this.tagsCache = new CacheableGithubTags(this.http);
   }
 
   @cache({
@@ -97,20 +93,44 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
         this.getCommit(registryUrl, repo!);
   }
 
+  @cache({
+    ttlMinutes: 10,
+    namespace: `datasource-${GithubTagsDatasource.id}`,
+    key: ({ registryUrl, packageName: repo }: GetReleasesConfig) =>
+      `${registryUrl}:${repo}:tags`,
+  })
+  async getTags({
+    registryUrl,
+    packageName: repo,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
+    // tag
+    const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
+
+    const versions = (
+      await this.http.getJson<GitHubTag[]>(url, {
+        paginate: true,
+      })
+    ).body.map((o) => o.name);
+    const dependency: ReleaseResult = {
+      sourceUrl: getSourceUrl(repo, registryUrl),
+      releases: versions.map((version) => ({
+        version,
+        gitRef: version,
+      })),
+    };
+    return dependency;
+  }
+
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
-    const tagReleases = await this.tagsCache.getItems(config);
+    const tagsResult = await this.getTags(config);
 
     // istanbul ignore if
-    if (!tagReleases.length) {
+    if (!tagsResult) {
       return null;
     }
-
-    const tagsResult: ReleaseResult = {
-      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-      releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
-    };
 
     try {
       // Fetch additional data from releases endpoint when possible
