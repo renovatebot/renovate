@@ -8,7 +8,7 @@ export function getRollbackUpdate(
   config: RollbackConfig,
   versions: Release[],
   version: VersioningApi
-): LookupUpdate {
+): LookupUpdate | null {
   const { packageFile, versioning, depName, currentValue } = config;
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
@@ -19,7 +19,8 @@ export function getRollbackUpdate(
     return null;
   }
   const lessThanVersions = versions.filter((v) =>
-    version.isLessThanRange(v.version, currentValue)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    version.isLessThanRange!(v.version, currentValue!)
   );
   // istanbul ignore if
   if (!lessThanVersions.length) {
@@ -53,14 +54,16 @@ export function getRollbackUpdate(
     return null;
   }
   const newValue = version.getNewValue({
-    currentValue,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    currentValue: currentValue!,
     rangeStrategy: 'replace',
     newVersion,
   });
   return {
     bucket: 'rollback',
-    newMajor: version.getMajor(newVersion),
-    newValue,
+    newMajor: version.getMajor(newVersion)!,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    newValue: newValue!,
     newVersion,
     updateType: 'rollback',
   };

@@ -16,7 +16,6 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig {
   registryUrls?: string[];
-  endpoint?: string;
   aliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
@@ -58,7 +57,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
-  manager?: string;
+  manager?: string | null;
   packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
@@ -145,6 +144,9 @@ export interface LookupUpdate {
   newVersion?: string;
   updateType?: UpdateType;
   userStrings?: Record<string, string>;
+  checksumUrl?: string;
+  downloadUrl?: string;
+  releaseTimestamp?: any;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -294,7 +296,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
 
-  platform?: string;
   upgrades: Upgrade[];
   npmLock?: string;
   yarnLock?: string;
