@@ -1038,7 +1038,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       config.followTag = 'insiders';
       config.rollbackPrs = true;
-      config.ignoreUnstable = false;
       httpMock
         .scope('https://registry.npmjs.org')
         .get('/typescript')
@@ -1726,40 +1725,6 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: `rollback`,
         },
       ]);
-    });
-
-    it('should roll back to unstable', async () => {
-      config.currentValue = '3.1.0';
-      config.depName = 'typescript';
-      config.datasource = NpmDatasource.id;
-      config.followTag = 'insiders';
-      config.rollbackPrs = true;
-      config.ignoreUnstable = false;
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/typescript')
-        .reply(200, typescriptJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
-      expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
-    });
-
-    it('should roll back to unstable version current', async () => {
-      config.currentValue = '3.0.1-insiders.20180826';
-      config.depName = 'typescript';
-      config.datasource = NpmDatasource.id;
-      config.followTag = 'insiders';
-      config.rollbackPrs = true;
-      config.ignoreUnstable = false;
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/typescript')
-        .reply(200, typescriptJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
-      expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
   });
 });

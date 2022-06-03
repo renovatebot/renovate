@@ -41,9 +41,9 @@ export function getRollbackUpdate(
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
   let newVersion;
   if (version.isStable(currentValue)) {
-    newVersion = lessThanVersions.filter((v) =>
-      version.isStable(v.version)
-    ).pop()?.version;
+    newVersion = lessThanVersions
+      .filter((v) => version.isStable(v.version))
+      .pop()?.version;
   }
   if (!newVersion) {
     newVersion = lessThanVersions.pop()?.version;
