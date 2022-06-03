@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
@@ -24,12 +25,9 @@ function extractDepFromIncludeFile(includeObj: {
   return dep;
 }
 
-export function extractPackageFile(
-  content: string,
-  _packageFile: string,
-  config: ExtractConfig
-): PackageFile | null {
+export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
+  const { platform, endpoint } = GlobalConfig.get();
   try {
     // TODO: fix me (#9610)
     const doc: any = load(replaceReferenceTags(content), {
@@ -44,10 +42,8 @@ export function extractPackageFile(
     for (const includeObj of includes) {
       if (includeObj?.file && includeObj.project) {
         const dep = extractDepFromIncludeFile(includeObj);
-        if (config.endpoint) {
-          dep.registryUrls = [
-            config.endpoint.replace(regEx(/\/api\/v4\/?/), ''),
-          ];
+        if (platform === 'gitlab' && endpoint) {
+          dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
         }
         deps.push(dep);
       }

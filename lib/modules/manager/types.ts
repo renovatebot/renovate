@@ -16,7 +16,6 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig {
   registryUrls?: string[];
-  endpoint?: string;
   aliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
@@ -297,7 +296,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
 
-  platform?: string;
   upgrades: Upgrade[];
   npmLock?: string;
   yarnLock?: string;

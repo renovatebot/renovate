@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { LocalRepoCache } from './impl/local';
 import { resetCache, setCache } from '.';
@@ -7,12 +8,9 @@ import { resetCache, setCache } from '.';
  */
 export async function initRepoCache(config: RenovateConfig): Promise<void> {
   resetCache();
-  if (
-    config.platform &&
-    config.repository &&
-    config.repositoryCache === 'enabled'
-  ) {
-    const localCache = new LocalRepoCache(config.platform, config.repository);
+  const { platform } = GlobalConfig.get();
+  if (platform && config.repository && config.repositoryCache === 'enabled') {
+    const localCache = new LocalRepoCache(platform, config.repository);
     await localCache.load();
     setCache(localCache);
   }

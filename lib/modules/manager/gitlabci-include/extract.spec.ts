@@ -1,4 +1,5 @@
 import { loadFixture } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from './extract';
 
 const yamlFileMultiConfig = loadFixture('gitlab-ci.1.yaml');
@@ -45,9 +46,8 @@ describe('modules/manager/gitlabci-include/extract', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {
-          endpoint,
-        });
+        GlobalConfig.set({ platform: 'gitlab', endpoint });
+        const res = extractPackageFile(yamlFileMultiConfig);
         expect(res.deps[0].registryUrls[0]).toBe('http://gitlab.test');
       }
     });
