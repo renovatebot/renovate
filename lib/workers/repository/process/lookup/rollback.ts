@@ -38,6 +38,7 @@ export function getRollbackUpdate(
     { dependency: depName, versions },
     'Versions found before rolling back'
   );
+
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
   let newVersion;
   if (version.isStable(currentValue)) {
