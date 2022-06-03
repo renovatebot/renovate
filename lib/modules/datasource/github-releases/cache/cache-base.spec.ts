@@ -251,12 +251,10 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     ];
     const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
-    const res = await cache.getItems({ packageName: 'foo/bar' });
-
-    expect(sortItems(res)).toMatchObject([
-      { version: 'v1', bar: 'aaa' },
-      { version: 'v2', bar: 'bbb' },
-      { version: 'v3', bar: 'ccc' },
-    ]);
+    await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
+      'Unknown error'
+    );
+    expect(packageCache.get).toHaveBeenCalled();
+    expect(packageCache.set).not.toHaveBeenCalled();
   });
 });
