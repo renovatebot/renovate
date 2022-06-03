@@ -1,5 +1,4 @@
 import { DateTime, DurationLikeObject } from 'luxon';
-import { logger } from '../../../../logger';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
