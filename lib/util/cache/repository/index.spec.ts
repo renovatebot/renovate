@@ -33,4 +33,11 @@ describe('util/cache/repository/index', () => {
     await saveCache();
     expect(fs.outputFile).toHaveBeenCalled();
   });
+
+  it('resets cache', async () => {
+    await initRepoCache({ ...config, repositoryCache: 'reset' });
+    expect(fs.readFile).not.toHaveBeenCalled();
+    expect(fs.outputFile).toHaveBeenCalled();
+    expect(getCache()).toBeEmpty();
+  });
 });
