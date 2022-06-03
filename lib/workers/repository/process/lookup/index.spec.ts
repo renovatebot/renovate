@@ -1698,5 +1698,27 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
+
+    it('rollback for invalid version to last stable version', async () => {
+      config.currentValue = '2.5.17';
+      config.depName = 'vue';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      config.ignoreUnstable = true;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/vue')
+        .reply(200, vueJson);
+      const res = (await lookup.lookupUpdates(config)).updates;
+      expect(res).toEqual([
+        {
+          bucket: `rollback`,
+          newMajor: 2,
+          newValue: `2.5.16`,
+          newVersion: `2.5.16`,
+          updateType: `rollback`,
+        },
+      ]);
+    });
   });
 });
