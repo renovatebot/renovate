@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import type {
@@ -24,7 +25,7 @@ async function getOnboardingConfig(
   // Check for org/renovate-config
   try {
     const repo = `${orgName}/renovate-config`;
-    await getPreset({ repo, baseConfig: config });
+    await getPreset({ repo });
     orgPreset = `local>${repo}`;
   } catch (err) {
     if (
@@ -37,13 +38,13 @@ async function getOnboardingConfig(
 
   if (!orgPreset) {
     // Check for org/.{{platform}}
+    const platform = GlobalConfig.get('platform');
     try {
-      const repo = `${orgName}/.${config.platform}`;
+      const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';
       await getPreset({
         repo,
         presetName,
-        baseConfig: config,
       });
       orgPreset = `local>${repo}:${presetName}`;
     } catch (err) {
