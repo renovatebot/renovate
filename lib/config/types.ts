@@ -120,8 +120,6 @@ export interface RepoGlobalConfig {
   localDir?: string;
   cacheDir?: string;
   platform?: string;
-  endpoint?: string;
-  platform?: string;
 }
 
 export interface LegacyAdminConfig {
