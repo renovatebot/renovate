@@ -1,5 +1,5 @@
-import { join } from 'upath';
 import { URL } from 'url';
+import { join } from 'upath';
 
 import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../types';
