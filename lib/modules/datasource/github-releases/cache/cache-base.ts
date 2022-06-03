@@ -177,115 +177,102 @@ export abstract class AbstractGithubDatasourceCache<
         cacheUpdatedAt = cache.updatedAt;
       }
 
-      try {
-        if (isExpired(now, cacheUpdatedAt, this.updateDuration)) {
-          const variables: GithubQueryParams = {
-            owner,
-            name,
-            cursor: null,
-            count: cacheDoesExist
-              ? this.itemsPerUpdatePage
-              : this.itemsPerPrefetchPage,
-          };
+      if (isExpired(now, cacheUpdatedAt, this.updateDuration)) {
+        const variables: GithubQueryParams = {
+          owner,
+          name,
+          cursor: null,
+          count: cacheDoesExist
+            ? this.itemsPerUpdatePage
+            : this.itemsPerPrefetchPage,
+        };
 
-          // Collect version values to determine deleted items
-          const checkedVersions = new Set<string>();
+        // Collect version values to determine deleted items
+        const checkedVersions = new Set<string>();
 
-          // Page-by-page update loop
-          let pagesRemained = cacheDoesExist
-            ? this.maxUpdatePages
-            : this.maxPrefetchPages;
-          let stopIteration = false;
-          while (pagesRemained > 0 && !stopIteration) {
-            const graphqlRes = await this.http.postJson<
-              GithubGraphqlResponse<QueryResponse<FetchedItem>>
-            >('/graphql', {
-              baseUrl,
-              body: { query: this.graphqlQuery, variables },
-            });
-            pagesRemained -= 1;
+        // Page-by-page update loop
+        let pagesRemained = cacheDoesExist
+          ? this.maxUpdatePages
+          : this.maxPrefetchPages;
+        let stopIteration = false;
+        while (pagesRemained > 0 && !stopIteration) {
+          const graphqlRes = await this.http.postJson<
+            GithubGraphqlResponse<QueryResponse<FetchedItem>>
+          >('/graphql', {
+            baseUrl,
+            body: { query: this.graphqlQuery, variables },
+          });
+          pagesRemained -= 1;
 
-            const data = graphqlRes.body.data;
-            if (data) {
-              const {
-                nodes: fetchedItems,
-                pageInfo: { hasNextPage, endCursor },
-              } = data.repository.payload;
+          const data = graphqlRes.body.data;
+          if (data) {
+            const {
+              nodes: fetchedItems,
+              pageInfo: { hasNextPage, endCursor },
+            } = data.repository.payload;
 
-              if (hasNextPage) {
-                variables.cursor = endCursor;
-              } else {
-                stopIteration = true;
-              }
+            if (hasNextPage) {
+              variables.cursor = endCursor;
+            } else {
+              stopIteration = true;
+            }
 
-              for (const item of fetchedItems) {
-                const newStoredItem = this.coerceFetched(item);
-                if (newStoredItem) {
-                  const { version } = newStoredItem;
+            for (const item of fetchedItems) {
+              const newStoredItem = this.coerceFetched(item);
+              if (newStoredItem) {
+                const { version } = newStoredItem;
 
-                  // Stop earlier if the stored item have reached stability,
-                  // which means `unstableDays` period have passed
-                  const oldStoredItem = cacheItems[version];
-                  if (
-                    oldStoredItem &&
-                    isExpired(
-                      now,
-                      oldStoredItem.releaseTimestamp,
-                      this.stabilityDuration
-                    )
-                  ) {
-                    stopIteration = true;
-                    break;
-                  }
-
-                  cacheItems[version] = newStoredItem;
-                  checkedVersions.add(version);
+                // Stop earlier if the stored item have reached stability,
+                // which means `unstableDays` period have passed
+                const oldStoredItem = cacheItems[version];
+                if (
+                  oldStoredItem &&
+                  isExpired(
+                    now,
+                    oldStoredItem.releaseTimestamp,
+                    this.stabilityDuration
+                  )
+                ) {
+                  stopIteration = true;
+                  break;
                 }
+
+                cacheItems[version] = newStoredItem;
+                checkedVersions.add(version);
               }
             }
-          }
-
-          // Detect removed items
-          for (const [version, item] of Object.entries(cacheItems)) {
-            if (
-              !isExpired(now, item.releaseTimestamp, this.stabilityDuration) &&
-              !checkedVersions.has(version)
-            ) {
-              delete cacheItems[version];
-            }
-          }
-
-          // Store cache
-          const expiry = DateTime.fromISO(cacheCreatedAt).plus(
-            this.resetDuration
-          );
-          const { minutes: ttlMinutes } = expiry
-            .diff(now, ['minutes'])
-            .toObject();
-          if (ttlMinutes && ttlMinutes > 0) {
-            const cacheValue: GithubDatasourceCache<StoredItem> = {
-              items: cacheItems,
-              createdAt: cacheCreatedAt,
-              updatedAt: now.toISO(),
-            };
-            await packageCache.set(
-              this.cacheNs,
-              cacheKey,
-              cacheValue,
-              ttlMinutes
-            );
           }
         }
-      } catch (err) {
-        logger.debug(
-          { err },
-          `GitHub datasource: error fetching cacheable GraphQL data`
-        );
 
-        // On errors, return previous value (if valid)
-        if (cacheDoesExist) {
-          const cachedItems = Object.values(cache.items);
-          return cachedItems;
+        // Detect removed items
+        for (const [version, item] of Object.entries(cacheItems)) {
+          if (
+            !isExpired(now, item.releaseTimestamp, this.stabilityDuration) &&
+            !checkedVersions.has(version)
+          ) {
+            delete cacheItems[version];
+          }
+        }
+
+        // Store cache
+        const expiry = DateTime.fromISO(cacheCreatedAt).plus(
+          this.resetDuration
+        );
+        const { minutes: ttlMinutes } = expiry
+          .diff(now, ['minutes'])
+          .toObject();
+        if (ttlMinutes && ttlMinutes > 0) {
+          const cacheValue: GithubDatasourceCache<StoredItem> = {
+            items: cacheItems,
+            createdAt: cacheCreatedAt,
+            updatedAt: now.toISO(),
+          };
+          await packageCache.set(
+            this.cacheNs,
+            cacheKey,
+            cacheValue,
+            ttlMinutes
+          );
         }
       }
     }
