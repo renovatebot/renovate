@@ -5,7 +5,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { replaceReferenceTags } from '../gitlabci/utils';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 
 function extractDepFromIncludeFile(includeObj: {
   file: any;
