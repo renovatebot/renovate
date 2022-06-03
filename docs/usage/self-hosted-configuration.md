@@ -365,7 +365,7 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 
 <!-- prettier-ignore -->
 !!! note
-    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphare.
+    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
