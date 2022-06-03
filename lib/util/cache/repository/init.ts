@@ -8,10 +8,25 @@ import { resetCache, setCache } from '.';
  */
 export async function initRepoCache(config: RenovateConfig): Promise<void> {
   resetCache();
+
   const { platform } = GlobalConfig.get();
-  if (platform && config.repository && config.repositoryCache === 'enabled') {
-    const localCache = new LocalRepoCache(platform, config.repository);
+  const { repository, repositoryCache } = config;
+
+  if (repositoryCache === 'disabled' || !platform || !repository) {
+    return;
+  }
+
+  if (repositoryCache === 'enabled') {
+    const localCache = new LocalRepoCache(platform, repository);
     await localCache.load();
     setCache(localCache);
+    return;
+  }
+
+  if (repositoryCache === 'reset') {
+    const localCache = new LocalRepoCache(platform, repository);
+    await localCache.save();
+    setCache(localCache);
+    return;
   }
 }
