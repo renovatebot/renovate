@@ -1,5 +1,5 @@
 import { fs } from '../../../../test/util';
-import { detectGlobalConfig } from './detect';
+import { detectGlobalConfig } from '.';
 
 jest.mock('../../../util/fs');
 
@@ -20,6 +20,7 @@ Object {
       expect(res.npmrc).toBeDefined();
       expect(res.npmrcMerge).toBe(true);
     });
+
     it('handles no .npmrc', async () => {
       fs.readFile.mockImplementationOnce(() => Promise.reject());
       const res = await detectGlobalConfig();

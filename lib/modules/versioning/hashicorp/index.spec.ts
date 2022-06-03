@@ -11,6 +11,7 @@ describe('modules/versioning/hashicorp/index', () => {
       expect(semver.matches(version, range)).toBe(expected);
     }
   );
+
   test.each`
     versions                                         | range         | expected
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}

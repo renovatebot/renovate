@@ -79,7 +79,7 @@ export function interpolateString(
   childTokens: Token[],
   variables: PackageVariables
 ): string | null {
-  const resolvedSubstrings = [];
+  const resolvedSubstrings: string[] = [];
   for (const childToken of childTokens) {
     const type = childToken.type;
     if (type === TokenType.String) {

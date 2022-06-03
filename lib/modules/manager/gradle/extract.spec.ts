@@ -207,7 +207,7 @@ describe('modules/manager/gradle/extract', () => {
         deps: [
           {
             depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-            groupName: 'io.gitlab.arturbosch.detekt',
+            groupName: 'detekt',
             currentValue: '1.17.0',
             managerData: {
               fileReplacePosition: 21,
@@ -216,7 +216,7 @@ describe('modules/manager/gradle/extract', () => {
           },
           {
             depName: 'io.kotest:kotest-assertions-core-jvm',
-            groupName: 'io.kotest',
+            groupName: 'kotest',
             currentValue: '4.6.0',
             managerData: {
               fileReplacePosition: 51,
@@ -225,7 +225,7 @@ describe('modules/manager/gradle/extract', () => {
           },
           {
             depName: 'io.kotest:kotest-runner-junit5',
-            groupName: 'io.kotest',
+            groupName: 'kotest',
             currentValue: '4.6.0',
             managerData: {
               fileReplacePosition: 51,
@@ -268,7 +268,6 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'io.gitlab.arturbosch.detekt',
             depType: 'plugin',
             currentValue: '1.17.0',
-            commitMessageTopic: 'plugin detekt',
             packageName:
               'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
             managerData: {
@@ -284,7 +283,6 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.danilopianini.publish-on-central',
             depType: 'plugin',
             currentValue: '0.5.0',
-            commitMessageTopic: 'plugin publish-on-central',
             packageName:
               'org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin',
             managerData: {
@@ -359,7 +357,7 @@ describe('modules/manager/gradle/extract', () => {
           },
           {
             depName: 'com.squareup.retrofit2:retrofit',
-            groupName: 'com.squareup.retrofit2',
+            groupName: 'retrofit',
             currentValue: '2.8.2',
             managerData: {
               fileReplacePosition: 41,
@@ -407,7 +405,6 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.jetbrains.kotlin.plugin.serialization',
             depType: 'plugin',
             currentValue: '1.5.21',
-            commitMessageTopic: 'plugin kotlinSerialization',
             packageName:
               'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
             managerData: {
@@ -451,5 +448,103 @@ describe('modules/manager/gradle/extract', () => {
       Object.keys(fsMock)
     );
     expect(res).toBeNull();
+  });
+
+  it('deletes commit message for plugins with version reference', async () => {
+    const tomlFile = `
+    [versions]
+    detekt = "1.18.1"
+
+    [plugins]
+    detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
+    [libraries]
+    detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+    `;
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        deps: [
+          {
+            depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
+            groupName: 'detekt',
+            currentValue: '1.18.1',
+            managerData: {
+              fileReplacePosition: 30,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            fileReplacePosition: 30,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            depType: 'plugin',
+            depName: 'io.gitlab.arturbosch.detekt',
+            packageName:
+              'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+            currentValue: '1.18.1',
+            managerData: {
+              fileReplacePosition: 30,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            groupName: 'detekt',
+            fileReplacePosition: 30,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should change the dependency version not the comment version', async () => {
+    const tomlFile = loadFixture('3/libs.versions.toml');
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'junit:junit',
+            groupName: 'junit',
+            currentValue: '1.4.9',
+            managerData: {
+              fileReplacePosition: 124,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            fileReplacePosition: 124,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            depName: 'mocha-junit:mocha-junit',
+            groupName: 'mocha-junit-reporter',
+            currentValue: '2.0.2',
+            managerData: {
+              fileReplacePosition: 82,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            fileReplacePosition: 82,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+    ]);
   });
 });

@@ -3,7 +3,7 @@ import { loadFixture } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 
@@ -16,36 +16,42 @@ describe('modules/manager/nuget/extract', () => {
     beforeEach(() => {
       GlobalConfig.set(adminConfig);
     });
+
     afterEach(() => {
       GlobalConfig.reset();
     });
+
     it('returns empty for invalid csproj', async () => {
       expect(await extractPackageFile('nothing here', 'bogus', config)).toEqual(
         { deps: [] }
       );
     });
+
     it('extracts package version dependency', async () => {
       const packageFile =
         'with-centralized-package-versions/Directory.Packages.props';
       const sample = loadFixture(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
+
     it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
       const sample = loadFixture(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
     });
+
     it('extracts all dependencies from global packages file', async () => {
       const packageFile = 'packages.props';
       const sample = loadFixture(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
     });
+
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
       const contents = loadFixture(packageFile);
@@ -64,6 +70,7 @@ describe('modules/manager/nuget/extract', () => {
         ],
       });
     });
+
     it('considers lower-case nuget.config', async () => {
       const packageFile =
         'with-lower-case-config-file/with-lower-case-config-file.csproj';
@@ -83,6 +90,7 @@ describe('modules/manager/nuget/extract', () => {
         ],
       });
     });
+
     it('considers pascal-case NuGet.Config', async () => {
       const packageFile =
         'with-pascal-case-config-file/with-pascal-case-config-file.csproj';
@@ -102,6 +110,7 @@ describe('modules/manager/nuget/extract', () => {
         ],
       });
     });
+
     it('handles malformed NuGet.config', async () => {
       const packageFile =
         'with-malformed-config-file/with-malformed-config-file.csproj';
@@ -117,6 +126,7 @@ describe('modules/manager/nuget/extract', () => {
         ],
       });
     });
+
     it('handles NuGet.config without package sources', async () => {
       const packageFile =
         'without-package-sources/without-package-sources.csproj';
@@ -168,6 +178,7 @@ describe('modules/manager/nuget/extract', () => {
         ],
       });
     });
+
     it('extracts registry URLs independently', async () => {
       const packageFile = 'multiple-package-files/one/one.csproj';
       const contents = loadFixture(packageFile);

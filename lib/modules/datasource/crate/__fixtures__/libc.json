@@ -1,0 +1,33 @@
+{
+  "categories": null,
+  "crate": {
+    "badges": null,
+    "categories": null,
+    "created_at": "2015-01-15T20:22:13.100871+00:00",
+    "description": "Raw FFI bindings to platform libraries like libc.\n",
+    "documentation": "https://docs.rs/libc/",
+    "downloads": 106751998,
+    "exact_match": false,
+    "homepage": "https://github.com/rust-lang/libc",
+    "id": "libc",
+    "keywords": null,
+    "links": {
+      "owner_team": "/api/v1/crates/libc/owner_team",
+      "owner_user": "/api/v1/crates/libc/owner_user",
+      "owners": "/api/v1/crates/libc/owners",
+      "reverse_dependencies": "/api/v1/crates/libc/reverse_dependencies",
+      "version_downloads": "/api/v1/crates/libc/downloads",
+      "versions": "/api/v1/crates/libc/versions"
+    },
+    "max_stable_version": null,
+    "max_version": "0.0.0",
+    "name": "libc",
+    "newest_version": "0.0.0",
+    "recent_downloads": null,
+    "repository": "https://github.com/rust-lang/libc",
+    "updated_at": "2022-04-18T23:40:23.878438+00:00",
+    "versions": null
+  },
+  "keywords": null,
+  "versions": null
+}

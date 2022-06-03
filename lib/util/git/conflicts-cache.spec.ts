@@ -1,6 +1,6 @@
 import { mocked } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
-import type { Cache } from '../cache/repository/types';
+import type { RepoCacheData } from '../cache/repository/types';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
@@ -10,7 +10,7 @@ jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/conflicts-cache', () => {
-  let repoCache: Cache = {};
+  let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
     repoCache = {};

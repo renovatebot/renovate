@@ -8,7 +8,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile {
+): PackageFile | null {
   let deps = [];
   // TODO: fix type
   let doc: any;
@@ -22,8 +22,8 @@ export function extractPackageFile(
     logger.debug({ fileName }, 'requirements.yaml has no dependencies');
     return null;
   }
-  deps = doc.dependencies.map((dep) => {
-    let currentValue; // Remove when #9610 has been implemented
+  deps = doc.dependencies.map((dep: Record<string, any>) => {
+    let currentValue: string | undefined; // Remove when #9610 has been implemented
     switch (typeof dep.version) {
       case 'number':
         currentValue = String(dep.version);
@@ -57,7 +57,7 @@ export function extractPackageFile(
       const repoWithPrefixRemoved = dep.repository.slice(
         dep.repository[0] === '@' ? 1 : 6
       );
-      const alias = config.aliases[repoWithPrefixRemoved];
+      const alias = config.aliases?.[repoWithPrefixRemoved];
       if (alias) {
         res.registryUrls = [alias];
         return res;

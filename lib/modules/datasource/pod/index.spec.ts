@@ -36,6 +36,7 @@ describe('modules/datasource/pod/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty result', async () => {
       // FIXME: why get request?
       httpMock
@@ -44,6 +45,7 @@ describe('modules/datasource/pod/index', () => {
         .reply(404);
       expect(await getPkgReleases(config)).toBeNull();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope(githubApiHost)
@@ -61,6 +63,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('returns null for 404 Github enterprise', async () => {
       httpMock
         .scope(githubEntApiHost)
@@ -81,6 +84,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('returns null for 404 Github enterprise with different url style', async () => {
       httpMock
         .scope(githubEntApiHost2)
@@ -98,6 +102,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toBeNull();
     });
+
     it('returns null for 401', async () => {
       httpMock
         .scope(cocoapodsHost)
@@ -105,6 +110,7 @@ describe('modules/datasource/pod/index', () => {
         .reply(401);
       expect(await getPkgReleases(config)).toBeNull();
     });
+
     it('throws for 429', async () => {
       httpMock
         .scope(cocoapodsHost)
@@ -112,6 +118,7 @@ describe('modules/datasource/pod/index', () => {
         .reply(429);
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(cocoapodsHost)
@@ -119,6 +126,7 @@ describe('modules/datasource/pod/index', () => {
         .replyWithError('foobar');
       expect(await getPkgReleases(config)).toBeNull();
     });
+
     it('processes real data from CDN', async () => {
       httpMock
         .scope(cocoapodsHost)
@@ -138,6 +146,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github with shard with specs', async () => {
       httpMock
         .scope(githubApiHost)
@@ -156,6 +165,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github with shard without specs', async () => {
       httpMock
         .scope(githubApiHost)
@@ -176,6 +186,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github with specs without shard', async () => {
       httpMock
         .scope(githubApiHost)
@@ -198,6 +209,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github without specs without shard', async () => {
       httpMock
         .scope(githubApiHost)
@@ -222,6 +234,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github Enterprise with shard with specs', async () => {
       httpMock
         .scope(githubEntApiHost)
@@ -240,6 +253,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github Enterprise with shard without specs', async () => {
       httpMock
         .scope(githubEntApiHost)
@@ -260,6 +274,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github Enterprise with specs without shard', async () => {
       httpMock
         .scope(githubEntApiHost)
@@ -282,6 +297,7 @@ describe('modules/datasource/pod/index', () => {
         ],
       });
     });
+
     it('processes real data from Github Enterprise without specs without shard', async () => {
       httpMock
         .scope(githubEntApiHost)

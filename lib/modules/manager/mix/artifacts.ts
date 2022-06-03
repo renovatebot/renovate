@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -70,7 +71,7 @@ export async function updateArtifacts({
     }
 
     return acc;
-  }, []);
+  }, [] as string[]);
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
@@ -82,7 +83,10 @@ export async function updateArtifacts({
   const command = [
     'mix',
     'deps.update',
-    ...updatedDeps.map((dep) => quote(dep.depName)),
+    ...updatedDeps
+      .map((dep) => dep.depName)
+      .filter(is.string)
+      .map((dep) => quote(dep)),
   ].join(' ');
 
   try {

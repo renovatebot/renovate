@@ -7,6 +7,7 @@ describe('modules/manager/pub/extract', () => {
       const res = extractPackageFile('foo: bar', 'pubspec.yaml');
       expect(res).toBeNull();
     });
+
     it('should return null if package is invalid', () => {
       const res = extractPackageFile(
         Fixtures.get('update.yaml'),
@@ -14,6 +15,7 @@ describe('modules/manager/pub/extract', () => {
       );
       expect(res).toBeNull();
     });
+
     it('should return valid dependencies', () => {
       const res = extractPackageFile(
         Fixtures.get('extract.yaml'),

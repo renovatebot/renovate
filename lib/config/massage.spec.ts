@@ -8,6 +8,7 @@ describe('config/massage', () => {
       const res = massage.massageConfig(config);
       expect(res).toEqual({});
     });
+
     it('massages strings to array', () => {
       const config: RenovateConfig = {
         schedule: 'before 5am' as never,
@@ -15,6 +16,7 @@ describe('config/massage', () => {
       const res = massage.massageConfig(config);
       expect(Array.isArray(res.schedule)).toBeTrue();
     });
+
     it('massages npmToken', () => {
       const config: RenovateConfig = {
         npmToken: 'some-token',
@@ -23,6 +25,7 @@ describe('config/massage', () => {
         npmrc: '//registry.npmjs.org/:_authToken=some-token\n',
       });
     });
+
     it('massages packageRules matchUpdateTypes', () => {
       const config: RenovateConfig = {
         packageRules: [
@@ -42,6 +45,7 @@ describe('config/massage', () => {
       expect(res).toMatchSnapshot();
       expect(res.packageRules).toHaveLength(3);
     });
+
     it('does not massage lockFileMaintenance', () => {
       const config: RenovateConfig = {
         packageRules: [

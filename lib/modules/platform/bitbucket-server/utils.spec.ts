@@ -7,7 +7,9 @@ import {
 } from './utils';
 
 describe('modules/platform/bitbucket-server/utils', () => {
-  function createError(body: Partial<BitbucketErrorResponse> = undefined) {
+  function createError(
+    body: Partial<BitbucketErrorResponse> | undefined = undefined
+  ) {
     return partial<BitbucketError>({
       response: partial<Response<BitbucketErrorResponse>>({ body }),
     });

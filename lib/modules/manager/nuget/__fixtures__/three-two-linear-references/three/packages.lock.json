@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net6.0": {
+      "Serilog": {
+        "type": "Direct",
+        "requested": "[2.11.0, )",
+        "resolved": "2.11.0",
+        "contentHash": "ysv+hBzTul6Dp+Hvm10FlhJO3yMQcFKSAleus+LpiIzvNstpeV4Z7gGuIZ1OPNfIMulSHOjmLuGAEDKzpnV8ZQ=="
+      },
+      "one": {
+        "type": "Project",
+        "dependencies": {
+          "Serilog": "2.11.0"
+        }
+      },
+      "two": {
+        "type": "Project",
+        "dependencies": {
+          "Serilog": "2.11.0",
+          "one": "1.0.0"
+        }
+      }
+    }
+  }
+}

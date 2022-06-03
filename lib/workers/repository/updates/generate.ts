@@ -115,7 +115,7 @@ export function generateBranchConfig(
         upgrade.newDigestShort ||
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
-    if (upgrade.isDigest || upgrade.updateType === 'pin') {
+    if (upgrade.isDigest || upgrade.isPinDigest) {
       upgrade.displayFrom = upgrade.currentDigestShort;
       upgrade.displayTo = upgrade.newDigestShort;
     } else if (upgrade.isLockfileUpdate) {
@@ -149,7 +149,12 @@ export function generateBranchConfig(
     delete upgrade.group;
 
     // istanbul ignore else
-    if (toVersions.length > 1 && toValues.size > 1 && !typesGroup) {
+    if (
+      toVersions.length > 1 &&
+      toValues.size > 1 &&
+      newValue.length > 1 &&
+      !typesGroup
+    ) {
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;

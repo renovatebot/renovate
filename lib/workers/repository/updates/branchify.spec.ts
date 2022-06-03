@@ -11,6 +11,7 @@ jest.mock('./flatten');
 jest.mock('../changelog');
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -25,6 +26,7 @@ describe('workers/repository/updates/branchify', () => {
       const res = await branchifyUpgrades(config, {});
       expect(res.branches).toBeEmptyArray();
     });
+
     it('returns one branch if one input', async () => {
       flattenUpdates.mockResolvedValueOnce([
         {
@@ -40,6 +42,7 @@ describe('workers/repository/updates/branchify', () => {
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(1);
     });
+
     it('deduplicates', async () => {
       flattenUpdates.mockResolvedValueOnce([
         {
@@ -65,6 +68,7 @@ describe('workers/repository/updates/branchify', () => {
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(1);
     });
+
     it('groups if same compiled branch names', async () => {
       flattenUpdates.mockResolvedValueOnce([
         {
@@ -89,6 +93,7 @@ describe('workers/repository/updates/branchify', () => {
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
+
     it('groups if same compiled group name', async () => {
       flattenUpdates.mockResolvedValueOnce([
         {
@@ -117,6 +122,7 @@ describe('workers/repository/updates/branchify', () => {
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
+
     it('no fetch changelogs', async () => {
       config.fetchReleaseNotes = false;
       flattenUpdates.mockResolvedValueOnce([

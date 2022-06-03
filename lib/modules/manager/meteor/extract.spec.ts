@@ -9,6 +9,7 @@ describe('modules/manager/meteor/extract', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');
       expect(res).toBeNull();
     });
+
     it('returns results', () => {
       const res = extractPackageFile(input01Content);
       expect(res).toMatchSnapshot();

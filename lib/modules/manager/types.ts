@@ -15,26 +15,26 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
-  constraints?: Record<string, string>;
-  registryUrls?: string[];
-  endpoint?: string;
-  gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-  updateInternalDeps?: boolean;
 }
 
-export interface CustomExtractConfig extends ExtractConfig {
-  autoReplaceStringTemplate?: string;
-  matchStrings: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
+export interface RegexManagerTemplates {
   depNameTemplate?: string;
   packageNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
   depTypeTemplate?: string;
+}
+
+export interface CustomExtractConfig
+  extends ExtractConfig,
+    RegexManagerTemplates {
+  autoReplaceStringTemplate?: string;
+  matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface UpdateArtifactsConfig {
@@ -56,7 +56,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
-  manager?: string;
+  manager?: string | null;
   packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
@@ -78,12 +78,13 @@ export interface PackageFile<T = Record<string, any>>
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   deps: PackageDependency[];
   lernaClient?: string;
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
   npmrc?: string;
-  packageFile?: string;
+  packageFile?: string | null;
   packageJsonName?: string;
   packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
@@ -95,14 +96,14 @@ export interface PackageFile<T = Record<string, any>>
 }
 
 export interface Package<T> extends ManagerData<T> {
-  currentValue?: string;
+  currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
   groupName?: string;
   lineNumber?: number;
-  packageName?: string;
+  packageName?: string | null;
   repo?: string;
   target?: string;
   versioning?: string;
@@ -118,7 +119,7 @@ export interface Package<T> extends ManagerData<T> {
   pinDigests?: boolean;
   currentRawValue?: string;
   major?: { enabled?: boolean };
-  prettyDepType?: any;
+  prettyDepType?: string;
 }
 
 export interface LookupUpdate {
@@ -128,6 +129,7 @@ export interface LookupUpdate {
   isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
+  isPinDigest?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
   isReplacement?: boolean;
@@ -142,6 +144,9 @@ export interface LookupUpdate {
   newVersion?: string;
   updateType?: UpdateType;
   userStrings?: Record<string, string>;
+  checksumUrl?: string;
+  downloadUrl?: string;
+  releaseTimestamp?: any;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -154,9 +159,9 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
-  lockedVersion?: string;
+  lockedVersion?: string | null;
   propSource?: string;
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
   sourceLine?: number;
@@ -168,6 +173,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  isInternal?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -219,13 +225,13 @@ export interface BumpPackageVersionResult {
 }
 
 export interface UpdateLockedConfig {
-  packageFile?: string;
+  packageFile: string;
   packageFileContent?: string;
-  lockFile?: string;
+  lockFile: string;
   lockFileContent?: string;
-  depName?: string;
+  depName: string;
   currentVersion?: string;
-  newVersion?: string;
+  newVersion: string;
   allowParentUpdates?: boolean;
   allowHigherOrRemoved?: boolean;
 }
@@ -290,10 +296,9 @@ export interface PostUpdateConfig<T = Record<string, any>>
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
 
-  platform?: string;
-  upgrades?: Upgrade[];
+  upgrades: Upgrade[];
   npmLock?: string;
   yarnLock?: string;
-  branchName?: string;
+  branchName: string;
   reuseExistingBranch?: boolean;
 }

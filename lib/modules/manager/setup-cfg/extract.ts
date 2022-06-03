@@ -15,7 +15,10 @@ function getSectionRecord(str: string): string {
   return sectionRecord;
 }
 
-function getDepType(section: string, record: string): null | string {
+function getDepType(
+  section: string | null,
+  record: string | null
+): null | string {
   if (section === 'options') {
     if (record === 'install_requires') {
       return 'install';
@@ -35,8 +38,8 @@ function getDepType(section: string, record: string): null | string {
 
 function parseDep(
   line: string,
-  section: string,
-  record: string
+  section: string | null,
+  record: string | null
 ): PackageDependency | null {
   const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
   const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
@@ -87,8 +90,8 @@ export function extractPackageFile(
 ): Result<PackageFile | null> {
   logger.trace('setup-cfg.extractPackageFile()');
 
-  let sectionName = null;
-  let sectionRecord = null;
+  let sectionName: string | null = null;
+  let sectionRecord: string | null = null;
 
   const deps: PackageDependency[] = [];
 

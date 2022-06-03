@@ -1,4 +1,5 @@
 import { PlatformId } from '../../../constants';
+import { GlobalConfig } from '../../global';
 import * as azure from '../azure';
 import * as bitbucket from '../bitbucket';
 import * as bitbucketServer from '../bitbucket-server';
@@ -14,30 +15,32 @@ const resolvers = {
   [PlatformId.Gitea]: gitea,
   [PlatformId.Github]: github,
   [PlatformId.Gitlab]: gitlab,
-};
+} as const;
 
 export function getPreset({
   repo,
   presetName = 'default',
   presetPath,
   tag,
-  baseConfig,
-}: PresetConfig): Promise<Preset> {
-  const { platform, endpoint } = baseConfig;
+}: PresetConfig): Promise<Preset | undefined> {
+  const { platform, endpoint } = GlobalConfig.get();
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  const resolver = resolvers[platform.toLowerCase()];
+  const resolver = resolvers[platform.toLowerCase() as PlatformId];
   if (!resolver) {
     throw new Error(
-      `Unsupported platform '${baseConfig.platform}' for local preset.`
+      // TODO: can be undefined? #7154
+      `Unsupported platform '${platform}' for local preset.`
     );
   }
   return resolver.getPresetFromEndpoint(
     repo,
     presetName,
     presetPath,
-    endpoint,
+    // TODO: fix type #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    endpoint!,
     tag
   );
 }

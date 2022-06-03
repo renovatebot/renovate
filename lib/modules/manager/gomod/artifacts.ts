@@ -43,7 +43,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   // get extra host rules for other git-based Go Module hosts
   const hostRules = getAll() || [];
 
-  const goGitAllowedHostType: string[] = [
+  const goGitAllowedHostType: (string | undefined)[] = [
     // All known git platforms
     PlatformId.Azure,
     PlatformId.Bitbucket,
@@ -62,13 +62,15 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
       hostRule.matchHost &&
       goGitAllowedHostType.includes(hostRule.hostType)
     ) {
-      const httpUrl = createURLFromHostOrURL(hostRule.matchHost).toString();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
       if (validateUrl(httpUrl)) {
         logger.debug(
           `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
-          httpUrl,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          httpUrl!,
           hostRule,
           environmentVariables
         );
@@ -87,7 +89,8 @@ function getUpdateImportPathCmds(
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
-    .map((dep) => dep.depName)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    .map((dep) => dep.depName!)
     .filter((x) => !x.startsWith('gopkg.in'))
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
@@ -121,7 +124,7 @@ function getUpdateImportPathCmds(
   return updateImportCommands;
 }
 
-function useModcacherw(goVersion: string): boolean {
+function useModcacherw(goVersion: string | undefined): boolean {
   if (!is.string(goVersion)) {
     return true;
   }
@@ -155,10 +158,25 @@ export async function updateArtifacts({
   const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
-  try {
+  let massagedGoMod = newGoModContent;
+
+  if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
+
+    // replace bracket after comments, so it doesn't break the regex, doing a complex regex causes problems
+    // when there's a comment and ")" after it, the regex will read replace block until comment.. and stop.
+    massagedGoMod = massagedGoMod
+      .split('\n')
+      .map((line) => {
+        if (line.trim().startsWith('//')) {
+          return line.replace(')', 'renovate-replace-bracket');
+        }
+        return line;
+      })
+      .join('\n');
+
     const inlineReplaceRegEx = regEx(
       /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
     );
@@ -179,17 +197,21 @@ export async function updateArtifacts({
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match): string =>
+    const blockCommentOut = (match: string): string =>
       match.replace(/(\r?\n)/g, '$1// renovate-replace ');
 
     // Comment out golang replace directives
-    const massagedGoMod = newGoModContent
+    massagedGoMod = massagedGoMod
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
     if (massagedGoMod !== newGoModContent) {
-      logger.debug('Removed some relative replace statements from go.mod');
+      logger.debug(
+        'Removed some relative replace statements and comments from go.mod'
+      );
     }
+  }
+  try {
     await writeLocalFile(goModFileName, massagedGoMod);
 
     const cmd = 'go';
@@ -213,7 +235,7 @@ export async function updateArtifacts({
       },
     };
 
-    const execCommands = [];
+    const execCommands: string[] = [];
 
     let args = 'get -d -t ./...';
     logger.debug({ cmd, args }, 'go get command included');
@@ -223,7 +245,8 @@ export async function updateArtifacts({
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major' &&
-      config.newMajor > 1;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      config.newMajor! > 1;
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
       if (updateImportCmds.length > 0) {
@@ -328,9 +351,9 @@ export async function updateArtifacts({
       }
     }
 
-    const finalGoModContent = (
-      await readLocalFile(goModFileName, 'utf8')
-    ).replace(regEx(/\/\/ renovate-replace /g), '');
+    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))
+      .replace(regEx(/\/\/ renovate-replace /g), '')
+      .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
       logger.debug('Found updated go.mod after go.sum update');
       res.push({

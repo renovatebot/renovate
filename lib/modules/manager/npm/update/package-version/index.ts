@@ -12,7 +12,7 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
-  let newPjVersion: string;
+  let newPjVersion: string | null;
   let bumpedContent = content;
   try {
     if (bumpVersion.startsWith('mirror:')) {

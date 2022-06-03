@@ -222,7 +222,6 @@ export class PodDatasource extends Datasource {
 
     const podName = packageName.replace(regEx(/\/.*$/), '');
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
-    baseUrl = massageGithubUrl(baseUrl);
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(baseUrl)) {
       [baseUrl] = this.defaultRegistryUrls;
@@ -231,6 +230,7 @@ export class PodDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const match = githubRegex.exec(baseUrl);
     if (match) {
+      baseUrl = massageGithubUrl(baseUrl);
       const { hostURL, account, repo } = match?.groups ?? {};
       const opts = { hostURL, account, repo };
       result = await this.getReleasesFromGithub(podName, opts);

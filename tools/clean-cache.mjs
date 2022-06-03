@@ -1,6 +1,6 @@
 import { tmpdir } from 'os';
-import { join } from 'path';
 import { remove } from 'fs-extra';
+import { join } from 'upath';
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {

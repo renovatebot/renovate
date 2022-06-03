@@ -74,7 +74,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'debian_stable/nginx',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for missing repository or package', async () => {
@@ -92,7 +91,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'this_should/never-exist',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws error on unexpected API response', async () => {
@@ -112,7 +110,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws error on unexpected Resolver response with binary package', async () => {
@@ -127,7 +124,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws error on unexpected Resolver response with source package', async () => {
@@ -146,7 +142,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws error on API request timeout', async () => {
@@ -166,7 +161,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws error on Resolver request timeout', async () => {
@@ -181,7 +175,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null on Resolver ambiguous binary package', async () => {
@@ -197,7 +190,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'ubuntu_20_04/git',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws without repository and package name', async () => {
@@ -208,7 +200,6 @@ describe('modules/datasource/repology/index', () => {
           depName: 'invalid-lookup-name',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns correct version for binary package', async () => {
@@ -225,7 +216,6 @@ describe('modules/datasource/repology/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe('1.14.2-2+deb10u1');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns correct version for source package', async () => {
@@ -245,7 +235,6 @@ describe('modules/datasource/repology/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe('1.181');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns correct version for api package', async () => {
@@ -262,7 +251,6 @@ describe('modules/datasource/repology/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe('1.181');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns correct version for multi-package project with same name', async () => {
@@ -279,7 +267,6 @@ describe('modules/datasource/repology/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe('9.3.0-r2');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns correct version for multi-package project with different name', async () => {
@@ -296,7 +283,6 @@ describe('modules/datasource/repology/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toBe('12.2-4+deb10u1');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns multiple versions if they are present in repository', async () => {
@@ -317,7 +303,6 @@ describe('modules/datasource/repology/index', () => {
       expect(res.releases).toHaveLength(6);
       expect(res.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
       expect(res.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for scenario when repo is not in package results', async () => {
@@ -344,7 +329,6 @@ describe('modules/datasource/repology/index', () => {
       });
 
       expect(release).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns correct package types for api_call', async () => {

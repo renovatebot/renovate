@@ -36,6 +36,7 @@ describe('logger/err-serializer', () => {
       },
     });
   });
+
   it('handles missing fields', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,
@@ -76,7 +77,6 @@ describe('logger/err-serializer', () => {
         err = errSerializer(error);
       }
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
       expect(err.response.body).toBeDefined();
       expect(err.options).toBeDefined();
@@ -94,7 +94,6 @@ describe('logger/err-serializer', () => {
         err = error;
       }
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
 
       // remove platform related props
@@ -107,7 +106,7 @@ describe('logger/err-serializer', () => {
         options: {
           method: 'POST',
           password: '***********',
-          url: 'https://:**redacted**@github.com/api',
+          url: 'https://**redacted**@github.com/api',
           username: '',
         },
       });

@@ -20,6 +20,7 @@ describe('workers/global/config/parse/index', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
     let defaultEnv: NodeJS.ProcessEnv;
+
     beforeEach(async () => {
       configParser = await import('./index');
       defaultArgv = getArgv();
@@ -31,6 +32,7 @@ describe('workers/global/config/parse/index', () => {
       };
       jest.mock('delay', () => Promise.resolve());
     });
+
     it('supports token in env', async () => {
       const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
@@ -67,6 +69,7 @@ describe('workers/global/config/parse/index', () => {
       ]);
       expect(parsedConfig).not.toContainKey('configFile');
     });
+
     it('supports config.force', async () => {
       const configPath = upath.join(__dirname, '__fixtures__/with-force.js');
       const env: NodeJS.ProcessEnv = {
@@ -84,6 +87,7 @@ describe('workers/global/config/parse/index', () => {
         ],
       ]);
     });
+
     it('reads private key from file', async () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
       const privateKeyPathOld = upath.join(
@@ -100,6 +104,7 @@ describe('workers/global/config/parse/index', () => {
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
+
     it('supports Bitbucket username/password', async () => {
       defaultArgv = defaultArgv.concat([
         '--platform=bitbucket',
@@ -116,6 +121,7 @@ describe('workers/global/config/parse/index', () => {
         ['password', 'pass'],
       ]);
     });
+
     it('massages trailing slash into endpoint', async () => {
       defaultArgv = defaultArgv.concat([
         '--endpoint=https://github.renovatebot.com/api/v3',
@@ -123,6 +129,7 @@ describe('workers/global/config/parse/index', () => {
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toBe('https://github.renovatebot.com/api/v3/');
     });
+
     it('parses global manager config', async () => {
       defaultArgv = defaultArgv.concat(['--detect-global-manager-config=true']);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
@@ -134,6 +141,42 @@ describe('workers/global/config/parse/index', () => {
       hostRulesFromEnv.mockReturnValueOnce([{ matchHost: 'example.org' }]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.hostRules).toContainEqual({ matchHost: 'example.org' });
+    });
+
+    it('env dryRun = true replaced to full', async () => {
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_DRY_RUN: 'true',
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['dryRun', 'full']]);
+    });
+
+    it('cli dryRun = true replaced to full', async () => {
+      defaultArgv = defaultArgv.concat(['--dry-run=true']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed).toContainEntries([['dryRun', 'full']]);
+    });
+
+    it('cli dryRun replaced to full', async () => {
+      defaultArgv = defaultArgv.concat(['--dry-run']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed).toContainEntries([['dryRun', 'full']]);
+    });
+
+    it('env dryRun = false replaced to null', async () => {
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_DRY_RUN: 'false',
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['dryRun', null]]);
+    });
+
+    it('cli dryRun = false replaced to null', async () => {
+      defaultArgv = defaultArgv.concat(['--dry-run=false']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed).toContainEntries([['dryRun', null]]);
     });
   });
 });

@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../../test/http-mock';
+import { partial } from '../../../../../test/util';
 import type { GithubRelease } from '../types';
 
 export class GitHubReleaseMocker {
@@ -15,12 +16,12 @@ export class GitHubReleaseMocker {
     version: string,
     assets: { [key: string]: string }
   ): GithubRelease {
-    const releaseData = {
+    const releaseData = partial<GithubRelease>({
       tag_name: version,
       published_at: '2020-03-09T11:00:00Z',
       prerelease: false,
       assets: [],
-    } as GithubRelease;
+    });
     for (const assetFn of Object.keys(assets)) {
       const assetPath = `/repos/${this.packageName}/releases/download/${version}/${assetFn}`;
       const assetData = assets[assetFn];

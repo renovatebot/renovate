@@ -29,6 +29,7 @@ describe('modules/manager/flux/extract', () => {
         ],
       });
     });
+
     it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
         loadFixture('system.yaml'),
@@ -48,6 +49,7 @@ describe('modules/manager/flux/extract', () => {
         ],
       });
     });
+
     it('considers components optional in system manifests', () => {
       const result = extractPackageFile(
         `# Flux Version: v0.27.0`,
@@ -55,6 +57,7 @@ describe('modules/manager/flux/extract', () => {
       );
       expect(result.deps[0].managerData.components).toBeUndefined();
     });
+
     it('ignores system manifests without a version', () => {
       const result = extractPackageFile(
         'not actually a system manifest!',
@@ -62,6 +65,7 @@ describe('modules/manager/flux/extract', () => {
       );
       expect(result).toBeNull();
     });
+
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
         loadFixture('release.yaml'),
@@ -69,14 +73,17 @@ describe('modules/manager/flux/extract', () => {
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
       expect(result).toBeNull();
     });
+
     it('ignores HelmRepository resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRepository', 'test.yaml');
       expect(result).toBeNull();
     });
+
     it('ignores HelmRepository resources without metadata', () => {
       const result = extractPackageFile(
         `${loadFixture('release.yaml')}
@@ -88,6 +95,7 @@ kind: HelmRepository
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('ignores HelmRelease resources without a chart name', () => {
       const result = extractPackageFile(
         `apiVersion: helm.toolkit.fluxcd.io/v2beta1
@@ -107,6 +115,7 @@ spec:
       );
       expect(result).toBeNull();
     });
+
     it('does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
         `apiVersion: source.toolkit.fluxcd.io/v1beta1
@@ -131,6 +140,7 @@ spec:
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
         `${loadFixture('source.yaml')}
@@ -149,6 +159,7 @@ spec:
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
         `${loadFixture('source.yaml')}
@@ -168,6 +179,7 @@ spec:
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
         `${loadFixture('release.yaml')}
@@ -181,6 +193,7 @@ metadata:
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
         `${loadFixture('release.yaml')}
@@ -195,6 +208,7 @@ metadata:
       );
       expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
+
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(
         `kind: SomethingElse
@@ -203,6 +217,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
       );
       expect(result).toBeNull();
     });
+
     it('ignores resources without a kind', () => {
       const result = extractPackageFile(
         'apiVersion: helm.toolkit.fluxcd.io/v2beta1',
@@ -210,10 +225,12 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
       );
       expect(result).toBeNull();
     });
+
     it('ignores bad manifests', () => {
       const result = extractPackageFile('"bad YAML', 'test.yaml');
       expect(result).toBeNull();
     });
+
     it('ignores null resources', () => {
       const result = extractPackageFile('null', 'test.yaml');
       expect(result).toBeNull();
@@ -240,6 +257,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
         },
       ]);
     });
+
     it('ignores files that do not exist', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/bogus.yaml',

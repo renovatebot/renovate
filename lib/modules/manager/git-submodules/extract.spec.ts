@@ -42,6 +42,7 @@ describe('modules/manager/git-submodules/extract', () => {
       };
     });
   });
+
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
       GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });

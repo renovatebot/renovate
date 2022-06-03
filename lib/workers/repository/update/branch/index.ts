@@ -20,6 +20,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
@@ -37,11 +38,11 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
-import { regEx } from '../../../../util/regex';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
+import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -56,14 +57,10 @@ import { setConfidence, setStability } from './status-checks';
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
   const labelRebase = branchPr.labels?.includes(config.rebaseLabel);
-  const prRebaseChecked = branchPr.body?.includes(
-    `- [x] <!-- rebase-check -->`
-  );
+  const prRebaseChecked = !!branchPr.bodyStruct?.rebaseRequested;
 
   return titleRebase || labelRebase || prRebaseChecked;
 }
-
-const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
@@ -86,7 +83,20 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   await checkoutBranch(config.baseBranch);
-  const branchExists = gitBranchExists(config.branchName);
+  let branchExists = gitBranchExists(config.branchName);
+
+  if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
+    const branchName = config.branchName.replace(
+      config.branchPrefix,
+      config.branchPrefixOld
+    );
+    branchExists = gitBranchExists(branchName);
+    if (branchExists) {
+      config.branchName = branchName;
+      logger.debug('Found existing branch with branchPrefixOld');
+    }
+  }
+
   let branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck =
@@ -181,11 +191,12 @@ export async function processBranch(
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = branchPr.body?.replace(
-              rebasingRegex,
-              '**Rebasing**: Renovate will not automatically rebase this PR, because other commits have been found.'
-            );
-            if (newBody !== branchPr.body) {
+            const newBody = await getPrBody(branchConfig, {
+              rebasingNotice:
+                'Renovate will not automatically rebase this PR, because other commits have been found.',
+            });
+            const newBodyHash = hashBody(newBody);
+            if (newBodyHash !== branchPr.bodyStruct?.hash) {
               logger.debug(
                 'Updating existing PR to indicate that rebasing is not possible'
               );
@@ -238,7 +249,7 @@ export async function processBranch(
     }
 
     // Check schedule
-    config.isScheduledNow = isScheduledNow(config);
+    config.isScheduledNow = isScheduledNow(config, 'schedule');
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
@@ -453,9 +464,7 @@ export async function processBranch(
 
     config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel);
 
-    const prRebaseChecked = branchPr?.body?.includes(
-      `- [x] <!-- rebase-check -->`
-    );
+    const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
 
     if (branchExists && dependencyDashboardCheck && config.stopUpdating) {
       if (!prRebaseChecked) {
@@ -519,6 +528,12 @@ export async function processBranch(
         }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
+      }
+      if (mergeStatus === 'off schedule') {
+        logger.debug(
+          'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
+        );
+        return { branchExists, result: BranchResult.NotScheduled };
       }
       if (
         mergeStatus === 'stale' &&

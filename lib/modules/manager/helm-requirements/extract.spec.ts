@@ -65,6 +65,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
     });
+
     it('parses simple requirements.yaml correctly', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -96,6 +97,7 @@ describe('modules/manager/helm-requirements/extract', () => {
         ],
       });
     });
+
     it('parses simple requirements.yaml but skips if necessary fields missing', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -111,6 +113,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('resolves aliased registry urls', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -139,6 +142,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
     });
+
     it('skips local dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -169,6 +173,7 @@ describe('modules/manager/helm-requirements/extract', () => {
         ],
       });
     });
+
     it('returns null if no dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -188,6 +193,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if requirements.yaml is invalid', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -209,6 +215,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       });
       expect(result).toBeNull();
     });
+
     it('returns null if Chart.yaml is empty', () => {
       const content = '';
       const fileName = 'requirements.yaml';
@@ -287,6 +294,7 @@ describe('modules/manager/helm-requirements/extract', () => {
         expect(result).toEqual(params.want);
       });
     });
+
     it('skips only invalid dependences', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1

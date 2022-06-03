@@ -8,20 +8,12 @@ export async function getPrConfigDescription(
 ): Promise<string> {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
-  if (
-    config.schedule &&
-    (config.schedule as never) !== 'at any time' &&
-    config.schedule[0] !== 'at any time'
-  ) {
-    prBody += `"${String(config.schedule)}"`;
-    if (config.timezone) {
-      prBody += ` in timezone ${config.timezone}.`;
-    } else {
-      prBody += ` (UTC).`;
-    }
-  } else {
-    prBody += 'At any time (no schedule defined).';
-  }
+  prBody +=
+    'Branch creation - ' + scheduleToString(config.schedule, config.timezone);
+  prBody +=
+    ', Automerge - ' +
+    scheduleToString(config.automergeSchedule, config.timezone) +
+    '.';
 
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
@@ -30,7 +22,6 @@ export async function getPrConfigDescription(
       config.branchName,
       config.ignoreTests
     );
-    // istanbul ignore if
     if (branchStatus === BranchStatus.red) {
       prBody += 'Disabled due to failing status checks.';
     } else {
@@ -52,7 +43,7 @@ export async function getPrConfigDescription(
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
-      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks.help}) if that's undesired.\n\n`
+      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`
     );
   } else {
     prBody += emojify(
@@ -62,4 +53,22 @@ export async function getPrConfigDescription(
     );
   }
   return prBody;
+}
+
+function scheduleToString(
+  schedule: string[] | undefined,
+  timezone: string | undefined
+): string {
+  let scheduleString = '';
+  if (schedule && schedule[0] !== 'at any time') {
+    scheduleString += `"${String(schedule)}"`;
+    if (timezone) {
+      scheduleString += ` in timezone ${timezone}`;
+    } else {
+      scheduleString += ` (UTC)`;
+    }
+  } else {
+    scheduleString += 'At any time (no schedule defined)';
+  }
+  return scheduleString;
 }

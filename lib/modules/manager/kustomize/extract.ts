@@ -19,7 +19,7 @@ const gitUrl = regEx(
 export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
-  if (!match) {
+  if (!match?.groups) {
     return null;
   }
 

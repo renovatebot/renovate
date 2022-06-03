@@ -13,9 +13,11 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked',
         []
       );
     });
+
     it('returns empty if failed to parse', () => {
       expect(getLockedDependencies({}, 'some-dep', '1.0.0')).toEqual([]);
     });
+
     it('finds direct dependency', () => {
       expect(
         getLockedDependencies(packageLockJson, 'express', '4.0.0')
@@ -26,6 +28,7 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked',
         },
       ]);
     });
+
     it('finds indirect dependency', () => {
       expect(
         getLockedDependencies(packageLockJson, 'send', '0.2.0')
@@ -36,11 +39,13 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked',
         },
       ]);
     });
+
     it('finds any version', () => {
       expect(getLockedDependencies(packageLockJson, 'send', null)).toHaveLength(
         2
       );
     });
+
     it('finds bundled dependency', () => {
       expect(
         getLockedDependencies(bundledPackageLockJson, 'ansi-regex', '3.0.0')

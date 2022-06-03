@@ -5,7 +5,7 @@ As a Renovate end user, there are two main categories of use:
 - You self-host Renovate, e.g. by running the pre-built Docker image, or
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If someone else is hosting Renovate for you, or you are using the WhiteSource Renovate App on GitHub, then you can skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
+If someone else is hosting Renovate for you, or you are using the Mend Renovate App on GitHub, then you can skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
@@ -23,7 +23,7 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this directly in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
 When you install Renovate from npm it naturally does not come bundled with any third-party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
-Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
+If you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
@@ -57,9 +57,9 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` as well as self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### WhiteSource Renovate On-Premises
+#### Mend Renovate On-Premises
 
-WhiteSource Renovate On-Premises (WSOP) started out as a commercial product "Renovate Pro", but was renamed and made free to use when Renovate became a part of WhiteSource in 2019.
+Mend Renovate On-Premises (WSOP) started out as a commercial product "Renovate Pro", but was renamed and made free to use when Renovate became a part of Mend (formerly WhiteSource) in 2019.
 It is built similarly to the "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit once it's processed all repositories
@@ -71,16 +71,16 @@ It is built similarly to the "full" Renovate image described above, but with the
 WSOP supports GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 Documentation can be found in its public GitHub repository [`whitesource/renovate-on-prem`](https://github.com/whitesource/renovate-on-prem).
 
-#### WhiteSource Remediate
+#### Mend Remediate
 
-[WhiteSource Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for WhiteSource commercial customers, with full enterprise support.
-It is integrated with WhiteSource's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
+[Mend Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for Mend commercial customers, with full enterprise support.
+It is integrated with Mend's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
 
-WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
+Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
 
 #### Forking Renovate app
 
-"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+"Forking Renovate" is the sister app to the Mend Renovate App on GitHub.com.
 The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
@@ -108,7 +108,7 @@ For the npm package approach or Docker images, you will need some form of VM or 
 In all the above cases you will need to make sure that some form of cron-like capability exists to schedule when Renovate runs.
 In general we recommend to run Renovate hourly if possible.
 
-WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-lived containers so do not need any additional cron-like concept as it is built-in.
+Mend Renovate On-Premises and Mend Remediate both run as long-lived containers so do not need any additional cron-like concept as it is built-in.
 
 ### Global config
 
@@ -150,103 +150,24 @@ An example of a `config.js` that exports an async function (which is a function 
 ### Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
-It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
-It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
-
-#### GitHub (Enterprise Server)
-
-First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-
-For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
-
-##### Running as a GitHub App
-
-Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
-
-When creating the GitHub App give it the following permissions:
-
-- Checks: Read & write
-- Contents: Read & write
-- Issues: Read & write
-- Metadata: Read-only
-- Pull requests: Read & write
-- Commit statuses: Read & write
-- Dependabot alerts: Read-only
-- Workflows: Read & write
-- Members: Read
-
-Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
-
-Inside your `config.js` you need to set the following values, assuming the name of your app is `self-hosted-renovate`:
-
-**`username:"self-hosted-renovate[bot]"`**
-
-The slug name of your app with `[bot]` appended
-
-**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
-
-The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
-A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
-
-**`token:"x-access-token:${github-app-installation}"`**
-
-The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
+We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
+We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
 <!-- prettier-ignore -->
-!!! note
-    The installation tokens expire after 1 hour and need to be regenerated regularly.
-    Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+!!! warning
+    We recommend you use a single, dedicated username for your Renovate bot.
+    Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
-**`repositories: ["orgname/repo-1","orgname/repo-2"]`**
+#### Docs
 
-List of repositories to run on.
-Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
-The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
+Read the platform-specific docs to learn how to setup authentication on your platform:
 
-#### GitLab
-
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes, or `read_user`, `read_api` and `read_repository` for dry runs).
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=gitlab` somewhere in config.
-
-#### Bitbucket Cloud
-
-First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
-Give the bot App password the following permission scopes:
-
-- [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
-- [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
-- [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
-- [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
-
-The bot also needs to be able to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
-
-Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
-Also be sure to configure the `username` for your bot account too.
-Don't forget to configure `platform=bitbucket` somewhere in config.
-
-#### Bitbucket Server
-
-Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for your bot account.
-Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
-Also configure the `username` for your bot account too, if you decided not to name it `@renovate-bot`.
-Don't forget to configure `platform=bitbucket-server` somewhere in config.
-
-If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
-
-#### Azure DevOps
-
-First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
-Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=azure` somewhere in config.
-
-#### Gitea
-
-First, [create an access token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for your bot account.
-Configure it as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
-Don't forget to configure `platform=gitea` somewhere in config.
+- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
+- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
+- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
+- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [github.com and GitHub Enterprise Server](https://docs.renovatebot.com/modules/platform/github/)
+- [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 
 ### GitHub.com token for release notes
 

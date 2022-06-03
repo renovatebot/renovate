@@ -34,6 +34,7 @@ const cache = mocked(_cache);
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
@@ -41,6 +42,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
     });
+
     it('throws if no package files', async () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
         REPOSITORY_NO_PACKAGE_FILES
@@ -60,6 +62,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         REPOSITORY_FORKED
       );
     });
+
     it('has default onboarding config', async () => {
       configModule.getOnboardingConfig.mockResolvedValue(
         config.onboardingConfig
@@ -79,6 +82,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       });
     });
+
     it('uses discovered onboarding config', async () => {
       configModule.getOnboardingConfig.mockResolvedValue({
         onboardingBranch: 'test',
@@ -109,27 +113,38 @@ describe('workers/repository/onboarding/branch/index', () => {
         extends: ['some/renovate-config'],
       });
     });
-    it('handles skipped onboarding combined with requireConfig = false', async () => {
-      config.requireConfig = false;
+
+    it('handles skipped onboarding combined with requireConfig = optional', async () => {
+      config.requireConfig = 'optional';
       config.onboarding = false;
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
-    it('handles skipped onboarding, requireConfig=true, and a config file', async () => {
-      config.requireConfig = true;
+
+    it('handles skipped onboarding, requireConfig=required, and a config file', async () => {
+      config.requireConfig = 'required';
       config.onboarding = false;
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
+
+    it('handles skipped onboarding, requireConfig=ignored', async () => {
+      config.requireConfig = 'ignored';
+      config.onboarding = false;
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBeTrue();
+    });
+
     it('handles skipped onboarding, requireConfig=true, and no config file', async () => {
-      config.requireConfig = true;
+      config.requireConfig = 'required';
       config.onboarding = false;
       git.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
       await expect(onboardingResult).rejects.toThrow('disabled');
     });
+
     it('detects repo is onboarded via file', async () => {
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
@@ -164,14 +179,16 @@ describe('workers/repository/onboarding/branch/index', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
+
     it('detects repo is onboarded via PR', async () => {
-      config.requireConfig = false;
+      config.requireConfig = 'optional';
       platform.findPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
+
     it('throws if no required config', async () => {
-      config.requireConfig = true;
+      config.requireConfig = 'required';
       platform.findPr.mockResolvedValue(mock<Pr>());
       platform.getPrList.mockResolvedValueOnce([
         {
@@ -182,6 +199,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
+
     it('updates onboarding branch', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);

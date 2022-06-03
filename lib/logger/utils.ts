@@ -103,7 +103,7 @@ export function sanitizeValue(
   seen = new WeakMap<NestedValue, unknown>()
 ): any {
   if (is.string(value)) {
-    return sanitize(value);
+    return sanitize(sanitizeUrls(value));
   }
 
   if (is.date(value)) {
@@ -242,4 +242,14 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
   });
   logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
   process.exit(1);
+}
+
+// Can't use `util/regex` because of circular reference to logger
+const urlRe = /[a-z]{3,9}:\/\/[-;:&=+$,\w]+@[a-z0-9.-]+/gi;
+const urlCredRe = /\/\/[^@]+@/g;
+
+export function sanitizeUrls(text: string): string {
+  return text.replace(urlRe, (url) => {
+    return url.replace(urlCredRe, '//**redacted**@');
+  });
 }

@@ -37,7 +37,6 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
@@ -45,7 +44,7 @@ export interface BranchUpgradeConfig
   groupName?: string;
   groupSlug?: string;
   language?: string;
-  manager?: string;
+  manager: string;
   packageFile?: string;
   lockFile?: string;
   lockFiles?: string[];

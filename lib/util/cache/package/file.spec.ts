@@ -6,6 +6,7 @@ describe('util/cache/package/file', () => {
     await set('test', 'key', 1234);
     expect(await get('test', 'key')).toBeUndefined();
   });
+
   it('gets null', async () => {
     init(os.tmpdir());
     expect(await get('test', 'missing-key')).toBeUndefined();
