@@ -87,6 +87,11 @@ describe('modules/manager/maven/extract', () => {
             depType: 'compile',
           },
           {
+            depName: 'org.example:optional',
+            currentValue: '1.0.0',
+            depType: 'optional',
+          },
+          {
             depName: 'org.example:relocation-artifact',
             currentValue: '1.0',
           },
