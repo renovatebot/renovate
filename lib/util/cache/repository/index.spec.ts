@@ -13,7 +13,7 @@ describe('util/cache/repository/index', () => {
   beforeEach(() => {
     resetCache();
     jest.resetAllMocks();
-    GlobalConfig.set({ cacheDir: '/tmp/cache' });
+    GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 
   const config: RenovateConfig = {
