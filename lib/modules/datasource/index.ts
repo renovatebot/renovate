@@ -190,15 +190,22 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 function resolveRegistryUrls(
   datasource: DatasourceApi,
   defaultRegistryUrls: string[] | undefined,
-  registryUrls: string[] | undefined
+  registryUrls: string[] | undefined,
+  additionalRegistryUrls: string[] | undefined
 ): string[] {
   if (!datasource.customRegistrySupport) {
     if (
       is.nonEmptyArray(registryUrls) ||
-      is.nonEmptyArray(defaultRegistryUrls)
+      is.nonEmptyArray(defaultRegistryUrls) ||
+      is.nonEmptyArray(additionalRegistryUrls)
     ) {
       logger.warn(
-        { datasource: datasource.id, registryUrls, defaultRegistryUrls },
+        {
+          datasource: datasource.id,
+          registryUrls,
+          defaultRegistryUrls,
+          additionalRegistryUrls,
+        },
         'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
@@ -212,8 +219,10 @@ function resolveRegistryUrls(
     resolvedUrls = [...customUrls];
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
+    resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
+    resolvedUrls.concat(additionalRegistryUrls ?? []);
   }
   return massageRegistryUrls(resolvedUrls);
 }
@@ -265,7 +274,8 @@ async function fetchReleases(
   registryUrls = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
-    registryUrls
+    registryUrls,
+    config.additionalRegistryUrls
   );
   let dep: ReleaseResult | null = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
@@ -419,7 +429,8 @@ function getDigestConfig(
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
-    config.registryUrls
+    config.registryUrls,
+    config.additionalRegistryUrls
   );
   return { packageName, registryUrl, currentValue, currentDigest };
 }

@@ -6,6 +6,7 @@ export interface GetDigestInputConfig {
   depName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
 }
@@ -26,6 +27,7 @@ export interface GetPkgReleasesConfig {
   npmrc?: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   datasource: string;
   depName: string;
   packageName?: string;
