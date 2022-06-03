@@ -26,18 +26,14 @@ export async function getReleaseList(
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
-    if (apiBaseUrl) {
-      switch (type) {
-        case 'gitlab':
-          return await gitlab.getReleaseList(apiBaseUrl, repository);
-        case 'github':
-          return await github.getReleaseList(apiBaseUrl, repository);
-
-        default:
-          logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-          return [];
-      }
+    if (apiBaseUrl && type === 'gitlab') {
+      return await gitlab.getReleaseList(apiBaseUrl, repository);
     }
+    if (apiBaseUrl && type === 'github') {
+      return await github.getReleaseList(apiBaseUrl, repository);
+    }
+    logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
+    return [];
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
@@ -126,8 +122,9 @@ function getExactReleaseMatch(
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
-  const matchedRelease = candidateReleases.find(
-    (r) => r.tag && exactReleaseReg.test(r.tag)
+  const matchedRelease = candidateReleases.find((r) =>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    exactReleaseReg.test(r.tag!)
   );
   return matchedRelease;
 }
@@ -173,10 +170,11 @@ function sectionize(text: string, level: number): string[] {
   const lines = text.split(newlineRegex);
   const tokens = markdown.parse(text, undefined);
   tokens.forEach((token) => {
-    if (token.type === 'heading_open' && token.map) {
+    if (token.type === 'heading_open') {
       const lev = +token.tag.substr(1);
       if (lev <= level) {
-        sections.push([lev, token.map[0]]);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        sections.push([lev, token.map![0]]);
       }
     }
   });
@@ -208,24 +206,22 @@ export async function getReleaseNotesMdFileInner(
 ): Promise<ChangeLogFile | null> {
   const { apiBaseUrl, repository, sourceDirectory, type } = project;
   try {
-    if (apiBaseUrl) {
-      if (type === 'gitlab') {
-        return await gitlab.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory
-        );
-      }
-      if (type === 'github') {
-        return await github.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory
-        );
-      }
-      // istanbul ignore next
-      logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
+    if (apiBaseUrl && type === 'gitlab') {
+      return await gitlab.getReleaseNotesMd(
+        repository,
+        apiBaseUrl,
+        sourceDirectory
+      );
     }
+    if (apiBaseUrl && type === 'github') {
+      return await github.getReleaseNotesMd(
+        repository,
+        apiBaseUrl,
+        sourceDirectory
+      );
+    }
+    // istanbul ignore next
+    logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug(
@@ -395,8 +391,7 @@ export async function addReleaseNotes(
       );
     }
     const changelogRelease: ChangeLogRelease = { ...v };
-    // istanbul ignore next
-    changelogRelease.releaseNotes = releaseNotes ?? (null as never);
+    changelogRelease.releaseNotes = releaseNotes!;
     output.versions?.push(changelogRelease);
     output.hasReleaseNotes = output.hasReleaseNotes || !!releaseNotes;
   }

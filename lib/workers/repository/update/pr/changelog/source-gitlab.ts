@@ -1,10 +1,10 @@
+import URL from 'url';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
-import { parseUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
@@ -41,18 +41,16 @@ export async function getChangeLogJSON(
     manager,
     sourceDirectory,
   } = config;
-  const parsedUrl = parseUrl(sourceUrl);
-  // istanbul ignore if
-  if (!versioning || !sourceUrl || !parsedUrl) {
-    return null;
-  }
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = parsedUrl;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const { protocol, host, pathname } = URL.parse(sourceUrl!);
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
-  const baseUrl = protocol.concat('//', host, '/');
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const baseUrl = protocol!.concat('//', host!, '/');
   const apiBaseUrl = baseUrl.concat('api/v4/');
-  const repository = pathname
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = pathname!
     .slice(1)
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
@@ -77,9 +75,10 @@ export async function getChangeLogJSON(
 
   let tags: string[];
 
-  const getRef = async (release: Release): Promise<string | null> => {
+  async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getCachedTags(apiBaseUrl, versioning, repository);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      tags = await getCachedTags(apiBaseUrl, versioning!, repository);
     }
     const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
     const tagName = tags
@@ -92,22 +91,23 @@ export async function getChangeLogJSON(
       return release.gitRef;
     }
     return null;
-  };
+  }
 
   function getCacheKey(prev: string, next: string): string {
     return `${manager}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
+  // compare versions
+  const include = (v: string): boolean =>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    version.isGreaterThan(v, currentVersion!) &&
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    !version.isGreaterThan(v, newVersion!);
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
-    if (
-      currentVersion &&
-      newVersion &&
-      version.isGreaterThan(next.version, currentVersion) &&
-      !version.isGreaterThan(next.version, newVersion)
-    ) {
+    if (include(next.version)) {
       let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
@@ -143,7 +143,8 @@ export async function getChangeLogJSON(
       baseUrl,
       type: 'gitlab',
       repository,
-      sourceUrl,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      sourceUrl: sourceUrl!,
       depName,
       sourceDirectory,
     },

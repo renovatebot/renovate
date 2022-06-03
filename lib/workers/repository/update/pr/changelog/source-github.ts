@@ -1,3 +1,4 @@
+import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
@@ -7,7 +8,6 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
-import { parseUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
@@ -41,18 +41,16 @@ export async function getChangeLogJSON(
     depName,
     manager,
   } = config;
-  const parsedUrl = parseUrl(sourceUrl);
-  if (
-    !parsedUrl ||
-    !sourceUrl ||
-    sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped'
-  ) {
+  if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
+    logger.trace('No release notes for @types');
     return null;
   }
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = parsedUrl;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const { protocol, host, pathname } = URL.parse(sourceUrl!);
   const baseUrl = `${protocol}//${host}/`;
-  const url = sourceUrl.startsWith('https://github.com/')
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const url = sourceUrl!.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
   const { token } = hostRules.find({
@@ -61,7 +59,8 @@ export async function getChangeLogJSON(
   });
   // istanbul ignore if
   if (!token) {
-    if (host === 'github.com' || host?.endsWith('.github.com')) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (host!.endsWith('github.com')) {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },
@@ -81,14 +80,16 @@ export async function getChangeLogJSON(
     );
     return null;
   }
-  const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const apiBaseUrl = sourceUrl!.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname
-    ?.slice(1)
-    ?.replace(regEx(/\/$/), '')
-    ?.replace(regEx(/\.git$/), '');
-  if (!repository || repository.split('/').length !== 2) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = pathname!
+    .slice(1)
+    .replace(regEx(/\/$/), '')
+    .replace(regEx(/\.git$/), '');
+  if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
@@ -109,21 +110,20 @@ export async function getChangeLogJSON(
 
   let tags: string[];
 
-  const getRef = async (release: Release): Promise<string | null> => {
+  async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    if (depName) {
-      const tagName = findTagOfRelease(version, depName, release.version, tags);
-      if (tagName) {
-        return tagName;
-      }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const tagName = findTagOfRelease(version, depName!, release.version, tags);
+    if (tagName) {
+      return tagName;
     }
     if (release.gitRef) {
       return release.gitRef;
     }
     return null;
-  };
+  }
 
   const cacheNamespace = 'changelog-github-release';
   function getCacheKey(prev: string, next: string): string {
@@ -131,15 +131,16 @@ export async function getChangeLogJSON(
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
+  // compare versions
+  const include = (v: string): boolean =>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    version.isGreaterThan(v, currentVersion!) &&
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    !version.isGreaterThan(v, newVersion!);
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
-    if (
-      currentVersion &&
-      newVersion &&
-      version.isGreaterThan(next.version, currentVersion) &&
-      !version.isGreaterThan(next.version, newVersion)
-    ) {
+    if (include(next.version)) {
       let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
@@ -176,7 +177,8 @@ export async function getChangeLogJSON(
       baseUrl,
       type: 'github',
       repository,
-      sourceUrl,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      sourceUrl: sourceUrl!,
       sourceDirectory,
       depName,
     },

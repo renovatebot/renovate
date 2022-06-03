@@ -4,10 +4,7 @@ import { getChangeLogJSON } from '../update/pr/changelog';
 
 // istanbul ignore next
 async function embedChangelog(upgrade: BranchUpgradeConfig): Promise<void> {
-  const logJSON = await getChangeLogJSON(upgrade);
-  if (logJSON) {
-    upgrade.logJSON = logJSON;
-  }
+  upgrade.logJSON = await getChangeLogJSON(upgrade)!;
 }
 
 // istanbul ignore next

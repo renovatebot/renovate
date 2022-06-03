@@ -37,36 +37,32 @@ export async function getInRangeReleases(
     const pkgReleases = releaseResult?.releases;
     const version = get(versioning);
 
-    if (pkgReleases) {
-      const releases = pkgReleases
-        .filter((release) =>
-          version.isCompatible(release.version, currentVersion)
-        )
-        .filter(
-          (release) =>
-            version.equals(release.version, currentVersion) ||
-            version.isGreaterThan(release.version, currentVersion)
-        )
-        .filter(
-          (release) => !version.isGreaterThan(release.version, newVersion)
-        )
-        .filter(
-          (release) =>
-            version.isStable(release.version) ||
-            matchesUnstable(version, currentVersion, release.version) ||
-            matchesUnstable(version, newVersion, release.version)
-        );
-      if (version.valueToVersion) {
-        for (const release of releases || []) {
-          release.version = version.valueToVersion(release.version);
-        }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const releases = pkgReleases!
+      .filter((release) =>
+        version.isCompatible(release.version, currentVersion)
+      )
+      .filter(
+        (release) =>
+          version.equals(release.version, currentVersion) ||
+          version.isGreaterThan(release.version, currentVersion)
+      )
+      .filter((release) => !version.isGreaterThan(release.version, newVersion))
+      .filter(
+        (release) =>
+          version.isStable(release.version) ||
+          matchesUnstable(version, currentVersion, release.version) ||
+          matchesUnstable(version, newVersion, release.version)
+      );
+    if (version.valueToVersion) {
+      for (const release of releases || []) {
+        release.version = version.valueToVersion(release.version);
       }
-      return releases;
     }
+    return releases;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getInRangeReleases err');
     logger.debug({ datasource, depName }, 'Error getting releases');
   }
-  // istanbul ignore next
   return null;
 }
