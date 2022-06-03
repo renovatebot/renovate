@@ -51,7 +51,6 @@ export interface RenovateSharedConfig {
   hashedBranchLength?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -95,6 +94,7 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
+  platform?: string;
   endpoint?: string;
 }
 
@@ -121,12 +121,11 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
+  platform?: string;
   endpoint?: string;
 }
 
 export interface LegacyAdminConfig {
-  endpoint?: string;
-
   localDir?: string;
 
   logContext?: string;
@@ -139,7 +138,6 @@ export interface LegacyAdminConfig {
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
 
-  platform?: string;
   requireConfig?: RequiredConfig;
 }
 export type ExecutionMode = 'branch' | 'update';

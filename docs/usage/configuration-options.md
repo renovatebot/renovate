@@ -2215,7 +2215,6 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
-Currently only a length of one `matchString` is supported.
 
 Example:
 

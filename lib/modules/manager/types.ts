@@ -80,6 +80,7 @@ export interface PackageFile<T = Record<string, any>>
   constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   deps: PackageDependency[];
   lernaClient?: string;
   lernaPackages?: string[];
@@ -297,7 +298,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
 
-  platform?: string;
   upgrades: Upgrade[];
   npmLock?: string;
   yarnLock?: string;

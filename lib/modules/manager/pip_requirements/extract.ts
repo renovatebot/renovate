@@ -7,7 +7,7 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -24,38 +24,44 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
-export function extractPackageFile(
-  content: string,
-  _: string,
-  config: ExtractConfig
-): PackageFile | null {
+export function cleanRegistryUrls(registryUrls: string[]): string[] {
+  return registryUrls.map((url) => {
+    // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
+    const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
+    if (!GlobalConfig.get('exposeAllEnv')) {
+      return cleaned;
+    }
+    // interpolate any environment variables
+    return cleaned.replace(
+      regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
+      (match) => {
+        const envvar = match
+          .substring(1)
+          .replace(regEx(/^{/), '')
+          .replace(regEx(/}$/), '');
+        const sub = process.env[envvar];
+        return sub || match;
+      }
+    );
+  });
+}
+
+export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
-  let indexUrl: string | undefined;
-  const extraUrls: string[] = [];
+  let registryUrls: string[] = [];
+  const additionalRegistryUrls: string[] = [];
   content.split(newlineRegex).forEach((line) => {
     if (line.startsWith('--index-url ')) {
-      indexUrl = line.substring('--index-url '.length).split(' ')[0];
+      registryUrls = [line.substring('--index-url '.length).split(' ')[0]];
     }
     if (line.startsWith('--extra-index-url ')) {
       const extraUrl = line
         .substring('--extra-index-url '.length)
         .split(' ')[0];
-      extraUrls.push(extraUrl);
+      additionalRegistryUrls.push(extraUrl);
     }
   });
-  let registryUrls: string[] = [];
-  if (indexUrl) {
-    // index url in file takes precedence
-    registryUrls.push(indexUrl);
-  } else if (config.registryUrls?.length) {
-    // configured registryURls takes next precedence
-    registryUrls = registryUrls.concat(config.registryUrls);
-  } else if (extraUrls.length) {
-    // Use default registry first if extra URLs are present and index URL is not
-    registryUrls.push(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
-  }
-  registryUrls = registryUrls.concat(extraUrls);
 
   const pkgRegex = regEx(`^(${packagePattern})$`);
   const pkgValRegex = regEx(`^${dependencyPattern}$`);
@@ -123,25 +129,10 @@ export function extractPackageFile(
   }
   const res: PackageFile = { deps };
   if (registryUrls.length > 0) {
-    res.registryUrls = registryUrls.map((url) => {
-      // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
-      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
-      if (!GlobalConfig.get('exposeAllEnv')) {
-        return cleaned;
-      }
-      // interpolate any environment variables
-      return cleaned.replace(
-        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
-        (match) => {
-          const envvar = match
-            .substring(1)
-            .replace(regEx(/^{/), '')
-            .replace(regEx(/}$/), '');
-          const sub = process.env[envvar];
-          return sub || match;
-        }
-      );
-    });
+    res.registryUrls = cleanRegistryUrls(registryUrls);
+  }
+  if (additionalRegistryUrls.length) {
+    res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
   }
   return res;
 }
