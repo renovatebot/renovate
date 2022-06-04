@@ -56,7 +56,10 @@ export async function set(
   ttlMinutes = 5
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+
+  // Redis requires TTL to be integer, not float
   const redisTTL = Math.floor(ttlMinutes * 60);
+
   await client?.set(
     getKey(namespace, key),
     JSON.stringify({
