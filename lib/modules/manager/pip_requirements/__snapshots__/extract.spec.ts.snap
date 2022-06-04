@@ -106,6 +106,9 @@ Array [
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
 Object {
+  "additionalRegistryUrls": Array [
+    "http://example.com/private-pypi/",
+  ],
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
@@ -146,13 +149,15 @@ Object {
   ],
   "registryUrls": Array [
     "https://artifactory.company.com/artifactory/api/pypi/python/simple",
-    "http://example.com/private-pypi/",
   ],
 }
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
 Object {
+  "additionalRegistryUrls": Array [
+    "http://example.com/private-pypi/",
+  ],
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
@@ -190,16 +195,15 @@ Object {
       "datasource": "pypi",
       "depName": "not_semver",
     },
-  ],
-  "registryUrls": Array [
-    "AnExistingDefaultUrl",
-    "http://example.com/private-pypi/",
   ],
 }
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
 Object {
+  "additionalRegistryUrls": Array [
+    "http://example.com/private-pypi/",
+  ],
   "deps": Array [
     Object {
       "currentValue": "==2.0.12",
@@ -237,10 +241,6 @@ Object {
       "datasource": "pypi",
       "depName": "not_semver",
     },
-  ],
-  "registryUrls": Array [
-    "https://pypi.org/pypi/",
-    "http://example.com/private-pypi/",
   ],
 }
 `;
