@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { createClient } from 'redis';
 import { logger } from '../../../logger';
@@ -54,14 +55,22 @@ export async function set(
   value: unknown,
   ttlMinutes = 5
 ): Promise<void> {
-  logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+  let minutes = ttlMinutes;
+  if (!is.integer(minutes)) {
+    if (is.number(minutes)) {
+      minutes = Math.floor(minutes);
+    } else {
+      minutes = 5;
+    }
+  }
+  logger.trace({ namespace, key, minutes }, 'Saving cached value');
   await client?.set(
     getKey(namespace, key),
     JSON.stringify({
       value,
-      expiry: DateTime.local().plus({ minutes: ttlMinutes }),
+      expiry: DateTime.local().plus({ minutes }),
     }),
-    { EX: ttlMinutes * 60 }
+    { EX: minutes * 60 }
   );
 }
 
