@@ -203,7 +203,13 @@ export abstract class AbstractGithubDatasourceCache<
           });
           pagesRemained -= 1;
 
-          const data = graphqlRes.body.data;
+          const { data, errors } = graphqlRes.body;
+
+          const errorMessage = errors?.[0]?.message;
+          if (errorMessage) {
+            throw Error(errorMessage);
+          }
+
           if (data) {
             const {
               nodes: fetchedItems,

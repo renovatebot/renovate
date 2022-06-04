@@ -50,7 +50,6 @@ export interface GithubGraphqlResponse<T = unknown> {
   errors?: {
     type?: string;
     message: string;
-    locations: unknown;
   }[];
 }
 
