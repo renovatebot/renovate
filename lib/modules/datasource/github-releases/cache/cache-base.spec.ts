@@ -234,7 +234,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     ]);
   });
 
-  it('returns cached values on server errors', async () => {
+  it('throws for unknown errors', async () => {
     packageCache.get.mockResolvedValueOnce({
       items: {
         v1: { version: 'v1', releaseTimestamp: t1, bar: 'aaa' },
@@ -253,6 +253,28 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
 
     await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
       'Unknown error'
+    );
+    expect(packageCache.get).toHaveBeenCalled();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('throws for graphql errors', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      items: {},
+      createdAt: t3,
+      updatedAt: t3,
+    });
+    responses = [
+      {
+        statusCode: 200,
+        headers: {},
+        body: { errors: [{ message: 'Ooops' }] },
+      },
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
+      'Ooops'
     );
     expect(packageCache.get).toHaveBeenCalled();
     expect(packageCache.set).not.toHaveBeenCalled();
