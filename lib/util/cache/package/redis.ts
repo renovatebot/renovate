@@ -55,22 +55,15 @@ export async function set(
   value: unknown,
   ttlMinutes = 5
 ): Promise<void> {
-  let minutes = ttlMinutes;
-  if (!is.integer(minutes)) {
-    if (is.number(minutes)) {
-      minutes = Math.floor(minutes);
-    } else {
-      minutes = 5;
-    }
-  }
-  logger.trace({ namespace, key, minutes }, 'Saving cached value');
+  logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+  const redisTTL = Math.floor(ttlMinutes * 60);
   await client?.set(
     getKey(namespace, key),
     JSON.stringify({
       value,
-      expiry: DateTime.local().plus({ minutes }),
+      expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     }),
-    { EX: minutes * 60 }
+    { EX: redisTTL }
   );
 }
 

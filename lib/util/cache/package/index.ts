@@ -36,7 +36,7 @@ export async function set(
   }
   const globalKey = getGlobalKey(namespace, key);
   memCache.set(globalKey, value);
-  await cacheProxy.set(namespace, key, value, Math.floor(minutes));
+  await cacheProxy.set(namespace, key, value, minutes);
 }
 
 export async function init(config: AllConfig): Promise<void> {
