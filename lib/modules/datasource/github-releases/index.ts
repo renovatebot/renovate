@@ -237,26 +237,22 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let result: ReleaseResult | null = null;
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
     const releases = await this.releasesCache.getItems(config);
-    if (releases.length) {
-      result = {
-        sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-        releases: releases.map((item) => {
-          const { version, releaseTimestamp, isStable } = item;
-          const result: Release = {
-            version,
-            gitRef: version,
-            releaseTimestamp,
-          };
-          if (isStable !== undefined) {
-            result.isStable = isStable;
-          }
-          return result;
-        }),
-      };
-    }
-    return result;
+    return {
+      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+      releases: releases.map((item) => {
+        const { version, releaseTimestamp, isStable } = item;
+        const result: Release = {
+          version,
+          gitRef: version,
+          releaseTimestamp,
+        };
+        if (isStable !== undefined) {
+          result.isStable = isStable;
+        }
+        return result;
+      }),
+    };
   }
 }

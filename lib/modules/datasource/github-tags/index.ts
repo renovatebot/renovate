@@ -82,13 +82,8 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
 
   override async getReleases(
     config: GetReleasesConfig
-  ): Promise<ReleaseResult | null> {
+  ): Promise<ReleaseResult> {
     const tagReleases = await this.tagsCache.getItems(config);
-
-    // istanbul ignore if
-    if (!tagReleases.length) {
-      return null;
-    }
 
     const tagsResult: ReleaseResult = {
       sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
@@ -113,8 +108,8 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       });
 
       tagsResult.releases = mergedReleases;
-    } catch (e) {
-      // no-op
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
     }
 
     return tagsResult;
