@@ -82,7 +82,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
 
   override async getReleases(
     config: GetReleasesConfig
-  ): Promise<ReleaseResult | null> {
+  ): Promise<ReleaseResult> {
     const tagReleases = await this.tagsCache.getItems(config);
 
     const tagsResult: ReleaseResult = {
