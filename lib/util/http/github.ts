@@ -45,7 +45,7 @@ interface GithubGraphqlRepoData<T = unknown> {
   repository?: T;
 }
 
-export interface GithubGraphqlResponse<T = unknown> {
+interface GithubGraphqlResponse<T = unknown> {
   data?: T;
   errors?: {
     type?: string;
