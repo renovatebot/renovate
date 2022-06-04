@@ -796,7 +796,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'registryAliases',
-    description: 'registryAliases for registries, package manager specific.',
+    description: 'Aliases for registries.',
     type: 'object',
     default: {},
     additionalProperties: {

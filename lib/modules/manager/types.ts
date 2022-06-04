@@ -15,8 +15,6 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
-  registryUrls?: string[];
-  endpoint?: string;
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
