@@ -234,7 +234,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     ]);
   });
 
-  it('throws for unknown errors', async () => {
+  it('throws for http errors', async () => {
     packageCache.get.mockResolvedValueOnce({
       items: {
         v1: { version: 'v1', releaseTimestamp: t1, bar: 'aaa' },
