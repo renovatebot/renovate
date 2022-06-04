@@ -1,5 +1,4 @@
 /* istanbul ignore file */
-import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { createClient } from 'redis';
 import { logger } from '../../../logger';
