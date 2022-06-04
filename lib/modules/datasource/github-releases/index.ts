@@ -245,7 +245,11 @@ export class GithubReleasesDatasource extends Datasource {
         sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
         releases: releases.map((item) => {
           const { version, releaseTimestamp, isStable } = item;
-          const result: Release = { version, releaseTimestamp };
+          const result: Release = {
+            version,
+            gitRef: version,
+            releaseTimestamp,
+          };
           if (isStable !== undefined) {
             result.isStable = isStable;
           }
