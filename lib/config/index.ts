@@ -1,16 +1,26 @@
 import { logger } from '../logger';
 import { get, getLanguageList, getManagerList } from '../modules/manager';
+import type { ExtractConfig } from '../modules/manager/types';
 import * as options from './options';
 import type {
   AllConfig,
   ManagerConfig,
   RenovateConfig,
   RenovateConfigStage,
+  WorkerExtractConfig,
 } from './types';
 import { mergeChildConfig } from './utils';
 
 export { mergeChildConfig };
 
+export function getExtractConfig(config: WorkerExtractConfig): ExtractConfig {
+  return {
+    npmrc: config.npmrc,
+    aliases: config.aliases,
+    skipInstalls: config.skipInstalls,
+    npmrcMerge: config.npmrcMerge,
+  };
+}
 export function getManagerConfig(
   config: RenovateConfig,
   manager: string

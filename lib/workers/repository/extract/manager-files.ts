@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { getExtractConfig } from '../../../config';
 import type { WorkerExtractConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
@@ -13,6 +14,7 @@ export async function getManagerPackageFiles(
   config: WorkerExtractConfig
 ): Promise<PackageFile[]> {
   const { enabled, manager, fileList } = config;
+  const extractConfig = getExtractConfig(config);
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
@@ -32,7 +34,7 @@ export async function getManagerPackageFiles(
   if (get(manager, 'extractAllPackageFiles')) {
     const allPackageFiles = await extractAllPackageFiles(
       manager,
-      config,
+      extractConfig,
       fileList
     );
     if (allPackageFiles) {
@@ -54,7 +56,7 @@ export async function getManagerPackageFiles(
         manager,
         content,
         packageFile,
-        config
+        extractConfig
       );
       if (res) {
         for (let index = 0; index < res.deps.length; index += 1) {
