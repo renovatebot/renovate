@@ -908,5 +908,16 @@ describe('workers/repository/updates/generate', () => {
         '`1.1.1` (+1)',
       ]);
     });
+
+    it('fixes commit message', () => {
+      const branch = [
+        partial<BranchUpgradeConfig>({
+          ...defaultConfig,
+          commitMessage: 'update to vv1.2.0',
+        }),
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage).toBe('Update to v1.2.0');
+    });
   });
 });
