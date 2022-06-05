@@ -11,7 +11,7 @@ import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 function getDefaultRegistryUrl(): string[] | (() => string[]) {
   const { platform, endpoint } = GlobalConfig.get();
   return platform === 'gitlab' && endpoint
-    ? () => [endpoint]
+    ? [endpoint]
     : [defaultRegistryUrl];
 }
 export class GitlabTagsDatasource extends Datasource {
@@ -24,7 +24,7 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = getDefaultRegistryUrl();
+  override readonly defaultRegistryUrls = getDefaultRegistryUrl;
 
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
