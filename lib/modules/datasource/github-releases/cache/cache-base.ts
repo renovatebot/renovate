@@ -21,7 +21,26 @@ const cacheDefaults: Required<CacheOptions> = {
   /**
    * How many minutes to wait until next cache update
    */
-  updateAfterMinutes: 30,
+  updateAfterMinutes: 120,
+
+  /**
+   * If package was released recently, we assume higher
+   * probability of having one more release soon.
+   *
+   * In this case, we use `updateAfterMinutesFresh` option.
+   */
+  packageFreshDays: 7,
+
+  /**
+   * If package was released recently, we assume higher
+   * probability of having one more release soon.
+   *
+   * In this case, this option will be used
+   * instead of `updateAfterMinutes`.
+   *
+   * Fresh period is configured via `freshDays` option.
+   */
+  updateAfterMinutesFresh: 30,
 
   /**
    * How many days to wait until full cache reset (for single package).
@@ -80,6 +99,8 @@ export abstract class AbstractGithubDatasourceCache<
   FetchedItem = unknown
 > {
   private updateDuration: DurationLikeObject;
+  private packageFreshDaysDuration: DurationLikeObject;
+  private updateDurationFresh: DurationLikeObject;
   private resetDuration: DurationLikeObject;
   private stabilityDuration: DurationLikeObject;
 
@@ -94,6 +115,8 @@ export abstract class AbstractGithubDatasourceCache<
   constructor(private http: GithubHttp, opts: CacheOptions = {}) {
     const {
       updateAfterMinutes,
+      packageFreshDays,
+      updateAfterMinutesFresh,
       resetAfterDays,
       unstableDays,
       maxPrefetchPages,
@@ -107,6 +130,8 @@ export abstract class AbstractGithubDatasourceCache<
     };
 
     this.updateDuration = { minutes: updateAfterMinutes };
+    this.packageFreshDaysDuration = { days: packageFreshDays };
+    this.updateDurationFresh = { minutes: updateAfterMinutesFresh };
     this.resetDuration = { days: resetAfterDays };
     this.stabilityDuration = { days: unstableDays };
 
@@ -168,15 +193,27 @@ export abstract class AbstractGithubDatasourceCache<
 
       const cacheDoesExist =
         cache && !isExpired(now, cache.createdAt, this.resetDuration);
+      let lastReleasedAt: string | null = null;
+      let updateDuration = this.updateDuration;
       if (cacheDoesExist) {
         // Keeping the the original `cache` value intact
         // in order to be used in exception handler
         cacheItems = { ...cache.items };
         cacheCreatedAt = cache.createdAt;
         cacheUpdatedAt = cache.updatedAt;
+        lastReleasedAt =
+          cache.lastReleasedAt ?? this.getLastReleaseTimestamp(cacheItems);
+
+        // Release is considered fresh, so we'll check it earlier
+        if (
+          lastReleasedAt &&
+          !isExpired(now, lastReleasedAt, this.packageFreshDaysDuration)
+        ) {
+          updateDuration = this.updateDurationFresh;
+        }
       }
 
-      if (isExpired(now, cacheUpdatedAt, this.updateDuration)) {
+      if (isExpired(now, cacheUpdatedAt, updateDuration)) {
         const variables: GithubQueryParams = {
           owner,
           name,
@@ -225,7 +262,7 @@ export abstract class AbstractGithubDatasourceCache<
             for (const item of fetchedItems) {
               const newStoredItem = this.coerceFetched(item);
               if (newStoredItem) {
-                const { version } = newStoredItem;
+                const { version, releaseTimestamp } = newStoredItem;
 
                 // Stop earlier if the stored item have reached stability,
                 // which means `unstableDays` period have passed
@@ -244,6 +281,14 @@ export abstract class AbstractGithubDatasourceCache<
 
                 cacheItems[version] = newStoredItem;
                 checkedVersions.add(version);
+
+                lastReleasedAt ??= releaseTimestamp;
+                if (
+                  DateTime.fromISO(releaseTimestamp) >
+                  DateTime.fromISO(lastReleasedAt)
+                ) {
+                  lastReleasedAt = releaseTimestamp;
+                }
               }
             }
           }
@@ -272,6 +317,11 @@ export abstract class AbstractGithubDatasourceCache<
             createdAt: cacheCreatedAt,
             updatedAt: now.toISO(),
           };
+
+          if (lastReleasedAt) {
+            cacheValue.lastReleasedAt = lastReleasedAt;
+          }
+
           await packageCache.set(
             this.cacheNs,
             cacheKey,
@@ -289,5 +339,25 @@ export abstract class AbstractGithubDatasourceCache<
   getRandomDeltaMinutes(): number {
     const rnd = Math.random();
     return Math.floor(rnd * this.resetDeltaMinutes);
+  }
+
+  private getLastReleaseTimestamp(
+    items: Record<string, StoredItem>
+  ): string | null {
+    let result: string | null = null;
+    let latest: DateTime | null = null;
+
+    for (const { releaseTimestamp } of Object.values(items)) {
+      const timestamp = DateTime.fromISO(releaseTimestamp);
+
+      result ??= releaseTimestamp;
+      latest ??= timestamp;
+
+      if (timestamp > latest) {
+        latest = timestamp;
+      }
+    }
+
+    return result;
   }
 }
