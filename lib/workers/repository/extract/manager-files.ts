@@ -15,7 +15,7 @@ import { readLocalFile } from '../../../util/fs';
 function getExtractConfig(config: WorkerExtractConfig): ExtractConfig {
   return {
     npmrc: config.npmrc,
-    aliases: config.aliases,
+    registryAliases: config.registryAliases,
     skipInstalls: config.skipInstalls,
     npmrcMerge: config.npmrcMerge,
   };
