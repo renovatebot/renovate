@@ -521,26 +521,6 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if aliases have invalid url', async () => {
-      const config = {
-        aliases: {
-          example1: 'noturl',
-          example2: 'http://www.example.com',
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
-        {
-          message:
-            'Invalid `aliases.aliases.example1` configuration: value is not a url',
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
-
     it('errors if aliases depth is more than 1', async () => {
       const config = {
         aliases: {
@@ -557,6 +537,26 @@ describe('config/validation', () => {
         {
           message:
             'Invalid `aliases.aliases.sample` configuration: value is not a url',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if aliases have invalid url', async () => {
+      const config = {
+        aliases: {
+          example1: 'noturl',
+          example2: 'http://www.example.com',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `aliases.aliases.example1` configuration: value is not a url',
           topic: 'Configuration Error',
         },
       ]);
