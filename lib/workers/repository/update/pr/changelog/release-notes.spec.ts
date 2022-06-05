@@ -5,6 +5,7 @@ import { CacheableGithubReleases } from '../../../../../modules/datasource/githu
 import { clone } from '../../../../../util/clone';
 import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
+import type { BranchUpgradeConfig } from '../../../../types';
 import {
   addReleaseNotes,
   getReleaseList,
@@ -94,9 +95,16 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   describe('addReleaseNotes()', () => {
     it('returns input if invalid', async () => {
       const input = { a: 1 };
-      expect(await addReleaseNotes(input as never)).toEqual(input);
-      expect(await addReleaseNotes(null)).toBeNull();
-      expect(await addReleaseNotes({ versions: [] } as never)).toStrictEqual({
+      expect(
+        await addReleaseNotes(input as never, {} as BranchUpgradeConfig)
+      ).toEqual(input);
+      expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
+      expect(
+        await addReleaseNotes(
+          { versions: [] } as never,
+          {} as BranchUpgradeConfig
+        )
+      ).toStrictEqual({
         versions: [],
       });
     });
@@ -110,7 +118,9 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         versions: [{ version: '3.10.0', compare: { url: '' } }],
       };
-      expect(await addReleaseNotes(input as never)).toEqual({
+      expect(
+        await addReleaseNotes(input as never, {} as BranchUpgradeConfig)
+      ).toEqual({
         a: 1,
         hasReleaseNotes: false,
         project: {
@@ -140,7 +150,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           { version: '20.26.0', compare: { url: '' } } as ChangeLogRelease,
         ],
       } as ChangeLogResult;
-      expect(await addReleaseNotes(input)).toEqual({
+      expect(await addReleaseNotes(input, {} as BranchUpgradeConfig)).toEqual({
         a: 1,
         hasReleaseNotes: false,
         project: {
@@ -280,7 +290,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.0',
           gitRef: '1.0.0',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toBeNull();
     });
@@ -303,7 +314,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -334,7 +346,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -366,7 +379,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -398,7 +412,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -429,7 +444,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -466,7 +482,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
@@ -502,7 +519,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
@@ -538,7 +556,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
@@ -561,7 +580,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.1',
           gitRef: '1.0.1',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toBeNull();
     });
@@ -588,7 +608,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           version: '1.0.0',
           gitRef: '1.0.0',
-        } as ChangeLogRelease
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
         url: 'correct/url/tag.com',
