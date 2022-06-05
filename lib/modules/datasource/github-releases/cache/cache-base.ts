@@ -283,6 +283,10 @@ export abstract class AbstractGithubDatasourceCache<
                 checkedVersions.add(version);
 
                 lastReleasedAt ??= releaseTimestamp;
+                // It may be tempting to optimize the code and
+                // remove the check, as we're fetching fresh releases here.
+                // That's wrong, because some items are already cached,
+                // and they obviously aren't latest.
                 if (
                   DateTime.fromISO(releaseTimestamp) >
                   DateTime.fromISO(lastReleasedAt)
