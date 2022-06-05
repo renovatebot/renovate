@@ -193,6 +193,7 @@ export abstract class AbstractGithubDatasourceCache<
 
       const cacheDoesExist =
         cache && !isExpired(now, cache.createdAt, this.resetDuration);
+      let lastReleasedAt: string | null = null;
       let updateDuration = this.updateDuration;
       if (cacheDoesExist) {
         // Keeping the the original `cache` value intact
@@ -200,11 +201,14 @@ export abstract class AbstractGithubDatasourceCache<
         cacheItems = { ...cache.items };
         cacheCreatedAt = cache.createdAt;
         cacheUpdatedAt = cache.updatedAt;
-        const lastReleasedAt =
+        lastReleasedAt =
           cache.lastReleasedAt ?? this.getLastReleaseTimestamp(cacheItems);
 
         // Release is considered fresh, so we'll check it earlier
-        if (!isExpired(now, lastReleasedAt, this.packageFreshDaysDuration)) {
+        if (
+          lastReleasedAt &&
+          !isExpired(now, lastReleasedAt, this.packageFreshDaysDuration)
+        ) {
           updateDuration = this.updateDurationFresh;
         }
       }
@@ -258,7 +262,7 @@ export abstract class AbstractGithubDatasourceCache<
             for (const item of fetchedItems) {
               const newStoredItem = this.coerceFetched(item);
               if (newStoredItem) {
-                const { version } = newStoredItem;
+                const { version, releaseTimestamp } = newStoredItem;
 
                 // Stop earlier if the stored item have reached stability,
                 // which means `unstableDays` period have passed
@@ -277,6 +281,18 @@ export abstract class AbstractGithubDatasourceCache<
 
                 cacheItems[version] = newStoredItem;
                 checkedVersions.add(version);
+
+                lastReleasedAt ??= releaseTimestamp;
+                // It may be tempting to optimize the code and
+                // remove the check, as we're fetching fresh releases here.
+                // That's wrong, because some items are already cached,
+                // and they obviously aren't latest.
+                if (
+                  DateTime.fromISO(releaseTimestamp) >
+                  DateTime.fromISO(lastReleasedAt)
+                ) {
+                  lastReleasedAt = releaseTimestamp;
+                }
               }
             }
           }
@@ -304,8 +320,11 @@ export abstract class AbstractGithubDatasourceCache<
             items: cacheItems,
             createdAt: cacheCreatedAt,
             updatedAt: now.toISO(),
-            lastReleasedAt: this.getLastReleaseTimestamp(cacheItems),
           };
+
+          if (lastReleasedAt) {
+            cacheValue.lastReleasedAt = lastReleasedAt;
+          }
 
           await packageCache.set(
             this.cacheNs,
