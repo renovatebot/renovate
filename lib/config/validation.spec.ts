@@ -541,6 +541,27 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if aliases depth is more than 1', async () => {
+      const config = {
+        aliases: {
+          sample: {
+            example1: 'http://www.example.com',
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `aliases.aliases.sample` configuration: value is not a url',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     it('errors if fileMatch has wrong parent', async () => {
       const config = {
         fileMatch: ['foo'],
