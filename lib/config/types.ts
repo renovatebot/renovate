@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { ExtractConfig } from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -26,6 +27,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
+  branchPrefixOld?: string;
   branchName?: string;
   manager?: string | null;
   commitMessage?: string;
@@ -49,7 +51,6 @@ export interface RenovateSharedConfig {
   hashedBranchLength?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -63,6 +64,7 @@ export interface RenovateSharedConfig {
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   schedule?: string[];
+  automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
@@ -92,6 +94,8 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
+  platform?: string;
+  endpoint?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -117,11 +121,11 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
+  platform?: string;
+  endpoint?: string;
 }
 
 export interface LegacyAdminConfig {
-  endpoint?: string;
-
   localDir?: string;
 
   logContext?: string;
@@ -134,7 +138,6 @@ export interface LegacyAdminConfig {
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
 
-  platform?: string;
   requireConfig?: RequiredConfig;
 }
 export type ExecutionMode = 'branch' | 'update';
@@ -216,6 +219,7 @@ export interface RenovateConfig
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
+  updateInternalDeps?: boolean;
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];
@@ -406,10 +410,10 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string;
+  manager?: string | null;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
@@ -427,6 +431,17 @@ export interface MigratedRenovateConfig extends RenovateConfig {
   node?: RenovateConfig;
   travis?: RenovateConfig;
   gradle?: RenovateConfig;
+}
+
+export interface ManagerConfig extends RenovateConfig {
+  manager: string;
+  language?: string | null;
+}
+
+export interface WorkerExtractConfig extends ExtractConfig {
+  manager: string;
+  enabled?: boolean;
+  fileList: string[];
 }
 
 export interface ValidationResult {

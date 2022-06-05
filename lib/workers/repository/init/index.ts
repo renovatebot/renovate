@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -17,8 +18,9 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
+    const platform = GlobalConfig.get('platform');
     logger.warn(
-      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${config.platform}'.`
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
     );
   }
 }

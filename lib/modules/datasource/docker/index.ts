@@ -57,7 +57,9 @@ export async function getAuthHeaders(
   apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckResponse = await http.get(apiCheckUrl, {
+    // use json request, as this will be cached for tags, so it returns json
+    // TODO: add cache test
+    const apiCheckResponse = await http.getJson(apiCheckUrl, {
       throwHttpErrors: false,
       noAuth: true,
     });

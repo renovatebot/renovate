@@ -112,8 +112,11 @@ function cronMatches(cron: string, now: DateTime): boolean {
   return true;
 }
 
-export function isScheduledNow(config: RenovateConfig): boolean {
-  let configSchedule = config.schedule;
+export function isScheduledNow(
+  config: RenovateConfig,
+  scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule'
+): boolean {
+  let configSchedule = config[scheduleKey];
   logger.debug(
     `Checking schedule(${String(configSchedule)}, ${config.timezone})`
   );
@@ -121,7 +124,6 @@ export function isScheduledNow(config: RenovateConfig): boolean {
     !configSchedule ||
     configSchedule.length === 0 ||
     configSchedule[0] === '' ||
-    configSchedule === ('at any time' as never) ||
     configSchedule[0] === 'at any time'
   ) {
     logger.debug('No schedule defined');

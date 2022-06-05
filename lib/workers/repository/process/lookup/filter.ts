@@ -50,7 +50,8 @@ export function filterVersions(
       const versionRelease = releases.find(
         (release) => release.version === v.version
       );
-      if (versionRelease.isDeprecated) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (versionRelease!.isDeprecated) {
         logger.trace(
           `Skipping ${config.depName}@${v.version} because it is deprecated`
         );
@@ -79,7 +80,7 @@ export function filterVersions(
         'Falling back to npm semver syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter((v) =>
-        semver.satisfies(semver.coerce(v.version), allowedVersions)
+        semver.satisfies(semver.coerce(v.version)!, allowedVersions)
       );
     } else if (
       config.versioning === poetryVersioning.id &&
