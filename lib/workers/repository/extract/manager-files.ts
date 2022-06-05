@@ -6,13 +6,26 @@ import {
   extractPackageFile,
   get,
 } from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
+import type {
+  ExtractConfig,
+  PackageFile,
+} from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
+
+function getExtractConfig(config: WorkerExtractConfig): ExtractConfig {
+  return {
+    npmrc: config.npmrc,
+    aliases: config.aliases,
+    skipInstalls: config.skipInstalls,
+    npmrcMerge: config.npmrcMerge,
+  };
+}
 
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig
 ): Promise<PackageFile[]> {
   const { enabled, manager, fileList } = config;
+  const extractConfig = getExtractConfig(config);
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
@@ -32,7 +45,7 @@ export async function getManagerPackageFiles(
   if (get(manager, 'extractAllPackageFiles')) {
     const allPackageFiles = await extractAllPackageFiles(
       manager,
-      config,
+      extractConfig,
       fileList
     );
     if (allPackageFiles) {
@@ -54,7 +67,7 @@ export async function getManagerPackageFiles(
         manager,
         content,
         packageFile,
-        config
+        extractConfig
       );
       if (res) {
         for (let index = 0; index < res.deps.length; index += 1) {
