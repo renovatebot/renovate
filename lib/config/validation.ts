@@ -535,6 +535,8 @@ export async function validateConfig(
         ) {
           if (is.plainObject(val)) {
             if (key === 'registryAliases') {
+              //eslint-disable-next-line
+              console.log('lmao', config.registryAliases);
               const res = validateAliasObject(val);
               if (res !== true) {
                 errors.push({
