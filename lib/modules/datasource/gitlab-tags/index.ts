@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
@@ -7,6 +8,12 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabCommit, GitlabTag } from './types';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
+function getDefaultRegistryUrl(): string[] | (() => string[]) {
+  const { platform, endpoint } = GlobalConfig.get();
+  return platform === 'gitlab' && endpoint
+    ? () => [endpoint]
+    : [defaultRegistryUrl];
+}
 export class GitlabTagsDatasource extends Datasource {
   static readonly id = 'gitlab-tags';
 
@@ -17,7 +24,7 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override readonly defaultRegistryUrls = getDefaultRegistryUrl();
 
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
