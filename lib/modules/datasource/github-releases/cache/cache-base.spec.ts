@@ -344,4 +344,14 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     expect(packageCache.get).toHaveBeenCalled();
     expect(packageCache.set).not.toHaveBeenCalled();
   });
+
+  it('finds latest release timestamp correctly', () => {
+    const cache = new TestCache(http);
+    const ts = cache.getLastReleaseTimestamp({
+      v2: { bar: 'bbb', releaseTimestamp: t2, version: 'v2' },
+      v3: { bar: 'ccc', releaseTimestamp: t3, version: 'v3' },
+      v1: { bar: 'aaa', releaseTimestamp: t1, version: 'v1' },
+    });
+    expect(ts).toEqual(t3);
+  });
 });

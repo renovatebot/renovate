@@ -341,7 +341,7 @@ export abstract class AbstractGithubDatasourceCache<
     return Math.floor(rnd * this.resetDeltaMinutes);
   }
 
-  private getLastReleaseTimestamp(
+  public getLastReleaseTimestamp(
     items: Record<string, StoredItem>
   ): string | null {
     let result: string | null = null;
@@ -354,6 +354,7 @@ export abstract class AbstractGithubDatasourceCache<
       latest ??= timestamp;
 
       if (timestamp > latest) {
+        result = releaseTimestamp;
         latest = timestamp;
       }
     }
