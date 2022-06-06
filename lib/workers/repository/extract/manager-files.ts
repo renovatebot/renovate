@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { WorkerExtractConfig } from '../../../config/types';
+import type { ManagerConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -7,22 +7,32 @@ import {
   get,
 } from '../../../modules/manager';
 import type {
+  CustomExtractConfig,
   ExtractConfig,
   PackageFile,
 } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 
-function getExtractConfig(config: WorkerExtractConfig): ExtractConfig {
-  return {
+export function getExtractConfig(
+  config: ManagerConfig
+): ExtractConfig | CustomExtractConfig {
+  const result = {
     npmrc: config.npmrc,
     aliases: config.aliases,
     skipInstalls: config.skipInstalls,
     npmrcMerge: config.npmrcMerge,
   };
+  if (config.manager === 'regex') {
+    result['matchStrings'] = config.matchStrings;
+    result['matchStringsStrategy'] = config.matchStringsStrategy;
+    result['autoReplaceStringTemplate'] = config.autoReplaceStringTemplate;
+  }
+
+  return result;
 }
 
 export async function getManagerPackageFiles(
-  config: WorkerExtractConfig
+  config: ManagerConfig
 ): Promise<PackageFile[]> {
   const { enabled, manager, fileList } = config;
   const extractConfig = getExtractConfig(config);

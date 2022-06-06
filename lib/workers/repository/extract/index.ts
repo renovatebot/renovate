@@ -1,10 +1,6 @@
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  ManagerConfig,
-  RenovateConfig,
-  WorkerExtractConfig,
-} from '../../../config/types';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -23,7 +19,7 @@ export async function extractAllDependencies(
       enabledManagers.includes(manager)
     );
   }
-  const extractList: WorkerExtractConfig[] = [];
+  const extractList: ManagerConfig[] = [];
   const fileList = await getFileList();
 
   const tryConfig = (managerConfig: ManagerConfig): void => {
