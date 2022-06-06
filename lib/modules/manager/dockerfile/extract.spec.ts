@@ -1,8 +1,10 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile, getDep } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { extractPackageFile, extractVariables, getDep } from './extract';
 
-const d1 = loadFixture('1.Dockerfile');
-const d2 = loadFixture('2.Dockerfile');
+const d1 = Fixtures.get('1.Dockerfile');
+const d2 = Fixtures.get('2.Dockerfile');
+const d3 = Fixtures.get('3.Dockerfile');
+const d4 = Fixtures.get('4.Dockerfile');
 
 describe('modules/manager/dockerfile/extract', () => {
   describe('extractPackageFile()', () => {
@@ -647,6 +649,377 @@ describe('modules/manager/dockerfile/extract', () => {
         ]
       `);
     });
+
+    it('handles implausible line continuation', () => {
+      const res = extractPackageFile(
+        'FROM alpine:3.5\n\nRUN something \\'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "3.5",
+            "datasource": "docker",
+            "depName": "alpine",
+            "depType": "final",
+            "replaceString": "alpine:3.5",
+          },
+        ]
+      `);
+    });
+
+    it('handles multi-line FROM with space after escape character', () => {
+      const res = extractPackageFile('FROM \\ \nnginx:1.20\n').deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.20",
+            "datasource": "docker",
+            "depName": "nginx",
+            "depType": "final",
+            "replaceString": "nginx:1.20",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM without ARG default value', () => {
+      const res = extractPackageFile('ARG img_base\nFROM $img_base\n').deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "datasource": "docker",
+            "depType": "final",
+            "replaceString": "$img_base",
+            "skipReason": "contains-variable",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with empty ARG default value', () => {
+      const res = extractPackageFile(
+        'ARG patch1=""\nARG patch2=\nFROM nginx:1.20${patch1}$patch2\n'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "FROM nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\${patch1}$patch2",
+            "currentDigest": undefined,
+            "currentValue": "1.20",
+            "datasource": "docker",
+            "depName": "nginx",
+            "depType": "final",
+            "replaceString": "FROM nginx:1.20\${patch1}$patch2",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with version in ARG value', () => {
+      const res = extractPackageFile(
+        'ARG\tVARIANT="1.60.0-bullseye"\nFROM\trust:${VARIANT}\n'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "ARG\tVARIANT=\\"{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\\"",
+            "currentDigest": undefined,
+            "currentValue": "1.60.0-bullseye",
+            "datasource": "docker",
+            "depName": "rust",
+            "depType": "final",
+            "replaceString": "ARG\tVARIANT=\\"1.60.0-bullseye\\"",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with version in ARG default value', () => {
+      const res = extractPackageFile(
+        'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}\nfrom ${IMAGE_VERSION} as base\n'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "ARG IMAGE_VERSION=\${IMAGE_VERSION:-ubuntu:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}}",
+            "currentValue": "xenial",
+            "datasource": "docker",
+            "depName": "ubuntu",
+            "depType": "final",
+            "replaceString": "ARG IMAGE_VERSION=\${IMAGE_VERSION:-ubuntu:xenial}",
+            "versioning": "ubuntu",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with digest in ARG default value', () => {
+      const res = extractPackageFile(
+        'ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f\n' +
+          '      FROM gcr.io/distroless/java17@$sha_digest'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "ARG sha_digest={{#if newDigest}}{{newDigest}}{{/if}}",
+            "currentDigest": "sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f",
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "gcr.io/distroless/java17",
+            "depType": "final",
+            "replaceString": "ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with overwritten ARG value', () => {
+      const res = extractPackageFile(
+        'ARG base=nginx:1.19\nFROM $base as stage1\nARG base=nginx:1.20\nFROM --platform=amd64 $base as stage2\n'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.19",
+            "datasource": "docker",
+            "depName": "nginx",
+            "depType": "stage",
+            "replaceString": "ARG base=nginx:1.19",
+          },
+          Object {
+            "autoReplaceStringTemplate": "ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.20",
+            "datasource": "docker",
+            "depName": "nginx",
+            "depType": "final",
+            "replaceString": "ARG base=nginx:1.20",
+          },
+        ]
+      `);
+    });
+
+    it('handles FROM with multiple ARG values', () => {
+      const res = extractPackageFile(
+        'ARG CUDA=9.2\nARG LINUX_VERSION ubuntu16.04\nFROM nvidia/cuda:${CUDA}-devel-${LINUX_VERSION}\n'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "9.2-devel-ubuntu16.04",
+            "datasource": "docker",
+            "depName": "nvidia/cuda",
+            "depType": "final",
+            "replaceString": "nvidia/cuda:9.2-devel-ubuntu16.04",
+          },
+        ]
+      `);
+    });
+
+    it('skips scratch if provided in ARG value', () => {
+      const res = extractPackageFile('ARG img="scratch"\nFROM $img as base\n');
+      expect(res).toBeNull();
+    });
+
+    it('extracts images from multi-line ARG statements', () => {
+      const res = extractPackageFile(d3).deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            ' ARG \\\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.15.4',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'stage',
+          replaceString:
+            ' ARG \\\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:3.15.4',
+        },
+        {
+          autoReplaceStringTemplate:
+            'ARG   \\\n' +
+            '  \\\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"',
+          currentDigest:
+            'sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd',
+          currentValue: '1.18.0-alpine',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'final',
+          replaceString:
+            'ARG   \\\n' +
+            '  \\\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd"',
+        },
+      ]);
+    });
+
+    it('ignores parser directives in wrong order', () => {
+      const res = extractPackageFile(
+        '# dummy\n# escape = `\n\nFROM\\\nnginx:1.20'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.20",
+            "datasource": "docker",
+            "depName": "nginx",
+            "depType": "final",
+            "replaceString": "nginx:1.20",
+          },
+        ]
+      `);
+    });
+
+    it('handles an alternative escape character', () => {
+      const res = extractPackageFile(d4).deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            ' ARG `\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.15.4',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'stage',
+          replaceString:
+            ' ARG `\n' +
+            '\t# multi-line arg\n' +
+            '   ALPINE_VERSION=alpine:3.15.4',
+        },
+        {
+          autoReplaceStringTemplate:
+            'ARG   `\n' +
+            '  `\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"',
+          currentDigest: 'sha256:abcdef',
+          currentValue: '18.04',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'stage',
+          replaceString:
+            'ARG   `\n' +
+            '  `\n' +
+            ' # multi-line arg\n' +
+            ' # and multi-line comment\n' +
+            '   nginx_version="nginx:18.04@sha256:abcdef"',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'image5',
+          depType: 'stage',
+          replaceString: 'image5',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'image12',
+          depType: 'final',
+          replaceString: 'image12',
+        },
+      ]);
+    });
+
+    it('handles FROM with version in ARG default value and quotes', () => {
+      const res = extractPackageFile(
+        'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}\nfrom ${REF_NAME}'
+      ).deps;
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "ARG REF_NAME=\${REF_NAME:-\\"gcr.io/distroless/static-debian11:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}\\"}",
+            "currentDigest": "sha256:abc",
+            "currentValue": "nonroot",
+            "datasource": "docker",
+            "depName": "gcr.io/distroless/static-debian11",
+            "depType": "final",
+            "replaceString": "ARG REF_NAME=\${REF_NAME:-\\"gcr.io/distroless/static-debian11:nonroot@sha256:abc\\"}",
+          },
+        ]
+      `);
+    });
+
+    it('handles version in ARG and digest in FROM with CRLF linefeed', () => {
+      const res = extractPackageFile(
+        'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n'
+      ).deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            'ARG IMAGE_TAG={{#if newValue}}{{newValue}}{{/if}}\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@{{#if newDigest}}{{newDigest}}{{/if}}',
+          currentDigest: 'sha256:abc',
+          currentValue: '14.04',
+          datasource: 'docker',
+          depName: 'ubuntu',
+          depType: 'final',
+          replaceString:
+            'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc',
+          versioning: 'ubuntu',
+        },
+      ]);
+    });
+
+    it('handles updates of multiple ARG values', () => {
+      const res = extractPackageFile(
+        '# random comment\n\n' +
+          'ARG NODE_IMAGE_HASH="@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4"\n' +
+          'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
+          'ARG NODE_IMAGE_NAME=node\n' +
+          'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"\n' +
+          'ARG DUMMY_PREFIX=\n' +
+          'FROM ${DUMMY_PREFIX}${NODE_IMAGE_HOST}${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}${NODE_IMAGE_HASH} as yarn\n'
+      ).deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            'ARG NODE_IMAGE_HASH="@{{#if newDigest}}{{newDigest}}{{/if}}"\n' +
+            'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
+            'ARG NODE_IMAGE_NAME=node\n' +
+            'ARG NODE_IMAGE_TAG="{{#if newValue}}{{newValue}}{{/if}}"',
+          currentDigest:
+            'sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4',
+          currentValue: '16.14.2-alpine3.14',
+          datasource: 'docker',
+          depName: 'docker.io/library/node',
+          depType: 'final',
+          replaceString:
+            'ARG NODE_IMAGE_HASH="@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4"\n' +
+            'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
+            'ARG NODE_IMAGE_NAME=node\n' +
+            'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"',
+        },
+      ]);
+    });
   });
 
   describe('getDep()', () => {
@@ -657,37 +1030,63 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles default environment variable values', () => {
       const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "sha256:abcd",
-  "currentValue": "5.0.0",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis:5.0.0@sha256:abcd",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abcd",
+          "currentValue": "5.0.0",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis:5.0.0@sha256:abcd",
+        }
+      `);
 
       const res2 = getDep('${REDIS_IMAGE:-redis:5.0.0}');
       expect(res2).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentValue": "5.0.0",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis:5.0.0",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentValue": "5.0.0",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis:5.0.0",
+        }
+      `);
 
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "sha256:abcd",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis@sha256:abcd",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abcd",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis@sha256:abcd",
+        }
+      `);
+
+      const res4 = getDep(
+        '${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}'
+      );
+      expect(res4).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abc",
+          "currentValue": "nonroot",
+          "datasource": "docker",
+          "depName": "gcr.io/distroless/static-debian11",
+          "replaceString": "gcr.io/distroless/static-debian11:nonroot@sha256:abc",
+        }
+      `);
+
+      const res5 = getDep(
+        '${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}'
+      );
+      expect(res5).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "\${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}",
+          "skipReason": "contains-variable",
+        }
+      `);
     });
 
     it('skips tag containing a variable', () => {
@@ -748,6 +1147,49 @@ Object {
           "skipReason": "contains-variable",
         }
       `);
+    });
+  });
+
+  describe('extractVariables()', () => {
+    it('handles no variable', () => {
+      expect(extractVariables('nginx:latest')).toBeEmpty();
+    });
+
+    it('handles simple variable', () => {
+      expect(extractVariables('nginx:$version')).toMatchObject({
+        $version: 'version',
+      });
+    });
+
+    it('handles escaped variable', () => {
+      expect(extractVariables('nginx:\\$version')).toMatchObject({
+        '\\$version': 'version',
+      });
+    });
+
+    it('handles complex variable', () => {
+      expect(extractVariables('ubuntu:${ubuntu_version}')).toMatchObject({
+        '${ubuntu_version}': 'ubuntu_version',
+      });
+    });
+
+    it('handles complex variable with static default value', () => {
+      expect(extractVariables('${var1:-nginx}:latest')).toMatchObject({
+        '${var1:-nginx}': 'var1',
+      });
+    });
+
+    it('handles complex variable with other variable as default value', () => {
+      expect(extractVariables('${VAR1:-$var2}:latest')).toMatchObject({
+        '${VAR1:-$var2}': 'VAR1',
+      });
+    });
+
+    it('handles multiple variables', () => {
+      expect(extractVariables('${var1:-$var2}:$version')).toMatchObject({
+        '${var1:-$var2}': 'var1',
+        $version: 'version',
+      });
     });
   });
 });

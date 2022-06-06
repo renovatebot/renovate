@@ -22,6 +22,7 @@ export function getExtractConfig(
     skipInstalls: config.skipInstalls,
     npmrcMerge: config.npmrcMerge,
   };
+
   if (config.manager === 'regex') {
     result['matchStrings'] = config.matchStrings;
     result['matchStringsStrategy'] = config.matchStringsStrategy;
