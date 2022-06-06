@@ -46,12 +46,24 @@ export class PackageFiles {
         deps += pad ? '</blockquote>\n</details>\n\n' : '';
         continue;
       }
+
+      const placeHolder = `no version found`;
+      let ver = '';
+      let digest = '';
+      let version = '';
+
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
           deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
-            deps += ` - \`${dep.depName} ${dep.currentValue}\`\n`;
+            ver = dep.currentValue ?? '';
+            digest = dep.currentDigest ?? '';
+            version =
+              ver && digest
+                ? `${ver}@${digest}`
+                : `${digest || ver || placeHolder}`;
+            deps += ` - \`${dep.depName} ${version}\`\n`;
           }
           deps += '\n</details>\n\n';
         }
