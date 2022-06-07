@@ -1564,7 +1564,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     // semver not null safe, accepts null and undefined
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     platformConfig.gheVersion!,
-    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
+    '>=3.5'
   );
   const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
   const query = vulnerabilityAlertsQuery(filterByState);
