@@ -2197,10 +2197,14 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 ## registryAliases
 
-The `registryAliases` object is used for configuring registry registryAliases.
-Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
 
-The above managers include this default registryAlias:
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
 
 ```json
 {
