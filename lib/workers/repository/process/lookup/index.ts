@@ -73,6 +73,8 @@ export async function lookupUpdates(
         return res;
       }
 
+      config = mergeConfigConstraints(config);
+
       const dependency = clone(await getPkgReleases(config));
       if (!dependency) {
         // If dependency lookup fails then warn and return
@@ -398,4 +400,24 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return res;
+}
+
+export function mergeConfigConstraints(
+  config: LookupUpdateConfig
+): LookupUpdateConfig {
+  if (config?.extractedConstraints) {
+    if (config?.constraints) {
+      for (const [constraint, value] of Object.entries(
+        config.extractedConstraints
+      )) {
+        if (is.nullOrUndefined(config.constraints[constraint])) {
+          config.constraints[constraint] = value;
+        }
+      }
+    } else {
+      config.constraints = config.extractedConstraints;
+    }
+    delete config.extractedConstraints;
+  }
+  return config;
 }
