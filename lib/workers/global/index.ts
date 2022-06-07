@@ -39,7 +39,6 @@ export async function getRepositoryConfig(
   );
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
-
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
