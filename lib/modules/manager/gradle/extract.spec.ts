@@ -1,4 +1,5 @@
-import { fs, loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles } from '.';
 
@@ -191,8 +192,60 @@ describe('modules/manager/gradle/extract', () => {
     ]);
   });
 
+  it('interpolates repository URLs', async () => {
+    const buildFile = `
+      repositories {
+          mavenCentral()
+          maven {
+              url = "\${repositoryBaseURL}/repository-build"
+          }
+      }
+
+      dependencies {
+          implementation "com.google.protobuf:protobuf-java:2.17.0"
+      }
+    `;
+
+    mockFs({
+      'build.gradle': buildFile,
+      'gradle.properties': 'repositoryBaseURL: https://dummy.org/whatever',
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'gradle.properties',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle.properties',
+        datasource: 'maven',
+        deps: [],
+      },
+      {
+        packageFile: 'build.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'com.google.protobuf:protobuf-java',
+            currentValue: '2.17.0',
+            managerData: {
+              fileReplacePosition: 227,
+              packageFile: 'build.gradle',
+            },
+            fileReplacePosition: 227,
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://dummy.org/whatever/repository-build',
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('works with dependency catalogs', async () => {
-    const tomlFile = loadFixture('1/libs.versions.toml');
+    const tomlFile = Fixtures.get('1/libs.versions.toml');
     const fsMock = {
       'gradle/libs.versions.toml': tomlFile,
     };
@@ -315,7 +368,7 @@ describe('modules/manager/gradle/extract', () => {
   });
 
   it("can run Javier's example", async () => {
-    const tomlFile = loadFixture('2/libs.versions.toml');
+    const tomlFile = Fixtures.get('2/libs.versions.toml');
     const fsMock = {
       'gradle/libs.versions.toml': tomlFile,
     };
@@ -507,7 +560,7 @@ describe('modules/manager/gradle/extract', () => {
   });
 
   it('should change the dependency version not the comment version', async () => {
-    const tomlFile = loadFixture('3/libs.versions.toml');
+    const tomlFile = Fixtures.get('3/libs.versions.toml');
     const fsMock = {
       'gradle/libs.versions.toml': tomlFile,
     };

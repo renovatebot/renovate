@@ -7,4 +7,4 @@ You might be interested in the following `postUpdateOptions`:
 1. `gomodMassage` - to enable massaging of all `replace` statements prior to running `go` so that they will be ignored.
 
 When Renovate is running using `binarySource=docker` (such as in the hosted Mend Renovate app) then it will pick the latest compatible version of Go to run, i.e. the latest `1.x` release.
-Therefore even if the `go.mod` has a version like `go 1.14`, you will see Renovate treating that as a `^1.14` constraint and not `=1.14`.
+Even if the `go.mod` has a version like `go 1.14`, Renovate will treat it as a `^1.14` constraint and not `=1.14`.
