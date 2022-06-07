@@ -220,6 +220,9 @@ function resolveRegistryUrls(
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls.concat(additionalRegistryUrls ?? []);
+  } else if (is.function_(datasource.defaultRegistryUrls)) {
+    resolvedUrls = [...datasource.defaultRegistryUrls()];
+    resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
     resolvedUrls.concat(additionalRegistryUrls ?? []);
