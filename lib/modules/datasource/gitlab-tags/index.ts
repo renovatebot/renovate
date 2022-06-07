@@ -8,7 +8,7 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabCommit, GitlabTag } from './types';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
-function getDefaultRegistryUrl(): string[] {
+export function getDefaultRegistryUrl(): string[] {
   const { platform, endpoint } = GlobalConfig.get();
   return platform === 'gitlab' && endpoint ? [endpoint] : [defaultRegistryUrl];
 }

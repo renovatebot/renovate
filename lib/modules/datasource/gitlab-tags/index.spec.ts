@@ -1,6 +1,7 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { GitlabTagsDatasource } from '.';
+import { GlobalConfig } from '../../../config/global';
+import { GitlabTagsDatasource, getDefaultRegistryUrl } from '.';
 
 const datasource = GitlabTagsDatasource.id;
 
@@ -147,6 +148,22 @@ describe('modules/datasource/gitlab-tags/index', () => {
         'unknown-branch'
       );
       expect(res).toBeNull();
+    });
+  });
+
+  describe('getDefaultRegistryUrls', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('returns endpoint', () => {
+      GlobalConfig.set({ platform: 'gitlab', endpoint: 'https://someurl.com' });
+      expect(getDefaultRegistryUrl()).toBe(['https://someurl.com']);
+    });
+
+    it('returns default', () => {
+      GlobalConfig.set({ platform: 'gitlab', endpoint: undefined });
+      expect(getDefaultRegistryUrl()).toBe([undefined]);
     });
   });
 });
