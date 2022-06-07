@@ -363,6 +363,10 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 This should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
 Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
 
+<!-- prettier-ignore -->
+!!! note
+    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
+
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 

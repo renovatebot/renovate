@@ -38,8 +38,17 @@ export function getRollbackUpdate(
     { dependency: depName, versions },
     'Versions found before rolling back'
   );
+
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
-  const newVersion = lessThanVersions.pop()?.version;
+  let newVersion;
+  if (currentValue && version.isStable(currentValue)) {
+    newVersion = lessThanVersions
+      .filter((v) => version.isStable(v.version))
+      .pop()?.version;
+  }
+  if (!newVersion) {
+    newVersion = lessThanVersions.pop()?.version;
+  }
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
