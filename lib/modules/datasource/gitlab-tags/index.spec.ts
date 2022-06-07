@@ -158,12 +158,12 @@ describe('modules/datasource/gitlab-tags/index', () => {
 
     it('returns endpoint', () => {
       GlobalConfig.set({ platform: 'gitlab', endpoint: 'https://someurl.com' });
-      expect(getDefaultRegistryUrl()).toBe(['https://someurl.com']);
+      expect(getDefaultRegistryUrl()).toStrictEqual(['https://someurl.com']);
     });
 
     it('returns default', () => {
-      GlobalConfig.set({ platform: 'gitlab', endpoint: undefined });
-      expect(getDefaultRegistryUrl()).toBe([undefined]);
+      GlobalConfig.set({ platform: 'gitlab' });
+      expect(getDefaultRegistryUrl()).toStrictEqual(['https://gitlab.com']);
     });
   });
 });
