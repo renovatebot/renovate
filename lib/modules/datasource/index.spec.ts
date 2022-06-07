@@ -43,6 +43,24 @@ class DummyDatasource extends Datasource {
   }
 }
 
+class DummyDatasource2 extends Datasource {
+  override readonly customRegistrySupport = false;
+  override defaultRegistryUrls = () => ['https://reg1.com'];
+  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+    super(datasource);
+  }
+
+  override getReleases({
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const fn = this.registriesMock[registryUrl];
+    if (typeof fn === 'function') {
+      return Promise.resolve(fn());
+    }
+    return Promise.resolve(fn ?? null);
+  }
+}
+
 jest.mock('./metadata-manual', () => ({
   manualChangelogUrls: {
     dummy: {
@@ -210,6 +228,12 @@ describe('modules/datasource/index', () => {
         defaultRegistryUrls: ['https://foo.bar'],
       });
       expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
+    });
+
+    it('defaultRegistryUrls function works', async () => {
+      datasources.set(datasource, new DummyDatasource2());
+      const res = await getPkgReleases({ datasource, depName });
+      expect(res).toMatchObject({ releases: [{ version: '1.2.3' }] });
     });
 
     it('applies extractVersion', async () => {
