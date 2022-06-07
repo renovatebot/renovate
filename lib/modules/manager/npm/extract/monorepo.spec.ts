@@ -48,12 +48,12 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageJsonName: '@org/b',
         },
       ] as any;
-      await detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
-          packageFile.deps?.some((dep) => dep.skipReason)
+          packageFile.deps?.some((dep) => dep.isInternal)
         )
       ).toBeTrue();
     });
@@ -102,14 +102,14 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageJsonName: '@org/b',
         },
       ] as any;
-      await detectMonorepos(packageFiles, true);
+      await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
-          packageFile.deps?.some((dep) => dep.skipReason)
+          packageFile.deps?.some((dep) => dep.isInternal)
         )
-      ).toBeFalse();
+      ).toBeTrue();
     });
 
     it('uses yarn workspaces package settings with lerna', async () => {
@@ -132,7 +132,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
     });
@@ -154,7 +154,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot([
         {},
         { npmrc: '@org:registry=//registry.some.org\n' },
@@ -184,7 +184,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           skipInstalls: true,
         },
       ];
-      await detectMonorepos(packageFiles, false);
+      await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot([
         {},
         { managerData: { yarnZeroInstall: true }, skipInstalls: false },
