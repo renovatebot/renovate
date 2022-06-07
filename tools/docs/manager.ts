@@ -181,7 +181,7 @@ sidebar_label: ${displayName}
         featureList && bugList ? ' and ' : ''
       }${bugList ? 'bugs' : ''}`;
       md += '\n\n';
-      md += `The above ${lists} were current at time of page generation on ${now}.\n`;
+      md += `The above ${lists} were current when this page was generated on ${now}.\n`;
     }
 
     await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
