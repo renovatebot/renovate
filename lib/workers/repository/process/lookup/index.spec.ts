@@ -1699,7 +1699,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
-    
+
     it('rollback for invalid version to last stable version', async () => {
       config.currentValue = '2.5.17';
       config.depName = 'vue';
@@ -1721,7 +1721,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
       ]);
     });
-    
+
     it('overrides extracted config with user config', () => {
       const config: LookupUpdateConfig = {
         datasource: '',
@@ -1773,5 +1773,6 @@ describe('workers/repository/process/lookup/index', () => {
           constraint4: 'exractedValue4',
         },
       });
+    });
   });
 });
