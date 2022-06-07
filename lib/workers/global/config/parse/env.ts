@@ -86,6 +86,10 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     if (option.env !== false) {
       const envName = getEnvName(option);
       const envVal = env[envName];
+      if (envName === 'RENOVATE_REGISTRY_ALIASES') {
+        //eslint-disable-next-line
+        console.log(envName, ':', envVal);
+      }
       if (envVal) {
         if (option.type === 'array' && option.subType === 'object') {
           try {
