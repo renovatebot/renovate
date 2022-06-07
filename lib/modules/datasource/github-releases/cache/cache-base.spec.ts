@@ -115,6 +115,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       {
         createdAt: now.toISO(),
         updatedAt: now.toISO(),
+        lastReleasedAt: t3,
         items: {
           v1: { bar: 'aaa', releaseTimestamp: t1, version: 'v1' },
           v2: { bar: 'bbb', releaseTimestamp: t2, version: 'v2' },
@@ -174,6 +175,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       {
         createdAt: t3,
         updatedAt: now.toISO(),
+        lastReleasedAt: t3,
         items: {
           v1: { bar: 'aaa', releaseTimestamp: t1, version: 'v1' },
           v2: { bar: 'bbb', releaseTimestamp: t2, version: 'v2' },
@@ -181,6 +183,69 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
         },
       },
       6 * 24 * 60
+    );
+  });
+
+  it('does not update non-fresh packages earlier than 120 minutes ago', async () => {
+    const releaseTimestamp = now.minus({ days: 7 }).toISO();
+    const createdAt = now.minus({ minutes: 119 }).toISO();
+    packageCache.get.mockResolvedValueOnce({
+      items: { v1: { version: 'v1', releaseTimestamp, bar: 'aaa' } },
+      createdAt: createdAt,
+      updatedAt: createdAt,
+    });
+    responses = [
+      resp([
+        { name: 'v1', createdAt: releaseTimestamp, foo: 'aaa' },
+        { name: 'v2', createdAt: now.toISO(), foo: 'bbb' },
+      ]),
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    const res = await cache.getItems({ packageName: 'foo/bar' });
+
+    expect(sortItems(res)).toMatchObject([
+      { version: 'v1', releaseTimestamp, bar: 'aaa' },
+    ]);
+    expect(httpPostJson).not.toHaveBeenCalled();
+  });
+
+  it('updates non-fresh packages after 120 minutes', async () => {
+    const releaseTimestamp = now.minus({ days: 7 }).toISO();
+    const recentTimestamp = now.toISO();
+    const createdAt = now.minus({ minutes: 120 }).toISO();
+    packageCache.get.mockResolvedValueOnce({
+      items: { v1: { version: 'v1', releaseTimestamp, bar: 'aaa' } },
+      createdAt: createdAt,
+      updatedAt: createdAt,
+    });
+    responses = [
+      resp([
+        { name: 'v1', createdAt: releaseTimestamp, foo: 'aaa' },
+        { name: 'v2', createdAt: recentTimestamp, foo: 'bbb' },
+      ]),
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    const res = await cache.getItems({ packageName: 'foo/bar' });
+
+    expect(sortItems(res)).toMatchObject([
+      { version: 'v1', releaseTimestamp, bar: 'aaa' },
+      { version: 'v2', releaseTimestamp: recentTimestamp, bar: 'bbb' },
+    ]);
+    expect(packageCache.set).toHaveBeenCalledWith(
+      'test-cache',
+      'https://api.github.com/:foo:bar',
+      {
+        createdAt: createdAt,
+        items: {
+          v1: { bar: 'aaa', releaseTimestamp, version: 'v1' },
+          v2: { bar: 'bbb', releaseTimestamp: recentTimestamp, version: 'v2' },
+        },
+        lastReleasedAt: recentTimestamp,
+        updatedAt: recentTimestamp,
+      },
+      60 * 24 * 7 - 120
     );
   });
 
@@ -278,5 +343,15 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     );
     expect(packageCache.get).toHaveBeenCalled();
     expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('finds latest release timestamp correctly', () => {
+    const cache = new TestCache(http);
+    const ts = cache.getLastReleaseTimestamp({
+      v2: { bar: 'bbb', releaseTimestamp: t2, version: 'v2' },
+      v3: { bar: 'ccc', releaseTimestamp: t3, version: 'v3' },
+      v1: { bar: 'aaa', releaseTimestamp: t1, version: 'v1' },
+    });
+    expect(ts).toEqual(t3);
   });
 });
