@@ -108,6 +108,9 @@ export async function detectGhe(token: string): Promise<void> {
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
     platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    logger.debug(
+      `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`
+    );
   }
 }
 
