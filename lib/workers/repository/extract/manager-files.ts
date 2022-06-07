@@ -20,8 +20,8 @@ import { readLocalFile } from '../../../util/fs';
 export function getExtractConfig(config: ManagerConfig): ExtractConfig {
   const result: ExtractConfig = {
     npmrc: config.npmrc,
-    aliases: config.aliases as Record<string, string>,
-    skipInstalls: config.skipInstalls,
+    aliases: config.aliases as Record<string, string>, // temporary fix : not for prod
+    skipInstalls: config.skipInstalls as boolean, // temporary fix : not for prod
     npmrcMerge: config.npmrcMerge,
   };
   return result;
@@ -32,8 +32,8 @@ export function getCustomExtractConfig(
 ): CustomExtractConfig {
   const result: CustomExtractConfig = {
     npmrc: config.npmrc,
-    aliases: config.aliases as Record<string, string>,
-    skipInstalls: config.skipInstalls,
+    aliases: config.aliases as Record<string, string>, // temporary fix : not for prod
+    skipInstalls: config.skipInstalls as boolean, // temporary fix : not for prod
     npmrcMerge: config.npmrcMerge,
     matchStrings: config.matchStrings,
     autoReplaceStringTemplate: config.autoReplaceStringTemplate,
