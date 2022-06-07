@@ -48,21 +48,18 @@ export class PackageFiles {
       }
 
       const placeHolder = `no version found`;
-      let ver = '';
-      let digest = '';
-      let version = '';
 
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
           deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
-            ver = dep.currentValue ?? '';
-            digest = dep.currentDigest ?? '';
-            version =
+            const ver = dep.currentValue;
+            const digest = dep.currentDigest;
+            const version =
               ver && digest
                 ? `${ver}@${digest}`
-                : `${digest || ver || placeHolder}`;
+                : `${digest ?? ver ?? placeHolder}`;
             deps += ` - \`${dep.depName} ${version}\`\n`;
           }
           deps += '\n</details>\n\n';
