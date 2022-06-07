@@ -8,11 +8,9 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabCommit, GitlabTag } from './types';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
-function getDefaultRegistryUrl(): string[] | (() => string[]) {
+function getDefaultRegistryUrl(): string[] {
   const { platform, endpoint } = GlobalConfig.get();
-  return platform === 'gitlab' && endpoint
-    ? [endpoint]
-    : [defaultRegistryUrl];
+  return platform === 'gitlab' && endpoint ? [endpoint] : [defaultRegistryUrl];
 }
 export class GitlabTagsDatasource extends Datasource {
   static readonly id = 'gitlab-tags';
