@@ -26,7 +26,7 @@ export async function filterInternalChecks(
   sortedReleases: Release[]
 ): Promise<InternalChecksResult> {
   const { currentVersion, datasource, depName, internalChecksFilter } = config;
-  let release: Release;
+  let release: Release | undefined = undefined;
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
   if (internalChecksFilter === 'none') {
@@ -41,12 +41,13 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        currentVersion,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        currentVersion!,
         candidateRelease.version
       );
       releaseConfig = mergeChildConfig(
         releaseConfig,
-        releaseConfig[releaseConfig.updateType]
+        releaseConfig[releaseConfig.updateType]!
       );
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig);
@@ -69,15 +70,21 @@ export async function filterInternalChecks(
           continue;
         }
       }
-      if (isActiveConfidenceLevel(minimumConfidence)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (isActiveConfidenceLevel(minimumConfidence!)) {
         const confidenceLevel = await getMergeConfidenceLevel(
-          datasource,
-          depName,
-          currentVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          datasource!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          depName!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          currentVersion!,
           newVersion,
-          updateType
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          updateType!
         );
-        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence)) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.debug(
             { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
@@ -106,5 +113,6 @@ export async function filterInternalChecks(
       }
     }
   }
-  return { release, pendingChecks, pendingReleases };
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return { release: release!, pendingChecks, pendingReleases };
 }

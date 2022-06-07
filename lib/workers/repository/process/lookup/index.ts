@@ -67,7 +67,8 @@ export async function lookupUpdates(
     if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
-        versioning.isSingleVersion(currentValue)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        versioning.isSingleVersion(currentValue!)
       ) {
         res.skipReason = 'is-pinned';
         return res;
@@ -134,7 +135,9 @@ export async function lookupUpdates(
       }
       // Check that existing constraint can be satisfied
       const allSatisfyingVersions = allVersions.filter(
-        (v) => unconstrainedValue || versioning.matches(v.version, currentValue)
+        (v) =>
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          unconstrainedValue || versioning.matches(v.version, currentValue!)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
@@ -154,10 +157,12 @@ export async function lookupUpdates(
           updateType: 'replacement',
           newName: dependency.replacementName,
           newValue: versioning.getNewValue({
-            currentValue,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            currentValue: currentValue!,
             newVersion: dependency.replacementVersion,
-            rangeStrategy,
-          }),
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            rangeStrategy: rangeStrategy!,
+          })!,
         });
       }
       // istanbul ignore next
@@ -173,33 +178,43 @@ export async function lookupUpdates(
         .map((release) => release.version);
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
-        currentVersion = lockedVersion;
+        currentVersion = lockedVersion!;
       }
       currentVersion ??=
         getCurrentVersion(
-          currentValue,
-          lockedVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          currentValue!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          lockedVersion!,
           versioning,
-          rangeStrategy,
-          latestVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          rangeStrategy!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          latestVersion!,
           nonDeprecatedVersions
-        ) ||
+        )! ||
         getCurrentVersion(
-          currentValue,
-          lockedVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          currentValue!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          lockedVersion!,
           versioning,
-          rangeStrategy,
-          latestVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          rangeStrategy!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          latestVersion!,
           allVersions.map((v) => v.version)
-        );
+        )!;
       // istanbul ignore if
-      if (!currentVersion && lockedVersion) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (!currentVersion! && lockedVersion) {
         return res;
       }
-      res.currentVersion = currentVersion;
+      res.currentVersion = currentVersion!;
       if (
         currentValue &&
-        currentVersion &&
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        currentVersion! &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
       ) {
@@ -211,20 +226,23 @@ export async function lookupUpdates(
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
-          }),
-          newMajor: versioning.getMajor(currentVersion),
+          })!,
+          newMajor: versioning.getMajor(currentVersion)!,
         });
       }
       // istanbul ignore if
-      if (!versioning.isVersion(currentVersion)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
         return res;
       }
       // Filter latest, unstable, etc
       let filteredReleases = filterVersions(
         config,
-        currentVersion,
-        latestVersion,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        currentVersion!,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        latestVersion!,
         allVersions,
         versioning
       ).filter(
@@ -239,7 +257,8 @@ export async function lookupUpdates(
       for (const release of filteredReleases) {
         const bucket = getBucket(
           config,
-          currentVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          currentVersion!,
           release.version,
           versioning
         );
@@ -271,16 +290,20 @@ export async function lookupUpdates(
         const update = generateUpdate(
           config,
           versioning,
-          rangeStrategy,
-          lockedVersion || currentVersion,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          rangeStrategy!,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          lockedVersion || currentVersion!,
           bucket,
           release
         );
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
-        if (pendingReleases.length) {
-          update.pendingVersions = pendingReleases.map((r) => r.version);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        if (pendingReleases!.length) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          update.pendingVersions = pendingReleases!.map((r) => r.version);
         }
         if (!update.newValue || update.newValue === currentValue) {
           if (!lockedVersion) {
@@ -328,7 +351,8 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            newValue: currentValue,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            newValue: currentValue!,
           });
         }
       } else if (pinDigests) {
@@ -338,21 +362,24 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            newValue: currentValue,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            newValue: currentValue!,
           });
         }
       }
       if (versioning.valueToVersion) {
-        res.currentVersion = versioning.valueToVersion(res.currentVersion);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        res.currentVersion = versioning.valueToVersion(res.currentVersion!);
         for (const update of res.updates || []) {
-          update.newVersion = versioning.valueToVersion(update.newVersion);
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
       }
       // update digest for all
       for (const update of res.updates) {
         if (pinDigests || currentDigest) {
           update.newDigest =
-            update.newDigest || (await getDigest(config, update.newValue));
+            update.newDigest || (await getDigest(config, update.newValue))!;
         }
       }
     }
@@ -366,7 +393,8 @@ export async function lookupUpdates(
         (update) =>
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||
-          (update.newDigest && !update.newDigest.startsWith(currentDigest))
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          (update.newDigest && !update.newDigest.startsWith(currentDigest!))
       );
     // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
     if (config.rangeStrategy === 'in-range-only') {

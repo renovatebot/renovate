@@ -8,46 +8,33 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import type { GitHubTag, TagResponse } from './types';
+import { CacheableGithubTags } from './cache';
 
 export class GithubTagsDatasource extends GithubReleasesDatasource {
   static override readonly id = 'github-tags';
 
+  private tagsCache: CacheableGithubTags;
+
   constructor() {
     super(GithubTagsDatasource.id);
+    this.tagsCache = new CacheableGithubTags(this.http);
   }
 
-  @cache({
-    ttlMinutes: 120,
-    namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: (registryUrl: string, githubRepo: string, tag: string) =>
-      `${registryUrl}:${githubRepo}:tag-${tag}`,
-  })
   async getTagCommit(
     registryUrl: string | undefined,
-    githubRepo: string,
+    packageName: string,
     tag: string
   ): Promise<string | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    let digest: string | null = null;
-    try {
-      const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
-      const res = (await this.http.getJson<TagResponse>(url)).body.object;
-      if (res.type === 'commit') {
-        digest = res.sha;
-      } else if (res.type === 'tag') {
-        digest = (await this.http.getJson<TagResponse>(res.url)).body.object
-          .sha;
-      } else {
-        logger.warn({ res }, 'Unknown git tag refs type');
-      }
-    } catch (err) {
-      logger.debug(
-        { githubRepo, err },
-        'Error getting tag commit from GitHub repo'
-      );
+    let result: string | null = null;
+    const tagReleases = await this.tagsCache.getItems({
+      packageName,
+      registryUrl,
+    });
+    const tagRelease = tagReleases.find(({ version }) => version === tag);
+    if (tagRelease) {
+      result = tagRelease.hash;
     }
-    return digest;
+    return result;
   }
 
   @cache({
@@ -93,44 +80,15 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
         this.getCommit(registryUrl, repo!);
   }
 
-  @cache({
-    ttlMinutes: 10,
-    namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: ({ registryUrl, packageName: repo }: GetReleasesConfig) =>
-      `${registryUrl}:${repo}:tags`,
-  })
-  async getTags({
-    registryUrl,
-    packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    // tag
-    const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
-
-    const versions = (
-      await this.http.getJson<GitHubTag[]>(url, {
-        paginate: true,
-      })
-    ).body.map((o) => o.name);
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: versions.map((version) => ({
-        version,
-        gitRef: version,
-      })),
-    };
-    return dependency;
-  }
-
   override async getReleases(
     config: GetReleasesConfig
-  ): Promise<ReleaseResult | null> {
-    const tagsResult = await this.getTags(config);
+  ): Promise<ReleaseResult> {
+    const tagReleases = await this.tagsCache.getItems(config);
 
-    // istanbul ignore if
-    if (!tagsResult) {
-      return null;
-    }
+    const tagsResult: ReleaseResult = {
+      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+      releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
+    };
 
     try {
       // Fetch additional data from releases endpoint when possible
@@ -150,8 +108,8 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       });
 
       tagsResult.releases = mergedReleases;
-    } catch (e) {
-      // no-op
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
     }
 
     return tagsResult;

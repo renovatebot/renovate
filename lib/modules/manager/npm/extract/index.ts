@@ -306,7 +306,7 @@ export async function extractPackageFile(
       githubRepo = matchUrlSshFormat[2];
       githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/; // TODO #12872 lookahead
+    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
     if (
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
