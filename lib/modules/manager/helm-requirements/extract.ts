@@ -57,8 +57,6 @@ export function extractPackageFile(
       const repoWithPrefixRemoved = dep.repository.slice(
         dep.repository[0] === '@' ? 1 : 6
       );
-      //eslint-disable-next-line
-      console.log('manager/helm-requirements/extract', config.registryAliases);
       const alias = config.registryAliases?.[repoWithPrefixRemoved];
       if (alias) {
         res.registryUrls = [alias];
