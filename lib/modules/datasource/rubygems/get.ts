@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import Marshal from 'marshal';
 import { logger } from '../../../logger';
+import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
@@ -222,7 +223,11 @@ export class InternalRubyGemsDatasource extends Datasource {
     return { endPoint, repository };
   }
 
-  private async isNexusDataSource(nexusEndPoint: string): Promise<boolean> {
+  @cache({
+    namespace: 'datasource-nexus',
+    key: (nexusEndPoint: string) => `isNexusDataSource:${nexusEndPoint}`,
+  })
+  async isNexusDataSource(nexusEndPoint: string): Promise<boolean> {
     const statusEndPoint = '/service/rest/v1/status';
     const nexusUrl = nexusEndPoint.concat(statusEndPoint);
     let isNexus = false;
@@ -230,7 +235,7 @@ export class InternalRubyGemsDatasource extends Datasource {
       const response = await this.http.getJson<HttpResponse>(nexusUrl);
       isNexus = response.headers?.server?.includes('Nexus') ?? false;
     } catch (err) {
-      logger.debug(`${nexusEndPoint} is not a nexus datasource`);
+      return false;
     }
     return isNexus;
   }
