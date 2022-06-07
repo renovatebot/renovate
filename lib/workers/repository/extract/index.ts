@@ -1,6 +1,10 @@
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
+import type {
+  CustomManager,
+  ManagerConfig,
+  RenovateConfig,
+} from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -19,10 +23,13 @@ export async function extractAllDependencies(
       enabledManagers.includes(manager)
     );
   }
-  const extractList: ManagerConfig[] = [];
+  const extractList: Array<ManagerConfig | (ManagerConfig & CustomManager)> =
+    [];
   const fileList = await getFileList();
 
-  const tryConfig = (managerConfig: ManagerConfig): void => {
+  const tryConfig = (
+    managerConfig: ManagerConfig | (ManagerConfig & CustomManager)
+  ): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
       extractList.push({ ...managerConfig, fileList: matchingFileList });

@@ -34,3 +34,27 @@ Array [
   },
 ]
 `;
+
+exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with regex extractAllPackageFiles 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "currentValue": "0.39.0-alpha",
+        "datasource": "github-releases",
+        "depIndex": 0,
+        "depName": "airbytehq/airbyte",
+        "replaceString": "# renovate: datasource=github-releases depName=airbytehq/airbyte versioning=maven
+version: \\"0.39.0-alpha\\"
+",
+        "versioning": "maven",
+      },
+    ],
+    "matchStrings": Array [
+      "# renovate: datasource=(?<datasource>[^\\\\s]*) depName=(?<depName>[^\\\\s]+)( versioning=(?<versioning>[^\\\\s]*))?.*\\\\n.*: [\\"]?(?<currentValue>v?[^\\"\\\\s]+)[\\"]?
+",
+    ],
+    "packageFile": "airbyte.yaml",
+  },
+]
+`;

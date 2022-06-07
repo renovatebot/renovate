@@ -90,5 +90,43 @@ describe('workers/repository/extract/manager-files', () => {
         },
       ]);
     });
+
+    it('returns files with regex extractAllPackageFiles', async () => {
+      const managerConfig = {
+        manager: 'regex',
+        enabled: true,
+        fileList: ['airbyte.yaml'],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[^\\s]*) depName=(?<depName>[^\\s]+)( versioning=(?<versioning>[^\\s]*))?.*\\n.*: ["]?(?<currentValue>v?[^"\\s]+)["]?\n',
+        ],
+        versioningTemplate:
+          '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['airbyte.yaml']);
+      fs.readLocalFile.mockResolvedValueOnce(
+        '# renovate: datasource=github-releases depName=airbytehq/airbyte versioning=maven\nversion: "0.39.0-alpha"\n'
+      );
+      const res = await getManagerPackageFiles(managerConfig);
+      expect(res).toMatchSnapshot([
+        {
+          packageFile: 'airbyte.yaml',
+          deps: [
+            {
+              depName: 'airbytehq/airbyte',
+              currentValue: '0.39.0-alpha',
+              datasource: 'github-releases',
+              versioning: 'maven',
+              replaceString:
+                '# renovate: datasource=github-releases depName=airbytehq/airbyte versioning=maven\n' +
+                'version: "0.39.0-alpha"\n',
+              depIndex: 0,
+            },
+          ],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[^\\s]*) depName=(?<depName>[^\\s]+)( versioning=(?<versioning>[^\\s]*))?.*\\n.*: ["]?(?<currentValue>v?[^"\\s]+)["]?\n',
+          ],
+        },
+      ]);
+    });
   });
 });

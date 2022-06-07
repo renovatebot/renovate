@@ -1,5 +1,9 @@
 import is from '@sindresorhus/is';
-import type { ManagerConfig } from '../../../config/types';
+import type {
+  CustomManager,
+  ManagerConfig,
+  MatchStringsStrategy,
+} from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -13,30 +17,40 @@ import type {
 } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 
-export function getExtractConfig(
-  config: ManagerConfig
-): ExtractConfig | CustomExtractConfig {
-  const result = {
+export function getExtractConfig(config: ManagerConfig): ExtractConfig {
+  const result: ExtractConfig = {
     npmrc: config.npmrc,
     aliases: config.aliases,
     skipInstalls: config.skipInstalls,
     npmrcMerge: config.npmrcMerge,
   };
+  return result;
+}
 
-  if (config.manager === 'regex') {
-    result['matchStrings'] = config.matchStrings;
-    result['matchStringsStrategy'] = config.matchStringsStrategy;
-    result['autoReplaceStringTemplate'] = config.autoReplaceStringTemplate;
-  }
+export function getCustomExtractConfig(
+  config: ManagerConfig & CustomManager
+): CustomExtractConfig {
+  const result: CustomExtractConfig = {
+    npmrc: config.npmrc,
+    aliases: config.aliases,
+    skipInstalls: config.skipInstalls,
+    npmrcMerge: config.npmrcMerge,
+    matchStrings: config.matchStrings,
+    autoReplaceStringTemplate: config.autoReplaceStringTemplate,
+    matchStringsStrategy: config.matchStringsStrategy as MatchStringsStrategy,
+  };
 
   return result;
 }
 
 export async function getManagerPackageFiles(
-  config: ManagerConfig
+  config: ManagerConfig | (ManagerConfig & CustomManager)
 ): Promise<PackageFile[]> {
   const { enabled, manager, fileList } = config;
-  const extractConfig = getExtractConfig(config);
+  const extractConfig =
+    manager === 'regex'
+      ? getCustomExtractConfig(config as ManagerConfig & CustomManager)
+      : getExtractConfig(config);
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
