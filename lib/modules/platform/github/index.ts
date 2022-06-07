@@ -279,13 +279,13 @@ export async function initRepo({
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
     }
 
-    // GitHub Enterprise Server <3.0.0 doesn't support hasIssuesEnabled objects
-    // Logic can be removed, when GHES 3.0 is no longer supported
+    // GitHub Enterprise Server <3.3.0 doesn't support hasIssuesEnabled objects
+    // Logic can be removed, when GHES 3.3 is no longer supported
     if (
       platformConfig.isGhe &&
       // semver not null safe, accepts null and undefined
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      semver.satisfies(platformConfig.gheVersion!, '<3.0.0')
+      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
     ) {
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
@@ -1341,15 +1341,12 @@ async function tryPrAutomerge(
 ): Promise<void> {
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   if (
-    platformConfig.isGhe &&
-    // semver not null safe, accepts null and undefined
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+    (platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) ||
+    !platformOptions?.usePlatformAutomerge
   ) {
-    return;
-  }
-
-  if (!platformOptions?.usePlatformAutomerge) {
     return;
   }
 
