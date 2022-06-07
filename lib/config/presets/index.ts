@@ -222,7 +222,6 @@ export async function getPreset(
     repo,
     presetPath,
     presetName,
-    baseConfig,
     tag,
   });
   if (!presetConfig) {
