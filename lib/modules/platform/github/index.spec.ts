@@ -2343,7 +2343,7 @@ describe('modules/platform/github/index', () => {
         await github.tryPrAutomerge(
           123,
           'abc',
-          {},
+          { usePlatformAutomerge: true },
           {
             isGhe: true,
             gheVersion: '3.1.5',
@@ -2362,7 +2362,7 @@ describe('modules/platform/github/index', () => {
         await github.tryPrAutomerge(
           123,
           'abc',
-          {},
+          { usePlatformAutomerge: true },
           {
             isGhe: true,
             gheVersion: '3.3.3',
@@ -2373,7 +2373,7 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).not.toHaveBeenCalledWith(
           { prNumber: 123 },
-          'GitHub-native automerge: not enabled in repo settings'
+          'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
         );
       });
 

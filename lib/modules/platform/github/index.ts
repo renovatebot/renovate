@@ -269,7 +269,7 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed objects
+    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     if (
       platformConfig.isGhe &&
       // semver not null safe, accepts null and undefined
@@ -277,16 +277,6 @@ export async function initRepo({
       semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
     ) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
-    }
-
-    // GitHub Enterprise Server <3.3.0 doesn't support hasIssuesEnabled objects
-    // Logic can be removed, when GHES 3.3 is no longer supported
-    if (
-      platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
-    ) {
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
 
@@ -1340,6 +1330,10 @@ export async function tryPrAutomerge(
   platformOptions: PlatformPrOptions | undefined,
   platformConfig: PlatformConfig
 ): Promise<void> {
+  if (!platformOptions?.usePlatformAutomerge) {
+    return;
+  }
+
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   if (platformConfig.isGhe) {
     // semver not null safe, accepts null and undefined
@@ -1351,10 +1345,6 @@ export async function tryPrAutomerge(
       );
       return;
     }
-  }
-
-  if (!platformOptions?.usePlatformAutomerge) {
-    return;
   }
 
   if (!config.autoMergeAllowed) {
