@@ -16,6 +16,7 @@ import { hashBody } from '../pr-body';
 import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
+import { PlatformId } from '../../../constants/platforms';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -2336,6 +2337,44 @@ describe('modules/platform/github/index', () => {
           restCreatePr,
           restAddLabels,
         ]);
+      });
+
+      it('should skip automerge if GHE <3.3.0', async () => {
+        await github.tryPrAutomerge(
+          123,
+          'abc',
+          {},
+          {
+            isGhe: true,
+            gheVersion: '3.1.5',
+            hostType: PlatformId.Github,
+            endpoint: 'https://github.enterprise.com/api/v3/',
+          }
+        );
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prNumber: 123 },
+          'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+        );
+      });
+
+      it('should use automerge if GHE >=3.3.0', async () => {
+        await github.tryPrAutomerge(
+          123,
+          'abc',
+          {},
+          {
+            isGhe: true,
+            gheVersion: '3.3.3',
+            hostType: PlatformId.Github,
+            endpoint: 'https://github.enterprise.com/api/v3/',
+          }
+        );
+
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          { prNumber: 123 },
+          'GitHub-native automerge: not enabled in repo settings'
+        );
       });
 
       it('should set automatic merge', async () => {

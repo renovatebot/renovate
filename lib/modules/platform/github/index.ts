@@ -1334,19 +1334,26 @@ export async function ensureCommentRemoval(
 
 // Pull Request
 
-async function tryPrAutomerge(
+export async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
-  platformOptions: PlatformPrOptions | undefined
+  platformOptions: PlatformPrOptions | undefined,
+  platformConfig: PlatformConfig
 ): Promise<void> {
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
-  if (
-    (platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) ||
-    !platformOptions?.usePlatformAutomerge
-  ) {
+  if (platformConfig.isGhe) {
+    // semver not null safe, accepts null and undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
+      logger.debug(
+        { prNumber },
+        'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+      );
+      return;
+    }
+  }
+
+  if (!platformOptions?.usePlatformAutomerge) {
     return;
   }
 
@@ -1425,7 +1432,7 @@ export async function createPr({
   );
   const { number, node_id } = ghPr;
   await addLabels(number, labels);
-  await tryPrAutomerge(number, node_id, platformOptions);
+  await tryPrAutomerge(number, node_id, platformOptions, platformConfig);
   const result = coerceRestPr(ghPr);
   cachePr(result);
   return result;
