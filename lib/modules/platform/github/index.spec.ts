@@ -6,6 +6,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
+import { PlatformId } from '../../../constants/platforms';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
@@ -16,7 +17,6 @@ import { hashBody } from '../pr-body';
 import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
-import { PlatformId } from '../../../constants/platforms';
 
 const githubApiHost = 'https://api.github.com';
 
