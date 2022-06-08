@@ -100,10 +100,10 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   // If so, remove everything except the image, defaultVal and digest.
   if (cleanedCurrentFrom?.includes(variableMarker)) {
     const defaultValueRegex = regEx(/^\${.*?:-"?(?<value>.*?)"?}$/);
-    const defaultValueMatch = defaultValueRegex.exec(cleanedCurrentFrom);
-    if (defaultValueMatch?.groups?.value) {
+    const defaultValueMatch = defaultValueRegex.exec(cleanedCurrentFrom)?.groups;
+    if (defaultValueMatch?.value) {
       isVariable = true;
-      cleanedCurrentFrom = defaultValueMatch.groups.value;
+      cleanedCurrentFrom = defaultValueMatch.value;
     }
 
     if (cleanedCurrentFrom?.includes(variableMarker)) {
