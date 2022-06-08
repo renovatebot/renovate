@@ -2584,6 +2584,10 @@ Read the parser documentation at [breejs.github.io/later/parsers.html#text](http
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 
+<!-- prettier-ignore -->
+!!! note
+    Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
+
 ## semanticCommitScope
 
 By default you will see Angular-style commit prefixes like `"chore(deps):"`.
