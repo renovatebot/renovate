@@ -66,7 +66,7 @@ export function init(): void {
           request,
           response
         ) => {
-          // ignore 404 error when branch protection of Github could not be found. This is expected when no rules are configured
+          // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
           if (
             !(request instanceof ClientRequest) ||
             (request.host === `api.github.com` &&

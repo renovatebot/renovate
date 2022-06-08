@@ -122,7 +122,10 @@ export async function start(): Promise<number> {
       config = await globalInitialize(config);
 
       // Set platform and endpoint in case local presets are used
-      GlobalConfig.set({ platform: config.platform, endpoint: config.endpoint });
+      GlobalConfig.set({
+        platform: config.platform,
+        endpoint: config.endpoint,
+      });
 
       await validatePresets(config);
 

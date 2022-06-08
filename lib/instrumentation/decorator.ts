@@ -17,7 +17,7 @@ interface SpanParameters {
   attributes?: Attributes;
 
   /**
-   * Should this span be added to the root span or add as child
+   * Should this span be added to the root span or to the current active span
    */
   ignoreParentSpan?: boolean;
 
