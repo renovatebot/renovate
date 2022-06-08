@@ -38,6 +38,15 @@ export function getCustomExtractConfig(
     matchStrings: config.matchStrings,
     autoReplaceStringTemplate: config.autoReplaceStringTemplate,
     matchStringsStrategy: config.matchStringsStrategy as MatchStringsStrategy,
+    depNameTemplate: config.depNameTemplate,
+    packageNameTemplate: config.packageNameTemplate,
+    datasourceTemplate: config.datasourceTemplate,
+    versioningTemplate: config.versioningTemplate,
+    depTypeTemplate: config.depTypeTemplate,
+    currentValueTemplate: config.currentValueTemplate,
+    currentDigestTemplate: config.currentDigestTemplate,
+    extractVersionTemplate: config.extractVersionTemplate,
+    registryUrlTemplate: config.registryUrlTemplate,
   };
 
   return result;

@@ -101,6 +101,7 @@ describe('workers/repository/extract/manager-files', () => {
         ],
         versioningTemplate:
           '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
+        depTypeTemplate: 'final',
       };
       fileMatch.getMatchingFiles.mockReturnValue(['airbyte.yaml']);
       fs.readLocalFile.mockResolvedValueOnce(
@@ -110,9 +111,11 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toMatchSnapshot([
         {
           packageFile: 'airbyte.yaml',
+          depTypeTemplate: 'final',
           deps: [
             {
               depName: 'airbytehq/airbyte',
+              depType: 'final',
               currentValue: '0.39.0-alpha',
               datasource: 'github-releases',
               versioning: 'maven',
@@ -125,8 +128,13 @@ describe('workers/repository/extract/manager-files', () => {
           matchStrings: [
             '# renovate: datasource=(?<datasource>[^\\s]*) depName=(?<depName>[^\\s]+)( versioning=(?<versioning>[^\\s]*))?.*\\n.*: ["]?(?<currentValue>v?[^"\\s]+)["]?\n',
           ],
+          versioningTemplate:
+            '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
         },
       ]);
+      expect(res[0].deps.filter((dep) => dep.depType === 'final')).toHaveLength(
+        1
+      );
     });
   });
 });

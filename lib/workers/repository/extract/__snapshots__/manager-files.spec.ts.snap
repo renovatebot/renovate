@@ -38,12 +38,14 @@ Array [
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with regex extractAllPackageFiles 1`] = `
 Array [
   Object {
+    "depTypeTemplate": "final",
     "deps": Array [
       Object {
         "currentValue": "0.39.0-alpha",
         "datasource": "github-releases",
         "depIndex": 0,
         "depName": "airbytehq/airbyte",
+        "depType": "final",
         "replaceString": "# renovate: datasource=github-releases depName=airbytehq/airbyte versioning=maven
 version: \\"0.39.0-alpha\\"
 ",
@@ -55,6 +57,7 @@ version: \\"0.39.0-alpha\\"
 ",
     ],
     "packageFile": "airbyte.yaml",
+    "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
   },
 ]
 `;

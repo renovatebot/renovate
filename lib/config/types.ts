@@ -166,6 +166,11 @@ export interface CustomManager {
   packageNameTemplate?: string;
   versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
+  depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
