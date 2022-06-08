@@ -172,7 +172,9 @@ export class GoProxyDatasource extends Datasource {
   static parsedNoproxy: Record<string, RegExp | null> = {};
 
   static parseNoproxy(
-    input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
+    input: unknown = process.env.GONOPROXY ||
+      process.env.GOPRIVATE ||
+      process.env.GOINSECURE
   ): RegExp | null {
     if (!is.string(input)) {
       return null;
