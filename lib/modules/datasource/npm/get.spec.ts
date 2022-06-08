@@ -8,7 +8,7 @@ import { resolveRegistryUrl, setNpmrc } from './npmrc';
 function getPath(s = ''): string {
   const [x] = s.split('\n');
   const prePath = x.replace(/^.*https:\/\/test\.org/, '');
-  return `${prePath}/@myco%2Ftest`;
+  return `${prePath}/@myco%2ftest`;
 }
 
 const http = new Http('npm');
@@ -186,7 +186,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://test.org')
-      .get('/@myco%2Ftest')
+      .get('/@myco%2ftest')
       .reply(200, {
         name: '@myco/test',
         repository: {},
@@ -198,7 +198,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://test.org')
-      .get('/@myco%2Ftest2')
+      .get('/@myco%2ftest2')
       .reply(200, {
         name: '@myco/test2',
         versions: { '1.0.0': {} },
@@ -247,7 +247,7 @@ describe('modules/datasource/npm/get', () => {
       .scope('https://test.org', {
         reqheaders: { authorization: 'Bearer XXX' },
       })
-      .get('/@neutrinojs%2Freact')
+      .get('/@neutrinojs%2freact')
       .reply(200, {
         name: '@neutrinojs/react',
         repository: {
@@ -274,7 +274,7 @@ describe('modules/datasource/npm/get', () => {
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
-          "url": "https://test.org/@neutrinojs%2Freact",
+          "url": "https://test.org/@neutrinojs%2freact",
         },
       ]
     `);
@@ -285,7 +285,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://test.org')
-      .get('/@neutrinojs%2Freact')
+      .get('/@neutrinojs%2freact')
       .reply(200, {
         name: '@neutrinojs/react',
         repository: {
@@ -344,7 +344,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://test.org')
-      .get('/@neutrinojs%2Freact')
+      .get('/@neutrinojs%2freact')
       .reply(200, {
         name: '@neutrinojs/react',
         repository: {
@@ -372,7 +372,7 @@ describe('modules/datasource/npm/get', () => {
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
-          "url": "https://test.org/@neutrinojs%2Freact",
+          "url": "https://test.org/@neutrinojs%2freact",
         },
       ]
     `);
@@ -383,7 +383,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://test.org')
-      .get('/@neutrinojs%2Freact')
+      .get('/@neutrinojs%2freact')
       .reply(200, {
         name: '@neutrinojs/react',
         repository: {
@@ -412,7 +412,7 @@ describe('modules/datasource/npm/get', () => {
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
-          "url": "https://test.org/@neutrinojs%2Freact",
+          "url": "https://test.org/@neutrinojs%2freact",
         },
       ]
     `);
