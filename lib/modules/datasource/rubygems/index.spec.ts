@@ -209,7 +209,7 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('it fetches gem from nexus', async () => {
+    it('fetches gem from nexus', async () => {
       const newparams = { ...params };
       newparams.registryUrls = ['http://localhost:8081/repository/gems'];
       httpMock
@@ -245,7 +245,7 @@ describe('modules/datasource/rubygems/index', () => {
       });
     });
 
-    it('it paginates from nexus', async () => {
+    it('paginates from nexus', async () => {
       const newparams = { ...params };
       newparams.registryUrls = ['http://localhost:8081/repository/gems'];
       httpMock

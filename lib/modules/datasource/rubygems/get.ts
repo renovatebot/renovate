@@ -11,9 +11,9 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
   JsonGemVersions,
   JsonGemsInfo,
-  JsonNexusGemsItems,
   MarshalledVersionInfo,
   NexusGems,
+  NexusGemsItems,
 } from './types';
 
 const INFO_PATH = '/api/v1/gems';
@@ -226,6 +226,7 @@ export class InternalRubyGemsDatasource extends Datasource {
   @cache({
     namespace: 'datasource-nexus',
     key: (nexusEndPoint: string) => `isNexusDataSource:${nexusEndPoint}`,
+    ttlMinutes: 1440,
   })
   async isNexusDataSource(nexusEndPoint: string): Promise<boolean> {
     const statusEndPoint = '/service/rest/v1/status';
@@ -246,7 +247,7 @@ export class InternalRubyGemsDatasource extends Datasource {
     dependencyName: string
   ): Promise<Release[]> {
     const result: Release[] = [];
-    const gemItems: JsonNexusGemsItems[] = [];
+    const gemItems: NexusGemsItems[] = [];
     const url = this.getNexusGemReleasesEndPoint(
       repository,
       endPoint,
@@ -268,7 +269,7 @@ export class InternalRubyGemsDatasource extends Datasource {
       }
     } catch (error) {
       logger.debug({ error }, 'Failed to retreive gems from nexus');
-      throw error;
+      return [];
     }
 
     result.push(
@@ -293,8 +294,8 @@ export class InternalRubyGemsDatasource extends Datasource {
   private async paginationResult(
     url: string,
     continuationToken: string
-  ): Promise<JsonNexusGemsItems[]> {
-    const gemItems: JsonNexusGemsItems[] = [];
+  ): Promise<NexusGemsItems[]> {
+    const gemItems: NexusGemsItems[] = [];
     let pageToken: string | null = continuationToken;
     while (pageToken) {
       const gemsOfPage: NexusGems = await this.pageOfNexusGems(url, pageToken);

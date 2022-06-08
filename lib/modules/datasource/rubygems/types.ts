@@ -45,9 +45,9 @@ export interface JsonGemVersions {
 
 export interface NexusGems {
   continuationToken: string | null;
-  items: JsonNexusGemsItems[];
+  items: NexusGemsItems[];
 }
-export interface JsonNexusGemsItems {
+export interface NexusGemsItems {
   name: string;
   version: string;
   assets: NexusGemAsset[];
