@@ -63,7 +63,7 @@ export async function getDependency(
     return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
-  const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
+  const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2f'));
 
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
