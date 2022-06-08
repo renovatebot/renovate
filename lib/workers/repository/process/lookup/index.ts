@@ -434,17 +434,10 @@ export function mergeConfigConstraints(
   config: LookupUpdateConfig
 ): LookupUpdateConfig {
   if (config?.extractedConstraints) {
-    if (config?.constraints) {
-      for (const [constraint, value] of Object.entries(
-        config.extractedConstraints
-      )) {
-        if (is.nullOrUndefined(config.constraints[constraint])) {
-          config.constraints[constraint] = value;
-        }
-      }
-    } else {
-      config.constraints = config.extractedConstraints;
-    }
+    config.constraints = {
+      ...config.extractedConstraints,
+      ...config.constraints,
+    };
     delete config.extractedConstraints;
   }
   return config;
