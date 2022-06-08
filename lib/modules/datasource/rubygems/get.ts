@@ -268,7 +268,7 @@ export class InternalRubyGemsDatasource extends Datasource {
         gemItems.push(...paginationGems);
       }
     } catch (error) {
-      logger.debug({ error }, 'Failed to retreive gems from nexus');
+      logger.debug('Failed to retreive gem from nexus');
       return [];
     }
 
@@ -315,7 +315,7 @@ export class InternalRubyGemsDatasource extends Datasource {
       const response = await this.http.getJson<NexusGems>(paginateUrl);
       nexusPage = response.body;
     } catch (error) {
-      logger.debug({ error }, 'Failed to retreive gems page from nexus');
+      logger.debug('Failed to retreive gems page from nexus');
       throw error;
     }
     return nexusPage;
