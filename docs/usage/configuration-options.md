@@ -2025,7 +2025,8 @@ This setting - if enabled - limits Renovate to a maximum of x concurrent PRs ope
 
 This limit is enforced on a per-repository basis.
 
-Note: this limit is not applied to security related PRs, which will be marked with `[SECURITY]` in the title.
+Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+Security PRs have `[SECURITY]` in their PR title.
 
 ## prCreation
 
