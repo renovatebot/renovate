@@ -1,6 +1,5 @@
 import table from 'markdown-table';
 import { getOptions } from '../../lib/config/options';
-import { newlineRegex } from '../../lib/util/regex';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
@@ -57,9 +56,8 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         if (objLen === 1) {
           el[1] = `\`${JSON.stringify(el[1])}\``;
         } else {
-          el[1] = `<pre>${JSON.stringify(el[1], undefined, 2)
-            .split(newlineRegex)
-            .join(`<br>`)}</pre>`;
+          // display default value outside the table
+          el[1] = `See below`;
         }
       }
       data.push(el);
@@ -79,6 +77,17 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     data.push(['default', '`null`']);
   }
   return table(data);
+}
+
+function genJsonDefault(type: string, def: any): string {
+  const objLen = Object.keys(def ?? []).length;
+
+  // given obj is either empty or has only one key, therefore does not out of table default print.
+  if (!['array', 'object'].includes(type) || objLen <= 1) {
+    return '';
+  }
+
+  return `\n\`\`\`json\n${JSON.stringify(def, undefined, 2)}\n\`\`\``;
 }
 
 export async function generateConfig(dist: string, bot = false): Promise<void> {
@@ -105,7 +114,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       configOptionsRaw[headerIndex] +=
         `\n${option.description}\n\n` +
-        genTable(Object.entries(el), option.type, option.default);
+        genTable(Object.entries(el), option.type, option.default) +
+        genJsonDefault(option.type, option.default);
     });
 
   await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
