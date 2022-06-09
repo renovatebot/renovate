@@ -19,22 +19,6 @@ import * as lookup from '.';
 
 jest.mock('../../../../modules/datasource/docker');
 
-jest.mock('../../../../modules/datasource/git-refs', function () {
-  const { GitRefsDatasource: Orig } = jest.requireActual(
-    '../../../../modules/datasource/git-refs'
-  );
-  const Mocked = jest.fn().mockImplementation(() => ({
-    getReleases: () =>
-      Promise.resolve({
-        releases: [{ version: 'master' }],
-      }),
-    getDigest: () =>
-      Promise.resolve('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
-  }));
-  Mocked['id'] = Orig.id;
-  return { GitRefsDatasource: Mocked };
-});
-
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
   ...Fixtures.getJson('01.json', fixtureRoot),
@@ -53,6 +37,11 @@ const docker = mocked(DockerDatasource.prototype);
 let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
+  const getGithubReleases = jest.spyOn(
+    GithubReleasesDatasource.prototype,
+    'getReleases'
+  );
+
   beforeEach(() => {
     // TODO: fix types #7154
     config = partial<LookupUpdateConfig>(getConfig() as never);
@@ -60,6 +49,14 @@ describe('workers/repository/process/lookup/index', () => {
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
     jest.resetAllMocks();
+    jest
+      .spyOn(GitRefsDatasource.prototype, 'getReleases')
+      .mockResolvedValueOnce({
+        releases: [{ version: 'master' }],
+      });
+    jest
+      .spyOn(GitRefsDatasource.prototype, 'getDigest')
+      .mockResolvedValueOnce('4b825dc642cb6eb9a060e54bf8d69288fbee4904');
   });
 
   // TODO: fix mocks
@@ -884,14 +881,13 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '1.4.4';
       config.depName = 'some/action';
       config.datasource = GithubReleasesDatasource.id;
-      httpMock
-        .scope('https://api.github.com')
-        .get('/repos/some/action/releases?per_page=100')
-        .reply(200, [
-          { tag_name: '1.4.4' },
-          { tag_name: '2.0.0' },
-          { tag_name: '2.1.0', prerelease: true },
-        ]);
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.4.4' },
+          { version: '2.0.0' },
+          { version: '2.1.0', isStable: false },
+        ],
+      });
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
         { newValue: '2.0.0', updateType: 'major' },
       ]);
@@ -907,14 +903,13 @@ describe('workers/repository/process/lookup/index', () => {
       yesterday.setDate(yesterday.getDate() - 1);
       const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
-      httpMock
-        .scope('https://api.github.com')
-        .get('/repos/some/action/releases?per_page=100')
-        .reply(200, [
-          { tag_name: '1.4.4' },
-          { tag_name: '1.4.5', published_at: lastWeek.toISOString() },
-          { tag_name: '1.4.6', published_at: yesterday.toISOString() },
-        ]);
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.4.4' },
+          { version: '1.4.5', releaseTimestamp: lastWeek.toISOString() },
+          { version: '1.4.6', releaseTimestamp: yesterday.toISOString() },
+        ],
+      });
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newVersion).toBe('1.4.6');
@@ -931,14 +926,13 @@ describe('workers/repository/process/lookup/index', () => {
       yesterday.setDate(yesterday.getDate() - 1);
       const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
-      httpMock
-        .scope('https://api.github.com')
-        .get('/repos/some/action/releases?per_page=100')
-        .reply(200, [
-          { tag_name: '1.4.4' },
-          { tag_name: '1.4.5', published_at: lastWeek.toISOString() },
-          { tag_name: '1.4.6', published_at: yesterday.toISOString() },
-        ]);
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.4.4' },
+          { version: '1.4.5', releaseTimestamp: lastWeek.toISOString() },
+          { version: '1.4.6', releaseTimestamp: yesterday.toISOString() },
+        ],
+      });
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newVersion).toBe('1.4.5');
@@ -1703,6 +1697,28 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
+    });
+
+    it('rollback for invalid version to last stable version', async () => {
+      config.currentValue = '2.5.17';
+      config.depName = 'vue';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      config.ignoreUnstable = true;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/vue')
+        .reply(200, vueJson);
+      const res = (await lookup.lookupUpdates(config)).updates;
+      expect(res).toEqual([
+        {
+          bucket: `rollback`,
+          newMajor: 2,
+          newValue: `2.5.16`,
+          newVersion: `2.5.16`,
+          updateType: `rollback`,
+        },
+      ]);
     });
   });
 });

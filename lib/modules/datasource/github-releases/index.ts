@@ -4,7 +4,13 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import { CacheableGithubReleases } from './cache';
 import { getApiBaseUrl, getSourceUrl } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
@@ -27,9 +33,12 @@ export class GithubReleasesDatasource extends Datasource {
 
   override http: GithubHttp;
 
+  private releasesCache: CacheableGithubReleases;
+
   constructor(id = GithubReleasesDatasource.id) {
     super(id);
     this.http = new GithubHttp(id);
+    this.releasesCache = new CacheableGithubReleases(this.http);
   }
 
   async findDigestFile(
@@ -218,11 +227,6 @@ export class GithubReleasesDatasource extends Datasource {
     return newDigest;
   }
 
-  @cache({
-    namespace: 'datasource-github-releases',
-    key: ({ packageName: repo, registryUrl }: GetReleasesConfig) =>
-      `${registryUrl}:${repo}:tags`,
-  })
   /**
    * github.getReleases
    *
@@ -233,27 +237,22 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
-  async getReleases({
-    packageName: repo,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
-    const res = await this.http.getJson<GithubRelease[]>(url, {
-      paginate: true,
-    });
-    const githubReleases = res.body;
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: githubReleases
-        .filter(({ draft }) => draft !== true)
-        .map(({ tag_name, published_at, prerelease }) => ({
-          version: tag_name,
-          gitRef: tag_name,
-          releaseTimestamp: published_at,
-          isStable: prerelease ? false : undefined,
-        })),
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
+    const releases = await this.releasesCache.getItems(config);
+    return {
+      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+      releases: releases.map((item) => {
+        const { version, releaseTimestamp, isStable } = item;
+        const result: Release = {
+          version,
+          gitRef: version,
+          releaseTimestamp,
+        };
+        if (isStable !== undefined) {
+          result.isStable = isStable;
+        }
+        return result;
+      }),
     };
-    return dependency;
   }
 }

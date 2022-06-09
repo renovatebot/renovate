@@ -39,7 +39,7 @@ npm, Yarn, Bundler, Composer, Poetry, Pipenv, and Cargo all support or use lock 
 
 If you use a lock file then changes to your package file must come with a compatible change to the lock file.
 Renovate can patch/update package files directly, but a lock file is too complex to "reverse engineer".
-Therefore Renovate lets the package manager do the lock file update.
+This is why Renovate lets the package manager do the lock file update.
 A simplified example:
 
 1. The repository has a `package.json` and `package-lock.json` with version `1.0.0` of a dependency
