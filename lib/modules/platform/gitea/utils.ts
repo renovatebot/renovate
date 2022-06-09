@@ -39,8 +39,8 @@ export function getRepoUrl(
     if (!url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    url.protocol = url.protocol?.slice(0, -1) || 'https';
-    url.username = opts.token || '';
+    url.protocol = url.protocol?.slice(0, -1) ?? 'https';
+    url.username = opts.token ?? '';
     url.pathname = url.pathname + repo.full_name + '.git';
     logger.debug(
       { url: url.toString() },
@@ -58,6 +58,6 @@ export function getRepoUrl(
   if (!repoUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  repoUrl.username = opts.token || '';
+  repoUrl.username = opts.token ?? '';
   return repoUrl.toString();
 }

@@ -5,7 +5,7 @@ import type {
   RepoParams,
   RepoResult,
 } from '..';
-import { partial } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
 import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
