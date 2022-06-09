@@ -41,7 +41,7 @@ export function getRepoUrl(
     }
     url.protocol = url.protocol?.slice(0, -1) ?? 'https';
     url.username = opts.token ?? '';
-    url.pathname = url.pathname + repo.full_name + '.git';
+    url.pathname = `${url.pathname}${repo.full_name}.git`;
     logger.debug(
       { url: url.toString() },
       'using URL based on configured endpoint'
