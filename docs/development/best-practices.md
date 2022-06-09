@@ -171,7 +171,6 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 
 ### Windows
 
-- It's best if you set [core.autocrlf = input](https://git-scm.com/docs/gitattributes#_text) in your gitConfig,
-  otherwise the carriage return `\r\n` will confuse renovateBot in some cases.
-  it can also be done in your repository where you add `* text=auto eol=lf` to the `.gitattributes` file
+We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your `gitConfig`, or the carriage return `\r\n` might confuse Renovate bot.
+You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
 -
