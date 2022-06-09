@@ -177,7 +177,7 @@ export async function getChangeLogJSON(
     versions: changelogReleases,
   };
 
-  res = await addReleaseNotes(res, config);
+  res = await addReleaseNotes(res);
 
   return res;
 }
