@@ -1090,6 +1090,21 @@ async function editComment(
   );
 }
 
+async function editDiscussion(
+  issueNo: number,
+  discussionId: string,
+  noteId: number,
+  body: string
+): Promise<void> {
+  // PUT /projects/:id/merge_requests/:merge_request_iid/discussions/:discussion_id/notes/:note_id
+  await gitlabApi.putJson(
+    `projects/${config.repository}/merge_requests/${issueNo}/discussions/${discussionId}/notes/${noteId}`,
+    {
+      body: {body},
+    }
+  );
+}
+
 async function deleteComment(
   issueNo: number,
   commentId: number
@@ -1172,6 +1187,11 @@ export async function ensureComment({
       'Added comment'
     );
   } else if (commentNeedsUpdating && discussionId) {
+    await editDiscussion(number, discussionId, noteId, body);
+    logger.debug(
+      { repository: config.repository, issueNo: number },
+      'Updated discussion'
+    );
   } else if (commentNeedsUpdating && commentId) {
     await editComment(number, commentId, body);
     logger.debug(

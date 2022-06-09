@@ -1151,6 +1151,25 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
+    it('update thread', async () => {
+      const scope = await initRepo();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200, [])
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
+        .reply(200, [{ id: 1234, notes: [ { id: 4321, body: '### some-subject\n\nblablabla' } ] }])
+        .put('/api/v4/projects/some%2Frepo/merge_requests/42/discussions/1234/notes/4321')
+        .reply(200);
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+          blocksMerge: true,
+        })
+      ).toResolve();
+    });
+
     it('add updates comment if necessary', async () => {
       const scope = await initRepo();
       scope
