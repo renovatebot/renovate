@@ -488,7 +488,7 @@ describe('config/validation', () => {
         constraints: { packageRules: [{}] },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as never, // TODO: #15963
         true
       );
       expect(warnings).toHaveLength(0);
