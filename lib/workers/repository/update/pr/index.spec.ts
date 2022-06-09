@@ -566,7 +566,6 @@ describe('workers/repository/update/pr/index', () => {
 
       const dummyRelease: ChangeLogRelease = {
         version: '',
-        gitRef: '',
         changes: dummyChanges,
         compare: {},
         date: '',

@@ -621,37 +621,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         body: 'some body\n',
       });
     });
-
-    it('fallback to extractVersion', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          version: `app-1.0.0`,
-          url: 'correct/url/tag.com',
-          description: 'some body',
-        },
-      ] as never);
-      const res = await getReleaseNotes(
-        {
-          ...githubProject,
-          repository: 'some/other-repository',
-          depName: 'exampleDep',
-        },
-        {
-          version: '1.0.0',
-          gitRef: '1.0.0',
-        } as ChangeLogRelease,
-        { extractVersion: 'app-(?<version>[0-9.]*)' } as BranchUpgradeConfig
-      );
-      expect(res).toEqual({
-        url: 'correct/url/tag.com',
-        notesSourceUrl:
-          'https://api.github.com/repos/some/other-repository/releases',
-        id: undefined,
-        tag: 'app-1.0.0',
-        name: undefined,
-        body: 'some body\n',
-      });
-    });
   });
 
   describe('getReleaseNotesMd()', () => {
