@@ -1,6 +1,7 @@
 # Renovate Hands-on-tutorial
 
-##Introduction
+## Introduction
+
 We will learn how to run renovate and experience how it works.
 There are Multiple ways to run Renovate, using CLI, self-hosted server or docker,
 but the easiest way to start with is the [Renovate App](https://github.com/apps/renovate).
