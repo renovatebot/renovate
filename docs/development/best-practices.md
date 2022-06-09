@@ -167,10 +167,11 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 
 ### regex
 
-Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing groups (e.g `(?<groupName>CapturedGroup`)
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing multiple groups (e.g `(?<groupName>CapturedGroup)`)
 
 ### Windows
 
 We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your `gitConfig`, or the carriage return `\r\n` might confuse Renovate bot.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
+
 -
