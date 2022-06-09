@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../lib/config/types';
 import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
+import * as hostRules from '../../lib/util/host-rules';
 import { GithubHttp } from '../../lib/util/http/github';
 import { getQueryString } from '../../lib/util/url';
 import { readFile, updateFile } from '../utils';
@@ -11,7 +12,10 @@ import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
 
 if (process.env.GITHUB_TOKEN) {
-  hostRules.Add({ matchHost: 'api.github.com', token: process.env.GITHUB_TOKEN });
+  hostRules.add({
+    matchHost: 'api.github.com',
+    token: process.env.GITHUB_TOKEN,
+  });
 }
 
 interface ManagerIssues {
