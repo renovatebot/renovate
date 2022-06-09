@@ -5,10 +5,10 @@ description: Configuration Options usable in renovate.json or package.json
 
 # Configuration Options
 
-This document describes all the configuration options you may configure in a Renovate configuration file.
+This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of the following locations:
+You can store your Renovate configuration file in one of these locations:
 
 1. `renovate.json`
 1. `renovate.json5`
