@@ -19,6 +19,7 @@ import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
+import { mergeConfigConstraints } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
@@ -428,17 +429,4 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return res;
-}
-
-export function mergeConfigConstraints(
-  config: LookupUpdateConfig
-): LookupUpdateConfig {
-  if (config?.extractedConstraints) {
-    config.constraints = {
-      ...config.extractedConstraints,
-      ...config.constraints,
-    };
-    delete config.extractedConstraints;
-  }
-  return config;
 }
