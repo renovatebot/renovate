@@ -1,5 +1,6 @@
 import table from 'markdown-table';
 import { getOptions } from '../../lib/config/options';
+import { newlineRegex } from '../../lib/util/regex';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
@@ -48,10 +49,18 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       // objects and arrays should be printed in JSON notation
       if ((type === 'object' || type === 'array') && el[0] === 'default') {
         // only show array and object defaults if they are not null and are not empty
-        if (Object.keys(el[1] ?? []).length === 0) {
+        const objLen = Object.keys(el[1] ?? []).length;
+        if (objLen === 0) {
           return;
         }
-        el[1] = `\`${JSON.stringify(el[1])}\``;
+
+        if (objLen === 1) {
+          el[1] = `\`${JSON.stringify(el[1])}\``;
+        } else {
+          el[1] = `<pre>${JSON.stringify(el[1], undefined, 2)
+            .split(newlineRegex)
+            .join(`<br>`)}</pre>`;
+        }
       }
       data.push(el);
     }
