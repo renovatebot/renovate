@@ -134,7 +134,7 @@ Use `UTC` to be time zone independent.
 - Avoid `toMatchSnapshot`, only use it for:
   - huge strings like the Renovate PR body text
   - huge complex objects where you only need to test parts
-- Avoid exporting non-exported functions purely for the purpose of testing unless it's necessary
+- Avoid exporting functions purely for the purpose of testing unless you really need to
 
 ### Fixtures
 
