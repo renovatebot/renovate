@@ -11,6 +11,11 @@ export interface GitlabComment {
   id: number;
 }
 
+export interface GitlabDiscussion {
+  notes: GitlabComment[];
+  id: string;
+}
+
 export interface GitLabUser {
   id: number;
   username: string;

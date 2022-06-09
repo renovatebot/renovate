@@ -58,6 +58,7 @@ import type {
   GitlabIssue,
   MergeMethod,
   RepoResponse,
+  GitlabDiscussion,
 } from './types';
 
 let config: {
@@ -1044,6 +1045,17 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
   return comments;
 }
 
+async function getDiscussions(issueNo: number): Promise<GitlabDiscussion[]> {
+  // GET projects/:id/merge_requests/:merge_request_iid/discussions
+  logger.debug(`Getting discussions for #${issueNo}`);
+  const url = `projects/${config.repository}/merge_requests/${issueNo}/discussions`;
+  const discussions = (
+    await gitlabApi.getJson<GitlabDiscussion[]>(url, { paginate: true })
+  ).body;
+  logger.debug(`Found ${discussions.length} discussions`);
+  return discussions;
+}
+
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST projects/:owner/:repo/merge_requests/:number/notes
   await gitlabApi.postJson(
@@ -1101,8 +1113,11 @@ export async function ensureComment({
         .replace(regEx(/PR/g), 'MR')
     : topic;
   const comments = await getComments(number);
+  const discussions = await getDiscussions(number);
   let body: string;
   let commentId: number | undefined;
+  let discussionId: string | undefined;
+  let noteId: number | undefined;
   let commentNeedsUpdating: boolean | undefined;
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
@@ -1116,6 +1131,15 @@ export async function ensureComment({
         commentNeedsUpdating = comment.body !== body;
       }
     });
+    discussions.forEach((discussion: { notes: GitlabComment[], id: string }) => {
+      discussion.notes.forEach((note: { body: string, id: number}) => {
+        if (note.body.startsWith(`### ${massagedTopic}\n\n`)) {
+          discussionId = discussion.id;
+          noteId = note.id;
+          commentNeedsUpdating = note.body !== body;
+        }
+      });
+    });
   } else {
     logger.debug(`Ensuring content-only comment in #${number}`);
     body = `${sanitizedContent}`;
@@ -1125,20 +1149,30 @@ export async function ensureComment({
         commentNeedsUpdating = false;
       }
     });
+    discussions.forEach((discussion: { notes: GitlabComment[], id: string }) => {
+      discussion.notes.forEach((note: { body: string, id: number}) => {
+        if (note.body === body) {
+          discussionId = discussion.id;
+          noteId = note.id;
+          commentNeedsUpdating = false;
+        }
+      });
+    });
   }
-  if (!commentId && blocksMerge) {
+  if (!commentId && !discussionId && blocksMerge) {
     await addDiscussion(number, body);
     logger.debug(
       {repository: config.repository, issueNo: number},
       'Added discussion'
     );
-  } else if (!commentId) {
+  } else if (!commentId && !discussionId) {
     await addComment(number, body);
     logger.debug(
       { repository: config.repository, issueNo: number },
       'Added comment'
     );
-  } else if (commentNeedsUpdating) {
+  } else if (commentNeedsUpdating && discussionId) {
+  } else if (commentNeedsUpdating && commentId) {
     await editComment(number, commentId, body);
     logger.debug(
       { repository: config.repository, issueNo: number },
