@@ -69,3 +69,12 @@ A full log dump takes a lot of time to scroll through, and it is next to impossi
 
 Instead, please select the logs relevant to your problem and paste just those.
 If it turns out there's a need for the full dump, someone can ask you for it later.
+
+## Avoid unjustified bug reports
+
+Don't raise a bug report unless it's definitely a bug.
+"I don't like this" or "I didn't expect this to happen" is not the same thing as a bug.
+
+Many unjustified bug reports are filed because people they think it will get them more attention.
+Instead, you may be just wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you are much less likely to get the attention you're hoping for.
+If in doubt, start a discussion instead.

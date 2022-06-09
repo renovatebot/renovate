@@ -1,4 +1,5 @@
 import { loadFixture } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from './extract';
 
 const yamlFileMultiConfig = loadFixture('gitlab-ci.1.yaml');
@@ -8,32 +9,22 @@ const yamlWithEmptyIncludeConfig = loadFixture('gitlab-ci.3.yaml');
 describe('modules/manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(
-        extractPackageFile('nothing here', '.gitlab-ci.yml', {})
-      ).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
 
     it('returns null for include block without any actual includes', () => {
-      const res = extractPackageFile(
-        yamlWithEmptyIncludeConfig,
-        '.gitlab-ci.yml',
-        {}
-      );
+      const res = extractPackageFile(yamlWithEmptyIncludeConfig);
       expect(res).toBeNull();
     });
 
     it('extracts single include block', () => {
-      const res = extractPackageFile(
-        yamlFileSingleConfig,
-        '.gitlab-ci.yml',
-        {}
-      );
+      const res = extractPackageFile(yamlFileSingleConfig);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
 
     it('extracts multiple include blocks', () => {
-      const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {});
+      const res = extractPackageFile(yamlFileMultiConfig);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
@@ -45,9 +36,8 @@ describe('modules/manager/gitlabci-include/extract', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {
-          endpoint,
-        });
+        GlobalConfig.set({ platform: 'gitlab', endpoint });
+        const res = extractPackageFile(yamlFileMultiConfig);
         expect(res.deps[0].registryUrls[0]).toBe('http://gitlab.test');
       }
     });

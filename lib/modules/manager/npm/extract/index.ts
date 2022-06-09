@@ -306,7 +306,7 @@ export async function extractPackageFile(
       githubRepo = matchUrlSshFormat[2];
       githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/; // TODO #12872 lookahead
+    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
     if (
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
@@ -472,11 +472,8 @@ export async function extractPackageFile(
   };
 }
 
-export async function postExtract(
-  packageFiles: PackageFile[],
-  updateInternalDeps: boolean
-): Promise<void> {
-  await detectMonorepos(packageFiles, updateInternalDeps);
+export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
+  await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
 
@@ -500,7 +497,8 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  await postExtract(npmFiles, !!config.updateInternalDeps);
+
+  await postExtract(npmFiles);
   return npmFiles;
 }
 

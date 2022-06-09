@@ -56,6 +56,10 @@ describe('modules/manager/terraform/modules', () => {
         'ssh://github.com/hashicorp/example.repo-123?ref=v1.0.0'
       ).groups;
 
+      const withoutSshHttpHttps = gitTagsRefMatchRegex.exec(
+        'git@my-gitlab-instance.local:devops/terraform/instance.git?ref=v5.0.0'
+      ).groups;
+
       expect(http.project).toBe('hashicorp/example.repo-123');
       expect(http.tag).toBe('v1.0.0');
 
@@ -64,6 +68,9 @@ describe('modules/manager/terraform/modules', () => {
 
       expect(ssh.project).toBe('hashicorp/example.repo-123');
       expect(ssh.tag).toBe('v1.0.0');
+
+      expect(withoutSshHttpHttps.project).toBe('terraform/instance.git');
+      expect(withoutSshHttpHttps.tag).toBe('v5.0.0');
     });
   });
 
