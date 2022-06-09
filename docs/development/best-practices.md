@@ -167,7 +167,7 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 
 ### regex
 
-- use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing groups (e.g `(?<groupName>CapturedGroup`)
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing groups (e.g `(?<groupName>CapturedGroup`)
 
 ### Windows
 
