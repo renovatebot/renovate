@@ -5,10 +5,10 @@ description: Configuration Options usable in renovate.json or package.json
 
 # Configuration Options
 
-This document describes all the configuration options you may configure in a Renovate configuration file.
+This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of the following locations:
+You can store your Renovate configuration file in one of these locations:
 
 1. `renovate.json`
 1. `renovate.json5`
@@ -2008,6 +2008,9 @@ This setting - if enabled - limits Renovate to a maximum of x concurrent PRs ope
 
 This limit is enforced on a per-repository basis.
 
+Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+Security PRs have `[SECURITY]` in their PR title.
+
 ## prCreation
 
 This setting tells Renovate when you would like it to raise PRs:
@@ -2587,6 +2590,10 @@ Technical details: We mostly rely on the text parsing of the library [@breejs/la
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+
+<!-- prettier-ignore -->
+!!! note
+    Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
 
 ## semanticCommitScope
 

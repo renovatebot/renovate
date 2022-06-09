@@ -64,7 +64,8 @@ export interface Repo {
   allow_rebase_explicit: boolean;
   allow_squash_merge: boolean;
   archived: boolean;
-  clone_url: string;
+  clone_url?: string;
+  ssh_url?: string;
   default_branch: string;
   empty: boolean;
   fork: boolean;
