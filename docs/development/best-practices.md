@@ -6,7 +6,7 @@ Follow these best practices when you're working on our code.
 ## General
 
 - Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
-- Prefer `interface` over `type` for typescript type declarations
+- Prefer `interface` over `type` for TypeScript type declarations
 - Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use union or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
