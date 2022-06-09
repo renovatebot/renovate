@@ -40,7 +40,6 @@ export interface BranchUpgradeConfig
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-  constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
   language?: string;
