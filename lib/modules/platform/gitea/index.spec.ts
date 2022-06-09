@@ -176,12 +176,12 @@ describe('modules/platform/gitea/index', () => {
     jest.mock('../../../logger');
 
     gitea = await import('.');
-    helper = (await import('./gitea-helper')) as any;
-    logger = (await import('../../../logger')).logger as any;
+    helper = mocked(await import('./gitea-helper'));
+    logger = mocked((await import('../../../logger')).logger);
     gitvcs = require('../../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules = (await import('../../../util/host-rules')) as any;
+    hostRules = mocked(await import('../../../util/host-rules'));
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
