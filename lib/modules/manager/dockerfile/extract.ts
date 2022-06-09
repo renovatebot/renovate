@@ -7,9 +7,6 @@ import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
 const variableMarker = '$';
-const variableOpen = '${';
-const variableClose = '}';
-const variableDefaultValueSplit = ':-';
 
 export function extractVariables(image: string): Record<string, string> {
   const variables: Record<string, string> = {};
@@ -96,36 +93,26 @@ function processDepForAutoReplace(
 }
 
 export function splitImageParts(currentFrom: string): PackageDependency {
+  let isVariable = false;
+  let cleanedCurrentFrom = currentFrom;
+
   // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
   // If so, remove everything except the image, defaultVal and digest.
-  let isVariable = false;
-  let cleanedCurrentFrom: string = currentFrom;
-  if (
-    currentFrom.startsWith(variableOpen) &&
-    currentFrom.endsWith(variableClose)
-  ) {
-    isVariable = true;
+  if (cleanedCurrentFrom?.includes(variableMarker)) {
+    const defaultValueRegex = regEx(/^\${.+?:-"?(?<value>.*?)"?}$/);
+    const defaultValueMatch =
+      defaultValueRegex.exec(cleanedCurrentFrom)?.groups;
+    if (defaultValueMatch?.value) {
+      isVariable = true;
+      cleanedCurrentFrom = defaultValueMatch.value;
+    }
 
-    // If the variable contains exactly one $ and has the default value, we consider it as a valid dependency;
-    // otherwise skip it.
-    if (
-      currentFrom.split('$').length !== 2 ||
-      currentFrom.indexOf(variableDefaultValueSplit) === -1
-    ) {
+    if (cleanedCurrentFrom?.includes(variableMarker)) {
+      // If cleanedCurrentFrom contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we do not support this.
       return {
         skipReason: 'contains-variable',
       };
     }
-
-    cleanedCurrentFrom = currentFrom.substr(
-      variableOpen.length,
-      currentFrom.length - (variableClose.length + 2)
-    );
-    cleanedCurrentFrom = cleanedCurrentFrom.substr(
-      cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
-        variableDefaultValueSplit.length
-    );
-    cleanedCurrentFrom = cleanedCurrentFrom.replace(regEx(/^"(.*)"$/), '$1');
   }
 
   const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
@@ -142,30 +129,14 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  if (depName?.includes(variableMarker)) {
-    // If depName contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we do not support this.
-    return {
-      skipReason: 'contains-variable',
-    };
-  }
-
-  if (currentValue?.includes(variableMarker)) {
-    // If tag contains a variable, e.g. "5.0${VERSION_SUFFIX}", we do not support this.
-    return {
-      skipReason: 'contains-variable',
-    };
-  }
+  const dep: PackageDependency = {
+    depName,
+    currentValue,
+    currentDigest,
+  };
 
   if (isVariable) {
-    // If we have the variable and it contains the default value, we need to return
-    // it as a valid dependency.
-
-    const dep: PackageDependency = {
-      depName,
-      currentValue,
-      currentDigest,
-      replaceString: cleanedCurrentFrom,
-    };
+    dep.replaceString = cleanedCurrentFrom;
 
     if (!dep.currentValue) {
       delete dep.currentValue;
@@ -174,15 +145,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     if (!dep.currentDigest) {
       delete dep.currentDigest;
     }
-
-    return dep;
   }
 
-  const dep: PackageDependency = {
-    depName,
-    currentValue,
-    currentDigest,
-  };
   return dep;
 }
 
