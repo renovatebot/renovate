@@ -12,6 +12,7 @@ import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
 
 if (process.env.GITHUB_TOKEN) {
+  logger.debug('Using GITHUB_TOKEN from env');
   hostRules.add({
     matchHost: 'api.github.com',
     token: process.env.GITHUB_TOKEN,
