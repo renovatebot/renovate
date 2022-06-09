@@ -55,6 +55,7 @@ and it will pick up any needed changes every few minutes/hours.
 ### Dashboard approval
 
 - Add this `PackageRule` to the `renovate.json`.
+
   ```
    {
      "matchUpdateTypes": [
@@ -66,13 +67,16 @@ and it will pick up any needed changes every few minutes/hours.
      "dependencyDashboardApproval": true
    }
   ```
+
 - we added `matchUpdateTypes=Major` and `matchManagers=npm` and `dependencyDashboard=approval`
   that means that branches will be created for Major version change only after approval, lets try that,
   add these outdated major version dependency updates to the `dependencies` section in the `package.json`
+
   ```
   "graceful-fs": "3.0.12",
   "ansi-regex": "4.1.0",
   ```
+
 - Wait a few seconds/minutes until renovate runs again and picks the new dependencies up, it will trigger after a change to the `package.json`
 - Now you will notice that nothing changed, but if you go to `issues` and press on the Dependency Dashboard
   you can see that there is a section with `Pending Approval`, for `ansi-regex` and `graceful-fs` major version update
@@ -84,6 +88,7 @@ and it will pick up any needed changes every few minutes/hours.
 - if you want to force open more PRs you can click the checkbox next to the PR you want to open, and it will force open a PR for the checked issue on the next trigger/hook.
 - or you can look into the [Docs](https://docs.renovatebot.com/configuration-options/#prconcurrentlimit)
 - you can also ignore the hourly limit preset
+
   ```
   {
     "extends": ["config:base"],
@@ -94,20 +99,25 @@ and it will pick up any needed changes every few minutes/hours.
 ### Grouping
 
 - You can group dependencies into a certain group, for example, lets add these dependencies to the `dependencies` section in the `package.json`
+
   ```
    "@mue-js/sass": "1.0.7",
    "@mue-js/react": "1.1.0",
    "@mue-js/icons": "1.0.3",
   ```
+
   renovate might trigger and run, these dependencies will probably show in your `issues` -> `dependency dashboard`
   then add to the configuration file `renovate.json` this packageRule
+
   ```
   {
     "matchPackagePatterns": ["@mue"],
     "groupName": "muePkgs"
   }
   ```
+
   that will look for every dependency that has the pattern `@mue` and add it to a group name called `muePkgs`
+
 - wait a few seconds until renovate triggers again and then look at your dependency dashboard,
   you will notice that every dependency that includes the keyword `@mue` is in the same Issue in the dashboard!
 
