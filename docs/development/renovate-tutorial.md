@@ -24,7 +24,7 @@ and it will pick up any needed changes every few minutes/hours.
 
 ### Allow specific versions
 
-- go to your `renovate.json` file and edit it, then change its contents to the below and commit it
+- Go to your `renovate.json` file and edit it, then change its contents to the below and commit it
 
   ```
   {
@@ -72,16 +72,27 @@ and it will pick up any needed changes every few minutes/hours.
   "graceful-fs": "3.0.12",
   "ansi-regex": "4.1.0",
   ```
-- wait a few seconds/minutes until renovate runs again and picks the new dependencies up, it will trigger after a change to the `package.json`
+- Wait a few seconds/minutes until renovate runs again and picks the new dependencies up, it will trigger after a change to the `package.json`
 - Now you will notice that nothing changed, but if you go to `issues` and press on the Dependency Dashboard
   you can see that there is a section with `Pending Approval`, for `ansi-regex` and `graceful-fs` major version update
-- you can see also the `Rate Limited` ansi-regex minor version update, since we have `prConcurrentLimit=2` and we already have 2 open PRs,
-  that way you can reduce noise
+
+### Rate limit
+
+- You can see also the `Rate Limited` ansi-regex minor version update, since renovate by default `config:base` doesn't open more than 2 PRs every hour,
+  and we already have 2 open PRs, that way you can reduce noise
 - if you want to force open more PRs you can click the checkbox next to the PR you want to open, and it will force open a PR for the checked issue on the next trigger/hook.
+- or you can look into the [Docs](https://docs.renovatebot.com/configuration-options/#prconcurrentlimit)
+- you can also ignore the hourly limit preset
+  ```
+  {
+    "extends": ["config:base"],
+    "ignorePresets": [":prHourlyLimit2"]
+  }
+  ```
 
 ### Grouping
 
-- introducing our grouping feature, you can group dependencies into a certain group, for example, lets add these dependencies to the `dependencies` section in the `package.json`
+- You can group dependencies into a certain group, for example, lets add these dependencies to the `dependencies` section in the `package.json`
   ```
    "@mue-js/sass": "1.0.7",
    "@mue-js/react": "1.1.0",
@@ -101,25 +112,23 @@ and it will pick up any needed changes every few minutes/hours.
 
 ### Auto merge
 
-- add this package rule for scheduling auto-merge,
+- Add this package rule for scheduling auto-merge,
 
-```
-{
- "matchPackagePatterns": ["mue"],
- "schedule": ["at any time"],
- "automerge": true,
- "matchUpdateTypes": ["minor", "patch"]
- }
-```
+  ```
+   {
+     "matchPackagePatterns": ["mue"],
+     "schedule": ["at any time"],
+     "automerge": true,
+     "matchUpdateTypes": ["minor", "patch"]
+   }
+  ```
 
 - You can read about the parameters in the configuration documentation, but I will summarize it for you,
   I'm Matching any package that has the pattern `mue`, and I put my schedule for auto-merge `at any time`,
   then I set `automerge=true` to activate it, then I want to auto-merge only `minor and patch` version upgrades,
-  what will happen now is that every about 3-4 hours renovate will run, if the Schedule matches the time of this rule,
-  then renovate will try to auto-merge one of the PRs that has a package that contains `mue` and has a minor or patch update,
-  if the second run causes any conflict in the Lockfile for example, then renovate will rebase the PR instead of auto-merging it.
-- since renovate by default has noise reduction, it doesn't create more than 2 PRs every hour, so lets Force a PR to auto merge it,
-  press the checkbox -
+- Since renovate by our default configuration has noise reduction, it doesn't create more than 2 PRs every hour, so lets Force a PR to auto merge it,
+  press the checkbox in the `issues` -> `Dependency Dashboard`
 - [x] <!-- unlimit-branch=renovate/muepkgs -->Update muePkgs (`@mue-js/icons`, `@mue-js/react`, `@mue-js/sass`)
-- renovate will open a PR with the 3 grouped dependencies, if they match the the auto-merge rule, and the schedule, and the PR status is Green, then it's waiting to be merged
-- now go to the [Dashboard](https://app.renovatebot.com/dashboard) and wait until renovate runs again, takes some time.
+- Renovate will open a PR with the 3 grouped dependencies, if they match the the auto-merge rule, and the schedule,
+  and the PR status is Green, then it's waiting to be auto-merged
+- Now go to the [Dashboard](https://app.renovatebot.com/dashboard) and wait until renovate runs again, takes some time.
