@@ -19,21 +19,12 @@ describe('workers/repository/index', () => {
 
     beforeEach(() => {
       config = getConfig();
+      GlobalConfig.set({ localDir: '' });
     });
 
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);
-      expect(res).toBeUndefined();
-    });
-
-    it('shows endpoint', async () => {
-      process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
-      const res = await renovateRepository({
-        ...config,
-        endpoint: 'https://github.com',
-      });
-      expect(GlobalConfig.get().endpoint).toBe('https://github.com');
       expect(res).toBeUndefined();
     });
   });

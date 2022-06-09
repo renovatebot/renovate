@@ -363,6 +363,10 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 This should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
 Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
 
+<!-- prettier-ignore -->
+!!! note
+    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
+
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
@@ -396,7 +400,7 @@ Disabling the warning is helpful for self-hosted environments that can't access 
 ## globalExtends
 
 Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.
-Therefore you need to use this field if your preset has any global-only configuration options, such as the list of repositories to run against.
+Use the `globalExtends` field if your preset has any global-only configuration options, such as the list of repositories to run against.
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 

@@ -1,6 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
+import { GithubTagsDatasource } from '../github-tags';
 import { BaseGoDatasource } from './base';
 import { GoDirectDatasource } from './releases-direct';
 
@@ -12,6 +13,11 @@ const getDatasourceSpy = jest.spyOn(BaseGoDatasource, 'getDatasource');
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/go/releases-direct', () => {
+  const githubGetTags = jest.spyOn(
+    GithubTagsDatasource.prototype,
+    'getReleases'
+  );
+
   beforeEach(() => {
     jest.resetAllMocks();
     hostRules.find.mockReturnValue({});
@@ -46,18 +52,24 @@ describe('modules/datasource/go/releases-direct', () => {
         packageName: 'golang/text',
         registryUrl: 'https://github.com',
       });
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/golang/text/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }])
-        .get('/repos/golang/text/releases?per_page=100')
-        .reply(200, []);
+      githubGetTags.mockResolvedValueOnce({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v2.0.0', version: 'v2.0.0' },
+        ],
+      });
+
       const res = await datasource.getReleases({
         packageName: 'golang.org/x/text',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+
+      expect(res).toEqual({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v2.0.0', version: 'v2.0.0' },
+        ],
+        sourceUrl: 'https://github.com/golang/text',
+      });
     });
 
     it('support gitlab', async () => {
@@ -125,18 +137,27 @@ describe('modules/datasource/go/releases-direct', () => {
         registryUrl: 'https://git.enterprise.com',
         packageName: 'example/module',
       });
-      httpMock
-        .scope('https://git.enterprise.com/')
-        .get('/api/v3/repos/example/module/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }])
-        .get('/api/v3/repos/example/module/releases?per_page=100')
-        .reply(200, []);
+      githubGetTags.mockResolvedValueOnce({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v2.0.0', version: 'v2.0.0' },
+        ],
+      });
+
       const res = await datasource.getReleases({
         packageName: 'git.enterprise.com/example/module',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+
+      expect(res).toEqual({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v2.0.0', version: 'v2.0.0' },
+        ],
+        sourceUrl: 'https://git.enterprise.com/example/module',
+      });
+      expect(githubGetTags.mock.calls).toMatchObject([
+        [{ registryUrl: 'https://git.enterprise.com' }],
+      ]);
     });
 
     it('works for known servers', async () => {
@@ -155,20 +176,7 @@ describe('modules/datasource/go/releases-direct', () => {
         packageName: 'go-x/x',
         registryUrl: 'https://github.com',
       });
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/x/text/tags?per_page=100')
-        .reply(200, [])
-        .get('/repos/x/text/releases?per_page=100')
-        .reply(200, [])
-        .get('/repos/x/text/tags?per_page=100')
-        .reply(200, [])
-        .get('/repos/x/text/releases?per_page=100')
-        .reply(200, [])
-        .get('/repos/go-x/x/tags?per_page=100')
-        .reply(200, [])
-        .get('/repos/go-x/x/releases?per_page=100')
-        .reply(200, []);
+      githubGetTags.mockResolvedValue({ releases: [] });
       const packages = [
         { packageName: 'github.com/x/text' },
         { packageName: 'gopkg.in/x/text' },
@@ -178,6 +186,7 @@ describe('modules/datasource/go/releases-direct', () => {
         const res = await datasource.getReleases(pkg);
         expect(res.releases).toBeEmpty();
       }
+      expect(githubGetTags).toHaveBeenCalledTimes(3);
     });
 
     it('support gitlab subgroups', async () => {
@@ -220,16 +229,15 @@ describe('modules/datasource/go/releases-direct', () => {
         { packageName: 'github.com/x/text/a' },
         { packageName: 'github.com/x/text/b' },
       ];
-      const tags = [{ name: 'a/v1.0.0' }, { name: 'b/v2.0.0' }];
+
+      githubGetTags.mockResolvedValue({
+        releases: [
+          { version: 'a/v1.0.0', gitRef: 'a/v1.0.0' },
+          { version: 'b/v2.0.0', gitRef: 'b/v2.0.0' },
+        ],
+      });
 
       for (const pkg of packages) {
-        httpMock
-          .scope('https://api.github.com/')
-          .get('/repos/x/text/tags?per_page=100')
-          .reply(200, tags)
-          .get('/repos/x/text/releases?per_page=100')
-          .reply(200, []);
-
         const prefix = pkg.packageName.split('/')[3];
         const result = await datasource.getReleases(pkg);
         expect(result.releases).toHaveLength(1);
@@ -252,16 +260,15 @@ describe('modules/datasource/go/releases-direct', () => {
         { packageName: 'github.com/x/text/a' },
         { packageName: 'github.com/x/text/b' },
       ];
-      const tags = [{ name: 'v1.0.0' }, { name: 'v2.0.0' }];
+
+      githubGetTags.mockResolvedValue({
+        releases: [
+          { version: 'v1.0.0', gitRef: 'v1.0.0' },
+          { version: 'v2.0.0', gitRef: 'v2.0.0' },
+        ],
+      });
 
       for (const pkg of packages) {
-        httpMock
-          .scope('https://api.github.com/')
-          .get('/repos/x/text/tags?per_page=100')
-          .reply(200, tags)
-          .get('/repos/x/text/releases?per_page=100')
-          .reply(200, []);
-
         const result = await datasource.getReleases(pkg);
         expect(result.releases).toHaveLength(0);
       }
@@ -274,24 +281,20 @@ describe('modules/datasource/go/releases-direct', () => {
         registryUrl: 'https://github.com',
       });
       const pkg = { packageName: 'github.com/x/text/b/v2' };
-      const tags = [
-        { name: 'a/v1.0.0' },
-        { name: 'v5.0.0' },
-        { name: 'b/v2.0.0' },
-        { name: 'b/v3.0.0' },
-      ];
 
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/x/text/tags?per_page=100')
-        .reply(200, tags)
-        .get('/repos/x/text/releases?per_page=100')
-        .reply(200, []);
+      githubGetTags.mockResolvedValue({
+        releases: [
+          { version: 'a/v1.0.0', gitRef: 'a/v1.0.0' },
+          { version: 'v5.0.0', gitRef: 'v5.0.0' },
+          { version: 'b/v2.0.0', gitRef: 'b/v2.0.0' },
+          { version: 'b/v3.0.0', gitRef: 'b/v3.0.0' },
+        ],
+      });
 
       const result = await datasource.getReleases(pkg);
       expect(result.releases).toEqual([
-        { gitRef: 'b/v2.0.0', version: 'v2.0.0' },
-        { gitRef: 'b/v3.0.0', version: 'v3.0.0' },
+        { version: 'v2.0.0', gitRef: 'b/v2.0.0' },
+        { version: 'v3.0.0', gitRef: 'b/v3.0.0' },
       ]);
     });
   });
