@@ -173,5 +173,3 @@ Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) wh
 
 We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your `gitConfig`, or the carriage return `\r\n` might confuse Renovate bot.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
-
--
