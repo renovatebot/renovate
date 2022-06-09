@@ -636,7 +636,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           repository: 'some/other-repository',
           depName: 'exampleDep',
         },
-        '1.0.0',
+        {
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        } as ChangeLogRelease,
         { extractVersion: 'app-(?<version>[0-9.]*)' } as BranchUpgradeConfig
       );
       expect(res).toEqual({
