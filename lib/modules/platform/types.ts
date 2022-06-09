@@ -134,6 +134,7 @@ export interface EnsureCommentConfig {
   number: number;
   topic: string | null;
   content: string;
+  blocksMerge?: boolean;
 }
 
 export interface EnsureCommentRemovalConfigByTopic {

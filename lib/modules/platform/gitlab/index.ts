@@ -1054,6 +1054,16 @@ async function addComment(issueNo: number, body: string): Promise<void> {
   );
 }
 
+async function addDiscussion(issueNo: number, body: string): Promise<void> {
+  // POST projects/:owner/:repo/merge_requests/:number/discussions
+  await gitlabApi.postJson(
+    `/projects/${config.repository}/merge_requests/${issueNo}/discussions`,
+    {
+      body: { body },
+    }
+  );
+}
+
 async function editComment(
   issueNo: number,
   commentId: number,
@@ -1082,6 +1092,7 @@ export async function ensureComment({
   number,
   topic,
   content,
+  blocksMerge
 }: EnsureCommentConfig): Promise<boolean> {
   const sanitizedContent = sanitize(content);
   const massagedTopic = topic
@@ -1115,7 +1126,13 @@ export async function ensureComment({
       }
     });
   }
-  if (!commentId) {
+  if (!commentId && blocksMerge) {
+    await addDiscussion(number, body);
+    logger.debug(
+      {repository: config.repository, issueNo: number},
+      'Added discussion'
+    );
+  } else if (!commentId) {
     await addComment(number, body);
     logger.debug(
       { repository: config.repository, issueNo: number },
