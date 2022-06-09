@@ -232,6 +232,8 @@ export interface RenovateConfig
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
+  aliases?: Record<string, any>;
+  skipInstalls?: boolean;
 }
 
 export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}

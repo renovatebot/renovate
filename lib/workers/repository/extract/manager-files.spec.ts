@@ -108,7 +108,7 @@ describe('workers/repository/extract/manager-files', () => {
         '# renovate: datasource=github-releases depName=airbytehq/airbyte versioning=maven\nversion: "0.39.0-alpha"\n'
       );
       const res = await getManagerPackageFiles(managerConfig);
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           packageFile: 'airbyte.yaml',
           depTypeTemplate: 'final',
@@ -132,9 +132,6 @@ describe('workers/repository/extract/manager-files', () => {
             '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
         },
       ]);
-      expect(res[0].deps.filter((dep) => dep.depType === 'final')).toHaveLength(
-        1
-      );
     });
   });
 });
