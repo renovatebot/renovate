@@ -10,6 +10,10 @@ import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
 
+if (process.env.GITHUB_TOKEN) {
+  hostRules.Add({ matchHost: 'api.github.com', token: process.env.GITHUB_TOKEN });
+}
+
 interface ManagerIssues {
   bugs: ItemsEntity[];
   features: ItemsEntity[];
