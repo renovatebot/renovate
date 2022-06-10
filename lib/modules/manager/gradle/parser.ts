@@ -278,8 +278,14 @@ function processPlugin({
 
 function processCustomRegistryUrl({
   tokenMap,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const registryUrl = tokenMap.registryUrl?.value;
+  let registryUrl: string | null = tokenMap.registryUrl?.value;
+  if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
+    const token = tokenMap.registryUrl as StringInterpolation;
+    registryUrl = interpolateString(token.children, variables);
+  }
+
   try {
     if (registryUrl) {
       const { host, protocol } = url.parse(registryUrl);
@@ -381,6 +387,18 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
+  {
+    // ext.foo.bar = 'baz'
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'ext' },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
   {
     // foo.bar = 'baz'
     matchers: [
@@ -530,7 +548,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'maven',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -549,7 +570,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'url',
       },
       { matchType: TokenType.Assignment },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -572,7 +596,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'uri',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -590,7 +617,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchType: TokenType.Word,
         matchValue: 'url',
       },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -599,7 +629,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -609,7 +642,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -895,7 +931,7 @@ export function parseGradle(
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
 const propRegex = regEx(
-  `^(?<leftPart>\\s*(?<key>${propWord})\\s*=\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
+  `^(?<leftPart>\\s*(?<key>${propWord})\\s*[= :]\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
 );
 
 export function parseProps(
