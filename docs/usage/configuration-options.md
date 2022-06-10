@@ -2396,6 +2396,11 @@ It will be compiled using Handlebars and the regex `groups` result.
 If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### sourceUrlTemplate
+
+If `sourceUrl` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
 ### packageNameTemplate
 
 `packageName` is used for looking up dependency versions.
