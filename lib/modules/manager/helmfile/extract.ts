@@ -22,7 +22,7 @@ export function extractPackageFile(
 ): PackageFile | null {
   let deps: PackageDependency[] = [];
   let docs: Doc[];
-  const aliases: Record<string, string> = {};
+  const registryAliases: Record<string, string> = {};
   try {
     docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
   } catch (err) {
@@ -36,10 +36,10 @@ export function extractPackageFile(
 
     if (doc.repositories) {
       for (let i = 0; i < doc.repositories.length; i += 1) {
-        aliases[doc.repositories[i].name] = doc.repositories[i].url;
+        registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
       }
     }
-    logger.debug({ aliases }, 'repositories discovered.');
+    logger.debug({ registryAliases }, 'repositories discovered.');
 
     deps = doc.releases.map((dep) => {
       let depName = dep.chart;
@@ -82,8 +82,8 @@ export function extractPackageFile(
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
-        registryUrls: [aliases[repoName]]
-          .concat([config.aliases?.[repoName]] as string[])
+        registryUrls: [registryAliases[repoName]]
+          .concat([config.registryAliases?.[repoName]] as string[])
           .filter(is.string),
       };
 
@@ -93,7 +93,7 @@ export function extractPackageFile(
       );
       if (repository?.oci) {
         res.datasource = DockerDatasource.id;
-        res.packageName = aliases[repoName] + '/' + depName;
+        res.packageName = registryAliases[repoName] + '/' + depName;
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
