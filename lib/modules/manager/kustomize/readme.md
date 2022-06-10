@@ -1,19 +1,19 @@
-This package will manage the following parts of the `kustomization.yaml` file:
+Renovate can manage these parts of the `kustomization.yaml` file:
 
 1. [remote resources](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md)
-2. [image tags](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/image.md)
-3. [components](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md)
-4. [helm charts](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/chart.md)
-5. [remote bases](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md) (deprecated since kustomize v2.1.0)
+1. [image tags](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/image.md)
+1. [components](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md)
+1. [helm charts](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/chart.md)
+1. [remote bases](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md) (deprecated since Kustomize `v2.1.0`)
 
 **How It Works**
 
-1. Renovate will search each repository for any `kustomization.yaml` files.
-2. Existing dependencies will be extracted from remote bases, image tags & Helm charts
-3. Renovate will resolve the dependency's source repository and check for SemVer tags if found.
-4. If an update was found, Renovate will update `kustomization.yaml`
+1. Renovate searches in each repository for any `kustomization.yaml` files
+1. Dependencies are extracted from remote bases, image tags and Helm charts
+1. Renovate resolves the dependency's source repository and checks if there are SemVer tags
+1. If Renovate finds an update, then it updates the `kustomization.yaml` file
 
-This manager uses three `depType`s to allow a fine-grained control of which dependencies are upgraded:
+This manager uses three `depType`s to allow fine-grained control of which dependencies are upgraded:
 
 - Component
 - Kustomization
@@ -21,7 +21,7 @@ This manager uses three `depType`s to allow a fine-grained control of which depe
 
 **Limitations**
 
-- Currently this hasn't been tested using HTTPS to fetch the repos
+- Using HTTPS to fetch the repositories is not tested
 - The keys for the image tags can be in any order
 
 ```yaml
