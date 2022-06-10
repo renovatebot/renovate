@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
@@ -6,12 +5,8 @@ import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabCommit, GitlabTag } from './types';
-import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
+import { getDefaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
-export function getDefaultRegistryUrl(): string[] {
-  const { platform, endpoint } = GlobalConfig.get();
-  return platform === 'gitlab' && endpoint ? [endpoint] : [defaultRegistryUrl];
-}
 export class GitlabTagsDatasource extends Datasource {
   static readonly id = 'gitlab-tags';
 
