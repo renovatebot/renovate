@@ -837,6 +837,13 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'sourceUrl',
+    description: 'Value for fixed source url for dependency.',
+    type: 'string',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioning',
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',
@@ -2228,6 +2235,15 @@ const options: RenovateOptions[] = [
     name: 'autoReplaceStringTemplate',
     description:
       'Optional `extractVersion` for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceUrlTemplate',
+    description:
+      'Optional `sourceUrl` for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,

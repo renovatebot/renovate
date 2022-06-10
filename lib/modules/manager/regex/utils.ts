@@ -16,6 +16,7 @@ export const validMatchFields = [
   'datasource',
   'versioning',
   'extractVersion',
+  'sourceUrl',
   'registryUrl',
   'depType',
 ] as const;
