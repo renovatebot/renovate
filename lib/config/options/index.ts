@@ -837,13 +837,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'sourceUrl',
-    description: 'Value for fixed source url for dependency.',
-    type: 'string',
-    cli: false,
-    env: false,
-  },
-  {
     name: 'versioning',
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',

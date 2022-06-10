@@ -1165,6 +1165,26 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    it('label from sourceUrl config', async () => {
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags }, {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+        sourceUrl: 'https://github.com/renovatebot/renovate',
+      });
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [{ version: '1.0.0' }],
+        sourceUrl: 'https://github.com/renovatebot/renovate',
+      });
+    });
+
     it('supports manifest lists', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
