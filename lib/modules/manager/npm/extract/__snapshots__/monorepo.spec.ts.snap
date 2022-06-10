@@ -26,9 +26,6 @@ Array [
       "lernaJsonFile": "lerna.json",
     },
     "packageFile": "package.json",
-    "packages": Array [
-      "packages/*",
-    ],
   },
   Object {
     "deps": Array [
@@ -95,9 +92,6 @@ Array [
       "lernaJsonFile": "lerna.json",
     },
     "packageFile": "package.json",
-    "packages": Array [
-      "packages/*",
-    ],
   },
   Object {
     "deps": Array [
