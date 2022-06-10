@@ -70,15 +70,18 @@ async function runDotnetRestore(
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig
 ): Promise<void> {
+  const nugetCacheDir = await ensureCacheDir('nuget');
+
   const execOptions: ExecOptions = {
     docker: {
       image: 'dotnet',
     },
+    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
   };
 
-  const nugetCacheDir = await ensureCacheDir('nuget');
   const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
   const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
+
   await outputFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
