@@ -388,6 +388,18 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
 
 const matcherConfigs: SyntaxMatchConfig[] = [
   {
+    // ext.foo.bar = 'baz'
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'ext' },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
+  {
     // foo.bar = 'baz'
     matchers: [
       { matchType: TokenType.Word, tokenMapKey: 'objectToken' },

@@ -135,6 +135,7 @@ Use `UTC` to be time zone independent.
 - Avoid `toMatchSnapshot`, only use it for:
   - huge strings like the Renovate PR body text
   - huge complex objects where you only need to test parts
+- Avoid exporting functions purely for the purpose of testing unless you really need to
 
 ### Fixtures
 
@@ -164,3 +165,12 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 - Omit constructors when defining Static classes
 - [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields). instead, use TypeScript's visibility annotations
 - Avoid underscore suffixes or prefixes, for example: `_prop`, use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as suffix/prefix i.e. `internalProp`
+
+### regex
+
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing multiple groups, for example: `(?<groupName>CapturedGroup)`.
+
+### Windows
+
+We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your `gitConfig`, or the carriage return `\r\n` might confuse Renovate bot.
+You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
