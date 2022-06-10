@@ -18,6 +18,7 @@ load(
     "http_archive",
     "http_file",
 )
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load(
     "@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
     _docker_toolchain_configure = "toolchain_configure",
@@ -209,6 +210,16 @@ py_library(
             strip_prefix = "bazel-skylib-0.6.0",
             urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
         )
+
+    maybe(
+        http_archive,
+        name = "io_bazel_stardoc",
+        sha256 = "c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+            "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+        ],
+    )
 
     if "gzip" not in excludes:
         local_tool(

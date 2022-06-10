@@ -15,7 +15,7 @@ describe('modules/manager/bazel/extract', () => {
 
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
-      expect(res.deps).toHaveLength(14);
+      expect(res.deps).toHaveLength(17);
       expect(res.deps).toMatchSnapshot();
     });
 
@@ -26,6 +26,7 @@ describe('modules/manager/bazel/extract', () => {
         { packageName: 'nelhage/rules_boost' },
         { packageName: 'lmirosevic/GBDeviceInfo' },
         { packageName: 'nelhage/rules_boost' },
+        { packageName: 'bazelbuild/rules_go' },
       ]);
     });
 
@@ -46,6 +47,10 @@ describe('modules/manager/bazel/extract', () => {
         {
           currentValue: '0.6.0',
           packageName: 'bazelbuild/bazel-skylib',
+        },
+        {
+          currentValue: '0.5.0',
+          packageName: 'bazelbuild/stardoc',
         },
       ]);
     });
