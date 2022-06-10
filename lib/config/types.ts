@@ -236,7 +236,7 @@ export interface RenovateConfig
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
-  aliases?: Record<string, any>;
+  registryAliases?: Record<string, any>;
   skipInstalls?: boolean;
   constraints?: Record<string, string>;
 }
