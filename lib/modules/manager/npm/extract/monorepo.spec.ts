@@ -172,6 +172,9 @@ describe('modules/manager/npm/extract/monorepo', () => {
             yarn: '3.2.1',
           },
           yarnLock: 'yarn.lock',
+          managerData: {
+            hasPackageManager: true,
+          },
         },
         {
           packageFile: 'docs/package.json',
@@ -187,11 +190,17 @@ describe('modules/manager/npm/extract/monorepo', () => {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
+          managerData: {
+            hasPackageManager: true,
+          },
         },
         {
           constraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '^3.2.0',
+          },
+          managerData: {
+            hasPackageManager: true,
           },
         },
       ]);
