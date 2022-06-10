@@ -5,11 +5,11 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
-  ensureCacheDir,
+  ensureDir,
   getSiblingFileName,
   outputFile,
+  privateCacheDir,
   readLocalFile,
-  remove,
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
@@ -27,11 +27,7 @@ import {
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
 } from './package-tree';
-import {
-  getConfiguredRegistries,
-  getDefaultRegistries,
-  getRandomString,
-} from './util';
+import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
 async function addSourceCmds(
   packageFileName: string,
@@ -70,7 +66,7 @@ async function runDotnetRestore(
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig
 ): Promise<void> {
-  const nugetCacheDir = await ensureCacheDir('nuget');
+  const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
   const execOptions: ExecOptions = {
     docker: {
@@ -79,8 +75,9 @@ async function runDotnetRestore(
     extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
   };
 
-  const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
-  const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
+  const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
+
+  await ensureDir(nugetCacheDir);
 
   await outputFile(
     nugetConfigFile,
@@ -97,7 +94,6 @@ async function runDotnetRestore(
     ),
   ];
   await exec(cmds, execOptions);
-  await remove(nugetConfigDir);
 }
 
 async function getLockFileContentMap(
@@ -223,7 +219,7 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileNames.join(', '),
-          stderr: err.message,
+          stderr: err.stdout,
         },
       },
     ];
