@@ -60,6 +60,7 @@ export async function extractPackageFile(
       res.skipReason = 'no-repository';
       return res;
     }
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const repository = resolveAlias(dep.repository, config.registryAliases!);
     if (!repository) {

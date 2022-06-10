@@ -8,6 +8,7 @@ export function parseRepository(
   repositoryURL: string
 ): PackageDependency {
   const res: PackageDependency = {};
+
   try {
     const url = new URL(repositoryURL);
     switch (url.protocol) {
