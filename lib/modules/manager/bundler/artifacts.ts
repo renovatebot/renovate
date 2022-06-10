@@ -18,12 +18,7 @@ import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
-import { createDependency } from '../regex/utils';
-import type {
-  PackageDependency,
-  UpdateArtifact,
-  UpdateArtifactsResult,
-} from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { getBundlerConstraint, getRubyConstraint } from './common';
 import {
   findAllAuthenticatable,
@@ -44,12 +39,6 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   );
   return {
     [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
-  };
-}
-
-function createDependency(name: string): PackageDependency {
-  return {
-    depName: name,
   };
 }
 
@@ -230,10 +219,12 @@ export async function updateArtifacts(
           { resolveMatches, updatedDeps },
           'Found new resolve matches - reattempting recursively'
         );
-        const resolvedDeps: PackageDependency[] = resolveMatches.map((match) =>
-          createDependency(match)
-        );
-        const newUpdatedDeps = [...new Set([...updatedDeps, ...resolvedDeps])];
+        const newUpdatedDeps = [
+          ...new Set([
+            ...updatedDeps,
+            ...resolveMatches.map((match) => ({ depName: match })),
+          ]),
+        ];
         return updateArtifacts({
           packageFileName,
           updatedDeps: newUpdatedDeps,
