@@ -18,7 +18,12 @@ import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { createDependency } from '../regex/utils';
+import type {
+  PackageDependency,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+} from '../types';
 import { getBundlerConstraint, getRubyConstraint } from './common';
 import {
   findAllAuthenticatable,
@@ -42,6 +47,12 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   };
 }
 
+function createDependency(name: string): PackageDependency {
+  return {
+    depName: name,
+  };
+}
+
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
@@ -61,6 +72,8 @@ export async function updateArtifacts(
     return null;
   }
 
+  const updatedDepNames = updatedDeps.map((dep) => `${dep.depName}`);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
@@ -69,8 +82,7 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundler lock --update';
     } else {
-      cmd = `bundler lock --update ${updatedDeps
-        .map((dep) => `${dep.depName}`)
+      cmd = `bundler lock --update ${updatedDepNames
         .filter((dep) => dep !== 'ruby')
         .map(quote)
         .join(' ')}`;
@@ -212,15 +224,16 @@ export async function updateArtifacts(
           resolveMatches.push(resolveMatch[1].split(' ').shift());
         }
       } while (resolveMatch);
-      // TODO: fixme `updatedDeps.includes(match)` is never true, as updatedDeps is `PackageDependency[]`
-      if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
+
+      if (resolveMatches.some((match) => !updatedDepNames.includes(match))) {
         logger.debug(
           { resolveMatches, updatedDeps },
           'Found new resolve matches - reattempting recursively'
         );
-        const newUpdatedDeps = [
-          ...new Set([...updatedDeps, ...resolveMatches]),
-        ];
+        const resolvedDeps: PackageDependency[] = resolveMatches.map((match) =>
+          createDependency(match)
+        );
+        const newUpdatedDeps = [...new Set([...updatedDeps, ...resolvedDeps])];
         return updateArtifacts({
           packageFileName,
           updatedDeps: newUpdatedDeps,
