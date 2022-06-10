@@ -7,7 +7,7 @@ export { bumpPackageVersion } from './update';
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
-  aliases: {
+  registryAliases: {
     stable: 'https://charts.helm.sh/stable',
   },
   commitMessageTopic: 'helm chart {{depName}}',

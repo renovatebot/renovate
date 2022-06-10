@@ -6,6 +6,7 @@ Follow these best practices when you're working on our code.
 ## General
 
 - Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
+- Prefer `interface` over `type` for TypeScript type declarations
 - Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use union or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
@@ -134,6 +135,7 @@ Use `UTC` to be time zone independent.
 - Avoid `toMatchSnapshot`, only use it for:
   - huge strings like the Renovate PR body text
   - huge complex objects where you only need to test parts
+- Avoid exporting functions purely for the purpose of testing unless you really need to
 
 ### Fixtures
 
@@ -163,3 +165,12 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 - Omit constructors when defining Static classes
 - [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields). instead, use TypeScript's visibility annotations
 - Avoid underscore suffixes or prefixes, for example: `_prop`, use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as suffix/prefix i.e. `internalProp`
+
+### regex
+
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing multiple groups, for example: `(?<groupName>CapturedGroup)`.
+
+### Windows
+
+We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your `gitConfig`, or the carriage return `\r\n` might confuse Renovate bot.
+You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.

@@ -304,8 +304,10 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
+      // TODO: fix types #7154
       expect(
-        migratedConfig.lockFileMaintenance?.packageRules[0].respectLatest
+        (migratedConfig.lockFileMaintenance as RenovateConfig)
+          ?.packageRules?.[0].respectLatest
       ).toBeFalse();
     });
 

@@ -38,6 +38,7 @@ export interface RenovateSharedConfig {
   enabledManagers?: string[];
   extends?: string[];
   fileMatch?: string[];
+  force?: RenovateConfig;
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
@@ -58,6 +59,7 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  respectLatest?: boolean;
   stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
@@ -140,16 +142,18 @@ export interface LegacyAdminConfig {
 
   requireConfig?: RequiredConfig;
 }
+
 export type ExecutionMode = 'branch' | 'update';
 
-export type PostUpgradeTasks = {
+export interface PostUpgradeTasks {
   commands?: string[];
   fileFilters?: string[];
   executionMode: ExecutionMode;
-};
+}
 
-type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
-  Partial<Record<UpdateType, T | null>>;
+export type UpdateConfig<
+  T extends RenovateSharedConfig = RenovateSharedConfig
+> = Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
   | string
@@ -228,8 +232,8 @@ export interface RenovateConfig
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
-  aliases?: Record<string, any>;
-  skipInstalls?: boolean;
+
+  constraints?: Record<string, string>;
 }
 
 export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
@@ -271,7 +275,8 @@ export type MergeStrategy =
 export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
-    Record<string, any> {
+    Record<string, unknown> {
+  description?: string | string[];
   matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
@@ -289,6 +294,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  registryUrls?: string[];
 }
 
 export interface ValidationMessage {
