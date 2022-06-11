@@ -4,7 +4,7 @@ import type {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
-import type { ChangeLogRelease } from '../../../../workers/repository/update/pr/changelog';
+import type { ChangeLogRelease } from '../../../../workers/repository/update/pr/changelog/types';
 import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
 import type {
