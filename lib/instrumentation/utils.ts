@@ -3,7 +3,7 @@ export function isTracingEnabled(): boolean {
 }
 
 export function isTraceDebuggingEnabled(): boolean {
-  return !!process.env.RENOVATE_DEBUG_TRACING;
+  return !!process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
 }
 
 export function isTraceSendingEnabled(): boolean {
