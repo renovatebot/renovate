@@ -909,15 +909,16 @@ describe('workers/repository/updates/generate', () => {
       ]);
     });
 
-    it('fixes commit message', () => {
+    it('fixes commit message with body', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
           commitMessage: 'update to vv1.2.0',
+          commitBody: 'some body',
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toBe('Update to v1.2.0');
+      expect(res.commitMessage).toBe('Update to v1.2.0\n\nsome body');
     });
   });
 });

@@ -193,10 +193,11 @@ export function generateBranchConfig(
       );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
-    upgrade.commitMessage = upgrade.commitMessage.replace(
+    commitMessage.subject = commitMessage.subject.replace(
       regEx(/to vv(\d)/),
       'to v$1'
     );
+    upgrade.commitMessage = commitMessage.formatSubject();
     if (upgrade.commitBody) {
       commitMessage.body = template.compile(upgrade.commitBody, upgrade);
       upgrade.commitMessage = commitMessage.toString();
