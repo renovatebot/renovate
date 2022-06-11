@@ -1,3 +1,4 @@
+import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
@@ -5,21 +6,40 @@ import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
 
+function indent(amount: number, indent = '  '): string {
+  let indentation = '';
+  for (let i = 0; i < amount; i++) {
+    indentation += indent;
+  }
+  return indentation;
+}
+
 function buildHtmlTable(data: string[][]): string {
-  const ind = '  '; // indentation 2 spaces
+  // skip empty tables
+  if (data.length < 2) {
+    return '';
+  }
   let table = `<table>\n`;
   for (const [i, row] of data.entries()) {
-    table += `${ind}<tr>\n`;
+    if (i === 0) {
+      table += `${indent(1)}<thead>\n`;
+    }
+
+    if (i === 1) {
+      table += `${indent(1)}</thead>\n${indent(1)}<tbody>\n`;
+    }
+
+    table += `${indent(2)}<tr>\n`;
     for (const col of row) {
       if (i === 0) {
-        table += `${ind}${ind}<th>${col}</th>\n`;
+        table += `${indent(3)}<th>${col}</th>\n`;
         continue;
       }
-      table += `${ind}${ind}<td>${col}</td>\n`;
+      table += `${indent(3)}<td>${col}</td>\n`;
     }
-    table += `${ind}</tr>\n`;
+    table += `${indent(2)}</tr>\n`;
   }
-  table += '</table>\n';
+  table += `${indent(1)}</tbody>\n</table>\n`;
   return table;
 }
 
@@ -68,7 +88,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         if (Object.keys(el[1] ?? []).length === 0) {
           return;
         }
-        el[1] = `<pre lang="json">${JSON.stringify(def, undefined, 2)}</pre>`;
+        el[1] = `<pre lang="json">${stringify(def, { indent: 2 })}</pre>`;
       }
       data.push(el);
     }
