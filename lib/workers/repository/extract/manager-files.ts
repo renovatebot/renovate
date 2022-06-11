@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import type { WorkerExtractConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -8,6 +7,7 @@ import {
 } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
+import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig
