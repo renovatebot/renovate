@@ -140,51 +140,20 @@ The previous implemented setup will produce following metrics, which are exposed
 ```
 # HELP calls_total
 # TYPE calls_total counter
-calls_total{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
-calls_total{operation="ensure onboarding PR",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
-calls_total{operation="extractDependencies",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
-calls_total{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+
+### Example of internal spans
 calls_total{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
 calls_total{operation="run",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
-calls_total{operation="update repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 3
-calls_total{http_host="api.github.com:443",http_method="GET",http_status_code="200",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 14
-calls_total{http_host="api.github.com:443",http_method="GET",http_status_code="404",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_OK"} 3
+### Example of http calls from Renovate to external services
 calls_total{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 9
-calls_total{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 1
-# HELP latency
-# TYPE latency histogram
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="0.1"} 0
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="1"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="2"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="6"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="10"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="100"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="250"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 1
-latency_bucket{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="+Inf"} 1
-latency_sum{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 0.2212
-latency_count{operation="discover repositories",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
 
 ...
 
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="0.1"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="1"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="2"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="6"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="10"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="100"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="250"} 0
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 1
-latency_bucket{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="+Inf"} 1
-latency_sum{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 508.1901
-latency_count{operation="load config",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 1
+# HELP latency
+# TYPE latency histogram
+### Example of internal spans
 latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="0.1"} 0
-latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="1"} 0
-latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="2"} 0
-latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="6"} 0
-latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="10"} 0
-latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="100"} 0
-latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="250"} 0
+...
 latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 3
 latency_bucket{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET",le="+Inf"} 3
 latency_sum{operation="renovate repository",service_name="renovate",span_kind="SPAN_KIND_INTERNAL",status_code="STATUS_CODE_UNSET"} 30947.4689
@@ -192,28 +161,14 @@ latency_count{operation="renovate repository",service_name="renovate",span_kind=
 
 ...
 
+### Example of http calls from Renovate to external services
 latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="0.1"} 0
-latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="1"} 0
-latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="2"} 0
-latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="6"} 0
-latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="10"} 0
-latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="100"} 0
+...
 latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="250"} 3
 latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="9.223372036854775e+12"} 9
 latency_bucket{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET",le="+Inf"} 9
 latency_sum{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 2306.1385999999998
 latency_count{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 9
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="0.1"} 0
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="1"} 0
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="2"} 0
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="6"} 0
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="10"} 0
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="100"} 0
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="250"} 1
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="9.223372036854775e+12"} 1
-latency_bucket{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR",le="+Inf"} 1
-latency_sum{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 232.9222
-latency_count{http_host="gitlab.com:443",http_method="GET",http_status_code="401",operation="HTTPS GET",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 1
 ```
 
 The [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/spanmetricsprocessor) creates two sets of metrics.
