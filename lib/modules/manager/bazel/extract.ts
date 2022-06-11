@@ -230,7 +230,7 @@ export function extractPackageFile(
     logger.debug({ dependency: depName, remote, currentValue });
 
     if (depType === 'maybe') {
-      depType = def.split('(', 2).pop().split(',', 1).pop().trim();
+      depType = def.split('(', 2).pop()!.split(',', 1).pop()!.trim();
     }
 
     const dep: PackageDependency = { depType, managerData: { def } };
