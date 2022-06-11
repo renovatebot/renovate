@@ -1,10 +1,27 @@
-import table from 'markdown-table';
 import { getOptions } from '../../lib/config/options';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
+
+function buildHtmlTable(data: string[][]): string {
+  const ind = '  '; // indentation 2 spaces
+  let table = `<table>\n`;
+  for (const [i, row] of data.entries()) {
+    table += `${ind}<tr>\n`;
+    for (const col of row) {
+      if (i === 0) {
+        table += `${ind}${ind}<th>${col}</th>\n`;
+        continue;
+      }
+      table += `${ind}${ind}<td>${col}</td>\n`;
+    }
+    table += `${ind}<tr>\n`;
+  }
+  table += '</table>\n';
+  return table;
+}
 
 function genTable(obj: [string, string][], type: string, def: any): string {
   const data = [['Name', 'Value']];
@@ -33,14 +50,14 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         name !== 'prBody')
     ) {
       if (type === 'string' && el[0] === 'default') {
-        el[1] = `\`"${el[1]}"\``;
+        el[1] = `<code>"${el[1]}"</code>`;
       }
       if (
         (type === 'boolean' && el[0] === 'default') ||
         el[0] === 'cli' ||
         el[0] === 'env'
       ) {
-        el[1] = `\`${el[1]}\``;
+        el[1] = `<code>${el[1]}</code>`;
       }
       if (type === 'string' && el[0] === 'default' && el[1].length > 200) {
         el[1] = `[template]`;
@@ -48,17 +65,10 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       // objects and arrays should be printed in JSON notation
       if ((type === 'object' || type === 'array') && el[0] === 'default') {
         // only show array and object defaults if they are not null and are not empty
-        const objLen = Object.keys(el[1] ?? []).length;
-        if (objLen === 0) {
+        if (Object.keys(el[1] ?? []).length === 0) {
           return;
         }
-
-        if (objLen === 1) {
-          el[1] = `\`${JSON.stringify(el[1])}\``;
-        } else {
-          // display default value outside the table
-          el[1] = `See below`;
-        }
+        el[1] = `<pre lang="json">${JSON.stringify(def, undefined, 2)}</pre>`;
       }
       data.push(el);
     }
@@ -76,18 +86,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
   if (type === 'boolean' && def === null) {
     data.push(['default', '`null`']);
   }
-  return table(data);
-}
-
-function genJsonDefault(type: string, def: any): string {
-  const objLen = Object.keys(def ?? []).length;
-
-  // given obj is either empty or has only one key, therefore does not out of table default print.
-  if (!['array', 'object'].includes(type) || objLen <= 1) {
-    return '';
-  }
-
-  return `\n\`\`\`json\n${JSON.stringify(def, undefined, 2)}\n\`\`\``;
+  return buildHtmlTable(data);
 }
 
 export async function generateConfig(dist: string, bot = false): Promise<void> {
@@ -114,8 +113,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       configOptionsRaw[headerIndex] +=
         `\n${option.description}\n\n` +
-        genTable(Object.entries(el), option.type, option.default) +
-        genJsonDefault(option.type, option.default);
+        genTable(Object.entries(el), option.type, option.default);
     });
 
   await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
