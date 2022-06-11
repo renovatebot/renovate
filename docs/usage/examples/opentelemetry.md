@@ -15,7 +15,7 @@ version: '3'
 services:
   # Jaeger
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1
     ports:
       - '16686:16686'
       - '14250'
