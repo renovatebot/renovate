@@ -1,9 +1,10 @@
-import { DateTime, DurationLikeObject } from 'luxon';
+import { DateTime, DurationLike, DurationLikeObject } from 'luxon';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
+import type { ChangeLogRelease } from '../../../../workers/repository/update/pr/changelog';
 import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
 import type {
@@ -163,7 +164,10 @@ export abstract class AbstractGithubDatasourceCache<
   /**
    * Pre-fetch, update, or just return the package cache items.
    */
-  async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
+  async getItems(
+    releasesConfig: GetReleasesConfig,
+    changelogRelease?: ChangeLogRelease
+  ): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
     // The time meant to be used across the function
@@ -213,7 +217,15 @@ export abstract class AbstractGithubDatasourceCache<
         }
       }
 
-      if (isExpired(now, cacheUpdatedAt, updateDuration)) {
+      if (
+        isExpired(now, cacheUpdatedAt, updateDuration) ||
+        this.isChangelogReleaseFresh(
+          changelogRelease,
+          now,
+          updateDuration,
+          cacheItems
+        )
+      ) {
         const variables: GithubQueryParams = {
           owner,
           name,
@@ -364,5 +376,26 @@ export abstract class AbstractGithubDatasourceCache<
     }
 
     return result;
+  }
+
+  public isChangelogReleaseFresh(
+    changelogRelease: ChangeLogRelease | undefined,
+    now: DateTime,
+    updateDuration: DurationLike,
+    cacheItems: Record<string, StoredItem>
+  ): boolean {
+    if (changelogRelease) {
+      const changelogReleaseTime = DateTime.fromISO(
+        changelogRelease.date.toString()
+      );
+      if (
+        !cacheItems[changelogRelease.version] &&
+        changelogReleaseTime.plus(updateDuration) >= now
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

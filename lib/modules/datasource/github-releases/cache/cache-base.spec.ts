@@ -5,6 +5,7 @@ import {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
+import type { ChangeLogRelease } from '../../../../workers/repository/update/pr/changelog';
 import { AbstractGithubDatasourceCache } from './cache-base';
 import type { QueryResponse, StoredItemBase } from './types';
 
@@ -353,5 +354,35 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       v1: { bar: 'aaa', releaseTimestamp: t1, version: 'v1' },
     });
     expect(ts).toEqual(t3);
+  });
+
+  describe('Changelog-based cache busting', () => {
+    it('forces cache update', async () => {
+      const lastUpdateTime = now.minus({ minutes: 15 }).toISO();
+      const githubTime = now.minus({ minutes: 10 }).toISO();
+      const changelogTime = now.minus({ minutes: 5 }).toISO();
+      packageCache.get.mockResolvedValueOnce({
+        items: {},
+        createdAt: lastUpdateTime,
+        updatedAt: lastUpdateTime,
+      });
+      responses = [
+        resp([{ name: '1.0.0', createdAt: githubTime, foo: 'aaa' }]),
+      ];
+      const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+      const res = await cache.getItems({ packageName: 'foo/bar' }, {
+        version: '1.0.0',
+        date: changelogTime,
+      } as ChangeLogRelease);
+
+      expect(sortItems(res)).toEqual([
+        {
+          bar: 'aaa',
+          releaseTimestamp: githubTime,
+          version: '1.0.0',
+        },
+      ]);
+    });
   });
 });
