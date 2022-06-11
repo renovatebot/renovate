@@ -1,6 +1,9 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
-import type { ExtractConfig } from '../modules/manager/types';
+import type {
+  CustomExtractConfig,
+  ExtractConfig,
+} from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -171,6 +174,11 @@ export interface CustomManager {
   packageNameTemplate?: string;
   versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
+  depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
@@ -446,10 +454,18 @@ export interface ManagerConfig extends RenovateConfig {
   language?: string | null;
 }
 
-export interface WorkerExtractConfig extends ExtractConfig {
+export interface WorkerExtractConfig
+  extends ExtractConfig,
+    Partial<CustomExtractConfig> {
   manager: string;
-  enabled?: boolean;
   fileList: string[];
+  fileMatch?: string[];
+  updateInternalDeps?: boolean;
+  includePaths?: string[];
+  ignorePaths?: string[];
+  regexManagers?: CustomManager[];
+  enabledManagers?: string[];
+  enabled?: boolean;
 }
 
 export interface ValidationResult {

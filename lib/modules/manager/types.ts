@@ -27,6 +27,10 @@ export interface RegexManagerTemplates {
   datasourceTemplate?: string;
   versioningTemplate?: string;
   depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
 }
 
 export interface CustomExtractConfig
