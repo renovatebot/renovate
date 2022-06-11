@@ -17,7 +17,7 @@ function buildHtmlTable(data: string[][]): string {
       }
       table += `${ind}${ind}<td>${col}</td>\n`;
     }
-    table += `${ind}<tr>\n`;
+    table += `${ind}</tr>\n`;
   }
   table += '</table>\n';
   return table;
@@ -78,13 +78,13 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     data.push(['default', '`[]`']);
   }
   if (type === 'string' && def === undefined) {
-    data.push(['default', '`null`']);
+    data.push(['default', '<code>null</code>']);
   }
   if (type === 'boolean' && def === undefined) {
-    data.push(['default', '`true`']);
+    data.push(['default', '<code>true</code>']);
   }
   if (type === 'boolean' && def === null) {
-    data.push(['default', '`null`']);
+    data.push(['default', '<code>null</code>']);
   }
   return buildHtmlTable(data);
 }
