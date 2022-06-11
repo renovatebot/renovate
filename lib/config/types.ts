@@ -1,9 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
-import type {
-  CustomExtractConfig,
-  ExtractConfig,
-} from '../modules/manager/types';
+import type { RegexManagerTemplates } from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -165,20 +162,11 @@ export type RenovateRepository =
       secrets?: Record<string, string>;
     };
 
-export interface CustomManager {
+export interface CustomManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
   matchStringsStrategy?: string;
-  depNameTemplate?: string;
-  datasourceTemplate?: string;
-  packageNameTemplate?: string;
-  versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
-  depTypeTemplate?: string;
-  currentValueTemplate?: string;
-  currentDigestTemplate?: string;
-  extractVersionTemplate?: string;
-  registryUrlTemplate?: string;
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
@@ -452,20 +440,6 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
   language?: string | null;
-}
-
-export interface WorkerExtractConfig
-  extends ExtractConfig,
-    Partial<CustomExtractConfig> {
-  manager: string;
-  fileList: string[];
-  fileMatch?: string[];
-  updateInternalDeps?: boolean;
-  includePaths?: string[];
-  ignorePaths?: string[];
-  regexManagers?: CustomManager[];
-  enabledManagers?: string[];
-  enabled?: boolean;
 }
 
 export interface ValidationResult {
