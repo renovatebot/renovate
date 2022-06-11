@@ -13,7 +13,7 @@ OpenTelemetry supports three types of observability data:
 - metrics
 - logs
 
-Renovate uses only traces which are exported using OpenTelemetryProtocol ( OTLP ), other export methods are not supported.
+Renovate can only sent traces and only via the OpenTelemetryProtocol (OTLP), other observability data or transfer protocols are not supported.
 
 ## Usage
 
