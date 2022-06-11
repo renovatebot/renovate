@@ -116,7 +116,10 @@ export async function getReleaseList(
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const { apiBaseUrl, repository } = project;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const apiBaseUrl = project.apiBaseUrl!;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = project.repository!;
   const notesSourceUrl = `${ensureTrailingSlash(
     apiBaseUrl
   )}repos/${repository}/releases`;
