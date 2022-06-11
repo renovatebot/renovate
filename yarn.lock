@@ -2047,10 +2047,10 @@
   uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
-"@renovatebot/pep440@2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.1.tgz#fb1affdcfcc7d9e8c6f46a817d9cb4f741acbc28"
-  integrity sha512-B6icy/x5ANwDGIUU3aTT+Y1zDCOkqjBtIpuTLcOENCYxLiAXwiZOn0sGEwpmwv2FF9VcuG0DSW5ZOdzpkmZI6g==
+"@renovatebot/pep440@2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.2.tgz#2daf92c1f3641d38698a594ebbc6749a890c9ec6"
+  integrity sha512-5E61yI69foKY0hxoYWabUZLYras9S3Mrzrz7bhf4W5pKVZJse1ypNUjKW5bsiSQoAiZqXFECiD0q1Nw8LA3gyQ==
 
 "@renovatebot/ruby-semver@1.1.3":
   version "1.1.3"
