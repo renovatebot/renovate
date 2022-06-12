@@ -8,6 +8,7 @@ import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
+import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
 
 const cacheNamespace = 'changelog-gitlab-release';
@@ -28,16 +29,18 @@ function getCachedTags(
   return promisedRes;
 }
 
-export async function getChangeLogJSON({
-  versioning,
-  currentVersion,
-  newVersion,
-  sourceUrl,
-  releases,
-  depName,
-  manager,
-  sourceDirectory,
-}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
+export async function getChangeLogJSON(
+  config: BranchUpgradeConfig
+): Promise<ChangeLogResult | null> {
+  const {
+    versioning,
+    currentVersion,
+    newVersion,
+    sourceUrl,
+    depName,
+    manager,
+    sourceDirectory,
+  } = config;
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
@@ -52,6 +55,7 @@ export async function getChangeLogJSON({
     logger.info({ sourceUrl }, 'Invalid gitlab URL found');
     return null;
   }
+  const releases = config.releases || (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
     return null;
@@ -106,6 +110,7 @@ export async function getChangeLogJSON({
         release = {
           version: next.version,
           date: next.releaseTimestamp,
+          gitRef: next.gitRef,
           // put empty changes so that existing templates won't break
           changes: [],
           compare: {},
@@ -140,7 +145,7 @@ export async function getChangeLogJSON({
     versions: changelogReleases,
   };
 
-  res = await addReleaseNotes(res);
+  res = await addReleaseNotes(res, config);
 
   return res;
 }

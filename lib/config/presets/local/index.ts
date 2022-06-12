@@ -1,4 +1,5 @@
 import { PlatformId } from '../../../constants';
+import { GlobalConfig } from '../../global';
 import * as azure from '../azure';
 import * as bitbucket from '../bitbucket';
 import * as bitbucketServer from '../bitbucket-server';
@@ -21,9 +22,8 @@ export function getPreset({
   presetName = 'default',
   presetPath,
   tag,
-  baseConfig,
 }: PresetConfig): Promise<Preset | undefined> {
-  const { platform, endpoint } = baseConfig ?? {};
+  const { platform, endpoint } = GlobalConfig.get();
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
@@ -31,8 +31,7 @@ export function getPreset({
   if (!resolver) {
     throw new Error(
       // TODO: can be undefined? #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      `Unsupported platform '${baseConfig!.platform}' for local preset.`
+      `Unsupported platform '${platform}' for local preset.`
     );
   }
   return resolver.getPresetFromEndpoint(

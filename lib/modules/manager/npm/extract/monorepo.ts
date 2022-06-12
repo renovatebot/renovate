@@ -22,7 +22,8 @@ export async function detectMonorepos(
       yarnWorkspacesPackages,
       skipInstalls,
     } = p;
-    const { lernaJsonFile, yarnZeroInstall } = managerData;
+    const { lernaJsonFile, yarnZeroInstall, hasPackageManager } = managerData;
+
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
       const internalPackagePatterns = (
@@ -51,6 +52,7 @@ export async function detectMonorepos(
         subPackage.managerData = subPackage.managerData || {};
         subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
+        subPackage.managerData.hasPackageManager = hasPackageManager;
         subPackage.lernaClient = lernaClient;
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
         subPackage.npmLock = subPackage.npmLock || npmLock;
@@ -58,6 +60,13 @@ export async function detectMonorepos(
         if (subPackage.yarnLock) {
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
           subPackage.npmrc = subPackage.npmrc || npmrc;
+        }
+
+        if (p.constraints) {
+          subPackage.constraints = {
+            ...p.constraints,
+            ...subPackage.constraints,
+          };
         }
 
         subPackage.deps?.forEach((dep) => {
