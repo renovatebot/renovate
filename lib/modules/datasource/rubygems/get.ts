@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import Marshal from 'marshal';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -46,11 +45,11 @@ export class InternalRubyGemsDatasource extends Datasource {
     dependency: string,
     registry: string
   ): Promise<ReleaseResult | null> {
-    const { endPoint, repository } = this.nexusEndPointRepoFrom(registry);
+    const { nexusRegistry, repository } = this.nexusEndPointRepoFrom(registry);
     if (
-      is.nonEmptyString(endPoint) &&
-      is.nonEmptyString(repository) &&
-      (await this.isNexusDataSource(endPoint))
+      nexusRegistry &&
+      repository &&
+      (await this.isNexusDataSource(nexusRegistry))
     ) {
       logger.debug(
         { dependency, api: 'Nexus' },
@@ -58,7 +57,7 @@ export class InternalRubyGemsDatasource extends Datasource {
       );
       const gemReleases: Release[] = await this.getReleasesFromNexus(
         repository,
-        endPoint,
+        nexusRegistry,
         dependency
       );
       return {
@@ -209,18 +208,15 @@ export class InternalRubyGemsDatasource extends Datasource {
     return new Marshal(response.body).parsed as T;
   }
 
-  private nexusEndPointRepoFrom(registry: string): {
-    endPoint: string;
+  private nexusEndPointRepoFrom(url: string): {
+    nexusRegistry: string;
     repository: string;
   } {
     const endPointRe = regEx(
-      `^(?<endPoint>.*:\\d{1,5}).*\\/repository\\/(?<repository>\\w+)\\/?`
+      `^(?<nexusRegistry>.*:\\d{1,5}).*\\/repository\\/(?<repository>\\w+)\\/?`
     );
-    const { endPoint, repository } = registry.match(endPointRe)?.groups ?? {
-      endPoint: '',
-      repository: '',
-    };
-    return { endPoint, repository };
+    const { nexusRegistry, repository } = url.match(endPointRe)?.groups ?? {};
+    return { nexusRegistry, repository };
   }
 
   @cache({
@@ -243,14 +239,14 @@ export class InternalRubyGemsDatasource extends Datasource {
 
   private async getReleasesFromNexus(
     repository: string,
-    endPoint: string,
+    nexusRegistry: string,
     dependencyName: string
   ): Promise<Release[]> {
     const result: Release[] = [];
     const gemItems: NexusGemsItems[] = [];
     const url = this.getNexusGemReleasesEndPoint(
       repository,
-      endPoint,
+      nexusRegistry,
       dependencyName
     );
     try {
@@ -282,12 +278,12 @@ export class InternalRubyGemsDatasource extends Datasource {
 
   private getNexusGemReleasesEndPoint(
     repository: string,
-    endPoint: string,
+    nexusRegistry: string,
     depName: string
   ): string {
     const nexusSearchPoint = '/service/rest/v1/search';
     const query = `${nexusSearchPoint}?repository=${repository}&name=${depName}&sort=version`;
-    const gemReleasesEndPoint = endPoint.concat(query);
+    const gemReleasesEndPoint = nexusRegistry.concat(query);
     return gemReleasesEndPoint;
   }
 
