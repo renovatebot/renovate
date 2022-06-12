@@ -4516,10 +4516,10 @@ eslint-plugin-jest-formatting@3.1.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-3.1.0.tgz#b26dd5a40f432b642dcc880021a771bb1c93dcd2"
   integrity sha512-XyysraZ1JSgGbLSDxjj5HzKKh0glgWf+7CkqxbTqb7zEhW7X2WHo5SBQ8cGhnszKN+2Lj3/oevBlHNbHezoc/A==
 
-eslint-plugin-jest@26.5.0:
-  version "26.5.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-26.5.0.tgz#d32dbe8141effccfbc9ae964a10e66e4e50a563f"
-  integrity sha512-myQMd4piRn7otD1d1fAC7FRZO+WiDCiksejuyeHZ2b3LO7o5bE0Q7u0cuq7/kzBBVqFs+uFSAIBQAAuBbOpKsg==
+eslint-plugin-jest@26.5.1:
+  version "26.5.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-26.5.1.tgz#a6b4cbd6884c1b5dcbe6afc0f43dde9afba29229"
+  integrity sha512-IUEw6DCJ7qPGffK2pc6ly3L+1HBXdT673pY5nson8Mu4Vwgc/8d4Hf8NhsZwkuspPdi/QMj83ugXND7OLTu6Bg==
   dependencies:
     "@typescript-eslint/utils" "^5.10.0"
 
