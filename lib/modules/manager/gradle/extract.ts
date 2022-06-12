@@ -99,18 +99,33 @@ export async function extractAllPackageFiles(
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      const pkgFile: PackageFile = packageFilesByName[key];
-      const { deps } = pkgFile;
-      deps.push({
-        ...dep,
-        registryUrls: [
-          ...new Set([
-            ...defaultRegistryUrls,
-            ...(dep.registryUrls || []),
-            ...registryUrls,
-          ]),
-        ],
-      });
+      let pkgFile: PackageFile = packageFilesByName[key];
+      if (!pkgFile) {
+        pkgFile = {
+          packageFile: key,
+          datasource,
+          deps: [],
+        } as PackageFile;
+      }
+
+      dep.registryUrls = [
+        ...new Set([
+          ...defaultRegistryUrls,
+          ...(dep.registryUrls || []),
+          ...registryUrls,
+        ]),
+      ];
+
+      const depAlreadyInPkgFile = pkgFile.deps.some(
+        (item) =>
+          item.depName === dep.depName &&
+          item.managerData?.fileReplacePosition ===
+            dep.managerData?.fileReplacePosition
+      );
+      if (!depAlreadyInPkgFile) {
+        pkgFile.deps.push(dep);
+      }
+
       packageFilesByName[key] = pkgFile;
     } else {
       logger.warn({ dep }, `Failed to process Gradle dependency`);
