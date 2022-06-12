@@ -73,7 +73,6 @@ export function extractPackageFile(content: string): PackageFile | null {
     // TODO: fix me (#9610)
     parsedContent = load(newContent, { json: true }) as any;
   } catch (err) {
-    2;
     logger.debug({ err }, 'Failed to parse helm-values YAML');
     return null;
   }
