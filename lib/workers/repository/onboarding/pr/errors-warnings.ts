@@ -4,12 +4,12 @@ import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
 
 export function getWarnings(config: RenovateConfig): string {
-  if (!config.warnings.length) {
+  if (!config?.warnings?.length) {
     return '';
   }
-  let warningText = `\n# Warnings (${config.warnings.length})\n\n`;
+  let warningText = `\n# Warnings (${config?.warnings.length})\n\n`;
   warningText += `Please correct - or verify that you can safely ignore - these warnings before you merge this PR.\n\n`;
-  config.warnings.forEach((w) => {
+  config?.warnings.forEach((w) => {
     warningText += `-   \`${w.topic}\`: ${w.message}\n`;
   });
   warningText += '\n---\n';
@@ -18,12 +18,12 @@ export function getWarnings(config: RenovateConfig): string {
 
 export function getErrors(config: RenovateConfig): string {
   let errorText = '';
-  if (!config.errors.length) {
+  if (!config?.errors?.length) {
     return '';
   }
-  errorText = `\n# Errors (${config.errors.length})\n\n`;
+  errorText = `\n# Errors (${config?.errors?.length})\n\n`;
   errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
-  config.errors.forEach((e) => {
+  config?.errors.forEach((e) => {
     errorText += `-   \`${e.topic}\`: ${e.message}\n`;
   });
   errorText += '\n---\n';
@@ -35,22 +35,30 @@ export function getDepWarnings(
 ): [string[], string[]] {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
-  for (const files of Object.values(packageFiles || {})) {
-    for (const file of files || []) {
-      if (file.deps) {
-        for (const dep of file.deps || []) {
-          if (dep.warnings?.length) {
-            const message = dep.warnings[0].message;
-            if (!warnings.includes(message)) {
-              warnings.push(message);
-            }
-            if (!warningFiles.includes(file.packageFile)) {
-              warningFiles.push(file.packageFile);
+  try {
+    for (const files of Object.values(packageFiles || {})) {
+      for (const file of files || []) {
+        if (file.deps) {
+          for (const dep of file.deps || []) {
+            if (dep.warnings?.length) {
+              const message = dep.warnings[0].message;
+              if (!warnings.includes(message)) {
+                warnings.push(message);
+              }
+              if (
+                file?.packageFile &&
+                !warningFiles.includes(file?.packageFile)
+              ) {
+                warningFiles.push(file?.packageFile);
+              }
             }
           }
         }
       }
     }
+  } catch (err) {
+    // istanbul ignore next
+    logger.error({ err }, 'Error generating packageFiles');
   }
   return [warnings, warningFiles];
 }

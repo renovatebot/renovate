@@ -656,7 +656,6 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
           const branches: BranchConfig[] = [];
-          const packageFiles: Record<string, PackageFile[]> = {};
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
@@ -673,7 +672,6 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           PackageFiles.clear();
           PackageFiles.add('main', {});
-          const packageFiles: Record<string, PackageFile[]> = {};
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
@@ -690,7 +688,6 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           PackageFiles.clear();
           PackageFiles.add('main', null);
-          const packageFiles: Record<string, PackageFile[]> = {};
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
@@ -706,7 +703,6 @@ describe('workers/repository/dependency-dashboard', () => {
         it('shows different combinations of version+digest for a given dependency', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', packageFilesWithDigest);
-          const packageFiles: Record<string, PackageFile[]> = {};
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
@@ -732,7 +728,6 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
           const branches: BranchConfig[] = [];
-          const packageFiles: Record<string, PackageFile[]> = {};
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
@@ -748,7 +743,6 @@ describe('workers/repository/dependency-dashboard', () => {
         it('show default message in issues body when packageFiles is empty', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', {});
-          const packageFiles: Record<string, PackageFile[]> = {};
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
@@ -764,7 +758,31 @@ describe('workers/repository/dependency-dashboard', () => {
         it('show default message in issues body when when packageFiles is null', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', null);
-          const packageFiles: Record<string, PackageFile[]> = {};
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFiles
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('Dependency Lookup Warnings message in issues body', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', {
+            npm: [{ packageFile: 'package.json', deps: [] }],
+          });
+          const dep = [
+            {
+              warnings: [{ message: 'Warning 2', topic: undefined }],
+            },
+          ];
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [{ packageFile: 'package.json', deps: dep }],
+          };
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
