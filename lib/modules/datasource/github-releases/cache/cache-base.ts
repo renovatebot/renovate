@@ -1,4 +1,4 @@
-import { DateTime, DurationLike, DurationLikeObject } from 'luxon';
+import { DateTime, DurationLikeObject } from 'luxon';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
@@ -381,17 +381,19 @@ export abstract class AbstractGithubDatasourceCache<
   public isChangelogReleaseFresh(
     changelogRelease: ChangeLogRelease | undefined,
     now: DateTime,
-    updateDuration: DurationLike,
+    updateDuration: DurationLikeObject,
     cacheItems: Record<string, StoredItem>
   ): boolean {
     if (changelogRelease?.date) {
-      const changelogReleaseTime = DateTime.fromISO(
-        changelogRelease.date.toString()
+      const changelogReleaseTime = changelogRelease.date.toString();
+
+      const isVersionPresentInCache = !!cacheItems[changelogRelease.version];
+      const isChangelogReleaseFresh = !isExpired(
+        now,
+        changelogReleaseTime,
+        updateDuration
       );
-      if (
-        !cacheItems[changelogRelease.version] &&
-        changelogReleaseTime.plus(updateDuration) >= now
-      ) {
+      if (!isVersionPresentInCache && isChangelogReleaseFresh) {
         return true;
       }
     }
