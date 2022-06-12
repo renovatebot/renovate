@@ -4,10 +4,12 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
+import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
+import { getDepWarningsDashboard } from './onboarding/pr/errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -98,7 +100,8 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: RenovateConfig,
-  allBranches: BranchConfig[]
+  allBranches: BranchConfig[],
+  packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
@@ -186,6 +189,7 @@ export async function ensureDependencyDashboard(
       branch.result === BranchResult.PrLimitReached ||
       branch.result === BranchResult.CommitLimitReached
   );
+
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
     issueBody +=
@@ -250,6 +254,11 @@ export async function ensureDependencyDashboard(
     for (const branch of prPendingBranchAutomerge) {
       issueBody += getListItem(branch, 'approvePr');
     }
+    issueBody += '\n';
+  }
+  const warn = getDepWarningsDashboard(packageFiles);
+  if (warn.length) {
+    issueBody += warn;
     issueBody += '\n';
   }
   const otherRes = [

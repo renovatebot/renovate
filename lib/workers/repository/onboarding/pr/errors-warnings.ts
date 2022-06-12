@@ -32,27 +32,72 @@ export function getErrors(config: RenovateConfig): string {
 
 export function getDepWarnings(
   packageFiles: Record<string, PackageFile[]>
-): string {
-  let warningText = '';
-  try {
-    const warnings: string[] = [];
-    const warningFiles: string[] = [];
-    for (const files of Object.values(packageFiles || {})) {
-      for (const file of files || []) {
-        if (file.deps) {
-          for (const dep of file.deps || []) {
-            if (dep.warnings?.length) {
-              const message = dep.warnings[0].message;
-              if (!warnings.includes(message)) {
-                warnings.push(message);
-              }
-              if (!warningFiles.includes(file.packageFile)) {
-                warningFiles.push(file.packageFile);
-              }
+): [string[], string[]] {
+  const warnings: string[] = [];
+  const warningFiles: string[] = [];
+  for (const files of Object.values(packageFiles || {})) {
+    for (const file of files || []) {
+      if (file.deps) {
+        for (const dep of file.deps || []) {
+          if (dep.warnings?.length) {
+            const message = dep.warnings[0].message;
+            if (!warnings.includes(message)) {
+              warnings.push(message);
+            }
+            if (!warningFiles.includes(file.packageFile)) {
+              warningFiles.push(file.packageFile);
             }
           }
         }
       }
+    }
+  }
+  return [warnings, warningFiles];
+}
+
+export function getDepWarningsDashboard(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  let warningText = '';
+  try {
+    const depWarnings = getDepWarnings(packageFiles);
+    const warnings = depWarnings[0];
+    const warningFiles = depWarnings[1];
+
+    if (!warnings.length) {
+      return '';
+    }
+    logger.debug(
+      { warnings, warningFiles },
+      'Found package lookup warnings in onboarding'
+    );
+    warningText = emojify(
+      `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+    );
+    warnings.forEach((w) => {
+      warningText += `-   \`${w}\`\n`;
+    });
+    warningText +=
+      '\nFiles affected: ' +
+      warningFiles.map((f) => '`' + f + '`').join(', ') +
+      '\n\n';
+  } catch (err) {
+    // istanbul ignore next
+    logger.error({ err }, 'Error generating dep warnings text');
+  }
+  return warningText;
+}
+
+export function getDepWarningsPR(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  let warningText = '';
+  try {
+    const depWarnings = getDepWarnings(packageFiles);
+    const warnings = depWarnings[0];
+    const warningFiles = depWarnings[1];
+    if (!warnings.length) {
+      return '';
     }
     if (!warnings.length) {
       return '';
