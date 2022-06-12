@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
@@ -14,7 +13,6 @@ import {
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -38,7 +36,7 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { smartLinks, trimTrailingApiPath } from './utils';
+import { getRepoUrl, smartLinks, trimTrailingApiPath } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -240,6 +238,7 @@ const platform: Platform = {
   async initRepo({
     repository,
     cloneSubmodules,
+    gitUrl,
   }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
@@ -298,18 +297,12 @@ const platform: Platform = {
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
-    // Find options for current host and determine Git endpoint
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitea,
-      url: defaults.endpoint,
-    });
-    const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token ?? null;
+    const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
 
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: URL.format(gitEndpoint),
+      url,
     });
 
     // Reset cached resources

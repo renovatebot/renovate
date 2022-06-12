@@ -1,9 +1,9 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const file1 = loadFixture('config.yml');
-const file2 = loadFixture('config2.yml');
-const file3 = loadFixture('config3.yml');
+const file1 = Fixtures.get('config.yml');
+const file2 = Fixtures.get('config2.yml');
+const file3 = Fixtures.get('config3.yml');
 
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -52,6 +52,17 @@ describe('modules/manager/circleci/extract', () => {
       expect(res.deps).toMatchSnapshot([
         { currentValue: '14.8.0', depName: 'cimg/node' },
       ]);
+    });
+
+    it('extracts and exclude android images', () => {
+      expect(
+        extractPackageFile(
+          'jobs:\n' +
+            '  build:\n' +
+            '    machine:\n' +
+            '      image: android:202102-01'
+        )
+      ).toBeNull();
     });
   });
 });

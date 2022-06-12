@@ -5,6 +5,7 @@ import semver from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
 import { mergeChildConfig } from '../../config';
+import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
@@ -31,9 +32,10 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
+  const platform = GlobalConfig.get('platform');
   repoConfig.localDir = upath.join(
     repoConfig.baseDir,
-    `./repos/${repoConfig.platform}/${repoConfig.repository}`
+    `./repos/${platform}/${repoConfig.repository}`
   );
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
@@ -115,6 +117,9 @@ export async function start(): Promise<number> {
     }
     // initialize all submodules
     config = await globalInitialize(config);
+
+    // Set platform and endpoint in case local presets are used
+    GlobalConfig.set({ platform: config.platform, endpoint: config.endpoint });
 
     await validatePresets(config);
 

@@ -11,6 +11,7 @@ import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
+import { getInRangeReleases } from './releases';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
@@ -28,16 +29,18 @@ function getCachedTags(
   return promisedRes;
 }
 
-export async function getChangeLogJSON({
-  versioning,
-  currentVersion,
-  newVersion,
-  sourceUrl,
-  sourceDirectory,
-  releases,
-  depName,
-  manager,
-}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
+export async function getChangeLogJSON(
+  config: BranchUpgradeConfig
+): Promise<ChangeLogResult | null> {
+  const {
+    versioning,
+    currentVersion,
+    newVersion,
+    sourceUrl,
+    sourceDirectory,
+    depName,
+    manager,
+  } = config;
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.trace('No release notes for @types');
     return null;
@@ -48,12 +51,12 @@ export async function getChangeLogJSON({
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
-  const config = hostRules.find({
+  const { token } = hostRules.find({
     hostType: PlatformId.Github,
     url,
   });
   // istanbul ignore if
-  if (!config.token) {
+  if (!token) {
     if (host.endsWith('github.com')) {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
@@ -85,6 +88,7 @@ export async function getChangeLogJSON({
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
+  const releases = config.releases || (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
     return null;
@@ -137,6 +141,7 @@ export async function getChangeLogJSON({
       if (!release) {
         release = {
           version: next.version,
+          gitRef: next.gitRef,
           date: next.releaseTimestamp,
           // put empty changes so that existing templates won't break
           changes: [],
@@ -172,7 +177,7 @@ export async function getChangeLogJSON({
     versions: changelogReleases,
   };
 
-  res = await addReleaseNotes(res);
+  res = await addReleaseNotes(res, config);
 
   return res;
 }

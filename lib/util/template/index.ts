@@ -71,6 +71,9 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentDigest: 'The extracted current digest of the dependency being updated',
+  currentDigestShort:
+    'The extracted current short digest of the dependency being updated',
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
   depNameLinked:

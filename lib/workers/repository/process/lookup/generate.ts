@@ -18,19 +18,26 @@ export function generateUpdate(
   const update: LookupUpdate = {
     bucket,
     newVersion,
-    newValue: null,
+    newValue: null!,
   };
-  const releaseFields = [
-    'checksumUrl',
-    'downloadUrl',
-    'newDigest',
-    'releaseTimestamp',
-  ];
-  for (const field of releaseFields) {
-    if (release[field] !== undefined) {
-      update[field] = release[field];
-    }
+
+  // istanbul ignore if
+  if (release.checksumUrl !== undefined) {
+    update.checksumUrl = release.checksumUrl;
   }
+  // istanbul ignore if
+  if (release.downloadUrl !== undefined) {
+    update.downloadUrl = release.downloadUrl;
+  }
+  // istanbul ignore if
+  if (release.newDigest !== undefined) {
+    update.newDigest = release.newDigest;
+  }
+  // istanbul ignore if
+  if (release.releaseTimestamp !== undefined) {
+    update.releaseTimestamp = release.releaseTimestamp;
+  }
+
   const { currentValue } = config;
   if (currentValue) {
     try {
@@ -39,7 +46,7 @@ export function generateUpdate(
         rangeStrategy,
         currentVersion,
         newVersion,
-      });
+      })!;
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
@@ -48,14 +55,14 @@ export function generateUpdate(
       update.newValue = currentValue;
     }
   } else {
-    update.newValue = currentValue;
+    update.newValue = currentValue!;
   }
-  update.newMajor = versioning.getMajor(newVersion);
-  update.newMinor = versioning.getMinor(newVersion);
+  update.newMajor = versioning.getMajor(newVersion)!;
+  update.newMinor = versioning.getMinor(newVersion)!;
   // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
-    update.newValue = currentValue;
+    update.newValue = currentValue!;
     return update;
   }
   update.updateType =
@@ -69,7 +76,8 @@ export function generateUpdate(
   }
   if (
     rangeStrategy === 'bump' &&
-    versioning.matches(newVersion, currentValue)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    versioning.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;
   }
