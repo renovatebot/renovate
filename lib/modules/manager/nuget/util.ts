@@ -1,4 +1,3 @@
-import cryptoRandomString from 'crypto-random-string';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
@@ -16,11 +15,6 @@ async function readFileAsXmlDocument(
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;
   }
-}
-
-/* istanbul ignore next */
-export function getRandomString(): string {
-  return cryptoRandomString({ length: 16 });
 }
 
 const defaultRegistries = defaultRegistryUrls.map(

@@ -19,6 +19,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'version = "1.2.3"'}         | ${'version'}         | ${'1.2.3'}
       ${'set("version", "1.2.3")'}   | ${'version'}         | ${'1.2.3'}
       ${'versions.foobar = "1.2.3"'} | ${'versions.foobar'} | ${'1.2.3'}
+      ${'ext.foo.bar = "1.2.3"'}     | ${'foo.bar'}         | ${'1.2.3'}
     `('$input', ({ input, name, value }) => {
       const { vars } = parseGradle(input);
       expect(vars).toContainKey(name);

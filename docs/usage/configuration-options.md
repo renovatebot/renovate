@@ -94,23 +94,6 @@ You normally don't need to configure this, but one example where it can be usefu
 In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
 This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
 
-## aliases
-
-The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
-
-The above managers include this default alias:
-
-```json
-{
-  "aliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
-
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
@@ -2214,6 +2197,27 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
 
 ### matchStrings
 
