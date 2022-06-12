@@ -323,6 +323,142 @@ Object {
 }
 `;
 
+exports[`modules/manager/terraform/extract extractPackageFile() extracts kubernetes resources 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": "sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52",
+      "currentValue": "v1.7.0",
+      "datasource": "docker",
+      "depName": "gcr.io/kaniko-project/executor",
+      "depType": "kubernetes_cron_job_v1",
+      "replaceString": "gcr.io/kaniko-project/executor:v1.7.0@sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": "sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52",
+      "currentValue": "v1.8.0",
+      "datasource": "docker",
+      "depName": "gcr.io/kaniko-project/executor",
+      "depType": "kubernetes_cron_job",
+      "replaceString": "gcr.io/kaniko-project/executor:v1.8.0@sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.1",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_daemon_set_v1",
+      "replaceString": "nginx:1.21.1",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.2",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_daemonset",
+      "replaceString": "nginx:1.21.2",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.3",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_deployment",
+      "replaceString": "nginx:1.21.3",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.4",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_deployment_v1",
+      "replaceString": "nginx:1.21.4",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.5",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_job",
+      "replaceString": "nginx:1.21.5",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.6",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_job_v1",
+      "replaceString": "nginx:1.21.6",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.7",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_pod",
+      "replaceString": "nginx:1.21.7",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.8",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_pod_v1",
+      "replaceString": "nginx:1.21.8",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.9",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_replication_controller",
+      "replaceString": "nginx:1.21.9",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.21.10",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "kubernetes_replication_controller_v1",
+      "replaceString": "nginx:1.21.10",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v2.2.1",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "depType": "kubernetes_stateful_set",
+      "replaceString": "prom/prometheus:v2.2.1",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v2.2.2",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "depType": "kubernetes_stateful_set_v1",
+      "replaceString": "prom/prometheus:v2.2.2",
+    },
+  ],
+}
+`;
+
 exports[`modules/manager/terraform/extract extractPackageFile() extracts providers 1`] = `
 Object {
   "deps": Array [

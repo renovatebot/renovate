@@ -10,6 +10,7 @@ const bitbucketModules = Fixtures.get('bitbucketModules.tf');
 const azureDevOpsModules = Fixtures.get('azureDevOpsModules.tf');
 const providers = Fixtures.get('providers.tf');
 const docker = Fixtures.get('docker.tf');
+const kubernetes = Fixtures.get('kubernetes.tf');
 
 const tf2 = `module "relative" {
   source = "../fe"
@@ -101,6 +102,13 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(docker, 'docker.tf', {});
       expect(res.deps).toHaveLength(8);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts kubernetes resources', async () => {
+      const res = await extractPackageFile(kubernetes, 'kubernetes.tf', {});
+      expect(res.deps).toHaveLength(15);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
       expect(res).toMatchSnapshot();
     });
 
