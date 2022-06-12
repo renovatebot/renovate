@@ -209,8 +209,8 @@ export class InternalRubyGemsDatasource extends Datasource {
   }
 
   private nexusEndPointRepoFrom(url: string): {
-    nexusRegistry: string;
-    repository: string;
+    nexusRegistry?: string;
+    repository?: string;
   } {
     const endPointRe = regEx(
       `^(?<nexusRegistry>.*:\\d{1,5}).*\\/repository\\/(?<repository>\\w+)\\/?`
