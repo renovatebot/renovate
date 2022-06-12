@@ -7,11 +7,7 @@ import { readFile, updateFile } from '../utils';
 const options = getOptions();
 
 function indent(amount: number, indent = '  '): string {
-  let indentation = '';
-  for (let i = 0; i < amount; i++) {
-    indentation += indent;
-  }
-  return indentation;
+  return indent.repeat(amount);
 }
 
 function buildHtmlTable(data: string[][]): string {
