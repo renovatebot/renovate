@@ -12,6 +12,7 @@ import {
   isBranchModified,
 } from '../../../../util/git';
 import type { BranchConfig } from '../../../types';
+import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
 
 // eslint-disable-next-line typescript-enum/no-enum
@@ -22,6 +23,7 @@ export enum PrAutomergeBlockReason {
   DryRun = 'DryRun',
   PlatformNotReady = 'PlatformNotReady',
   PlatformRejection = 'PlatformRejection',
+  OffSchedule = 'off schedule',
 }
 
 export type AutomergePrResult = {
@@ -45,6 +47,13 @@ export async function checkAutoMerge(
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
+  if (!isScheduledNow(config, 'automergeSchedule')) {
+    logger.debug(`PR automerge is off schedule`);
+    return {
+      automerged: false,
+      prAutomergeBlockReason: PrAutomergeBlockReason.OffSchedule,
+    };
+  }
   const isConflicted =
     config.isConflicted ??
     (await isBranchConflicted(config.baseBranch, config.branchName));

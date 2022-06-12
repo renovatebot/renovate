@@ -1,7 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type { GithubRelease } from '../../../../../../modules/datasource/github-releases/types';
-import type { GitHubTag } from '../../../../../../modules/datasource/github-tags/types';
+import { CacheableGithubReleases } from '../../../../../../modules/datasource/github-releases/cache';
+import { CacheableGithubTags } from '../../../../../../modules/datasource/github-tags/cache';
 import type {
   GithubGitBlob,
   GithubGitTree,
@@ -10,29 +10,35 @@ import type {
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash } from '../../../../../../util/url';
-import type { ChangeLogFile, ChangeLogNotes } from '../types';
+import type {
+  ChangeLogFile,
+  ChangeLogNotes,
+  ChangeLogProject,
+  ChangeLogRelease,
+} from '../types';
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
+const tagsCache = new CacheableGithubTags(http);
+const releasesCache = new CacheableGithubReleases(http);
 
 export async function getTags(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
   logger.trace('github.getTags()');
-  const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
-    const res = await http.getJson<GitHubTag[]>(url, {
-      paginate: true,
+    const tags = await tagsCache.getItems({
+      registryUrl: endpoint,
+      packageName: repository,
     });
 
-    const tags = res.body;
-
+    // istanbul ignore if
     if (!tags.length) {
       logger.debug({ repository }, 'repository has no Github tags');
     }
 
-    return tags.map((tag) => tag.name).filter(Boolean);
+    return tags.map(({ version }) => version).filter(Boolean);
   } catch (err) {
     logger.debug(
       { sourceRepo: repository, err },
@@ -106,20 +112,27 @@ export async function getReleaseNotesMd(
 }
 
 export async function getReleaseList(
-  apiBaseUrl: string,
-  repository: string
+  project: ChangeLogProject,
+  _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
-  const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
-    paginate: true,
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const apiBaseUrl = project.apiBaseUrl!;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = project.repository!;
+  const notesSourceUrl = `${ensureTrailingSlash(
+    apiBaseUrl
+  )}repos/${repository}/releases`;
+  const items = await releasesCache.getItems({
+    registryUrl: apiBaseUrl,
+    packageName: repository,
   });
-  return res.body.map((release) => ({
-    url: release.html_url,
-    notesSourceUrl: url,
-    id: release.id,
-    tag: release.tag_name,
-    name: release.name,
-    body: release.body,
+  return items.map(({ url, id, version: tag, name, description: body }) => ({
+    url,
+    notesSourceUrl,
+    id,
+    tag,
+    name,
+    body,
   }));
 }
