@@ -384,7 +384,7 @@ export abstract class AbstractGithubDatasourceCache<
     updateDuration: DurationLike,
     cacheItems: Record<string, StoredItem>
   ): boolean {
-    if (changelogRelease) {
+    if (changelogRelease?.date) {
       const changelogReleaseTime = DateTime.fromISO(
         changelogRelease.date.toString()
       );
