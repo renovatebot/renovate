@@ -1,7 +1,7 @@
 import { ClientRequest } from 'http';
-import type { Tracer } from '@opentelemetry/api';
+import type { Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
-import { SpanStatusCode } from '@opentelemetry/api';
+import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -22,12 +22,14 @@ import {
   isTracingEnabled,
 } from './utils';
 
-let traceProvider: NodeTracerProvider;
-
 init();
 
 export function init(): void {
-  traceProvider = new NodeTracerProvider({
+  if (!isTracingEnabled()) {
+    return;
+  }
+
+  const traceProvider = new NodeTracerProvider({
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
       [SemanticResourceAttributes.SERVICE_NAME]: 'renovate',
@@ -35,7 +37,6 @@ export function init(): void {
       [SemanticResourceAttributes.SERVICE_VERSION]: pkg.version,
     }),
   });
-  api.trace.setGlobalTracerProvider(traceProvider);
 
   // add processors
   if (isTraceDebuggingEnabled()) {
@@ -50,13 +51,10 @@ export function init(): void {
     traceProvider.addSpanProcessor(new BatchSpanProcessor(exporter));
   }
 
-  if (isTracingEnabled()) {
-    const contextManager = new AsyncLocalStorageContextManager();
-    api.context.setGlobalContextManager(contextManager);
-    traceProvider.register({
-      contextManager,
-    });
-  }
+  const contextManager = new AsyncLocalStorageContextManager();
+  traceProvider.register({
+    contextManager,
+  });
 
   registerInstrumentations({
     instrumentations: [
@@ -82,10 +80,24 @@ export function init(): void {
   });
 }
 
-export function getTracerProvider(): NodeTracerProvider {
-  return traceProvider;
+/* istanbul ignore next */
+// https://github.com/open-telemetry/opentelemetry-js-api/issues/34
+export async function shutdown(): Promise<void> {
+  const traceProvider = getTracerProvider();
+  if (traceProvider instanceof NodeTracerProvider) {
+    await traceProvider.shutdown();
+  } else if (traceProvider instanceof ProxyTracerProvider) {
+    const delegateProvider = traceProvider.getDelegate();
+    if (delegateProvider instanceof NodeTracerProvider) {
+      await delegateProvider.shutdown();
+    }
+  }
+}
+
+export function getTracerProvider(): TracerProvider {
+  return api.trace.getTracerProvider();
 }
 
 export function getTracer(): Tracer {
-  return traceProvider.getTracer('renovate');
+  return getTracerProvider().getTracer('renovate');
 }

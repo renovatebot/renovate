@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getTracer, getTracerProvider } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
+import { getTracer, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
 import { logger } from './logger';
 import * as proxy from './proxy';
 import * as globalWorker from './workers/global';
@@ -20,7 +20,7 @@ proxy.bootstrap();
     span.end();
     return exitCode;
   });
-  await getTracerProvider().shutdown(); //gracefully shutdown OpenTelemetry
+  await telemetryShutdown(); //gracefully shutdown OpenTelemetry
 
   // istanbul ignore if
   if (process.env.RENOVATE_X_HARD_EXIT) {

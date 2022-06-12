@@ -1,15 +1,24 @@
-import { NoopSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { ProxyTracerProvider } from '@opentelemetry/api';
+import * as api from '@opentelemetry/api';
+import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
 import { MultiSpanProcessor } from '@opentelemetry/sdk-trace-base/build/src/MultiSpanProcessor';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { getTracerProvider, init } from './index';
 
 jest.unmock('.');
 
 describe('instrumentation/index', () => {
-  it('should use NoopSpanProcessor if not activated', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    api.trace.disable(); // clear global components
+  });
+
+  it('should use NoopTraceProvider if not activated', () => {
     init();
     const traceProvider = getTracerProvider();
-    const provider = traceProvider.getActiveSpanProcessor();
-    expect(provider).toStrictEqual(new NoopSpanProcessor());
+    expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
+    const provider = traceProvider as ProxyTracerProvider;
+    expect(provider.getDelegate()).toBeInstanceOf(NoopTracerProvider);
   });
 
   it('activate console logger', () => {
@@ -17,7 +26,12 @@ describe('instrumentation/index', () => {
 
     init();
     const traceProvider = getTracerProvider();
-    const provider = traceProvider.getActiveSpanProcessor();
+    expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const provider = nodeProvider.getActiveSpanProcessor();
     expect(provider).toBeInstanceOf(MultiSpanProcessor);
     expect(provider).toMatchSnapshot();
   });
@@ -27,7 +41,12 @@ describe('instrumentation/index', () => {
 
     init();
     const traceProvider = getTracerProvider();
-    const provider = traceProvider.getActiveSpanProcessor();
+    expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const provider = nodeProvider.getActiveSpanProcessor();
     expect(provider).toBeInstanceOf(MultiSpanProcessor);
     expect(provider).toMatchSnapshot();
   });
@@ -38,7 +57,12 @@ describe('instrumentation/index', () => {
 
     init();
     const traceProvider = getTracerProvider();
-    const provider = traceProvider.getActiveSpanProcessor();
+    expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const provider = nodeProvider.getActiveSpanProcessor();
     expect(provider).toBeInstanceOf(MultiSpanProcessor);
     expect(provider).toMatchSnapshot();
   });
