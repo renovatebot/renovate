@@ -12,6 +12,18 @@ function mockFs(files: Record<string, string>): void {
       ? Promise.resolve(content)
       : Promise.reject(`File not found: ${fileName}`);
   });
+
+  fs.getSiblingFileName.mockImplementation(
+    (existingFileNameWithPath: string, otherFileName: string) => {
+      return existingFileNameWithPath
+        .slice(0, existingFileNameWithPath.lastIndexOf('/') + 1)
+        .concat(otherFileName);
+    }
+  );
+  fs.readLocalFileSync.mockImplementation((fileName: string): string | null => {
+    const content = files?.[fileName];
+    return typeof content === 'string' ? content : null;
+  });
 }
 
 describe('modules/manager/gradle/extract', () => {
@@ -597,6 +609,266 @@ describe('modules/manager/gradle/extract', () => {
             registryUrls: ['https://repo.maven.apache.org/maven2'],
           },
         ],
+      },
+    ]);
+  });
+
+  it('loads further scripts using apply from statements', async () => {
+    const buildFile = `
+      buildscript {
+          repositories {
+              mavenCentral()
+          }
+
+          apply from: "\${someDir}/libs1.gradle"
+          apply from: file("gradle/libs2.gradle")
+          apply from: "gradle/libs3.gradle"
+          apply from: file("gradle/non-existing.gradle")
+
+          dependencies {
+              classpath "com.google.protobuf:protobuf-java:\${protoBufVersion}"
+              classpath "com.google.guava:guava:\${guavaVersion}"
+              classpath "io.jsonwebtoken:jjwt-api:0.11.2"
+
+              classpath "org.junit.jupiter:junit-jupiter-api:\${junitVersion}"
+              classpath "org.junit.jupiter:junit-jupiter-engine:\${junitVersion}"
+          }
+      }
+    `;
+
+    mockFs({
+      'gradleX/libs1.gradle': "ext.junitVersion = '5.5.2'",
+      'gradle/libs2.gradle': "ext.protoBufVersion = '3.18.2'",
+      'gradle/libs3.gradle': "ext.guavaVersion = '30.1-jre'",
+      'build.gradle': buildFile,
+      'gradle.properties': 'someDir=gradleX',
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'gradleX/libs1.gradle',
+      'gradle/libs2.gradle',
+      // 'gradle/libs3.gradle', is intentionally not listed here
+      'build.gradle',
+      'gradle.properties',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle.properties',
+        datasource: 'maven',
+        deps: [],
+      },
+      {
+        packageFile: 'build.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'io.jsonwebtoken:jjwt-api',
+            currentValue: '0.11.2',
+            managerData: {
+              fileReplacePosition: 507,
+              packageFile: 'build.gradle',
+            },
+            fileReplacePosition: 507,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+      {
+        packageFile: 'gradle/libs2.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'com.google.protobuf:protobuf-java',
+            currentValue: '3.18.2',
+            managerData: {
+              fileReplacePosition: 23,
+              packageFile: 'gradle/libs2.gradle',
+            },
+            groupName: 'protoBufVersion',
+            fileReplacePosition: 23,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+      {
+        packageFile: 'gradleX/libs1.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'org.junit.jupiter:junit-jupiter-api',
+            currentValue: '5.5.2',
+            managerData: {
+              fileReplacePosition: 20,
+              packageFile: 'gradleX/libs1.gradle',
+            },
+            groupName: 'junitVersion',
+            fileReplacePosition: 20,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            depName: 'org.junit.jupiter:junit-jupiter-engine',
+            currentValue: '5.5.2',
+            managerData: {
+              fileReplacePosition: 20,
+              packageFile: 'gradleX/libs1.gradle',
+            },
+            groupName: 'junitVersion',
+            fileReplacePosition: 20,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+      {
+        packageFile: 'gradle/libs3.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'com.google.guava:guava',
+            currentValue: '30.1-jre',
+            managerData: {
+              fileReplacePosition: 20,
+              packageFile: 'gradle/libs3.gradle',
+            },
+            groupName: 'guavaVersion',
+            fileReplacePosition: 20,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('apply from works with files in sub-directories', async () => {
+    const buildFile = `
+      buildscript {
+          repositories {
+              mavenCentral()
+          }
+
+          apply from: "gradle/libs4.gradle"
+
+          dependencies {
+              classpath "com.google.protobuf:protobuf-java:\${protoBufVersion}"
+          }
+      }
+    `;
+
+    mockFs({
+      'somesubdir/gradle/libs4.gradle': "ext.protoBufVersion = '3.18.2'",
+      'somesubdir/build.gradle': buildFile,
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'somesubdir/gradle/libs4.gradle',
+      'somesubdir/build.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'somesubdir/build.gradle',
+        datasource: 'maven',
+        deps: [],
+      },
+      {
+        packageFile: 'somesubdir/gradle/libs4.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'com.google.protobuf:protobuf-java',
+            currentValue: '3.18.2',
+            managerData: {
+              fileReplacePosition: 23,
+              packageFile: 'somesubdir/gradle/libs4.gradle',
+            },
+            groupName: 'protoBufVersion',
+            fileReplacePosition: 23,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('prevents recursive apply from calls', async () => {
+    mockFs({
+      'build.gradle': "apply from: 'test.gradle'",
+      'test.gradle': "apply from: 'build.gradle'",
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'test.gradle',
+    ]);
+
+    expect(res).toBeNull();
+  });
+
+  it('filters duplicate dependency findings', async () => {
+    const buildFile = `
+      apply from: 'test.gradle'
+
+      repositories {
+          mavenCentral()
+      }
+
+      dependencies {
+        implementation "io.jsonwebtoken:jjwt-api:$\{jjwtVersion}"
+        runtimeOnly "io.jsonwebtoken:jjwt-impl:$\{jjwtVersion}"
+      }
+    `;
+
+    const testFile = `
+      ext.jjwtVersion = '0.11.2'
+
+      ext {
+          jjwtApi = "io.jsonwebtoken:jjwt-api:$jjwtVersion"
+      }
+    `;
+
+    mockFs({
+      'build.gradle': buildFile,
+      'test.gradle': testFile,
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'test.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'test.gradle',
+        datasource: 'maven',
+        deps: [
+          {
+            depName: 'io.jsonwebtoken:jjwt-api',
+            currentValue: '0.11.2',
+            managerData: {
+              fileReplacePosition: 26,
+              packageFile: 'test.gradle',
+            },
+            groupName: 'jjwtVersion',
+            fileReplacePosition: 26,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            depName: 'io.jsonwebtoken:jjwt-impl',
+            currentValue: '0.11.2',
+            managerData: {
+              fileReplacePosition: 26,
+              packageFile: 'test.gradle',
+            },
+            groupName: 'jjwtVersion',
+            fileReplacePosition: 26,
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+      {
+        packageFile: 'build.gradle',
+        datasource: 'maven',
+        deps: [],
       },
     ]);
   });

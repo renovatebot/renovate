@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -6,6 +7,23 @@ import {
   MAVEN_REPO,
 } from './common';
 import { parseGradle, parseProps } from './parser';
+
+jest.mock('../../../util/fs');
+
+function mockFs(files: Record<string, string>): void {
+  fs.getSiblingFileName.mockImplementation(
+    (existingFileNameWithPath: string, otherFileName: string) => {
+      return existingFileNameWithPath
+        .slice(0, existingFileNameWithPath.lastIndexOf('/') + 1)
+        .concat(otherFileName);
+    }
+  );
+
+  fs.readLocalFileSync.mockImplementation((fileName: string): string | null => {
+    const content = files?.[fileName];
+    return typeof content === 'string' ? content : null;
+  });
+}
 
 describe('modules/manager/gradle/parser', () => {
   it('handles end of input', () => {
@@ -199,6 +217,48 @@ describe('modules/manager/gradle/parser', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('apply from', () => {
+    const key = 'version';
+    const value = '1.2.3';
+    const validOutput = {
+      version: {
+        key,
+        value,
+        fileReplacePosition: 11,
+        packageFile: 'foo/bar.gradle',
+      },
+    };
+
+    mockFs({
+      'foo/bar.gradle': key + ' = "' + value + '"',
+    });
+
+    test.each`
+      def             | input                                              | output
+      ${''}           | ${'apply from: ""'}                                | ${{}}
+      ${''}           | ${'apply from: "foo/invalid.gradle"'}              | ${{}}
+      ${''}           | ${'apply from: "https://someurl.com/file.gradle"'} | ${{}}
+      ${''}           | ${'apply from: "foo/bar.gradle"'}                  | ${validOutput}
+      ${'base="foo"'} | ${'apply from: "${base}/bar.gradle"'}              | ${validOutput}
+      ${''}           | ${'apply from: file("foo/bar.gradle")'}            | ${validOutput}
+      ${'base="foo"'} | ${'apply from: file("${base}/bar.gradle")'}        | ${validOutput}
+      ${''}           | ${'apply from: new File("foo/bar.gradle")'}        | ${validOutput}
+      ${'base="foo"'} | ${'apply from: new File("${base}/bar.gradle")'}    | ${validOutput}
+      ${''}           | ${'apply(from = "foo/bar.gradle"))'}               | ${validOutput}
+      ${'base="foo"'} | ${'apply(from = "${base}/bar.gradle"))'}           | ${validOutput}
+      ${''}           | ${'apply(from = File("foo/bar.gradle"))'}          | ${validOutput}
+      ${'base="foo"'} | ${'apply(from = File("${base}/bar.gradle"))'}      | ${validOutput}
+    `('$def | $input', ({ def, input, output }) => {
+      const { vars } = parseGradle([def, input].join('\n'));
+      expect(vars).toMatchObject(output);
+    });
+
+    it('recursion check', () => {
+      const { vars } = parseGradle('apply from: "foo/bar.gradle"', {}, null, 1);
+      expect(vars).toBeEmpty();
     });
   });
 });
