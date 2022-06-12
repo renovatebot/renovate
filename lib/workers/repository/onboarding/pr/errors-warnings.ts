@@ -107,9 +107,6 @@ export function getDepWarningsPR(
     if (!warnings.length) {
       return '';
     }
-    if (!warnings.length) {
-      return '';
-    }
     logger.debug(
       { warnings, warningFiles },
       'Found package lookup warnings in onboarding'
