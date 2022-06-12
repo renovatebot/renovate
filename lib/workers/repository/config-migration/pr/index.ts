@@ -115,23 +115,21 @@ If you need any further assistance then you can also [request help here](${
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create migration PR');
     } else {
-      const targetBranch = config.defaultBranch;
-      if (targetBranch) {
-        const pr = await platform.createPr({
-          sourceBranch: branchName,
-          targetBranch,
-          prTitle,
-          prBody,
-          labels,
-          platformOptions: getPlatformPrOptions({
-            ...config,
-            automerge: false,
-          }),
-        });
-        logger.info({ pr: pr?.number }, 'Migration PR created');
-        if (pr) {
-          await addParticipants(config, pr);
-        }
+      const pr = await platform.createPr({
+        sourceBranch: branchName,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        targetBranch: config.defaultBranch!,
+        prTitle,
+        prBody,
+        labels,
+        platformOptions: getPlatformPrOptions({
+          ...config,
+          automerge: false,
+        }),
+      });
+      logger.info({ pr: pr?.number }, 'Migration PR created');
+      if (pr) {
+        await addParticipants(config, pr);
       }
     }
   } catch (err) {
