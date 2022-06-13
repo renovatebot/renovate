@@ -3,6 +3,8 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
 
+type depWarningsModes = 'pr' | 'dashboard';
+
 export function getWarnings(config: RenovateConfig): string {
   if (!config?.warnings?.length) {
     return '';
@@ -32,7 +34,7 @@ export function getErrors(config: RenovateConfig): string {
 
 export function getDepWarnings(
   packageFiles: Record<string, PackageFile[]>,
-  mode = ''
+  mode: depWarningsModes = 'pr'
 ): string {
   let warningText = '';
   try {

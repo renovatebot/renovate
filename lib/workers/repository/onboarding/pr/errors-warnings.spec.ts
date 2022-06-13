@@ -70,7 +70,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarnings(packageFiles, 'pr');
+      const res = getDepWarnings(packageFiles);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
