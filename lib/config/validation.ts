@@ -534,7 +534,7 @@ export async function validateConfig(
           currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
-            if (key === 'aliases') {
+            if (key === 'registryAliases') {
               const res = validateAliasObject(val);
               if (res !== true) {
                 errors.push({

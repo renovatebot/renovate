@@ -22,16 +22,17 @@ const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
 export async function getReleaseList(
-  project: ChangeLogProject
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
       case 'gitlab':
-        return await gitlab.getReleaseList(apiBaseUrl, repository);
+        return await gitlab.getReleaseList(project, release);
       case 'github':
-        return await github.getReleaseList(apiBaseUrl, repository);
+        return await github.getReleaseList(project, release);
 
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
@@ -51,7 +52,8 @@ export async function getReleaseList(
 }
 
 export function getCachedReleaseList(
-  project: ChangeLogProject
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${project.apiBaseUrl}-${project.repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
@@ -59,7 +61,7 @@ export function getCachedReleaseList(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseList(project);
+  const promisedRes = getReleaseList(project, release);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -103,7 +105,7 @@ export async function getReleaseNotes(
   const { depName, repository } = project;
   const { version, gitRef } = release;
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releases = await getCachedReleaseList(project);
+  const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
