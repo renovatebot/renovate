@@ -110,7 +110,7 @@ If you need any further assistance then you can also [request help here](${
     return;
   }
   logger.debug('Creating migration PR');
-  const labels: string[] = prepareLabels(config);
+  const labels = prepareLabels(config);
   try {
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create migration PR');
