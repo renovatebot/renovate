@@ -295,6 +295,7 @@ export async function resolveConfigPresets(
         let fetchedPreset: RenovateConfig;
         try {
           fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
+          logUserExtendedConfig(fetchedPreset, inputConfig, preset);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
@@ -385,4 +386,17 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   return config;
+}
+
+export function logUserExtendedConfig(
+  fetchedConfig: RenovateConfig,
+  inputConfig: AllConfig,
+  presetSource: string
+): void {
+  if (presetSource.includes('>')) {
+    const combinedConfig = { ...inputConfig, ...fetchedConfig };
+    const presetIndex = combinedConfig.extends.indexOf(presetSource);
+    combinedConfig.extends.splice(presetIndex, 1);
+    logger.debug({ combinedConfig: combinedConfig }, 'shallow config log');
+  }
 }
