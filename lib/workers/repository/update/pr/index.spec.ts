@@ -22,7 +22,7 @@ import {
   ChangeLogRelease,
 } from './changelog/types';
 import * as _participants from './participants';
-import { ensurePr } from '.';
+import { ensurePr, updatePrRenovateVerData } from '.';
 
 jest.mock('../../../../util/git');
 
@@ -87,23 +87,10 @@ describe('workers/repository/update/pr/index', () => {
         );
       });
 
-      it('creates PR with html comment', async () => {
+      it('updates PR due to body change with pr data', () => {
         const prbodyContent = Fixtures.get('prbody1');
-        prBody.getPrBody.mockResolvedValueOnce(prbodyContent);
-
-        platform.createPr.mockResolvedValueOnce(pr);
-
-        const res = await ensurePr(config);
-
-        expect(res).toEqual({ type: 'with-pr', pr });
-        expect(limits.incLimitedValue).toHaveBeenCalledOnce();
-        expect(limits.incLimitedValue).toHaveBeenCalledWith(
-          limits.Limit.PullRequests
-        );
-        expect(logger.logger.info).toHaveBeenCalledWith(
-          { pr: pr.number, prTitle },
-          'PR created'
-        );
+        const res = updatePrRenovateVerData(undefined, prbodyContent);
+        expect(res).toMatchSnapshot();
       });
 
       it('aborts PR creation once limit is exceeded', async () => {
@@ -291,38 +278,24 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
       });
 
-      it('updates PR due to body change with html comment', async () => {
+      it('updates PR due to body change with pr data', () => {
+        const prbodyContent = Fixtures.get('prbody2');
         const changedPr: Pr = {
           ...pr,
-          bodyStruct: getPrBodyStruct(`${body} updated`),
+          bodyStruct: getPrBodyStruct(`${prbodyContent} updated`),
         };
-        platform.getBranchPr.mockResolvedValueOnce(changedPr);
-
-        const prbodyContent = Fixtures.get('prbody2');
-        prBody.getPrBody.mockResolvedValueOnce(prbodyContent);
-
-        const res = await ensurePr(config);
-
-        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
-        expect(platform.updatePr).toHaveBeenCalled();
-        expect(platform.createPr).not.toHaveBeenCalled();
+        const res = updatePrRenovateVerData(changedPr, prbodyContent);
+        expect(res).toMatchSnapshot();
       });
 
-      it('updates PR due to body change without html comment', async () => {
+      it('updates PR due to body change without pr data', () => {
+        const prbodyContent = Fixtures.get('prbody1');
         const changedPr: Pr = {
           ...pr,
-          bodyStruct: getPrBodyStruct(`${body} updated`),
+          bodyStruct: getPrBodyStruct(`${prbodyContent} updated`),
         };
-        platform.getBranchPr.mockResolvedValueOnce(changedPr);
-
-        const prbodyContent = Fixtures.get('prbody1');
-        prBody.getPrBody.mockResolvedValueOnce(prbodyContent);
-
-        const res = await ensurePr(config);
-
-        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
-        expect(platform.updatePr).toHaveBeenCalled();
-        expect(platform.createPr).not.toHaveBeenCalled();
+        const res = updatePrRenovateVerData(changedPr, prbodyContent);
+        expect(res).toMatchSnapshot();
       });
 
       it('ignores reviewable content ', async () => {

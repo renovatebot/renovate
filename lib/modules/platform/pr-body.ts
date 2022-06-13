@@ -1,7 +1,10 @@
 import hasha from 'hasha';
 import { stripEmojis } from '../../util/emoji';
 import { regEx } from '../../util/regex';
+import { fromBase64 } from '../../util/string';
 import type { PrBodyStruct } from './types';
+
+export const prVerDataRe = regEx(/<!--renovate-pr-data:(?<payload>.*?)-->/s);
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
@@ -21,20 +24,30 @@ export function hashBody(body: string | undefined): string {
   return result;
 }
 
-export function isRebaseRequested(body: string | undefined): boolean {
+function isRebaseRequested(body: string | undefined): boolean {
   return !!body?.includes(`- [x] <!-- rebase-check -->`);
+}
+
+export function getRenovatePrVerData(body: string | undefined): string {
+  const match = prVerDataRe.exec(body);
+  return match?.groups?.payload;
 }
 
 export function getPrBodyStruct(
   input: string | undefined | null
 ): PrBodyStruct {
-  const str = input ?? '';
-  const hash = hashBody(str);
+  const body = input ?? '';
+  const hash = hashBody(body);
   const result: PrBodyStruct = { hash };
 
-  const rebaseRequested = isRebaseRequested(str);
+  const rebaseRequested = isRebaseRequested(body);
   if (rebaseRequested) {
     result.rebaseRequested = rebaseRequested;
+  }
+
+  const base64data = getRenovatePrVerData(body);
+  if (base64data) {
+    result.renovatePrVerData = fromBase64(base64data);
   }
 
   return result;

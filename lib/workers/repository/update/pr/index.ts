@@ -8,15 +8,20 @@ import {
 } from '../../../../constants/error-messages';
 import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
-import { PlatformPrOptions, Pr, platform } from '../../../../modules/platform';
+import {
+  PlatformPrOptions,
+  Pr,
+  RenovatePrData,
+  platform,
+} from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
+import { hashBody, prVerDataRe } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { regEx } from '../../../../util/regex';
+import { toBase64 } from '../../../../util/string';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -28,10 +33,6 @@ import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
-
-const prRenovateVersionsRe = regEx(
-  /<!--\s*renovate-pr-data\s*(?<json>{(?:\s*.*)+})\s*-->/
-);
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -63,9 +64,35 @@ export type ResultWithoutPr = {
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
-interface PrRenVer {
-  prCreationVer: string;
-  prUpdateVer: string;
+export function updatePrRenovateVerData(
+  existingPr: Pr,
+  prBody: string
+): string {
+  let res = prBody;
+  let oldData;
+  let prDataNew: RenovatePrData;
+  if (existingPr) {
+    oldData = existingPr.bodyStruct?.renovatePrVerData;
+    if (oldData) {
+      prDataNew = JSON.parse(oldData);
+      prDataNew.prUpdateVer = pkg.version;
+    } else {
+      prDataNew = { prCreationVer: null, prUpdateVer: pkg.version };
+    }
+  } else {
+    prDataNew = { prCreationVer: pkg.version, prUpdateVer: pkg.version };
+  }
+
+  const prVerNew64 = toBase64(JSON.stringify(prDataNew));
+
+  if (oldData) {
+    res = res.replace(prVerDataRe, `<!--renovate-pr-data:${prVerNew64}-->`);
+  } else {
+    res += `\n<!--renovate-pr-data:${prVerNew64}-->\n`;
+  }
+
+  logger.debug(`PR Renovate Version Data:${JSON.stringify(prDataNew)}`);
+  return res;
 }
 
 // Ensures that PR exists with matching title/body
@@ -308,29 +335,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
-        const prRenVer = prRenovateVersionsRe.exec(prBody);
-        if (prRenVer?.groups) {
-          const parsed = JSON.parse(prRenVer.groups.json) as PrRenVer;
-          parsed.prUpdateVer = pkg.version;
-          prBody = prBody.replace(
-            prRenovateVersionsRe,
-            `\n<!-- renovate-pr-data ${JSON.stringify(parsed, null, 2)} \n-->\n`
-          );
-          logger.debug(`PR Renovate Version :${JSON.stringify(parsed)}`);
-        } else {
-          prBody += `\n<!-- renovate-pr-data ${JSON.stringify(
-            { prCreationVer: null, prUpdateVer: pkg.version },
-            null,
-            2
-          )} \n-->\n`;
-          logger.debug(
-            `PR Renovate Version :${JSON.stringify({
-              prCreationVer: null,
-              prUpdateVer: pkg.version,
-            })}`
-          );
-        }
-
+        prBody = updatePrRenovateVerData(existingPr, prBody);
         await platform.updatePr({
           number: existingPr.number,
           prTitle,
@@ -359,17 +364,7 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        prBody += `\n<!-- renovate-pr-data ${JSON.stringify(
-          { prCreationVer: pkg.version, prUpdateVer: pkg.version },
-          null,
-          2
-        )} \\n-->\\n`;
-        logger.debug(
-          `PR Renovate Version : ${JSON.stringify({
-            prCreationVer: pkg.version,
-            prUpdateVer: pkg.version,
-          })}`
-        );
+        prBody = updatePrRenovateVerData(undefined, prBody);
         pr = await platform.createPr({
           sourceBranch: branchName,
           targetBranch: config.baseBranch ?? '',
@@ -379,6 +374,7 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {

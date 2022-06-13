@@ -43,9 +43,15 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
 }
 
+export interface RenovatePrData {
+  prCreationVer: string;
+  prUpdateVer: string;
+}
+
 export interface PrBodyStruct {
   hash: string;
   rebaseRequested?: boolean;
+  renovatePrVerData?: string;
 }
 
 /**
