@@ -402,7 +402,7 @@ export function logUserCombinedConfig(
   inputConfig: AllConfig,
   userExtendedConfig: RenovateConfig
 ): void {
-  // remove internal presets from the log
+  // remove resolved presets from the log
   const repoConfig = Object.assign({}, inputConfig);
   if (repoConfig?.extends.length) {
     repoConfig.extends = repoConfig.extends.filter(
