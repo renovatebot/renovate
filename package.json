@@ -261,7 +261,7 @@
     "@typescript-eslint/parser": "5.27.0",
     "aws-sdk-client-mock": "0.6.2",
     "callsite": "1.0.0",
-    "conventional-changelog-conventionalcommits": "4.6.3",
+    "conventional-changelog-conventionalcommits": "5.0.0",
     "cross-env": "7.0.3",
     "diff": "5.1.0",
     "emojibase-data": "7.0.1",
