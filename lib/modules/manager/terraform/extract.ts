@@ -34,7 +34,8 @@ const dependencyBlockExtractionRegex = regEx(
 const contentCheckList = [
   'module "',
   'provider "',
-  'image ',
+  '"docker_',
+  '"kubernetes_',
   'required_providers ',
   ' "helm_release" ',
   ' "docker_image" ',
