@@ -277,7 +277,7 @@
     "expect-more-jest": "5.4.1",
     "glob": "8.0.3",
     "graphql": "16.5.0",
-    "husky": "7.0.4",
+    "husky": "8.0.1",
     "jest": "27.5.1",
     "jest-extended": "2.0.0",
     "jest-github-actions-reporter": "1.0.3",
