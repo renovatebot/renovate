@@ -108,7 +108,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         if (Object.keys(el[1] ?? []).length === 0) {
           return;
         }
-        el[1] = `<pre lang="json">${stringify(el[1], { indent: 2 })}</pre>`;
+        el[1] = `\n\`\`\`json\n${stringify(el[1], { indent: 2 })}\n\`\`\`\n`;
       }
       data.push(el);
     }
