@@ -521,13 +521,20 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.getIssue.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
+
         ## Pending Approval
+
         These branches will be created by Renovate only once you click their checkbox below.
+
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [x] <!-- approve-branch=branchName2 -->pr2
+
         ## Awaiting Schedule
+
         These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
          - [x] <!-- unschedule-branch=branchName3 -->pr3
+
          - [x] <!-- rebase-all-open-prs -->'
         `,
       });
