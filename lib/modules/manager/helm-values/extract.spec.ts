@@ -68,7 +68,7 @@ describe('modules/manager/helm-values/extract', () => {
         repository: bitnami/postgres-exporter2
         tag: 7.0.100-preview.1.22110.4`;
       const result = extractPackageFile(input);
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         deps: [
           {
             depName: 'docker.io/mjnagel/postgresql12',
