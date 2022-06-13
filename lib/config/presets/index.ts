@@ -266,7 +266,8 @@ export async function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
-  existingPresets: string[] = []
+  existingPresets: string[] = [],
+  shallowLog = false
 ): Promise<AllConfig> {
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
@@ -277,6 +278,7 @@ export async function resolveConfigPresets(
     'resolveConfigPresets'
   );
   let config: AllConfig = {};
+  let userExtendedConfig: RenovateConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
@@ -295,7 +297,6 @@ export async function resolveConfigPresets(
         let fetchedPreset: RenovateConfig;
         try {
           fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
-          logUserExtendedConfig(fetchedPreset, inputConfig, preset);
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
@@ -339,6 +340,12 @@ export async function resolveConfigPresets(
           ignorePresets,
           existingPresets.concat([preset])
         );
+        if (preset.includes('>')) {
+          userExtendedConfig = mergeChildConfig(
+            userExtendedConfig,
+            fetchedPreset
+          );
+        }
         // istanbul ignore if
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
@@ -350,6 +357,9 @@ export async function resolveConfigPresets(
   logger.trace({ config }, `Post-preset resolve config`);
   // Now assign "regular" config on top
   config = mergeChildConfig(config, inputConfig);
+  if (shallowLog) {
+    logUserCombinedConfig(inputConfig, userExtendedConfig);
+  }
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
@@ -388,15 +398,19 @@ export async function resolveConfigPresets(
   return config;
 }
 
-export function logUserExtendedConfig(
-  fetchedConfig: RenovateConfig,
+export function logUserCombinedConfig(
   inputConfig: AllConfig,
-  presetSource: string
+  userExtendedConfig: RenovateConfig
 ): void {
-  if (presetSource.includes('>')) {
-    const combinedConfig = { ...inputConfig, ...fetchedConfig };
-    const presetIndex = combinedConfig.extends.indexOf(presetSource);
-    combinedConfig.extends.splice(presetIndex, 1);
-    logger.debug({ combinedConfig: combinedConfig }, 'shallow config');
+  // remove internal presets from the log
+  const repoConfig = Object.assign({}, inputConfig);
+  if (repoConfig?.extends.length) {
+    repoConfig.extends = repoConfig.extends.filter(
+      (preset) => !preset.includes('>')
+    );
   }
+  logger.debug(
+    { combinedConfig: mergeChildConfig(repoConfig, userExtendedConfig) },
+    'shallow config'
+  );
 }
