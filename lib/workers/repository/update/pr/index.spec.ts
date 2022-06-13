@@ -87,12 +87,6 @@ describe('workers/repository/update/pr/index', () => {
         );
       });
 
-      it('updates PR due to body change with pr data', () => {
-        const prbodyContent = Fixtures.get('prbody1');
-        const res = updatePrRenovateVerData(undefined, prbodyContent);
-        expect(res).toMatchSnapshot();
-      });
-
       it('aborts PR creation once limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
@@ -276,6 +270,12 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
+      it('creates PR with pr data', () => {
+        const prbodyContent = Fixtures.get('prbody1');
+        const res = updatePrRenovateVerData(undefined, prbodyContent);
+        expect(res).toMatchSnapshot();
       });
 
       it('updates PR due to body change with pr data', () => {

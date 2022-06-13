@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { stripEmojis } from '../../util/emoji';
 import { regEx } from '../../util/regex';
@@ -28,7 +29,7 @@ function isRebaseRequested(body: string | undefined): boolean {
   return !!body?.includes(`- [x] <!-- rebase-check -->`);
 }
 
-export function getRenovatePrVerData(body: string | undefined): string {
+export function getRenovatePrVerData(body: string): string {
   const match = prVerDataRe.exec(body);
   return match?.groups?.payload;
 }
@@ -45,10 +46,13 @@ export function getPrBodyStruct(
     result.rebaseRequested = rebaseRequested;
   }
 
+  if (!is.string(body)) {
+    return result;
+  }
+
   const base64data = getRenovatePrVerData(body);
   if (base64data) {
     result.renovatePrVerData = fromBase64(base64data);
   }
-
   return result;
 }

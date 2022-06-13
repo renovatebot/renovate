@@ -65,7 +65,7 @@ export type ResultWithoutPr = {
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 export function updatePrRenovateVerData(
-  existingPr: Pr,
+  existingPr: Pr | undefined,
   prBody: string
 ): string {
   let res = prBody;
@@ -77,7 +77,7 @@ export function updatePrRenovateVerData(
       prDataNew = JSON.parse(oldData);
       prDataNew.prUpdateVer = pkg.version;
     } else {
-      prDataNew = { prCreationVer: null, prUpdateVer: pkg.version };
+      prDataNew = { prCreationVer: 'unknown', prUpdateVer: pkg.version };
     }
   } else {
     prDataNew = { prCreationVer: pkg.version, prUpdateVer: pkg.version };
