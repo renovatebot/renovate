@@ -397,6 +397,6 @@ export function logUserExtendedConfig(
     const combinedConfig = { ...inputConfig, ...fetchedConfig };
     const presetIndex = combinedConfig.extends.indexOf(presetSource);
     combinedConfig.extends.splice(presetIndex, 1);
-    logger.debug({ combinedConfig: combinedConfig }, 'shallow config log');
+    logger.debug({ combinedConfig: combinedConfig }, 'shallow config');
   }
 }
