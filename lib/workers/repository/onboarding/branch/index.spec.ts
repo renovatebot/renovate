@@ -96,13 +96,16 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
+      const expectConfig = {
+        ...config,
+        onboardingBranch: 'test',
+        renovateJsonPresent: true,
+        warnings: [],
+      };
+      delete expectConfig.extends;
+      delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
-        {
-          ...config,
-          onboardingBranch: 'test',
-          renovateJsonPresent: true,
-          warnings: [],
-        },
+        expectConfig,
         configFileNames[0]
       );
       const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
