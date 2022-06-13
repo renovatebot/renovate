@@ -393,6 +393,9 @@ Object {
       "skipReason": "invalid-dependency-specification",
     },
     Object {
+      "skipReason": "invalid-value",
+    },
+    Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "1.21.6",

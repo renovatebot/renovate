@@ -129,6 +129,21 @@ resource "kubernetes_job" "demo_invalid" {
   }
 }
 
+resource "kubernetes_job_invalid" "demo_invalid2" {
+  metadata {}
+  spec {
+    template {
+      metadata {}
+      spec {
+        container {
+          name    = "example5"
+          image   = "nginx:1.21.6"
+        }
+      }
+    }
+  }
+}
+
 resource "kubernetes_job_v1" "demo" {
   metadata {}
   spec {
