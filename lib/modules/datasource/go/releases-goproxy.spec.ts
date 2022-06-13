@@ -310,31 +310,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it('skips GONOPROXY and GOINSECURE packages', async () => {
-      process.env.GOPROXY = baseUrl;
-      process.env.GOINSECURE = 'github.com/google/*, github.com/google/zx';
-
-      githubGetTags.mockResolvedValueOnce({
-        releases: [
-          { gitRef: 'v1.0.0', version: 'v1.0.0' },
-          { gitRef: 'v1.0.1', version: 'v1.0.1' },
-        ],
-      });
-      githubGetReleases.mockResolvedValueOnce({ releases: [] });
-
-      const res = await datasource.getReleases({
-        packageName: 'github.com/google/btree',
-      });
-
-      expect(res).toEqual({
-        releases: [
-          { gitRef: 'v1.0.0', version: 'v1.0.0' },
-          { gitRef: 'v1.0.1', version: 'v1.0.1' },
-        ],
-        sourceUrl: 'https://github.com/google/btree',
-      });
-    });
-
     it('fetches release data from goproxy', async () => {
       process.env.GOPROXY = baseUrl;
 
