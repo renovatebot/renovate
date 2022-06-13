@@ -55,6 +55,11 @@ export function readLocalFileSync(
 ): string | Buffer | null {
   const { localDir } = GlobalConfig.get();
   const localFileName = upath.join(localDir, fileName);
+  if (localDir && !localFileName.startsWith(localDir)) {
+    logger.warn('Preventing access to file outside the base directory');
+    return null;
+  }
+
   try {
     return encoding
       ? fs.readFileSync(localFileName, encoding as BufferEncoding)

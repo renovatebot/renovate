@@ -61,9 +61,18 @@ describe('util/fs/index', () => {
       // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
       expect(readLocalFileSync(__dirname)).toBeNull();
     });
+
+    it('blocks path traversal attempt', () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      expect(readLocalFileSync('../' + __filename, 'utf8')).toBeNull();
+    });
   });
 
   describe('localPathExists', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir: '' });
+    });
+
     it('returns true for file', async () => {
       expect(await localPathExists(__filename)).toBeTrue();
     });
