@@ -40,7 +40,7 @@ For fine-grained control, e.g., to turn off only parts of this manager, you can 
 | Docker service                       |            `docker_service`            |                                                                            |
 | Kubernetes CronJob                   |         `kubernetes_cron_job`          |                                                                            |
 | Kubernetes CronJob v1                |        `kubernetes_cron_job_v1`        |                                                                            |
-| Kubernetes DaemonSet                 |            `docker_service`            |                                                                            |
+| Kubernetes DaemonSet                 |        `kubernetes_daemon_set`         |                                                                            |
 | Kubernetes DaemonSet v1              |       `kubernetes_daemon_set_v1`       |                                                                            |
 | Kubernetes Deployment                |        `kubernetes_deployment`         |                                                                            |
 | Kubernetes Deployment v1             |       `kubernetes_deployment_v1`       |                                                                            |
