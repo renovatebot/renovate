@@ -46,6 +46,7 @@ export function getPrBodyStruct(
     result.rebaseRequested = rebaseRequested;
   }
 
+  //istanbul ignore if
   if (!is.string(body)) {
     return result;
   }
