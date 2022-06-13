@@ -48,7 +48,7 @@ describe('modules/manager/helm-values/extract', () => {
       expect(result.deps).toHaveLength(5);
     });
 
-    it('extracts from values.yaml image tag"', () => {
+    it('extracts from values.yaml image tag', () => {
       const input = `
       replicaCount: 1
       firstImage:
@@ -58,7 +58,15 @@ describe('modules/manager/helm-values/extract', () => {
       secondImage:
         registry: docker.io
         repository: bitnami/postgres-exporter
-        tag: "10.70"`;
+        tag: "10.70"
+      thirdImage:
+        registry: docker.io
+        repository: bitnami/postgres-exporter1
+        tag: 10.20.30
+      fourthImage:
+        registry: docker.io
+        repository: bitnami/postgres-exporter2
+        tag: 7.0.100-preview.1.22110.4`;
       const result = extractPackageFile(input);
       expect(result).toMatchObject({
         deps: [
@@ -77,6 +85,26 @@ describe('modules/manager/helm-values/extract', () => {
             currentValue: '10.70',
             datasource: 'docker',
             replaceString: '10.70',
+            versioning: 'docker',
+            currentDigest: undefined,
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+          {
+            depName: 'docker.io/bitnami/postgres-exporter1',
+            currentValue: '10.20.30',
+            datasource: 'docker',
+            replaceString: '10.20.30',
+            versioning: 'docker',
+            currentDigest: undefined,
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+          {
+            depName: 'docker.io/bitnami/postgres-exporter2',
+            currentValue: '7.0.100-preview.1.22110.4',
+            datasource: 'docker',
+            replaceString: '7.0.100-preview.1.22110.4',
             versioning: 'docker',
             currentDigest: undefined,
             autoReplaceStringTemplate:

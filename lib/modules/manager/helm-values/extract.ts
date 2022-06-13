@@ -1,6 +1,5 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
-//import { regEx } from '../../../util/regex';
 import { regEx } from '../../../util/regex';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
@@ -64,7 +63,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   try {
     //This regex checks if type of tag: version is double if yes modify it to string
     const newContent = content.replace(
-      regEx(/(?<tag>^\s*tag:\s*)(?<ver>[\d.]*0$)/gm),
+      regEx(/(?<tag>^\s*tag:\s*)(?<ver>\d+.\d*0$)/gm),
       '$<tag>"$<ver>"'
     );
 
