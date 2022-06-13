@@ -9,7 +9,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
-import { getDepWarningsDashboard } from './onboarding/pr/errors-warnings';
+import { getDepWarnings } from './onboarding/pr/errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -101,7 +101,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 export async function ensureDependencyDashboard(
   config: RenovateConfig,
   allBranches: BranchConfig[],
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
@@ -256,7 +256,7 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
-  const warn = getDepWarningsDashboard(packageFiles);
+  const warn = getDepWarnings(packageFiles, 'dashboard');
   if (warn.length) {
     issueBody += warn;
     issueBody += '\n';

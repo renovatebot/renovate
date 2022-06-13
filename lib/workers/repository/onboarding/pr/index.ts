@@ -18,7 +18,7 @@ import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
-import { getDepWarningsPR, getErrors, getWarnings } from './errors-warnings';
+import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
@@ -99,7 +99,7 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsPR(packageFiles)
+    getWarnings(config) + getDepWarnings(packageFiles, 'pr')
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));

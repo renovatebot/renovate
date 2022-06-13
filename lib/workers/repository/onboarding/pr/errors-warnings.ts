@@ -31,11 +31,13 @@ export function getErrors(config: RenovateConfig): string {
 }
 
 export function getDepWarnings(
-  packageFiles: Record<string, PackageFile[]>
-): [string[], string[]] {
-  const warnings: string[] = [];
-  const warningFiles: string[] = [];
+  packageFiles: Record<string, PackageFile[]>,
+  mode = ''
+): string {
+  let warningText = '';
   try {
+    const warnings: string[] = [];
+    const warningFiles: string[] = [];
     for (const files of Object.values(packageFiles || {})) {
       for (const file of files || []) {
         if (file.deps) {
@@ -56,22 +58,24 @@ export function getDepWarnings(
         }
       }
     }
+    if (mode === 'pr') {
+      warningText = getDepWarningsPR(warnings, warningFiles);
+    } else if (mode === 'dashboard') {
+      warningText = getDepWarningsDashboard(warnings, warningFiles);
+    }
   } catch (err) {
     // istanbul ignore next
     logger.error({ err }, 'Error generating packageFiles');
   }
-  return [warnings, warningFiles];
+  return warningText;
 }
 
-export function getDepWarningsDashboard(
-  packageFiles: Record<string, PackageFile[]>
+function getDepWarningsDashboard(
+  warnings: string[],
+  warningFiles: string[]
 ): string {
   let warningText = '';
   try {
-    const depWarnings = getDepWarnings(packageFiles);
-    const warnings = depWarnings[0];
-    const warningFiles = depWarnings[1];
-
     if (!warnings.length) {
       return '';
     }
@@ -96,14 +100,9 @@ export function getDepWarningsDashboard(
   return warningText;
 }
 
-export function getDepWarningsPR(
-  packageFiles: Record<string, PackageFile[]>
-): string {
+function getDepWarningsPR(warnings: string[], warningFiles: string[]): string {
   let warningText = '';
   try {
-    const depWarnings = getDepWarnings(packageFiles);
-    const warnings = depWarnings[0];
-    const warningFiles = depWarnings[1];
     if (!warnings.length) {
       return '';
     }

@@ -35,12 +35,7 @@ async function dryRun(
 ) {
   jest.clearAllMocks();
   GlobalConfig.set({ dryRun: 'full' });
-  const packageFiles: Record<string, PackageFile[]> = {};
-  await dependencyDashboard.ensureDependencyDashboard(
-    config,
-    branches,
-    packageFiles
-  );
+  await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
   );
@@ -80,12 +75,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -105,12 +95,7 @@ describe('workers/repository/dependency-dashboard', () => {
           dependencyDashboardApproval: false,
         },
       ];
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -122,12 +107,7 @@ describe('workers/repository/dependency-dashboard', () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
       config.dependencyDashboardAutoclose = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
         config.dependencyDashboardTitle
@@ -154,12 +134,7 @@ describe('workers/repository/dependency-dashboard', () => {
       ];
       config.dependencyDashboard = true;
       config.dependencyDashboardAutoclose = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
         config.dependencyDashboardTitle
@@ -175,12 +150,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardHeader = 'This is a header';
       config.dependencyDashboardFooter = 'And this is a footer';
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -205,12 +175,7 @@ describe('workers/repository/dependency-dashboard', () => {
         'This is a header for platform:{{platform}}';
       config.dependencyDashboardFooter =
         'And this is a footer for repository:{{repository}}';
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -296,12 +261,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -338,12 +298,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -388,12 +343,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -428,12 +378,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -483,12 +428,7 @@ describe('workers/repository/dependency-dashboard', () => {
       ];
       config.dependencyDashboard = true;
       config.dependencyDashboardPrApproval = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
@@ -546,12 +486,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ]);
       config.dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
@@ -586,29 +521,17 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.getIssue.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
-
         ## Pending Approval
-
         These branches will be created by Renovate only once you click their checkbox below.
-
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [x] <!-- approve-branch=branchName2 -->pr2
-
         ## Awaiting Schedule
-
         These updates are awaiting their schedule. Click on a checkbox to get an update now.
-
          - [x] <!-- unschedule-branch=branchName3 -->pr3
-
          - [x] <!-- rebase-all-open-prs -->'
         `,
       });
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
@@ -616,12 +539,7 @@ describe('workers/repository/dependency-dashboard', () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
       config.dependencyDashboardLabels = ['RenovateBot', 'Maintenance'];
-      const packageFiles: Record<string, PackageFile[]> = {};
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        packageFiles
-      );
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].labels).toStrictEqual([
         'RenovateBot',
@@ -656,11 +574,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
           const branches: BranchConfig[] = [];
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -672,11 +586,7 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           PackageFiles.clear();
           PackageFiles.add('main', {});
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -688,11 +598,7 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           PackageFiles.clear();
           PackageFiles.add('main', null);
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -703,11 +609,7 @@ describe('workers/repository/dependency-dashboard', () => {
         it('shows different combinations of version+digest for a given dependency', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', packageFilesWithDigest);
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -728,11 +630,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
           const branches: BranchConfig[] = [];
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -743,11 +641,7 @@ describe('workers/repository/dependency-dashboard', () => {
         it('show default message in issues body when packageFiles is empty', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', {});
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -758,11 +652,7 @@ describe('workers/repository/dependency-dashboard', () => {
         it('show default message in issues body when when packageFiles is null', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', null);
-          await dependencyDashboard.ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles
-          );
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 

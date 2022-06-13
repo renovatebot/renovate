@@ -1,12 +1,6 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
 import type { PackageFile } from '../../../../modules/manager/types';
-import {
-  getDepWarnings,
-  getDepWarningsDashboard,
-  getDepWarningsPR,
-  getErrors,
-  getWarnings,
-} from './errors-warnings';
+import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
 describe('workers/repository/onboarding/pr/errors-warnings', () => {
   describe('getWarnings()', () => {
@@ -39,12 +33,12 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
     });
   });
 
-  describe('getDepWarningsPR()', () => {
+  describe('getDepWarnings()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
-    it('returns warning text', () => {
+    it('returns pr warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -76,7 +70,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarningsPR(packageFiles);
+      const res = getDepWarnings(packageFiles, 'pr');
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -93,14 +87,8 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
         "
       `);
     });
-  });
 
-  describe('getDepWarningsDashboard()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
-    it('returns warning text', () => {
+    it('returns dashboard warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -132,7 +120,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarningsDashboard(packageFiles);
+      const res = getDepWarnings(packageFiles, 'dashboard');
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -146,56 +134,6 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
 
         "
       `);
-    });
-  });
-
-  describe('getDepWarnings()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
-    it('returns warning text', () => {
-      const packageFiles: Record<string, PackageFile[]> = {
-        npm: [
-          {
-            packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
-              },
-              {},
-            ],
-          },
-          {
-            packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
-              },
-            ],
-          },
-        ],
-        dockerfile: [
-          {
-            packageFile: 'Dockerfile',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 2', topic: undefined }],
-              },
-            ],
-          },
-        ],
-      };
-      const res = getDepWarnings(packageFiles);
-      const expectedWarnings = ['Warning 1', 'Warning 2'];
-      const expectedWarningFiles = [
-        'package.json',
-        'backend/package.json',
-        'Dockerfile',
-      ];
-      expect(res).toHaveLength(2);
-      expect(res[0]).toEqual(expectedWarnings);
-      expect(res[1]).toEqual(expectedWarningFiles);
     });
   });
 
