@@ -29,7 +29,7 @@ function isRebaseRequested(body: string | undefined): boolean {
   return !!body?.includes(`- [x] <!-- rebase-check -->`);
 }
 
-export function getRenovatePrVerData(body: string): string {
+export function getRenovatePrVerData(body: string): string | undefined {
   const match = prVerDataRe.exec(body);
   return match?.groups?.payload;
 }
