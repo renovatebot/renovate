@@ -92,7 +92,6 @@ describe('workers/repository/update/pr/index', () => {
         limits.isLimitReached.mockReturnValueOnce(true);
 
         const res = await ensurePr(config);
-
         expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
         expect(platform.createPr).not.toHaveBeenCalled();
       });
@@ -102,7 +101,6 @@ describe('workers/repository/update/pr/index', () => {
         limits.isLimitReached.mockReturnValueOnce(true);
 
         const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
-
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
       });
@@ -111,7 +109,6 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr({ ...config, updateType: 'rollback' });
-
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(logger.logger.info).toHaveBeenCalledWith('Creating Rollback PR');
       });
