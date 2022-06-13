@@ -680,7 +680,6 @@ describe('workers/repository/dependency-dashboard', () => {
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
-
           // same with dry run
           await dryRun(branches, platform);
         });
