@@ -6,11 +6,35 @@ import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
 
-function indent(amount: number, indent = '  '): string {
-  return indent.repeat(amount);
+type IndentTemplateFunction = (
+  strings: TemplateStringsArray,
+  ...keys: (string | number)[]
+) => string;
+
+function getIndentFunction(indent = '  '): IndentTemplateFunction {
+  return (
+    strings: TemplateStringsArray,
+    ...keys: (string | number)[]
+  ): string => {
+    const amount = keys.shift() as number;
+    const merged: string[] = [];
+    for (const str of strings) {
+      if (!str) {
+        continue;
+      }
+      merged.push(str);
+
+      const key = keys.pop();
+      if (key !== undefined) {
+        merged.push(key as string);
+      }
+    }
+    return indent.repeat(amount) + merged.concat(keys.map(String)).join('');
+  };
 }
 
 function buildHtmlTable(data: string[][]): string {
+  const indent = getIndentFunction(); // default indentation function
   // skip empty tables
   if (data.length < 2) {
     return '';
@@ -18,24 +42,24 @@ function buildHtmlTable(data: string[][]): string {
   let table = `<table>\n`;
   for (const [i, row] of data.entries()) {
     if (i === 0) {
-      table += `${indent(1)}<thead>\n`;
+      table += indent`${1}<thead>\n`;
     }
 
     if (i === 1) {
-      table += `${indent(1)}</thead>\n${indent(1)}<tbody>\n`;
+      table += indent`${1}</thead>\n` + indent`${1}<tbody>\n`;
     }
 
-    table += `${indent(2)}<tr>\n`;
+    table += indent`${2}<tr>\n`;
     for (const col of row) {
       if (i === 0) {
-        table += `${indent(3)}<th>${col}</th>\n`;
+        table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
-      table += `${indent(3)}<td>${col}</td>\n`;
+      table += indent`${3}<td>${col}</td>\n`;
     }
-    table += `${indent(2)}</tr>\n`;
+    table += indent`${2}</tr>\n`;
   }
-  table += `${indent(1)}</tbody>\n</table>\n`;
+  table += indent`${1}</tbody>\n</table>\n`;
   return table;
 }
 
