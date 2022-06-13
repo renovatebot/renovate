@@ -172,7 +172,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
-      const res = await getReleaseList({} as ChangeLogProject);
+      const res = await getReleaseList(
+        {} as ChangeLogProject,
+        {} as ChangeLogRelease
+      );
       expect(res).toBeEmptyArray();
     });
 
@@ -186,10 +189,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
       ] as never);
 
-      const res = await getReleaseList({
-        ...githubProject,
-        repository: 'some/yet-other-repository',
-      });
+      const res = await getReleaseList(
+        {
+          ...githubProject,
+          repository: 'some/yet-other-repository',
+        },
+        {} as ChangeLogRelease
+      );
       expect(res).toMatchSnapshot([
         {
           notesSourceUrl:
@@ -218,10 +224,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
         ]);
-      const res = await getReleaseList({
-        ...gitlabProject,
-        repository: 'some/yet-other-repository',
-      });
+      const res = await getReleaseList(
+        {
+          ...gitlabProject,
+          repository: 'some/yet-other-repository',
+        },
+        {} as ChangeLogRelease
+      );
       expect(res).toMatchSnapshot([
         {
           notesSourceUrl:
@@ -252,12 +261,15 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             body: 'some body #123, [#124](https://my.custom.domain/some/yet-other-repository/issues/124)',
           },
         ]);
-      const res = await getReleaseList({
-        ...gitlabProject,
-        repository: 'some/yet-other-repository',
-        apiBaseUrl: 'https://my.custom.domain/api/v4/',
-        baseUrl: 'https://my.custom.domain/',
-      });
+      const res = await getReleaseList(
+        {
+          ...gitlabProject,
+          repository: 'some/yet-other-repository',
+          apiBaseUrl: 'https://my.custom.domain/api/v4/',
+          baseUrl: 'https://my.custom.domain/',
+        },
+        {} as ChangeLogRelease
+      );
       expect(res).toMatchSnapshot([
         {
           notesSourceUrl:

@@ -1,3 +1,4 @@
+import type { PackageFile } from '../../types';
 import { detectMonorepos } from './monorepo';
 
 jest.mock('./pnpm');
@@ -5,14 +6,13 @@ jest.mock('./pnpm');
 describe('modules/manager/npm/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('uses lerna package settings', async () => {
-      const packageFiles = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
             lernaJsonFile: 'lerna.json',
           },
           lernaPackages: ['packages/*'],
-          packages: ['packages/*'],
           deps: [
             {
               depName: '@org/a',
@@ -47,10 +47,10 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageFile: 'packages/b/package.json',
           packageJsonName: '@org/b',
         },
-      ] as any;
+      ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
+      expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.isInternal)
@@ -59,14 +59,13 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('updates internal packages', async () => {
-      const packageFiles = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
             lernaJsonFile: 'lerna.json',
           },
           lernaPackages: ['packages/*'],
-          packages: ['packages/*'],
           deps: [
             {
               depName: '@org/a',
@@ -101,10 +100,10 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageFile: 'packages/b/package.json',
           packageJsonName: '@org/b',
         },
-      ] as any;
+      ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
+      expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.isInternal)
@@ -113,7 +112,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings with lerna', async () => {
-      const packageFiles = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
@@ -134,11 +133,11 @@ describe('modules/manager/npm/extract/monorepo', () => {
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
+      expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
     });
 
     it('uses yarn workspaces package settings without lerna', async () => {
-      const packageFiles = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           npmrc: '@org:registry=//registry.some.org\n',
@@ -162,8 +161,53 @@ describe('modules/manager/npm/extract/monorepo', () => {
       ]);
     });
 
+    it('uses yarn workspaces package settings with contraints', async () => {
+      const packageFiles: Partial<PackageFile>[] = [
+        {
+          packageFile: 'package.json',
+          yarnWorkspacesPackages: ['docs'],
+          skipInstalls: true, // coverage
+          constraints: {
+            node: '^14.15.0 || >=16.13.0',
+            yarn: '3.2.1',
+          },
+          yarnLock: 'yarn.lock',
+          managerData: {
+            hasPackageManager: true,
+          },
+        },
+        {
+          packageFile: 'docs/package.json',
+          packageJsonName: 'docs',
+          yarnLock: 'yarn.lock',
+          constraints: { yarn: '^3.2.0' },
+        },
+      ];
+      await detectMonorepos(packageFiles);
+      expect(packageFiles).toMatchObject([
+        {
+          constraints: {
+            node: '^14.15.0 || >=16.13.0',
+            yarn: '3.2.1',
+          },
+          managerData: {
+            hasPackageManager: true,
+          },
+        },
+        {
+          constraints: {
+            node: '^14.15.0 || >=16.13.0',
+            yarn: '^3.2.0',
+          },
+          managerData: {
+            hasPackageManager: true,
+          },
+        },
+      ]);
+    });
+
     it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', async () => {
-      const packageFiles = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
