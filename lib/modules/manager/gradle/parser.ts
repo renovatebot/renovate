@@ -996,10 +996,15 @@ function parseInlineScriptFile(
     return null;
   }
 
+  if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
+    logger.warn({ scriptFile }, `Only Gradle files are eligible for inclusion`);
+    return null;
+  }
+
   const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
   const scriptFileContent = readLocalFileSync(scriptFilePath, 'utf-8');
   if (!scriptFileContent) {
-    logger.warn({ scriptFileContent }, `Failed to process Gradle file`);
+    logger.warn({ scriptFilePath }, `Failed to process Gradle file`);
     return null;
   }
 

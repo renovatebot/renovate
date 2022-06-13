@@ -240,6 +240,7 @@ describe('modules/manager/gradle/parser', () => {
       def             | input                                              | output
       ${''}           | ${'apply from: ""'}                                | ${{}}
       ${''}           | ${'apply from: "foo/invalid.gradle"'}              | ${{}}
+      ${''}           | ${'apply from: "foo/invalid.non-gradle"'}          | ${{}}
       ${''}           | ${'apply from: "https://someurl.com/file.gradle"'} | ${{}}
       ${''}           | ${'apply from: "foo/bar.gradle"'}                  | ${validOutput}
       ${'base="foo"'} | ${'apply from: "${base}/bar.gradle"'}              | ${validOutput}

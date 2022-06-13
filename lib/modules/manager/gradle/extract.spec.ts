@@ -804,6 +804,18 @@ describe('modules/manager/gradle/extract', () => {
     expect(res).toBeNull();
   });
 
+  it('prevents inclusion of non-Gradle files', async () => {
+    mockFs({
+      'build.gradle': "apply from: '../../test.non-gradle'",
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+    ]);
+
+    expect(res).toBeNull();
+  });
+
   it('filters duplicate dependency findings', async () => {
     const buildFile = `
       apply from: 'test.gradle'
