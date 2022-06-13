@@ -402,9 +402,12 @@ export function logUserCombinedConfig(
   inputConfig: AllConfig,
   userExtendedConfig: RenovateConfig
 ): void {
+  if (Object.keys(userExtendedConfig).length === 0) {
+    return;
+  }
   // remove resolved presets from the log
   const repoConfig = Object.assign({}, inputConfig);
-  if (repoConfig?.extends.length) {
+  if (repoConfig?.extends?.length) {
     repoConfig.extends = repoConfig.extends.filter(
       (preset) => !preset.includes('>')
     );
