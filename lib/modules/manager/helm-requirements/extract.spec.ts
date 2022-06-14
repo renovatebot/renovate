@@ -26,7 +26,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -57,7 +57,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -85,7 +85,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -107,7 +107,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `);
       const fileName = 'requirements.yaml';
       const result = extractPackageFile('', fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -133,7 +133,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           placeholder: 'https://my-registry.gcr.io/',
           longalias: 'https://registry.example.com/',
         },
@@ -162,7 +162,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -187,7 +187,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -209,7 +209,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -220,7 +220,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       const content = '';
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });

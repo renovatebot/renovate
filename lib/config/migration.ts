@@ -221,7 +221,8 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
           const newKey = renameMap[oldKey as keyof typeof renameMap];
           if (newKey) {
-            packageRule[newKey] = ruleVal;
+            // TODO: fix types #7154
+            packageRule[newKey] = ruleVal as never;
             delete packageRule[oldKey];
           }
         }

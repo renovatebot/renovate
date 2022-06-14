@@ -249,6 +249,7 @@ export async function mergeRenovateConfig(
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
+  returnConfig = await presets.resolveConfigPresets(returnConfig, config);
   returnConfig.renovateJsonPresent = true;
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {

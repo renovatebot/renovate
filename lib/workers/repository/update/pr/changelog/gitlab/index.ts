@@ -5,7 +5,12 @@ import type { GitlabTag } from '../../../../../../modules/datasource/gitlab-tags
 import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../../../util/http/gitlab';
 import { ensureTrailingSlash } from '../../../../../../util/url';
-import type { ChangeLogFile, ChangeLogNotes } from '../types';
+import type {
+  ChangeLogFile,
+  ChangeLogNotes,
+  ChangeLogProject,
+  ChangeLogRelease,
+} from '../types';
 
 export const id = 'gitlab-changelog';
 const http = new GitlabHttp(id);
@@ -91,11 +96,14 @@ export async function getReleaseNotesMd(
 }
 
 export async function getReleaseList(
-  apiBaseUrl: string,
-  repository: string
+  project: ChangeLogProject,
+  _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
-
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const apiBaseUrl = project.apiBaseUrl!;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = project.repository!;
   const urlEncodedRepo = encodeURIComponent(repository);
   const apiUrl = `${ensureTrailingSlash(
     apiBaseUrl
