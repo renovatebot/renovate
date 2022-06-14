@@ -2393,9 +2393,7 @@ describe('modules/platform/github/index', () => {
           })
           .post('/repos/some/repo/issues/123/labels')
           .reply(200, [])
-          .post('/graphql', (body) =>
-            JSON.stringify(body).includes('autoMergeAllowed')
-          )
+          .post('/graphql')
           .reply(200, {
             data: {
               repository: {
