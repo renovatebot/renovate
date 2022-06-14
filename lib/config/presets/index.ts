@@ -355,11 +355,11 @@ export async function resolveConfigPresets(
     }
   }
   logger.trace({ config }, `Post-preset resolve config`);
-  // Now assign "regular" config on top
-  config = mergeChildConfig(config, inputConfig);
   if (shallowLog) {
     logUserCombinedConfig(inputConfig, userExtendedConfig);
   }
+  // Now assign "regular" config on top
+  config = mergeChildConfig(config, inputConfig);
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
