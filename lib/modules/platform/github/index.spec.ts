@@ -2352,8 +2352,6 @@ describe('modules/platform/github/index', () => {
           .post('/repos/some/repo/pulls')
           .reply(200, {
             number: 123,
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
           })
           .post('/repos/some/repo/issues/123/labels')
           .reply(200, []);
@@ -2392,8 +2390,6 @@ describe('modules/platform/github/index', () => {
           .post('/repos/some/repo/pulls')
           .reply(200, {
             number: 123,
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
           })
           .post('/repos/some/repo/issues/123/labels')
           .reply(200, [])
