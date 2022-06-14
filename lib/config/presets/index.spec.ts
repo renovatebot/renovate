@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
+import { logger } from '../../logger';
 import type { RenovateConfig } from '../types';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -956,20 +957,25 @@ Object {
     });
 
     it('logs user extended config', () => {
-      const spy = jest.spyOn(presets, 'logUserCombinedConfig');
       logUserCombinedConfig(
         { extends: ['github>username/preset-repo'] },
         { pacakgeRules: ['some rule'] }
       );
-      expect(spy).toHaveBeenCalled();
-      spy.mockRestore();
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          combinedConfig: {
+            extends: [],
+            pacakgeRules: ['some rule'],
+          },
+        },
+        'shallow config'
+      );
     });
 
     it('skip log when there is no extended user config', () => {
-      const spy = jest.spyOn(presets, 'logUserCombinedConfig');
-      logUserCombinedConfig({ extends: ['github>username/preset-repo'] }, {});
-      expect(spy).toHaveBeenCalled();
-      spy.mockRestore();
+      logUserCombinedConfig({ pacakgeRules: ['some rule'] }, {});
+      // log gets called once "Using RE2 as regex engine" behind the scenes.
+      expect(logger.debug).toHaveBeenCalledTimes(1);
     });
   });
 });
