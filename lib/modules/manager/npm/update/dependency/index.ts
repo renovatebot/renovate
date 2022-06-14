@@ -217,7 +217,7 @@ export function updateDependency({
           newFileContent,
           'resolutions',
           depKey,
-          parsedContents.resolutions[depKey],
+          parsedContents.resolutions[depKey]!,
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           newValue!
         );

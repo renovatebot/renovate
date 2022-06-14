@@ -181,7 +181,7 @@ export async function extractPackageFile(
   function extractDependency(
     depType: string,
     depName: string,
-    input: string
+    input?: string
   ): PackageDependency {
     const dep: PackageDependency = {};
     if (!validateNpmPackageName(depName).validForOldPackages) {
@@ -347,7 +347,7 @@ export async function extractPackageFile(
    */
   function extractOverrideDepsRec(
     parents: string[],
-    child: NpmManagerData
+    child?: NpmManagerData
   ): PackageDependency[] {
     const deps: PackageDependency[] = [];
     if (!child || is.emptyObject(child)) {
@@ -355,7 +355,7 @@ export async function extractPackageFile(
     }
     for (const [overrideName, versionValue] of Object.entries(child)) {
       if (is.string(versionValue)) {
-        // special handling for "." override depenency name
+        // special handling for "." override dependency name
         // "." means the constraint is applied to the parent dep
         const currDepName =
           overrideName === '.' ? parents[parents.length - 1] : overrideName;
