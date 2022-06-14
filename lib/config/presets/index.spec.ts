@@ -11,6 +11,7 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
+import { logUserCombinedConfig } from '.';
 
 jest.mock('./npm');
 jest.mock('./github');
@@ -952,6 +953,23 @@ Object {
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBeUndefined();
       expect(e!.validationMessage).toBeUndefined();
+    });
+
+    it('logs user extended config', () => {
+      const spy = jest.spyOn(presets, 'logUserCombinedConfig');
+      logUserCombinedConfig(
+        { extends: ['github>username/preset-repo'] },
+        { pacakgeRules: ['some rule'] }
+      );
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('skip log when there is no extended user config', () => {
+      const spy = jest.spyOn(presets, 'logUserCombinedConfig');
+      logUserCombinedConfig({ extends: ['github>username/preset-repo'] }, {});
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
     });
   });
 });
