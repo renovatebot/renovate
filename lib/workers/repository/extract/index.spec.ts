@@ -1,6 +1,7 @@
 import { defaultConfig, git, mocked } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { getExtractList } from '../process/extract-update';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
 
@@ -22,28 +23,32 @@ describe('workers/repository/extract/index', () => {
 
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      const res = await extractAllDependencies(config);
+      const [extractList] = await getExtractList(config);
+      const res = await extractAllDependencies(config, extractList);
       expect(Object.keys(res)).toContain('ansible');
     });
 
     it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      const res = await extractAllDependencies(config);
+      const [extractList] = await getExtractList(config);
+      const res = await extractAllDependencies(config, extractList);
       expect(res).toEqual({ npm: [{}] });
     });
 
     it('warns if no packages found for a enabled manager', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
-      expect(await extractAllDependencies(config)).toEqual({});
+      const [extractList] = await getExtractList(config);
+      expect(await extractAllDependencies(config, extractList)).toEqual({});
       expect(logger.debug).toHaveBeenCalled();
     });
 
     it('warns if packageFiles is null', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue(null);
-      expect(await extractAllDependencies(config)).toEqual({});
+      const [extractList] = await getExtractList(config);
+      expect(await extractAllDependencies(config, extractList)).toEqual({});
     });
 
     it('adds skipReason to internal deps when updateInternalDeps is false/undefined', async () => {
@@ -53,7 +58,8 @@ describe('workers/repository/extract/index', () => {
           deps: [{ depName: 'a', isInternal: true }, { depName: 'b' }],
         },
       ]);
-      expect(await extractAllDependencies(config)).toEqual({
+      const [extractList] = await getExtractList(config);
+      expect(await extractAllDependencies(config, extractList)).toEqual({
         npm: [
           {
             deps: [
@@ -73,7 +79,8 @@ describe('workers/repository/extract/index', () => {
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
-      const res = await extractAllDependencies(config);
+      const [extractList] = await getExtractList(config);
+      const res = await extractAllDependencies(config, extractList);
       expect(Object.keys(res)).toContain('regex');
     });
   });

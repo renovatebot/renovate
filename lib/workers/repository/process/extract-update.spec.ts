@@ -1,5 +1,10 @@
 import hasha from 'hasha';
-import { git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  defaultConfig,
+  git,
+  mocked,
+} from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
@@ -25,10 +30,19 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
 
 describe('workers/repository/process/extract-update', () => {
   describe('extract()', () => {
+    let config: RenovateConfig;
+    const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
+
+    beforeEach(() => {
+      config = { ...defaultConfig };
+      git.getFileList.mockResolvedValue(fileList);
+    });
+
     it('runs with no baseBranches', async () => {
-      const config = {
+      config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
+        ...config,
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       git.checkoutBranch.mockResolvedValueOnce('123test');
@@ -49,10 +63,11 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('runs with baseBranches', async () => {
-      const config = {
+      config = {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
+        ...config,
       };
       git.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
@@ -62,10 +77,11 @@ describe('workers/repository/process/extract-update', () => {
 
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
-      const config = {
+      config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
         baseBranch: 'master',
+        ...config,
       };
       repositoryCache.getCache.mockReturnValueOnce({
         scan: {

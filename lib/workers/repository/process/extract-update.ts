@@ -1,12 +1,23 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
-import type { RenovateConfig } from '../../../config/types';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type {
+  ManagerConfig,
+  RenovateConfig,
+  WorkerExtractConfig,
+} from '../../../config/types';
 import { logger } from '../../../logger';
+import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
-import { checkoutBranch, getBranchCommit } from '../../../util/git';
+import {
+  checkoutBranch,
+  getBranchCommit,
+  getFileList,
+} from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
+import { getMatchingFiles } from '../extract/file-match';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
@@ -47,6 +58,41 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   return stats;
 }
 
+export async function getExtractList(
+  config: RenovateConfig
+): Promise<[WorkerExtractConfig[], string]> {
+  let managerList = getManagerList();
+  const { enabledManagers } = config;
+  if (is.nonEmptyArray(enabledManagers)) {
+    logger.debug('Applying enabledManagers filtering');
+    managerList = managerList.filter((manager) =>
+      enabledManagers.includes(manager)
+    );
+  }
+  const extractList: WorkerExtractConfig[] = [];
+  const fileList = await getFileList();
+  const matchingFilesList: string[] = [];
+  const tryConfig = (managerConfig: ManagerConfig): void => {
+    const matchingFileList = getMatchingFiles(managerConfig, fileList);
+    if (matchingFileList.length) {
+      matchingFilesList.push(...matchingFileList);
+      extractList.push({ ...managerConfig, fileList: matchingFileList });
+    }
+  };
+  for (const manager of managerList) {
+    const managerConfig = getManagerConfig(config, manager);
+    managerConfig.manager = manager;
+    if (manager === 'regex') {
+      for (const regexManager of config.regexManagers ?? []) {
+        tryConfig(mergeChildConfig(managerConfig, regexManager));
+      }
+    } else {
+      tryConfig(managerConfig);
+    }
+  }
+  return [extractList, hasha(matchingFilesList)];
+}
+
 export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
@@ -58,6 +104,9 @@ export async function extract(
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [extractList] = await getExtractList(config);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
@@ -79,7 +128,7 @@ export async function extract(
     }
   } else {
     await checkoutBranch(baseBranch);
-    packageFiles = await extractAllDependencies(config);
+    packageFiles = await extractAllDependencies(config, extractList);
     cache.scan[baseBranch] = {
       sha: baseBranchSha,
       configHash,
