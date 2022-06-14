@@ -1,6 +1,5 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
-import type { RegexManagerTemplates } from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -161,7 +160,17 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
-
+export interface RegexManagerTemplates {
+  depNameTemplate?: string;
+  packageNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
+  depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
+}
 export interface CustomManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
