@@ -41,7 +41,7 @@ function replaceAsString(
     parsedContents[depType] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
-    delete Object.assign(parsedContents[depType], {
+    delete Object.assign(parsedContents[depType]!, {
       [newValue]: parsedContents[depType]![oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
