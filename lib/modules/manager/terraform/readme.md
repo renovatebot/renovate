@@ -14,7 +14,7 @@ Currently, Terraform supports renovating the following dependencies, where sub-p
 - docker\_\*
   - Docker registry ( Public and Private )
 - kubernetes\_\*
-  - Kubernetes registry ( Public and Private )
+  - Docker registry ( Public and Private )
 - [tfe_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace) ( `terraform_version` argument )
 
 Terraform range constraints are supported:
