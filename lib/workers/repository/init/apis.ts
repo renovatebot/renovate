@@ -12,8 +12,8 @@ export type WorkerPlatformConfig = RepoResult &
   Record<string, any>;
 
 const defaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName)
-    ? config.onboardingConfigFileName
+  configFileNames.includes(config.onboardingConfigFileName!)
+    ? config.onboardingConfigFileName!
     : configFileNames[0];
 
 async function getJsonFile(file: string): Promise<RenovateConfig | null> {

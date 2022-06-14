@@ -32,18 +32,22 @@ function getCachedTags(
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const {
-    versioning,
-    currentVersion,
-    newVersion,
-    sourceUrl,
-    depName,
-    manager,
-    sourceDirectory,
-  } = config;
+  const versioning = config.versioning!;
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
+  const sourceUrl = config.sourceUrl!;
+  const depName = config.depName!;
+  const manager = config.manager;
+  const sourceDirectory = config.sourceDirectory!;
+
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = URL.parse(sourceUrl);
+
+  const parsedUrl = URL.parse(sourceUrl);
+  const protocol = parsedUrl.protocol!;
+  const host = parsedUrl.host!;
+  const pathname = parsedUrl.pathname!;
+
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = protocol.concat('//', host, '/');
   const apiBaseUrl = baseUrl.concat('api/v4/');
@@ -55,7 +59,7 @@ export async function getChangeLogJSON(
     logger.info({ sourceUrl }, 'Invalid gitlab URL found');
     return null;
   }
-  const releases = config.releases || (await getInRangeReleases(config));
+  const releases = config.releases ?? (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
     return null;

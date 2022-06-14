@@ -22,7 +22,7 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
   const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    depName?.startsWith('@types/');
+    !!depName?.startsWith('@types/');
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade)
   );
@@ -31,15 +31,13 @@ function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
   upgrades.push(...regularUpgrades, ...typesUpgrades);
 }
 
-function getTableValues(
-  upgrade: BranchUpgradeConfig
-): [string, string, string, string] | null {
+function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   if (!upgrade.commitBodyTable) {
     return null;
   }
   const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = packageName || depName;
+  const name = packageName ?? depName;
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
@@ -76,13 +74,18 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   branchUpgrades.forEach((upg) => {
-    if (!depNames.includes(upg.depName)) {
-      depNames.push(upg.depName);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (!depNames.includes(upg.depName!)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      depNames.push(upg.depName!);
     }
-    if (!toVersions.includes(upg.newVersion)) {
-      toVersions.push(upg.newVersion);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (!toVersions.includes(upg.newVersion!)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      toVersions.push(upg.newVersion!);
     }
-    toValues.add(upg.newValue);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    toValues.add(upg.newValue!);
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
@@ -107,7 +110,7 @@ export function generateBranchConfig(
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
     if (upgrade.currentDigest) {
       upgrade.currentDigestShort =
-        upgrade.currentDigestShort ||
+        upgrade.currentDigestShort ??
         upgrade.currentDigest.replace('sha256:', '').substring(0, 7);
     }
     if (upgrade.newDigest) {
@@ -129,7 +132,10 @@ export function generateBranchConfig(
     upgrade.displayTo ??= '';
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      upgrade.displayPending = `\`${upgrade.pendingVersions.slice(-1).pop()}\``;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      upgrade.displayPending = `\`${upgrade
+        .pendingVersions!.slice(-1)
+        .pop()}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }
@@ -137,7 +143,7 @@ export function generateBranchConfig(
       upgrade.displayPending = '';
     }
     upgrade.prettyDepType =
-      upgrade.prettyDepType || upgrade.depType || 'dependency';
+      upgrade.prettyDepType ?? upgrade.depType ?? 'dependency';
     if (useGroupSettings) {
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
@@ -176,14 +182,15 @@ export function generateBranchConfig(
           upgrade
         )})`;
       }
-      upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
       upgrade.toLowerCase =
-        regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null &&
-        !upgrade.semanticCommitType.startsWith(':');
+        regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
+        !upgrade.semanticCommitType!.startsWith(':');
     }
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
-      upgrade.commitMessage || '',
+      upgrade.commitMessage ?? '',
       upgrade
     );
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
@@ -256,7 +263,8 @@ export function generateBranchConfig(
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
     config.upgrades.push(upgrade);
     if (upgrade.releaseTimestamp) {
-      if (releaseTimestamp) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (releaseTimestamp!) {
         const existingStamp = DateTime.fromISO(releaseTimestamp);
         const upgradeStamp = DateTime.fromISO(upgrade.releaseTimestamp);
         if (upgradeStamp > existingStamp) {
@@ -291,17 +299,24 @@ export function generateBranchConfig(
         return -1;
       }
 
-      if (a.depName < b.depName) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (a.depName! < b.depName!) {
         return -1;
       }
-      if (a.depName > b.depName) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (a.depName! > b.depName!) {
         return 1;
       }
       return 0;
     });
   }
   // Now assign first upgrade's config as branch config
-  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme (#9666)
+  config = {
+    ...config,
+    ...config.upgrades[0],
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    releaseTimestamp: releaseTimestamp!,
+  }; // TODO: fixme (#9666)
   config.reuseLockFiles = config.upgrades.every(
     (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
   );
@@ -314,7 +329,8 @@ export function generateBranchConfig(
   config.prBodyColumns = [
     ...new Set(
       config.upgrades.reduce(
-        (existing, upgrade) => existing.concat(upgrade.prBodyColumns),
+        (existing: string[], upgrade) =>
+          existing.concat(upgrade.prBodyColumns!),
         []
       )
     ),
@@ -324,14 +340,14 @@ export function generateBranchConfig(
   config.labels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.labels || [])
+        .map((upgrade) => upgrade.labels ?? [])
         .reduce((a, b) => a.concat(b), [])
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.addLabels || [])
+        .map((upgrade) => upgrade.addLabels ?? [])
         .reduce((a, b) => a.concat(b), [])
     ),
   ];
@@ -344,13 +360,16 @@ export function generateBranchConfig(
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
   }
-  const tableRows = config.upgrades
-    .map((upgrade) => getTableValues(upgrade))
-    .filter(Boolean);
+
+  const tableValues = config.upgrades.map(getTableValues);
+  const tableRows: string[][] = tableValues.filter(
+    (x: unknown): x is string[] => is.array<string[]>(x)
+  );
   if (tableRows.length) {
-    let table = [];
+    let table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);
-    table = table.concat(tableRows);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    table = table.concat(tableRows!);
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
   return config;

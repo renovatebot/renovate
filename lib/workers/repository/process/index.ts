@@ -37,7 +37,8 @@ async function getBaseBranchConfig(
 
     try {
       baseBranchConfig = await platform.getJsonFile(
-        configFileName,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        configFileName!,
         config.repository,
         baseBranch
       );
@@ -59,7 +60,8 @@ async function getBaseBranchConfig(
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (config.baseBranches.length > 1) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (config.baseBranches!.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
@@ -76,7 +78,7 @@ export async function extractDependencies(
   let res: ExtractResult = {
     branches: [],
     branchList: [],
-    packageFiles: null,
+    packageFiles: null!,
   };
   if (config.baseBranches?.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');

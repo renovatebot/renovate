@@ -104,16 +104,21 @@ export class Vulnerabilities {
     packageDependency: PackageDependency
   ): Promise<PackageRule[]> {
     const ecosystem =
-      Vulnerabilities.managerEcosystemMap[packageFileConfig.manager];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      Vulnerabilities.managerEcosystemMap[packageFileConfig.manager!];
 
     const vulnerabilities = await this.osvOffline?.getVulnerabilities(
-      ecosystem,
-      packageDependency.depName
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      ecosystem!,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      packageDependency.depName!
     );
     return this.convertToPackageRule(
       vulnerabilities ?? [],
-      packageDependency.depName,
-      ecosystem
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      packageDependency.depName!,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      ecosystem!
     );
   }
 
@@ -134,7 +139,7 @@ export class Vulnerabilities {
           matchPackageNames: [dependencyName],
           allowedVersions: affected?.ranges?.[0].events.find(
             (event) => event.fixed !== undefined
-          ).fixed,
+          )!.fixed,
           isVulnerabilityAlert: true,
         })
       );

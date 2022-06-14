@@ -24,7 +24,8 @@ export async function confirmIfDepUpdated(
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade: PackageDependency;
   try {
-    const newExtract = await extractPackageFile(
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const newExtract = await extractPackageFile!(
       newContent,
       packageFile,
       upgrade
@@ -34,11 +35,13 @@ export async function confirmIfDepUpdated(
       logger.debug({ manager, packageFile }, 'Could not extract package file');
       return false;
     }
-    newUpgrade = newExtract.deps[depIndex];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    newUpgrade = newExtract.deps[depIndex!];
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
-  if (!newUpgrade) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!newUpgrade!) {
     logger.debug({ manager, packageFile }, 'No newUpgrade');
     return false;
   }
@@ -91,12 +94,12 @@ export async function checkBranchDepsMatchBaseDeps(
   const { baseDeps, manager, packageFile } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   try {
-    const { deps: branchDeps } = await extractPackageFile(
-      branchContent,
-      packageFile,
-      upgrade
-    );
-    return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const res = await extractPackageFile!(branchContent, packageFile, upgrade)!;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const branchDeps = res!.deps;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       { manager, packageFile },
@@ -138,9 +141,10 @@ export async function doAutoReplace(
     logger.debug({ packageFile, depName }, 'Branch dep is already updated');
     return existingContent;
   }
-  const replaceString = upgrade.replaceString || currentValue;
+  const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
-  let searchIndex = existingContent.indexOf(replaceString);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  let searchIndex = existingContent.indexOf(replaceString!);
   if (searchIndex === -1) {
     logger.info(
       { packageFile, depName, existingContent, replaceString },
@@ -153,11 +157,12 @@ export async function doAutoReplace(
     if (autoReplaceStringTemplate) {
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
-      newString = replaceString;
+      newString = replaceString!;
       if (currentValue) {
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), 'g'),
-          newValue
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          newValue!
         );
       }
       if (currentDigest && newDigest) {
@@ -174,7 +179,8 @@ export async function doAutoReplace(
     // Iterate through the rest of the file
     for (; searchIndex < existingContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
-      if (matchAt(existingContent, searchIndex, replaceString)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      if (matchAt(existingContent, searchIndex, replaceString!)) {
         logger.debug(
           { packageFile, depName },
           `Found match at index ${searchIndex}`
@@ -183,16 +189,19 @@ export async function doAutoReplace(
         const testContent = replaceAt(
           existingContent,
           searchIndex,
-          replaceString,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          replaceString!,
           newString
         );
-        await writeLocalFile(upgrade.packageFile, testContent);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        await writeLocalFile(upgrade.packageFile!, testContent);
 
         if (await confirmIfDepUpdated(upgrade, testContent)) {
           return testContent;
         }
         // istanbul ignore next
-        await writeLocalFile(upgrade.packageFile, existingContent);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        await writeLocalFile(upgrade.packageFile!, existingContent);
       }
     }
   } catch (err) /* istanbul ignore next */ {

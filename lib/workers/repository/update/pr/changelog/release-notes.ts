@@ -70,7 +70,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string
 ): string {
-  let body = input || '';
+  let body = input ?? '';
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup
@@ -109,7 +109,7 @@ export async function getReleaseNotes(
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(depName, version, releases);
+  let matchedRelease = getExactReleaseMatch(depName!, version, releases);
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
@@ -123,7 +123,8 @@ export async function getReleaseNotes(
   if (is.undefined(matchedRelease) && config.extractVersion) {
     const extractVersionRegEx = regEx(config.extractVersion);
     matchedRelease = releases.find((r) => {
-      const extractedVersion = extractVersionRegEx.exec(r.tag)?.groups?.version;
+      const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
+        ?.version;
       return version === extractedVersion;
     });
   }
@@ -140,7 +141,7 @@ function getExactReleaseMatch(
   const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
-    exactReleaseReg.test(r.tag)
+    exactReleaseReg.test(r.tag!)
   );
   return matchedRelease;
 }
@@ -189,7 +190,7 @@ function sectionize(text: string, level: number): string[] {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substr(1);
       if (lev <= level) {
-        sections.push([lev, token.map[0]]);
+        sections.push([lev, token.map![0]]);
       }
     }
   });
@@ -218,8 +219,10 @@ function isUrl(url: string): boolean {
 
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
-): Promise<ChangeLogFile> | null {
-  const { apiBaseUrl, repository, sourceDirectory, type } = project;
+): Promise<ChangeLogFile | null> {
+  const { repository, type } = project;
+  const apiBaseUrl = project.apiBaseUrl!;
+  const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
       case 'gitlab':
@@ -355,7 +358,7 @@ export async function getReleaseNotesMd(
 export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   const dt = is.date(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
-    : DateTime.fromISO(releaseDate);
+    : DateTime.fromISO(releaseDate!);
 
   const now = DateTime.local();
 
@@ -387,7 +390,7 @@ export async function addReleaseNotes(
     }${version}`;
   }
   for (const v of input.versions) {
-    let releaseNotes: ChangeLogNotes;
+    let releaseNotes: ChangeLogNotes | null | undefined = null;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
@@ -409,11 +412,11 @@ export async function addReleaseNotes(
         cacheMinutes
       );
     }
-    output.versions.push({
+    output.versions!.push({
       ...v,
-      releaseNotes,
+      releaseNotes: releaseNotes!,
     });
-    output.hasReleaseNotes = output.hasReleaseNotes || !!releaseNotes;
+    output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
   }
   return output;
 }

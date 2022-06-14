@@ -51,12 +51,15 @@ export function generateBranchName(update: RenovateConfig): void {
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
-    update.branchTopic = update.group.branchTopic || update.branchTopic;
-    update.branchName = update.group.branchName || update.branchName;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    update.branchTopic = update.group!.branchTopic || update.branchTopic;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    update.branchName = update.group!.branchName || update.branchName;
   }
 
   if (update.hashedBranchLength) {
-    let hashLength = update.hashedBranchLength - update.branchPrefix.length;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
         `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`
@@ -84,7 +87,8 @@ export function generateBranchName(update: RenovateConfig): void {
 
     update.branchName = update.branchPrefix + hash.slice(0, hashLength);
   } else {
-    update.branchName = template.compile(update.branchName, update);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    update.branchName = template.compile(update.branchName!, update);
 
     // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);

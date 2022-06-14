@@ -251,7 +251,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
+    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>'
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -769,7 +769,7 @@ export async function getFile(
   await syncGit();
   try {
     const content = await git.show([
-      'origin/' + (branchName || config.currentBranch) + ':' + filePath,
+      'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
     return content;
   } catch (err) {
@@ -1022,7 +1022,7 @@ export function getUrl({
     return `git@${hostname}:${repository}.git`;
   }
   return URL.format({
-    protocol: protocol || 'https',
+    protocol: protocol ?? 'https',
     auth,
     hostname,
     host,

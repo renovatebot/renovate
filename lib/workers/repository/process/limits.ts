@@ -19,8 +19,10 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
-          pr.sourceBranch.startsWith(config.branchPrefix) &&
-          DateTime.fromISO(pr.createdAt) > currentHourStart
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          pr.sourceBranch.startsWith(config.branchPrefix!) &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          DateTime.fromISO(pr.createdAt!) > currentHourStart
       );
       const prsRemaining = Math.max(
         0,

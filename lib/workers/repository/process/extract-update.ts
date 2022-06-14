@@ -19,12 +19,24 @@ export type ExtractResult = {
   packageFiles: Record<string, PackageFile[]>;
 };
 
+interface StatsResult {
+  fileCount: number;
+  depCount: number;
+}
+
+interface Stats {
+  managers: Record<string, StatsResult>;
+  total: StatsResult;
+}
+
 // istanbul ignore next
-function extractStats(packageFiles: Record<string, PackageFile[]>): any {
+function extractStats(
+  packageFiles: Record<string, PackageFile[]>
+): Stats | null {
   if (!packageFiles) {
-    return {};
+    return null;
   }
-  const stats = {
+  const stats: Stats = {
     managers: {},
     total: {
       fileCount: 0,
@@ -52,11 +64,13 @@ export async function extract(
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
-  const baseBranchSha = getBranchCommit(baseBranch);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const baseBranchSha = getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
-  const cachedExtract = cache.scan[baseBranch];
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const cachedExtract = cache.scan[baseBranch!];
   const configHash = hasha(JSON.stringify(config));
   // istanbul ignore if
   if (
@@ -78,10 +92,13 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
-    await checkoutBranch(baseBranch);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    await checkoutBranch(baseBranch!);
     packageFiles = await extractAllDependencies(config);
-    cache.scan[baseBranch] = {
-      sha: baseBranchSha,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    cache.scan[baseBranch!] = {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      sha: baseBranchSha!,
       configHash,
       packageFiles,
     };
@@ -91,7 +108,8 @@ export async function extract(
       : [baseBranch];
     Object.keys(cache.scan).forEach((branchName) => {
       if (!baseBranches.includes(branchName)) {
-        delete cache.scan[branchName];
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        delete cache.scan![branchName];
       }
     });
   }

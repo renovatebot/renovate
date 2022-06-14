@@ -14,14 +14,14 @@ export async function raiseConfigWarningIssue(
   if (error.validationSource) {
     body += `Location: \`${error.validationSource}\`\n`;
   }
-  body += `Error type: ${error.validationError}\n`;
+  body += `Error type: ${error.validationError!}\n`;
   if (error.validationMessage) {
     body += `Message: \`${error.validationMessage.replace(
       regEx(/`/g),
       "'"
     )}\`\n`;
   }
-  const pr = await platform.getBranchPr(config.onboardingBranch);
+  const pr = await platform.getBranchPr(config.onboardingBranch!);
   if (pr?.state === PrState.Open) {
     logger.debug('Updating onboarding PR with config error notice');
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
@@ -32,7 +32,7 @@ export async function raiseConfigWarningIssue(
       try {
         await platform.updatePr({
           number: pr.number,
-          prTitle: config.onboardingPrTitle,
+          prTitle: config.onboardingPrTitle!,
           prBody: body,
         });
       } catch (err) /* istanbul ignore next */ {

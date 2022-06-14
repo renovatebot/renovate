@@ -8,15 +8,15 @@ import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName)
-    ? config.onboardingConfigFileName
+  configFileNames.includes(config.onboardingConfigFileName!)
+    ? config.onboardingConfigFileName!
     : configFileNames[0];
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
-  if (await isBranchModified(config.onboardingBranch)) {
+  if (await isBranchModified(config.onboardingBranch!)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
@@ -25,7 +25,7 @@ export async function rebaseOnboardingBranch(
   const contents = await getOnboardingConfigContents(config, configFile);
   if (
     contents === existingContents &&
-    !(await isBranchStale(config.onboardingBranch))
+    !(await isBranchStale(config.onboardingBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;
@@ -45,7 +45,7 @@ export async function rebaseOnboardingBranch(
   }
 
   return commitAndPush({
-    branchName: config.onboardingBranch,
+    branchName: config.onboardingBranch!,
     files: [
       {
         type: 'addition',

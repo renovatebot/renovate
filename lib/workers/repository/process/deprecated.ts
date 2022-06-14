@@ -23,12 +23,18 @@ export async function raiseDeprecationWarnings(
       for (const dep of packageFile.deps) {
         const { deprecationMessage } = dep;
         if (deprecationMessage) {
-          deprecatedPackages[dep.depName] = deprecatedPackages[dep.depName] || {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          deprecatedPackages[dep.depName!] = deprecatedPackages[
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            dep.depName!
+          ] || {
             deprecationMessage,
             depPackageFiles: [],
           };
-          deprecatedPackages[dep.depName].depPackageFiles.push(
-            packageFile.packageFile
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          deprecatedPackages[dep.depName!].depPackageFiles.push(
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            packageFile.packageFile!
           );
         }
       }
@@ -61,7 +67,8 @@ export async function raiseDeprecationWarnings(
         const ensureOnce = true;
         await platform.ensureIssue({
           title: issueTitle,
-          body: issueBody,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          body: issueBody!,
           once: ensureOnce,
           confidential: config.confidential,
         });
@@ -73,11 +80,14 @@ export async function raiseDeprecationWarnings(
     const issueList = await platform.getIssueList();
     if (issueList?.length) {
       const deprecatedIssues = issueList.filter(
-        (i) => i.title.startsWith(issueTitlePrefix) && i.state === 'open'
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open'
       );
       for (const i of deprecatedIssues) {
-        if (!issueTitleList.includes(i.title)) {
-          await platform.ensureIssueClosing(i.title);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        if (!issueTitleList.includes(i.title!)) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          await platform.ensureIssueClosing(i.title!);
         }
       }
     }

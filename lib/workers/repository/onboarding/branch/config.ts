@@ -20,7 +20,7 @@ async function getOnboardingConfig(
     'Checking if this org/owner has a default Renovate preset which can be used.'
   );
 
-  const orgName = config.repository.split('/')[0];
+  const orgName = config.repository!.split('/')[0];
 
   // Check for org/renovate-config
   try {
@@ -36,7 +36,7 @@ async function getOnboardingConfig(
     }
   }
 
-  if (!orgPreset) {
+  if (!orgPreset!) {
     // Check for org/.{{platform}}
     const platform = GlobalConfig.get('platform');
     try {
@@ -57,7 +57,7 @@ async function getOnboardingConfig(
     }
   }
 
-  if (orgPreset) {
+  if (orgPreset!) {
     onboardingConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [orgPreset],

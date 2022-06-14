@@ -10,11 +10,13 @@ import type { BranchConfig } from '../../../types';
 export function commitFilesToBranch(
   config: BranchConfig
 ): Promise<string | null> {
-  let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
+  let updatedFiles = config.updatedPackageFiles!.concat(
+    config.updatedArtifacts!
+  );
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
-      const matchesExcludePaths = config.excludeCommitPaths.some(
+      const matchesExcludePaths = config.excludeCommitPaths!.some(
         (excludedPath) => minimatch(filePath, excludedPath, { dot: true })
       );
       if (matchesExcludePaths) {
@@ -26,14 +28,14 @@ export function commitFilesToBranch(
   }
   if (!is.nonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
-    return null;
+    return Promise.resolve(null);
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
-    return null;
+    return Promise.resolve(null);
   }
   // istanbul ignore if
   if (
@@ -51,7 +53,7 @@ export function commitFilesToBranch(
   return commitAndPush({
     branchName: config.branchName,
     files: updatedFiles,
-    message: config.commitMessage,
+    message: config.commitMessage!,
     force: !!config.forceCommit,
     platformCommit: !!config.platformCommit,
   });
