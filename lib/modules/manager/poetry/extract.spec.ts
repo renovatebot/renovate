@@ -44,7 +44,7 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(9);
-      expect(res.constraints).toEqual({
+      expect(res.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
     });
@@ -135,7 +135,7 @@ describe('modules/manager/poetry/extract', () => {
       fs.readLocalFile.mockResolvedValue(pyproject11tomlLock);
       const res = await extractPackageFile(pyproject11toml, filename);
       expect(res).toMatchSnapshot({
-        constraints: { python: '^3.9' },
+        extractedConstraints: { python: '^3.9' },
         deps: [{ lockedVersion: '1.17.5' }],
       });
     });
