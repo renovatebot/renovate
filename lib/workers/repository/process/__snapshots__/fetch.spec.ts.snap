@@ -1,26 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/process/fetch fetchUpdates() fetch updates for internal deps if updateInternalDeps is true 1`] = `
-Object {
-  "maven": Array [
-    Object {
-      "deps": Array [
-        Object {
-          "datasource": "maven",
-          "depName": "bbb",
-          "isInternal": true,
-          "updates": Array [
-            "a",
-            "b",
-          ],
-        },
-      ],
-      "packageFile": "pom.xml",
-    },
-  ],
-}
-`;
-
 exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
 Object {
   "maven": Array [
