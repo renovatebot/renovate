@@ -8,8 +8,9 @@ import {
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
-import { extractAllDependencies, getExtractList } from '../../extract';
+import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
+import { getExtractList } from '../../process/extract-update';
 import { isOnboarded, onboardingPrExists } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
