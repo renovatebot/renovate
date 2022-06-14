@@ -139,7 +139,21 @@ describe('workers/repository/process/fetch', () => {
       };
       lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toMatchObject({
+        maven: [
+          {
+            deps: [
+              {
+                datasource: 'maven',
+                depName: 'bbb',
+                isInternal: true,
+                updates: ['a', 'b'],
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      });
     });
   });
 });
