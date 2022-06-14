@@ -6,35 +6,50 @@ import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
 
-type IndentTemplateFunction = (
+/**
+ * Merge string arrays one by one
+ * Example: let arr1 = ['a','b','c'], arr2 = ['1','2','3','4','5']
+ * merge(arr1,arr2) = ['a','1','b','2','c','3','4','5']
+ * @param array1
+ * @param array2
+ */
+function merge(array1: string[], array2: string[]): string[] {
+  const arr1 = [...array1];
+  const arr2 = [...array2];
+  const merged: string[] = [];
+
+  for (const str1 of arr1) {
+    merged.push(str1);
+    const str2 = arr2.pop();
+    if (str2 !== undefined) {
+      merged.push(str2);
+    }
+  }
+  return merged.concat(arr2);
+}
+
+function indent(
   strings: TemplateStringsArray,
   ...keys: (string | number)[]
-) => string;
-
-function getIndentFunction(indent = '  '): IndentTemplateFunction {
+): string {
+  const indent = '  ';
+  const strs = [...strings];
+  let amount = 0;
+  // validate input
+  if (typeof keys[0] === 'number' && strings[0] === '') {
+    amount = keys.shift() as number;
+    strs.shift();
+  }
   return (
-    strings: TemplateStringsArray,
-    ...keys: (string | number)[]
-  ): string => {
-    const amount = keys.shift() as number;
-    const merged: string[] = [];
-    for (const str of strings) {
-      if (!str) {
-        continue;
-      }
-      merged.push(str);
-
-      const key = keys.pop();
-      if (key !== undefined) {
-        merged.push(key as string);
-      }
-    }
-    return indent.repeat(amount) + merged.concat(keys.map(String)).join('');
-  };
+    indent.repeat(amount) +
+    merge(
+      strs,
+      keys.map((k) => `${k}`)
+    ).join('')
+  );
 }
 
 function buildHtmlTable(data: string[][]): string {
-  const indent = getIndentFunction(); // default indentation function
   // skip empty tables
   if (data.length < 2) {
     return '';
@@ -55,7 +70,10 @@ function buildHtmlTable(data: string[][]): string {
         table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
-      table += indent`${3}<td>${col}</td>\n`;
+      table +=
+        indent`${3}<td>${col}` +
+        (`${col}`.endsWith('\n') ? indent`${3}` : '') +
+        `</td>\n`;
     }
     table += indent`${2}</tr>\n`;
   }
