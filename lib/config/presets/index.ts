@@ -406,7 +406,7 @@ export function logUserCombinedConfig(
     return;
   }
   // remove resolved presets from the log
-  const repoConfig = Object.assign({}, inputConfig);
+  const repoConfig = clone(inputConfig);
   if (repoConfig?.extends?.length) {
     repoConfig.extends = repoConfig.extends.filter(
       (preset) => !preset.includes('>')

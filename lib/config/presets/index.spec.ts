@@ -956,6 +956,11 @@ Object {
       expect(e!.validationMessage).toBeUndefined();
     });
 
+    it('skip log when there is no extended user config', () => {
+      logUserCombinedConfig({ pacakgeRules: ['some rule'] }, {});
+      expect(logger.debug).toHaveBeenCalledTimes(0);
+    });
+
     it('logs user extended config', () => {
       logUserCombinedConfig(
         { extends: ['github>username/preset-repo'] },
@@ -970,12 +975,6 @@ Object {
         },
         'shallow config'
       );
-    });
-
-    it('skip log when there is no extended user config', () => {
-      logUserCombinedConfig({ pacakgeRules: ['some rule'] }, {});
-      // log gets called once "Using RE2 as regex engine" behind the scenes.
-      expect(logger.debug).toHaveBeenCalledTimes(1);
     });
   });
 });
