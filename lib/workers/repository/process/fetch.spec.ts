@@ -139,7 +139,7 @@ describe('workers/repository/process/fetch', () => {
       };
       lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
-      expect(packageFiles.deps[0].updates).toHaveLength(2);
+      expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
     });
   });
 });
