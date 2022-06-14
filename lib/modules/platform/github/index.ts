@@ -1324,11 +1324,10 @@ export async function ensureCommentRemoval(
 
 // Pull Request
 
-export async function tryPrAutomerge(
+async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
-  platformOptions: PlatformPrOptions | undefined,
-  platformConfig: PlatformConfig
+  platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
   if (!platformOptions?.usePlatformAutomerge) {
     return;
@@ -1422,7 +1421,7 @@ export async function createPr({
   );
   const { number, node_id } = ghPr;
   await addLabels(number, labels);
-  await tryPrAutomerge(number, node_id, platformOptions, platformConfig);
+  await tryPrAutomerge(number, node_id, platformOptions);
   const result = coerceRestPr(ghPr);
   cachePr(result);
   return result;

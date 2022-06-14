@@ -6,7 +6,6 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import { PlatformId } from '../../../constants/platforms';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
@@ -2340,40 +2339,96 @@ describe('modules/platform/github/index', () => {
       });
 
       it('should skip automerge if GHE <3.3.0', async () => {
-        await github.tryPrAutomerge(
-          123,
-          'abc',
-          { usePlatformAutomerge: true },
-          {
-            isGhe: true,
-            gheVersion: '3.1.5',
-            hostType: PlatformId.Github,
-            endpoint: 'https://github.enterprise.com/api/v3/',
-          }
-        );
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200, '', { 'x-github-enterprise-version': '3.1.7' })
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, []);
 
-        expect(logger.logger.debug).toHaveBeenCalledWith(
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        hostRules.find.mockReturnValue({
+          token: '123test',
+        });
+        await github.initRepo({
+          repository: 'some/repo',
+        } as any);
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenNthCalledWith(
+          10,
           { prNumber: 123 },
           'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
         );
       });
 
-      it('should use automerge if GHE >=3.3.0', async () => {
-        await github.tryPrAutomerge(
-          123,
-          'abc',
-          { usePlatformAutomerge: true },
-          {
-            isGhe: true,
-            gheVersion: '3.3.3',
-            hostType: PlatformId.Github,
-            endpoint: 'https://github.enterprise.com/api/v3/',
-          }
-        );
+      it('should perform automerge if GHE >=3.3.0', async () => {
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200, '', { 'x-github-enterprise-version': '3.3.5' })
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, [])
+          .post('/graphql', (body) =>
+            JSON.stringify(body).includes('autoMergeAllowed')
+          )
+          .reply(200, {
+            data: {
+              repository: {
+                defaultBranchRef: {
+                  name: 'main',
+                },
+                nameWithOwner: 'some/repo',
+                autoMergeAllowed: true,
+              },
+            },
+          });
 
-        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        hostRules.find.mockReturnValue({
+          token: '123test',
+        });
+        await github.initRepo({
+          repository: 'some/repo',
+        } as any);
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenNthCalledWith(
+          11,
           { prNumber: 123 },
-          'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+          'GitHub-native automerge: success'
         );
       });
 
