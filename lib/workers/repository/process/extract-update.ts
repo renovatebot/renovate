@@ -47,8 +47,7 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   }
   return stats;
 }
-//istanbul ignore next
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 function getFileMatchFingerprint(config: RenovateConfig): string {
   let managerList = getManagerList();
   const { enabledManagers } = config;
@@ -77,7 +76,9 @@ export async function extract(
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
-
+  //istanbul ignore next
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const fileMatchFingerprint = getFileMatchFingerprint(config);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
