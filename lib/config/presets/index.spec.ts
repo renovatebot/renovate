@@ -12,7 +12,7 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
-import { logUserCombinedConfig } from '.';
+import { logShallowCombinedConfig } from '.';
 
 jest.mock('./npm');
 jest.mock('./github');
@@ -956,13 +956,8 @@ Object {
       expect(e!.validationMessage).toBeUndefined();
     });
 
-    it('skip log when there is no extended user config', () => {
-      logUserCombinedConfig({ pacakgeRules: ['some rule'] }, {});
-      expect(logger.debug).toHaveBeenCalledTimes(0);
-    });
-
     it('logs user extended config', () => {
-      logUserCombinedConfig(
+      logShallowCombinedConfig(
         { extends: ['github>username/preset-repo'] },
         { pacakgeRules: ['some rule'] }
       );
