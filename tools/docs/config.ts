@@ -30,7 +30,7 @@ function merge(array1: string[], array2: string[]): string[] {
 
 function indent(
   strings: TemplateStringsArray,
-  ...keys: (string | number)[]
+  ...keys: (string | number | boolean)[]
 ): string {
   const indent = '  ';
   const strs = [...strings];
@@ -40,13 +40,7 @@ function indent(
     amount = keys.shift() as number;
     strs.shift();
   }
-  return (
-    indent.repeat(amount) +
-    merge(
-      strs,
-      keys.map((k) => `${k}`)
-    ).join('')
-  );
+  return indent.repeat(amount) + merge(strs, keys.map(String)).join('');
 }
 
 function buildHtmlTable(data: string[][]): string {
