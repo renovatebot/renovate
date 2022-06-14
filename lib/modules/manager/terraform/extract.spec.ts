@@ -109,7 +109,84 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(kubernetes, 'kubernetes.tf', {});
       expect(res.deps).toHaveLength(16);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
-      expect(res).toMatchSnapshot();
+      expect(res.deps).toMatchObject([
+        {
+          depName: 'gcr.io/kaniko-project/executor',
+          currentValue: 'v1.7.0',
+          currentDigest:
+            'sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52',
+          depType: 'kubernetes_cron_job_v1',
+        },
+        {
+          depName: 'gcr.io/kaniko-project/executor',
+          currentValue: 'v1.8.0',
+          currentDigest:
+            'sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52',
+          depType: 'kubernetes_cron_job',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.1',
+          depType: 'kubernetes_daemon_set_v1',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.2',
+          depType: 'kubernetes_daemonset',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.3',
+          depType: 'kubernetes_deployment',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.4',
+          depType: 'kubernetes_deployment_v1',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.5',
+          depType: 'kubernetes_job',
+        },
+        { skipReason: 'invalid-dependency-specification' },
+        { skipReason: 'invalid-value' },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.6',
+          depType: 'kubernetes_job_v1',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.7',
+          depType: 'kubernetes_pod',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.8',
+          depType: 'kubernetes_pod_v1',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.9',
+          depType: 'kubernetes_replication_controller',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.10',
+          depType: 'kubernetes_replication_controller_v1',
+        },
+        {
+          depName: 'prom/prometheus',
+          currentValue: 'v2.2.1',
+          depType: 'kubernetes_stateful_set',
+        },
+        {
+          depName: 'prom/prometheus',
+          currentValue: 'v2.2.2',
+          depType: 'kubernetes_stateful_set_v1',
+        },
+      ]);
     });
 
     it('returns null if only local deps', async () => {
