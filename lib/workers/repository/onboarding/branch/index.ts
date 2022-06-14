@@ -10,7 +10,6 @@ import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
-import { getExtractList } from '../../process/extract-update';
 import { isOnboarded, onboardingPrExists } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
@@ -53,10 +52,8 @@ export async function checkOnboardingBranch(
     let mergedConfig = mergeChildConfig(config, onboardingConfig);
     mergedConfig = await mergeRenovateConfig(mergedConfig);
     onboardingBranch = mergedConfig.onboardingBranch;
-    const [extractList] = await getExtractList(mergedConfig);
     if (
-      Object.entries(await extractAllDependencies(mergedConfig, extractList))
-        .length === 0
+      Object.entries(await extractAllDependencies(mergedConfig)).length === 0
     ) {
       if (!config?.onboardingNoDeps) {
         throw new Error(REPOSITORY_NO_PACKAGE_FILES);

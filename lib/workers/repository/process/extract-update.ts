@@ -1,23 +1,13 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  ManagerConfig,
-  RenovateConfig,
-  WorkerExtractConfig,
-} from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
-import {
-  checkoutBranch,
-  getBranchCommit,
-  getFileList,
-} from '../../../util/git';
+import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
-import { getMatchingFiles } from '../extract/file-match';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
@@ -57,10 +47,9 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   }
   return stats;
 }
-
-export async function getExtractList(
-  config: RenovateConfig
-): Promise<[WorkerExtractConfig[], string]> {
+//istanbul ignore next
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getFileMatchFingerprint(config: RenovateConfig): string {
   let managerList = getManagerList();
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
@@ -69,28 +58,12 @@ export async function getExtractList(
       enabledManagers.includes(manager)
     );
   }
-  const extractList: WorkerExtractConfig[] = [];
-  const fileList = await getFileList();
   const matchingFilesList: string[] = [];
-  const tryConfig = (managerConfig: ManagerConfig): void => {
-    const matchingFileList = getMatchingFiles(managerConfig, fileList);
-    if (matchingFileList.length) {
-      matchingFilesList.push(...matchingFileList);
-      extractList.push({ ...managerConfig, fileList: matchingFileList });
-    }
-  };
   for (const manager of managerList) {
-    const managerConfig = getManagerConfig(config, manager);
-    managerConfig.manager = manager;
-    if (manager === 'regex') {
-      for (const regexManager of config.regexManagers ?? []) {
-        tryConfig(mergeChildConfig(managerConfig, regexManager));
-      }
-    } else {
-      tryConfig(managerConfig);
-    }
+    const fileMatch = config[manager]['fileMatch'] ?? [];
+    matchingFilesList.push(...fileMatch);
   }
-  return [extractList, hasha(matchingFilesList)];
+  return hasha(matchingFilesList);
 }
 
 export async function extract(
@@ -105,8 +78,6 @@ export async function extract(
   const cachedExtract = cache.scan[baseBranch];
   const configHash = hasha(JSON.stringify(config));
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [extractList] = await getExtractList(config);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
@@ -128,7 +99,7 @@ export async function extract(
     }
   } else {
     await checkoutBranch(baseBranch);
-    packageFiles = await extractAllDependencies(config, extractList);
+    packageFiles = await extractAllDependencies(config);
     cache.scan[baseBranch] = {
       sha: baseBranchSha,
       configHash,
