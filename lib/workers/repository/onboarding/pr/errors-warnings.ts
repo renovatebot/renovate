@@ -6,7 +6,7 @@ import { emojify } from '../../../../util/emoji';
 type depWarningsModes = 'pr' | 'dashboard';
 
 export function getWarnings(config: RenovateConfig): string {
-  if (!config?.warnings?.length) {
+  if (!config.warnings?.length) {
     return '';
   }
   let warningText = `\n# Warnings (${config.warnings.length})\n\n`;
@@ -20,7 +20,7 @@ export function getWarnings(config: RenovateConfig): string {
 
 export function getErrors(config: RenovateConfig): string {
   let errorText = '';
-  if (!config?.errors?.length) {
+  if (!config.errors?.length) {
     return '';
   }
   errorText = `\n# Errors (${config.errors.length})\n\n`;
@@ -50,10 +50,10 @@ export function getDepWarnings(
                 warnings.push(message);
               }
               if (
-                file?.packageFile &&
-                !warningFiles.includes(file?.packageFile)
+                file.packageFile &&
+                !warningFiles.includes(file.packageFile)
               ) {
-                warningFiles.push(file?.packageFile);
+                warningFiles.push(file.packageFile);
               }
             }
           }
