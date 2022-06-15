@@ -2061,10 +2061,10 @@
   uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
-"@renovatebot/pep440@2.1.2":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.2.tgz#2daf92c1f3641d38698a594ebbc6749a890c9ec6"
-  integrity sha512-5E61yI69foKY0hxoYWabUZLYras9S3Mrzrz7bhf4W5pKVZJse1ypNUjKW5bsiSQoAiZqXFECiD0q1Nw8LA3gyQ==
+"@renovatebot/pep440@2.1.3":
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.3.tgz#9845809ab50f98f08c2914c7ab50b0931e43968d"
+  integrity sha512-ZCBEyZ19sA/Anp/Ke74Kdn7aL06T7v1RL15wzKDJrLuScZrpgZ6eMFQKY4vgTzSikXShlox73NGF8qHJ+z+7Gw==
 
 "@renovatebot/ruby-semver@1.1.4":
   version "1.1.4"
@@ -7781,10 +7781,10 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openpgp@5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.2.1.tgz#cc48b25eb7d1b4613a167c9e6def8717eea53429"
-  integrity sha512-zvu63kxe70q3D6WlKC/TB2pzI59I8V/l4G+z/VYgNVOyARsoH9q4i/WqwoHPjWG5HnRjhII3WSvp3gXH2DMPVg==
+openpgp@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.3.0.tgz#e8fc97e538865b8c095dbd91c7be4203bd1dd1df"
+  integrity sha512-qjCj0vYpV3dmmkE+vURiJ5kVAJwrMk8BPukvpWJiHcTNWKwPVsRS810plIe4klIcHVf1ScgUQwqtBbv99ff+kQ==
   dependencies:
     asn1.js "^5.0.0"
 
