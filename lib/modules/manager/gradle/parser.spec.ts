@@ -84,6 +84,7 @@ describe('modules/manager/gradle/parser', () => {
       test.each`
         def                                   | str                                                     | output
         ${'foo = "1.2.3"'}                    | ${'"foo:bar:$foo@@@"'}                                  | ${null}
+        ${'foo = "1"; bar = "2"; baz = "3"'}  | ${'"foo:bar:$foo.$bar.$baz"'}                           | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'contains-variable' }}
         ${'baz = "1.2.3"'}                    | ${'"foo:bar:$baz"'}                                     | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'foo.bar = "1.2.3"'}                | ${'"foo:bar:$foo.bar"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
         ${'foo = "1.2.3"'}                    | ${'"foo:bar_$foo:4.5.6"'}                               | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}

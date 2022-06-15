@@ -8,9 +8,7 @@ jest.mock('../../../util/fs');
 function mockFs(files: Record<string, string>): void {
   fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
     const content = files?.[fileName];
-    return typeof content === 'string'
-      ? Promise.resolve(content)
-      : Promise.reject(`File not found: ${fileName}`);
+    return Promise.resolve(content ?? '');
   });
 
   fs.getSiblingFileName.mockImplementation(
@@ -20,10 +18,6 @@ function mockFs(files: Record<string, string>): void {
         .concat(otherFileName);
     }
   );
-  fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
-    const content = files?.[fileName];
-    return Promise.resolve(content ?? '');
-  });
 }
 
 describe('modules/manager/gradle/extract', () => {
