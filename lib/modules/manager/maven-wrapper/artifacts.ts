@@ -38,10 +38,6 @@ function getJavaContraint(mavenVersion: string): string | null {
   return '^5.0.0';
 }
 
-export function getJavaVersioning(): string {
-  return npmVersioning;
-}
-
 async function addIfUpdated(
   status: StatusResult,
   fileProjectPath: string
