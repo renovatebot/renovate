@@ -338,7 +338,8 @@ export async function resolveConfigPresets(
           fetchedPreset,
           baseConfig ?? inputConfig,
           ignorePresets,
-          existingPresets.concat([preset])
+          existingPresets.concat([preset]),
+          false
         );
         if (preset.includes('>')) {
           // combine shallow config with fetched config
