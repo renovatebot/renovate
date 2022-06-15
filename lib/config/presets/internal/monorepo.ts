@@ -197,6 +197,7 @@ const repoGroups = {
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
+  skiasharp: 'https://github.com/mono/SkiaSharp',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
   strapi: 'https://github.com/strapi/strapi',

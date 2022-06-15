@@ -19,6 +19,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'version = "1.2.3"'}         | ${'version'}         | ${'1.2.3'}
       ${'set("version", "1.2.3")'}   | ${'version'}         | ${'1.2.3'}
       ${'versions.foobar = "1.2.3"'} | ${'versions.foobar'} | ${'1.2.3'}
+      ${'ext.foo.bar = "1.2.3"'}     | ${'foo.bar'}         | ${'1.2.3'}
     `('$input', ({ input, name, value }) => {
       const { vars } = parseGradle(input);
       expect(vars).toContainKey(name);
@@ -72,6 +73,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                    | ${'foobar = "foo:bar:$baz"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'group: "foo", name: "bar", version: baz'}            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${''}                                 | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'library("foo.bar", "foo", "bar")'} | ${'"${foo.bar}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', ({ def, str, output }) => {
         const input = [def, str].join('\n');
