@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const typeBinFileContent = loadFixture(
   'wrapper-and-maven/maven-wrapper.properties'
