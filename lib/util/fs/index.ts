@@ -46,30 +46,6 @@ export async function readLocalFile(
   }
 }
 
-// TODO: can return null #7154
-export function readLocalFileSync(fileName: string): Buffer;
-export function readLocalFileSync(fileName: string, encoding: string): string;
-export function readLocalFileSync(
-  fileName: string,
-  encoding?: string
-): string | Buffer | null {
-  const { localDir } = GlobalConfig.get();
-  const localFileName = upath.join(localDir, fileName);
-  if (localDir && !localFileName.startsWith(localDir)) {
-    logger.warn('Preventing access to file outside the base directory');
-    return null;
-  }
-
-  try {
-    return encoding
-      ? fs.readFileSync(localFileName, encoding as BufferEncoding)
-      : fs.readFileSync(localFileName);
-  } catch (err) {
-    logger.trace({ err }, 'Error reading local file');
-    return null;
-  }
-}
-
 export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer

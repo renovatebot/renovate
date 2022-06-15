@@ -1,7 +1,7 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFileSync } from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -985,12 +985,12 @@ function tryMatch({
   return null;
 }
 
-function parseInlineScriptFile(
+async function parseInlineScriptFile(
   scriptFile: string,
   variables: PackageVariables,
   recursionDepth: number,
   packageFile = ''
-): SyntaxHandlerOutput {
+): Promise<SyntaxHandlerOutput> {
   if (recursionDepth > 0) {
     logger.warn({ scriptFile }, `Max recursion depth reached`);
     return null;
@@ -1002,7 +1002,7 @@ function parseInlineScriptFile(
   }
 
   const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
-  const scriptFileContent = readLocalFileSync(scriptFilePath, 'utf-8');
+  const scriptFileContent = await readLocalFile(scriptFilePath, 'utf8');
   if (!scriptFileContent) {
     logger.warn({ scriptFilePath }, `Failed to process Gradle file`);
     return null;
@@ -1016,12 +1016,12 @@ function parseInlineScriptFile(
   );
 }
 
-export function parseGradle(
+export async function parseGradle(
   input: string,
   initVars: PackageVariables = {},
   packageFile?: string,
   recursionDepth = 0
-): ParseGradleResult {
+): Promise<ParseGradleResult> {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
   const urls: string[] = [];
@@ -1031,7 +1031,7 @@ export function parseGradle(
   while (tokens.length) {
     let matchResult = tryMatch({ tokens, variables: vars, packageFile });
     if (matchResult?.scriptFile) {
-      matchResult = parseInlineScriptFile(
+      matchResult = await parseInlineScriptFile(
         matchResult.scriptFile,
         vars,
         recursionDepth,

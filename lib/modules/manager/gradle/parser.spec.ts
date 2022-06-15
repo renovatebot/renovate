@@ -19,16 +19,16 @@ function mockFs(files: Record<string, string>): void {
     }
   );
 
-  fs.readLocalFileSync.mockImplementation((fileName: string): string | null => {
+  fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
     const content = files?.[fileName];
-    return typeof content === 'string' ? content : null;
+    return Promise.resolve(content ?? '');
   });
 }
 
 describe('modules/manager/gradle/parser', () => {
-  it('handles end of input', () => {
-    expect(parseGradle('version = ').deps).toBeEmpty();
-    expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
+  it('handles end of input', async () => {
+    expect((await parseGradle('version = ')).deps).toBeEmpty();
+    expect((await parseGradle('id "foo.bar" version')).deps).toBeEmpty();
   });
 
   describe('variable assignments', () => {
@@ -38,8 +38,8 @@ describe('modules/manager/gradle/parser', () => {
       ${'set("version", "1.2.3")'}   | ${'version'}         | ${'1.2.3'}
       ${'versions.foobar = "1.2.3"'} | ${'versions.foobar'} | ${'1.2.3'}
       ${'ext.foo.bar = "1.2.3"'}     | ${'foo.bar'}         | ${'1.2.3'}
-    `('$input', ({ input, name, value }) => {
-      const { vars } = parseGradle(input);
+    `('$input', async ({ input, name, value }) => {
+      const { vars } = await parseGradle(input);
       expect(vars).toContainKey(name);
       expect(vars[name]).toMatchObject({ key: name, value });
     });
@@ -57,8 +57,8 @@ describe('modules/manager/gradle/parser', () => {
         ${'"foo:bar:1.2.3@zip"'}                                                          | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
         ${'(group: "foo", name: "bar", version: "1.2.3", classifier: "sources")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'(group: "foo", name: "bar", version: "1.2.3") {exclude module: "spring-jcl"}'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      `('$input', ({ input, output }) => {
-        const { deps } = parseGradle(input);
+      `('$input', async ({ input, output }) => {
+        const { deps } = await parseGradle(input);
         expect(deps).toMatchObject([output].filter(Boolean));
       });
     });
@@ -74,8 +74,8 @@ describe('modules/manager/gradle/parser', () => {
         ${'mutableListOf("foo", "bar", "baz")'}                      | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
         ${'setOf("foo", "bar", "baz")'}                              | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
         ${'mutableSetOf("foo", "bar", "baz")'}                       | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      `('$input', ({ input, output }) => {
-        const { deps } = parseGradle(input);
+      `('$input', async ({ input, output }) => {
+        const { deps } = await parseGradle(input);
         expect(deps).toMatchObject([output].filter(Boolean));
       });
     });
@@ -92,9 +92,9 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                    | ${'group: "foo", name: "bar", version: baz'}            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'library("foo.bar", "foo", "bar")'} | ${'"${foo.bar}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      `('$def | $str', ({ def, str, output }) => {
+      `('$def | $str', async ({ def, str, output }) => {
         const input = [def, str].join('\n');
-        const { deps } = parseGradle(input);
+        const { deps } = await parseGradle(input);
         expect(deps).toMatchObject([output].filter(Boolean));
       });
     });
@@ -115,8 +115,8 @@ describe('modules/manager/gradle/parser', () => {
         ${'z = "1.2.3"'}    | ${'id("x.y") version "$z"'}         | ${{ depName: 'x.y', packageName: 'x.y:x.y.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("x.y") version "$z"'}         | ${{ depName: 'x.y', skipReason: 'unknown-version', currentValue: 'z' }}
         ${''}               | ${'id("x.y") version "x${y}z"'}     | ${{ depName: 'x.y', skipReason: 'unknown-version' }}
-      `('$input', ({ def, input, output }) => {
-        const { deps } = parseGradle([def, input].join('\n'));
+      `('$input', async ({ def, input, output }) => {
+        const { deps } = await parseGradle([def, input].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));
       });
     });
@@ -144,17 +144,17 @@ describe('modules/manager/gradle/parser', () => {
       ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz"'}                 | ${'https://foo.bar/baz'}
       ${''}                       | ${"maven { url = 'https://foo.bar/baz'"}       | ${'https://foo.bar/baz'}
       ${'base="https://foo.bar"'} | ${'maven { url = "${base}/baz"'}               | ${'https://foo.bar/baz'}
-    `('$def | $input', ({ def, input, url }) => {
+    `('$def | $input', async ({ def, input, url }) => {
       const expected = [url].filter(Boolean);
-      const { urls } = parseGradle([def, input].join('\n'));
+      const { urls } = await parseGradle([def, input].join('\n'));
       expect(urls).toStrictEqual(expected);
     });
   });
 
   describe('calculations', () => {
-    it('calculates offset', () => {
+    it('calculates offset', async () => {
       const content = "'foo:bar:1.2.3'";
-      const { deps } = parseGradle(content);
+      const { deps } = await parseGradle(content);
       const [res] = deps;
       const idx = content
         .slice(res.managerData.fileReplacePosition)
@@ -162,9 +162,9 @@ describe('modules/manager/gradle/parser', () => {
       expect(idx).toBe(0);
     });
 
-    it('parses fixture from "gradle" manager', () => {
+    it('parses fixture from "gradle" manager', async () => {
       const content = Fixtures.get('build.gradle.example1');
-      const { deps } = parseGradle(content, {}, 'build.gradle');
+      const { deps } = await parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
         content.slice(managerData.fileReplacePosition).indexOf(currentValue)
       );
@@ -252,13 +252,18 @@ describe('modules/manager/gradle/parser', () => {
       ${'base="foo"'} | ${'apply(from = "${base}/bar.gradle"))'}           | ${validOutput}
       ${''}           | ${'apply(from = File("foo/bar.gradle"))'}          | ${validOutput}
       ${'base="foo"'} | ${'apply(from = File("${base}/bar.gradle"))'}      | ${validOutput}
-    `('$def | $input', ({ def, input, output }) => {
-      const { vars } = parseGradle([def, input].join('\n'));
+    `('$def | $input', async ({ def, input, output }) => {
+      const { vars } = await parseGradle([def, input].join('\n'));
       expect(vars).toMatchObject(output);
     });
 
-    it('recursion check', () => {
-      const { vars } = parseGradle('apply from: "foo/bar.gradle"', {}, null, 1);
+    it('recursion check', async () => {
+      const { vars } = await parseGradle(
+        'apply from: "foo/bar.gradle"',
+        {},
+        null,
+        1
+      );
       expect(vars).toBeEmpty();
     });
   });

@@ -73,7 +73,7 @@ export async function extractAllPackageFiles(
           deps,
           urls,
           vars: gradleVars,
-        } = parseGradle(content, vars, packageFile);
+        } = await parseGradle(content, vars, packageFile);
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);

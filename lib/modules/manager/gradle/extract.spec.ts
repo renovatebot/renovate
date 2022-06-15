@@ -20,9 +20,9 @@ function mockFs(files: Record<string, string>): void {
         .concat(otherFileName);
     }
   );
-  fs.readLocalFileSync.mockImplementation((fileName: string): string | null => {
+  fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
     const content = files?.[fileName];
-    return typeof content === 'string' ? content : null;
+    return Promise.resolve(content ?? '');
   });
 }
 
@@ -97,7 +97,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
       'build.gradle': 'url "https://example.com"; "foo:bar:$baz@zip"',
-      'settings.gradle': null,
+      'settings.gradle': '',
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [

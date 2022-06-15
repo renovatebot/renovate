@@ -15,7 +15,6 @@ import {
   localPathIsFile,
   readLocalDirectory,
   readLocalFile,
-  readLocalFileSync,
   writeLocalFile,
 } from '.';
 
@@ -41,30 +40,6 @@ describe('util/fs/index', () => {
     it('does not throw', async () => {
       // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
       expect(await readLocalFile(__dirname)).toBeNull();
-    });
-  });
-
-  describe('readLocalFileSync', () => {
-    beforeEach(() => {
-      GlobalConfig.set({ localDir: '' });
-    });
-
-    it('reads buffer', () => {
-      expect(readLocalFileSync(__filename)).toBeInstanceOf(Buffer);
-    });
-
-    it('reads string', () => {
-      expect(typeof readLocalFileSync(__filename, 'utf8')).toBe('string');
-    });
-
-    it('does not throw', () => {
-      // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
-      expect(readLocalFileSync(__dirname)).toBeNull();
-    });
-
-    it('blocks path traversal attempt', () => {
-      GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      expect(readLocalFileSync('../' + __filename, 'utf8')).toBeNull();
     });
   });
 
