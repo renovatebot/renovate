@@ -5,7 +5,6 @@ import {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
-import type { ChangeLogRelease } from '../../../../workers/repository/update/pr/changelog';
 import { AbstractGithubDatasourceCache } from './cache-base';
 import type { QueryResponse, StoredItemBase } from './types';
 
@@ -374,7 +373,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       const res = await cache.getItems({ packageName: 'foo/bar' }, {
         version: '1.0.0',
         date: changelogTime,
-      } as ChangeLogRelease);
+      } as never);
 
       expect(sortItems(res)).toEqual([
         {

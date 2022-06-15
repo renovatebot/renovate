@@ -4,11 +4,11 @@ import type {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
-import type { ChangeLogRelease } from '../../../../workers/repository/update/pr/changelog/types';
 import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
 import type {
   CacheOptions,
+  ChangelogRelease,
   GithubDatasourceCache,
   GithubQueryParams,
   QueryResponse,
@@ -166,7 +166,7 @@ export abstract class AbstractGithubDatasourceCache<
    */
   async getItems(
     releasesConfig: GetReleasesConfig,
-    changelogRelease?: ChangeLogRelease
+    changelogRelease?: ChangelogRelease
   ): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
@@ -219,7 +219,7 @@ export abstract class AbstractGithubDatasourceCache<
 
       if (
         isExpired(now, cacheUpdatedAt, updateDuration) ||
-        this.isChangelogReleaseFresh(
+        this.newChangelogReleaseDetected(
           changelogRelease,
           now,
           updateDuration,
@@ -378,8 +378,8 @@ export abstract class AbstractGithubDatasourceCache<
     return result;
   }
 
-  public isChangelogReleaseFresh(
-    changelogRelease: ChangeLogRelease | undefined,
+  private newChangelogReleaseDetected(
+    changelogRelease: ChangelogRelease | undefined,
     now: DateTime,
     updateDuration: DurationLikeObject,
     cacheItems: Record<string, StoredItem>
