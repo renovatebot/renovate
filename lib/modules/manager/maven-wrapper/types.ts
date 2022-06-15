@@ -1,4 +1,4 @@
-type Version = {
+export interface Version {
   url: string;
   version: string;
 };
