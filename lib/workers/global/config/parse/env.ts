@@ -35,6 +35,7 @@ export function getEnvName(option: ParseConfigOptions): string {
 }
 
 const renameKeys = {
+  aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
 };

@@ -30,7 +30,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -58,7 +58,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -91,7 +91,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -127,7 +127,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           placeholder: 'https://my-registry.gcr.io/',
           longalias: 'https://registry.example.com/',
           ociRegistry: 'oci://quay.example.com/organization',
@@ -146,7 +146,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -170,7 +170,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -195,7 +195,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -215,7 +215,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -235,7 +235,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -246,7 +246,7 @@ describe('modules/manager/helmv3/extract', () => {
       const content = '';
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -263,7 +263,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });
@@ -284,7 +284,7 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
       });

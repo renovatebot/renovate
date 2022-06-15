@@ -21,7 +21,7 @@ export async function getLockedVersions(
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
-      if (!isYarn1) {
+      if (!isYarn1 && !packageFile.constraints?.yarn) {
         if (lockfileVersion && lockfileVersion >= 8) {
           // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion

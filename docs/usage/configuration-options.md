@@ -5,10 +5,10 @@ description: Configuration Options usable in renovate.json or package.json
 
 # Configuration Options
 
-This document describes all the configuration options you may configure in a Renovate configuration file.
+This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of the following locations:
+You can store your Renovate configuration file in one of these locations:
 
 1. `renovate.json`
 1. `renovate.json5`
@@ -93,23 +93,6 @@ You normally don't need to configure this, but one example where it can be usefu
 
 In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
 This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
-
-## aliases
-
-The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
-
-The above managers include this default alias:
-
-```json
-{
-  "aliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
 
 ## assignAutomerge
 
@@ -2025,6 +2008,9 @@ This setting - if enabled - limits Renovate to a maximum of x concurrent PRs ope
 
 This limit is enforced on a per-repository basis.
 
+Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+Security PRs have `[SECURITY]` in their PR title.
+
 ## prCreation
 
 This setting tells Renovate when you would like it to raise PRs:
@@ -2211,6 +2197,27 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
 
 ### matchStrings
 
