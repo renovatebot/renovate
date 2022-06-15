@@ -45,15 +45,6 @@ export async function extractAllDependencies(
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
-      //TODO: updateInternalDeps can be removed from WorkerExtractConfig once we move this
-      for (const p of packageFiles ?? []) {
-        for (const dep of p.deps ?? []) {
-          if (!config.updateInternalDeps && dep.isInternal) {
-            dep.skipReason = 'internal-package';
-          }
-        }
-      }
-
       return { manager: managerConfig.manager, packageFiles };
     })
   );
