@@ -269,7 +269,13 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    if (platformConfig.isGhe) {
+    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+    ) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
@@ -1323,8 +1329,21 @@ async function tryPrAutomerge(
   prNodeId: string,
   platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
-  if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
+  if (!platformOptions?.usePlatformAutomerge) {
     return;
+  }
+
+  // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
+  if (platformConfig.isGhe) {
+    // semver not null safe, accepts null and undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
+      logger.debug(
+        { prNumber },
+        'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+      );
+      return;
+    }
   }
 
   if (!config.autoMergeAllowed) {
