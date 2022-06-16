@@ -44,8 +44,10 @@ class DummyDatasource extends Datasource {
 }
 
 class DummyDatasource2 extends Datasource {
-  override readonly customRegistrySupport = false;
-  override defaultRegistryUrls = () => ['https://reg1.com'];
+  override defaultRegistryUrls = function () {
+    return ['https://reg1.com'];
+  };
+
   constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
   }
@@ -232,7 +234,10 @@ describe('modules/datasource/index', () => {
 
     it('defaultRegistryUrls function works', async () => {
       datasources.set(datasource, new DummyDatasource2());
-      const res = await getPkgReleases({ datasource, depName });
+      const res = await getPkgReleases({
+        datasource,
+        depName,
+      });
       expect(res).toMatchObject({
         releases: [{ version: '1.2.3' }],
         registryUrl: 'https://reg1.com',
