@@ -159,8 +159,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extends',
-    description:
-      'Configuration presets to use or extend. Note: This config option does not work if you use a `config.js` file.',
+    description: 'Configuration presets to use or extend.',
     stage: 'package',
     type: 'array',
     subType: 'string',
