@@ -212,7 +212,13 @@ export async function mergeRenovateConfig(
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config, [], [], true),
+    await presets.resolveConfigPresets(
+      decryptedConfig,
+      config,
+      [],
+      [],
+      'on' // shallow log config
+    ),
     repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');

@@ -12,7 +12,11 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
-import { logShallowCombinedConfig } from '.';
+import {
+  isPresetForShallowConfig,
+  logShallowConfig,
+  updateShallowConfig,
+} from '.';
 
 jest.mock('./npm');
 jest.mock('./github');
@@ -956,20 +960,51 @@ Object {
       expect(e!.validationMessage).toBeUndefined();
     });
 
-    it('logs user extended config', () => {
-      logShallowCombinedConfig(
+    it('logs user extended config for shallow mode', () => {
+      logShallowConfig(
         { extends: ['github>username/preset-repo'] },
-        { pacakgeRules: ['some rule'] }
+        { extends: ['config:base'], pacakgeRules: ['some rule'] }
       );
       expect(logger.debug).toHaveBeenCalledWith(
         {
           combinedConfig: {
-            extends: [],
+            extends: ['config:base'],
             pacakgeRules: ['some rule'],
           },
         },
         'shallow config'
       );
+    });
+
+    it('includes external presets for shallow mode', () => {
+      expect(
+        isPresetForShallowConfig('github>whitesource/merge-confidence:beta')
+      ).toBeFalsy();
+      expect(isPresetForShallowConfig('github>somerepo/renovate')).toBeTruthy();
+      expect(isPresetForShallowConfig('gitlab>somerepo/renovate')).toBeTruthy();
+      expect(isPresetForShallowConfig('gitea>somerepo/renovate')).toBeTruthy();
+      expect(isPresetForShallowConfig('local>somerepo/renovate')).toBeTruthy();
+    });
+
+    it('combines config for shallow mode', () => {
+      const repoConfig = {
+        value: {
+          extends: ['config:base'],
+          dependencyDashboard: true,
+        },
+      };
+      const fetchedConfig = {
+        extends: ['config:app'],
+        automergeType: 'pr',
+      };
+      updateShallowConfig(repoConfig, fetchedConfig);
+      expect(repoConfig).toMatchObject({
+        value: {
+          extends: ['config:base', 'config:app'],
+          automergeType: 'pr',
+          dependencyDashboard: true,
+        },
+      });
     });
   });
 });

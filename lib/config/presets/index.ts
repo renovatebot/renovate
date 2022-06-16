@@ -18,7 +18,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { ParsedPreset, PresetApi } from './types';
+import type { ParsedPreset, PresetApi, shallowLogMode } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -43,6 +43,9 @@ const nonScopedPresetWithSubdirRegex = regEx(
 const gitPresetRegex = regEx(
   /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/
 );
+
+// shallow mode preset to ignore regex
+const whitesourcePresetRegex = regEx(/^.*>(whitesource)\//);
 
 export function replaceArgs(
   obj: string,
@@ -267,7 +270,8 @@ export async function resolveConfigPresets(
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
-  shallowLog = false
+  shallowLog: shallowLogMode = 'off',
+  shallowExtendedConfig: Record<string, RenovateConfig> = { value: {} }
 ): Promise<AllConfig> {
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
@@ -278,7 +282,6 @@ export async function resolveConfigPresets(
     'resolveConfigPresets'
   );
   let config: AllConfig = {};
-  let shallowExtendedConfig: RenovateConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
@@ -334,20 +337,18 @@ export async function resolveConfigPresets(
           );
           throw error;
         }
+        if (shallowLog !== 'off' && isPresetForShallowConfig(preset)) {
+          updateShallowConfig(shallowExtendedConfig, fetchedPreset);
+        }
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
           baseConfig ?? inputConfig,
           ignorePresets,
           existingPresets.concat([preset]),
-          false
+          shallowLog === 'off' ? 'off' : 'resolveOnly',
+          shallowExtendedConfig
         );
-        if (preset.includes('>')) {
-          // combine shallow config with fetched config
-          shallowExtendedConfig = mergeChildConfig(
-            shallowExtendedConfig,
-            fetchedPreset
-          );
-        }
+
         // istanbul ignore if
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
@@ -357,8 +358,8 @@ export async function resolveConfigPresets(
     }
   }
   logger.trace({ config }, `Post-preset resolve config`);
-  if (shallowLog) {
-    logShallowCombinedConfig(inputConfig, shallowExtendedConfig);
+  if (shallowLog === 'on') {
+    logShallowConfig(inputConfig, shallowExtendedConfig.value);
   }
   // Now assign "regular" config on top
   config = mergeChildConfig(config, inputConfig);
@@ -377,7 +378,9 @@ export async function resolveConfigPresets(
               element as RenovateConfig,
               baseConfig,
               ignorePresets,
-              existingPresets
+              existingPresets,
+              shallowLog === 'off' ? 'off' : 'resolveOnly',
+              shallowExtendedConfig
             )
           );
         } else {
@@ -391,7 +394,9 @@ export async function resolveConfigPresets(
         val as RenovateConfig,
         baseConfig,
         ignorePresets,
-        existingPresets
+        existingPresets,
+        shallowLog === 'off' ? 'off' : 'resolveOnly',
+        shallowExtendedConfig
       );
     }
   }
@@ -400,7 +405,43 @@ export async function resolveConfigPresets(
   return config;
 }
 
-export function logShallowCombinedConfig(
+export function updateShallowConfig(
+  shallowExtendedConfig: Record<string, RenovateConfig>,
+  fetchedPreset: RenovateConfig
+): void {
+  // save extends array from both config
+  const tempExtend = new Set<string>();
+  if (is.array(shallowExtendedConfig.value?.extends)) {
+    shallowExtendedConfig.value.extends.forEach((e) => tempExtend.add(e));
+  }
+  if (is.array(fetchedPreset?.extends)) {
+    fetchedPreset.extends.forEach((e) => tempExtend.add(e));
+  }
+  // merge config
+  shallowExtendedConfig.value = mergeChildConfig(
+    shallowExtendedConfig.value,
+    fetchedPreset
+  );
+  // add extends back to the result
+  if (tempExtend.size) {
+    shallowExtendedConfig.value.extends = [];
+    tempExtend.forEach((e) => shallowExtendedConfig.value.extends.push(e));
+  }
+}
+
+export function isPresetForShallowConfig(presetSource: string): boolean {
+  if (whitesourcePresetRegex.test(presetSource)) {
+    return false;
+  }
+  return (
+    presetSource.startsWith('github>') ||
+    presetSource.startsWith('gitlab>') ||
+    presetSource.startsWith('gitea>') ||
+    presetSource.startsWith('local>')
+  );
+}
+
+export function logShallowConfig(
   inputConfig: AllConfig,
   ShallowConfig: RenovateConfig
 ): void {
@@ -408,9 +449,15 @@ export function logShallowCombinedConfig(
   const repoConfig = clone(inputConfig);
   if (repoConfig?.extends?.length) {
     repoConfig.extends = repoConfig.extends.filter(
-      (preset) => !preset.includes('>')
+      (preset) => !isPresetForShallowConfig(preset)
     );
   }
+  if (ShallowConfig?.extends?.length) {
+    ShallowConfig.extends = ShallowConfig.extends.filter(
+      (preset) => !isPresetForShallowConfig(preset)
+    );
+  }
+
   logger.debug(
     { combinedConfig: mergeChildConfig(repoConfig, ShallowConfig) },
     'shallow config'

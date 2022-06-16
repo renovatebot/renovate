@@ -40,3 +40,5 @@ export type FetchPresetConfig = {
   tag?: string | null;
   fetch: PresetFetcher;
 };
+
+export type shallowLogMode = 'off' | 'on' | 'resolveOnly';
