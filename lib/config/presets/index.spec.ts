@@ -314,6 +314,31 @@ describe('config/presets/index', () => {
         labels: ['self-hosted resolved'],
       });
     });
+
+    it('logs user extended config and returns original config', async () => {
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset.mockResolvedValueOnce({
+        labels: ['self-hosted resolved'],
+      });
+      const res = await presets.resolveConfigPresets(
+        config,
+        {},
+        [],
+        [],
+        'on' // shallow log config
+      );
+      expect(res).toEqual({
+        labels: ['self-hosted resolved'],
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          combinedConfig: {
+            labels: ['self-hosted resolved'],
+          },
+        },
+        'shallow config'
+      );
+    });
   });
 
   describe('replaceArgs', () => {
@@ -1005,6 +1030,25 @@ Object {
           dependencyDashboard: true,
         },
       });
+    });
+
+    it('removes empty extends array for shallow log', () => {
+      logShallowConfig(
+        {
+          extends: ['github>username/preset-repo1'],
+          dependencyDashboard: true,
+        },
+        { extends: ['github>username/preset-repo2'], automergeType: 'pr' }
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          combinedConfig: {
+            automergeType: 'pr',
+            dependencyDashboard: true,
+          },
+        },
+        'shallow config'
+      );
     });
   });
 });

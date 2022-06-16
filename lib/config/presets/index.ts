@@ -412,10 +412,14 @@ export function updateShallowConfig(
   // save extends array from both config
   const tempExtend = new Set<string>();
   if (is.array(shallowExtendedConfig.value?.extends)) {
-    shallowExtendedConfig.value.extends.forEach((e) => tempExtend.add(e));
+    for (const extend of shallowExtendedConfig.value.extends) {
+      tempExtend.add(extend);
+    }
   }
   if (is.array(fetchedPreset?.extends)) {
-    fetchedPreset.extends.forEach((e) => tempExtend.add(e));
+    for (const extend of fetchedPreset.extends) {
+      tempExtend.add(extend);
+    }
   }
   // merge config
   shallowExtendedConfig.value = mergeChildConfig(
@@ -423,9 +427,8 @@ export function updateShallowConfig(
     fetchedPreset
   );
   // add extends back to the result
-  if (tempExtend.size) {
-    shallowExtendedConfig.value.extends = [];
-    tempExtend.forEach((e) => shallowExtendedConfig.value.extends.push(e));
+  if (tempExtend.size && shallowExtendedConfig.value.extends) {
+    shallowExtendedConfig.value.extends = Array.from(tempExtend);
   }
 }
 
@@ -447,15 +450,21 @@ export function logShallowConfig(
 ): void {
   // remove resolved presets from the log
   const repoConfig = clone(inputConfig);
-  if (repoConfig?.extends?.length) {
+  if (is.array(repoConfig?.extends)) {
     repoConfig.extends = repoConfig.extends.filter(
       (preset) => !isPresetForShallowConfig(preset)
     );
+    if (repoConfig.extends.length === 0) {
+      delete repoConfig.extends;
+    }
   }
-  if (ShallowConfig?.extends?.length) {
+  if (is.array(ShallowConfig?.extends)) {
     ShallowConfig.extends = ShallowConfig.extends.filter(
       (preset) => !isPresetForShallowConfig(preset)
     );
+    if (ShallowConfig.extends.length === 0) {
+      delete ShallowConfig.extends;
+    }
   }
 
   logger.debug(
