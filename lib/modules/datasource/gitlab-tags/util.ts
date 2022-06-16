@@ -1,4 +1,3 @@
-// import { GlobalConfig } from '../../../config/global';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 
