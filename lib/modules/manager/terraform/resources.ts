@@ -5,6 +5,7 @@ import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import { extractTerraformKubernetesResource } from './extract/kubernetes';
 import { analyseTerraformVersion } from './required-version';
 import type { ExtractionResult, ResourceManagerData } from './types';
 import {
@@ -45,6 +46,14 @@ export function extractTerraformResource(
     Object.keys(TerraformResourceTypes).some((key) => {
       return TerraformResourceTypes[key].includes(resourceType);
     });
+
+  if (isKnownType && resourceType.startsWith('kubernetes_')) {
+    return extractTerraformKubernetesResource(
+      startingLine,
+      lines,
+      resourceType
+    );
+  }
 
   managerData.resourceType = isKnownType
     ? resourceType
