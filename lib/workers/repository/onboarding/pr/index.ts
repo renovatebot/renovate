@@ -13,12 +13,12 @@ import {
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
+import { getDepWarnings, getErrors, getWarnings } from '../../errors-warnings';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
-import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(

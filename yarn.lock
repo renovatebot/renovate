@@ -2061,10 +2061,10 @@
   uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
-"@renovatebot/pep440@2.1.2":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.2.tgz#2daf92c1f3641d38698a594ebbc6749a890c9ec6"
-  integrity sha512-5E61yI69foKY0hxoYWabUZLYras9S3Mrzrz7bhf4W5pKVZJse1ypNUjKW5bsiSQoAiZqXFECiD0q1Nw8LA3gyQ==
+"@renovatebot/pep440@2.1.3":
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.3.tgz#9845809ab50f98f08c2914c7ab50b0931e43968d"
+  integrity sha512-ZCBEyZ19sA/Anp/Ke74Kdn7aL06T7v1RL15wzKDJrLuScZrpgZ6eMFQKY4vgTzSikXShlox73NGF8qHJ+z+7Gw==
 
 "@renovatebot/ruby-semver@1.1.4":
   version "1.1.4"
@@ -2424,10 +2424,10 @@
   resolved "https://registry.yarnpkg.com/@types/emscripten/-/emscripten-1.39.6.tgz#698b90fe60d44acf93c31064218fbea93fbfd85a"
   integrity sha512-H90aoynNhhkQP6DRweEjJp5vfUVdIj7tdPLsu7pq89vODD/lcugKfZOsfgwpvM6XUewEp2N5dCg1Uf3Qe55Dcg==
 
-"@types/eslint@8.4.2":
-  version "8.4.2"
-  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-8.4.2.tgz#48f2ac58ab9c631cb68845c3d956b28f79fad575"
-  integrity sha512-Z1nseZON+GEnFjJc04sv4NSALGjhFwy6K0HXt7qsn5ArfAKtb63dXNJHf+1YW6IpOIYRBGUbu3GwJdj8DGnCjA==
+"@types/eslint@8.4.3":
+  version "8.4.3"
+  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-8.4.3.tgz#5c92815a3838b1985c90034cd85f26f59d9d0ece"
+  integrity sha512-YP1S7YJRMPs+7KZKDb9G63n8YejIwW9BALq7a5j2+H4yl6iOv9CB29edho+cuFRrvmJbbaH2yiVChKLJVysDGw==
   dependencies:
     "@types/estree" "*"
     "@types/json-schema" "*"
@@ -2617,10 +2617,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.42.tgz#d7e8f22700efc94d125103075c074396b5f41f9b"
   integrity sha512-Q5BPGyGKcvQgAMbsr7qEGN/kIPN6zZecYYABeTDBizOsau+2NMdSVTar9UQw21A2+JyA2KRNDYaYrPB0Rpk2oQ==
 
-"@types/node@16.11.38":
-  version "16.11.38"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.38.tgz#be0edd097b23eace6c471c525a74b3f98803017f"
-  integrity sha512-hjO/0K140An3GWDw2HJfq7gko3wWeznbjXgg+rzPdVzhe198hp4x2i1dgveAOEiFKd8sOilAxzoSJiVv5P/CUg==
+"@types/node@16.11.39":
+  version "16.11.39"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.39.tgz#07223cd2bc332ad9d92135e3a522eebdee3b060e"
+  integrity sha512-K0MsdV42vPwm9L6UwhIxMAOmcvH/1OoVkZyCgEtVu4Wx7sElGloy/W7kMBNe/oJ7V/jW9BVt1F6RahH6e7tPXw==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -7781,10 +7781,10 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openpgp@5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.2.1.tgz#cc48b25eb7d1b4613a167c9e6def8717eea53429"
-  integrity sha512-zvu63kxe70q3D6WlKC/TB2pzI59I8V/l4G+z/VYgNVOyARsoH9q4i/WqwoHPjWG5HnRjhII3WSvp3gXH2DMPVg==
+openpgp@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.3.0.tgz#e8fc97e538865b8c095dbd91c7be4203bd1dd1df"
+  integrity sha512-qjCj0vYpV3dmmkE+vURiJ5kVAJwrMk8BPukvpWJiHcTNWKwPVsRS810plIe4klIcHVf1ScgUQwqtBbv99ff+kQ==
   dependencies:
     asn1.js "^5.0.0"
 
