@@ -9,7 +9,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
-import { getDepWarnings } from './onboarding/pr/errors-warnings';
+import { getDepWarnings } from './errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
