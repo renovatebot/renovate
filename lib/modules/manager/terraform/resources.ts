@@ -37,10 +37,18 @@ export function extractTerraformResource(
 
   const typeMatch = resourceTypeExtractionRegex.exec(line);
 
-  // Sets the resourceType, e.g. "helm_release" 'resource "helm_release" "test_release"'
-  managerData.resourceType =
-    TerraformResourceTypes[typeMatch?.groups?.type as TerraformResourceTypes] ??
-    TerraformResourceTypes.unknown;
+  // Sets the resourceType, e.g., 'resource "helm_release" "test_release"' -> helm_release
+  const resourceType = typeMatch?.groups?.type;
+
+  const isKnownType =
+    resourceType &&
+    Object.keys(TerraformResourceTypes).some((key) => {
+      return TerraformResourceTypes[key].includes(resourceType);
+    });
+
+  managerData.resourceType = isKnownType
+    ? resourceType
+    : TerraformResourceTypes.unknown[0];
 
   /**
    * Iterates over all lines of the resource to extract the relevant key value pairs,
@@ -96,21 +104,19 @@ export function extractTerraformResource(
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
-  // istanbul ignore if: should tested?
-  if (!dep.managerData) {
-    return;
-  }
-  switch (dep.managerData.resourceType) {
-    case TerraformResourceTypes.docker_container:
+  switch (dep.managerData?.resourceType) {
+    case TerraformResourceTypes.generic_image_resource.find(
+      (key) => key === dep.managerData?.resourceType
+    ):
       if (dep.managerData.image) {
         applyDockerDependency(dep, dep.managerData.image);
-        dep.depType = 'docker_container';
+        dep.depType = dep.managerData.resourceType;
       } else {
         dep.skipReason = 'invalid-dependency-specification';
       }
       break;
 
-    case TerraformResourceTypes.docker_image:
+    case TerraformResourceTypes.docker_image[0]:
       if (dep.managerData.name) {
         applyDockerDependency(dep, dep.managerData.name);
         dep.depType = 'docker_image';
@@ -119,16 +125,7 @@ export function analyseTerraformResource(
       }
       break;
 
-    case TerraformResourceTypes.docker_service:
-      if (dep.managerData.image) {
-        applyDockerDependency(dep, dep.managerData.image);
-        dep.depType = 'docker_service';
-      } else {
-        dep.skipReason = 'invalid-dependency-specification';
-      }
-      break;
-
-    case TerraformResourceTypes.helm_release:
+    case TerraformResourceTypes.helm_release[0]:
       if (!dep.managerData.chart) {
         dep.skipReason = 'invalid-name';
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
@@ -141,7 +138,7 @@ export function analyseTerraformResource(
       dep.datasource = HelmDatasource.id;
       break;
 
-    case TerraformResourceTypes.tfe_workspace:
+    case TerraformResourceTypes.tfe_workspace[0]:
       if (dep.currentValue) {
         analyseTerraformVersion(dep);
         dep.depType = 'tfe_workspace';
