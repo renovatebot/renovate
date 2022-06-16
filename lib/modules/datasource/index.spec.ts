@@ -233,7 +233,7 @@ describe('modules/datasource/index', () => {
     it('defaultRegistryUrls function works', async () => {
       datasources.set(datasource, new DummyDatasource2());
       const res = await getPkgReleases({ datasource, depName });
-      expect(res).toMatchObject({ releases: [{ version: '1.2.3' }] });
+      expect(res).toMatchObject({ releases: [{ version: '1.2.3' }], registryUrl: 'https://reg1.com' });
     });
 
     it('applies extractVersion', async () => {
