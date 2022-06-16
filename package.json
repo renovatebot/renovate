@@ -304,7 +304,9 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "**/json-schema": "^0.4.0"
+    "**/json-schema": "^0.4.0",
+    "@types/jest/jest-matcher-utils": "^28.0.0",
+    "@types/jest/pretty-format": "^28.0.0"
   },
   "files": [
     "dist"
