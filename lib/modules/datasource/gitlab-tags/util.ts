@@ -10,8 +10,6 @@ export function getDepHost(registryUrl: string = defaultRegistryUrl): string {
 
 export function getDefaultRegistryUrl(): string[] {
   return [defaultRegistryUrl];
-  // const { platform, endpoint } = GlobalConfig.get();
-  // return platform === 'gitlab' && endpoint ? [endpoint] : [defaultRegistryUrl];
 }
 
 export function getSourceUrl(
