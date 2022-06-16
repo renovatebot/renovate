@@ -84,7 +84,16 @@ export async function lookupUpdates(
           topic: depName,
           message: `Failed to look up dependency ${depName}`,
         };
-        logger.debug({ dependency: depName, packageFile }, warning.message);
+        logger.warn(
+          {
+            dependency: depName,
+            packageFile,
+            datasource,
+            repository: config.repository,
+            registryUrls: config.registryUrls,
+          },
+          warning.message
+        );
         // TODO: return warnings in own field
         res.warnings.push(warning);
         return res;
