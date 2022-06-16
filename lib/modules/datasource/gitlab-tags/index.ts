@@ -17,7 +17,7 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = getDefaultRegistryUrl();
+  override readonly defaultRegistryUrls = getDefaultRegistryUrl;
 
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
