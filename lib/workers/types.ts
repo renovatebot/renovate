@@ -1,8 +1,8 @@
 import type { Merge } from 'type-fest';
 import type {
-  RegExManager,
   GroupConfig,
   LegacyAdminConfig,
+  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
