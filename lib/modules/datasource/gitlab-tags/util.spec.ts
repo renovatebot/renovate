@@ -1,5 +1,4 @@
-import { GlobalConfig } from '../../../config/global';
-import { getDefaultRegistryUrl, getDepHost, getSourceUrl } from './util';
+import { getDepHost, getSourceUrl } from './util';
 
 describe('modules/datasource/gitlab-tags/util', () => {
   describe('getDepHost', () => {
@@ -20,22 +19,6 @@ describe('modules/datasource/gitlab-tags/util', () => {
       expect(
         getSourceUrl('some/repo', 'https://gitlab.domain.test/api/v4')
       ).toBe('https://gitlab.domain.test/some/repo');
-    });
-  });
-
-  describe('getDefaultRegistryUrls', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
-    it('returns endpoint', () => {
-      GlobalConfig.set({ platform: 'gitlab', endpoint: 'https://someurl.com' });
-      expect(getDefaultRegistryUrl()).toStrictEqual(['https://someurl.com']);
-    });
-
-    it('returns default', () => {
-      GlobalConfig.set({ platform: 'gitlab' });
-      expect(getDefaultRegistryUrl()).toStrictEqual(['https://gitlab.com']);
     });
   });
 });

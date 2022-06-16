@@ -1,4 +1,4 @@
-import { GlobalConfig } from '../../../config/global';
+// import { GlobalConfig } from '../../../config/global';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 
@@ -9,8 +9,9 @@ export function getDepHost(registryUrl: string = defaultRegistryUrl): string {
 }
 
 export function getDefaultRegistryUrl(): string[] {
-  const { platform, endpoint } = GlobalConfig.get();
-  return platform === 'gitlab' && endpoint ? [endpoint] : [defaultRegistryUrl];
+  return [defaultRegistryUrl];
+  // const { platform, endpoint } = GlobalConfig.get();
+  // return platform === 'gitlab' && endpoint ? [endpoint] : [defaultRegistryUrl];
 }
 
 export function getSourceUrl(
