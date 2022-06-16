@@ -39,7 +39,7 @@
     "prepare:re2": "node tools/check-re2.mjs",
     "prestart": "run-s generate:* ",
     "pretest": "run-s generate:* ",
-    "prettier": "prettier --check \"**/*.{ts,js,mjs,json,md,yml}\"",
+    "prettier": "prettier --cache --check \"**/*.{ts,js,mjs,json,md,yml}\"",
     "prettier-fix": "prettier --write --cache \"**/*.{ts,js,mjs,json,md,yml}\"",
     "release:prepare": "node -r ts-node/register/transpile-only -- tools/generate-docs.ts",
     "release:publish": "node tools/release.mjs",
