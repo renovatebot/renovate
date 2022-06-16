@@ -7,10 +7,6 @@ export function getDepHost(registryUrl: string = defaultRegistryUrl): string {
   return registryUrl.replace(regEx(/\/api\/v4$/), '');
 }
 
-export function getDefaultRegistryUrl(): string[] {
-  return [defaultRegistryUrl];
-}
-
 export function getSourceUrl(
   packageName: string,
   registryUrl?: string

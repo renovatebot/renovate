@@ -5,7 +5,7 @@ import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabCommit, GitlabTag } from './types';
-import { getDefaultRegistryUrl, getDepHost, getSourceUrl } from './util';
+import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
 export class GitlabTagsDatasource extends Datasource {
   static readonly id = 'gitlab-tags';
@@ -17,7 +17,7 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = getDefaultRegistryUrl;
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
