@@ -1,6 +1,6 @@
 import type { Merge } from 'type-fest';
 import type {
-  CustomManager,
+  RegExManager,
   GroupConfig,
   LegacyAdminConfig,
   RenovateConfig,
@@ -136,7 +136,7 @@ export interface WorkerExtractConfig
   updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
-  regexManagers?: CustomManager[];
+  regexManagers?: RegExManager[];
   enabledManagers?: string[];
   enabled?: boolean;
 }

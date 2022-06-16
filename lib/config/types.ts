@@ -171,7 +171,7 @@ export interface RegexManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
-export interface CustomManager extends RegexManagerTemplates {
+export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
   matchStringsStrategy?: string;
@@ -233,7 +233,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
-  regexManagers?: CustomManager[];
+  regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
