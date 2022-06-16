@@ -9,7 +9,7 @@ import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
-import type { BranchConfig } from '../../types';
+import type { BranchConfig, NarrowedRenovateConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
@@ -115,11 +115,23 @@ export async function extractDependencies(
   return res;
 }
 
+export function narrowRenotoUpdateReno(
+  config: RenovateConfig
+): NarrowedRenovateConfig {
+  return {
+    repoIsOnboarded: config.repoIsOnboarded,
+    prHourlyLimit: config.prHourlyLimit,
+    onboardingBranch: config.onboardingBranch,
+    branchPrefix: config.branchPrefix,
+    prConcurrentLimit: config.prConcurrentLimit,
+    branchConcurrentLimit: config.branchConcurrentLimit as number,
+  };
+}
 export function updateRepo(
   config: RenovateConfig,
   branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   logger.debug('processRepo()');
 
-  return update(config, branches);
+  return update(narrowRenotoUpdateReno(config), branches);
 }

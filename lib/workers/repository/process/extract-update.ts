@@ -5,7 +5,7 @@ import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
-import type { BranchConfig } from '../../types';
+import type { BranchConfig, NarrowedRenovateConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
@@ -120,7 +120,7 @@ export async function lookup(
 }
 
 export async function update(
-  config: RenovateConfig,
+  config: NarrowedRenovateConfig,
   branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;

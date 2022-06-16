@@ -5,7 +5,7 @@ import { Pr, platform } from '../../../modules/platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
-import type { BranchConfig } from '../../types';
+import type { BranchConfig, NarrowedRenovateConfig } from '../../types';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig
@@ -78,7 +78,7 @@ export async function getConcurrentPrsRemaining(
 }
 
 export async function getPrsRemaining(
-  config: RenovateConfig,
+  config: NarrowedRenovateConfig,
   branches: BranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
@@ -87,7 +87,7 @@ export async function getPrsRemaining(
 }
 
 export function getConcurrentBranchesRemaining(
-  config: RenovateConfig,
+  config: NarrowedRenovateConfig,
   branches: BranchConfig[]
 ): number {
   const { branchConcurrentLimit, prConcurrentLimit } = config;
@@ -123,7 +123,7 @@ export function getConcurrentBranchesRemaining(
 }
 
 export async function getBranchesRemaining(
-  config: RenovateConfig,
+  config: NarrowedRenovateConfig,
   branches: BranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
