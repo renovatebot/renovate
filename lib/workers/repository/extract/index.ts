@@ -14,7 +14,7 @@ import type { WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
-function narrowedConfig(
+export function narrowedConfig(
   config: ManagerConfig & Partial<RegExManager>
 ): WorkerExtractConfig {
   return {

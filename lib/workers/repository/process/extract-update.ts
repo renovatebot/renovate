@@ -1,12 +1,14 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { getManagerList, hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
-import { extractAllDependencies } from '../extract';
+import { extractAllDependencies, narrowedConfig } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
@@ -47,6 +49,38 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   return stats;
 }
 
+function extractCacheFingerprint(config: RenovateConfig): string {
+  const { enabledManagers } = config;
+  let managerList = getManagerList();
+  if (is.nonEmptyArray(enabledManagers)) {
+    logger.debug('Applying enabledManagers filtering');
+    managerList = managerList.filter((manager) =>
+      enabledManagers.includes(manager)
+    );
+  }
+  const extractList: string[] = [];
+
+  for (const manager of managerList) {
+    const managerConfig = getManagerConfig(config, manager);
+    managerConfig.manager = manager;
+    if (manager === 'regex') {
+      for (const regexManager of config.regexManagers ?? []) {
+        extractList.push(
+          JSON.stringify(
+            narrowedConfig(mergeChildConfig(managerConfig, regexManager))
+          ) + hashMap.get(manager)
+        );
+      }
+    } else {
+      extractList.push(
+        JSON.stringify(narrowedConfig(managerConfig)) + hashMap.get(manager)
+      );
+    }
+  }
+
+  return hasha(extractList);
+}
+
 export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
@@ -57,7 +91,7 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch];
-  const configHash = hasha(JSON.stringify(config));
+  const configHash = extractCacheFingerprint(config);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
