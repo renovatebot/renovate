@@ -129,8 +129,8 @@ export interface BranchConfig
 
 export interface WorkerExtractConfig
   extends ExtractConfig,
-    CustomExtractConfig {
-  manager?: string;
+    Partial<CustomExtractConfig> {
+  manager: string;
   fileList?: string[];
   fileMatch?: string[];
   updateInternalDeps?: boolean;

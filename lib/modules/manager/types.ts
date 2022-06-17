@@ -25,7 +25,7 @@ export interface ExtractConfig {
 
 export interface CustomExtractConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
-  matchStrings?: string[];
+  matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
 
@@ -255,14 +255,14 @@ export interface ManagerApi extends ModuleApi {
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
-    config: WorkerExtractConfig,
+    config: ExtractConfig,
     files: string[]
   ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
-    config?: WorkerExtractConfig
+    config?: Partial<WorkerExtractConfig>
   ): Result<PackageFile | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;

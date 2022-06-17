@@ -3,6 +3,7 @@ import type { RangeStrategy } from '../../types';
 import type { WorkerExtractConfig } from '../../workers/types';
 import managers from './api';
 import type {
+  ExtractConfig,
   GlobalManagerConfig,
   ManagerApi,
   PackageFile,
@@ -38,7 +39,7 @@ export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
 
 export async function extractAllPackageFiles(
   manager: string,
-  config: WorkerExtractConfig,
+  config: ExtractConfig,
   files: string[]
 ): Promise<PackageFile[] | null> {
   if (!managers.has(manager)) {
@@ -60,7 +61,7 @@ export function extractPackageFile(
   manager: string,
   content: string,
   fileName: string,
-  config: WorkerExtractConfig
+  config: Partial<WorkerExtractConfig>
 ): Result<PackageFile | null> {
   if (!managers.has(manager)) {
     return null;
