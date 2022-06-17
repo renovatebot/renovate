@@ -33,6 +33,7 @@ export interface CustomExtractConfig
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
+  conservative?: boolean;
   composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];

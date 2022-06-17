@@ -61,6 +61,10 @@ export async function updateArtifacts(
     return null;
   }
 
+  const args = ['--update', config.conservative && '--conservative'].filter(
+    Boolean
+  );
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
@@ -69,7 +73,7 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundler lock --update';
     } else {
-      cmd = `bundler lock --update ${updatedDeps
+      cmd = `bundler lock ${args.join(' ')} ${updatedDeps
         .map((dep) => `${dep.depName}`)
         .filter((dep) => dep !== 'ruby')
         .map(quote)

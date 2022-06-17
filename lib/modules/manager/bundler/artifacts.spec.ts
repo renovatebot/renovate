@@ -128,6 +128,29 @@ describe('modules/manager/bundler/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('supports conservative mode', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce(null as never);
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['Gemfile.lock'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        newPackageFileContent: 'Updated Gemfile content',
+        config: {
+          ...config,
+          conservative: true,
+        },
+      })
+    ).toEqual([updatedGemfileLock]);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   describe('Docker', () => {
     beforeEach(() => {
       GlobalConfig.set({
