@@ -5,6 +5,7 @@ import { envMock } from '../../../test/exec-util';
 import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   exists,
@@ -41,10 +42,30 @@ describe('util/fs/index', () => {
       // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
       expect(await readLocalFile(__dirname)).toBeNull();
     });
+
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      expect(await readLocalFile('../filename')).toBeNull();
+    });
+  });
+
+  describe('writeLocalFile', () => {
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      expect(await writeLocalFile('../filename', '')).toBeUndefined();
+    });
+  });
+
+  describe('deleteLocalFile', () => {
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      expect(await deleteLocalFile('../filename')).toBeUndefined();
+    });
   });
 
   describe('localPathExists', () => {
     it('returns true for file', async () => {
+      GlobalConfig.set({ localDir: '' });
       expect(await localPathExists(__filename)).toBeTrue();
     });
 
@@ -56,6 +77,11 @@ describe('util/fs/index', () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
         false
       );
+    });
+
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      expect(await localPathExists('../filename')).toBeFalse();
     });
   });
 
@@ -129,7 +155,7 @@ describe('util/fs/index', () => {
           expect(result).toMatchSnapshot();
 
           await writeLocalFile('Cargo.lock', '');
-          await writeLocalFile('/test/subdir/Cargo.lock', '');
+          await writeLocalFile('test/subdir/Cargo.lock', '');
 
           const resultWithAdditionalFiles = await readLocalDirectory('test');
           expect(resultWithAdditionalFiles).not.toBeNull();
@@ -161,6 +187,11 @@ describe('util/fs/index', () => {
       const result = await readLocalDirectory('somedir');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(0);
+    });
+
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      await expect(readLocalDirectory('../filename')).toReject();
     });
   });
 
@@ -195,6 +226,11 @@ describe('util/fs/index', () => {
         { unsafeCleanup: true }
       );
     });
+
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ cacheDir: join('some/invalid/dir') });
+      await expect(ensureCacheDir('../../filename')).toReject();
+    });
   });
 
   describe('localPathIsFile', () => {
@@ -214,6 +250,11 @@ describe('util/fs/index', () => {
       expect(
         await localPathIsFile(__filename.replace('.ts', '.txt'))
       ).toBeFalse();
+    });
+
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: 'some/invalid/dir' });
+      expect(await localPathIsFile('../filename')).toBeFalse();
     });
   });
 

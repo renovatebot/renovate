@@ -11,6 +11,15 @@ export * from './proxies';
 
 export const pipeline = util.promisify(stream.pipeline);
 
+function isPathInBaseDir(path: string, baseDir?: string): boolean {
+  if (baseDir && !path.startsWith(upath.resolve(baseDir))) {
+    logger.warn('Preventing access to file outside the base directory');
+    return false;
+  }
+
+  return true;
+}
+
 export function getSubDirectory(fileName: string): string {
   return upath.parse(fileName).dir;
 }
@@ -34,7 +43,11 @@ export async function readLocalFile(
   encoding?: string
 ): Promise<string | Buffer | null> {
   const { localDir } = GlobalConfig.get();
-  const localFileName = upath.join(localDir, fileName);
+  const localFileName = upath.resolve(localDir, fileName);
+  if (!isPathInBaseDir(localFileName, localDir)) {
+    return null;
+  }
+
   try {
     const fileContent = encoding
       ? await fs.readFile(localFileName, encoding)
@@ -51,14 +64,20 @@ export async function writeLocalFile(
   fileContent: string | Buffer
 ): Promise<void> {
   const { localDir } = GlobalConfig.get();
-  const localFileName = upath.join(localDir, fileName);
+  const localFileName = upath.resolve(localDir, fileName);
+  if (!isPathInBaseDir(localFileName, localDir)) {
+    return;
+  }
   await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
   const { localDir } = GlobalConfig.get();
   if (localDir) {
-    const localFileName = upath.join(localDir, fileName);
+    const localFileName = upath.resolve(localDir, fileName);
+    if (!isPathInBaseDir(localFileName, localDir)) {
+      return;
+    }
     await fs.remove(localFileName);
   }
 }
@@ -69,7 +88,15 @@ export async function renameLocalFile(
   toFile: string
 ): Promise<void> {
   const { localDir } = GlobalConfig.get();
-  await fs.move(upath.join(localDir, fromFile), upath.join(localDir, toFile));
+  const fromPath = upath.resolve(localDir, fromFile);
+  const toPath = upath.resolve(localDir, toFile);
+  if (
+    !isPathInBaseDir(fromPath, localDir) ||
+    !isPathInBaseDir(toPath, localDir)
+  ) {
+    return;
+  }
+  await fs.move(fromPath, toPath);
 }
 
 // istanbul ignore next
@@ -82,15 +109,20 @@ export async function ensureDir(dirName: string): Promise<void> {
 // istanbul ignore next
 export async function ensureLocalDir(dirName: string): Promise<void> {
   const { localDir } = GlobalConfig.get();
-  const localDirName = upath.join(localDir, dirName);
+  const localDirName = upath.resolve(localDir, dirName);
+  if (!isPathInBaseDir(localDirName, localDir)) {
+    return;
+  }
   await fs.ensureDir(localDirName);
 }
 
 export async function ensureCacheDir(name: string): Promise<string> {
-  const cacheDirName = upath.join(
-    GlobalConfig.get('cacheDir'),
-    `others/${name}`
-  );
+  const { cacheDir } = GlobalConfig.get();
+  const cacheDirName = upath.resolve(cacheDir, `others/${name}`);
+  if (!isPathInBaseDir(cacheDirName, cacheDir)) {
+    return Promise.reject();
+  }
+
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
 }
@@ -107,9 +139,14 @@ export function privateCacheDir(): string {
 
 export function localPathExists(pathName: string): Promise<boolean> {
   const { localDir } = GlobalConfig.get();
+  const localPathName = upath.resolve(localDir, pathName);
+  if (!isPathInBaseDir(localPathName, localDir)) {
+    return Promise.resolve(false);
+  }
+
   // Works for both files as well as directories
   return fs
-    .stat(upath.join(localDir, pathName))
+    .stat(localPathName)
     .then((s) => !!s)
     .catch(() => false);
 }
@@ -148,7 +185,11 @@ export async function findLocalSiblingOrParent(
  */
 export async function readLocalDirectory(path: string): Promise<string[]> {
   const { localDir } = GlobalConfig.get();
-  const localPath = upath.join(localDir, path);
+  const localPath = upath.resolve(localDir, path);
+  if (!isPathInBaseDir(localPath, localDir)) {
+    return Promise.reject();
+  }
+
   const fileList = await fs.readdir(localPath);
   return fileList;
 }
@@ -159,8 +200,13 @@ export function createWriteStream(path: string): fs.WriteStream {
 
 export function localPathIsFile(pathName: string): Promise<boolean> {
   const { localDir } = GlobalConfig.get();
+  const localPathName = upath.resolve(localDir, pathName);
+  if (!isPathInBaseDir(localPathName, localDir)) {
+    return Promise.resolve(false);
+  }
+
   return fs
-    .stat(upath.join(localDir, pathName))
+    .stat(localPathName)
     .then((s) => s.isFile())
     .catch(() => false);
 }
