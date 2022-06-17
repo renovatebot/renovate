@@ -37,5 +37,17 @@ describe('modules/manager/bazelisk/extract', () => {
         },
       ]);
     });
+
+    it('ignores comments past the first line', () => {
+      const res = extractPackageFile('5.2.0\n# comment1\n\n# comment2');
+      expect(res.deps).toEqual([
+        {
+          currentValue: '5.2.0',
+          datasource: 'github-releases',
+          depName: 'bazel',
+          packageName: 'bazelbuild/bazel',
+        },
+      ]);
+    });
   });
 });
