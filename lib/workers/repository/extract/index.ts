@@ -1,6 +1,11 @@
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
+import type {
+  ManagerConfig,
+  MatchStringsStrategy,
+  RegExManager,
+  RenovateConfig,
+} from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -8,6 +13,38 @@ import { getFileList } from '../../../util/git';
 import type { WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
+
+function narrowedConfig(
+  config: ManagerConfig & Partial<RegExManager>
+): WorkerExtractConfig {
+  return {
+    manager: config.manager,
+    fileMatch: config.fileMatch,
+    updateInternalDeps: config.updateInternalDeps,
+    includePaths: config.includePaths,
+    ignorePaths: config.ignorePaths,
+    regexManagers: config.regexManagers,
+    enabledManagers: config.enabledManagers,
+    enabled: config.enabled,
+    registryAliases: config.registryAliases as Record<string, string>,
+    npmrc: config.npmrc,
+    npmrcMerge: config.npmrcMerge,
+    skipInstalls: config.skipInstalls as boolean,
+    autoReplaceStringTemplate: config.autoReplaceStringTemplate,
+    matchStrings: config.matchStrings,
+    matchStringsStrategy: config.matchStringsStrategy as MatchStringsStrategy,
+    depNameTemplate: config.depNameTemplate,
+    packageNameTemplate: config.packageNameTemplate,
+    datasourceTemplate: config.datasourceTemplate,
+    versioningTemplate: config.versioningTemplate,
+    depTypeTemplate: config.depTypeTemplate,
+    currentValueTemplate: config.currentValueTemplate,
+    currentDigestTemplate: config.currentDigestTemplate,
+    extractVersionTemplate: config.extractVersionTemplate,
+    registryUrlTemplate: config.registryUrlTemplate,
+    fileList: config.fileList,
+  };
+}
 
 export async function extractAllDependencies(
   config: RenovateConfig
@@ -23,10 +60,14 @@ export async function extractAllDependencies(
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await getFileList();
 
-  const tryConfig = (managerConfig: ManagerConfig): void => {
+  const tryConfig = (
+    managerConfig: ManagerConfig & Partial<RegExManager>
+  ): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push({ ...managerConfig, fileList: matchingFileList });
+      extractList.push(
+        narrowedConfig({ ...managerConfig, fileList: matchingFileList })
+      );
     }
   };
 
