@@ -181,6 +181,9 @@ export class PypiDatasource extends Datasource {
 
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+    // Also match the current wheel spec
+    // https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
+    // where any of -_. characters in {distribution} are replaced with _
     const wheelText = text.toLowerCase();
     const wheelPrefixWithPeriod =
       packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
