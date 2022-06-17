@@ -8,6 +8,7 @@ import type {
 import type { ProgrammingLanguage } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
+import type { WorkerExtractConfig } from '../../workers/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -22,11 +23,9 @@ export interface ExtractConfig {
   skipInstalls?: boolean;
 }
 
-export interface CustomExtractConfig
-  extends ExtractConfig,
-    RegexManagerTemplates {
+export interface CustomExtractConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
-  matchStrings: string[];
+  matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
 
@@ -256,14 +255,14 @@ export interface ManagerApi extends ModuleApi {
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
-    config: ExtractConfig,
+    config: WorkerExtractConfig,
     files: string[]
   ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
-    config?: ExtractConfig
+    config?: WorkerExtractConfig
   ): Result<PackageFile | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
