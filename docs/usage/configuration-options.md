@@ -423,6 +423,16 @@ Renovate's default behavior is to reuse/reopen a single Config Warning issue in 
 However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date.
 Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
 
+## conservative
+
+Enable conservative mode for package managers that support it. This will only update the immediate dependency in the lockfile instead of all subdependencies.
+
+```
+{
+  "conservative": true
+}
+```
+
 ## constraints
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
