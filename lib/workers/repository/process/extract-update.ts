@@ -49,7 +49,7 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   return stats;
 }
 
-function extractCacheFingerprint(config: RenovateConfig): string {
+export function extractCacheFingerprint(config: RenovateConfig): string {
   const { enabledManagers } = config;
   let managerList = getManagerList();
   if (is.nonEmptyArray(enabledManagers)) {
@@ -68,7 +68,7 @@ function extractCacheFingerprint(config: RenovateConfig): string {
         extractList.push(
           JSON.stringify(
             narrowedConfig(mergeChildConfig(managerConfig, regexManager))
-          ) + hashMap.get(manager)
+          )
         );
       }
     } else {
