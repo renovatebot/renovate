@@ -1,14 +1,9 @@
+import hasha from 'hasha';
 import { git, mocked } from '../../../../test/util';
-import type { RenovateConfig } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
-import {
-  extract,
-  extractCacheFingerprint,
-  lookup,
-  update,
-} from './extract-update';
+import { extract, lookup, update } from './extract-update';
 
 jest.mock('./write');
 jest.mock('./sort');
@@ -76,7 +71,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: extractCacheFingerprint(config),
+            configHash: hasha(JSON.stringify(config)),
             packageFiles,
           },
         },
@@ -85,28 +80,6 @@ describe('workers/repository/process/extract-update', () => {
       git.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
-    });
-  });
-
-  describe('extractCacheFingerprint()', () => {
-    it('works', () => {
-      const { narrowedConfig } = require('../extract');
-      const config: RenovateConfig = {
-        enabledManagers: ['regex'],
-        regexManagers: [
-          {
-            fileMatch: ['^Dockerfile$'],
-            matchStringsStrategy: 'any',
-            matchStrings: [
-              'ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
-              'FROM (?<depName>\\S*):(?<currentValue>\\S*)',
-            ],
-            datasourceTemplate: 'docker',
-          },
-        ],
-      };
-      narrowedConfig.mockImplementation(() => 'somstr');
-      expect(extractCacheFingerprint(config)).toBeString();
     });
   });
 });
