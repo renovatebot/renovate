@@ -1,4 +1,4 @@
-import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import * as semverVersioning from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
@@ -9,4 +9,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const supportedDatasources = [GithubTagsDatasource.id];
+export const supportedDatasources = [GithubReleasesDatasource.id];
