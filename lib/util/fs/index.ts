@@ -13,7 +13,10 @@ export const pipeline = util.promisify(stream.pipeline);
 
 function isPathInBaseDir(path: string, baseDir?: string): boolean {
   if (baseDir && !path.startsWith(upath.resolve(baseDir))) {
-    logger.warn({ path, baseDir }, 'Preventing access to file outside the base directory');
+    logger.warn(
+      { path, baseDir },
+      'Preventing access to file outside the base directory'
+    );
     return false;
   }
 
