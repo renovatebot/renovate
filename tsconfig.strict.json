@@ -51,6 +51,7 @@
     "lib/workers/repository/errors-warnings.ts",
     "lib/workers/repository/onboarding/pr/index.ts",
     "lib/workers/repository/onboarding/pr/pr-list.ts",
+    "lib/workers/repository/config-migration/pr/index.ts",
     "lib/workers/repository/process/deprecated.ts",
     "lib/workers/repository/process/extract-update.ts",
     "lib/workers/repository/process/fetch.ts",
