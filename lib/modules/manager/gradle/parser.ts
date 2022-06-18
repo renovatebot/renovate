@@ -299,7 +299,6 @@ function processCustomRegistryUrl({
 
   try {
     if (registryUrl) {
-      registryUrl = registryUrl.replaceAll('\\', '');
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
         return { urls: [registryUrl] };

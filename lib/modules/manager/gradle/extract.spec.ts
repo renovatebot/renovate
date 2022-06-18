@@ -212,7 +212,7 @@ describe('modules/manager/gradle/extract', () => {
 
     mockFs({
       'build.gradle': buildFile,
-      'gradle.properties': 'repositoryBaseURL: https\\://dummy.org/whatever',
+      'gradle.properties': 'repositoryBaseURL: https://dummy.org/whatever',
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [
