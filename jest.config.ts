@@ -25,7 +25,7 @@ const config: InitialOptionsTsJest = {
     },
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
-  reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
+  reporters: ci ? ['default', 'github-actions'] : ['default'],
   setupFilesAfterEnv: [
     'jest-extended/all',
     'expect-more-jest',

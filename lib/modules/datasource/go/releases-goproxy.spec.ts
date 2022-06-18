@@ -1,10 +1,22 @@
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
+import { GithubReleasesDatasource } from '../github-releases';
+import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
 
 const datasource = new GoProxyDatasource();
 
 describe('modules/datasource/go/releases-goproxy', () => {
+  const githubGetReleases = jest.spyOn(
+    GithubReleasesDatasource.prototype,
+    'getReleases'
+  );
+
+  const githubGetTags = jest.spyOn(
+    GithubTagsDatasource.prototype,
+    'getReleases'
+  );
+
   it('encodeCase', () => {
     expect(datasource.encodeCase('foo')).toBe('foo');
     expect(datasource.encodeCase('Foo')).toBe('!foo');
@@ -276,12 +288,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
       process.env.GOPROXY = baseUrl;
       process.env.GOPRIVATE = 'github.com/google/*';
 
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/google/btree/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v1.0.1' }])
-        .get('/repos/google/btree/releases?per_page=100')
-        .reply(200, []);
+      githubGetTags.mockResolvedValueOnce({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v1.0.1', version: 'v1.0.1' },
+        ],
+      });
+      githubGetReleases.mockResolvedValueOnce({ releases: [] });
 
       const res = await datasource.getReleases({
         packageName: 'github.com/google/btree',
@@ -458,12 +471,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(410);
 
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/foo/bar/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v1.0.1' }])
-        .get('/repos/foo/bar/releases?per_page=100')
-        .reply(200, []);
+      githubGetTags.mockResolvedValueOnce({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v1.0.1', version: 'v1.0.1' },
+        ],
+      });
+      githubGetReleases.mockResolvedValueOnce({ releases: [] });
 
       const res = await datasource.getReleases({
         packageName: 'github.com/foo/bar',

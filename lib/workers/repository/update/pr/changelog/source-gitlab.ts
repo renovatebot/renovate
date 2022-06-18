@@ -110,6 +110,7 @@ export async function getChangeLogJSON(
         release = {
           version: next.version,
           date: next.releaseTimestamp,
+          gitRef: next.gitRef,
           // put empty changes so that existing templates won't break
           changes: [],
           compare: {},
@@ -144,7 +145,7 @@ export async function getChangeLogJSON(
     versions: changelogReleases,
   };
 
-  res = await addReleaseNotes(res);
+  res = await addReleaseNotes(res, config);
 
   return res;
 }
