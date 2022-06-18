@@ -124,6 +124,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configMigration',
+    description: 'Enable this to get config migration PRs when needed.',
+    stage: 'repository',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'productLinks',
     description: 'Links which are used in PRs, issues and comments.',
     type: 'object',

@@ -417,6 +417,31 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 !!! note
     This option is applicable to GitLab only.
 
+## configMigration
+
+If enabled, Renovate will raise a pull request if config file migration is needed.
+
+We're adding new features to Renovate bot often.
+Most times you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to change your Renovate configuration.
+To help you with this, Renovate will create config migration pull requests.
+
+Example:
+
+After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would make this change:
+
+```diff
+{
+- "baseBranch": "main"
++ "baseBranches": ["main"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! info
+    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
