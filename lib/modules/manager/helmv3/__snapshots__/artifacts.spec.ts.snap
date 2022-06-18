@@ -75,7 +75,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts do not add aliases to repository list 1`] = `
+exports[`modules/manager/helmv3/artifacts do not add registryAliases to repository list 1`] = `
 Array [
   Object {
     "file": Object {
@@ -96,7 +96,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts do not add aliases to repository list 2`] = `
+exports[`modules/manager/helmv3/artifacts do not add registryAliases to repository list 2`] = `
 Array [
   Object {
     "cmd": "helm repo add jetstack --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://charts.jetstack.io",
@@ -158,7 +158,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in aliases 1`] = `
+exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in registryAliases 1`] = `
 Array [
   Object {
     "file": Object {
@@ -179,7 +179,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in aliases 2`] = `
+exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in registryAliases 2`] = `
 Array [
   Object {
     "cmd": "helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username registryUser --password password registry.gitlab.com/user/oci-helm-test",
@@ -241,7 +241,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in aliases 1`] = `
+exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in registryAliases 1`] = `
 Array [
   Object {
     "file": Object {
@@ -262,7 +262,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in aliases 2`] = `
+exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in registryAliases 2`] = `
 Array [
   Object {
     "cmd": "helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username test --password aPassword registry.example.com/organization",
@@ -590,7 +590,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts sets repositories from aliases 1`] = `
+exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 1`] = `
 Array [
   Object {
     "file": Object {
@@ -611,7 +611,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts sets repositories from aliases 2`] = `
+exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 2`] = `
 Array [
   Object {
     "cmd": "helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url",
@@ -692,7 +692,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts sets repositories from aliases with docker 1`] = `
+exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases with docker 1`] = `
 Array [
   Object {
     "file": Object {
@@ -713,7 +713,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts sets repositories from aliases with docker 2`] = `
+exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases with docker 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/sidecar",

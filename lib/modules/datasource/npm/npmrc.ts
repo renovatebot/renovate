@@ -173,7 +173,9 @@ export function resolveRegistryUrl(packageName: string): string {
       !matchPackagePrefixes ||
       packageName.startsWith(matchPackagePrefixes[0])
     ) {
-      registryUrl = registryUrls[0];
+      // TODO: fix types #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      registryUrl = registryUrls![0];
     }
   }
   return registryUrl;
