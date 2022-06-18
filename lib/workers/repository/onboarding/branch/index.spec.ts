@@ -12,6 +12,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import * as _cache from '../../../../util/cache/repository';
@@ -165,6 +166,19 @@ describe('workers/repository/onboarding/branch/index', () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Checking cached config file name'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Existing config file confirmed'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          fileName: '.renovaterc',
+          config: {},
+        },
+        'Repository config'
+      );
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
@@ -173,6 +187,21 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Checking cached config file name'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Existing config file confirmed'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          fileName: 'package.json',
+          config: {
+            renovate: {},
+          },
+        },
+        'Repository config'
+      );
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
