@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  RegExManager,
   RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
@@ -8,7 +9,6 @@ import type {
 import type { ProgrammingLanguage } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
-import type { WorkerExtractConfig } from '../../workers/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -29,6 +29,19 @@ export interface CustomExtractConfig extends RegexManagerTemplates {
   matchStringsStrategy?: MatchStringsStrategy;
 }
 
+export interface WorkerExtractConfig
+  extends ExtractConfig,
+    Partial<CustomExtractConfig> {
+  manager: string;
+  fileList?: string[];
+  fileMatch?: string[];
+  updateInternalDeps?: boolean;
+  includePaths?: string[];
+  ignorePaths?: string[];
+  regexManagers?: RegExManager[];
+  enabledManagers?: string[];
+  enabled?: boolean;
+}
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;

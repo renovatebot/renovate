@@ -1,6 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
 import type { RangeStrategy } from '../../types';
-import type { WorkerExtractConfig } from '../../workers/types';
 import managers from './api';
 import type {
   ExtractConfig,
@@ -9,6 +8,7 @@ import type {
   PackageFile,
   RangeConfig,
   Result,
+  WorkerExtractConfig,
 } from './types';
 export { hashMap } from './fingerprint.generated';
 const managerList = Array.from(managers.keys());
