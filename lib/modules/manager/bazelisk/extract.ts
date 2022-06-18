@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile {
   const dep: PackageDependency = {
     depName: 'bazel',
-    currentValue: content.trim().split('\n', 2)[0].trim(),
+    currentValue: content.split('\n', 2)[0].trim(),
     datasource: GithubReleasesDatasource.id,
     packageName: 'bazelbuild/bazel',
   };
