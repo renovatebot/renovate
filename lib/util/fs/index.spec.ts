@@ -7,14 +7,12 @@ import { GlobalConfig } from '../../config/global';
 import {
   deleteLocalFile,
   ensureCacheDir,
-  ensureLocalDir,
   exists,
   findLocalSiblingOrParent,
   findUpLocal,
   getSubDirectory,
   localPathExists,
   localPathIsFile,
-  readLocalDirectory,
   readLocalFile,
   writeLocalFile,
 } from '.';
@@ -136,62 +134,6 @@ describe('util/fs/index', () => {
     it('immediately returns null when either path is absolute', async () => {
       expect(await findLocalSiblingOrParent('/etc/hosts', 'other')).toBeNull();
       expect(await findLocalSiblingOrParent('other', '/etc/hosts')).toBeNull();
-    });
-  });
-
-  describe('readLocalDirectory', () => {
-    it('returns dir content', async () => {
-      await withDir(
-        async (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          await writeLocalFile('test/Cargo.toml', '');
-          await writeLocalFile('test/Cargo.lock', '');
-
-          const result = await readLocalDirectory('test');
-          expect(result).not.toBeNull();
-          expect(result).toBeArrayOfSize(2);
-          expect(result).toMatchSnapshot();
-
-          await writeLocalFile('Cargo.lock', '');
-          await writeLocalFile('test/subdir/Cargo.lock', '');
-
-          const resultWithAdditionalFiles = await readLocalDirectory('test');
-          expect(resultWithAdditionalFiles).not.toBeNull();
-          expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
-          expect(resultWithAdditionalFiles).toMatchSnapshot();
-        },
-        {
-          unsafeCleanup: true,
-        }
-      );
-    });
-
-    it('return empty array for non existing directory', async () => {
-      await withDir(
-        async (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          await expect(readLocalDirectory('somedir')).rejects.toThrow();
-        },
-        {
-          unsafeCleanup: true,
-        }
-      );
-    });
-
-    it('return empty array for a existing but empty directory', async () => {
-      await ensureLocalDir('somedir');
-      const result = await readLocalDirectory('somedir');
-      expect(result).not.toBeNull();
-      expect(result).toBeArrayOfSize(0);
-    });
-
-    it('blocks path traversal attempt', async () => {
-      GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      await expect(readLocalDirectory('../filename')).toReject();
     });
   });
 

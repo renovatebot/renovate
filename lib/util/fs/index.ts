@@ -183,20 +183,6 @@ export async function findLocalSiblingOrParent(
   return null;
 }
 
-/**
- * Get files by name from directory
- */
-export async function readLocalDirectory(path: string): Promise<string[]> {
-  const { localDir } = GlobalConfig.get();
-  const localPath = upath.resolve(localDir, path);
-  if (!isPathInBaseDir(localPath, localDir)) {
-    return Promise.reject();
-  }
-
-  const fileList = await fs.readdir(localPath);
-  return fileList;
-}
-
 export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
 }
