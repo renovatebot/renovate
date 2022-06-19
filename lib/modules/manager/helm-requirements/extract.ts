@@ -57,7 +57,7 @@ export function extractPackageFile(
       const repoWithPrefixRemoved = dep.repository.slice(
         dep.repository[0] === '@' ? 1 : 6
       );
-      const alias = config.aliases?.[repoWithPrefixRemoved];
+      const alias = config.registryAliases?.[repoWithPrefixRemoved];
       if (alias) {
         res.registryUrls = [alias];
         return res;

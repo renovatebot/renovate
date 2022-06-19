@@ -83,7 +83,20 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   await checkoutBranch(config.baseBranch);
-  const branchExists = gitBranchExists(config.branchName);
+  let branchExists = gitBranchExists(config.branchName);
+
+  if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
+    const branchName = config.branchName.replace(
+      config.branchPrefix,
+      config.branchPrefixOld
+    );
+    branchExists = gitBranchExists(branchName);
+    if (branchExists) {
+      config.branchName = branchName;
+      logger.debug('Found existing branch with branchPrefixOld');
+    }
+  }
+
   let branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck =
@@ -236,7 +249,7 @@ export async function processBranch(
     }
 
     // Check schedule
-    config.isScheduledNow = isScheduledNow(config);
+    config.isScheduledNow = isScheduledNow(config, 'schedule');
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
@@ -515,6 +528,12 @@ export async function processBranch(
         }
         logger.debug('Branch is automerged - returning');
         return { branchExists: false, result: BranchResult.Automerged };
+      }
+      if (mergeStatus === 'off schedule') {
+        logger.debug(
+          'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
+        );
+        return { branchExists, result: BranchResult.NotScheduled };
       }
       if (
         mergeStatus === 'stale' &&

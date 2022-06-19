@@ -4,6 +4,7 @@ import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -107,6 +108,9 @@ export async function detectGhe(token: string): Promise<void> {
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
     platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    logger.debug(
+      `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`
+    );
   }
 }
 
@@ -265,7 +269,13 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    if (platformConfig.isGhe) {
+    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+    ) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
@@ -663,6 +673,10 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       return null;
     }
     logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
+    if (GlobalConfig.get('dryRun')) {
+      logger.info('DRY-RUN: Would try to reopen autoclosed PR');
+      return null;
+    }
     const { sha, number } = autoclosedPr;
     try {
       await githubApi.postJson(`repos/${config.repository}/git/refs`, {
@@ -1315,8 +1329,21 @@ async function tryPrAutomerge(
   prNodeId: string,
   platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
-  if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
+  if (!platformOptions?.usePlatformAutomerge) {
     return;
+  }
+
+  // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
+  if (platformConfig.isGhe) {
+    // semver not null safe, accepts null and undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
+      logger.debug(
+        { prNumber },
+        'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+      );
+      return;
+    }
   }
 
   if (!config.autoMergeAllowed) {
@@ -1556,7 +1583,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     // semver not null safe, accepts null and undefined
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     platformConfig.gheVersion!,
-    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
+    '>=3.5'
   );
   const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
   const query = vulnerabilityAlertsQuery(filterByState);

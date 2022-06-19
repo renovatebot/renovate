@@ -13,12 +13,12 @@ import {
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
+import { getDepWarnings, getErrors, getWarnings } from '../../errors-warnings';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
-import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
@@ -152,14 +152,16 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addParticipants(config, pr);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (
-      err.statusCode === 422 &&
+      err.response?.statusCode === 422 &&
       err.response?.body?.errors?.[0]?.message?.startsWith(
         'A pull request already exists'
       )
     ) {
-      logger.debug('Onboarding PR already exists but cannot find it');
+      logger.warn(
+        'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+      );
       await deleteBranch(config.onboardingBranch);
       return;
     }

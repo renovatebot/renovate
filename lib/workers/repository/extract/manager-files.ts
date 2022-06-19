@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -8,9 +7,10 @@ import {
 } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
+import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
-  config: RenovateConfig
+  config: WorkerExtractConfig
 ): Promise<PackageFile[]> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
@@ -42,7 +42,8 @@ export async function getManagerPackageFiles(
         }
       }
     }
-    return allPackageFiles;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    return allPackageFiles!;
   }
   const packageFiles: PackageFile[] = [];
   for (const packageFile of fileList) {

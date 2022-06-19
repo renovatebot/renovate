@@ -1,3 +1,4 @@
+import type { RequestError, Response } from 'got';
 import {
   RenovateConfig,
   defaultConfig,
@@ -202,6 +203,39 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would create onboarding PR'
       );
+    });
+
+    describe('ensureOnboardingPr() throws', () => {
+      const response = partial<Response>({ statusCode: 422 });
+      const err = partial<RequestError>({ response });
+
+      beforeEach(() => {
+        jest.resetAllMocks();
+        GlobalConfig.reset();
+        git.deleteBranch.mockResolvedValue();
+      });
+
+      it('throws when trying to create a new PR', async () => {
+        platform.createPr.mockRejectedValueOnce(err);
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).toReject();
+        expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      });
+
+      it('deletes branch when PR already exists but cannot find it', async () => {
+        err.response.body = {
+          errors: [{ message: 'A pull request already exists' }],
+        };
+        platform.createPr.mockRejectedValueOnce(err);
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).toResolve();
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+        );
+        expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

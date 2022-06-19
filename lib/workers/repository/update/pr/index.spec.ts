@@ -57,6 +57,7 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     const config: BranchConfig = {
+      manager: 'some-manager',
       branchName: sourceBranch,
       upgrades: [],
       prTitle,
@@ -565,6 +566,7 @@ describe('workers/repository/update/pr/index', () => {
 
       const dummyRelease: ChangeLogRelease = {
         version: '',
+        gitRef: '',
         changes: dummyChanges,
         compare: {},
         date: '',

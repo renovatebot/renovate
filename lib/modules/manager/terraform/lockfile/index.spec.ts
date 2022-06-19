@@ -3,8 +3,8 @@ import { fs, loadFixture, mocked } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
+import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
-import { updateArtifacts } from './index';
 
 // auto-mock fs
 jest.mock('../../../../util/fs');
