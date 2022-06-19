@@ -253,7 +253,6 @@
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
     "@types/shelljs": "0.8.11",
-    "@types/tmp": "0.2.3",
     "@types/traverse": "0.6.32",
     "@types/url-join": "4.0.1",
     "@types/validate-npm-package-name": "3.0.3",
