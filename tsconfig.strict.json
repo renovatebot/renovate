@@ -16,10 +16,10 @@
 
     // TODO: fixme
     "lib/util/cache/package/decorator.spec.ts",
-    "lib/util/exec/docker/index.spec.ts",
-    "lib/util/exec/index.spec.ts",
+    // "lib/util/exec/docker/index.spec.ts",
+    // "lib/util/exec/index.spec.ts",
     // "lib/util/git/author.spec.ts",
-    // "lib/util/git/index.spec.ts",
+    "lib/util/git/index.spec.ts",
     // "lib/util/http/github.spec.ts",
     "lib/util/index.spec.ts",
     "lib/util/merge-confidence/index.spec.ts",
