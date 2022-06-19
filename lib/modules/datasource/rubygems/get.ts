@@ -254,11 +254,10 @@ export class InternalRubyGemsDatasource extends Datasource {
     response: HttpResponse<HttpResponse<string>>
   ): string {
     let headerRespose = '';
+    // istanbul ignore else: not testable with nock
     if (is.string(response.headers?.server)) {
       headerRespose = response.headers?.server;
-    }
-    // istanbul ignore if: not testable with nock
-    else if (is.array(response.headers?.server)) {
+    } else if (is.array(response.headers?.server)) {
       [headerRespose] = response.headers?.server ?? [''];
     }
     return headerRespose;
