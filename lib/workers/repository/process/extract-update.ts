@@ -20,12 +20,12 @@ export type ExtractResult = {
   packageFiles: Record<string, PackageFile[]>;
 };
 
-interface StatsResult {
+export interface StatsResult {
   fileCount: number;
   depCount: number;
 }
 
-interface Stats {
+export interface Stats {
   managers: Record<string, StatsResult>;
   total: StatsResult;
 }
