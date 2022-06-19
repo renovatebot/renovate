@@ -12,11 +12,6 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
-import {
-  isPresetForShallowConfig,
-  logShallowConfig,
-  updateShallowConfig,
-} from '.';
 
 jest.mock('./npm');
 jest.mock('./github');
@@ -986,7 +981,7 @@ Object {
     });
 
     it('logs user extended config for shallow mode', () => {
-      logShallowConfig(
+      presets.logShallowConfig(
         { extends: ['github>username/preset-repo'] },
         { extends: ['config:base'], pacakgeRules: ['some rule'] }
       );
@@ -1003,12 +998,22 @@ Object {
 
     it('includes external presets for shallow mode', () => {
       expect(
-        isPresetForShallowConfig('github>whitesource/merge-confidence:beta')
+        presets.isPresetForShallowConfig(
+          'github>whitesource/merge-confidence:beta'
+        )
       ).toBeFalsy();
-      expect(isPresetForShallowConfig('github>somerepo/renovate')).toBeTruthy();
-      expect(isPresetForShallowConfig('gitlab>somerepo/renovate')).toBeTruthy();
-      expect(isPresetForShallowConfig('gitea>somerepo/renovate')).toBeTruthy();
-      expect(isPresetForShallowConfig('local>somerepo/renovate')).toBeTruthy();
+      expect(
+        presets.isPresetForShallowConfig('github>somerepo/renovate')
+      ).toBeTruthy();
+      expect(
+        presets.isPresetForShallowConfig('gitlab>somerepo/renovate')
+      ).toBeTruthy();
+      expect(
+        presets.isPresetForShallowConfig('gitea>somerepo/renovate')
+      ).toBeTruthy();
+      expect(
+        presets.isPresetForShallowConfig('local>somerepo/renovate')
+      ).toBeTruthy();
     });
 
     it('combines config for shallow mode', () => {
@@ -1022,7 +1027,7 @@ Object {
         extends: ['config:app'],
         automergeType: 'pr',
       };
-      updateShallowConfig(repoConfig, fetchedConfig);
+      presets.updateShallowConfig(repoConfig, fetchedConfig);
       expect(repoConfig).toMatchObject({
         value: {
           extends: ['config:base', 'config:app'],
@@ -1033,7 +1038,7 @@ Object {
     });
 
     it('removes empty extends array for shallow log', () => {
-      logShallowConfig(
+      presets.logShallowConfig(
         {
           extends: ['github>username/preset-repo1'],
           dependencyDashboard: true,
