@@ -1,6 +1,11 @@
 import { RenovateConfig, getConfig } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
-import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
+import {
+  getDepWarningsDashboard,
+  getDepWarningsPR,
+  getErrors,
+  getWarnings,
+} from './errors-warnings';
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
@@ -38,7 +43,7 @@ describe('workers/repository/errors-warnings', () => {
       jest.resetAllMocks();
     });
 
-    it('returns warning text', () => {
+    it('returns PR warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -70,7 +75,7 @@ describe('workers/repository/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarnings(packageFiles);
+      const res = getDepWarningsPR(packageFiles);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -78,6 +83,54 @@ describe('workers/repository/errors-warnings', () => {
         ### ⚠ Dependency Lookup Warnings ⚠
 
         Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
+
+        -   \`Warning 1\`
+        -   \`Warning 2\`
+
+        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+        "
+      `);
+    });
+
+    it('returns dashboard warning text', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: undefined }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: undefined }],
+              },
+            ],
+          },
+        ],
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 2', topic: undefined }],
+              },
+            ],
+          },
+        ],
+      };
+      const res = getDepWarningsDashboard(packageFiles);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
 
         -   \`Warning 1\`
         -   \`Warning 2\`
