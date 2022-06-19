@@ -159,8 +159,8 @@ export default async function executePostUpgradeCommands(
   const { allowedPostUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =
-    config.updatedPackageFiles?.length > 0 ||
-    config.updatedArtifacts?.length > 0;
+    config.updatedPackageFiles!.length > 0 ||
+    config.updatedArtifacts!.length > 0;
 
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
