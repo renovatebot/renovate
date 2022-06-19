@@ -3,7 +3,7 @@ import { parseGitAuthor } from './author';
 describe('util/git/author', () => {
   describe('parseGitAuthor', () => {
     it('returns null if empty email given', () => {
-      expect(parseGitAuthor(undefined)).toBeNull();
+      expect(parseGitAuthor(undefined as never)).toBeNull();
     });
 
     it('handles a normal address', () => {

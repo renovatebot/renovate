@@ -188,7 +188,7 @@ const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12873
 
 export function compile(
   template: string,
-  input?: CompileInput,
+  input: CompileInput,
   filterFields = true
 ): string {
   const data = { ...GlobalConfig.get(), ...input };
