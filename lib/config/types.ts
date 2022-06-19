@@ -429,7 +429,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   baseBranch?: string;
   manager?: string | null;
   datasource?: string;
-  packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  packageRules?: (PackageRule & PackageRuleInputConfig)[] | null;
 }
 
 export interface ConfigMigration {
