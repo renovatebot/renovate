@@ -225,7 +225,6 @@ export async function processBranch(
           logger.debug('Branch has been edited but found no PR - skipping');
           return {
             branchExists,
-            prNo: undefined,
             result: BranchResult.PrEdited,
           };
         }
@@ -243,7 +242,6 @@ export async function processBranch(
           );
           return {
             branchExists,
-            prNo: undefined,
             result: BranchResult.PrEdited,
           };
         }
@@ -274,7 +272,6 @@ export async function processBranch(
         logger.debug('Skipping PR creation out of schedule');
         return {
           branchExists,
-          prNo: undefined,
           result: BranchResult.NotScheduled,
         };
       }
