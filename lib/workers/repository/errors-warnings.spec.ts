@@ -36,14 +36,20 @@ describe('workers/repository/errors-warnings', () => {
         "
       `);
     });
+
+    it('getWarning returns empty string', () => {
+      config.warnings = [];
+      const res = getWarnings(config);
+      expect(res).toMatchInlineSnapshot(`""`);
+    });
   });
 
-  describe('getDepWarnings()', () => {
+  describe('getDepWarningsPR()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
-    it('returns PR warning text', () => {
+    it('returns pr warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -93,6 +99,18 @@ describe('workers/repository/errors-warnings', () => {
       `);
     });
 
+    it('PR warning returns empty string', () => {
+      const packageFiles: Record<string, PackageFile[]> = null;
+      const res = getDepWarningsPR(packageFiles);
+      expect(res).toMatchInlineSnapshot(`""`);
+    });
+  });
+
+  describe('getDepWarningsDashboard()', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('returns dashboard warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -140,6 +158,12 @@ describe('workers/repository/errors-warnings', () => {
         "
       `);
     });
+
+    it('dashboard warning returns empty string', () => {
+      const packageFiles: Record<string, PackageFile[]> = null;
+      const res = getDepWarningsDashboard(packageFiles);
+      expect(res).toMatchInlineSnapshot(`""`);
+    });
   });
 
   describe('getErrors()', () => {
@@ -169,6 +193,12 @@ describe('workers/repository/errors-warnings', () => {
         ---
         "
       `);
+    });
+
+    it('getError returns empty string', () => {
+      config.errors = [];
+      const res = getErrors(config);
+      expect(res).toMatchInlineSnapshot(`""`);
     });
   });
 });
