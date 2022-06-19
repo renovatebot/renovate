@@ -2,6 +2,7 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -9,6 +10,8 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
+  CustomExtractConfig,
+  ExtractConfig,
   LookupUpdate,
   PackageDependency,
   PackageFile,
@@ -40,7 +43,6 @@ export interface BranchUpgradeConfig
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-  constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
   language?: string;
@@ -123,4 +125,18 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+}
+
+export interface WorkerExtractConfig
+  extends ExtractConfig,
+    Partial<CustomExtractConfig> {
+  manager: string;
+  fileList: string[];
+  fileMatch?: string[];
+  updateInternalDeps?: boolean;
+  includePaths?: string[];
+  ignorePaths?: string[];
+  regexManagers?: RegExManager[];
+  enabledManagers?: string[];
+  enabled?: boolean;
 }

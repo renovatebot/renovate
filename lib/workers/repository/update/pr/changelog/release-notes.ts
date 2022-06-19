@@ -7,12 +7,14 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import type { BranchUpgradeConfig } from '../../../../types';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
+  ChangeLogRelease,
   ChangeLogResult,
 } from './types';
 
@@ -20,16 +22,17 @@ const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
 export async function getReleaseList(
-  project: ChangeLogProject
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
       case 'gitlab':
-        return await gitlab.getReleaseList(apiBaseUrl, repository);
+        return await gitlab.getReleaseList(project, release);
       case 'github':
-        return await github.getReleaseList(apiBaseUrl, repository);
+        return await github.getReleaseList(project, release);
 
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
@@ -49,7 +52,8 @@ export async function getReleaseList(
 }
 
 export function getCachedReleaseList(
-  project: ChangeLogProject
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${project.apiBaseUrl}-${project.repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
@@ -57,7 +61,7 @@ export function getCachedReleaseList(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseList(project);
+  const promisedRes = getReleaseList(project, release);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -95,11 +99,13 @@ export function massageBody(
 
 export async function getReleaseNotes(
   project: ChangeLogProject,
-  version: string
+  release: ChangeLogRelease,
+  config: BranchUpgradeConfig
 ): Promise<ChangeLogNotes | null> {
   const { depName, repository } = project;
+  const { version, gitRef } = release;
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releases = await getCachedReleaseList(project);
+  const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
@@ -107,8 +113,19 @@ export async function getReleaseNotes(
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
-      (r) => r.tag === version || r.tag === `v${version}`
+      (r) =>
+        r.tag === version ||
+        r.tag === `v${version}` ||
+        r.tag === gitRef ||
+        r.tag === `v${gitRef}`
     );
+  }
+  if (is.undefined(matchedRelease) && config.extractVersion) {
+    const extractVersionRegEx = regEx(config.extractVersion);
+    matchedRelease = releases.find((r) => {
+      const extractedVersion = extractVersionRegEx.exec(r.tag)?.groups?.version;
+      return version === extractedVersion;
+    });
   }
   releaseNotes = await releaseNotesResult(matchedRelease, project);
   logger.trace({ releaseNotes });
@@ -256,9 +273,10 @@ export function getReleaseNotesMdFile(
 
 export async function getReleaseNotesMd(
   project: ChangeLogProject,
-  version: string
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes | null> {
   const { baseUrl, repository } = project;
+  const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
   // istanbul ignore if
@@ -353,7 +371,8 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
 }
 
 export async function addReleaseNotes(
-  input: ChangeLogResult
+  input: ChangeLogResult,
+  config: BranchUpgradeConfig
 ): Promise<ChangeLogResult> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
@@ -373,10 +392,10 @@ export async function addReleaseNotes(
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
     if (!releaseNotes) {
-      releaseNotes = await getReleaseNotesMd(input.project, v.version);
+      releaseNotes = await getReleaseNotesMd(input.project, v);
       // istanbul ignore else: should be tested
       if (!releaseNotes) {
-        releaseNotes = await getReleaseNotes(input.project, v.version);
+        releaseNotes = await getReleaseNotes(input.project, v, config);
       }
       // Small hack to force display of release notes when there is a compare url
       if (!releaseNotes && v.compare.url) {

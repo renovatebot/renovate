@@ -1,6 +1,5 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
-import type { ExtractConfig } from '../modules/manager/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -38,6 +37,7 @@ export interface RenovateSharedConfig {
   enabledManagers?: string[];
   extends?: string[];
   fileMatch?: string[];
+  force?: RenovateConfig;
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
@@ -58,6 +58,7 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  respectLatest?: boolean;
   stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
@@ -140,16 +141,18 @@ export interface LegacyAdminConfig {
 
   requireConfig?: RequiredConfig;
 }
+
 export type ExecutionMode = 'branch' | 'update';
 
-export type PostUpgradeTasks = {
+export interface PostUpgradeTasks {
   commands?: string[];
   fileFilters?: string[];
   executionMode: ExecutionMode;
-};
+}
 
-type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
-  Partial<Record<UpdateType, T | null>>;
+export type UpdateConfig<
+  T extends RenovateSharedConfig = RenovateSharedConfig
+> = Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
   | string
@@ -157,15 +160,21 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
-
-export interface CustomManager {
+export interface RegexManagerTemplates {
+  depNameTemplate?: string;
+  packageNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
+  depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
+}
+export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
   matchStringsStrategy?: string;
-  depNameTemplate?: string;
-  datasourceTemplate?: string;
-  packageNameTemplate?: string;
-  versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
 }
 
@@ -177,6 +186,7 @@ export interface RenovateConfig
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
+    ConfigMigration,
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
@@ -224,10 +234,12 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
-  regexManagers?: CustomManager[];
+  regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
+
+  constraints?: Record<string, string>;
 }
 
 export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
@@ -269,7 +281,8 @@ export type MergeStrategy =
 export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
-    Record<string, any> {
+    Record<string, unknown> {
+  description?: string | string[];
   matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
@@ -287,6 +300,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  registryUrls?: string[];
 }
 
 export interface ValidationMessage {
@@ -418,6 +432,10 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
 
+export interface ConfigMigration {
+  configMigration?: boolean;
+}
+
 export interface MigratedConfig {
   isMigrated: boolean;
   migratedConfig: RenovateConfig;
@@ -436,12 +454,6 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
   language?: string | null;
-}
-
-export interface WorkerExtractConfig extends ExtractConfig {
-  manager: string;
-  enabled?: boolean;
-  fileList: string[];
 }
 
 export interface ValidationResult {

@@ -63,6 +63,8 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
+      } else if (branchIsModified) {
+        logger.debug('Orphan Branch is modified - skipping branch deletion');
       } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {

@@ -20,6 +20,7 @@ export interface ChangeLogRelease {
   date: string | Date;
   releaseNotes?: ChangeLogNotes;
   version: string;
+  gitRef: string;
 }
 
 export interface ChangeLogProject {

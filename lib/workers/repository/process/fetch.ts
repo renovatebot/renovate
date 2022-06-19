@@ -26,6 +26,9 @@ async function fetchDepUpdates(
   if (!is.nonEmptyString(dep.depName)) {
     dep.skipReason = 'invalid-name';
   }
+  if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
+    dep.skipReason = 'internal-package';
+  }
   if (dep.skipReason) {
     return dep;
   }

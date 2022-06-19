@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
-import type { PackageFile } from '../../../../modules/manager/types';
+import { RenovateConfig, getConfig } from '../../../test/util';
+import type { PackageFile } from '../../modules/manager/types';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
-describe('workers/repository/onboarding/pr/errors-warnings', () => {
+describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
     let config: RenovateConfig;
 

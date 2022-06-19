@@ -128,16 +128,17 @@ export async function extractPackageFile(
     return null;
   }
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
-    constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
+    extractedConstraints.python =
+      pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFile = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
-    constraints,
+    extractedConstraints,
   };
   // Try poetry.lock first
   let lockFile = getSiblingFileName(fileName, 'poetry.lock');
