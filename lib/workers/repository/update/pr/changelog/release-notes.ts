@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import URL from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';

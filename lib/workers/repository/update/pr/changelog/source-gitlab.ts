@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import URL from 'url';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -19,9 +20,7 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           pr.sourceBranch.startsWith(config.branchPrefix!) &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           DateTime.fromISO(pr.createdAt!) > currentHourStart
       );
       const prsRemaining = Math.max(

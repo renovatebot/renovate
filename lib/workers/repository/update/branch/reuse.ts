@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -109,8 +110,7 @@ export async function shouldReuseExistingBranch(
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
   for (const upgrade of config.upgrades) {
     const packageFile = upgrade.packageFile!;
-    groupedByPackageFile[packageFile] =
-      groupedByPackageFile[packageFile] || new Set();
+    groupedByPackageFile[packageFile] ??= new Set();
     groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);
 
     if (

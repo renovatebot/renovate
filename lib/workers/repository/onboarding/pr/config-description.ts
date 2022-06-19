@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';

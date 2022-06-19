@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { REPOSITORY_CHANGED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';

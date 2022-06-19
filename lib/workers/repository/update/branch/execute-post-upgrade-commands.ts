@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { GlobalConfig } from '../../../../config/global';

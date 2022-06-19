@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
@@ -55,7 +56,7 @@ export async function getChangeLogJSON(
   });
   // istanbul ignore if
   if (!token) {
-    if (host!.endsWith('github.com')) {
+    if (host!.endsWith('.github.com') || host === 'github.com') {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },

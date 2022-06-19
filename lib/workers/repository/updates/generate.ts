@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
@@ -74,17 +75,12 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   branchUpgrades.forEach((upg) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     if (!depNames.includes(upg.depName!)) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       depNames.push(upg.depName!);
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     if (!toVersions.includes(upg.newVersion!)) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       toVersions.push(upg.newVersion!);
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     toValues.add(upg.newValue!);
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
@@ -132,7 +128,6 @@ export function generateBranchConfig(
     upgrade.displayTo ??= '';
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       upgrade.displayPending = `\`${upgrade
         .pendingVersions!.slice(-1)
         .pop()}\``;
@@ -182,7 +177,6 @@ export function generateBranchConfig(
           upgrade
         )})`;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
       upgrade.toLowerCase =
         regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
@@ -263,7 +257,6 @@ export function generateBranchConfig(
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
     config.upgrades.push(upgrade);
     if (upgrade.releaseTimestamp) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       if (releaseTimestamp!) {
         const existingStamp = DateTime.fromISO(releaseTimestamp);
         const upgradeStamp = DateTime.fromISO(upgrade.releaseTimestamp);
@@ -299,11 +292,9 @@ export function generateBranchConfig(
         return -1;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       if (a.depName! < b.depName!) {
         return -1;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       if (a.depName! > b.depName!) {
         return 1;
       }
@@ -314,7 +305,6 @@ export function generateBranchConfig(
   config = {
     ...config,
     ...config.upgrades[0],
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
   config.reuseLockFiles = config.upgrades.every(
@@ -368,7 +358,6 @@ export function generateBranchConfig(
   if (tableRows.length) {
     let table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     table = table.concat(tableRows!);
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }

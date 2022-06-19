@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import cleanGitRef from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
@@ -51,14 +52,11 @@ export function generateBranchName(update: RenovateConfig): void {
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     update.branchTopic = update.group!.branchTopic || update.branchTopic;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     update.branchName = update.group!.branchName || update.branchName;
   }
 
   if (update.hashedBranchLength) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
@@ -87,7 +85,6 @@ export function generateBranchName(update: RenovateConfig): void {
 
     update.branchName = update.branchPrefix + hash.slice(0, hashLength);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     update.branchName = template.compile(update.branchName!, update);
 
     // Compile extra times in case of nested templates

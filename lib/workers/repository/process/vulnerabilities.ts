@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Ecosystem, Osv, OsvOffline } from '@jamiemagee/osv-offline';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
@@ -104,20 +105,15 @@ export class Vulnerabilities {
     packageDependency: PackageDependency
   ): Promise<PackageRule[]> {
     const ecosystem =
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       Vulnerabilities.managerEcosystemMap[packageFileConfig.manager!];
 
     const vulnerabilities = await this.osvOffline?.getVulnerabilities(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       ecosystem!,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       packageDependency.depName!
     );
     return this.convertToPackageRule(
       vulnerabilities ?? [],
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       packageDependency.depName!,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       ecosystem!
     );
   }

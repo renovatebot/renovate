@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import {

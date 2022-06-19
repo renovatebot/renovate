@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';

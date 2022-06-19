@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
@@ -110,12 +111,9 @@ export async function branchifyUpgrades(
     logger.debug({ err }, 'Error checking branch duplicates');
   }
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     errors: config.errors!.concat(errors),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     warnings: config.warnings!.concat(warnings),
     branches,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     branchList: branchList!,
   };
 }

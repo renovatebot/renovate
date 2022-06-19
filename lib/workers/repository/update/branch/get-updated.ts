@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -32,7 +33,6 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;

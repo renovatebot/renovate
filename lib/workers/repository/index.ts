@@ -33,7 +33,7 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult | undefined = undefined;
   queue.clear();
-  const localDir = GlobalConfig.get().localDir!;
+  const localDir = GlobalConfig.get('localDir')!;
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
@@ -62,6 +62,7 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches);
       }
       await finaliseRepo(config, branchList);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       repoResult = processResult(config, res!);
     }
   } catch (err) /* istanbul ignore next */ {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import type { RenovateConfig } from '../../../config/types';
@@ -64,12 +65,10 @@ export async function extract(
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const baseBranchSha = getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = hasha(JSON.stringify(config));
   // istanbul ignore if
@@ -92,12 +91,9 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     await checkoutBranch(baseBranch!);
     packageFiles = await extractAllDependencies(config);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     cache.scan[baseBranch!] = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       sha: baseBranchSha!,
       configHash,
       packageFiles,
@@ -108,7 +104,6 @@ export async function extract(
       : [baseBranch];
     Object.keys(cache.scan).forEach((branchName) => {
       if (!baseBranches.includes(branchName)) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         delete cache.scan![branchName];
       }
     });

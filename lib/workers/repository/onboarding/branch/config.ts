@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
@@ -14,7 +15,7 @@ async function getOnboardingConfig(
 ): Promise<RenovateSharedConfig> {
   let onboardingConfig = clone(config.onboardingConfig);
 
-  let orgPreset: string;
+  let orgPreset: string | undefined;
 
   logger.debug(
     'Checking if this org/owner has a default Renovate preset which can be used.'
@@ -36,7 +37,7 @@ async function getOnboardingConfig(
     }
   }
 
-  if (!orgPreset!) {
+  if (!orgPreset) {
     // Check for org/.{{platform}}
     const platform = GlobalConfig.get('platform');
     try {
@@ -57,7 +58,7 @@ async function getOnboardingConfig(
     }
   }
 
-  if (orgPreset!) {
+  if (orgPreset) {
     onboardingConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [orgPreset],

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
@@ -37,7 +38,6 @@ async function getBaseBranchConfig(
 
     try {
       baseBranchConfig = await platform.getJsonFile(
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         configFileName!,
         config.repository,
         baseBranch
@@ -60,7 +60,6 @@ async function getBaseBranchConfig(
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   if (config.baseBranches!.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;

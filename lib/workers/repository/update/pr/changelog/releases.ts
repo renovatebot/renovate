@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { logger } from '../../../../../logger';
 import {
   Release,

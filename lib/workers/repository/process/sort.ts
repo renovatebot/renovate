@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { logger } from '../../../logger';
 import type { BranchConfig } from '../../types';
 
@@ -17,7 +18,6 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
       return -1;
     }
     if (a.prPriority !== b.prPriority) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       return b.prPriority! - a.prPriority!;
     }
     const sortDiff =
@@ -26,7 +26,6 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
       return sortDiff;
     }
     // Sort by prTitle if updateType is the same
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     return a.prTitle! < b.prTitle! ? -1 : 1;
   });
 }
