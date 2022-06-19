@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import Marshal from 'marshal';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -55,14 +56,24 @@ export class InternalRubyGemsDatasource extends Datasource {
         { dependency, api: 'Nexus' },
         'RubyGems lookup for dependency'
       );
-      const gemReleases: Release[] = await this.getReleasesFromNexus(
-        repository,
-        nexusRegistry,
-        dependency
-      );
-      return {
-        releases: gemReleases,
-      };
+      try {
+        const gemReleases = await this.getReleasesFromNexus(
+          repository,
+          nexusRegistry,
+          dependency
+        );
+        return {
+          releases: gemReleases,
+        };
+      } catch (err) {
+        logger.debug(
+          { errorMsg: err?.message, errorCode: err?.statusCode },
+          'Failed to retrieve gem from nexus source'
+        );
+        return {
+          releases: [],
+        };
+      }
     }
 
     logger.debug(
@@ -227,14 +238,30 @@ export class InternalRubyGemsDatasource extends Datasource {
   async isNexusDataSource(nexusEndPoint: string): Promise<boolean> {
     const statusEndPoint = '/service/rest/v1/status';
     const nexusUrl = nexusEndPoint.concat(statusEndPoint);
-    let isNexus = false;
     try {
       const response = await this.http.getJson<HttpResponse>(nexusUrl);
-      isNexus = response.headers?.server?.includes('Nexus') ?? false;
+      return this.extractServerFrom(response).startsWith('Nexus/') ?? false;
     } catch (err) {
+      // istanbul ignore if
+      if (err.response?.headers?.server?.startsWith('Nexus/')) {
+        this.handleGenericErrors(err);
+      }
       return false;
     }
-    return isNexus;
+  }
+
+  private extractServerFrom(
+    response: HttpResponse<HttpResponse<string>>
+  ): string {
+    let headerRespose = '';
+    if (is.string(response.headers?.server)) {
+      headerRespose = response.headers?.server;
+    }
+    // istanbul ignore else: not testable with nock
+    else if (is.array(response.headers?.server)) {
+      [headerRespose] = response.headers?.server ?? [''];
+    }
+    return headerRespose;
   }
 
   private async getReleasesFromNexus(
@@ -249,23 +276,18 @@ export class InternalRubyGemsDatasource extends Datasource {
       nexusRegistry,
       dependencyName
     );
-    try {
-      const nexusResponse = (await this.http.getJson<NexusGems>(url))?.body || {
-        continuationToken: null,
-        items: [],
-      };
-      gemItems.push(...nexusResponse.items);
-      const continuationToken: string | null = nexusResponse.continuationToken;
-      if (continuationToken) {
-        const paginationGems = await this.paginationResult(
-          url,
-          continuationToken
-        );
-        gemItems.push(...paginationGems);
-      }
-    } catch (error) {
-      logger.debug('Failed to retreive gem from nexus');
-      return [];
+    const nexusResponse = (await this.http.getJson<NexusGems>(url))?.body || {
+      continuationToken: null,
+      items: [],
+    };
+    gemItems.push(...nexusResponse.items);
+    const continuationToken: string | null = nexusResponse.continuationToken;
+    if (continuationToken) {
+      const paginationGems = await this.paginationResult(
+        url,
+        continuationToken
+      );
+      gemItems.push(...paginationGems);
     }
 
     result.push(
@@ -283,8 +305,7 @@ export class InternalRubyGemsDatasource extends Datasource {
   ): string {
     const nexusSearchPoint = '/service/rest/v1/search';
     const query = `${nexusSearchPoint}?repository=${repository}&name=${depName}&sort=version`;
-    const gemReleasesEndPoint = nexusRegistry.concat(query);
-    return gemReleasesEndPoint;
+    return joinUrlParts(nexusRegistry, query);
   }
 
   private async paginationResult(
@@ -293,27 +314,15 @@ export class InternalRubyGemsDatasource extends Datasource {
   ): Promise<NexusGemsItems[]> {
     const gemItems: NexusGemsItems[] = [];
     let pageToken: string | null = continuationToken;
-    while (pageToken) {
-      const gemsOfPage: NexusGems = await this.pageOfNexusGems(url, pageToken);
+    let pageCounter = 0;
+    while (pageToken && pageCounter < 1000) {
+      const paginateUrl = joinUrlParts(url, `&continuationToken=${pageToken}`);
+      const response = await this.http.getJson<NexusGems>(paginateUrl);
+      const gemsOfPage = response?.body;
       gemItems.push(...gemsOfPage.items.filter(Boolean));
       pageToken = gemsOfPage.continuationToken;
+      pageCounter++;
     }
     return gemItems;
-  }
-
-  private async pageOfNexusGems(
-    url: string,
-    pageToken: string
-  ): Promise<NexusGems> {
-    let nexusPage: NexusGems = { continuationToken: null, items: [] };
-    try {
-      const paginateUrl = url.concat(`&continuationToken=${pageToken}`);
-      const response = await this.http.getJson<NexusGems>(paginateUrl);
-      nexusPage = response.body;
-    } catch (error) {
-      logger.debug('Failed to retreive gems page from nexus');
-      throw error;
-    }
-    return nexusPage;
   }
 }
