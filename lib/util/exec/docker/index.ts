@@ -208,7 +208,7 @@ export async function removeDanglingContainers(): Promise<void> {
 
 export async function generateDockerCommand(
   commands: string[],
-  preCommands: string[],
+  preCommands: Opt<string>[],
   options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
