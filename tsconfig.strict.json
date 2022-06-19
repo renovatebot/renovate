@@ -14,7 +14,6 @@
     "config.js",
     "tmp",
     // TODO: fixme
-    // "lib/util/cache/package/decorator.spec.ts",
     "lib/util/fs/index.spec.ts",
     "lib/util/git/index.spec.ts",
     "lib/workers/**/*.spec.ts",
