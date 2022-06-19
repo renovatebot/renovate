@@ -12,7 +12,7 @@ Object {
       "replaceString": "docker.io/library/nginx:1.18-alpine",
     },
     Object {
-      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "autoReplaceStringTemplate": "\\"{{newValue}}\\"{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "11.6.0-debian-9-r0",
       "datasource": "docker",
@@ -21,7 +21,7 @@ Object {
       "versioning": "docker",
     },
     Object {
-      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "autoReplaceStringTemplate": "\\"{{newValue}}\\"{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "0.7.0-debian-9-r12",
       "datasource": "docker",
@@ -30,7 +30,7 @@ Object {
       "versioning": "docker",
     },
     Object {
-      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "autoReplaceStringTemplate": "\\"{{newValue}}\\"{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": "sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809",
       "currentValue": "11.5.0-debian-9-r0",
       "datasource": "docker",
@@ -39,7 +39,7 @@ Object {
       "versioning": "docker",
     },
     Object {
-      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "autoReplaceStringTemplate": "\\"{{newValue}}\\"{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "2.1.3-debian-10-r38",
       "datasource": "docker",
@@ -55,7 +55,7 @@ exports[`modules/manager/helm-values/extract extractPackageFile() extracts from 
 Object {
   "deps": Array [
     Object {
-      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "autoReplaceStringTemplate": "\\"{{newValue}}\\"{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "1.16.1",
       "datasource": "docker",
