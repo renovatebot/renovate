@@ -237,7 +237,7 @@ export class InternalRubyGemsDatasource extends Datasource {
   })
   async isNexusDataSource(nexusEndPoint: string): Promise<boolean> {
     const statusEndPoint = '/service/rest/v1/status';
-    const nexusUrl = nexusEndPoint.concat(statusEndPoint);
+    const nexusUrl = joinUrlParts(nexusEndPoint, statusEndPoint);
     try {
       const response = await this.http.getJson<HttpResponse>(nexusUrl);
       return this.extractServerFrom(response).startsWith('Nexus/') ?? false;
