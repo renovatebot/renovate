@@ -18,8 +18,12 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
   'very high': 2,
 };
 
-export function isActiveConfidenceLevel(confidence: string): boolean {
-  return confidence !== 'low' && MERGE_CONFIDENCE.includes(confidence);
+export function isActiveConfidenceLevel(confidence: string | null): boolean {
+  return (
+    !!confidence &&
+    confidence !== 'low' &&
+    MERGE_CONFIDENCE.includes(confidence)
+  );
 }
 
 export function satisfiesConfidenceLevel(
@@ -49,7 +53,7 @@ export async function getMergeConfidenceLevel(
   depName: string,
   currentVersion: string,
   newVersion: string,
-  updateType: UpdateType
+  updateType?: UpdateType
 ): Promise<MergeConfidence> {
   if (!(currentVersion && newVersion && updateType)) {
     return 'neutral';

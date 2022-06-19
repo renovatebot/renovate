@@ -22,7 +22,7 @@
     "lib/util/git/index.spec.ts",
     // "lib/util/http/github.spec.ts",
     "lib/util/index.spec.ts",
-    "lib/util/merge-confidence/index.spec.ts",
+    // "lib/util/merge-confidence/index.spec.ts",
     "lib/util/package-rules.spec.ts",
     "lib/util/template/index.spec.ts",
     "lib/workers/**/*.spec.ts",
