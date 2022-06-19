@@ -359,8 +359,22 @@ export async function processBranch(
       config.dependencyDashboardRebaseAllOpen ||
       config.rebaseRequested;
 
+    const userApproveAllPendingPRs = config.dependencyDashboardAllPending;
+    const userApproveAllRatelimitedPRs =
+      config.dependencyDashboardAllRateLimited;
+
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
+      config.reuseExistingBranch = false;
+    } else if (userApproveAllPendingPRs) {
+      logger.debug(
+        'Manual Approve All Pending PRs requested via Dependency Dashboard'
+      );
+      config.reuseExistingBranch = false;
+    } else if (userApproveAllRatelimitedPRs) {
+      logger.debug(
+        'Manual Approve All Rate limited PRs requested via Dependency Dashboard'
+      );
       config.reuseExistingBranch = false;
     } else if (branchExists && config.rebaseWhen === 'never') {
       logger.debug('rebaseWhen=never so skipping branch update check');

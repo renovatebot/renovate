@@ -207,6 +207,8 @@ export interface RenovateConfig
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
   dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardAllPending: boolean;
+  dependencyDashboardAllRateLimited: boolean;
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
