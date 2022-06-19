@@ -352,8 +352,8 @@ export async function processBranch(
     }
 
     const userRebaseRequested =
-      dependencyDashboardCheck === 'rebase' ??
-      config.dependencyDashboardRebaseAllOpen ??
+      dependencyDashboardCheck === 'rebase' ||
+      config.dependencyDashboardRebaseAllOpen ||
       config.rebaseRequested;
 
     if (userRebaseRequested) {
