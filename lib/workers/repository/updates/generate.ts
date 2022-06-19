@@ -351,10 +351,9 @@ export function generateBranchConfig(
     }
   }
 
-  const tableValues = config.upgrades.map(getTableValues);
-  const tableRows: string[][] = tableValues.filter(
-    (x: unknown): x is string[] => is.array<string[]>(x)
-  );
+  const tableRows = config.upgrades
+    .map(getTableValues)
+    .filter((x): x is string[] => is.array(x, is.string));
   if (tableRows.length) {
     let table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);

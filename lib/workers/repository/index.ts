@@ -31,7 +31,7 @@ export async function renovateRepository(
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');
   logger.trace({ config });
-  let repoResult: ProcessResult | undefined = undefined;
+  let repoResult: ProcessResult | undefined;
   queue.clear();
   const localDir = GlobalConfig.get('localDir')!;
   try {

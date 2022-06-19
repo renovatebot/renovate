@@ -391,7 +391,7 @@ export async function addReleaseNotes(
     }${version}`;
   }
   for (const v of input.versions) {
-    let releaseNotes: ChangeLogNotes | null | undefined = null;
+    let releaseNotes: ChangeLogNotes | null | undefined;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
