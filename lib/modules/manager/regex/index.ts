@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
+import type { RegexManagerTemplates } from '../../../config/types';
 import type {
   CustomExtractConfig,
   PackageDependency,
   PackageFile,
-  RegexManagerTemplates,
   Result,
 } from '../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';

@@ -181,7 +181,7 @@ export abstract class AbstractGithubDatasourceCache<
     // so that soft update mechanics is immediately starting.
     let cacheUpdatedAt = now.minus(this.updateDuration).toISO();
 
-    const baseUrl = getApiBaseUrl(registryUrl).replace('/v3/', '/'); // Replace for GHE
+    const baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
 
     const [owner, name] = packageName.split('/');
     if (owner && name) {
