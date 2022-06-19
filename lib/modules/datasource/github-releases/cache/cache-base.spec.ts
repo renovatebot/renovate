@@ -356,6 +356,55 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
   });
 
   describe('Changelog-based cache busting', () => {
+    describe('newChangelogReleaseDetected', () => {
+      const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+      it('returns false for undefined release argument', () => {
+        expect(
+          cache.newChangelogReleaseDetected(undefined, now, {}, {})
+        ).toBeFalse();
+      });
+
+      it('returns false if version is present in cache', () => {
+        expect(
+          cache.newChangelogReleaseDetected(
+            { date: now.minus({ minutes: 10 }).toISO(), version: '1.2.3' },
+            now,
+            { minutes: 20 },
+            {
+              '1.2.3': {
+                bar: '1',
+                version: '1.2.3',
+                releaseTimestamp: now.toISO(),
+              },
+            }
+          )
+        ).toBeFalse();
+      });
+
+      it('returns false if changelog release is not fresh', () => {
+        expect(
+          cache.newChangelogReleaseDetected(
+            { date: now.minus({ minutes: 20 }).toISO(), version: '1.2.3' },
+            now,
+            { minutes: 10 },
+            {}
+          )
+        ).toBeFalse();
+      });
+
+      it('returns true for fresh changelog release', () => {
+        expect(
+          cache.newChangelogReleaseDetected(
+            { date: now.minus({ minutes: 10 }).toISO(), version: '1.2.3' },
+            now,
+            { minutes: 20 },
+            {}
+          )
+        ).toBeTrue();
+      });
+    });
+
     it('forces cache update', async () => {
       const lastUpdateTime = now.minus({ minutes: 15 }).toISO();
       const githubTime = now.minus({ minutes: 10 }).toISO();

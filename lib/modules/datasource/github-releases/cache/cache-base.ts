@@ -378,26 +378,28 @@ export abstract class AbstractGithubDatasourceCache<
     return result;
   }
 
-  private newChangelogReleaseDetected(
+  newChangelogReleaseDetected(
     changelogRelease: ChangelogRelease | undefined,
     now: DateTime,
     updateDuration: DurationLikeObject,
     cacheItems: Record<string, StoredItem>
   ): boolean {
-    if (changelogRelease?.date) {
-      const changelogReleaseTime = changelogRelease.date.toString();
-
-      const isVersionPresentInCache = !!cacheItems[changelogRelease.version];
-      const isChangelogReleaseFresh = !isExpired(
-        now,
-        changelogReleaseTime,
-        updateDuration
-      );
-      if (!isVersionPresentInCache && isChangelogReleaseFresh) {
-        return true;
-      }
+    if (!changelogRelease) {
+      return false;
     }
 
-    return false;
+    const releaseTime = changelogRelease.date.toString();
+    const isVersionPresentInCache = !!cacheItems[changelogRelease.version];
+    const isChangelogReleaseFresh = !isExpired(
+      now,
+      releaseTime,
+      updateDuration
+    );
+
+    if (isVersionPresentInCache || !isChangelogReleaseFresh) {
+      return false;
+    }
+
+    return true;
   }
 }
