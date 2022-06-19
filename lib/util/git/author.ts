@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { regEx } from '../regex';
 import type { GitAuthor } from './types';
 
-export function parseGitAuthor(input: string): GitAuthor | null {
+export function parseGitAuthor(input?: string): GitAuthor | null {
   let result: GitAuthor | null = null;
   if (!input) {
     return null;

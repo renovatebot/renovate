@@ -27,7 +27,7 @@ describe('util/git/author', () => {
     });
 
     it('escapes names', () => {
-      expect(parseGitAuthor('name [what] <name@what.com>').name).toBe(
+      expect(parseGitAuthor('name [what] <name@what.com>')?.name).toBe(
         `name [what]`
       );
     });
