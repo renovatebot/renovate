@@ -107,14 +107,19 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts kubernetes resources', async () => {
       const res = await extractPackageFile(kubernetes, 'kubernetes.tf', {});
-      expect(res.deps).toHaveLength(16);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
+      expect(res.deps).toHaveLength(18);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
       expect(res.deps).toMatchObject([
         {
           depName: 'gcr.io/kaniko-project/executor',
           currentValue: 'v1.7.0',
           currentDigest:
             'sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52',
+          depType: 'kubernetes_cron_job_v1',
+        },
+        {
+          depName: 'node',
+          currentValue: '14',
           depType: 'kubernetes_cron_job_v1',
         },
         {
@@ -149,7 +154,6 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.21.5',
           depType: 'kubernetes_job',
         },
-        { skipReason: 'invalid-dependency-specification' },
         { skipReason: 'invalid-value' },
         {
           depName: 'nginx',
@@ -177,9 +181,19 @@ describe('modules/manager/terraform/extract', () => {
           depType: 'kubernetes_replication_controller_v1',
         },
         {
+          depName: 'nginx',
+          currentValue: '1.21.11',
+          depType: 'kubernetes_stateful_set',
+        },
+        {
           depName: 'prom/prometheus',
           currentValue: 'v2.2.1',
           depType: 'kubernetes_stateful_set',
+        },
+        {
+          depName: 'nginx',
+          currentValue: '1.21.12',
+          depType: 'kubernetes_stateful_set_v1',
         },
         {
           depName: 'prom/prometheus',
