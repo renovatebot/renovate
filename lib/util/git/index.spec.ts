@@ -284,8 +284,7 @@ describe('util/git/index', () => {
     });
   });
 
-  // eslint-disable-next-line jest/no-focused-tests
-  describe.only('getBranchFiles(branchName)', () => {
+  describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file: FileChange = {
         type: 'addition',
@@ -294,7 +293,7 @@ describe('util/git/index', () => {
       };
       await git.commitFiles({
         branchName: 'renovate/branch_with_changes',
-        files: [file, { type: 'addition', path: 'dummy', contents: null }],
+        files: [file, { type: 'addition', path: 'dummy', contents: '' }],
         message: 'Create something',
       });
       const branchFiles = await git.getBranchFiles(
@@ -874,7 +873,7 @@ describe('util/git/index', () => {
         .filter(Boolean);
 
     it('creates renovate ref in default section', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop') ?? '';
 
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
@@ -883,7 +882,7 @@ describe('util/git/index', () => {
     });
 
     it('creates custom section for renovate ref', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop') ?? '';
 
       await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
 
@@ -892,7 +891,7 @@ describe('util/git/index', () => {
     });
 
     it('clears pushed Renovate refs', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop') ?? '';
       await git.pushCommitToRenovateRef(commit, 'foo');
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
@@ -903,7 +902,7 @@ describe('util/git/index', () => {
     });
 
     it('clears remote Renovate refs', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop') ?? '';
       const tmpGit = Git(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
@@ -915,7 +914,7 @@ describe('util/git/index', () => {
     });
 
     it('preserves unknown sections by default', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop') ?? '';
       const tmpGit = Git(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
@@ -926,7 +925,7 @@ describe('util/git/index', () => {
 
   describe('listCommitTree', () => {
     it('creates non-branch ref', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop') ?? '';
       const res = await git.listCommitTree(commit);
       expect(res).toEqual([
         {
