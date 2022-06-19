@@ -67,8 +67,8 @@ export class InternalRubyGemsDatasource extends Datasource {
         };
       } catch (err) {
         logger.debug(
-          { errorMsg: err?.message, errorCode: err?.statusCode },
-          'Failed to retrieve gem from nexus source'
+          { errorCode: err.statusCode },
+          `Failed to retrieve ${dependency} from nexus source`
         );
         return {
           releases: [],
@@ -246,8 +246,8 @@ export class InternalRubyGemsDatasource extends Datasource {
       if (err.response?.headers?.server?.startsWith('Nexus/')) {
         this.handleGenericErrors(err);
       }
-      return false;
     }
+    return false;
   }
 
   private extractServerFrom(
