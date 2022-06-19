@@ -76,6 +76,10 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
           configFileContent.renovate
         ) {
           logger.debug('Existing config file confirmed');
+          logger.debug(
+            { fileName: cache.configFileName, config: configFileContent },
+            'Repository config'
+          );
           return true;
         }
       }

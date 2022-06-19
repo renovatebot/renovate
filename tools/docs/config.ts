@@ -141,6 +141,14 @@ function genTable(obj: [string, string][], type: string, def: any): string {
   return buildHtmlTable(data);
 }
 
+function stringifyArrays(el: Record<string, any>): void {
+  for (const [key, value] of Object.entries(el)) {
+    if (key !== 'default' && Array.isArray(value)) {
+      el[key] = value.join(', ');
+    }
+  }
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -162,6 +170,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       }
       el.cli = getCliName(option);
       el.env = getEnvName(option);
+      stringifyArrays(el);
 
       configOptionsRaw[headerIndex] +=
         `\n${option.description}\n\n` +

@@ -187,6 +187,7 @@ const repoGroups = {
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
+  remix: 'https://github.com/remix-run/remix',
   router5: 'https://github.com/router5/router5',
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
