@@ -315,7 +315,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
           {
             "matchHost": "europe-docker.pkg.dev",
             "authType": "Basic",
-            "token": "<base64 pre-fixed service account>"
+            "token": "<base64 prefixed service account>"
           }
         ]
       }
@@ -328,7 +328,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
             "matchHost": "europe-docker.pkg.dev",
             "authType": "Basic",
             "encrypted": {
-              "token": "<encrypted base64 pre-fixed service account>"
+              "token": "<encrypted base64 prefixed service account>"
             }
           }
         ]
