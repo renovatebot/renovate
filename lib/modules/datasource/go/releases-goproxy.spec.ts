@@ -76,7 +76,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
     it('ignores everything starting from "direct" and "off" keywords', () => {
       expect(datasource.parseGoproxy(undefined)).toBeEmpty();
-      expect(datasource.parseGoproxy(null as never)).toBeEmpty();
+      expect(datasource.parseGoproxy(undefined)).toBeEmpty();
       expect(datasource.parseGoproxy('')).toBeEmpty();
       expect(datasource.parseGoproxy('off')).toMatchObject([
         { url: 'off', fallback: '|' },

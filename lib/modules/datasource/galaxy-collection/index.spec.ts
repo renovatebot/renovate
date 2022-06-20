@@ -124,7 +124,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: null as never,
+          depName: '',
         })
       ).toBeNull();
     });

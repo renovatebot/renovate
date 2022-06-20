@@ -40,7 +40,7 @@ describe('modules/datasource/github-tags/index', () => {
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, [{ sha: 'abcdef' }]);
 
-      const res = await github.getDigest({ packageName }, null as never);
+      const res = await github.getDigest({ packageName }, undefined);
 
       expect(res).toBe('abcdef');
     });
@@ -51,7 +51,7 @@ describe('modules/datasource/github-tags/index', () => {
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, []);
 
-      const res = await github.getDigest({ packageName }, null as never);
+      const res = await github.getDigest({ packageName }, undefined);
 
       expect(res).toBeNull();
     });
@@ -86,7 +86,7 @@ describe('modules/datasource/github-tags/index', () => {
 
       const res = await github.getDigest(
         { packageName, registryUrl: githubEnterpriseApiHost },
-        null as never
+        undefined
       );
 
       expect(res).toBe('abcdef');

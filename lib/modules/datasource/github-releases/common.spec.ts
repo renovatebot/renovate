@@ -8,7 +8,7 @@ describe('modules/datasource/github-releases/common', () => {
     });
 
     it('defaults to github.com', () => {
-      const sourceUrl = getSourceUrlBase(null as never);
+      const sourceUrl = getSourceUrlBase(undefined);
       expect(sourceUrl).toBe('https://github.com/');
     });
   });

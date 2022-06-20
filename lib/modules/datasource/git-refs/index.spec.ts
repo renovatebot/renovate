@@ -17,7 +17,7 @@ describe('modules/datasource/git-refs/index', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(null) as unknown as Response<string>;
+          return Promise.resolve('') as Response<string>;
         },
       });
       const versions = await getPkgReleases({
