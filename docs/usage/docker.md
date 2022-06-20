@@ -248,7 +248,7 @@ module.exports = {
 
 #### Google Container Registry / Google Artifact Registry
 
-#### Using long-lived service account credentials
+##### Using long-lived service account credentials
 
 To access Google Container Registry (deprecated) or Google Artifact Registry you can use the JSON service account directly with `Basic` auth using `_json_key` as username and the service account as password. Google Artifact Registry, but not Google Container Registry, support `_json_key_base64` and a base64 encoded service account directly.
 
@@ -335,7 +335,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-#### Using short-lived access tokens
+##### Using short-lived access tokens
 
 Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
 
