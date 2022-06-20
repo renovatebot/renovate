@@ -140,3 +140,8 @@ export interface WorkerExtractConfig
   enabledManagers?: string[];
   enabled?: boolean;
 }
+
+export interface DepWarnings {
+  warnings: string[];
+  warningFiles: string[];
+}

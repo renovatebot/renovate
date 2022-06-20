@@ -2,11 +2,7 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
-
-type DepWarnings = {
-  warnings: string[];
-  warningFiles: string[];
-};
+import type { DepWarnings } from '../types';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
@@ -14,9 +10,9 @@ export function getWarnings(config: RenovateConfig): string {
   }
   let warningText = `\n# Warnings (${config.warnings.length})\n\n`;
   warningText += `Please correct - or verify that you can safely ignore - these warnings before you merge this PR.\n\n`;
-  config.warnings.forEach((w) => {
+  for (const w of config.warnings) {
     warningText += `-   \`${w.topic}\`: ${w.message}\n`;
-  });
+  }
   warningText += '\n---\n';
   return warningText;
 }
@@ -28,9 +24,9 @@ export function getErrors(config: RenovateConfig): string {
   }
   errorText = `\n# Errors (${config.errors.length})\n\n`;
   errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
-  config.errors.forEach((e) => {
+  for (const e of config.errors) {
     errorText += `-   \`${e.topic}\`: ${e.message}\n`;
-  });
+  }
   errorText += '\n---\n';
   return errorText;
 }
@@ -71,8 +67,8 @@ function getDepWarnings(
 export function getDepWarningsDashboard(
   packageFiles: Record<string, PackageFile[]>
 ): string {
-  const { warnings, warningFiles } = getDepWarnings(packageFiles);
   let warningText = '';
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
   try {
     if (!warnings.length) {
       return '';
@@ -84,9 +80,9 @@ export function getDepWarningsDashboard(
     warningText = emojify(
       `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
     );
-    warnings.forEach((w) => {
+    for (const w of warnings) {
       warningText += `-   \`${w}\`\n`;
-    });
+    }
     warningText +=
       '\nFiles affected: ' +
       warningFiles.map((f) => '`' + f + '`').join(', ') +
@@ -115,9 +111,9 @@ export function getDepWarningsPR(
       `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
     );
     warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
-    warnings.forEach((w) => {
+    for (const w of warnings) {
       warningText += `-   \`${w}\`\n`;
-    });
+    }
     warningText +=
       '\nFiles affected: ' +
       warningFiles.map((f) => '`' + f + '`').join(', ') +
