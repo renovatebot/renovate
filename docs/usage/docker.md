@@ -252,9 +252,9 @@ module.exports = {
 
 To access Google Container Registry (deprecated) or Google Artifact Registry you can use the JSON service account directly with `Basic` auth using `_json_key` as username and the service account as password.
 
-Because JSON in JSON wrapping makes things more complicated, it is easier to encode the JSON service account beforehand in order to avoid the encoding problems altogether.
+Because JSON in JSON wrapping makes things more complex, avoid it completely by encoding the JSON service account beforehand.
 
-Google Artifact Registry, but not Google Container Registry, support `_json_key_base64` and a base64 encoded service account natively.
+Google Artifact Registry, but not Google Container Registry, supports `_json_key_base64` and a base64 encoded service account natively.
 If all your dependencies are on Google Artifact Registry, you can base64 encode and use the service account directly:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has read (and only read) permissions to your artifacts.
@@ -276,7 +276,7 @@ If all your dependencies are on Google Artifact Registry, you can base64 encode 
       }
       ```
 
-   1. If you want to add it your repository renovate config file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+   1. If you want to add it to your repository renovate configuration file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
 
       ```json
       {
@@ -330,7 +330,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-   1. If you want to add it your repository renovate config file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+   1. If you want to add it to your repository renovate configuration file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
 
       ```json
       {
