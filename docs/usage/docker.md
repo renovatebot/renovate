@@ -298,7 +298,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
 1. Download your JSON service account and store it on your machine. Make sure that the service account has read (and only read) permissions to your artifacts.
 1. Open the file and prefix the content with `_json_key:`. The file should look like this:
 
-   ```json
+   ```
    _json_key:{
      "type": "service_account",
      "project_id": "sample-project",
