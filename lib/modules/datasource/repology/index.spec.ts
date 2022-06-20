@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
 import { RepologyDatasource } from './index';
-import { Fixtures } from '../../../../test/fixtures';
 
 const datasource = RepologyDatasource.id;
 

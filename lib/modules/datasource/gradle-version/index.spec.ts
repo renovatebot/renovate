@@ -1,10 +1,10 @@
 import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { GradleVersionDatasource } from '.';
-import { Fixtures } from '../../../../test/fixtures';
 
 const allResponse = Fixtures?.get('all.json');
 

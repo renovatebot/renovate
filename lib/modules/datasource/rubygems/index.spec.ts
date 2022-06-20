@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import { RubyGemsDatasource } from '.';
-import { Fixtures } from '../../../../test/fixtures';
 
 const rubygemsOrgVersions = Fixtures?.get('rubygems-org.txt');
 const railsInfo = Fixtures?.getJson('rails/info.json');

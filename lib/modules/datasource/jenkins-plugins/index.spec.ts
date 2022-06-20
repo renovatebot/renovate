@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as versioning from '../../versioning/docker';
 import { JenkinsPluginsDatasource } from '.';
-import { Fixtures } from '../../../../test/fixtures';
 
 const jenkinsPluginsVersions = Fixtures?.getJson('plugin-versions.json');
 const jenkinsPluginsInfo = Fixtures?.getJson('update-center.actual.json');

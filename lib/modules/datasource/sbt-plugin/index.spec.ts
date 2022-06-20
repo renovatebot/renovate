@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-package/util';
 import { SbtPluginDatasource } from '.';
-import { Fixtures } from '../../../../test/fixtures';
 
 const mavenIndexHtml = Fixtures.get(`maven-index.html`);
 const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);

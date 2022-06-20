@@ -1,3 +1,5 @@
+/* fixme #7154 */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import fs from 'fs-extra';
 import { logger } from '../../../test/util';
 import {

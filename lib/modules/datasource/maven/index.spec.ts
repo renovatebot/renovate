@@ -1,10 +1,10 @@
 import { ReleaseResult, getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';
-import { Fixtures } from '../../../../test/fixtures';
 
 const datasource = MavenDatasource.id;
 
