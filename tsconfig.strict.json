@@ -17,7 +17,6 @@
     "lib/workers/**/*.spec.ts",
     "lib/modules/datasource/**/*.spec.ts",
     "lib/modules/manager/**/*.spec.ts",
-    "lib/modules/versioning/**/*.spec.ts",
     "lib/renovate.ts",
     "lib/renovate.spec.ts",
     "lib/workers/global/autodiscover.ts",
