@@ -84,7 +84,7 @@ export async function parseConfigs(
 
   if (config.detectHostRulesFromEnv) {
     const hostRules = hostRulesFromEnv(env);
-    config.hostRules = [...config.hostRules, ...hostRules];
+    config.hostRules = [...(config.hostRules ?? []), ...hostRules];
   }
   // Get global config
   logger.trace({ config }, 'Full config');
