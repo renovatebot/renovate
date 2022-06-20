@@ -15,8 +15,6 @@
     "tmp",
     // TODO: fixme
     "lib/workers/**/*.spec.ts",
-    "lib/modules/datasource/**/*.spec.ts",
-    "lib/modules/manager/**/*.spec.ts",
     "lib/renovate.spec.ts"
   ]
 }

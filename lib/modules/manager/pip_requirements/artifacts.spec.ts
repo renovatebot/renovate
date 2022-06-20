@@ -1,7 +1,7 @@
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec');
@@ -73,7 +73,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     });
     expect(
       await updateArtifacts({
-        packageFileName: null,
+        packageFileName: '',
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,

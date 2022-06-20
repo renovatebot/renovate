@@ -26,7 +26,7 @@ describe('modules/datasource/gitlab-releases/index', () => {
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('returns releases from default registry', async () => {
@@ -39,7 +39,7 @@ describe('modules/datasource/gitlab-releases/index', () => {
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('return null if not found', async () => {
