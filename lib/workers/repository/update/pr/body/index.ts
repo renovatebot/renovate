@@ -21,8 +21,19 @@ function massageUpdateMetadata(config: BranchConfig): void {
       dependencyUrl,
     } = upgrade;
     let depNameLinked = upgrade.depName;
-    const primaryLink = homepage || sourceUrl || dependencyUrl;
+    let primaryLink = homepage || sourceUrl || dependencyUrl;
+    const slashPrefixRe = regEx('^/*');
     if (primaryLink) {
+      if (
+        primaryLink === sourceUrl &&
+        sourceDirectory &&
+        sourceUrl.includes('github.com')
+      ) {
+        primaryLink =
+          ensureTrailingSlash(sourceUrl) +
+          'tree/HEAD/' +
+          sourceDirectory.replace(slashPrefixRe, '');
+      }
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
     const otherLinks = [];
@@ -46,7 +57,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
         fullUrl =
           ensureTrailingSlash(sourceUrl) +
           'tree/HEAD/' +
-          sourceDirectory.replace('^/?/', '');
+          sourceDirectory.replace(slashPrefixRe, '');
       }
       references.push(`[source](${fullUrl})`);
     }

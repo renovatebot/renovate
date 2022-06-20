@@ -84,7 +84,7 @@ describe('workers/repository/update/pr/body/index', () => {
         dependencyUrl: 'https://github.com/foo/bar',
         homepage: 'https://example.com',
         references:
-          '[homepage](https://example.com), [source](https://github.com/foo/bar.git/tree/HEAD//baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md)',
+          '[homepage](https://example.com), [source](https://github.com/foo/bar.git/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md)',
         sourceDirectory: '/baz',
         sourceUrl: 'https://github.com/foo/bar.git',
       });
@@ -136,6 +136,29 @@ describe('workers/repository/update/pr/body/index', () => {
         { rebasingNotice: 'BAR' }
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
+    });
+
+    it('sets dependencyUrl to directory source', async () => {
+      const upgrade = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        sourceUrl: 'https://github.com/foo/bar',
+        sourceDirectory: '/baz',
+      };
+
+      await getPrBody({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        upgrades: [upgrade],
+      });
+
+      expect(upgrade).toMatchObject({
+        branchName: 'some-branch',
+        depNameLinked: '[undefined](https://github.com/foo/bar/tree/HEAD/baz)',
+        manager: 'some-manager',
+        sourceDirectory: '/baz',
+        sourceUrl: 'https://github.com/foo/bar',
+      });
     });
   });
 });
