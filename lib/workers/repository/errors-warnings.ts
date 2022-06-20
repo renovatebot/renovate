@@ -18,11 +18,10 @@ export function getWarnings(config: RenovateConfig): string {
 }
 
 export function getErrors(config: RenovateConfig): string {
-  let errorText = '';
   if (!config.errors?.length) {
     return '';
   }
-  errorText = `\n# Errors (${config.errors.length})\n\n`;
+  let errorText = `\n# Errors (${config.errors.length})\n\n`;
   errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
   for (const e of config.errors) {
     errorText += `-   \`${e.topic}\`: ${e.message}\n`;
