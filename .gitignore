@@ -17,6 +17,7 @@ junit.xml
 renovate-schema.json
 **/gradle-wrapper/__fixtures__/**/.gradle
 .clinic/
+.eslintcache
 
 # generated code
 **/*.generated.ts
