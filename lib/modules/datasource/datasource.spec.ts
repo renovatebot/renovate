@@ -1,4 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
+import { partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { Datasource } from './datasource';
 import type { GetReleasesConfig, ReleaseResult } from './types';
