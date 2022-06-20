@@ -16,7 +16,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: undefined,
+          depName: undefined as never, // #7154
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -41,7 +41,7 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, null);
+        .reply(200);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
