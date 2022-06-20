@@ -6,7 +6,7 @@ describe('modules/versioning/versioning-metadata', () => {
       (item) => !item.includes('.')
     );
     for (const versioning of allVersioning) {
-      let readme: string | undefined = undefined;
+      let readme: string | undefined;
       try {
         readme = await readFile(
           'lib/modules/versioning/' + versioning + '/readme.md',
