@@ -18,7 +18,7 @@ class TestDatasource extends Datasource {
     } catch (err) {
       this.handleGenericErrors(err);
     }
-    return Promise.resolve(undefined);
+    return Promise.resolve(undefined as never);
   }
 }
 
@@ -28,8 +28,8 @@ describe('modules/datasource/datasource', () => {
 
     httpMock.scope(exampleUrl).get('/').reply(429);
 
-    await expect(testDatasource.getReleases(undefined)).rejects.toThrow(
-      EXTERNAL_HOST_ERROR
-    );
+    await expect(
+      testDatasource.getReleases(undefined as never)
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 });

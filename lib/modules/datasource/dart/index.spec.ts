@@ -10,7 +10,10 @@ const baseUrl = 'https://pub.dartlang.org/api/packages/';
 describe('modules/datasource/dart/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
-      httpMock.scope(baseUrl).get('/non_sense').reply(200, null);
+      httpMock
+        .scope(baseUrl)
+        .get('/non_sense')
+        .reply(200, null as never);
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,

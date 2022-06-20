@@ -18,7 +18,7 @@ describe('modules/datasource/git-tags/index', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(null) as Response<string>;
+          return Promise.resolve(null) as unknown as Response<string>;
         },
       });
       const versions = await getPkgReleases({ datasource, depName });

@@ -16,7 +16,10 @@ describe('modules/datasource/cdnjs/index', () => {
     });
 
     it('throws for empty result', async () => {
-      httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(200, null);
+      httpMock
+        .scope(baseUrl)
+        .get(pathFor('foo/bar'))
+        .reply(200, null as never);
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,

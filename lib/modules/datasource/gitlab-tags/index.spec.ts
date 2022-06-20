@@ -32,7 +32,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
+      expect(res?.releases).toHaveLength(3);
     });
 
     it('returns tags from custom registry in sub path', async () => {
@@ -75,7 +75,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
     });
   });
 
@@ -120,11 +120,10 @@ describe('modules/datasource/gitlab-tags/index', () => {
     });
 
     it('returns null from gitlab installation with no commits', async () => {
-      const body = [];
       httpMock
         .scope('https://gitlab.company.com')
         .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
-        .reply(200, body);
+        .reply(200, []);
       const res = await getDigest({
         datasource,
         registryUrls: ['https://gitlab.company.com/api/v4/'],
@@ -137,7 +136,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
       httpMock
         .scope('https://gitlab.company.com')
         .get('/api/v4/projects/some%2Fdep2/repository/commits/unknown-branch')
-        .reply(404, null);
+        .reply(404, null as never);
       const res = await getDigest(
         {
           datasource,
