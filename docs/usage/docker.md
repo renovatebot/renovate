@@ -246,7 +246,96 @@ module.exports = {
 };
 ```
 
-#### Google Container Registry
+#### Google Container Registry / Google Artifact Registry
+
+#### Using long-lived service account credentials
+
+To access Google Container Registry (deprecated) or Google Artifact Registry you can use the JSON service account directly with `Basic` auth using `_json_key` as username and the service account as password. Google Artifact Registry, but not Google Container Registry, support `_json_key_base64` and a base64 encoded service account directly.
+
+Because JSON in JSON wrapping makes things more complicated, it is easier to encode the JSON service account beforehand in order to avoid the encoding problems altogether.
+
+If you all your dependencies are on Google Artifact Registry, you can base64 encode the service account directly:
+
+1. Download your JSON service account and store it on your machine. Make sure that the service account has read (and only read) permissions to your artifacts.
+1. Base64 encode the service account credentials using `cat service-account.json | base64`
+1. Add it your configuration file
+   1. If you want to add it to your self-hosted configuration file:
+      ```json
+      {
+        "hostRules": [
+          {
+            "matchHost": "europe-docker.pkg.dev",
+            "authType": "Basic",
+            "username": "_json_key_base64",
+            "password": "<base64 service account>"
+          }
+        ]
+      }
+      ```
+   2. If you want to add it your repository renovate config file, make sure to [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+      ```json
+      {
+        "hostRules": [
+          {
+            "matchHost": "europe-docker.pkg.dev",
+            "authType": "Basic",
+            "username": "_json_key_base64",
+            "encrypted": {
+              "password": "<encrypted base64 service account>"
+            }
+          }
+        ]
+      }
+      ```
+
+If you have dependencies on Google Container Registry (and Artifact Registry) you need to use `_json_key` and a slightly different encoding:
+
+1. Download your JSON service account and store it on your machine. Make sure that the service account has read (and only read) permissions to your artifacts.
+1. Open the file and prefix the content with `_json_key:`. The file should look like this:
+   ```json
+   _json_key:{
+     "type": "service_account",
+     "project_id": "sample-project",
+     "private_key_id": "5786ff7e615522b932a2a37b4a6f9645c4316dbd",
+     "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDaOkxZut9uDUHV\n...\n/PWs0Wa2z5+IawMD7nO63+b6\n-----END PRIVATE KEY-----\n",
+     "client_email": "renovate-lookup@sample-project.iam.gserviceaccount.com",
+     "client_id": "115429165445403928973",
+     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+     "token_uri": "https://oauth2.googleapis.com/token",
+     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/renovate-lookup%40sample-project.iam.gserviceaccount.com"
+   }
+   ```
+1. Base64 encode the prefixed service account credentials using `cat prefixed-service-account.json | base64`
+1. Add it your configuration file
+   1. If you want to add it to your self-hosted configuration file:
+      ```json
+      {
+        "hostRules": [
+          {
+            "matchHost": "europe-docker.pkg.dev",
+            "authType": "Basic",
+            "token": "<base64 pre-fixed service account>"
+          }
+        ]
+      }
+      ```
+   1. If you want to add it your repository renovate config file, make sure to [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it like this:
+      ```json
+      {
+        "hostRules": [
+          {
+            "matchHost": "europe-docker.pkg.dev",
+            "authType": "Basic",
+            "encrypted": {
+              "token": "<encrypted base64 pre-fixed service account>"
+            }
+          }
+        ]
+      }
+      ```
+
+#### Using short-lived access tokens
 
 Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
 
