@@ -71,13 +71,13 @@ describe('util/template/index', () => {
   it('string to pretty JSON ', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
-    const output = template.compile(userTemplate, undefined);
+    const output = template.compile(userTemplate, undefined as never);
     expect(output).toMatchSnapshot();
   });
 
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
-    const output = template.compile(userTemplate, undefined);
+    const output = template.compile(userTemplate, undefined as never);
     expect(output).toBe('foo');
   });
 });
