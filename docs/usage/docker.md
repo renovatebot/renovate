@@ -250,16 +250,19 @@ module.exports = {
 
 ##### Using long-lived service account credentials
 
-To access Google Container Registry (deprecated) or Google Artifact Registry you can use the JSON service account directly with `Basic` auth using `_json_key` as username and the service account as password. Google Artifact Registry, but not Google Container Registry, support `_json_key_base64` and a base64 encoded service account directly.
+To access Google Container Registry (deprecated) or Google Artifact Registry you can use the JSON service account directly with `Basic` auth using `_json_key` as username and the service account as password.
 
 Because JSON in JSON wrapping makes things more complicated, it is easier to encode the JSON service account beforehand in order to avoid the encoding problems altogether.
 
-If you all your dependencies are on Google Artifact Registry, you can base64 encode the service account directly:
+Google Artifact Registry, but not Google Container Registry, support `_json_key_base64` and a base64 encoded service account natively.
+If all your dependencies are on Google Artifact Registry, you can base64 encode and use the service account directly:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has read (and only read) permissions to your artifacts.
 1. Base64 encode the service account credentials using `cat service-account.json | base64`
-1. Add it your configuration file
+1. Add the encoded service account to your configuration file
+
    1. If you want to add it to your self-hosted configuration file:
+
       ```json
       {
         "hostRules": [
@@ -272,7 +275,9 @@ If you all your dependencies are on Google Artifact Registry, you can base64 enc
         ]
       }
       ```
-   2. If you want to add it your repository renovate config file, make sure to [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+
+   1. If you want to add it your repository renovate config file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+
       ```json
       {
         "hostRules": [
@@ -292,6 +297,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has read (and only read) permissions to your artifacts.
 1. Open the file and prefix the content with `_json_key:`. The file should look like this:
+
    ```json
    _json_key:{
      "type": "service_account",
@@ -306,9 +312,12 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/renovate-lookup%40sample-project.iam.gserviceaccount.com"
    }
    ```
+
 1. Base64 encode the prefixed service account credentials using `cat prefixed-service-account.json | base64`
-1. Add it your configuration file
+1. Add the prefixed and encoded service account to your configuration file
+
    1. If you want to add it to your self-hosted configuration file:
+
       ```json
       {
         "hostRules": [
@@ -320,7 +329,9 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
         ]
       }
       ```
-   1. If you want to add it your repository renovate config file, make sure to [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it like this:
+
+   1. If you want to add it your repository renovate config file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+
       ```json
       {
         "hostRules": [
