@@ -31,7 +31,7 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
-        .reply(200, '}');
+        .reply(200, []);
       config.depName = 'fakepackage';
       expect(
         await getPkgReleases({
