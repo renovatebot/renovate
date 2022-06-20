@@ -15,21 +15,6 @@
     "tmp",
     // TODO: fixme
     "lib/workers/**/*.spec.ts",
-    "lib/modules/datasource/golang-version/index.spec.ts",
-    "lib/modules/datasource/gradle-version/index.spec.ts",
-    "lib/modules/datasource/helm/index.spec.ts",
-    "lib/modules/datasource/hex/index.spec.ts",
-    "lib/modules/datasource/index.spec.ts",
-    "lib/modules/datasource/jenkins-plugins/index.spec.ts",
-    "lib/modules/datasource/maven/index.spec.ts",
-    "lib/modules/datasource/maven/util.spec.ts",
-    "lib/modules/datasource/node/index.spec.ts",
-    "lib/modules/datasource/npm/get.spec.ts",
-    "lib/modules/datasource/npm/index.spec.ts",
-    "lib/modules/datasource/repology/index.spec.ts",
-    "lib/modules/datasource/rubygems/index.spec.ts",
-    "lib/modules/datasource/sbt-package/index.spec.ts",
-    "lib/modules/datasource/sbt-plugin/index.spec.ts",
     "lib/modules/manager/**/*.spec.ts",
     "lib/renovate.spec.ts"
   ]

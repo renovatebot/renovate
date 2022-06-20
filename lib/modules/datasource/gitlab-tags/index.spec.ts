@@ -136,7 +136,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
       httpMock
         .scope('https://gitlab.company.com')
         .get('/api/v4/projects/some%2Fdep2/repository/commits/unknown-branch')
-        .reply(404, null as never);
+        .reply(404, '}');
       const res = await getDigest(
         {
           datasource,
