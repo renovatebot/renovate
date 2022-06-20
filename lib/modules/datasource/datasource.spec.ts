@@ -18,7 +18,7 @@ class TestDatasource extends Datasource {
     } catch (err) {
       this.handleGenericErrors(err);
     }
-    return Promise.resolve(undefined as never);
+    return Promise.resolve(null);
   }
 }
 
