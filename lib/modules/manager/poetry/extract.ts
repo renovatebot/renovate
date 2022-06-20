@@ -91,7 +91,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
       registryUrls.add(source.url);
     }
   }
-  registryUrls.add(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
+  registryUrls.add(process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
 }
@@ -115,7 +115,7 @@ export async function extractPackageFile(
 
   // handle the lockfile
   const lockfileName = getSiblingFileName(fileName, 'poetry.lock');
-  const lockContents = await readLocalFile(lockfileName, 'utf8');
+  const lockContents = (await readLocalFile(lockfileName, 'utf8')) ?? '';
 
   const lockfileMapping = extractLockFileEntries(lockContents);
 

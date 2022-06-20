@@ -134,7 +134,12 @@ export async function generateLockFile(
     }
 
     // Read the result
-    lockFile = await readLocalFile(upath.join(lockFileDir, filename), 'utf8');
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    lockFile = (await readLocalFile(
+      upath.join(lockFileDir, filename),
+      'utf8'
+    ))!;
 
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile

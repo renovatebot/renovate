@@ -52,7 +52,9 @@ export async function extractAllPackageFiles(
     };
 
     try {
-      const content = await readLocalFile(packageFile, 'utf8');
+      // TODO #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const content = (await readLocalFile(packageFile, 'utf8'))!;
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {
@@ -106,7 +108,7 @@ export async function extractAllPackageFiles(
         registryUrls: [
           ...new Set([
             ...defaultRegistryUrls,
-            ...(dep.registryUrls || []),
+            ...(dep.registryUrls ?? []),
             ...registryUrls,
           ]),
         ],

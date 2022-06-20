@@ -95,7 +95,7 @@ export async function extractPackageFile(
       lockFiles[key] = undefined;
     }
   }
-  lockFiles.npmLock = lockFiles.packageLock || lockFiles.shrinkwrapJson;
+  lockFiles.npmLock = lockFiles.packageLock ?? lockFiles.shrinkwrapJson;
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
 
@@ -109,7 +109,7 @@ export async function extractPackageFile(
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
     } else {
-      npmrc = config.npmrc || '';
+      npmrc = config.npmrc ?? '';
       if (npmrc.length) {
         if (!npmrc.endsWith('\n')) {
           npmrc += '\n';
@@ -152,7 +152,9 @@ export async function extractPackageFile(
     | undefined;
   try {
     lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
-    lernaJson = JSON.parse(await readLocalFile(lernaJsonFile, 'utf8'));
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }

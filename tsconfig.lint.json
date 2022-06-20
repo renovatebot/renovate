@@ -1,4 +1,7 @@
 {
   "extends": "./tsconfig",
+  "compilerOptions": {
+    "strictNullChecks": true /* required for js files */
+  },
   "include": [".eslintrc.js", "**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"]
 }

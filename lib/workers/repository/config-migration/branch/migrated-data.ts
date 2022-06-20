@@ -51,7 +51,9 @@ export class MigratedDataFactory {
       const raw = await readLocalFile(filename, 'utf8');
 
       // indent defaults to 2 spaces
-      const indent = detectIndent(raw).indent ?? '  ';
+      // TODO #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const indent = detectIndent(raw!).indent ?? '  ';
       let content: string;
 
       if (filename.endsWith('.json5')) {

@@ -47,13 +47,15 @@ export async function postUpgradeCommandsExecutor(
       for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && canWriteFile) {
-          let contents;
+          let contents: Buffer | null;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
           }
-          await writeLocalFile(file.path, contents);
+          // TODO #7154
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          await writeLocalFile(file.path, contents!);
         }
       }
 

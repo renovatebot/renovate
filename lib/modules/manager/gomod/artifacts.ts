@@ -351,7 +351,9 @@ export async function updateArtifacts({
       }
     }
 
-    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {

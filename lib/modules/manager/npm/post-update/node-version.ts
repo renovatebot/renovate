@@ -6,7 +6,9 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
-    const constraint = (await readLocalFile(filename, 'utf8'))
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const constraint = (await readLocalFile(filename, 'utf8'))!
       .split(newlineRegex)[0]
       .replace(regEx(/^v/), '');
     if (semver.validRange(constraint)) {
@@ -35,8 +37,8 @@ export async function getNodeConstraint(
 ): Promise<string | null> {
   const { packageFile } = config;
   const constraint =
-    (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ||
-    (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ||
+    (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ??
+    (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ??
     getPackageJsonConstraint(config);
   if (!constraint) {
     logger.debug('No node constraint found - using latest');

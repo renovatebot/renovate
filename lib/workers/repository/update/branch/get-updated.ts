@@ -248,7 +248,9 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents.toString(),
+        // TODO #7154
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
@@ -278,7 +280,9 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents.toString(),
+        // TODO #7154
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
