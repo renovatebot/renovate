@@ -22,7 +22,7 @@ import { printRequestStats } from './stats';
 export async function renovateRepository(
   repoConfig: RenovateConfig,
   canRetry = true
-): Promise<ProcessResult> {
+): Promise<ProcessResult | undefined> {
   splitInit();
   let config = GlobalConfig.set(
     applySecretsToConfig(repoConfig, undefined, false)
@@ -31,9 +31,9 @@ export async function renovateRepository(
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');
   logger.trace({ config });
-  let repoResult: ProcessResult;
+  let repoResult: ProcessResult | undefined;
   queue.clear();
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir')!;
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
@@ -62,7 +62,8 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches);
       }
       await finaliseRepo(config, branchList);
-      repoResult = processResult(config, res);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      repoResult = processResult(config, res!);
     }
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });

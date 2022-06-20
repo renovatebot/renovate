@@ -354,4 +354,83 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     });
     expect(ts).toEqual(t3);
   });
+
+  describe('Changelog-based cache busting', () => {
+    describe('newChangelogReleaseDetected', () => {
+      const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+      it('returns false for undefined release argument', () => {
+        expect(
+          cache.newChangelogReleaseDetected(undefined, now, {}, {})
+        ).toBeFalse();
+      });
+
+      it('returns false if version is present in cache', () => {
+        expect(
+          cache.newChangelogReleaseDetected(
+            { date: now.minus({ minutes: 10 }).toISO(), version: '1.2.3' },
+            now,
+            { minutes: 20 },
+            {
+              '1.2.3': {
+                bar: '1',
+                version: '1.2.3',
+                releaseTimestamp: now.toISO(),
+              },
+            }
+          )
+        ).toBeFalse();
+      });
+
+      it('returns false if changelog release is not fresh', () => {
+        expect(
+          cache.newChangelogReleaseDetected(
+            { date: now.minus({ minutes: 20 }).toISO(), version: '1.2.3' },
+            now,
+            { minutes: 10 },
+            {}
+          )
+        ).toBeFalse();
+      });
+
+      it('returns true for fresh changelog release', () => {
+        expect(
+          cache.newChangelogReleaseDetected(
+            { date: now.minus({ minutes: 10 }).toISO(), version: '1.2.3' },
+            now,
+            { minutes: 20 },
+            {}
+          )
+        ).toBeTrue();
+      });
+    });
+
+    it('forces cache update', async () => {
+      const lastUpdateTime = now.minus({ minutes: 15 }).toISO();
+      const githubTime = now.minus({ minutes: 10 }).toISO();
+      const changelogTime = now.minus({ minutes: 5 }).toISO();
+      packageCache.get.mockResolvedValueOnce({
+        items: {},
+        createdAt: lastUpdateTime,
+        updatedAt: lastUpdateTime,
+      });
+      responses = [
+        resp([{ name: '1.0.0', createdAt: githubTime, foo: 'aaa' }]),
+      ];
+      const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+      const res = await cache.getItems({ packageName: 'foo/bar' }, {
+        version: '1.0.0',
+        date: changelogTime,
+      } as never);
+
+      expect(sortItems(res)).toEqual([
+        {
+          bar: 'aaa',
+          releaseTimestamp: githubTime,
+          version: '1.0.0',
+        },
+      ]);
+    });
+  });
 });

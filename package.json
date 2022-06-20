@@ -36,6 +36,7 @@
     "prepare": "run-s prepare:*",
     "prepare:husky": "husky install",
     "prepare:generate": "run-s generate:*",
+    "prepare:install-re2": "npm explore re2 -- npm run install",
     "prepare:re2": "node tools/check-re2.mjs",
     "prestart": "run-s generate:* ",
     "pretest": "run-s generate:* ",
