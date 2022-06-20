@@ -48,13 +48,14 @@ describe('util/exec/buildpack', () => {
 
   describe('resolveConstraint()', () => {
     beforeEach(() => {
-      datasource.getPkgReleases.mockResolvedValueOnce({
+      datasource.getPkgReleases.mockResolvedValue({
         releases: [
           { version: '1.0.0' },
           { version: '1.1.0' },
           { version: '1.3.0' },
           { version: '2.0.14' },
           { version: '2.1.0' },
+          { version: '2.2.0-pre.0' },
         ],
       });
     });
@@ -65,8 +66,34 @@ describe('util/exec/buildpack', () => {
       ).toBe('1.1.0');
     });
 
-    it('returns from latest', async () => {
+    it('returns highest stable', async () => {
       expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.1.0');
+    });
+
+    it('returns highest unstable', async () => {
+      datasource.getPkgReleases.mockResolvedValue({
+        releases: [{ version: '2.0.14-b.1' }, { version: '2.1.0-a.1' }],
+      });
+      expect(await resolveConstraint({ toolName: 'composer' })).toBe(
+        '2.1.0-a.1'
+      );
+    });
+
+    it('respects latest', async () => {
+      datasource.getPkgReleases.mockResolvedValue({
+        tags: {
+          latest: '2.0.14',
+        },
+        releases: [
+          { version: '1.0.0' },
+          { version: '1.1.0' },
+          { version: '1.3.0' },
+          { version: '2.0.14' },
+          { version: '2.1.0' },
+          { version: '2.2.0-pre.0' },
+        ],
+      });
+      expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.0.14');
     });
 
     it('throws for unknown tools', async () => {

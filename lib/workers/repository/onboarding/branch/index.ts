@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -43,8 +44,8 @@ export async function checkOnboardingBranch(
     }
     // istanbul ignore if
     if (platform.refreshPr) {
-      const onboardingPr = await platform.getBranchPr(config.onboardingBranch);
-      await platform.refreshPr(onboardingPr.number);
+      const onboardingPr = await platform.getBranchPr(config.onboardingBranch!);
+      await platform.refreshPr(onboardingPr!.number);
     }
   } else {
     logger.debug('Onboarding PR does not exist');
@@ -71,8 +72,8 @@ export async function checkOnboardingBranch(
     }
   }
   if (!GlobalConfig.get('dryRun')) {
-    await checkoutBranch(onboardingBranch);
+    await checkoutBranch(onboardingBranch!);
   }
-  const branchList = [onboardingBranch];
+  const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }

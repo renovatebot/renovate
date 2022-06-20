@@ -1,6 +1,6 @@
 import { ReleaseResult, getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
@@ -25,7 +25,7 @@ interface MockOpts {
   latest?: string;
   jars?: Record<string, number> | null;
   snapshots?: SnapshotOpts[] | null;
-  html?: string;
+  html?: string | null;
 }
 
 function mockGenericPackage(opts: MockOpts = {}) {
@@ -36,8 +36,8 @@ function mockGenericPackage(opts: MockOpts = {}) {
     html,
   } = opts;
   const meta =
-    opts.meta === undefined ? loadFixture('metadata.xml') : opts.meta;
-  const pom = opts.pom === undefined ? loadFixture('pom.xml') : opts.pom;
+    opts.meta === undefined ? Fixtures.get('metadata.xml') : opts.meta;
+  const pom = opts.pom === undefined ? Fixtures.get('pom.xml') : opts.pom;
   const jars =
     opts.jars === undefined
       ? {
@@ -54,12 +54,12 @@ function mockGenericPackage(opts: MockOpts = {}) {
       ? [
           {
             version: '1.0.3-SNAPSHOT',
-            meta: loadFixture('metadata-snapshot-version.xml'),
+            meta: Fixtures.get('metadata-snapshot-version.xml'),
             jarStatus: 200,
           },
           {
             version: '1.0.4-SNAPSHOT',
-            meta: loadFixture('metadata-snapshot-version-invalid.xml'),
+            meta: Fixtures.get('metadata-snapshot-version-invalid.xml'),
           },
           {
             version: '1.0.5-SNAPSHOT',
@@ -83,9 +83,25 @@ function mockGenericPackage(opts: MockOpts = {}) {
   }
 
   if (pom) {
-    scope
-      .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
-      .reply(200, pom);
+    if (latest.endsWith('-SNAPSHOT')) {
+      const [major, minor, patch] = latest
+        .replace('-SNAPSHOT', '')
+        .split('.')
+        .map((x) => parseInt(x, 10))
+        .map((x) => (x < 10 ? `0${x}` : `${x}`));
+      scope
+        .get(
+          `/${packagePath}/${latest}/${artifact}-${latest.replace(
+            '-SNAPSHOT',
+            ''
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+        )
+        .reply(200, pom);
+    } else {
+      scope
+        .get(`/${packagePath}/${latest}/${artifact}-${latest}.pom`)
+        .reply(200, pom);
+    }
   }
 
   if (jars) {
@@ -96,7 +112,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
         .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
-      const headers = version.startsWith('0.')
+      const headers: httpMock.ReplyHeaders = version.startsWith('0.')
         ? {}
         : { 'Last-Modified': timestamp };
       scope
@@ -189,14 +205,51 @@ describe('modules/datasource/maven/index', () => {
     expect(res).toMatchSnapshot();
   });
 
+  it('returns releases when only snapshot', async () => {
+    const meta = Fixtures.get('metadata-snapshot-version.xml');
+    mockGenericPackage({
+      meta: Fixtures.get('metadata-snapshot-only.xml'),
+      jars: null,
+      html: null,
+      latest: '1.0.3-SNAPSHOT',
+      snapshots: [
+        {
+          version: '1.0.3-SNAPSHOT',
+          meta: meta,
+          jarStatus: 200,
+        },
+      ],
+    });
+    httpMock
+      .scope(baseUrl)
+      .get('/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml')
+      .reply(200, meta);
+
+    const res = await get();
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        {
+          releaseTimestamp: '2020-01-01T01:00:03.000Z',
+          version: '1.0.3-SNAPSHOT',
+        },
+      ],
+    });
+  });
+
   it('returns html-based releases', async () => {
     process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
 
     mockGenericPackage({
       latest: '2.0.0',
       jars: null,
-      html: loadFixture('index.html'),
-      meta: loadFixture('index.xml'),
+      html: Fixtures.get('index.html'),
+      meta: Fixtures.get('index.xml'),
       snapshots: null,
     });
 
@@ -229,19 +282,15 @@ describe('modules/datasource/maven/index', () => {
     mockGenericPackage({ html: null });
     mockGenericPackage({
       base: baseUrlCustom,
-      meta: loadFixture('metadata-extra.xml'),
+      meta: Fixtures.get('metadata-extra.xml'),
       latest: '3.0.0',
       jars: { '3.0.0': 200 },
       snapshots: [],
     });
 
-    const { releases } = await get(
-      'org.example:package',
-      baseUrl,
-      baseUrlCustom
-    );
+    const res = await get('org.example:package', baseUrl, baseUrlCustom);
 
-    expect(releases).toMatchObject([
+    expect(res?.releases).toMatchObject([
       { version: '0.0.1' },
       { version: '1.0.0' },
       { version: '1.0.3-SNAPSHOT' },
@@ -255,11 +304,11 @@ describe('modules/datasource/maven/index', () => {
     httpMock
       .scope('https://failed_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(404, null);
+      .reply(404);
     httpMock
       .scope('https://unauthorized_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(403, null);
+      .reply(403);
     httpMock
       .scope('https://empty_repo')
       .get('/org/example/package/maven-metadata.xml')
@@ -294,14 +343,13 @@ describe('modules/datasource/maven/index', () => {
     const base = baseUrl.replace('https', 'http');
     mockGenericPackage({ base });
 
-    const { releases } = await get(
+    const res = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      's3://protocol_error_repo',
       base
     );
 
-    expect(releases).toMatchSnapshot();
+    expect(res?.releases).toMatchSnapshot();
   });
 
   it('skips registry with invalid metadata structure', async () => {
@@ -309,7 +357,7 @@ describe('modules/datasource/maven/index', () => {
     httpMock
       .scope('https://invalid_metadata_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(200, loadFixture('metadata-invalid.xml'));
+      .reply(200, Fixtures.get('metadata-invalid.xml'));
 
     const res = await get(
       'org.example:package',
@@ -343,7 +391,7 @@ describe('modules/datasource/maven/index', () => {
     const resB = await get('org.example:package', baseUrl.replace(/\/*$/, '/'));
     expect(resA).not.toBeNull();
     expect(resB).not.toBeNull();
-    expect(resA.releases).toEqual(resB.releases);
+    expect(resA?.releases).toEqual(resB?.releases);
   });
 
   it('returns null for invalid registryUrls', async () => {
@@ -356,12 +404,12 @@ describe('modules/datasource/maven/index', () => {
   });
 
   it('supports scm.url values prefixed with "scm:"', async () => {
-    const pom = loadFixture('pom.scm-prefix.xml');
+    const pom = Fixtures.get('pom.scm-prefix.xml');
     mockGenericPackage({ pom, html: null });
 
-    const { sourceUrl } = await get();
+    const res = await get();
 
-    expect(sourceUrl).toBe('https://github.com/example/test');
+    expect(res?.sourceUrl).toBe('https://github.com/example/test');
   });
 
   it('removes authentication header after redirect', async () => {
@@ -397,9 +445,9 @@ describe('modules/datasource/maven/index', () => {
     httpMock
       .scope(backendUrl, { badheaders: ['authorization'] })
       .get(`${metadataPath}${queryStr}`)
-      .reply(200, loadFixture('metadata.xml'))
+      .reply(200, Fixtures.get('metadata.xml'))
       .get(`${pomfilePath}${queryStr}`)
-      .reply(200, loadFixture('pom.xml'));
+      .reply(200, Fixtures.get('pom.xml'));
 
     const res = await get('org.example:package', frontendUrl);
 
@@ -410,7 +458,7 @@ describe('modules/datasource/maven/index', () => {
     const parentPackage = {
       dep: 'org.example:parent',
       meta: null,
-      pom: loadFixture('parent-scm-homepage/pom.xml'),
+      pom: Fixtures.get('parent-scm-homepage/pom.xml'),
       latest: '1.0.0',
       jars: null,
       snapshots: [],
@@ -418,8 +466,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should get source and homepage from parent', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-no-info/meta.xml'),
-        pom: loadFixture('child-no-info/pom.xml'),
+        meta: Fixtures.get('child-no-info/meta.xml'),
+        pom: Fixtures.get('child-no-info/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -437,8 +485,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should deal with missing parent fields', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-empty/meta.xml'),
-        pom: loadFixture('child-empty/pom.xml'),
+        meta: Fixtures.get('child-empty/meta.xml'),
+        pom: Fixtures.get('child-empty/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -457,7 +505,7 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('should deal with circular hierarchy', async () => {
-      const parentPom = loadFixture('child-parent-cycle/parent.pom.xml');
+      const parentPom = Fixtures.get('child-parent-cycle/parent.pom.xml');
       const parentPomMock = {
         dep: 'org.example:parent',
         meta: null,
@@ -467,8 +515,8 @@ describe('modules/datasource/maven/index', () => {
         snapshots: [],
       };
 
-      const childMeta = loadFixture('child-parent-cycle/child.meta.xml');
-      const childPom = loadFixture('child-parent-cycle/child.pom.xml');
+      const childMeta = Fixtures.get('child-parent-cycle/child.meta.xml');
+      const childPom = Fixtures.get('child-parent-cycle/child.pom.xml');
       const childPomMock = {
         dep: 'org.example:child',
         meta: null,
@@ -500,8 +548,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should get source from own pom and homepage from parent', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-scm/meta.xml'),
-        pom: loadFixture('child-scm/pom.xml'),
+        meta: Fixtures.get('child-scm/meta.xml'),
+        pom: Fixtures.get('child-scm/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -519,8 +567,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should get homepage from own pom and source from parent', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-url/meta.xml'),
-        pom: loadFixture('child-url/pom.xml'),
+        meta: Fixtures.get('child-url/meta.xml'),
+        pom: Fixtures.get('child-url/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -538,8 +586,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should get homepage and source from own pom', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-all-info/meta.xml'),
-        pom: loadFixture('child-all-info/pom.xml'),
+        meta: Fixtures.get('child-all-info/meta.xml'),
+        pom: Fixtures.get('child-all-info/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -556,8 +604,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should be able to detect git@github.com:child-scm as valid sourceUrl', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-scm-gitatcolon/meta.xml'),
-        pom: loadFixture('child-scm-gitatcolon/pom.xml'),
+        meta: Fixtures.get('child-scm-gitatcolon/meta.xml'),
+        pom: Fixtures.get('child-scm-gitatcolon/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -573,8 +621,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should be able to detect git@github.com/child-scm as valid sourceUrl', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-scm-gitatslash/meta.xml'),
-        pom: loadFixture('child-scm-gitatslash/pom.xml'),
+        meta: Fixtures.get('child-scm-gitatslash/meta.xml'),
+        pom: Fixtures.get('child-scm-gitatslash/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
@@ -590,8 +638,8 @@ describe('modules/datasource/maven/index', () => {
 
     it('should be able to detect git://@github.com/child-scm as valid sourceUrl', async () => {
       mockGenericPackage({
-        meta: loadFixture('child-scm-gitprotocol/meta.xml'),
-        pom: loadFixture('child-scm-gitprotocol/pom.xml'),
+        meta: Fixtures.get('child-scm-gitprotocol/meta.xml'),
+        pom: Fixtures.get('child-scm-gitprotocol/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],

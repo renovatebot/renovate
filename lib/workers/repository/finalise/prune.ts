@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
@@ -63,6 +64,8 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
+      } else if (branchIsModified) {
+        logger.debug('Orphan Branch is modified - skipping branch deletion');
       } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
@@ -98,7 +101,7 @@ export async function pruneStaleBranches(
     return;
   }
   let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix)
+    branchName.startsWith(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

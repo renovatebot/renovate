@@ -11,6 +11,7 @@ import type {
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
+import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
 
@@ -30,7 +31,7 @@ export function prInfo(pr: BbsRestPr): BbsPr {
   return {
     version: pr.version,
     number: pr.id,
-    body: pr.description,
+    bodyStruct: getPrBodyStruct(pr.description),
     sourceBranch: pr.fromRef.displayId,
     targetBranch: pr.toRef.displayId,
     title: pr.title,

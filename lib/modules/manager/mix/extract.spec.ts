@@ -9,8 +9,8 @@ describe('modules/manager/mix/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns empty for invalid dependency file', async () => {
-      const { deps } = await extractPackageFile('nothing here', 'mix.exs');
-      expect(deps).toBeEmpty();
+      const res = await extractPackageFile('nothing here', 'mix.exs');
+      expect(res?.deps).toBeEmpty();
     });
 
     it('extracts all dependencies', async () => {

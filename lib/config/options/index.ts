@@ -3,7 +3,6 @@ import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import * as dockerVersioning from '../../modules/versioning/docker';
-import * as pep440Versioning from '../../modules/versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -125,6 +124,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configMigration',
+    description: 'Enable this to get config migration PRs when needed.',
+    stage: 'repository',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'productLinks',
     description: 'Links which are used in PRs, issues and comments.',
     type: 'object',
@@ -153,8 +159,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extends',
-    description:
-      'Configuration presets to use or extend. Note: This config option does not work if you use a `config.js` file.',
+    description: 'Configuration presets to use or extend.',
     stage: 'package',
     type: 'array',
     subType: 'string',
@@ -405,10 +410,11 @@ const options: RenovateOptions[] = [
   {
     name: 'requireConfig',
     description:
-      'Set to `false` if it is optional for repositories to contain a config.',
+      "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
     stage: 'repository',
-    type: 'boolean',
-    default: true,
+    type: 'string',
+    default: 'required',
+    allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
   },
   {
@@ -527,6 +533,16 @@ const options: RenovateOptions[] = [
   {
     name: 'schedule',
     description: 'Limit branch creation to these times of day or week.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    cli: true,
+    env: false,
+    default: ['at any time'],
+  },
+  {
+    name: 'automergeSchedule',
+    description: 'Limit automerge to these times of day or week.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -708,7 +724,7 @@ const options: RenovateOptions[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from `baseBranches` instead of only the default branch',
+      'Whether to read configuration from `baseBranches` instead of only the default branch.',
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
@@ -785,8 +801,8 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'aliases',
-    description: 'Aliases for registries, package manager specific.',
+    name: 'registryAliases',
+    description: 'Aliases for registries.',
     type: 'object',
     default: {},
     additionalProperties: {
@@ -1082,7 +1098,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchUpdateTypes',
     description:
-      'Update types to match against (`major`, `minor`, `pin`, etc.). Valid only within a `packageRules` object.',
+      'Update types to match against (`major`, `minor`, `pin`, `pinDigest`, etc). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowedValues: [
@@ -1090,6 +1106,7 @@ const options: RenovateOptions[] = [
       'minor',
       'patch',
       'pin',
+      'pinDigest',
       'digest',
       'lockFileMaintenance',
       'rollback',
@@ -1215,6 +1232,13 @@ const options: RenovateOptions[] = [
     default: `renovate/`,
   },
   {
+    name: 'branchPrefixOld',
+    description: 'Old Prefix to check for existing PRs.',
+    stage: 'branch',
+    type: 'string',
+    default: `renovate/`,
+  },
+  {
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
@@ -1277,6 +1301,24 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-digest',
       commitMessageExtra: 'to {{newDigestShort}}',
       commitMessageTopic: '{{{depName}}} digest',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'pinDigest',
+    description:
+      'Configuration to apply when pinning a digest (no change in tag/version).',
+    stage: 'package',
+    type: 'object',
+    default: {
+      groupName: 'Pin Dependencies',
+      groupSlug: 'pin-dependencies',
+      commitMessageAction: 'Pin',
+      group: {
+        commitMessageTopic: 'dependencies',
+        commitMessageExtra: '',
+      },
     },
     cli: false,
     mergeable: true,
@@ -1494,6 +1536,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
+      stabilityDays: 0,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
@@ -1583,7 +1626,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1801,6 +1844,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
@@ -1866,9 +1910,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration object for Python.',
     stage: 'package',
     type: 'object',
-    default: {
-      versioning: pep440Versioning.id,
-    },
+    default: {},
     mergeable: true,
     cli: false,
   },
@@ -2060,6 +2102,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'deprecationWarningIssues',
       'onboardingClose',
+      'configErrorIssue',
     ],
     cli: false,
     env: false,
@@ -2076,6 +2119,7 @@ const options: RenovateOptions[] = [
     description: 'Enable or disable Unicode emoji.',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'gitLabIgnoreApprovals',

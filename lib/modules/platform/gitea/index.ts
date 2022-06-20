@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
@@ -14,10 +13,10 @@ import {
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
+import { getPrBodyStruct, hashBody } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -37,7 +36,7 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { smartLinks } from './utils';
+import { getRepoUrl, smartLinks, trimTrailingApiPath } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -52,7 +51,7 @@ interface GiteaRepoConfig {
 
 const defaults = {
   hostType: PlatformId.Gitea,
-  endpoint: 'https://gitea.com/api/v1/',
+  endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
 
@@ -96,7 +95,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     displayNumber: `Pull Request #${data.number}`,
     state: data.state,
     title: data.title,
-    body: data.body,
+    bodyStruct: getPrBodyStruct(data.body),
     sha: data.head.sha,
     sourceBranch: data.head.label,
     targetBranch: data.base.ref,
@@ -183,7 +182,9 @@ const platform: Platform = {
     }
 
     if (endpoint) {
-      defaults.endpoint = ensureTrailingSlash(endpoint);
+      let baseEndpoint = trimTrailingApiPath(endpoint);
+      baseEndpoint = ensureTrailingSlash(baseEndpoint);
+      defaults.endpoint = baseEndpoint;
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
@@ -231,15 +232,13 @@ const platform: Platform = {
       repoName,
       branchOrTag
     )) as string;
-    if (fileName.endsWith('.json5')) {
-      return JSON5.parse(raw);
-    }
-    return JSON.parse(raw);
+    return JSON5.parse(raw);
   },
 
   async initRepo({
     repository,
     cloneSubmodules,
+    gitUrl,
   }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
@@ -298,18 +297,12 @@ const platform: Platform = {
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
-    // Find options for current host and determine Git endpoint
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitea,
-      url: defaults.endpoint,
-    });
-    const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token ?? null;
+    const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
 
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: URL.format(gitEndpoint),
+      url,
     });
 
     // Reset cached resources
@@ -527,8 +520,8 @@ const platform: Platform = {
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
-        if (pr) {
-          if (pr.title !== title || pr.body !== body) {
+        if (pr?.bodyStruct) {
+          if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
               `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating...`
             );
@@ -538,7 +531,7 @@ const platform: Platform = {
               prBody: body,
             });
             pr.title = title;
-            pr.body = body;
+            pr.bodyStruct = getPrBodyStruct(body);
           } else {
             logger.debug(
               `Recovered from 409 Conflict and PR for ${sourceBranch} is up-to-date`

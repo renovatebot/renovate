@@ -10,7 +10,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
-import * as composer from './artifacts';
+import * as composer from '.';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
@@ -344,7 +344,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerIgnorePlatformReqs: null,
+          composerIgnorePlatformReqs: undefined,
         },
       })
     ).not.toBeNull();

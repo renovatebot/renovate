@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
@@ -12,6 +13,7 @@ import {
   isBranchModified,
 } from '../../../../util/git';
 import type { BranchConfig } from '../../../types';
+import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
 
 // eslint-disable-next-line typescript-enum/no-enum
@@ -22,6 +24,7 @@ export enum PrAutomergeBlockReason {
   DryRun = 'DryRun',
   PlatformNotReady = 'PlatformNotReady',
   PlatformRejection = 'PlatformRejection',
+  OffSchedule = 'off schedule',
 }
 
 export type AutomergePrResult = {
@@ -45,9 +48,16 @@ export async function checkAutoMerge(
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
+  if (!isScheduledNow(config, 'automergeSchedule')) {
+    logger.debug(`PR automerge is off schedule`);
+    return {
+      automerged: false,
+      prAutomergeBlockReason: PrAutomergeBlockReason.OffSchedule,
+    };
+  }
   const isConflicted =
     config.isConflicted ??
-    (await isBranchConflicted(config.baseBranch, config.branchName));
+    (await isBranchConflicted(config.baseBranch!, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -101,13 +111,13 @@ export async function checkAutoMerge(
       await ensureCommentRemoval({
         type: 'by-content',
         number: pr.number,
-        content: automergeComment,
+        content: automergeComment!,
       });
     }
     await ensureComment({
       number: pr.number,
       topic: null,
-      content: automergeComment,
+      content: automergeComment!,
     });
     return { automerged: true, branchRemoved: false };
   }

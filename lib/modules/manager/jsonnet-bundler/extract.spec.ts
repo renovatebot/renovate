@@ -1,12 +1,12 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const jsonnetfile = loadFixture('jsonnetfile.json');
-const jsonnetfileWithName = loadFixture('jsonnetfile-with-name.json');
-const jsonnetfileNoDependencies = loadFixture(
+const jsonnetfile = Fixtures.get('jsonnetfile.json');
+const jsonnetfileWithName = Fixtures.get('jsonnetfile-with-name.json');
+const jsonnetfileNoDependencies = Fixtures.get(
   'jsonnetfile-no-dependencies.json'
 );
-const jsonnetfileLocalDependencies = loadFixture(
+const jsonnetfileLocalDependencies = Fixtures.get(
   'jsonnetfile-local-dependencies.json'
 );
 

@@ -1,9 +1,9 @@
 import upath from 'upath';
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 
@@ -30,31 +30,31 @@ describe('modules/manager/nuget/extract', () => {
     it('extracts package version dependency', async () => {
       const packageFile =
         'with-centralized-package-versions/Directory.Packages.props';
-      const sample = loadFixture(packageFile);
+      const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
-      const sample = loadFixture(packageFile);
+      const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
     });
 
     it('extracts all dependencies from global packages file', async () => {
       const packageFile = 'packages.props';
-      const sample = loadFixture(packageFile);
+      const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
     });
 
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -74,7 +74,7 @@ describe('modules/manager/nuget/extract', () => {
     it('considers lower-case nuget.config', async () => {
       const packageFile =
         'with-lower-case-config-file/with-lower-case-config-file.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -94,7 +94,7 @@ describe('modules/manager/nuget/extract', () => {
     it('considers pascal-case NuGet.Config', async () => {
       const packageFile =
         'with-pascal-case-config-file/with-pascal-case-config-file.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -114,7 +114,7 @@ describe('modules/manager/nuget/extract', () => {
     it('handles malformed NuGet.config', async () => {
       const packageFile =
         'with-malformed-config-file/with-malformed-config-file.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -130,7 +130,7 @@ describe('modules/manager/nuget/extract', () => {
     it('handles NuGet.config without package sources', async () => {
       const packageFile =
         'without-package-sources/without-package-sources.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -145,7 +145,7 @@ describe('modules/manager/nuget/extract', () => {
 
     it('handles NuGet.config with whitespaces in package source keys', async () => {
       const packageFile = 'with-whitespaces/with-whitespaces.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -165,7 +165,7 @@ describe('modules/manager/nuget/extract', () => {
     it('ignores local feed in NuGet.config', async () => {
       const packageFile =
         'with-local-feed-in-config-file/with-local-feed-in-config-file.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -181,9 +181,9 @@ describe('modules/manager/nuget/extract', () => {
 
     it('extracts registry URLs independently', async () => {
       const packageFile = 'multiple-package-files/one/one.csproj';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       const otherPackageFile = 'multiple-package-files/two/two.csproj';
-      const otherContents = loadFixture(otherPackageFile);
+      const otherContents = Fixtures.get(otherPackageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
@@ -218,7 +218,7 @@ describe('modules/manager/nuget/extract', () => {
 
     it('extracts msbuild-sdks from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.json';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchObject({
@@ -241,7 +241,7 @@ describe('modules/manager/nuget/extract', () => {
 
     it('extracts dotnet-sdk from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.1.json';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(
         await extractPackageFile(contents, 'global.json', config)
       ).toMatchObject({
@@ -258,7 +258,7 @@ describe('modules/manager/nuget/extract', () => {
 
     it('handles malformed global.json', async () => {
       const packageFile = 'msbuild-sdk-files/invalid-json/global.json';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toBeNull();
@@ -266,7 +266,7 @@ describe('modules/manager/nuget/extract', () => {
 
     it('handles not-a-nuget global.json', async () => {
       const packageFile = 'msbuild-sdk-files/not-nuget/global.json';
-      const contents = loadFixture(packageFile);
+      const contents = Fixtures.get(packageFile);
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toBeNull();
@@ -274,7 +274,7 @@ describe('modules/manager/nuget/extract', () => {
 
     describe('.config/dotnet-tools.json', () => {
       const packageFile = '.config/dotnet-tools.json';
-      const contents = loadFixture('dotnet-tools.json');
+      const contents = Fixtures.get('dotnet-tools.json');
 
       it('works', async () => {
         expect(await extractPackageFile(contents, packageFile, config)).toEqual(

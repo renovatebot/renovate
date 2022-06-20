@@ -1,25 +1,27 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+import { updateLockedDependency } from '../..';
+import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
-import { loadFixture } from '../../../../../../test/util';
 import { clone } from '../../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
-import { updateLockedDependency } from '.';
 
-const packageFileContent = loadFixture('package.json', './package-lock');
-const lockFileContent = loadFixture('package-lock.json', './package-lock');
-const lockFileV2Content = loadFixture('package-lock-v2.json', './package-lock');
-const acceptsJson = JSON.parse(loadFixture('accepts.json', './package-lock'));
-const expressJson = JSON.parse(loadFixture('express.json', './common'));
-const mimeJson = JSON.parse(loadFixture('mime.json', './package-lock'));
-const serveStaticJson = JSON.parse(
-  loadFixture('serve-static.json', './package-lock')
+const packageFileContent = Fixtures.get('package.json', './package-lock');
+const lockFileContent = Fixtures.get('package-lock.json', './package-lock');
+const lockFileV2Content = Fixtures.get(
+  'package-lock-v2.json',
+  './package-lock'
 );
-const sendJson = JSON.parse(loadFixture('send.json', './package-lock'));
-const typeIsJson = JSON.parse(loadFixture('type-is.json', './package-lock'));
-const bundledPackageJson = loadFixture(
+const acceptsJson = Fixtures.getJson('accepts.json', './package-lock');
+const expressJson = Fixtures.get('express.json', './common');
+const mimeJson = Fixtures.get('mime.json', './package-lock');
+const serveStaticJson = Fixtures.get('serve-static.json', './package-lock');
+const sendJson = Fixtures.get('send.json', './package-lock');
+const typeIsJson = Fixtures.getJson('type-is.json', './package-lock');
+const bundledPackageJson = Fixtures.get(
   'bundled.package.json',
   './package-lock'
 );
-const bundledPackageLockJson = loadFixture(
+const bundledPackageLockJson = Fixtures.get(
   'bundled.package-lock.json',
   './package-lock'
 );
@@ -97,7 +99,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         newVersion: '1.2.12',
       });
       expect(
-        JSON.parse(res.files['package-lock.json']).dependencies.mime.version
+        JSON.parse(res.files!['package-lock.json']).dependencies.mime.version
       ).toBe('1.2.12');
     });
 
@@ -137,8 +139,8 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       config.currentVersion = '4.0.0';
       config.newVersion = '4.1.0';
       const res = await updateLockedDependency(config);
-      expect(res.files['package.json']).toContain('"express": "4.1.0"');
-      const packageLock = JSON.parse(res.files['package-lock.json']);
+      expect(res.files!['package.json']).toContain('"express": "4.1.0"');
+      const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
 
@@ -148,8 +150,8 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       config.newVersion = '4.1.0';
       config.lockFileContent = lockFileV2Content;
       const res = await updateLockedDependency(config);
-      expect(res.files['package.json']).toContain('"express": "4.1.0"');
-      const packageLock = JSON.parse(res.files['package-lock.json']);
+      expect(res.files!['package.json']).toContain('"express": "4.1.0"');
+      const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
 
@@ -218,7 +220,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         .get('/type-is')
         .reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
-      const packageLock = JSON.parse(res.files['package-lock.json']);
+      const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toBe('1.4.1');
       expect(packageLock.dependencies.express.version).toBe('4.16.0');
     });

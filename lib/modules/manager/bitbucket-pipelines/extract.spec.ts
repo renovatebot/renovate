@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/bitbucket-pipelines/extract', () => {
   describe('extractPackageFile()', () => {
@@ -9,7 +9,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
 
     it('extracts dependencies', () => {
       const res = extractPackageFile(Fixtures.get('bitbucket-pipelines.yaml'));
-      expect(res.deps).toMatchInlineSnapshot(`
+      expect(res?.deps).toMatchInlineSnapshot(`
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -37,7 +37,7 @@ Array [
   },
 ]
 `);
-      expect(res.deps).toHaveLength(3);
+      expect(res?.deps).toHaveLength(3);
     });
   });
 });

@@ -95,7 +95,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
         .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
-      const headers = version.startsWith('0.')
+      const headers: httpMock.ReplyHeaders = version.startsWith('0.')
         ? {}
         : { 'Last-Modified': timestamp };
       scope
@@ -184,11 +184,11 @@ describe('modules/datasource/clojure/index', () => {
       snapshots: [],
     });
 
-    const { releases } = await get(
+    const { releases } = (await get(
       'org.example:package',
       baseUrl,
       baseUrlCustom
-    );
+    ))!;
 
     expect(releases).toMatchObject([
       { version: '0.0.1' },
@@ -204,11 +204,11 @@ describe('modules/datasource/clojure/index', () => {
     httpMock
       .scope('https://failed_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(404, null);
+      .reply(404, '}');
     httpMock
       .scope('https://unauthorized_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(403, null);
+      .reply(403, '}');
     httpMock
       .scope('https://empty_repo')
       .get('/org/example/package/maven-metadata.xml')
@@ -234,12 +234,11 @@ describe('modules/datasource/clojure/index', () => {
     const base = baseUrl.replace('https', 'http');
     mockGenericPackage({ base });
 
-    const { releases } = await get(
+    const { releases } = (await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      's3://protocol_error_repo',
       base
-    );
+    ))!;
 
     expect(releases).toMatchSnapshot();
   });
@@ -286,7 +285,7 @@ describe('modules/datasource/clojure/index', () => {
     const resB = await get('org.example:package', baseUrl.replace(/\/*$/, '/'));
     expect(resA).not.toBeNull();
     expect(resB).not.toBeNull();
-    expect(resA.releases).toEqual(resB.releases);
+    expect(resA?.releases).toEqual(resB?.releases);
   });
 
   it('returns null for invalid registryUrls', async () => {
@@ -307,7 +306,7 @@ describe('modules/datasource/clojure/index', () => {
       .get('/maven2/org/example/package/maven-metadata.xml')
       .reply(200, '###');
 
-    const { sourceUrl } = await get();
+    const { sourceUrl } = (await get())!;
 
     expect(sourceUrl).toBe('https://github.com/example/test');
   });

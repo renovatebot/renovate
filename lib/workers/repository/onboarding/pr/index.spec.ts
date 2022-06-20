@@ -1,3 +1,4 @@
+import type { RequestError, Response } from 'got';
 import {
   RenovateConfig,
   defaultConfig,
@@ -20,6 +21,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
 
+    const bodyStruct = {
+      hash: '8d5d8373c3fc54803f573ea57ded60686a9df8eb0430ad25da281472eed9ce4e',
+    };
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
@@ -35,8 +40,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       GlobalConfig.reset();
     });
 
-    let createPrBody: string;
-
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
       await expect(
@@ -47,7 +50,6 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
 
     it('creates PR with labels', async () => {
@@ -123,7 +125,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       await ensureOnboardingPr(config, packageFiles, branches);
@@ -136,7 +138,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       git.isBranchConflicted.mockResolvedValueOnce(true);
@@ -151,7 +153,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -161,7 +163,13 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('creates PR (no require config)', async () => {
-      config.requireConfig = false;
+      config.requireConfig = 'optional';
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates PR (require config)', async () => {
+      config.requireConfig = 'required';
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
@@ -172,7 +180,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
-          body: createPrBody,
+          bodyStruct,
         })
       );
       git.isBranchConflicted.mockResolvedValueOnce(true);
@@ -195,6 +203,39 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would create onboarding PR'
       );
+    });
+
+    describe('ensureOnboardingPr() throws', () => {
+      const response = partial<Response>({ statusCode: 422 });
+      const err = partial<RequestError>({ response });
+
+      beforeEach(() => {
+        jest.resetAllMocks();
+        GlobalConfig.reset();
+        git.deleteBranch.mockResolvedValue();
+      });
+
+      it('throws when trying to create a new PR', async () => {
+        platform.createPr.mockRejectedValueOnce(err);
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).toReject();
+        expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      });
+
+      it('deletes branch when PR already exists but cannot find it', async () => {
+        err.response.body = {
+          errors: [{ message: 'A pull request already exists' }],
+        };
+        platform.createPr.mockRejectedValueOnce(err);
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).toResolve();
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+        );
+        expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

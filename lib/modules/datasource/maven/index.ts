@@ -14,7 +14,8 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
-  checkHttpResource,
+  checkResource,
+  createUrlForDependencyPom,
   downloadHttpProtocol,
   downloadMavenXml,
   getDependencyInfo,
@@ -48,37 +49,6 @@ const mavenCentralHtmlVersionRegex = regEx(
   '^<a href="(?<version>[^"]+)\\/" title="(?:[^"]+)\\/">(?:[^"]+)\\/<\\/a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-$',
   'i'
 );
-
-function isSnapshotVersion(version: string): boolean {
-  if (version.endsWith('-SNAPSHOT')) {
-    return true;
-  }
-  return false;
-}
-
-function extractSnapshotVersion(metadata: XmlDocument): string | null {
-  // Parse the maven-metadata.xml for the snapshot version and determine
-  // the fixed version of the latest deployed snapshot.
-  // The metadata descriptor can be found at
-  // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
-  //
-  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
-  // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
-  const version = metadata
-    .descendantWithPath('version')
-    ?.val?.replace('-SNAPSHOT', '');
-
-  const snapshot = metadata.descendantWithPath('versioning.snapshot');
-  const timestamp = snapshot?.childNamed('timestamp')?.val;
-  const build = snapshot?.childNamed('buildNumber')?.val;
-
-  // If we weren't able to parse out the required 3 version elements,
-  // return null because we can't determine the fixed version of the latest snapshot.
-  if (!version || !timestamp || !build) {
-    return null;
-  }
-  return `${version}-${timestamp}-${build}`;
-}
 
 export const defaultRegistryUrls = [MAVEN_REPO];
 
@@ -190,53 +160,6 @@ export class MavenDatasource extends Datasource {
     return releaseMap;
   }
 
-  async getSnapshotFullVersion(
-    version: string,
-    dependency: MavenDependency,
-    repoUrl: string
-  ): Promise<string | null> {
-    // To determine what actual files are available for the snapshot, first we have to fetch and parse
-    // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
-    const metadataUrl = getMavenUrl(
-      dependency,
-      repoUrl,
-      `${version}/maven-metadata.xml`
-    );
-
-    const { xml: mavenMetadata } = await downloadMavenXml(
-      this.http,
-      metadataUrl
-    );
-    if (!mavenMetadata) {
-      return null;
-    }
-
-    return extractSnapshotVersion(mavenMetadata);
-  }
-
-  async createUrlForDependencyPom(
-    version: string,
-    dependency: MavenDependency,
-    repoUrl: string
-  ): Promise<string> {
-    if (isSnapshotVersion(version)) {
-      // By default, Maven snapshots are deployed to the repository with fixed file names.
-      // Resolve the full, actual pom file name for the version.
-      const fullVersion = await this.getSnapshotFullVersion(
-        version,
-        dependency,
-        repoUrl
-      );
-
-      // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
-      if (fullVersion !== null) {
-        return `${version}/${dependency.name}-${fullVersion}.pom`;
-      }
-    }
-
-    return `${version}/${dependency.name}-${version}.pom`;
-  }
-
   /**
    *
    * Double-check releases using HEAD request and
@@ -317,7 +240,8 @@ export class MavenDatasource extends Datasource {
     // Update cached data with freshly discovered versions
     if (freshVersions.length) {
       const queue = freshVersions.map((version) => async (): Promise<void> => {
-        const pomUrl = await this.createUrlForDependencyPom(
+        const pomUrl = await createUrlForDependencyPom(
+          this.http,
           version,
           dependency,
           repoUrl
@@ -325,7 +249,7 @@ export class MavenDatasource extends Datasource {
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
 
-        const res = await checkHttpResource(this.http, artifactUrl);
+        const res = await checkResource(this.http, artifactUrl);
 
         if (is.date(res)) {
           release.releaseTimestamp = res.toISOString();

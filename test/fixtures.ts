@@ -26,6 +26,35 @@ export class Fixtures {
   }
 
   /**
+   * Returns content from fixture file from __fixtures__ folder as `Buffer`
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getBinary(name: string, fixturesRoot = '.'): Buffer {
+    return realFs.readFileSync(
+      upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name)
+    );
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder and parses as JSON
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getJson<T = any>(name: string, fixturesRoot = '.'): T {
+    return JSON.parse(
+      realFs.readFileSync(
+        upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
+        {
+          encoding: 'utf-8',
+        }
+      )
+    ) as T;
+  }
+
+  /**
    * Adds files from a flat json object to the file-system
    * @param json flat object
    * @param cwd is an optional string used to compute absolute file paths, if a file path is given in a relative form

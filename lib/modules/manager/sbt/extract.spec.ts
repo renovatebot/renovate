@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
@@ -12,7 +12,7 @@ const sbtPrivateVariableDependencyFile = Fixtures.get(
 describe('modules/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile(null)).toBeNull();
+      expect(extractPackageFile('')).toBeNull();
       expect(extractPackageFile('non-sense')).toBeNull();
       expect(
         extractPackageFile('libraryDependencies += "foo" % "bar" % ???')
@@ -212,6 +212,47 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'com.abc:abc',
             currentValue: '1.2.3',
+          },
+        ],
+        packageFileVersion: undefined,
+      });
+    });
+
+    it('extract deps when they are defined in a new line', () => {
+      const content = `
+      name := "service"
+      scalaVersion := "2.13.8"
+
+      lazy val compileDependencies =
+        Seq(
+          "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
+          "ch.qos.logback" % "logback-classic" % "1.2.10"
+        )
+
+      libraryDependencies ++= compileDependencies`;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.8',
+            separateMinorPatch: true,
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'com.typesafe.scala-logging:scala-logging',
+            packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
+            currentValue: '3.9.4',
+            datasource: 'sbt-package',
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'ch.qos.logback:logback-classic',
+            packageName: 'ch.qos.logback:logback-classic',
+            currentValue: '1.2.10',
+            datasource: 'sbt-package',
           },
         ],
         packageFileVersion: undefined,

@@ -23,7 +23,7 @@ import { ensureTrailingSlash } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
-import type { NpmDepType } from '../types';
+import type { NpmDepType, NpmManagerData } from '../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import * as lerna from './lerna';
 import * as npm from './npm';
@@ -269,7 +269,7 @@ export async function writeUpdatedPackageFiles(
     const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
-        hostType: config.platform,
+        hostType: 'github',
         url: 'https://api.github.com/',
       });
       for (const upgrade of config.upgrades) {
@@ -448,7 +448,7 @@ export async function updateYarnBinary(
 }
 
 export async function getAdditionalFiles(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
@@ -507,7 +507,7 @@ export async function getAdditionalFiles(
   let token: string | undefined;
   try {
     ({ token } = hostRules.find({
-      hostType: config.platform,
+      hostType: 'github',
       url: 'https://api.github.com/',
     }));
     token = token ? /* istanbul ignore next */ `${token}@` : token;

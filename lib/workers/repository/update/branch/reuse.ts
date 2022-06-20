@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -36,19 +37,21 @@ export async function shouldReuseExistingBranch(
       logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
       return result;
     }
-    if (pr.body?.includes(`- [x] <!-- rebase-check -->`)) {
+    if (pr.bodyStruct?.rebaseRequested) {
       logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
       return result;
     }
-    if (pr.labels?.includes(config.rebaseLabel)) {
+    if (pr.labels?.includes(config.rebaseLabel!)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(
-          `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
+          `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
+            pr.number
+          }`
         );
       } else {
-        await platform.deleteLabel(pr.number, config.rebaseLabel);
+        await platform.deleteLabel(pr.number, config.rebaseLabel!);
       }
       return result;
     }
@@ -74,12 +77,12 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping stale branch check due to rebaseWhen=${config.rebaseWhen}`
+      `Skipping stale branch check due to rebaseWhen=${config.rebaseWhen!}`
     );
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  result.isConflicted = await isBranchConflicted(baseBranch, branchName);
+  result.isConflicted = await isBranchConflicted(baseBranch!, branchName);
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
@@ -106,13 +109,13 @@ export async function shouldReuseExistingBranch(
   // This is why we are skipping branch reuse in this case (#10050)
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
   for (const upgrade of config.upgrades) {
-    groupedByPackageFile[upgrade.packageFile] =
-      groupedByPackageFile[upgrade.packageFile] || new Set();
-    groupedByPackageFile[upgrade.packageFile].add(upgrade.rangeStrategy);
+    const packageFile = upgrade.packageFile!;
+    groupedByPackageFile[packageFile] ??= new Set();
+    groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);
 
     if (
-      groupedByPackageFile[upgrade.packageFile].size > 1 &&
-      groupedByPackageFile[upgrade.packageFile].has('update-lockfile')
+      groupedByPackageFile[packageFile].size > 1 &&
+      groupedByPackageFile[packageFile].has('update-lockfile')
     ) {
       logger.debug(
         `Detected multiple rangeStrategies along with update-lockfile`

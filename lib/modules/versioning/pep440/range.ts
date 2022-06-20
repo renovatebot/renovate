@@ -85,7 +85,7 @@ function getFutureVersion(
 
 interface Range {
   operator: string;
-  prefix: string;
+  prefix?: string;
   version: string;
 }
 
@@ -316,6 +316,9 @@ function updateRangeValue(
     return range.operator + newVersion;
   }
   if (['==', '<='].includes(range.operator)) {
+    if (lte(newVersion, range.version)) {
+      return range.operator + range.version;
+    }
     return range.operator + newVersion;
   }
 
@@ -362,6 +365,23 @@ function trimTrailingZeros(numbers: number[]): number[] {
   return numbers.slice(0, i + 1);
 }
 
+function divideCompatibleReleaseRange(currentRange: Range): Range[] {
+  const currentVersionUpperBound = currentRange.version
+    .split('.')
+    .map((num) => parseInt(num));
+  if (currentVersionUpperBound.length > 1) {
+    currentVersionUpperBound.splice(-1);
+  }
+  currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
+  return [
+    { operator: '>=', version: currentRange.version },
+    {
+      operator: '<',
+      version: currentVersionUpperBound.join('.'),
+    },
+  ];
+}
+
 function handleWidenStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
   ranges: Range[]
@@ -372,7 +392,15 @@ function handleWidenStrategy(
   }
   let rangePrecision = getRangePrecision(ranges);
   const trimZeros = hasZeroSpecifier(ranges);
-  return ranges.map((range) => {
+  let newRanges: Range[] = [];
+  if (ranges.length === 1 && ranges[0].operator === '~=') {
+    // If range operator is '~=', divide the range into its logical equivalent.
+    // Example: ~=1.0 --> >=1.0,<2
+    newRanges = divideCompatibleReleaseRange(ranges[0]);
+  } else {
+    newRanges = ranges;
+  }
+  return newRanges.map((range) => {
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
       const upperBound = parseVersion(range.version)?.release ?? [];

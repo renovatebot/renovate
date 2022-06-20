@@ -222,7 +222,6 @@ export async function getPreset(
     repo,
     presetPath,
     presetName,
-    baseConfig,
     tag,
   });
   if (!presetConfig) {
@@ -335,7 +334,7 @@ export async function resolveConfigPresets(
         }
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
-          baseConfig,
+          baseConfig ?? inputConfig,
           ignorePresets,
           existingPresets.concat([preset])
         );

@@ -57,21 +57,42 @@ function massageUpdateMetadata(config: BranchConfig): void {
   });
 }
 
-export async function getPrBody(config: BranchConfig): Promise<string> {
-  massageUpdateMetadata(config);
+interface PrBodyConfig {
+  appendExtra?: string | null | undefined;
+  rebasingNotice?: string;
+}
+
+const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
+
+export async function getPrBody(
+  branchConfig: BranchConfig,
+  prBodyConfig?: PrBodyConfig
+): Promise<string> {
+  massageUpdateMetadata(branchConfig);
   const content = {
-    header: getPrHeader(config),
-    table: getPrUpdatesTable(config),
-    notes: getPrNotes(config) + getPrExtraNotes(config),
-    changelogs: getChangelogs(config),
-    configDescription: await getPrConfigDescription(config),
-    controls: await getControls(config),
-    footer: getPrFooter(config),
+    header: getPrHeader(branchConfig),
+    table: getPrUpdatesTable(branchConfig),
+    notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
+    changelogs: getChangelogs(branchConfig),
+    configDescription: await getPrConfigDescription(branchConfig),
+    controls: await getControls(branchConfig),
+    footer: getPrFooter(branchConfig),
   };
-  const prBodyTemplate = config.prBodyTemplate;
-  let prBody = template.compile(prBodyTemplate, content, false);
-  prBody = prBody.trim();
-  prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
-  prBody = platform.massageMarkdown(prBody);
+
+  let prBody = '';
+  if (branchConfig.prBodyTemplate) {
+    const prBodyTemplate = branchConfig.prBodyTemplate;
+    prBody = template.compile(prBodyTemplate, content, false);
+    prBody = prBody.trim();
+    prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
+    prBody = platform.massageMarkdown(prBody);
+
+    if (prBodyConfig?.rebasingNotice) {
+      prBody = prBody.replace(
+        rebasingRegex,
+        `**Rebasing**: ${prBodyConfig.rebasingNotice}`
+      );
+    }
+  }
   return prBody;
 }

@@ -304,8 +304,10 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
+      // TODO: fix types #7154
       expect(
-        migratedConfig.lockFileMaintenance?.packageRules[0].respectLatest
+        (migratedConfig.lockFileMaintenance as RenovateConfig)
+          ?.packageRules?.[0].respectLatest
       ).toBeFalse();
     });
 
@@ -627,13 +629,13 @@ describe('config/migration', () => {
     const config: RenovateConfig = {
       regexManagers: [
         {
-          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
           matchStrings: [
             '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
           ],
         },
         {
-          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
           matchStrings: [
             '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
           ],
