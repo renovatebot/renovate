@@ -131,7 +131,9 @@ describe('modules/manager/mix/artifacts', () => {
     expect(result).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
 
-    const [updateResult] = result;
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const [updateResult] = result!;
     expect(updateResult).toEqual({
       file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
     });

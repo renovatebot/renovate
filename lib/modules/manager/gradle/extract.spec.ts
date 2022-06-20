@@ -85,7 +85,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
       'build.gradle': 'url "https://example.com"; "foo:bar:$baz@zip"',
-      'settings.gradle': null,
+      'settings.gradle': null as never, // TODO: #7154
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [

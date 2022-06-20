@@ -1,10 +1,10 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { extractPackageFile } from '.';
 
-const kubernetesImagesFile = loadFixture('kubernetes.yaml');
-const kubernetesConfigMapFile = loadFixture('configmap.yaml');
-const kubernetesArraySyntaxFile = loadFixture('array-syntax.yaml');
-const otherYamlFile = loadFixture('gitlab-ci.yaml');
+const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
+const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
+const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
+const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 
 describe('modules/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
@@ -14,14 +14,14 @@ describe('modules/manager/kubernetes/extract', () => {
 
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(kubernetesImagesFile);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts image line in a YAML array', () => {
       const res = extractPackageFile(kubernetesArraySyntaxFile);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('ignores non-Kubernetes YAML files', () => {

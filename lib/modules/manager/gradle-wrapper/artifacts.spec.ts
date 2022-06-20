@@ -102,7 +102,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
@@ -155,7 +155,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].artifactError).toBeUndefined();
+    expect(result?.[0].artifactError).toBeUndefined();
 
     expect(execSnapshots).toMatchSnapshot();
   });
