@@ -13,9 +13,7 @@
     "coverage",
     "config.js",
     "tmp",
-
     // TODO: fixme
-    "lib/util/**/*.spec.ts",
     "lib/workers/**/*.spec.ts",
     "lib/modules/datasource/**/*.spec.ts",
     "lib/modules/manager/**/*.spec.ts",
