@@ -1,11 +1,11 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { loadJsonFixture } from '../../../../test/util';
 import * as versioning from '../../versioning/docker';
 import { JenkinsPluginsDatasource } from '.';
+import { Fixtures } from '../../../../test/fixtures';
 
-const jenkinsPluginsVersions = loadJsonFixture('plugin-versions.json');
-const jenkinsPluginsInfo = loadJsonFixture('update-center.actual.json');
+const jenkinsPluginsVersions = Fixtures?.getJson('plugin-versions.json');
+const jenkinsPluginsInfo = Fixtures?.getJson('update-center.actual.json');
 
 describe('modules/datasource/jenkins-plugins/index', () => {
   describe('getReleases', () => {
@@ -46,18 +46,18 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .reply(200, jenkinsPluginsVersions);
 
       const res = await getPkgReleases(params);
-      expect(res.releases).toHaveLength(75);
+      expect(res?.releases).toHaveLength(75);
       expect(res).toMatchSnapshot();
 
-      expect(res.sourceUrl).toBe(
+      expect(res?.sourceUrl).toBe(
         'https://github.com/jenkinsci/email-ext-plugin'
       );
 
       expect(
-        res.releases.find((release) => release.version === '2.69')
+        res?.releases.find((release) => release.version === '2.69')
       ).toBeDefined();
       expect(
-        res.releases.find((release) => release.version === '12.98')
+        res?.releases.find((release) => release.version === '12.98')
       ).toBeUndefined();
     });
 
@@ -73,10 +73,10 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .reply(200, '{}');
 
       const res = await getPkgReleases(params);
-      expect(res.releases).toBeEmpty();
+      expect(res?.releases).toBeEmpty();
       expect(res).toMatchSnapshot();
 
-      expect(res.sourceUrl).toBe(
+      expect(res?.sourceUrl).toBe(
         'https://github.com/jenkinsci/email-ext-plugin'
       );
     });

@@ -1,11 +1,12 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { hostRules, loadJsonFixture } from '../../../../test/util';
+import { hostRules } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HexDatasource } from '.';
+import { Fixtures } from '../../../../test/fixtures';
 
-const certifiResponse = loadJsonFixture('certifi.json');
-const privatePackageResponse = loadJsonFixture('private_package.json');
+const certifiResponse = Fixtures.get('certifi.json');
+const privatePackageResponse = Fixtures.get('private_package.json');
 
 jest.mock('../../../util/host-rules');
 
@@ -24,10 +25,7 @@ describe('modules/datasource/hex/index', () => {
 
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/packages/non_existent_package')
-        .reply(200, null);
+      httpMock.scope(baseUrl).get('/packages/non_existent_package').reply(200);
       expect(
         await getPkgReleases({
           datasource,

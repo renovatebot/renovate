@@ -219,7 +219,7 @@ describe('modules/datasource/npm/get', () => {
     registryUrl = resolveRegistryUrl('error-404');
     expect(await getDependency(http, registryUrl, 'error-404')).toBeNull();
 
-    httpMock.scope('https://test.org').get('/error4').reply(200, null);
+    httpMock.scope('https://test.org').get('/error4').reply(200);
     registryUrl = resolveRegistryUrl('error4');
     expect(await getDependency(http, registryUrl, 'error4')).toBeNull();
 
@@ -260,8 +260,8 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('packages/react');
+    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceDirectory).toBe('packages/react');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
       Array [
@@ -297,8 +297,8 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('packages/react');
+    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceDirectory).toBe('packages/react');
   });
 
   it('handles mixed sourceUrls in releases', async () => {
@@ -332,9 +332,9 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('vue');
     const dep = await getDependency(http, registryUrl, 'vue');
 
-    expect(dep.sourceUrl).toBe('https://github.com/vuejs/vue.git');
-    expect(dep.releases[0].sourceUrl).toBeUndefined();
-    expect(dep.releases[1].sourceUrl).toBe(
+    expect(dep?.sourceUrl).toBe('https://github.com/vuejs/vue.git');
+    expect(dep?.releases[0].sourceUrl).toBeUndefined();
+    expect(dep?.releases[1].sourceUrl).toBe(
       'https://github.com/vuejs/vue-next.git'
     );
   });
@@ -358,8 +358,8 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('packages/foo');
+    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceDirectory).toBe('packages/foo');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
       Array [
@@ -396,10 +396,10 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe(
+    expect(dep?.sourceUrl).toBe(
       'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react'
     );
-    expect(dep.sourceDirectory).toBeUndefined();
+    expect(dep?.sourceDirectory).toBeUndefined();
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
       Array [

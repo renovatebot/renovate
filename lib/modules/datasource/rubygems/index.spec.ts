@@ -1,18 +1,14 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import {
-  loadBinaryFixture,
-  loadFixture,
-  loadJsonFixture,
-} from '../../../../test/util';
 import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import { RubyGemsDatasource } from '.';
+import { Fixtures } from '../../../../test/fixtures';
 
-const rubygemsOrgVersions = loadFixture('rubygems-org.txt');
-const railsInfo = loadJsonFixture('rails/info.json');
-const railsVersions = loadJsonFixture('rails/versions.json');
-const railsDependencies = loadBinaryFixture('dependencies-rails.dat');
+const rubygemsOrgVersions = Fixtures?.get('rubygems-org.txt');
+const railsInfo = Fixtures?.getJson('rails/info.json');
+const railsVersions = Fixtures?.getJson('rails/versions.json');
+const railsDependencies = Fixtures?.getBinary('dependencies-rails.dat');
 const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
 
 describe('modules/datasource/rubygems/index', () => {
@@ -43,11 +39,11 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://firstparty.com')
         .get('/basepath/api/v1/gems/rails.json')
-        .reply(200, null);
+        .reply(200);
       httpMock
         .scope('https://thirdparty.com')
         .get('/api/v1/gems/rails.json')
-        .reply(200, null);
+        .reply(200);
       expect(await getPkgReleases(params)).toBeNull();
     });
 
@@ -74,13 +70,13 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, rubygemsOrgVersions);
       const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
       expect(
-        res.releases.find((release) => release.version === '0.1.1')
+        res?.releases.find((release) => release.version === '0.1.1')
       ).toBeDefined();
       expect(
-        res.releases.find((release) => release.version === '0.1.2')
+        res?.releases.find((release) => release.version === '0.1.2')
       ).toBeUndefined();
     });
 
@@ -103,7 +99,7 @@ describe('modules/datasource/rubygems/index', () => {
         registryUrls: [],
       });
       expect(res).not.toBeNull();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
     });
 
@@ -116,7 +112,7 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, railsVersions);
 
       const res = await getPkgReleases(params);
-      expect(res.releases).toHaveLength(339);
+      expect(res?.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
 
@@ -133,7 +129,7 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, railsVersions);
 
       const res = await getPkgReleases(params);
-      expect(res.releases).toHaveLength(339);
+      expect(res?.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
 
@@ -145,7 +141,7 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://firstparty.com/')
         .get('/basepath/api/v1/gems/rails.json')
-        .reply(200, null);
+        .reply(200);
       expect(await getPkgReleases(params)).toBeNull();
     });
 
@@ -157,8 +153,8 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/api/v1/versions/rails.json')
         .reply(400, {});
       const res = await getPkgReleases(params);
-      expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBe(railsInfo.version);
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0].version).toBe(railsInfo.version);
     });
 
     it('errors when version request fails with anything other than 400 or 404', async () => {
@@ -205,7 +201,7 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, railsDependencies);
       const res = await getPkgReleases(newparams);
-      expect(res.releases).toHaveLength(339);
+      expect(res?.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
   });

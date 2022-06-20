@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
 import { RepologyDatasource } from './index';
+import { Fixtures } from '../../../../test/fixtures';
 
 const datasource = RepologyDatasource.id;
 
@@ -48,12 +48,12 @@ const mockResolverCall = (
   }
 };
 
-const fixtureNginx = loadFixture(`nginx.json`);
-const fixtureGccDefaults = loadFixture(`gcc-defaults.json`);
-const fixtureGcc = loadFixture(`gcc.json`);
-const fixturePulseaudio = loadFixture(`pulseaudio.json`);
-const fixtureJdk = loadFixture(`openjdk.json`);
-const fixturePython = loadFixture(`python.json`);
+const fixtureNginx = Fixtures?.get(`nginx.json`);
+const fixtureGccDefaults = Fixtures?.get(`gcc-defaults.json`);
+const fixtureGcc = Fixtures?.get(`gcc.json`);
+const fixturePulseaudio = Fixtures?.get(`pulseaudio.json`);
+const fixtureJdk = Fixtures?.get(`openjdk.json`);
+const fixturePython = Fixtures?.get(`python.json`);
 
 describe('modules/datasource/repology/index', () => {
   describe('getReleases', () => {
@@ -214,8 +214,8 @@ describe('modules/datasource/repology/index', () => {
         depName: 'debian_stable/nginx',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBe('1.14.2-2+deb10u1');
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0].version).toBe('1.14.2-2+deb10u1');
     });
 
     it('returns correct version for source package', async () => {
@@ -233,8 +233,8 @@ describe('modules/datasource/repology/index', () => {
         depName: 'debian_stable/gcc-defaults',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBe('1.181');
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0].version).toBe('1.181');
     });
 
     it('returns correct version for api package', async () => {
@@ -249,8 +249,8 @@ describe('modules/datasource/repology/index', () => {
         depName: 'debian_stable/gcc-defaults',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBe('1.181');
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0].version).toBe('1.181');
     });
 
     it('returns correct version for multi-package project with same name', async () => {
@@ -265,8 +265,8 @@ describe('modules/datasource/repology/index', () => {
         depName: 'alpine_3_12/gcc',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBe('9.3.0-r2');
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0].version).toBe('9.3.0-r2');
     });
 
     it('returns correct version for multi-package project with different name', async () => {
@@ -281,8 +281,8 @@ describe('modules/datasource/repology/index', () => {
         depName: 'debian_stable/pulseaudio-utils',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBe('12.2-4+deb10u1');
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0].version).toBe('12.2-4+deb10u1');
     });
 
     it('returns multiple versions if they are present in repository', async () => {
@@ -300,9 +300,9 @@ describe('modules/datasource/repology/index', () => {
         depName: 'centos_8/java-11-openjdk',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(6);
-      expect(res.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
-      expect(res.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
+      expect(res?.releases).toHaveLength(6);
+      expect(res?.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
+      expect(res?.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
     });
 
     it('returns null for scenario when repo is not in package results', async () => {
