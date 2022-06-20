@@ -7,7 +7,6 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const constraint = (await readLocalFile(filename, 'utf8'))!
       .split(newlineRegex)[0]
       .replace(regEx(/^v/), '');

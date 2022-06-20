@@ -135,7 +135,6 @@ export async function generateLockFile(
 
     // Read the result
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     lockFile = (await readLocalFile(
       upath.join(lockFileDir, filename),
       'utf8'

@@ -53,7 +53,6 @@ export async function extractAllPackageFiles(
 
     try {
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const content = (await readLocalFile(packageFile, 'utf8'))!;
       const dir = upath.dirname(toAbsolutePath(packageFile));
 

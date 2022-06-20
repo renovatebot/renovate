@@ -642,8 +642,8 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: yarnLock,
-        // ignore empty string
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        // TODO #7154
+
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -715,8 +715,7 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
-        // ignore emptys string
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        // TODO #7154
         stderr: res.stderr || res.stdout,
       });
     } else {

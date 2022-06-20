@@ -4,7 +4,6 @@ import type { LockFile, LockFileEntry } from './types';
 
 export async function getNpmLock(filePath: string): Promise<LockFile> {
   // TODO #7154
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const lockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const lockParsed = JSON.parse(lockRaw);

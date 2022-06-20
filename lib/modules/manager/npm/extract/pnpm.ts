@@ -18,7 +18,6 @@ export async function extractPnpmFilters(
 ): Promise<string[] | undefined> {
   try {
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const contents = load((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;

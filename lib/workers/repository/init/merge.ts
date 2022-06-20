@@ -27,8 +27,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     let configFileParsed = (await platform.getJsonFile(configFileName))!;
     if (configFileParsed) {
       if (configFileName === 'package.json') {
@@ -43,8 +41,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
         try {
-          // TODO #7154
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           const pJson = JSON.parse(
             (await readLocalFile('package.json', 'utf8'))!
           );
@@ -74,7 +70,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     // We already know it parses
     configFileParsed = JSON.parse(
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       (await readLocalFile('package.json', 'utf8'))!
     ).renovate;
     if (is.string(configFileParsed)) {

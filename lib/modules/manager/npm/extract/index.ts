@@ -153,7 +153,6 @@ export async function extractPackageFile(
   try {
     lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');

@@ -249,7 +249,6 @@ export async function getUpdatedPackageFiles(
         packageFileName: packageFile.path,
         updatedDeps,
         // TODO #7154
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
@@ -281,7 +280,6 @@ export async function getUpdatedPackageFiles(
         packageFileName: packageFile.path,
         updatedDeps,
         // TODO #7154
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         newPackageFileContent: packageFile.contents!.toString(),
         config,
       });

@@ -11,7 +11,6 @@ import type { LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #7154
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const yarnLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const parsed = parseSyml(yarnLockRaw);

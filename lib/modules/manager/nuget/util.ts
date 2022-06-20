@@ -11,7 +11,6 @@ async function readFileAsXmlDocument(
 ): Promise<XmlDocument | undefined> {
   try {
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     return new XmlDocument((await readLocalFile(file, 'utf8'))!);
   } catch (err) {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
