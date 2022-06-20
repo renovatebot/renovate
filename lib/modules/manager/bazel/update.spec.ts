@@ -351,8 +351,8 @@ maybe(
         upgrade,
       });
       expect(res).not.toEqual(content);
-      expect(res.indexOf('0.5.0')).toBe(-1);
-      expect(res.indexOf('0.6.2')).not.toBe(-1);
+      expect(res?.indexOf('0.5.0')).toBe(-1);
+      expect(res?.indexOf('0.6.2')).not.toBe(-1);
       expect(res).toMatch(/maybe\([\n\s]*http_archive,/);
     });
   });
