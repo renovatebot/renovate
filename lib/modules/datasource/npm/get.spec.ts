@@ -219,7 +219,8 @@ describe('modules/datasource/npm/get', () => {
     registryUrl = resolveRegistryUrl('error-404');
     expect(await getDependency(http, registryUrl, 'error-404')).toBeNull();
 
-    httpMock.scope('https://test.org').get('/error4').reply(200);
+    // return invalid json to get coverage
+    httpMock.scope('https://test.org').get('/error4').reply(200, '{');
     registryUrl = resolveRegistryUrl('error4');
     expect(await getDependency(http, registryUrl, 'error4')).toBeNull();
 
