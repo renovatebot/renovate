@@ -248,7 +248,8 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents.toString(),
+        // TODO #7154
+        newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
@@ -278,7 +279,8 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents.toString(),
+        // TODO #7154
+        newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
