@@ -141,7 +141,7 @@ export async function writeExistingFiles(
     const basedir =
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       upath.dirname(packageFile.packageFile!);
-    const npmrc: string = packageFile.npmrc || config.npmrc;
+    const npmrc: string = packageFile.npmrc ?? config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
       try {
@@ -257,7 +257,9 @@ export async function writeUpdatedPackageFiles(
       supportedLockFiles.some((fileName) => packageFile.path.endsWith(fileName))
     ) {
       logger.debug(`Writing lock file: ${packageFile.path}`);
-      await writeLocalFile(packageFile.path, packageFile.contents);
+      // TODO #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
     if (!packageFile.path.endsWith('package.json')) {
@@ -265,8 +267,13 @@ export async function writeUpdatedPackageFiles(
     }
     logger.debug(`Writing ${packageFile.path}`);
     const detectedIndent =
-      detectIndent(packageFile.contents.toString()).indent || '  ';
-    const massagedFile = JSON.parse(packageFile.contents.toString());
+      // TODO #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      detectIndent(packageFile.contents!.toString()).indent || '  ';
+
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const massagedFile = JSON.parse(packageFile.contents!.toString());
     try {
       const { token } = hostRules.find({
         hostType: 'github',
@@ -406,8 +413,8 @@ async function updateYarnOffline(
 export async function updateYarnBinary(
   lockFileDir: string,
   updatedArtifacts: FileChange[],
-  existingYarnrcYmlContent: string | undefined
-): Promise<string | undefined> {
+  existingYarnrcYmlContent: string | undefined | null
+): Promise<string | undefined | null> {
   let yarnrcYml = existingYarnrcYmlContent;
   try {
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
@@ -465,7 +472,7 @@ export async function getAdditionalFiles(
     !config.updatedPackageFiles?.length &&
     config.transitiveRemediation &&
     config.upgrades?.every(
-      (upgrade) => upgrade.isRemediation || upgrade.isVulnerabilityAlert
+      (upgrade) => upgrade.isRemediation ?? upgrade.isVulnerabilityAlert
     )
   ) {
     logger.debug('Skipping lock file generation for remediations');
@@ -581,7 +588,7 @@ export async function getAdditionalFiles(
     const npmrcContent = await getNpmrcContent(lockFileDir);
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     let yarnRcYmlFilename: string | undefined;
-    let existingYarnrcYmlContent: string | undefined;
+    let existingYarnrcYmlContent: string | undefined | null;
     // istanbul ignore if: needs test
     if (additionalYarnRcYml) {
       yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
@@ -635,6 +642,8 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: yarnLock,
+        // TODO #7154
+
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -706,6 +715,7 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
+        // TODO #7154
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -742,9 +752,9 @@ export async function getAdditionalFiles(
       throw new Error('lerna-no-lockfile');
     }
     if (lernaPackageFile.lernaClient === 'npm') {
-      lockFile = config.npmLock || 'package-lock.json';
+      lockFile = config.npmLock ?? 'package-lock.json';
     } else {
-      lockFile = config.yarnLock || 'yarn.lock';
+      lockFile = config.yarnLock ?? 'yarn.lock';
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
@@ -811,8 +821,8 @@ export async function getAdditionalFiles(
       });
     } else {
       for (const packageFile of packageFiles.npm) {
-        const filename = packageFile.npmLock || packageFile.yarnLock;
-        logger.trace('Checking for ' + filename);
+        const filename = packageFile.npmLock ?? packageFile.yarnLock;
+        logger.trace(`Checking for ${filename}`);
         const existingContent = await getFile(
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           filename!,

@@ -1,11 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { ClojureDatasource } from '../../datasource/clojure';
-import {
-  extractFromVectors,
-  extractPackageFile,
-  extractVariables,
-  trimAtKey,
-} from './extract';
+import { extractFromVectors, extractVariables, trimAtKey } from './extract';
+import { extractPackageFile } from '.';
 
 const leinProjectClj = Fixtures.get(`project.clj`);
 

@@ -12,6 +12,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import * as _cache from '../../../../util/cache/repository';
@@ -96,13 +97,16 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
+      const expectConfig = {
+        ...config,
+        onboardingBranch: 'test',
+        renovateJsonPresent: true,
+        warnings: [],
+      };
+      delete expectConfig.extends;
+      delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
-        {
-          ...config,
-          onboardingBranch: 'test',
-          renovateJsonPresent: true,
-          warnings: [],
-        },
+        expectConfig,
         configFileNames[0]
       );
       const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
@@ -162,6 +166,19 @@ describe('workers/repository/onboarding/branch/index', () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Checking cached config file name'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Existing config file confirmed'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          fileName: '.renovaterc',
+          config: {},
+        },
+        'Repository config'
+      );
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
@@ -170,6 +187,21 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Checking cached config file name'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Existing config file confirmed'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          fileName: 'package.json',
+          config: {
+            renovate: {},
+          },
+        },
+        'Repository config'
+      );
       expect(res.repoIsOnboarded).toBeTrue();
     });
 

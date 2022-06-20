@@ -75,43 +75,42 @@ See the docs for `versioning` for documentation and examples of `regex` versioni
 ## Digest Pinning
 
 We recommend that you pin your Docker images to an exact digest.
-By pinning to a digest you ensure your Docker builds are **immutable**: every time you do a `pull` you get the same content.
+By pinning to a digest you make your Docker builds immutable, every time you do a `pull` you get the same content.
 
-If you have experience with the way dependency versioning is handled in the JavaScript/npm ecosystem, you might be used to exact versions being immutable.
-e.g. if you specify a version like `2.0.1`, you and your colleagues always get the exact same "code".
+If you work with dependencies in the JavaScript/npm ecosystem, you may be used to exact versions being immutable.
+For example, if you set a version like `2.0.1`, you and your colleagues always get the exact same "code".
 
-What you may not know is that Docker's tags are not immutable versions, even if they look like a version.
-e.g. you probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
+Docker's tags are not immutable versions, even if tags _look_ like a version.
+You probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
 Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-Using a Docker digest as the image's primary identifier instead of using a Docker tag will achieve immutability.
-It's not easy to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+By replacing Docker tags with Docker digests as the image's primary identifier you'll get immutable builds.
+It's hard to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
 Luckily Renovate can update the digests for you, so you don't have to.
 
-To keep things simple, Renovate retains the Docker tag in the `FROM` line, e.g. `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
-Read on to see how Renovate updates Docker digests.
+To keep things simple, Renovate keeps the Docker tag in the `FROM` line, like this: `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
 
 ## Digest Updating
 
-If you follow our advice to go from a simple tag like `node:14` to using a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
+If you follow our advice to replace a simple tag like `node:14` with a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
-Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you get code that represents `node:14.15.1`.
+Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you pull code that represents `node:14.15.1`.
 But you can never be sure, especially as Docker caches.
-Perhaps some of your colleagues or worse still your build machine are stuck on an older version with a security vulnerability.
+Maybe some of your colleagues, or worse still your build machine, are stuck on an older version with a security vulnerability.
 
 By pinning to a digest instead, you will get these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
-This ensures everyone on the team uses the latest versions and is in sync.
+This makes sure everyone on your team uses the latest versions.
 
 ## Version Upgrading
 
 Renovate also supports _upgrading_ versions in Docker tags, e.g. from `myimage:1.2.0` to `myimage:1.2.1` or `myimage:1.2` to `myimage:1.3`.
 If a tag looks like a version, Renovate will upgrade it like a version.
 
-We recommend you use the major.minor.patch tagging scheme e.g. change from `myimage:1` to `myimage:1.1.1`.
+We recommend you use the major.minor.patch tagging scheme, e.g. change from `myimage:1` to `myimage:1.1.1`.
 This way it's easy to see what the Renovate PR is going to change.
-You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2`. and a PR that changes the contents of the version you already use (`1.1.1`).
+You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2` and a PR that changes the contents of the version you already use (`1.1.1`).
 
-Currently, Renovate will upgrade minor/patch versions (e.g. from `1.2.0` to `1.2.1`) by default, but not upgrade major versions.
+By default, Renovate will upgrade minor/patch versions (like from `1.2.0` to `1.2.1`), but not upgrade major versions.
 If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
 
 Renovate has some Docker-specific intelligence when it comes to versions.
@@ -268,7 +267,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:32.74.3
+FROM renovate/renovate:32.90.0
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

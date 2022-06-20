@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -11,17 +12,17 @@ const defaultConfigFile = configFileNames[0];
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
-  const configFile = configFileNames.includes(config.onboardingConfigFileName)
+  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName
     : defaultConfigFile;
 
   logger.debug('createOnboardingBranch()');
-  const contents = await getOnboardingConfigContents(config, configFile);
+  const contents = await getOnboardingConfigContents(config, configFile!);
   logger.debug('Creating onboarding branch');
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile
+    configFile!
   );
   const commitMessage = commitMessageFactory.create();
 
@@ -32,11 +33,11 @@ export async function createOnboardingBranch(
   }
 
   return commitAndPush({
-    branchName: config.onboardingBranch,
+    branchName: config.onboardingBranch!,
     files: [
       {
         type: 'addition',
-        path: configFile,
+        path: configFile!,
         contents,
       },
     ],

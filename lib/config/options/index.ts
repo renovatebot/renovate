@@ -124,6 +124,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configMigration',
+    description: 'Enable this to get config migration PRs when needed.',
+    stage: 'repository',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'productLinks',
     description: 'Links which are used in PRs, issues and comments.',
     type: 'object',
@@ -152,8 +159,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extends',
-    description:
-      'Configuration presets to use or extend. Note: This config option does not work if you use a `config.js` file.',
+    description: 'Configuration presets to use or extend.',
     stage: 'package',
     type: 'array',
     subType: 'string',

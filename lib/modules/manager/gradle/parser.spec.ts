@@ -73,6 +73,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                    | ${'foobar = "foo:bar:$baz"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'group: "foo", name: "bar", version: baz'}            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${''}                                 | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'library("foo.bar", "foo", "bar")'} | ${'"${foo.bar}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', ({ def, str, output }) => {
         const input = [def, str].join('\n');
@@ -139,7 +140,9 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = parseGradle(content);
       const [res] = deps;
       const idx = content
-        .slice(res.managerData.fileReplacePosition)
+        // TODO #7154
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        .slice(res.managerData!.fileReplacePosition)
         .indexOf('1.2.3');
       expect(idx).toBe(0);
     });
@@ -148,7 +151,9 @@ describe('modules/manager/gradle/parser', () => {
       const content = Fixtures.get('build.gradle.example1');
       const { deps } = parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
-        content.slice(managerData.fileReplacePosition).indexOf(currentValue)
+        // TODO #7154
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        content.slice(managerData!.fileReplacePosition).indexOf(currentValue!)
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();
       expect(deps).toMatchSnapshot();

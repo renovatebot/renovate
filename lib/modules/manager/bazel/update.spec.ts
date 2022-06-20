@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
-import { updateDependency } from './update';
+import { updateDependency } from '.';
 
 const content = loadFixture('WORKSPACE1');
 const contentContainerPull = loadFixture('container_pull');
@@ -165,7 +165,7 @@ describe('modules/manager/bazel/update', () => {
         upgrade,
       });
       expect(res).not.toEqual(fileWithBzlExtension);
-      expect(res.indexOf('0.8.0')).not.toBe(-1);
+      expect(res?.indexOf('0.8.0')).not.toBe(-1);
     });
 
     it('updates finds url instead of urls', async () => {
@@ -193,7 +193,7 @@ describe('modules/manager/bazel/update', () => {
         upgrade,
       });
       expect(res).not.toEqual(fileWithBzlExtension);
-      expect(res.indexOf('0.8.0')).not.toBe(-1);
+      expect(res?.indexOf('0.8.0')).not.toBe(-1);
     });
 
     it('returns null if no urls resolve hashes', async () => {
@@ -311,8 +311,8 @@ http_archive(
         upgrade,
       });
       expect(res).not.toEqual(content);
-      expect(res.indexOf('0.5.0')).toBe(-1);
-      expect(res.indexOf('0.6.2')).not.toBe(-1);
+      expect(res?.indexOf('0.5.0')).toBe(-1);
+      expect(res?.indexOf('0.6.2')).not.toBe(-1);
     });
 
     it('updates maybe(http_archive) with urls array', async () => {

@@ -17,10 +17,10 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
-handlebars.registerHelper('lowercase', (str: string) => str.toLowerCase());
+handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
-handlebars.registerHelper('containsString', (str, subStr, options) =>
-  str.includes(subStr)
+handlebars.registerHelper('containsString', (str, subStr) =>
+  str?.includes(subStr)
 );
 
 handlebars.registerHelper({
@@ -143,6 +143,9 @@ const prBodyFields = [
   'table',
   'notes',
   'changelogs',
+  'hasWarningsErrors',
+  'errors',
+  'warnings',
   'configDescription',
   'controls',
   'footer',

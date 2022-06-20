@@ -185,7 +185,7 @@ interface GraphqlPageCacheItem {
   pageSize: number;
 }
 
-type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
+export type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
 
 function getGraphqlPageSize(
   fieldName: string,
