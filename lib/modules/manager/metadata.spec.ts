@@ -9,14 +9,15 @@ describe('modules/manager/metadata', () => {
     .sort();
 
   test.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
-    let readme: string;
+    let readme: string | undefined;
     try {
       readme = await fs.readFile(`${__dirname}/${manager}/readme.md`, 'utf8');
     } catch (err) {
       // do nothing
     }
     expect(readme).toBeDefined();
-    const lines = readme.split('\n');
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const lines = readme!.split('\n');
     let isCode = false;
     const res: string[] = [];
 
