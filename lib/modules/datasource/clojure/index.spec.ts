@@ -204,11 +204,11 @@ describe('modules/datasource/clojure/index', () => {
     httpMock
       .scope('https://failed_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(404, null as never);
+      .reply(404, '}');
     httpMock
       .scope('https://unauthorized_repo')
       .get('/org/example/package/maven-metadata.xml')
-      .reply(403, null as never);
+      .reply(403, '}');
     httpMock
       .scope('https://empty_repo')
       .get('/org/example/package/maven-metadata.xml')
