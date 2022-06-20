@@ -13,7 +13,7 @@ class TestDatasource extends Datasource {
 
   async getReleases(
     getReleasesConfig: GetReleasesConfig
-  ): Promise<ReleaseResult> {
+  ): Promise<ReleaseResult | null> {
     try {
       await this.http.get(exampleUrl);
     } catch (err) {
