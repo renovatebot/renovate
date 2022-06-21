@@ -77,7 +77,7 @@ export function updatePrRenovateVerData(
       prDataNew = JSON.parse(oldData);
       prDataNew.prUpdateVer = pkg.version;
     } else {
-      prDataNew = { prCreationVer: 'unknown', prUpdateVer: pkg.version };
+      prDataNew = { prCreationVer: '', prUpdateVer: pkg.version };
     }
   } else {
     prDataNew = { prCreationVer: pkg.version, prUpdateVer: pkg.version };
