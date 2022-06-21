@@ -1,3 +1,5 @@
+/* fixme #7154 */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import fs from 'fs-extra';
 import { logger } from '../../../test/util';
 import {
@@ -20,7 +22,10 @@ import {
 const datasource = 'dummy';
 const depName = 'package';
 
-type RegistriesMock = Record<string, ReleaseResult | (() => ReleaseResult)>;
+type RegistriesMock = Record<
+  string,
+  ReleaseResult | (() => ReleaseResult) | null
+>;
 const defaultRegistriesMock: RegistriesMock = {
   'https://reg1.com': { releases: [{ version: '1.2.3' }] },
 };
@@ -35,7 +40,48 @@ class DummyDatasource extends Datasource {
   override getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fn = this.registriesMock[registryUrl];
+    const fn = this.registriesMock[registryUrl!];
+    if (typeof fn === 'function') {
+      return Promise.resolve(fn());
+    }
+    return Promise.resolve(fn ?? null);
+  }
+}
+
+class DummyDatasource2 extends Datasource {
+  override defaultRegistryUrls = function () {
+    return ['https://reg1.com'];
+  };
+
+  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+    super(datasource);
+  }
+
+  override getReleases({
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const fn = this.registriesMock[registryUrl!];
+    if (typeof fn === 'function') {
+      return Promise.resolve(fn());
+    }
+    return Promise.resolve(fn ?? null);
+  }
+}
+
+class DummyDatasource3 extends Datasource {
+  override customRegistrySupport = false;
+  override defaultRegistryUrls = function () {
+    return ['https://reg1.com'];
+  };
+
+  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+    super(datasource);
+  }
+
+  override getReleases({
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const fn = this.registriesMock[registryUrl!];
     if (typeof fn === 'function') {
       return Promise.resolve(fn());
     }
@@ -110,7 +156,7 @@ describe('modules/datasource/index', () => {
       expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
       for (const dsName of dss.keys()) {
-        const ds = dss.get(dsName);
+        const ds = dss.get(dsName)!;
         expect(validateDatasource(ds, dsName)).toBeTrue();
       }
     });
@@ -118,7 +164,7 @@ describe('modules/datasource/index', () => {
     it('returns null for null datasource', async () => {
       expect(
         await getPkgReleases({
-          datasource: null,
+          datasource: null as never, // #7154
           depName: 'some/dep',
         })
       ).toBeNull();
@@ -129,7 +175,7 @@ describe('modules/datasource/index', () => {
       expect(
         await getPkgReleases({
           datasource: datasource,
-          depName: null,
+          depName: null as never, // #7154
         })
       ).toBeNull();
     });
@@ -210,6 +256,30 @@ describe('modules/datasource/index', () => {
         defaultRegistryUrls: ['https://foo.bar'],
       });
       expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
+    });
+
+    it('defaultRegistryUrls function works', async () => {
+      datasources.set(datasource, new DummyDatasource2());
+      const res = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(res).toMatchObject({
+        releases: [{ version: '1.2.3' }],
+        registryUrl: 'https://reg1.com',
+      });
+    });
+
+    it('defaultRegistryUrls function with customRegistrySupport works', async () => {
+      datasources.set(datasource, new DummyDatasource3());
+      const res = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(res).toMatchObject({
+        releases: [{ version: '1.2.3' }],
+        registryUrl: 'https://reg1.com',
+      });
     });
 
     it('applies extractVersion', async () => {

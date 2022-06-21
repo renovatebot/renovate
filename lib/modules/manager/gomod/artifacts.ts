@@ -224,6 +224,7 @@ export async function updateArtifacts({
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
+        GOINSECURE: process.env.GOINSECURE,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
@@ -351,7 +352,8 @@ export async function updateArtifacts({
       }
     }
 
-    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))
+    // TODO #7154
+    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
