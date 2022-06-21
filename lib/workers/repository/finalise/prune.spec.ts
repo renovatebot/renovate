@@ -28,7 +28,7 @@ describe('workers/repository/finalise/prune', () => {
 
     it('returns if no branchList', async () => {
       delete config.branchList;
-      await cleanup.pruneStaleBranches(config, config.branchList);
+      await cleanup.pruneStaleBranches(config, config.branchList ?? []);
       expect(git.getBranchList).toHaveBeenCalledTimes(0);
     });
 

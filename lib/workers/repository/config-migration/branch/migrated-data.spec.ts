@@ -1,6 +1,6 @@
 import detectIndent from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { mockedFunction } from '../../../../../test/util';
+import { RenovateConfig, mockedFunction } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
 import { readLocalFile } from '../../../../util/fs';
@@ -40,7 +40,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Calls getAsync a first when migration not needed', async () => {
       mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: false,
-        migratedConfig: null,
+        migratedConfig: <RenovateConfig>{},
       });
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
     });
@@ -62,12 +62,12 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     describe('MigratedData class', () => {
       it('gets the filename from the class instance', async () => {
         const data = await MigratedDataFactory.getAsync();
-        expect(data.filename).toBe('renovate.json');
+        expect(data?.filename).toBe('renovate.json');
       });
 
       it('gets the content from the class instance', async () => {
         const data = await MigratedDataFactory.getAsync();
-        expect(data.content).toBe(migratedData.content);
+        expect(data?.content).toBe(migratedData.content);
       });
     });
 
@@ -80,9 +80,9 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('Resets the factory and gets a new value with default indentation', async () => {
       mockedFunction(detectIndent).mockReturnValueOnce({
-        type: null,
+        type: null as never,
         amount: 0,
-        indent: null,
+        indent: null as never,
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
@@ -103,7 +103,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('Returns nothing due to fs error', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-        configFileName: null,
+        configFileName: undefined,
       });
       mockedFunction(readLocalFile).mockRejectedValueOnce(null);
       MigratedDataFactory.reset();

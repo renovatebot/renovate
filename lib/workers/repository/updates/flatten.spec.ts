@@ -1,4 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../test/util';
+import type { PackageRule } from '../../../config/types';
 
 import { ProgrammingLanguage } from '../../../constants';
 import { flattenUpdates } from './flatten';
@@ -15,6 +16,7 @@ beforeEach(() => {
 describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
+      config.lockFileMaintenance = <PackageRule>{};
       config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {

@@ -10,7 +10,7 @@ describe('workers/repository/update/branch/artifacts', () => {
   beforeEach(() => {
     GlobalConfig.set({});
     jest.resetAllMocks();
-    config = {
+    config = <BranchConfig>{
       ...getConfig(),
       manager: 'some-manager',
       branchName: 'renovate/pin',
@@ -40,6 +40,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     });
 
     it('skips status (no errors)', async () => {
+      config.artifactErrors = [];
       platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       config.artifactErrors.length = 0;
       await setArtifactErrorStatus(config);

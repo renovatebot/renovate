@@ -10,11 +10,11 @@ describe('workers/repository/update/branch/check-existing', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      config = <BranchConfig>{
         ...defaultConfig,
         branchName: 'some-branch',
         prTitle: 'some-title',
-      });
+      };
       jest.resetAllMocks();
     });
 

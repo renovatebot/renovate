@@ -1,7 +1,6 @@
-import { defaultConfig, partial } from '../../../../test/util';
+import { defaultConfig } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
-import type { LookupUpdate } from '../../../modules/manager/types';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
@@ -187,7 +186,7 @@ describe('workers/repository/updates/generate', () => {
           automerge: false,
         },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-07T20:01:41+00:00');
@@ -405,16 +404,16 @@ describe('workers/repository/updates/generate', () => {
 
     it('pins digest to table', () => {
       const branch = [
-        partial<LookupUpdate & BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           depName: 'foo-image',
           newDigest: 'abcdefg987612345',
           currentDigest: '',
           updateType: 'pinDigest',
           isPinDigest: true,
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.upgrades[0].displayFrom).toBe('');
       expect(res.upgrades[0].displayTo).toBe('abcdefg');
     });
@@ -461,7 +460,7 @@ describe('workers/repository/updates/generate', () => {
 
     it('uses semantic commits', () => {
       const branch = [
-        partial<BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           manager: 'some-manager',
           depName: 'some-dep',
@@ -475,9 +474,9 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.prTitle).toBe(
         'chore(package): update dependency some-dep to v1.2.0'
       );
@@ -485,7 +484,7 @@ describe('workers/repository/updates/generate', () => {
 
     it('scopes monorepo commits', () => {
       const branch = [
-        partial<BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           manager: 'some-manager',
           depName: 'some-dep',
@@ -501,15 +500,15 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
     });
 
     it('scopes monorepo commits with nested package files using parent directory', () => {
       const branch = [
-        partial<BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           commitBodyTable: false,
           manager: 'some-manager',
@@ -526,9 +525,9 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.prTitle).toBe(
         'chore(bar): update dependency some-dep to v1.2.0'
       );
@@ -536,7 +535,7 @@ describe('workers/repository/updates/generate', () => {
 
     it('scopes monorepo commits with nested package files using base directory', () => {
       const branch = [
-        partial<BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           manager: 'some-manager',
           depName: 'some-dep',
@@ -552,9 +551,9 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
@@ -562,7 +561,7 @@ describe('workers/repository/updates/generate', () => {
 
     it('adds commit message body', () => {
       const branch = [
-        partial<BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           manager: 'some-manager',
           depName: 'some-dep',
@@ -570,24 +569,24 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.2.0',
           isSingleVersion: true,
           newVersion: '1.2.0',
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.commitMessage).toMatchSnapshot();
       expect(res.commitMessage).toContain('\n');
     });
 
     it('supports manual prTitle', () => {
       const branch = [
-        partial<BranchUpgradeConfig>({
+        {
           ...defaultConfig,
           manager: 'some-manager',
           depName: 'some-dep',
           prTitle: 'Upgrade {{depName}}',
           toLowerCase: true,
-        }),
+        },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.prTitle).toBe('upgrade some-dep');
     });
 
@@ -598,7 +597,7 @@ describe('workers/repository/updates/generate', () => {
           commitBodyTable: true,
           datasource: NpmDatasource.id,
           depName: '@types/some-dep',
-          groupName: null,
+          groupName: null as never,
           branchName: 'some-branch',
           prTitle: 'some-title',
           currentValue: '0.5.7',
@@ -612,7 +611,7 @@ describe('workers/repository/updates/generate', () => {
           datasource: NpmDatasource.id,
           manager: 'some-manager',
           depName: 'some-dep',
-          groupName: null,
+          groupName: null as never,
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.6.0',
@@ -623,7 +622,7 @@ describe('workers/repository/updates/generate', () => {
           datasource: NpmDatasource.id,
           manager: 'some-manager',
           depName: 'some-dep',
-          groupName: null,
+          groupName: null as never,
           branchName: 'some-branch',
           prTitle: 'some-other-title',
           newValue: '1.0.0',
@@ -661,7 +660,7 @@ describe('workers/repository/updates/generate', () => {
         {
           manager: 'some-manager',
           depName: 'some-dep',
-          groupName: null,
+          groupName: null as never,
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.6.0',
@@ -673,7 +672,7 @@ describe('workers/repository/updates/generate', () => {
           datasource: NpmDatasource.id,
           manager: 'some-manager',
           depName: 'some-dep',
-          groupName: null,
+          groupName: null as never,
           branchName: 'some-branch',
           prTitle: 'some-other-title',
           newValue: '1.0.0',
@@ -683,7 +682,7 @@ describe('workers/repository/updates/generate', () => {
         {
           manager: 'some-manager',
           depName: '@types/some-dep',
-          groupName: null,
+          groupName: null as never,
           branchName: 'some-branch',
           prTitle: 'some-title',
           newValue: '0.5.7',
@@ -718,7 +717,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles upgrades', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = [
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -766,7 +765,7 @@ describe('workers/repository/updates/generate', () => {
           fileReplacePosition: 0,
         },
       ];
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
       expect(res.prTitle).toMatchSnapshot('some-title (patch)');
     });
 

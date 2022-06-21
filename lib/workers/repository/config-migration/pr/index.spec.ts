@@ -61,7 +61,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
     it('creates PR with default PR title', async () => {
       await ensureConfigMigrationPr(
-        { ...config, onboardingPrTitle: null },
+        { ...config, onboardingPrTitle: '' },
         migratedData
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);

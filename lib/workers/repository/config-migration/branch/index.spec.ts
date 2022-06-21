@@ -37,7 +37,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('Exits when Migration is not needed', async () => {
       await expect(
-        checkConfigMigrationBranch(config, null)
+        checkConfigMigrationBranch(config, null as never)
       ).resolves.toBeNull();
       expect(logger.debug).toHaveBeenCalledWith(
         'checkConfigMigrationBranch() Config does not need migration'

@@ -85,7 +85,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     };
-    const upgrade3: BranchUpgradeConfig = undefined;
+    const upgrade3 = undefined as never;
     const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',

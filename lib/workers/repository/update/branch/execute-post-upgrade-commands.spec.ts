@@ -35,6 +35,17 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         modified: [],
         not_added: [],
         deleted: [],
+        conflicted: [],
+        renamed: [],
+        staged: [],
+        created: [],
+        detached: false,
+        tracking: '',
+        current: '',
+        behind: 0,
+        ahead: 0,
+        files: [],
+        isClean: () => false,
       } as StatusResult);
       GlobalConfig.set({
         localDir: __dirname,

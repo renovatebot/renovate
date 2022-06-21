@@ -1,9 +1,4 @@
-import {
-  defaultConfig,
-  git,
-  partial,
-  platform,
-} from '../../../../../test/util';
+import { defaultConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
@@ -15,7 +10,7 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      config = <BranchConfig>{
         ...defaultConfig,
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
@@ -24,7 +19,8 @@ describe('workers/repository/update/branch/commit', () => {
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
         updatedArtifacts: [],
-      });
+        upgrades: [],
+      };
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
       platform.commitFiles = jest.fn();
@@ -37,7 +33,7 @@ describe('workers/repository/update/branch/commit', () => {
     });
 
     it('commits files', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -48,7 +44,7 @@ describe('workers/repository/update/branch/commit', () => {
     });
 
     it('commits via platform', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -56,12 +52,12 @@ describe('workers/repository/update/branch/commit', () => {
       config.platformCommit = true;
       await commitFilesToBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
+      expect((platform.commitFiles as jest.Mock).mock.calls).toMatchSnapshot();
     });
 
     it('dry runs', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',

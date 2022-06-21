@@ -17,9 +17,9 @@ describe('workers/repository/update/pr/automerge', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      config = <BranchConfig>{
         ...defaultConfig,
-      });
+      };
       pr = partial<Pr>({});
     });
 
