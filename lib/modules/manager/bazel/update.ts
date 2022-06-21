@@ -93,7 +93,7 @@ export async function updateDependency({
 }: UpdateDependencyConfig<BazelManagerData>): Promise<string | null> {
   try {
     logger.debug(
-      `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
+      `bazel.updateDependency(): ${upgrade.newValue ?? upgrade.newDigest}`
     );
     let newDef: string | undefined;
     if (upgrade.depType === 'container_pull' && upgrade.managerData?.def) {
