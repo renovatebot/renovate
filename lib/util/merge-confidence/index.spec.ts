@@ -10,7 +10,7 @@ import {
 describe('util/merge-confidence/index', () => {
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
-      expect(isActiveConfidenceLevel(null)).toBeFalse();
+      expect(isActiveConfidenceLevel(null as never)).toBeFalse();
     });
 
     it('returns false if low', () => {
@@ -53,7 +53,7 @@ describe('util/merge-confidence/index', () => {
           'renovate',
           '25.0.0',
           '25.0.0',
-          undefined
+          undefined as never
         )
       ).toBe('neutral');
     });

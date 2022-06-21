@@ -1,11 +1,11 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import { updateLockedDependency } from '.';
 
 const lockFile = 'pyproject.11.toml.lock';
 const packageFile = 'pyproject.11.toml';
 
-const lockFileContent = loadFixture(lockFile);
+const lockFileContent = Fixtures.get(lockFile);
 
 describe('modules/manager/poetry/update-locked', () => {
   it('detects already updated', () => {

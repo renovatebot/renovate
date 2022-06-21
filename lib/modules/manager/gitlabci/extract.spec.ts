@@ -45,7 +45,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(res).toHaveLength(3);
 
       const deps: PackageDependency[] = [];
-      res.forEach((e) => {
+      res?.forEach((e) => {
         e.deps.forEach((d) => {
           deps.push(d);
         });
@@ -59,7 +59,7 @@ describe('modules/manager/gitlabci/extract', () => {
       ]);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].deps).toHaveLength(3);
+      expect(res?.[0].deps).toHaveLength(3);
     });
 
     it('extracts multiple named services', async () => {
@@ -68,7 +68,7 @@ describe('modules/manager/gitlabci/extract', () => {
       ]);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].deps).toHaveLength(10);
+      expect(res?.[0].deps).toHaveLength(10);
     });
 
     it('extracts multiple image lines', async () => {
@@ -79,14 +79,16 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(res).toHaveLength(1);
 
       const deps: PackageDependency[] = [];
-      res.forEach((e) => {
+      res?.forEach((e) => {
         e.deps.forEach((d) => {
           deps.push(d);
         });
       });
       expect(deps).toHaveLength(8);
 
-      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBeFalse();
+      // TODO #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      expect(deps.some((dep) => dep.currentValue!.includes("'"))).toBeFalse();
     });
 
     it('extracts multiple image lines with comments', async () => {
@@ -97,7 +99,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(res).toHaveLength(1);
 
       const deps: PackageDependency[] = [];
-      res.forEach((e) => {
+      res?.forEach((e) => {
         e.deps.forEach((d) => {
           deps.push(d);
         });
@@ -177,7 +179,7 @@ describe('modules/manager/gitlabci/extract', () => {
           - name: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0
             alias: imagealias1
       `);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
             '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/' +

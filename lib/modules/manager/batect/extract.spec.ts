@@ -5,7 +5,7 @@ import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency } from '../types';
-import { extractAllPackageFiles } from './extract';
+import { extractAllPackageFiles } from '.';
 
 const fixturesDir = 'lib/modules/manager/batect/__fixtures__';
 
@@ -76,8 +76,10 @@ describe('modules/manager/batect/extract', () => {
         `${fixturesDir}/valid/batect.yml`,
       ]);
 
+      // TODO: #7154
       expect(
-        result.sort((a, b) => a.packageFile.localeCompare(b.packageFile))
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        result?.sort((a, b) => a.packageFile!.localeCompare(b.packageFile!))
       ).toEqual([
         {
           packageFile: `${fixturesDir}/valid/another-include.yml`,

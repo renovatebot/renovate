@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
@@ -56,7 +57,7 @@ export async function checkAutoMerge(
   }
   const isConflicted =
     config.isConflicted ??
-    (await isBranchConflicted(config.baseBranch, config.branchName));
+    (await isBranchConflicted(config.baseBranch!, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -110,13 +111,13 @@ export async function checkAutoMerge(
       await ensureCommentRemoval({
         type: 'by-content',
         number: pr.number,
-        content: automergeComment,
+        content: automergeComment!,
       });
     }
     await ensureComment({
       number: pr.number,
       topic: null,
-      content: automergeComment,
+      content: automergeComment!,
     });
     return { automerged: true, branchRemoved: false };
   }

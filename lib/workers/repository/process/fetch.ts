@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
@@ -35,10 +36,10 @@ async function fetchDepUpdates(
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
+  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig = applyPackageRules(depConfig);
-  if (depConfig.ignoreDeps.includes(depName)) {
+  if (depConfig.ignoreDeps!.includes(depName!)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
@@ -104,7 +105,7 @@ export async function fetchUpdates(
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  PackageFiles.add(config.baseBranch, { ...packageFiles });
+  PackageFiles.add(config.baseBranch!, { ...packageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete'

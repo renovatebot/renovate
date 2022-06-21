@@ -26,7 +26,7 @@ export function findLockFile(packageFilePath: string): string {
   return getSiblingFileName(packageFilePath, lockFile);
 }
 
-export function readLockFile(lockFilePath: string): Promise<string> {
+export function readLockFile(lockFilePath: string): Promise<string | null> {
   return readLocalFile(lockFilePath, 'utf8');
 }
 
