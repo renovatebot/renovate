@@ -141,7 +141,6 @@ export async function extractAllPackageFiles(
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const manifest = readManifest(content!, file);
     if (manifest) {
       manifests.push(manifest);

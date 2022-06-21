@@ -1,5 +1,4 @@
 // TODO #7154
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';

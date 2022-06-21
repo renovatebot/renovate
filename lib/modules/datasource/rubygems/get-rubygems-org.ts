@@ -119,8 +119,7 @@ export class RubyGemsOrgDatasource extends Datasource {
   async syncVersions(): Promise<void> {
     if (RubyGemsOrgDatasource.isDataStale()) {
       this.updateRubyGemsVersionsPromise =
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        this.updateRubyGemsVersionsPromise || this.updateRubyGemsVersions();
+        this.updateRubyGemsVersionsPromise ?? this.updateRubyGemsVersions();
       await this.updateRubyGemsVersionsPromise;
       this.updateRubyGemsVersionsPromise = null;
     }
