@@ -121,10 +121,19 @@ export async function initPlatform({
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
-    throw new Error('Init: You must configure a GitHub personal access token');
+    throw new Error(
+      'Init: You must configure a GitHub personal access token or app installation token'
+    );
   }
 
-  platformConfig.isGHApp = token.startsWith('x-access-token:');
+  let prefixedToken: string = token;
+  if (token.startsWith('x-access-token:')) {
+    platformConfig.isGHApp = true;
+    prefixedToken = token;
+  } else if (token.startsWith('ghs_')) {
+    platformConfig.isGHApp = true;
+    prefixedToken = 'x-access-token:' + token;
+  }
 
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
@@ -133,7 +142,7 @@ export async function initPlatform({
     logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  await detectGhe(token);
+  await detectGhe(prefixedToken);
 
   let renovateUsername: string;
   if (username) {
@@ -141,7 +150,7 @@ export async function initPlatform({
   } else {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
-      token
+      prefixedToken
     );
     renovateUsername = platformConfig.userDetails.username;
   }
@@ -149,11 +158,11 @@ export async function initPlatform({
   if (!gitAuthor) {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
-      token
+      prefixedToken
     );
     platformConfig.userEmail ??= await getUserEmail(
       platformConfig.endpoint,
-      token
+      prefixedToken
     );
     if (platformConfig.userEmail) {
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
@@ -164,6 +173,7 @@ export async function initPlatform({
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
+    token: prefixedToken,
   };
 
   return platformResult;

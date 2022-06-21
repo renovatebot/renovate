@@ -22,7 +22,6 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
       options.hostType &&
       GITHUB_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
-      options.headers.authorization = `token ${options.token}`;
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
         options.headers.authorization = `token ${appToken}`;
@@ -32,6 +31,8 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
             'application/vnd.github.machine-man-preview+json'
           );
         }
+      } else {
+        options.headers.authorization = `token ${options.token}`;
       }
     } else if (
       options.hostType &&

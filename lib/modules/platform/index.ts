@@ -55,6 +55,12 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   }
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
+
+  // There might have been platform-specific modifications to the token
+  if (returnConfig.token) {
+    config.token = returnConfig.token;
+  }
+
   const platformRule: HostRule = {
     // TODO: null check (#7154)
     matchHost: URL.parse(returnConfig.endpoint).hostname!,
