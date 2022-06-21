@@ -12,12 +12,7 @@
     "**/__mocks__/*",
     "coverage",
     "config.js",
-    "tmp",
+    "tmp"
     // TODO: fixme
-    "lib/renovate.spec.ts",
-    "lib/workers/repository/dependency-dashboard.spec.ts",
-    "lib/workers/repository/config-migration/pr/index.spec.ts",
-    "lib/workers/repository/onboarding/pr/index.spec.ts",
-    "lib/workers/repository/process/vulnerabilities.spec.ts"
   ]
 }

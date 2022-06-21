@@ -229,7 +229,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('deletes branch when PR already exists but cannot find it', async () => {
-      err.response.body = {
+      response.body = {
         errors: [{ message: 'A pull request already exists' }],
       };
       platform.createPr.mockRejectedValue(err);
