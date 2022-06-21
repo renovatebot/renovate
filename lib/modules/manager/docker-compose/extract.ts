@@ -64,7 +64,7 @@ export function extractPackageFile(
     // since docker-compose spec version 1.27, the 'version' key has
     // become optional and can no longer be used to differentiate
     // between v1 and v2.
-    const services = config.services || config;
+    const services = config.services ?? config;
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally

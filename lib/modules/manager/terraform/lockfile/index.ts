@@ -89,7 +89,7 @@ export async function updateArtifacts({
       updates.push(...maintenanceUpdates);
     } else {
       const providerDeps = updatedDeps.filter((dep) =>
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         ['provider', 'required_provider'].includes(dep.depType!)
       );
       for (const dep of providerDeps) {
@@ -108,15 +108,13 @@ export async function updateArtifacts({
           continue;
         }
         const update: ProviderLockUpdate = {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           newVersion: newVersion!,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           newConstraint: newConstraint!,
           newHashes:
             (await TerraformProviderHash.createHashes(
               registryUrl,
               updateLock.packageName,
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
               newVersion!
             )) ?? /* istanbul ignore next: needs test */ [],
           ...updateLock,

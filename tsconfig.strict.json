@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    /* TODO add new checks */
   },
   "exclude": [
     // tsconfig.json

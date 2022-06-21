@@ -54,7 +54,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     logger.warn({ err }, 'Error extracting terragrunt plugins');
   }
   deps.forEach((dep) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     switch (dep.managerData!.terragruntDependencyType) {
       case TerragruntDependencyTypes.terragrunt:
         analyseTerragruntModule(dep);

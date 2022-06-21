@@ -41,7 +41,6 @@ export async function getDependentPackageFiles(
     const packageFileContent = await readLocalFile(f, 'utf8');
 
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const doc = new xmldoc.XmlDocument(packageFileContent!);
     const projectReferenceAttributes = doc
       .childrenNamed('ItemGroup')

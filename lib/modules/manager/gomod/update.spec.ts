@@ -40,7 +40,6 @@ describe('modules/manager/gomod/update', () => {
         depType: 'require',
       };
       const res2 = updateDependency({
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         fileContent: res1!,
         upgrade: upgrade2,
       });

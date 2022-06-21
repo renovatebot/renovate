@@ -178,15 +178,12 @@ function applyPropsInternal(
       return substr;
     });
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const depName = replaceAll(dep.depName!);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
   let groupName: string | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const currentValue = dep.currentValue!.replace(
     regEx(/^\${.*?}$/),
     (substr) => {
@@ -289,7 +286,6 @@ export function extractPackage(
     }
     result.deps.forEach((dep) => {
       if (is.array(dep.registryUrls)) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         repoUrls.forEach((url) => dep.registryUrls!.push(url));
       }
     });
@@ -297,7 +293,7 @@ export function extractPackage(
 
   if (packageFile && project.childNamed('parent')) {
     const parentPath =
-      project.valueWithPath('parent.relativePath')?.trim() || '../pom.xml';
+      project.valueWithPath('parent.relativePath')?.trim() ?? '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
@@ -370,7 +366,6 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const name = pkg.packageFile!;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
@@ -386,7 +381,6 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const visitedPackages: Set<string> = new Set();
     let pkg: PackageFile | null = extractedPackages[name];
     while (pkg) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       propsHierarchy.unshift(pkg.mavenProps!);
 
       if (pkg.deps) {
@@ -414,7 +408,6 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const urlsSet = new Set([...rawDep.registryUrls!, ...registryUrls[name]]);
       rawDep.registryUrls = [...urlsSet];
     });
@@ -425,7 +418,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
-      const sourceName = dep.propSource || name;
+      const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
     });
   });

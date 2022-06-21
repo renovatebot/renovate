@@ -35,7 +35,7 @@ async function addSourceCmds(
   nugetConfigFile: string
 ): Promise<string[]> {
   const registries =
-    (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({

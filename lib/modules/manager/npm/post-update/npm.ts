@@ -149,13 +149,9 @@ export async function generateLockFile(
           const depType = lockUpdate.depType as
             | 'dependencies'
             | 'optionalDependencies';
-          if (
-            lockFileParsed.packages?.['']?.[depType]?.[
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-              lockUpdate.depName!
-            ]
-          ) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+          // TODO #7154
+          if (lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.depName!]) {
             lockFileParsed.packages[''][depType]![lockUpdate.depName!] =
               lockUpdate.newValue!;
           }

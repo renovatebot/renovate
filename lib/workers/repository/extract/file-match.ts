@@ -40,9 +40,9 @@ export function getFilteredFileList(
   fileList: string[]
 ): string[] {
   const { includePaths, ignorePaths } = config;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
+
   let filteredList = getIncludedFiles(fileList, includePaths!);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
   return filteredList;
 }
@@ -54,7 +54,7 @@ export function getMatchingFiles(
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   for (const match of fileMatch!) {
     logger.debug(`Using file match: ${match} for manager ${manager}`);
     const re = regEx(match);
