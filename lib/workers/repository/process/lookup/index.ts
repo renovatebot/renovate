@@ -45,7 +45,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
-  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
+  const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
     warnings: [],
@@ -138,7 +138,7 @@ export async function lookupUpdates(
       const allSatisfyingVersions = allVersions.filter(
         (v) =>
           // TODO #7154
-          unconstrainedValue ?? versioning.matches(v.version, currentValue!)
+          unconstrainedValue || versioning.matches(v.version, currentValue!)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
@@ -238,7 +238,7 @@ export async function lookupUpdates(
       ).filter(
         (v) =>
           // Leave only compatible versions
-          unconstrainedValue ?? versioning.isCompatible(v.version, currentValue)
+          unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
       if (isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
@@ -310,7 +310,8 @@ export async function lookupUpdates(
           res.isSingleVersion = true;
         }
         res.isSingleVersion =
-          res.isSingleVersion ?? !!versioning.isSingleVersion(update.newValue);
+          !!res.isSingleVersion ||
+          !!versioning.isSingleVersion(update.newValue);
 
         res.updates.push(update);
       }
