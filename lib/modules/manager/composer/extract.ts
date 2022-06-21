@@ -45,7 +45,6 @@ function parseRepositories(
         switch (repo.type) {
           case 'vcs':
           case 'git':
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             repositories[name!] = repo;
             break;
           case 'composer':

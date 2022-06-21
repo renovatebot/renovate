@@ -39,7 +39,6 @@ export function getPreset({
     presetName,
     presetPath,
     // TODO: fix type #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     endpoint!,
     tag
   );

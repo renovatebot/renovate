@@ -58,7 +58,6 @@ describe('modules/manager/npm/utils', () => {
       const lockFile = Fixtures.get('lockfile-parsing/package-lock.json');
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const lockFileComposed = composeLockFile(lockFileParsed!, detectedIndent);
       expect(lockFileComposed).toBe(lockFile);
     });

@@ -16,7 +16,6 @@ describe('modules/manager/metadata', () => {
       // do nothing
     }
     expect(readme).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const lines = readme!.split('\n');
     let isCode = false;
     const res: string[] = [];

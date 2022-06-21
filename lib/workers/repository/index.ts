@@ -62,7 +62,7 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches);
       }
       await finaliseRepo(config, branchList);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       repoResult = processResult(config, res!);
     }
   } catch (err) /* istanbul ignore next */ {

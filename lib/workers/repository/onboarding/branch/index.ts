@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -44,6 +43,7 @@ export async function checkOnboardingBranch(
     }
     // istanbul ignore if
     if (platform.refreshPr) {
+      // TODO #7154
       const onboardingPr = await platform.getBranchPr(config.onboardingBranch!);
       await platform.refreshPr(onboardingPr!.number);
     }
@@ -72,8 +72,10 @@ export async function checkOnboardingBranch(
     }
   }
   if (!GlobalConfig.get('dryRun')) {
+    // TODO #7154
     await checkoutBranch(onboardingBranch!);
   }
+  // TODO #7154
   const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// TODO #7154
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';

@@ -22,7 +22,7 @@ export function getLernaVersion(
     );
     return 'latest';
   }
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   return lernaDep.currentValue!;
 }
 

@@ -254,7 +254,7 @@ export function extractPackageFile(
       (currentValue || commit)
     ) {
       dep.depName = depName;
-      dep.currentValue = currentValue || commit?.substring(0, 7);
+      dep.currentValue = currentValue ?? commit?.substring(0, 7);
       dep.datasource = GoDatasource.id;
       dep.packageName = importpath;
       if (remote) {

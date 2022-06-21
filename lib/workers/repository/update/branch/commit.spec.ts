@@ -60,7 +60,6 @@ describe('workers/repository/update/branch/commit', () => {
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
       // TODO #7154
       expect(
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         mockedFunction(platform.commitFiles!).mock.calls
       ).toMatchSnapshot();
     });
