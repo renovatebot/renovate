@@ -374,6 +374,7 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   return 14495; // 5 minutes shy of 10 days
 }
 
+// TODO #7154 allow `null` and `undefined`
 export async function addReleaseNotes(
   input: ChangeLogResult,
   config: BranchUpgradeConfig
