@@ -56,6 +56,7 @@ const goEnv = {
   GOPROXY: 'proxy.example.com',
   GOPRIVATE: 'private.example.com/*',
   GONOPROXY: 'noproxy.example.com/*',
+  GOINSECURE: 'insecure.example.com/*',
   CGO_ENABLED: '1',
 };
 
