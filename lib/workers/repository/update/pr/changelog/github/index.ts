@@ -113,7 +113,7 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -123,10 +123,13 @@ export async function getReleaseList(
   const notesSourceUrl = `${ensureTrailingSlash(
     apiBaseUrl
   )}repos/${repository}/releases`;
-  const items = await releasesCache.getItems({
-    registryUrl: apiBaseUrl,
-    packageName: repository,
-  });
+  const items = await releasesCache.getItems(
+    {
+      registryUrl: apiBaseUrl,
+      packageName: repository,
+    },
+    release
+  );
   return items.map(({ url, id, version: tag, name, description: body }) => ({
     url,
     notesSourceUrl,

@@ -1,12 +1,12 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
 
-const dockerfileContent = loadFixture(`Dockerfile`);
-const ansibleYamlContent = loadFixture(`ansible.yml`);
-const exampleJsonContent = loadFixture(`example.json`);
-const exampleGitlabCiYml = loadFixture(`gitlab-ci.yml`);
+const dockerfileContent = Fixtures.get(`Dockerfile`);
+const ansibleYamlContent = Fixtures.get(`ansible.yml`);
+const exampleJsonContent = Fixtures.get(`example.json`);
+const exampleGitlabCiYml = Fixtures.get(`gitlab-ci.yml`);
 
 describe('modules/manager/regex/index', () => {
   it('has default config', () => {
@@ -30,14 +30,14 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(8);
-    expect(res.deps.find((dep) => dep.depName === 'yarn').versioning).toBe(
+    expect(res?.deps).toHaveLength(8);
+    expect(res?.deps.find((dep) => dep.depName === 'yarn')?.versioning).toBe(
       'semver'
     );
-    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toBe(
+    expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
       'maven'
     );
-    expect(res.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
+    expect(res?.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
 
   it('returns null if no dependencies found', async () => {
@@ -79,11 +79,11 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
     expect(
-      res.deps.find(
+      res?.deps.find(
         (dep) => dep.depName === 'openresty/headers-more-nginx-module'
-      ).extractVersion
+      )?.extractVersion
     ).toBe('^v(?<version>.*)$');
   });
 
@@ -136,9 +136,9 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
     expect(
-      res.deps.find((dep) => dep.depName === 'gradle').registryUrls
+      res?.deps.find((dep) => dep.depName === 'gradle')?.registryUrls
     ).toEqual(['http://registry.gradle.com/']);
   });
 
@@ -186,11 +186,11 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(2);
+    expect(res?.deps).toHaveLength(2);
     expect(
-      res.deps.find((dep) => dep.depName === 'nodejs/node').versioning
+      res?.deps.find((dep) => dep.depName === 'nodejs/node')?.versioning
     ).toBe('node');
-    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toBe(
+    expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
       'maven'
     );
   });
@@ -210,7 +210,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy', async () => {
@@ -228,7 +228,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and non standard capture groups', async () => {
@@ -248,8 +248,8 @@ describe('modules/manager/regex/index', () => {
       'ansible.yml',
       config
     );
-    expect(res.deps).toHaveLength(1);
-    expect(res.deps[0].depName).toBe('docker.io/prom/prometheus');
+    expect(res?.deps).toHaveLength(1);
+    expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
     expect(res).toMatchSnapshot();
   });
 
@@ -268,7 +268,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and registry url', async () => {
@@ -287,7 +287,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and templates', async () => {
@@ -306,7 +306,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and empty file', async () => {
@@ -337,7 +337,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with recursive strategy and multiple matches', async () => {
@@ -354,7 +354,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(2);
+    expect(res?.deps).toHaveLength(2);
   });
 
   it('extracts with recursive strategy and multiple layers ', async () => {
@@ -372,7 +372,7 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with recursive strategy and fail because of not sufficient regexes', async () => {
@@ -417,6 +417,6 @@ describe('modules/manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(4);
+    expect(res?.deps).toHaveLength(4);
   });
 });

@@ -1,19 +1,18 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { loadFixture, mocked } from '../../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { Fixtures } from '../../../../test/fixtures';
+import { env, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _env from '../../../util/exec/env';
 import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
-const pyproject1toml = loadFixture('pyproject.1.toml');
-const pyproject10toml = loadFixture('pyproject.10.toml');
+const pyproject1toml = Fixtures.get('pyproject.1.toml');
+const pyproject10toml = Fixtures.get('pyproject.10.toml');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -22,8 +21,6 @@ jest.mock('../../datasource');
 jest.mock('../../../util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
@@ -97,7 +94,8 @@ describe('modules/manager/poetry/artifacts', () => {
   });
 
   it('passes private credential environment vars', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    // TODO #7154
+    fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -122,7 +120,8 @@ describe('modules/manager/poetry/artifacts', () => {
   });
 
   it('prioritizes pypi-scoped credentials', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    // TODO #7154
+    fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce(Buffer.from('[metadata]\n'));
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce(Buffer.from('New poetry.lock'));
@@ -147,7 +146,8 @@ describe('modules/manager/poetry/artifacts', () => {
   });
 
   it('returns updated pyproject.lock', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    // TODO #7154
+    fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
