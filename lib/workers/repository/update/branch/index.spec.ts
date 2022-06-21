@@ -1,4 +1,3 @@
-import { exec, mockExecAll } from '../../../../../test/exec-util';
 import {
   defaultConfig,
   fs,
@@ -18,6 +17,7 @@ import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
+import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
@@ -63,6 +63,7 @@ const commit = mocked(_commit);
 const mergeConfidence = mocked(_mergeConfidence);
 const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
+const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const limits = mocked(_limits);
 
@@ -99,7 +100,6 @@ describe('workers/repository/update/branch/index', () => {
         warnings: [],
         upgrades: [{ depName: 'some-dep-name' }] as BranchUpgradeConfig[],
       } as BranchConfig;
-      mockExecAll(exec);
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('123test');
 
@@ -1270,7 +1270,7 @@ describe('workers/repository/update/branch/index', () => {
         localDir: '/localDir',
       });
 
-      mockExecAll(exec, new Error('Meh, this went wrong!'));
+      exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
 
       await branchWorker.processBranch({
         ...config,
@@ -1376,7 +1376,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
       });
     });
@@ -1500,13 +1500,13 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
+      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
       });
-      expect(exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
+      expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
         cwd: '/localDir',
       });
-      expect(exec).toHaveBeenCalledTimes(2);
+      expect(exec.exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
       const updatedArtifacts = calledWithConfig.updatedArtifacts;
       expect(findFileContent(updatedArtifacts, 'modified_file')).toBe(
@@ -1644,10 +1644,10 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
+      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
       });
-      expect(exec).toHaveBeenCalledTimes(1);
+      expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
         findFileContent(
           commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts,
