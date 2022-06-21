@@ -99,6 +99,7 @@ describe('workers/repository/update/branch/index', () => {
         warnings: [],
         upgrades: [{ depName: 'some-dep-name' }] as BranchUpgradeConfig[],
       } as BranchConfig;
+      mockExecAll(exec);
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('123test');
 
