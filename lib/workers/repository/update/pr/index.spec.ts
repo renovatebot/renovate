@@ -303,7 +303,7 @@ describe('workers/repository/update/pr/index', () => {
         const res = updatePrRenovateVerData(changedPr, prbodyContent);
         const match = prVerDataRe.exec(res);
         expect(match?.groups?.payload).toBe(
-          'eyJwckNyZWF0aW9uVmVyIjoidW5rbm93biIsInByVXBkYXRlVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSJ9'
+          'eyJwckNyZWF0aW9uVmVyIjoiIiwicHJVcGRhdGVWZXIiOiIwLjAuMC1zZW1hbnRpYy1yZWxlYXNlIn0='
         );
       });
 

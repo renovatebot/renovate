@@ -90,7 +90,7 @@ export function updatePrRenovateVerData(
   } else {
     res += `\n<!--renovate-pr-data:${prVerNew64}-->\n`;
   }
-
+  res = platform.massageMarkdown(res);
   logger.debug(prDataNew, 'PR Renovate Version Data');
   return res;
 }
@@ -364,7 +364,7 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        prBody = updatePrRenovateVerData(undefined, prBody);
+        prBody = updatePrRenovateVerData(existingPr, prBody);
         pr = await platform.createPr({
           sourceBranch: branchName,
           targetBranch: config.baseBranch ?? '',
