@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const invalidYamlFile = loadFixture('invalid.yaml');
 
@@ -28,14 +28,14 @@ describe('modules/manager/jenkins/extract', () => {
 
     it('extracts multiple image lines in text format', () => {
       const res = extractPackageFile(pluginsTextFile, 'path/file.txt');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(6);
     });
 
     it('extracts multiple image lines in yaml format', () => {
       const res = extractPackageFile(pluginsYamlFile, 'path/file.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(8);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(8);
     });
   });
 });

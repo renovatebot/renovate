@@ -102,7 +102,7 @@ function resolveManifest(
             rep.kind === release.spec.chart.spec.sourceRef?.kind &&
             rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
             rep.metadata.namespace ===
-              (release.spec.chart.spec.sourceRef.namespace ||
+              (release.spec.chart.spec.sourceRef.namespace ??
                 release.metadata?.namespace)
         );
         if (matchingRepositories.length) {
@@ -140,7 +140,9 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    const manifest = readManifest(content, file);
+    // TODO #7154
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const manifest = readManifest(content!, file);
     if (manifest) {
       manifests.push(manifest);
     }

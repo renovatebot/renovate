@@ -209,7 +209,9 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
-    return datasource.defaultRegistryUrls ?? [];
+    return is.function_(datasource.defaultRegistryUrls)
+      ? datasource.defaultRegistryUrls()
+      : datasource.defaultRegistryUrls ?? [];
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
@@ -217,6 +219,9 @@ function resolveRegistryUrls(
     resolvedUrls = [...customUrls];
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
+    resolvedUrls.concat(additionalRegistryUrls ?? []);
+  } else if (is.function_(datasource.defaultRegistryUrls)) {
+    resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];

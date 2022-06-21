@@ -130,7 +130,7 @@ Use `UTC` to be time zone independent.
   - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
 - Prefer `jest.spyOn` for mocking single functions, or mock entire modules
   - Avoid overwriting functions, for example: (`func = jest.fn();`)
-- Prefer `toEqual` or `toDeepEqual`
+- Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
 - Avoid `toMatchSnapshot`, only use it for:
   - huge strings like the Renovate PR body text

@@ -1,5 +1,5 @@
 # docker_image resources
-# https://www.terraform.io/docs/providers/docker/r/image.html
+# https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/image
 resource "docker_image" "nginx" {
   name = "nginx:1.7.8"
 }
@@ -14,7 +14,7 @@ resource "docker_image" "ignore_variable" {
 
 
 # docker_container resources
-# https://www.terraform.io/docs/providers/docker/r/container.html
+# https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/container
 resource "docker_container" "foo" {
   name  = "foo"
   image = "nginx:1.7.8"
@@ -26,7 +26,7 @@ resource "docker_container" "invalid" {
 
 
 # docker_service resources
-# https://www.terraform.io/docs/providers/docker/r/service.html
+# https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/service
 resource "docker_service" "foo" {
   name = "foo-service"
 
