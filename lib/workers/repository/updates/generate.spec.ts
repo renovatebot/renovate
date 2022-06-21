@@ -403,7 +403,8 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('pins digest to table', () => {
-      const branch = [
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
           depName: 'foo-image',
@@ -411,9 +412,9 @@ describe('workers/repository/updates/generate', () => {
           currentDigest: '',
           updateType: 'pinDigest',
           isPinDigest: true,
-        },
+        } as BranchUpgradeConfig,
       ];
-      const res = generateBranchConfig(<BranchUpgradeConfig[]>branch);
+      const res = generateBranchConfig(branch);
       expect(res.upgrades[0].displayFrom).toBe('');
       expect(res.upgrades[0].displayTo).toBe('abcdefg');
     });
