@@ -80,7 +80,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: 'abcd' },
               { currentValue: '2.8.11', datasource: 'docker' },
               { depName: ' ' },
-              { depName: undefined },
+              {},
               { depName: undefined },
               { depName: { oh: 'no' } as unknown as string },
             ],

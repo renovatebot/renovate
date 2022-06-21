@@ -1,4 +1,4 @@
-import { fs, git } from '../../../../../test/util';
+import { fs, git, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -31,22 +31,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
       };
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: [],
-        not_added: [],
-        deleted: [],
-        conflicted: [],
-        renamed: [],
-        staged: [],
-        created: [],
-        detached: false,
-        tracking: '',
-        current: '',
-        behind: 0,
-        ahead: 0,
-        files: [],
-        isClean: () => false,
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        })
+      );
       GlobalConfig.set({
         localDir: __dirname,
         allowedPostUpgradeCommands: ['some-command'],

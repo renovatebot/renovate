@@ -42,7 +42,7 @@ describe('workers/repository/extract/index', () => {
 
     it('warns if packageFiles is null', async () => {
       config.enabledManagers = ['npm'];
-      managerFiles.getManagerPackageFiles.mockResolvedValue([]);
+      managerFiles.getManagerPackageFiles.mockResolvedValue(null);
       expect(await extractAllDependencies(config)).toEqual({});
     });
 

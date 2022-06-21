@@ -1,3 +1,4 @@
+import { exec, mockExecAll } from '../../../../../test/exec-util';
 import {
   defaultConfig,
   fs,
@@ -15,10 +16,8 @@ import {
 import { logger } from '../../../../logger';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
-import type { ArtifactError } from '../../../../modules/manager/types';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
-import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
@@ -64,16 +63,18 @@ const commit = mocked(_commit);
 const mergeConfidence = mocked(_mergeConfidence);
 const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
-const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
-function findFileContent(files: FileChange[], path: string): string | null {
-  const f = files.find((file) => file.path === path);
+function findFileContent(
+  files: FileChange[] | undefined,
+  path: string
+): string | null {
+  const f = files?.find((file) => file.path === path);
   if (f?.type === 'addition' && f.contents) {
-    return f?.contents.toString();
+    return f.contents.toString();
   }
   return null;
 }
@@ -96,7 +97,7 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
-        upgrades: [{ depName: 'some-dep-name' }] as BranchConfig['upgrades'],
+        upgrades: [{ depName: 'some-dep-name' }] as BranchUpgradeConfig[],
       } as BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('123test');
@@ -471,8 +472,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -487,8 +488,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
@@ -505,8 +506,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -523,8 +524,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -546,8 +547,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -569,8 +570,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -592,8 +593,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -615,8 +616,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -638,8 +639,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       expect(
         await branchWorker.processBranch({
@@ -662,8 +663,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
@@ -684,8 +685,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
@@ -885,8 +886,8 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
@@ -934,8 +935,8 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -970,8 +971,8 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
       } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -1003,14 +1004,16 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('branch pr no schedule', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [],
-        artifactErrors: [],
-        updatedArtifacts: [],
-      } as PackageFilesResult);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>({})],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -1039,14 +1042,16 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('skips branch update if stopUpdatingLabel presents', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [],
-        artifactErrors: [],
-        updatedArtifacts: [],
-      } as PackageFilesResult);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>({})],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -1075,14 +1080,16 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('updates branch if stopUpdatingLabel presents and PR rebase/retry box checked', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [],
-        artifactErrors: [],
-        updatedArtifacts: [],
-      } as PackageFilesResult);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>({})],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: <ArtifactError[]>[],
-        updatedArtifacts: <FileChange[]>[{}],
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -1144,22 +1151,13 @@ describe('workers/repository/update/branch/index', () => {
         },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: ['modified_file'],
-        not_added: [],
-        deleted: ['deleted_file'],
-        conflicted: [],
-        renamed: [],
-        staged: [],
-        created: [],
-        detached: false,
-        tracking: '',
-        current: '',
-        behind: 0,
-        ahead: 0,
-        files: [],
-        isClean: () => false,
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file'],
+          not_added: [],
+          deleted: ['deleted_file'],
+        })
+      );
       fs.readLocalFile.mockResolvedValueOnce('modified file content');
       fs.localPathExists
         .mockResolvedValueOnce(true)
@@ -1244,22 +1242,13 @@ describe('workers/repository/update/branch/index', () => {
         },
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: ['modified_file'],
-        not_added: [],
-        deleted: ['deleted_file'],
-        conflicted: [],
-        renamed: [],
-        staged: [],
-        created: [],
-        detached: false,
-        tracking: '',
-        current: '',
-        behind: 0,
-        ahead: 0,
-        files: [],
-        isClean: () => false,
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file'],
+          not_added: [],
+          deleted: ['deleted_file'],
+        })
+      );
 
       fs.readLocalFile.mockResolvedValueOnce('modified file content');
       fs.localPathExists
@@ -1280,7 +1269,7 @@ describe('workers/repository/update/branch/index', () => {
         localDir: '/localDir',
       });
 
-      exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
+      mockExecAll(exec, new Error('Meh, this went wrong!'));
 
       await branchWorker.processBranch({
         ...config,
@@ -1336,22 +1325,13 @@ describe('workers/repository/update/branch/index', () => {
         },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: ['modified_file'],
-        not_added: [],
-        deleted: ['deleted_file'],
-        conflicted: [],
-        renamed: [],
-        staged: [],
-        created: [],
-        detached: false,
-        tracking: '',
-        current: '',
-        behind: 0,
-        ahead: 0,
-        files: [],
-        isClean: () => false,
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file'],
+          not_added: [],
+          deleted: ['deleted_file'],
+        })
+      );
 
       fs.readLocalFile.mockResolvedValueOnce('modified file content');
       fs.localPathExists
@@ -1395,7 +1375,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+      expect(exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
       });
     });
@@ -1432,38 +1412,20 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus
-        .mockResolvedValueOnce({
-          modified: ['modified_file', 'modified_then_deleted_file'],
-          not_added: [],
-          deleted: ['deleted_file', 'deleted_then_created_file'],
-          conflicted: [],
-          renamed: [],
-          staged: [],
-          created: [],
-          detached: false,
-          tracking: '',
-          current: '',
-          behind: 0,
-          ahead: 0,
-          files: [],
-          isClean: () => false,
-        } as StatusResult)
-        .mockResolvedValueOnce({
-          modified: ['modified_file', 'deleted_then_created_file'],
-          not_added: [],
-          deleted: ['deleted_file', 'modified_then_deleted_file'],
-          conflicted: [],
-          renamed: [],
-          staged: [],
-          created: [],
-          detached: false,
-          tracking: '',
-          current: '',
-          behind: 0,
-          ahead: 0,
-          files: [],
-          isClean: () => false,
-        } as StatusResult);
+        .mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['modified_file', 'modified_then_deleted_file'],
+            not_added: [],
+            deleted: ['deleted_file', 'deleted_then_created_file'],
+          })
+        )
+        .mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['modified_file', 'deleted_then_created_file'],
+            not_added: [],
+            deleted: ['deleted_file', 'modified_then_deleted_file'],
+          })
+        );
 
       fs.readLocalFile
         .mockResolvedValueOnce('modified file content' as never)
@@ -1537,20 +1499,20 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
+      expect(exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
+      expect(exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
         cwd: '/localDir',
       });
-      expect(exec.exec).toHaveBeenCalledTimes(2);
+      expect(exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
       const updatedArtifacts = calledWithConfig.updatedArtifacts;
-      expect(findFileContent(updatedArtifacts ?? [], 'modified_file')).toBe(
+      expect(findFileContent(updatedArtifacts, 'modified_file')).toBe(
         'modified file content again'
       );
       expect(
-        findFileContent(updatedArtifacts ?? [], 'deleted_then_created_file')
+        findFileContent(updatedArtifacts, 'deleted_then_created_file')
       ).toBe('this file was once deleted');
       expect(
         updatedArtifacts?.find(
@@ -1602,22 +1564,13 @@ describe('workers/repository/update/branch/index', () => {
         },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: ['modified_file', 'modified_then_deleted_file'],
-        not_added: [],
-        deleted: ['deleted_file', 'deleted_then_created_file'],
-        conflicted: [],
-        renamed: [],
-        staged: [],
-        created: [],
-        detached: false,
-        tracking: '',
-        current: '',
-        behind: 0,
-        ahead: 0,
-        files: [],
-        isClean: () => false,
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        })
+      );
 
       fs.readLocalFile
         .mockResolvedValueOnce('modified file content')
@@ -1690,13 +1643,13 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
+      expect(exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
       });
-      expect(exec.exec).toHaveBeenCalledTimes(1);
+      expect(exec).toHaveBeenCalledTimes(1);
       expect(
         findFileContent(
-          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts ?? [],
+          commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts,
           'modified_file'
         )
       ).toBe('modified file content');

@@ -1,6 +1,6 @@
 import detectIndent from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, mockedFunction } from '../../../../../test/util';
+import { mockedFunction } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
 import { readLocalFile } from '../../../../util/fs';
@@ -40,7 +40,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Calls getAsync a first when migration not needed', async () => {
       mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: false,
-        migratedConfig: <RenovateConfig>{},
+        migratedConfig: {},
       });
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
     });
@@ -80,9 +80,9 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('Resets the factory and gets a new value with default indentation', async () => {
       mockedFunction(detectIndent).mockReturnValueOnce({
-        type: null as never,
+        type: undefined,
         amount: 0,
-        indent: null as never,
+        indent: '',
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
