@@ -71,6 +71,9 @@ describe('workers/repository/update/pr/index', () => {
       jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockResolvedValue(body);
+      jest.spyOn(platform, 'massageMarkdown').mockImplementation((prBody) => {
+        return prBody;
+      });
     });
 
     describe('Create', () => {
@@ -477,8 +480,9 @@ describe('workers/repository/update/pr/index', () => {
       it('comments on automerge failure', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
-        platform.massageMarkdown.mockReturnValueOnce('markdown content');
-
+        jest
+          .spyOn(platform, 'massageMarkdown')
+          .mockImplementation((prBody) => 'markdown content');
         await ensurePr({
           ...config,
           automerge: true,
