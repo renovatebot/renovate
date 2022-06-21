@@ -51,7 +51,7 @@ describe('modules/datasource/flutter-version/index', () => {
         depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(31);
+      expect(res?.releases).toHaveLength(31);
     });
   });
 });
