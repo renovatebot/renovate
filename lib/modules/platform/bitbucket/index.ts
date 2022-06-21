@@ -469,7 +469,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-pr-data:(.*\s*)*?-->/), '');
+    .replace(regEx(/<!--renovate-pr-data:.*?-->/), '');
 }
 
 export async function ensureIssue({
