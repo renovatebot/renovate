@@ -92,7 +92,7 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
     if (pnpmWorkspace === null) {
       continue;
@@ -115,7 +115,6 @@ export async function detectPnpmWorkspaces(
     const packagePaths = packagePathCache.get(workspaceYamlPath);
 
     const isPackageInWorkspace = packagePaths?.some((p) =>
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       p.endsWith(packageFile!)
     );
 

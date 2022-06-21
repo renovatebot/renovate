@@ -42,7 +42,7 @@ describe('website-docs', () => {
     .sort();
 
   const selfHostExpectedOptions = options
-    .filter((option) => option.globalOnly || option.stage === 'global')
+    .filter((option) => !!option.globalOnly || option.stage === 'global')
     .map((option) => option.name)
     .sort();
 

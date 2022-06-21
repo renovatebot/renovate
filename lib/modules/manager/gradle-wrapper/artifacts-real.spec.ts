@@ -247,7 +247,6 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
       expect(
         await readString(
           // TODO #7154
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           adminConfig.localDir!,
           `gradle/wrapper/gradle-wrapper.properties`
         )

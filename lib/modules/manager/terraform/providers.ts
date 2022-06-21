@@ -41,8 +41,8 @@ export function extractTerraformProvider(
     // istanbul ignore else
     if (is.string(line)) {
       // `{` will be counted with +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(regEx(/\{/g)) || []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
+      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
+      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block
@@ -52,9 +52,8 @@ export function extractTerraformProvider(
           if (kvMatch.groups.key === 'version') {
             dep.currentValue = kvMatch.groups.value;
           } else if (kvMatch.groups.key === 'source') {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            // TODO #7154
             dep.managerData!.source = kvMatch.groups.value;
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             dep.managerData!.sourceLine = lineNumber;
           }
         }
@@ -81,7 +80,7 @@ export function analyzeTerraformProvider(
   dep.datasource = TerraformProviderDatasource.id;
 
   if (is.nonEmptyString(dep.managerData?.source)) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     const source = sourceExtractionRegex.exec(dep.managerData!.source);
     if (!source?.groups) {
       dep.skipReason = 'unsupported-url';

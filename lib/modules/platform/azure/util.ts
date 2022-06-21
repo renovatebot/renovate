@@ -101,7 +101,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const bodyStruct = getPrBodyStruct(azurePr.description);
 
   const createdAt = azurePr.creationDate?.toISOString();
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+  // TODO #7154
   const state = stateMap[azurePr.status!] ?? PrState.Open;
 
   const sourceRefName = azurePr.sourceRefName;
@@ -183,6 +184,6 @@ export function getRepoByName(
       (r) =>
         project === r?.project?.name?.toLowerCase() &&
         repo === r?.name?.toLowerCase()
-    ) || null
+    ) ?? null
   );
 }

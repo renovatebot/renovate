@@ -23,7 +23,7 @@ export function extractTerragruntModule(
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     dep.managerData!.terragruntDependencyType =
       TerragruntDependencyTypes.terragrunt;
   });
@@ -33,7 +33,7 @@ export function extractTerragruntModule(
 export function analyseTerragruntModule(
   dep: PackageDependency<TerraformManagerData>
 ): void {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const source = dep.managerData!.source;
   const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../../config/global';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
@@ -21,6 +20,7 @@ async function getOnboardingConfig(
     'Checking if this org/owner has a default Renovate preset which can be used.'
   );
 
+  // TODO #7154
   const orgName = config.repository!.split('/')[0];
 
   // Check for org/renovate-config

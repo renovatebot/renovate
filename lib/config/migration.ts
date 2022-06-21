@@ -155,13 +155,10 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
         // validated non-null
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         delete migratedConfig.node!.enabled;
         migratedConfig.travis = migratedConfig.travis ?? {};
         migratedConfig.travis.enabled = true;
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         if (Object.keys(migratedConfig.node!).length) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           const subMigrate = migrateConfig(migratedConfig.node!);
           migratedConfig.node = subMigrate.migratedConfig;
         } else {

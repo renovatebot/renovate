@@ -36,7 +36,7 @@ function depStringHandler(
 ): Context {
   const depStr = token.value;
   const match = extractRegex.exec(depStr);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const { depName, currentValue } = match!.groups!;
 
   const dep: PackageDependency<ManagerData> = {

@@ -18,7 +18,6 @@ describe('modules/manager/index', () => {
 
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         supportedDatasources!.every((d) => {
           expect(datasources.includes(d)).toBeTrue();
         });
