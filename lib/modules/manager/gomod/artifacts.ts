@@ -224,6 +224,7 @@ export async function updateArtifacts({
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
+        GOINSECURE: process.env.GOINSECURE,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
