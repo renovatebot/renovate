@@ -364,7 +364,7 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        prBody = updatePrRenovateVerData(existingPr, prBody);
+        prBody = updatePrRenovateVerData(undefined, prBody);
         pr = await platform.createPr({
           sourceBranch: branchName,
           targetBranch: config.baseBranch ?? '',
