@@ -28,7 +28,7 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
     .mockName('clone')
     .mockImplementation(
       async (_registryUrl: string, clonePath: string, _opts) => {
-        if (delayMs > 0) {
+        if (delayMs && delayMs > 0) {
           await delay(delayMs);
         }
 
@@ -114,7 +114,7 @@ describe('modules/datasource/crate/index', () => {
     });
 
     afterEach(async () => {
-      await tmpDir.cleanup();
+      await tmpDir?.cleanup();
       tmpDir = null;
       GlobalConfig.reset();
     });

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
@@ -45,7 +46,7 @@ export async function branchifyUpgrades(
     addMeta({
       branch: branchName,
     });
-    const seenUpdates = {};
+    const seenUpdates: Record<string, string> = {};
     // Filter out duplicates
     branchUpgrades[branchName] = branchUpgrades[branchName]
       .reverse()
@@ -68,7 +69,7 @@ export async function branchifyUpgrades(
           );
           return false;
         }
-        seenUpdates[upgradeKey] = newValue;
+        seenUpdates[upgradeKey] = newValue!;
         return true;
       })
       .reverse();
@@ -93,7 +94,7 @@ export async function branchifyUpgrades(
         const key = `${sourceUrl}|${newVersion}`;
         branchUpdates[key] = branchUpdates[key] || {};
         if (!branchUpdates[key][branchName]) {
-          branchUpdates[key][branchName] = depName;
+          branchUpdates[key][branchName] = depName!;
         }
       }
     }
@@ -110,9 +111,9 @@ export async function branchifyUpgrades(
     logger.debug({ err }, 'Error checking branch duplicates');
   }
   return {
-    errors: config.errors.concat(errors),
-    warnings: config.warnings.concat(warnings),
+    errors: config.errors!.concat(errors),
+    warnings: config.warnings!.concat(warnings),
     branches,
-    branchList,
+    branchList: branchList!,
   };
 }

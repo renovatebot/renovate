@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -30,7 +31,8 @@ const configFileExists = async (): Promise<boolean> => {
 
 const packageJsonConfigExists = async (): Promise<boolean> => {
   try {
-    const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
+    // TODO #7154
+    const pJson = JSON.parse((await readLocalFile('package.json', 'utf8'))!);
     if (pJson.renovate) {
       return true;
     }
@@ -45,7 +47,7 @@ export type Pr = any;
 
 const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
   platform.findPr({
-    branchName: config.onboardingBranch,
+    branchName: config.onboardingBranch!,
     prTitle: config.onboardingPrTitle,
     state: PrState.NotOpen,
   });
@@ -76,6 +78,10 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
           configFileContent.renovate
         ) {
           logger.debug('Existing config file confirmed');
+          logger.debug(
+            { fileName: cache.configFileName, config: configFileContent },
+            'Repository config'
+          );
           return true;
         }
       }
@@ -113,7 +119,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     return true;
   }
   logger.debug('Repo is not onboarded and no merged PRs exist');
-  if (!config.suppressNotifications.includes('onboardingClose')) {
+  if (!config.suppressNotifications!.includes('onboardingClose')) {
     // ensure PR comment
     await ensureComment({
       number: pr.number,
@@ -126,4 +132,4 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
 
 export const onboardingPrExists = async (
   config: RenovateConfig
-): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch));
+): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch!));
