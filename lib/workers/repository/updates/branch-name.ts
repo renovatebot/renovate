@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// TODO #7154
 import cleanGitRef from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
@@ -38,7 +38,7 @@ export function generateBranchName(update: RenovateConfig): void {
     logger.debug(
       `Dependency ${update.depName} is part of group ${update.groupName}`
     );
-    update.groupSlug = slugify(update.groupSlug || update.groupName, {
+    update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
       lower: true,
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {
@@ -52,8 +52,8 @@ export function generateBranchName(update: RenovateConfig): void {
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
-    update.branchTopic = update.group!.branchTopic || update.branchTopic;
-    update.branchName = update.group!.branchName || update.branchName;
+    update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
+    update.branchName = update.group!.branchName ?? update.branchName;
   }
 
   if (update.hashedBranchLength) {
@@ -83,7 +83,7 @@ export function generateBranchName(update: RenovateConfig): void {
 
     const hash = hasha(hashInput);
 
-    update.branchName = update.branchPrefix + hash.slice(0, hashLength);
+    update.branchName = `${update.branchPrefix}${hash.slice(0, hashLength)}`;
   } else {
     update.branchName = template.compile(update.branchName!, update);
 

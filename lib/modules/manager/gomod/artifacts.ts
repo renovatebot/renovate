@@ -69,7 +69,6 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
           `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           httpUrl!,
           hostRule,
           environmentVariables
@@ -89,7 +88,6 @@ function getUpdateImportPathCmds(
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     .map((dep) => dep.depName!)
     .filter((x) => !x.startsWith('gopkg.in'))
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
@@ -246,7 +244,6 @@ export async function updateArtifacts({
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major' &&
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       config.newMajor! > 1;
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
