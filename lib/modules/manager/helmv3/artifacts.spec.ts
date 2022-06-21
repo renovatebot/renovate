@@ -8,7 +8,7 @@ import * as docker from '../../../util/exec/docker';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import * as helmv3 from './artifacts';
+import * as helmv3 from '.';
 
 jest.mock('child_process');
 jest.mock('../../datasource');

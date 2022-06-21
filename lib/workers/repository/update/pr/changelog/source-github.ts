@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
@@ -32,15 +33,13 @@ function getCachedTags(
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const {
-    versioning,
-    currentVersion,
-    newVersion,
-    sourceUrl,
-    sourceDirectory,
-    depName,
-    manager,
-  } = config;
+  const versioning = config.versioning!;
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
+  const sourceUrl = config.sourceUrl!;
+  const sourceDirectory = config.sourceDirectory!;
+  const depName = config.depName!;
+  const manager = config.manager;
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.trace('No release notes for @types');
     return null;
@@ -57,7 +56,7 @@ export async function getChangeLogJSON(
   });
   // istanbul ignore if
   if (!token) {
-    if (host.endsWith('github.com')) {
+    if (host!.endsWith('.github.com') || host === 'github.com') {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },
@@ -80,7 +79,7 @@ export async function getChangeLogJSON(
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname
+  const repository = pathname!
     .slice(1)
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
@@ -88,7 +87,7 @@ export async function getChangeLogJSON(
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
-  const releases = config.releases || (await getInRangeReleases(config));
+  const releases = config.releases ?? (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
     return null;

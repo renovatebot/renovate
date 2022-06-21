@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateType } from '../../../config/types';
-import { updateDependency } from './update';
+import { updateDependency } from '.';
 
 const gomod1 = Fixtures.get('1/go.mod');
 const gomod2 = Fixtures.get('2/go.mod');
@@ -30,6 +30,7 @@ describe('modules/manager/gomod/update', () => {
         fileContent: gomod1,
         upgrade: upgrade1,
       });
+      expect(res1).toBeString();
       expect(res1).not.toEqual(gomod1);
       expect(res1).toContain(upgrade1.newValue);
       const upgrade2 = {
@@ -39,7 +40,8 @@ describe('modules/manager/gomod/update', () => {
         depType: 'require',
       };
       const res2 = updateDependency({
-        fileContent: res1,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        fileContent: res1!,
         upgrade: upgrade2,
       });
       expect(res2).not.toEqual(res1);
@@ -113,7 +115,11 @@ describe('modules/manager/gomod/update', () => {
     });
 
     it('returns null if error', () => {
-      const res = updateDependency({ fileContent: null, upgrade: null });
+      // TODO: #7154 bad test, uses invalid null to throwing nullref error
+      const res = updateDependency({
+        fileContent: null as never,
+        upgrade: null as never,
+      });
       expect(res).toBeNull();
     });
 
@@ -302,7 +308,7 @@ describe('modules/manager/gomod/update', () => {
 
     it('should return null for replacement', () => {
       const res = updateDependency({
-        fileContent: undefined,
+        fileContent: '',
         upgrade: { updateType: 'replacement' },
       });
       expect(res).toBeNull();

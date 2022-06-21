@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
@@ -100,7 +101,7 @@ export async function pruneStaleBranches(
     return;
   }
   let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix)
+    branchName.startsWith(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

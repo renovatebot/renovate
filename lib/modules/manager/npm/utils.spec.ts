@@ -1,11 +1,11 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import type { LockFile } from './types';
 import { composeLockFile, parseLockFile } from './utils';
 
 describe('modules/manager/npm/utils', () => {
   describe('parseLockFile', () => {
     it('parses lockfile string into an object', () => {
-      const lockFile = loadFixture('lockfile-parsing/package-lock.json');
+      const lockFile = Fixtures.get('lockfile-parsing/package-lock.json');
       const parseLockFileResult = parseLockFile(lockFile);
       expect(parseLockFileResult).toStrictEqual({
         detectedIndent: '  ',
@@ -55,9 +55,11 @@ describe('modules/manager/npm/utils', () => {
     });
 
     it('adds trailing newline to match npms behaviour and avoid diffs', () => {
-      const lockFile = loadFixture('lockfile-parsing/package-lock.json');
+      const lockFile = Fixtures.get('lockfile-parsing/package-lock.json');
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
-      const lockFileComposed = composeLockFile(lockFileParsed, detectedIndent);
+      // TODO #7154
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const lockFileComposed = composeLockFile(lockFileParsed!, detectedIndent);
       expect(lockFileComposed).toBe(lockFile);
     });
   });
