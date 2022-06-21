@@ -8,7 +8,10 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
 import * as _comment from '../../../../modules/platform/comment';
-import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
+import {
+  getPrBodyStruct,
+  prVerDataRe,
+} from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
@@ -272,7 +275,10 @@ describe('workers/repository/update/pr/index', () => {
       it('creates PR with pr data', () => {
         const prbodyContent = Fixtures.get('prbody1');
         const res = updatePrRenovateVerData(undefined, prbodyContent);
-        expect(res).toMatchSnapshot();
+        const match = prVerDataRe.exec(res);
+        expect(match?.groups?.payload).toBe(
+          'eyJwckNyZWF0aW9uVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSIsInByVXBkYXRlVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSJ9'
+        );
       });
 
       it('updates PR due to body change with pr data', () => {
@@ -282,7 +288,10 @@ describe('workers/repository/update/pr/index', () => {
           bodyStruct: getPrBodyStruct(`${prbodyContent} updated`),
         };
         const res = updatePrRenovateVerData(changedPr, prbodyContent);
-        expect(res).toMatchSnapshot();
+        const match = prVerDataRe.exec(res);
+        expect(match?.groups?.payload).toBe(
+          'eyJwckNyZWF0aW9uVmVyIjoieC55LnoiLCJwclVwZGF0ZVZlciI6IjAuMC4wLXNlbWFudGljLXJlbGVhc2UifQ=='
+        );
       });
 
       it('updates PR due to body change without pr data', () => {
@@ -292,7 +301,10 @@ describe('workers/repository/update/pr/index', () => {
           bodyStruct: getPrBodyStruct(`${prbodyContent} updated`),
         };
         const res = updatePrRenovateVerData(changedPr, prbodyContent);
-        expect(res).toMatchSnapshot();
+        const match = prVerDataRe.exec(res);
+        expect(match?.groups?.payload).toBe(
+          'eyJwckNyZWF0aW9uVmVyIjoidW5rbm93biIsInByVXBkYXRlVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSJ9'
+        );
       });
 
       it('ignores reviewable content ', async () => {

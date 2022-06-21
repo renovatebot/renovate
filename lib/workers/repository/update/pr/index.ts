@@ -69,7 +69,7 @@ export function updatePrRenovateVerData(
   prBody: string
 ): string {
   let res = prBody;
-  let oldData;
+  let oldData: string | undefined;
   let prDataNew: RenovatePrData;
   if (existingPr) {
     oldData = existingPr.bodyStruct?.renovatePrVerData;
@@ -91,7 +91,7 @@ export function updatePrRenovateVerData(
     res += `\n<!--renovate-pr-data:${prVerNew64}-->\n`;
   }
 
-  logger.debug(`PR Renovate Version Data:${JSON.stringify(prDataNew)}`);
+  logger.debug(prDataNew, 'PR Renovate Version Data');
   return res;
 }
 

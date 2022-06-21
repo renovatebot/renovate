@@ -973,7 +973,9 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(regEx('<!--.*?-->', 'g'), '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx('<!--.*?-->', 'g'), '')
+    .replace(regEx(/<!--renovate-pr-data:(.*\s*)*?-->/), '');
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

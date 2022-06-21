@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { stripEmojis } from '../../util/emoji';
 import { regEx } from '../../util/regex';
@@ -44,11 +43,6 @@ export function getPrBodyStruct(
   const rebaseRequested = isRebaseRequested(body);
   if (rebaseRequested) {
     result.rebaseRequested = rebaseRequested;
-  }
-
-  // istanbul ignore if
-  if (!is.string(body)) {
-    return result;
   }
 
   const base64data = getRenovatePrVerData(body);
