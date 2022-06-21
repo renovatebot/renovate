@@ -50,9 +50,9 @@ describe('modules/platform/bitbucket/index', () => {
     repoResp?: any,
     existingScope?: httpMock.Scope
   ): Promise<httpMock.Scope> {
-    const repository = config?.repository || 'some/repo';
+    const repository = config?.repository ?? 'some/repo';
 
-    const scope = existingScope || httpMock.scope(baseUrl);
+    const scope = existingScope ?? httpMock.scope(baseUrl);
 
     scope.get(`/2.0/repositories/${repository}`).reply(200, {
       owner: {},

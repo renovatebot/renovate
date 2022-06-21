@@ -49,7 +49,7 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName) || null;
+    const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
     let parentSha = null;
     if (sha) {
