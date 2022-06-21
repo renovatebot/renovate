@@ -82,7 +82,8 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(detectIndent).mockReturnValueOnce({
         type: undefined,
         amount: 0,
-        indent: '',
+        // TODO: incompatible types (#7154)
+        indent: null as never,
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(

@@ -79,6 +79,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       expect(JSON.parse(contents!)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       });
@@ -112,6 +113,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       expect(JSON.parse(contents!)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['some/renovate-config'],
