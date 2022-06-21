@@ -137,28 +137,5 @@ describe('workers/repository/update/pr/body/index', () => {
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
-
-    it('sets dependencyUrl to directory source', async () => {
-      const upgrade = {
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        sourceUrl: 'https://github.com/foo/bar',
-        sourceDirectory: '/baz',
-      };
-
-      await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [upgrade],
-      });
-
-      expect(upgrade).toMatchObject({
-        branchName: 'some-branch',
-        depNameLinked: '[undefined](https://github.com/foo/bar/tree/HEAD/baz)',
-        manager: 'some-manager',
-        sourceDirectory: '/baz',
-        sourceUrl: 'https://github.com/foo/bar',
-      });
-    });
   });
 });

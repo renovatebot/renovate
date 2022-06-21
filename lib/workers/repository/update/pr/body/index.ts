@@ -21,19 +21,9 @@ function massageUpdateMetadata(config: BranchConfig): void {
       dependencyUrl,
     } = upgrade;
     let depNameLinked = upgrade.depName;
-    let primaryLink = homepage || sourceUrl || dependencyUrl;
+    const primaryLink = homepage || sourceUrl || dependencyUrl;
     const slashPrefixRe = regEx('^/*');
     if (primaryLink) {
-      if (
-        primaryLink === sourceUrl &&
-        sourceDirectory &&
-        sourceUrl.includes('github.com')
-      ) {
-        primaryLink =
-          ensureTrailingSlash(sourceUrl) +
-          'tree/HEAD/' +
-          sourceDirectory.replace(slashPrefixRe, '');
-      }
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
     const otherLinks = [];

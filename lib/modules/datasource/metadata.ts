@@ -118,8 +118,8 @@ export function addMetaData(
   if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
+      delete dep.homepage;
     }
-    delete dep.homepage;
   }
   const extraBaseUrls = [];
   // istanbul ignore next
