@@ -52,7 +52,7 @@ async function fetchDepUpdates(
         ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
       };
     }
-    dep.updates = dep.updates || [];
+    dep.updates = dep.updates ?? [];
   }
   return dep;
 }
