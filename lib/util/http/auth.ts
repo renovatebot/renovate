@@ -22,7 +22,15 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
       options.hostType &&
       GITHUB_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
-      if (options.token.startsWith('x-access-token:')) {
+      if (options.token.startsWith('ghs_')) {
+        options.headers.authorization = `token ${options.token}`;
+        if (is.string(options.headers.accept)) {
+          options.headers.accept = options.headers.accept.replace(
+            'application/vnd.github.v3+json',
+            'application/vnd.github.machine-man-preview+json'
+          );
+        }
+      } else if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
         options.headers.authorization = `token ${appToken}`;
         if (is.string(options.headers.accept)) {
