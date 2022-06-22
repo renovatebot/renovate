@@ -717,7 +717,7 @@ export async function processBranch(
               number: pr.number,
               topic: artifactErrorTopic,
               content,
-              blocksMerge: true,
+              blocksMerge: config.artifactUpdateWarningAsThread ?? false,
             });
           }
         }

@@ -2319,6 +2319,14 @@ const options: RenovateOptions[] = [
     default: false,
     supportedPlatforms: ['github'],
   },
+  {
+    name: 'artifactUpdateWarningAsThread',
+    description:
+      'If enabled, an artifact update problem is created as a thread instead of a comment.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
