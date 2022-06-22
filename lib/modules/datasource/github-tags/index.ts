@@ -74,10 +74,8 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     newValue?: string
   ): Promise<string | null> {
     return newValue
-      ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        this.getTagCommit(registryUrl, repo!, newValue)
-      : // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        this.getCommit(registryUrl, repo!);
+      ? this.getTagCommit(registryUrl, repo!, newValue)
+      : this.getCommit(registryUrl, repo!);
   }
 
   override async getReleases(

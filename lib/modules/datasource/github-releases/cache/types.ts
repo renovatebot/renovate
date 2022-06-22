@@ -120,3 +120,8 @@ export interface CacheOptions {
    */
   maxUpdatePages?: number;
 }
+
+export interface ChangelogRelease {
+  date: string | Date;
+  version: string;
+}

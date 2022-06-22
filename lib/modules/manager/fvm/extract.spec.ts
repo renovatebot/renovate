@@ -28,7 +28,7 @@ describe('modules/manager/fvm/extract', () => {
         '{"flutterSdkVersion": "2.10.1", "flavors": {}}',
         packageFile
       );
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '2.10.1',
           datasource: 'flutter-version',
@@ -43,7 +43,7 @@ describe('modules/manager/fvm/extract', () => {
         '{"flutterSdkVersion": "stable", "flavors": {}}',
         packageFile
       );
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: 'stable',
           datasource: 'flutter-version',

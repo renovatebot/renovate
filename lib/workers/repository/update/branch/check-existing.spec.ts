@@ -10,11 +10,12 @@ describe('workers/repository/update/branch/check-existing', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      // TODO #7154 incompatible types
+      config = {
         ...defaultConfig,
         branchName: 'some-branch',
         prTitle: 'some-title',
-      });
+      } as BranchConfig;
       jest.resetAllMocks();
     });
 
