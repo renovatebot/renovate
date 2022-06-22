@@ -92,7 +92,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res?.sourceUrl).toBeDefined();
   });
 
   it('should parse repo url (string)', async () => {
@@ -113,7 +113,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res?.sourceUrl).toBeDefined();
   });
 
   it('should return deprecated', async () => {
@@ -146,7 +146,7 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res.deprecationMessage).toMatchSnapshot();
+    expect(res?.deprecationMessage).toMatchSnapshot();
   });
 
   it('should handle foobar', async () => {

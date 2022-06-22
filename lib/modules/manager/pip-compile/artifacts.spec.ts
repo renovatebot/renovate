@@ -1,17 +1,16 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { git, mocked } from '../../../../test/util';
+import { env, git } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
-import * as _env from '../../../util/exec/env';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
-import * as pipCompile from './artifacts';
+import { constructPipCompileCmd } from './artifacts';
+import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -21,8 +20,6 @@ jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -48,7 +45,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns if no requirements.txt found', async () => {
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -62,7 +59,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('content' as any);
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -80,7 +77,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -98,7 +95,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('new lock' as any);
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -114,7 +111,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       throw new Error('not found');
     });
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -135,7 +132,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -153,7 +150,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('new lock' as any);
     expect(
-      await pipCompile.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -166,7 +163,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   describe('constructPipCompileCmd()', () => {
     it('returns default cmd for garbage', () => {
       expect(
-        pipCompile.constructPipCompileCmd(
+        constructPipCompileCmd(
           Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
@@ -176,7 +173,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     it('returns extracted common arguments (like those featured in the README)', () => {
       expect(
-        pipCompile.constructPipCompileCmd(
+        constructPipCompileCmd(
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
@@ -188,7 +185,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     it('skips unknown arguments', () => {
       expect(
-        pipCompile.constructPipCompileCmd(
+        constructPipCompileCmd(
           Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'
@@ -202,7 +199,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     it('skips exploitable subcommands and files', () => {
       expect(
-        pipCompile.constructPipCompileCmd(
+        constructPipCompileCmd(
           Fixtures.get('requirementsWithExploitingArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt'

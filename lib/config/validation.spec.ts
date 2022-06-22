@@ -488,7 +488,7 @@ describe('config/validation', () => {
         constraints: { packageRules: [{}] },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as never, // TODO: #15963
         true
       );
       expect(warnings).toHaveLength(0);
@@ -507,9 +507,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('validates valid alias objects', async () => {
+    it('validates valid registryAlias objects', async () => {
       const config = {
-        aliases: {
+        registryAliases: {
           example1: 'http://www.example.com',
           example2: 'https://www.example2.com/example',
         },
@@ -521,9 +521,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if aliases depth is more than 1', async () => {
+    it('errors if registryAliases depth is more than 1', async () => {
       const config = {
-        aliases: {
+        registryAliases: {
           sample: {
             example1: 'http://www.example.com',
           },
@@ -536,15 +536,15 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `aliases.aliases.sample` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.sample` configuration: value is not a url',
           topic: 'Configuration Error',
         },
       ]);
     });
 
-    it('errors if aliases have invalid url', async () => {
+    it('errors if registryAliases have invalid url', async () => {
       const config = {
-        aliases: {
+        registryAliases: {
           example1: 'noturl',
           example2: 'http://www.example.com',
         },
@@ -556,7 +556,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `aliases.aliases.example1` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.example1` configuration: value is not a url',
           topic: 'Configuration Error',
         },
       ]);

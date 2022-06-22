@@ -130,7 +130,8 @@ describe('workers/repository/process/limits', () => {
 
     it('returns prConcurrentLimit if errored', () => {
       config.branchConcurrentLimit = 2;
-      const res = limits.getConcurrentBranchesRemaining(config, null);
+      // TODO: #7154
+      const res = limits.getConcurrentBranchesRemaining(config, null as never);
       expect(res).toBe(2);
     });
   });

@@ -52,8 +52,9 @@ For a high level overview of scheduling when Renovate bot runs, read the [key co
 
 On its own, the Renovate CLI tool runs once and then exits.
 Hence, it only runs as often as its administrator sets it to (e.g. via `cron`).
+
 For the [Renovate app on GitHub](https://github.com/apps/renovate), it currently runs continuously using a job queue that gets refreshed hourly, or when you make relevant commits to your repository.
-Therefore, you can expect to get PRs at any time of the day, e.g. soon after versions are published to npm.
+You can expect to get PRs at any time of the day, e.g. soon after versions are published to npm.
 
 Receiving PRs at any hour can increase the feeling of being "overwhelmed" by updates and possibly interrupt your flow during working hours, so many Renovate users also consider reducing Renovate's schedule to be outside their normal working hours, for example weeknights and weekends.
 This is achievable by configuring `schedule` in your Renovate config and optionally `timezone` (Renovate's default time zone is UTC, so you may find it easier to write schedules if you override `timezone` to your local one).

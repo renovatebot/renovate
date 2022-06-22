@@ -71,7 +71,7 @@ describe('modules/versioning/composer/index', () => {
     ${'0.3.1'} | ${'~0.4'} | ${true}
     ${'0.5.1'} | ${'~0.4'} | ${false}
   `('isLessThanRange("$a", "$b") === $expected', ({ a, b, expected }) => {
-    expect(semver.isLessThanRange(a, b)).toBe(expected);
+    expect(semver.isLessThanRange?.(a, b)).toBe(expected);
   });
 
   test.each`
@@ -150,6 +150,8 @@ describe('modules/versioning/composer/index', () => {
     ${'^5.1'}                 | ${'update-lockfile'} | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6.0'}
     ${'^5'}                   | ${'update-lockfile'} | ${'5.1.0'}        | ${'5.2.0'}       | ${'^5'}
     ${'^5'}                   | ${'update-lockfile'} | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6'}
+    ${'^0.4.0'}               | ${'replace'}         | ${'0.4'}          | ${'0.5'}         | ${'^0.5.0'}
+    ${'^0.4.0'}               | ${'replace'}         | ${'0.4'}          | ${'1.0'}         | ${'^1.0.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

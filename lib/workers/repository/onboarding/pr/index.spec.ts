@@ -224,7 +224,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       });
 
       it('deletes branch when PR already exists but cannot find it', async () => {
-        err.response.body = {
+        response.body = {
           errors: [{ message: 'A pull request already exists' }],
         };
         platform.createPr.mockRejectedValueOnce(err);

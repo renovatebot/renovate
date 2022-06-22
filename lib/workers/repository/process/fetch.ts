@@ -1,3 +1,4 @@
+// TODO #7154
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
@@ -26,16 +27,19 @@ async function fetchDepUpdates(
   if (!is.nonEmptyString(dep.depName)) {
     dep.skipReason = 'invalid-name';
   }
+  if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
+    dep.skipReason = 'internal-package';
+  }
   if (dep.skipReason) {
     return dep;
   }
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
+  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig = applyPackageRules(depConfig);
-  if (depConfig.ignoreDeps.includes(depName)) {
+  if (depConfig.ignoreDeps!.includes(depName!)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
@@ -48,7 +52,7 @@ async function fetchDepUpdates(
         ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
       };
     }
-    dep.updates = dep.updates || [];
+    dep.updates = dep.updates ?? [];
   }
   return dep;
 }
@@ -101,7 +105,7 @@ export async function fetchUpdates(
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  PackageFiles.add(config.baseBranch, { ...packageFiles });
+  PackageFiles.add(config.baseBranch!, { ...packageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete'

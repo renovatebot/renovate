@@ -52,7 +52,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
               const payload = migrateConfig(
                 packageFile as RenovateConfig
               ).migratedConfig;
-              for (const subrule of payload.packageRules || []) {
+              for (const subrule of payload.packageRules ?? []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
               }
@@ -148,13 +148,10 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
         // validated non-null
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         delete migratedConfig.node!.enabled;
-        migratedConfig.travis = migratedConfig.travis || {};
+        migratedConfig.travis = migratedConfig.travis ?? {};
         migratedConfig.travis.enabled = true;
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         if (Object.keys(migratedConfig.node!).length) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           const subMigrate = migrateConfig(migratedConfig.node!);
           migratedConfig.node = subMigrate.migratedConfig;
         } else {
@@ -214,7 +211,8 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
           const newKey = renameMap[oldKey as keyof typeof renameMap];
           if (newKey) {
-            packageRule[newKey] = ruleVal;
+            // TODO: fix types #7154
+            packageRule[newKey] = ruleVal as never;
             delete packageRule[oldKey];
           }
         }
@@ -251,7 +249,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     }
     if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle || {},
+        migratedConfig.gradle ?? {},
         migratedConfig['gradle-lite']
       );
     }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import * as npmUpdater from '../..';
 import { Fixtures } from '../../../../../../test/fixtures';
 

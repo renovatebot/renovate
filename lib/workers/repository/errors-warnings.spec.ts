@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
-import type { PackageFile } from '../../../../modules/manager/types';
+import { RenovateConfig, getConfig } from '../../../test/util';
+import type { PackageFile } from '../../modules/manager/types';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
-describe('workers/repository/onboarding/pr/errors-warnings', () => {
+describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
     let config: RenovateConfig;
 
@@ -45,7 +45,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
+                warnings: [{ message: 'Warning 1', topic: '' }],
               },
               {},
             ],
@@ -54,7 +54,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'backend/package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
+                warnings: [{ message: 'Warning 1', topic: '' }],
               },
             ],
           },
@@ -64,7 +64,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'Dockerfile',
             deps: [
               {
-                warnings: [{ message: 'Warning 2', topic: undefined }],
+                warnings: [{ message: 'Warning 2', topic: '' }],
               },
             ],
           },
