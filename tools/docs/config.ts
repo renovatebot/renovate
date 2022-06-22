@@ -184,16 +184,6 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning;
 }
 
-function findFooterIndex(optionsRaw: string[], headerIndex: number): number {
-  const len = optionsRaw.length;
-  for (let i = headerIndex + 1; i < len; i++) {
-    if (optionsRaw[i].includes('#')) {
-      return i - 1;
-    }
-  }
-  return len - 1;
-}
-
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -221,9 +211,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         `\n${option.description}\n\n` +
         genTable(Object.entries(el), option.type, option.default);
 
-      if (el.experimental && headerIndex !== -1) {
-        const footerIndex = findFooterIndex(configOptionsRaw, headerIndex);
-        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      if (el.experimental) {
+        const footerIndex = configOptionsRaw.indexOf(
+          `<!-- Auto-generated-warning-for ${option.name} -->`,
+          headerIndex + 1
+        );
+        if (footerIndex !== -1) {
+          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
       }
     });
 

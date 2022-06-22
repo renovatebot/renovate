@@ -2354,13 +2354,4 @@ function loadManagerOptions(): void {
   }
 }
 
-function setExperimentalFalse(): void {
-  for (const option of options) {
-    if (!option.experimental) {
-      option.experimental = false;
-    }
-  }
-}
-
 loadManagerOptions();
-setExperimentalFalse();

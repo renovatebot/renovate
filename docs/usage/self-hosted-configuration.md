@@ -615,6 +615,10 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
+<!-- prettier-ignore-start -->
+<!-- Auto-generated-warning-for repositoryCache -->
+<!-- prettier-ignore-end -->
+
 ## requireConfig
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
