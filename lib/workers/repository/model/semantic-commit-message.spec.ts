@@ -25,20 +25,11 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(message.toString()).toBe('fix(scope): test');
   });
 
-  it('should transform to lowercase only first letter', () => {
-    const message = new SemanticCommitMessage();
-    message.subject = 'Update My Org dependencies';
-    message.type = 'fix';
-    message.scope = 'deps ';
-
-    expect(message.toString()).toBe('fix(deps): update My Org dependencies');
-  });
-
   it('should create instance from string without scope', () => {
     const instance = SemanticCommitMessage.fromString('feat: ticket 123');
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(instance.toJSON()).toEqual({
+    expect(instance?.toJSON()).toEqual({
       body: '',
       footer: '',
       scope: '',
@@ -53,7 +44,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     );
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(instance.toJSON()).toEqual({
+    expect(instance?.toJSON()).toEqual({
       body: '',
       footer: '',
       scope: 'dashboard',
@@ -66,7 +57,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const instance = SemanticCommitMessage.fromString('fix(deps): ');
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(instance.toJSON()).toEqual({
+    expect(instance?.toJSON()).toEqual({
       body: '',
       footer: '',
       scope: 'deps',

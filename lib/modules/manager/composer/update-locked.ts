@@ -12,7 +12,6 @@ export function updateLockedDependency(
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const locked = JSON.parse(lockFileContent!) as ComposerLock;
     if (
       locked.packages?.find(

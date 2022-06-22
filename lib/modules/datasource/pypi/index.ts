@@ -23,7 +23,7 @@ export class PypiDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [
-    process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
+    process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/',
   ];
 
   override readonly defaultVersioning = pep440.id;
@@ -146,7 +146,7 @@ export class PypiDatasource extends Datasource {
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
-        const releases = dep.releases?.[version] || [];
+        const releases = dep.releases?.[version] ?? [];
         const { upload_time: releaseTimestamp } = releases[0] || {};
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
@@ -181,11 +181,18 @@ export class PypiDatasource extends Datasource {
 
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+    // Also match the current wheel spec
+    // https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
+    // where any of -_. characters in {distribution} are replaced with _
     const wheelText = text.toLowerCase();
-    const wheelPrefix = packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
+    const wheelPrefixWithPeriod =
+      packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
+    const wheelPrefixWithoutPeriod =
+      packageName.replace(regEx(/[^\w\d]+/g), '_') + '-';
     const wheelSuffix = '.whl';
     if (
-      wheelText.startsWith(wheelPrefix) &&
+      (wheelText.startsWith(wheelPrefixWithPeriod) ||
+        wheelText.startsWith(wheelPrefixWithoutPeriod)) &&
       wheelText.endsWith(wheelSuffix) &&
       wheelText.split('-').length > 2
     ) {
@@ -253,7 +260,7 @@ export class PypiDatasource extends Datasource {
     }
     const versions = Object.keys(releases);
     dependency.releases = versions.map((version) => {
-      const versionReleases = releases[version] || [];
+      const versionReleases = releases[version] ?? [];
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
       if (isDeprecated) {

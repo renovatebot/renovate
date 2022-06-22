@@ -46,7 +46,7 @@ export interface FileAddition {
   /**
    * File contents
    */
-  contents: string | Buffer;
+  contents: string | Buffer | null;
 
   /**
    * The executable bit

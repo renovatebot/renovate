@@ -31,6 +31,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -62,6 +63,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -91,6 +93,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -139,6 +142,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -168,6 +172,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -192,6 +197,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -216,6 +222,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -245,6 +252,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -279,7 +287,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_KEY_1 -e GIT_CONFIG_VALUE_1 -e GIT_CONFIG_KEY_2 -e GIT_CONFIG_VALUE_2 -e GIT_CONFIG_COUNT -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_KEY_1 -e GIT_CONFIG_VALUE_1 -e GIT_CONFIG_KEY_2 -e GIT_CONFIG_VALUE_2 -e GIT_CONFIG_COUNT -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -293,6 +301,7 @@ Array [
         "GIT_CONFIG_VALUE_1": "git@github.com:",
         "GIT_CONFIG_VALUE_2": "https://github.com/",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -327,13 +336,14 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./... && go mod tidy && go mod tidy\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./... && go mod tidy && go mod tidy\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -368,13 +378,14 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -409,13 +420,14 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -445,6 +457,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -474,6 +487,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -498,6 +512,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -522,6 +537,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -546,6 +562,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -570,6 +587,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -599,6 +617,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -623,6 +642,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -647,6 +667,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -671,6 +692,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -695,6 +717,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -724,6 +747,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -748,6 +772,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -772,6 +797,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -796,6 +822,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -820,6 +847,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -849,6 +877,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -873,6 +902,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -897,6 +927,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -921,6 +952,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",
@@ -945,6 +977,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
+        "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPRIVATE": "private.example.com/*",

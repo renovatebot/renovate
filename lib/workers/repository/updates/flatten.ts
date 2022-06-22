@@ -101,7 +101,7 @@ export async function flattenUpdates(
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
             if (updateConfig.updateTypes) {
-              updateConfig.updateTypes.forEach((updateType) => {
+              updateConfig.updateTypes.forEach((updateType: string) => {
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
@@ -157,7 +157,11 @@ export async function flattenUpdates(
       }
       if (get(manager, 'updateLockedDependency')) {
         for (const lockFile of packageFileConfig.lockFiles || []) {
-          const remediations = config.remediations?.[lockFile];
+          const lockfileRemediations = config.remediations as Record<
+            string,
+            Record<string, any>[]
+          >;
+          const remediations = lockfileRemediations?.[lockFile];
           if (remediations) {
             for (const remediation of remediations) {
               let updateConfig = mergeChildConfig(

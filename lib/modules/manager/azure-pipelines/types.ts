@@ -1,10 +1,10 @@
 export interface Container {
-  image: string;
+  image?: string | null;
 }
 export interface Repository {
   type: 'git' | 'github' | 'bitbucket';
   name: string;
-  ref: string;
+  ref?: string | null;
 }
 export interface Resources {
   repositories: Repository[];

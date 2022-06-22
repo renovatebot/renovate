@@ -50,7 +50,7 @@ export function filterVersions(
       const versionRelease = releases.find(
         (release) => release.version === v.version
       );
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       if (versionRelease!.isDeprecated) {
         logger.trace(
           `Skipping ${config.depName}@${v.version} because it is deprecated`
