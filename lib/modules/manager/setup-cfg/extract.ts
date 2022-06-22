@@ -6,12 +6,12 @@ import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
-  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || [];
+  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) ?? [];
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) || [];
+  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) ?? [];
   return sectionRecord;
 }
 
@@ -62,7 +62,7 @@ function parseDep(
 
   const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
   const packageMatches =
-    pkgValRegex.exec(lineNoEnvMarkers) || pkgRegex.exec(lineNoEnvMarkers);
+    pkgValRegex.exec(lineNoEnvMarkers) ?? pkgRegex.exec(lineNoEnvMarkers);
 
   if (!packageMatches) {
     return null;

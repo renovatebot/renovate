@@ -1,5 +1,4 @@
 // TODO #7154
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '../../../../test/fixtures';
 import * as pomUpdater from '.';

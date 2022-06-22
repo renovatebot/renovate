@@ -52,7 +52,6 @@ export class MigratedDataFactory {
 
       // indent defaults to 2 spaces
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const indent = detectIndent(raw!).indent ?? '  ';
       let content: string;
 

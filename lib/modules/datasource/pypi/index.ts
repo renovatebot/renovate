@@ -23,7 +23,7 @@ export class PypiDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [
-    process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
+    process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/',
   ];
 
   override readonly defaultVersioning = pep440.id;
@@ -146,7 +146,7 @@ export class PypiDatasource extends Datasource {
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
-        const releases = dep.releases?.[version] || [];
+        const releases = dep.releases?.[version] ?? [];
         const { upload_time: releaseTimestamp } = releases[0] || {};
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
@@ -260,7 +260,7 @@ export class PypiDatasource extends Datasource {
     }
     const versions = Object.keys(releases);
     dependency.releases = versions.map((version) => {
-      const versionReleases = releases[version] || [];
+      const versionReleases = releases[version] ?? [];
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
       if (isDeprecated) {

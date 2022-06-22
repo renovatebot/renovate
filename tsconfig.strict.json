@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    /* TODO add new checks */
   },
   "exclude": [
     // tsconfig.json
@@ -12,9 +11,7 @@
     "**/__mocks__/*",
     "coverage",
     "config.js",
-    "tmp",
+    "tmp"
     // TODO: fixme
-    "lib/workers/**/*.spec.ts",
-    "lib/renovate.spec.ts"
   ]
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { configFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import {
@@ -7,11 +6,12 @@ import {
 } from '../../../constants/error-messages';
 import { RepoParams, RepoResult, platform } from '../../../modules/platform';
 
-// TODO: fix types
+// TODO: fix types (#7154)
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
 
+// TODO #7154
 const defaultConfigFile = (config: RenovateConfig): string =>
   configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
@@ -45,7 +45,7 @@ async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   }
 }
 
-// TODO: fix types
+// TODO: fix types (#7154)
 async function getPlatformConfig(
   config: RepoParams
 ): Promise<WorkerPlatformConfig> {
@@ -56,7 +56,7 @@ async function getPlatformConfig(
   };
 }
 
-// TODO: fix types
+// TODO: fix types (#7154)
 export async function initApis(
   input: RenovateConfig
 ): Promise<WorkerPlatformConfig> {

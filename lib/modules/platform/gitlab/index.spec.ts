@@ -180,7 +180,7 @@ describe('modules/platform/gitlab/index', () => {
     const justRepo = repo.split('/').slice(0, 2).join('/');
     scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
       200,
-      repoResp || {
+      repoResp ?? {
         default_branch: 'master',
         http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
       }
