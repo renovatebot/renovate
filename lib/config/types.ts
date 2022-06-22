@@ -344,6 +344,12 @@ export interface RenovateOptionBase {
   releaseStatus?: 'alpha' | 'beta' | 'unpublished';
 
   stage?: RenovateConfigStage;
+
+  experimental?: boolean;
+
+  experimentalDescription?: string;
+
+  experimentalIssues?: number[];
 }
 
 export interface RenovateArrayOption<

@@ -86,6 +86,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'allowString',
     'admin',
     'globalOnly',
+    'experimental',
+    'experimentalDescription',
+    'experimentalIssues',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -142,11 +145,53 @@ function genTable(obj: [string, string][], type: string, def: any): string {
 }
 
 function stringifyArrays(el: Record<string, any>): void {
+  const ignoredKeys = ['default', 'experimentalIssues'];
+
   for (const [key, value] of Object.entries(el)) {
-    if (key !== 'default' && Array.isArray(value)) {
+    if (!ignoredKeys.includes(key) && Array.isArray(value)) {
       el[key] = value.join(', ');
     }
   }
+}
+
+function genExperimentalMsg(el: Record<string, any>): string {
+  const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
+
+  if (!el.experimental) {
+    return '';
+  }
+
+  if (el.experimentalDescription) {
+    warning += indent`${2}${el.experimentalDescription}`;
+  } else {
+    warning += indent`${2}Experimental features might be changed or even removed at any time.`;
+  }
+
+  const issues: string[] = [];
+  for (const issue of el.experimentalIssues) {
+    issues.push(`[#${issue}](${ghIssuesUrl}${issue})`);
+  }
+
+  if (issues.length > 0) {
+    warning += `<br>To track this feature visit the following GitHub ${
+      issues.length > 1 ? 'issues' : 'issue'
+    } `;
+    warning += issues.join(', ') + '.';
+  }
+
+  return warning;
+}
+
+function findFooterIndex(optionsRaw: string[], headerIndex: number): number {
+  const len = optionsRaw.length;
+  for (let i = headerIndex + 1; i < len; i++) {
+    if (optionsRaw[i].includes('#')) {
+      return i - 1;
+    }
+  }
+  return len - 1;
 }
 
 export async function generateConfig(dist: string, bot = false): Promise<void> {
@@ -175,6 +220,11 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       configOptionsRaw[headerIndex] +=
         `\n${option.description}\n\n` +
         genTable(Object.entries(el), option.type, option.default);
+
+      if (el.experimental && headerIndex !== -1) {
+        const footerIndex = findFooterIndex(configOptionsRaw, headerIndex);
+        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      }
     });
 
   await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));

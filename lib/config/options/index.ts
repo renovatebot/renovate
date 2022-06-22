@@ -223,6 +223,10 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
+    experimental: true,
+    experimentalDescription:
+      'This is an experimental feature and may be modified or removed in a future non-major release.',
+    experimentalIssues: [6589],
   },
   {
     name: 'force',
@@ -2350,4 +2354,13 @@ function loadManagerOptions(): void {
   }
 }
 
+function setExperimentalFalse(): void {
+  for (const option of options) {
+    if (!option.experimental) {
+      option.experimental = false;
+    }
+  }
+}
+
 loadManagerOptions();
+setExperimentalFalse();
