@@ -36,9 +36,9 @@ export async function migrateAndValidate(
     if (is.nonEmptyArray(errors)) {
       logger.info({ errors }, 'Found renovate config errors');
     }
-    massagedConfig.errors = (config.errors || []).concat(errors);
+    massagedConfig.errors = (config.errors ?? []).concat(errors);
     if (!config.repoIsOnboarded) {
-      massagedConfig.warnings = (config.warnings || []).concat(warnings);
+      massagedConfig.warnings = (config.warnings ?? []).concat(warnings);
     }
     return massagedConfig;
   } catch (err) /* istanbul ignore next */ {

@@ -14,13 +14,14 @@ async function getOnboardingConfig(
 ): Promise<RenovateSharedConfig> {
   let onboardingConfig = clone(config.onboardingConfig);
 
-  let orgPreset: string;
+  let orgPreset: string | undefined;
 
   logger.debug(
     'Checking if this org/owner has a default Renovate preset which can be used.'
   );
 
-  const orgName = config.repository.split('/')[0];
+  // TODO #7154
+  const orgName = config.repository!.split('/')[0];
 
   // Check for org/renovate-config
   try {

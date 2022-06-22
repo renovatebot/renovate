@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noImplicitAny": false /* TODO: fix me */,
-    "strictNullChecks": false /* TODO: fix me */,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2020",

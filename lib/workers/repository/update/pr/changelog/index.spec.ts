@@ -59,7 +59,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          currentVersion: null,
+          currentVersion: undefined,
         })
       ).toBeNull();
     });

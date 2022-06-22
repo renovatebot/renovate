@@ -18,7 +18,7 @@ describe('modules/manager/index', () => {
 
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
-        supportedDatasources.every((d) => {
+        supportedDatasources!.every((d) => {
           expect(datasources.includes(d)).toBeTrue();
         });
       });
@@ -62,7 +62,7 @@ describe('modules/manager/index', () => {
     expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr));
 
     for (const name of mgrs.keys()) {
-      const mgr = mgrs.get(name);
+      const mgr = mgrs.get(name)!;
       expect(validate(mgr)).toBeTrue();
     }
   });
@@ -110,10 +110,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.extractPackageFile('unknown', null, 'filename', {})
+        manager.extractPackageFile('unknown', '', 'filename', {})
       ).toBeNull();
       expect(
-        manager.extractPackageFile('dummy', null, 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {})
       ).toBeNull();
     });
 
@@ -125,7 +125,7 @@ describe('modules/manager/index', () => {
       });
 
       expect(
-        manager.extractPackageFile('dummy', null, 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {})
       ).not.toBeNull();
     });
 

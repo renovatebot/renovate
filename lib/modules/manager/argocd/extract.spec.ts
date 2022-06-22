@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const validApplication = Fixtures.get('validApplication.yml');
 const malformedApplication = Fixtures.get('malformedApplications.yml');
@@ -28,8 +28,8 @@ describe('modules/manager/argocd/extract', () => {
     it('full test', () => {
       const result = extractPackageFile(validApplication, 'applications.yml');
       expect(result).not.toBeNull();
-      expect(result.deps).toBeArrayOfSize(3);
-      expect(result.deps).toMatchSnapshot();
+      expect(result?.deps).toBeArrayOfSize(3);
+      expect(result?.deps).toMatchSnapshot();
     });
 
     it('supports applicationsets', () => {
