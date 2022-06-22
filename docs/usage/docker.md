@@ -253,10 +253,9 @@ module.exports = {
 To access the Google Container Registry (deprecated) or the Google Artifact Registry, use the JSON service account with `Basic` authentication, and use the:
 
 - `_json_key` as username
-- service account (what? name???) as password
+- full Google Cloud Platform service account JSON as password
 
-Encode the JSON service account beforehand.
-This way you avoid JSON-in-JSON wrapping, which is complex.
+To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON service account beforehand.
 
 Google Container Registry does not natively support `_json_key_base64` and a base64 encoded service account.
 Google Artifact Registry supports `_json_key_base64` and a base64 encoded service account natively.
