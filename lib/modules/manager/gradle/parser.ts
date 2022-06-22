@@ -278,10 +278,21 @@ function processCustomRegistryUrl({
   tokenMap,
   variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
+  let localVariables = variables;
+  if (tokenMap.keyToken?.value === 'name') {
+    localVariables = {
+      ...variables,
+      name: {
+        key: 'name',
+        value: tokenMap.valToken.value,
+      },
+    };
+  }
+
   let registryUrl: string | null = tokenMap.registryUrl?.value;
   if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
     const token = tokenMap.registryUrl as StringInterpolation;
-    registryUrl = interpolateString(token.children, variables);
+    registryUrl = interpolateString(token.children, localVariables);
   }
 
   try {
@@ -552,6 +563,37 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         tokenMapKey: 'registryUrl',
       },
       { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { name = "baz"; url = "https://maven.springframework.org/${name}" }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'name',
+        tokenMapKey: 'keyToken',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'valToken',
+      },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
