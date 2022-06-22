@@ -53,17 +53,19 @@ function isDockerHost(host: string): boolean {
 export async function getAuthHeaders(
   http: Http,
   registryHost: string,
-  dockerRepository: string
+  dockerRepository: string,
+  apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckUrl = `${registryHost}/v2/`;
-    const apiCheckResponse = await http.get(apiCheckUrl, {
+    // use json request, as this will be cached for tags, so it returns json
+    // TODO: add cache test
+    const apiCheckResponse = await http.getJson(apiCheckUrl, {
       throwHttpErrors: false,
       noAuth: true,
     });
 
     if (apiCheckResponse.statusCode === 200) {
-      logger.debug({ registryHost }, 'No registry auth required');
+      logger.debug({ apiCheckUrl }, 'No registry auth required');
       return {};
     }
     if (
@@ -71,7 +73,7 @@ export async function getAuthHeaders(
       !is.nonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(
-        { registryHost, res: apiCheckResponse },
+        { apiCheckUrl, res: apiCheckResponse },
         'Invalid registry response'
       );
       return null;
@@ -135,7 +137,16 @@ export async function getAuthHeaders(
       return opts.headers ?? null;
     }
 
-    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
+    let scope = `repository:${dockerRepository}:pull`;
+    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
+    if (
+      is.string(authenticateHeader.params.scope) &&
+      !apiCheckUrl.endsWith('/v2/')
+    ) {
+      scope = authenticateHeader.params.scope;
+    }
+
+    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=${scope}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -148,7 +159,7 @@ export async function getAuthHeaders(
       )
     ).body;
 
-    const token = authResponse.token || authResponse.access_token;
+    const token = authResponse.token ?? authResponse.access_token;
     // istanbul ignore if
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
@@ -501,7 +512,7 @@ export class DockerDatasource extends Datasource {
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
       (!manifest.mediaType && hasKey('manifests', manifest))
     ) {
-      const imageList = manifest as OciImageList;
+      const imageList = manifest;
       if (imageList.manifests.length) {
         logger.trace(
           { registry, dockerRepository, tag },
@@ -691,7 +702,8 @@ export class DockerDatasource extends Datasource {
     const headers = await getAuthHeaders(
       this.http,
       registryHost,
-      dockerRepository
+      dockerRepository,
+      url
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
@@ -800,10 +812,9 @@ export class DockerDatasource extends Datasource {
       { registryUrl, packageName }: GetReleasesConfig,
       newValue?: string
     ) => {
-      const newTag = newValue || 'latest';
+      const newTag = newValue ?? 'latest';
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         registryUrl!
       );
       return `${registryHost}:${dockerRepository}:${newTag}`;
@@ -815,13 +826,12 @@ export class DockerDatasource extends Datasource {
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       registryUrl!
     );
     logger.debug(
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
-    const newTag = newValue || 'latest';
+    const newTag = newValue ?? 'latest';
     let digest: string | null = null;
     try {
       let manifestResponse = await this.getManifestResponse(
@@ -845,7 +855,6 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             newTag
           );
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
         logger.debug({ digest }, 'Got docker digest');
@@ -883,7 +892,6 @@ export class DockerDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       registryUrl!
     );
     const tags = await this.getTags(registryHost, dockerRepository);

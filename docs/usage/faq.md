@@ -51,7 +51,7 @@ The default branch name that Git uses is `master` (this will be changed to `main
 The Git-hosting ecosystem has settled on using `main` to replace `master`.
 When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
 
-It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
+We've replaced `master` with `main` in our documentation where possible.
 
 A branch name has no special meaning within the Git program, it's just a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.

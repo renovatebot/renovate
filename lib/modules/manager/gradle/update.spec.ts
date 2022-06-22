@@ -78,7 +78,7 @@ describe('modules/manager/gradle/update', () => {
 
   it('should return null for replacement', () => {
     const res = updateDependency({
-      fileContent: undefined,
+      fileContent: '',
       upgrade: { updateType: 'replacement' },
     });
     expect(res).toBeNull();

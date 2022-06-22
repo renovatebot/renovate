@@ -1,3 +1,4 @@
+// TODO #7154
 import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
@@ -11,6 +12,7 @@ import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
+import { getInRangeReleases } from './releases';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
@@ -28,16 +30,16 @@ function getCachedTags(
   return promisedRes;
 }
 
-export async function getChangeLogJSON({
-  versioning,
-  currentVersion,
-  newVersion,
-  sourceUrl,
-  sourceDirectory,
-  releases,
-  depName,
-  manager,
-}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
+export async function getChangeLogJSON(
+  config: BranchUpgradeConfig
+): Promise<ChangeLogResult | null> {
+  const versioning = config.versioning!;
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
+  const sourceUrl = config.sourceUrl!;
+  const sourceDirectory = config.sourceDirectory!;
+  const depName = config.depName!;
+  const manager = config.manager;
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.trace('No release notes for @types');
     return null;
@@ -48,13 +50,13 @@ export async function getChangeLogJSON({
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
-  const config = hostRules.find({
+  const { token } = hostRules.find({
     hostType: PlatformId.Github,
     url,
   });
   // istanbul ignore if
-  if (!config.token) {
-    if (host.endsWith('github.com')) {
+  if (!token) {
+    if (host!.endsWith('.github.com') || host === 'github.com') {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
           { manager, depName, sourceUrl },
@@ -77,7 +79,7 @@ export async function getChangeLogJSON({
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname
+  const repository = pathname!
     .slice(1)
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
@@ -85,6 +87,7 @@ export async function getChangeLogJSON({
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
+  const releases = config.releases ?? (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
     return null;
@@ -105,10 +108,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
-    const tagName = tags
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
+    const tagName = findTagOfRelease(version, depName, release.version, tags);
     if (tagName) {
       return tagName;
     }
@@ -140,6 +140,7 @@ export async function getChangeLogJSON({
       if (!release) {
         release = {
           version: next.version,
+          gitRef: next.gitRef,
           date: next.releaseTimestamp,
           // put empty changes so that existing templates won't break
           changes: [],
@@ -175,7 +176,31 @@ export async function getChangeLogJSON({
     versions: changelogReleases,
   };
 
-  res = await addReleaseNotes(res);
+  res = await addReleaseNotes(res, config);
 
   return res;
+}
+
+function findTagOfRelease(
+  version: allVersioning.VersioningApi,
+  depName: string,
+  depNewVersion: string,
+  tags: string[]
+): string | undefined {
+  const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
+  const excactReleaseRegex = regEx(`${depName}[@-_]v?${depNewVersion}`);
+  const exactTagsList = tags.filter((tag) => {
+    return excactReleaseRegex.test(tag);
+  });
+  let tagName: string | undefined;
+  if (exactTagsList.length) {
+    tagName = exactTagsList
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  } else {
+    tagName = tags
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  }
+  return tagName;
 }

@@ -38,13 +38,13 @@ export class ConanDatasource extends Datasource {
     }
     const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
     const res = await this.githubHttp.get(url, {
-      headers: { Accept: 'application/vnd.github.v3.raw' },
+      headers: { accept: 'application/vnd.github.v3.raw' },
     });
     const doc = load(res.body, {
       json: true,
     }) as ConanYAML;
     return {
-      releases: Object.keys(doc?.versions || {}).map((version) => ({
+      releases: Object.keys(doc?.versions ?? {}).map((version) => ({
         version,
       })),
     };
@@ -80,7 +80,7 @@ export class ConanDatasource extends Datasource {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };
 
-          for (const resultString of Object.values(versions.results || {})) {
+          for (const resultString of Object.values(versions.results ?? {})) {
             const fromMatch = conanDatasourceRegex.exec(resultString);
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;

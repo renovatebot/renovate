@@ -68,7 +68,6 @@ export async function updateArtifacts({
     const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       projectDir!,
       await stat(gradlewPath).catch(() => null),
       `wrapper`
@@ -93,7 +92,6 @@ export async function updateArtifacts({
         cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       cmd += ` --gradle-version ${quote(config.newValue!)}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
@@ -101,7 +99,6 @@ export async function updateArtifacts({
       docker: {
         image: 'java',
         tagConstraint:
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           config.constraints?.java ?? getJavaContraint(config.currentValue!),
         tagScheme: getJavaVersioning(),
       },

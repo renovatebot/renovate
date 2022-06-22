@@ -1,4 +1,4 @@
-import { fs, git } from '../../../../../test/util';
+import { fs, git, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -12,6 +12,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
     it('handles an artifact which is a directory', async () => {
       const commands: BranchUpgradeConfig[] = [
         {
+          manager: 'some-manager',
           branchName: 'main',
           postUpgradeTasks: {
             executionMode: 'update',
@@ -20,6 +21,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         },
       ];
       const config: BranchConfig = {
+        manager: 'some-manager',
         updatedPackageFiles: [],
         updatedArtifacts: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
@@ -29,11 +31,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
       };
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: [],
-        not_added: [],
-        deleted: [],
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        })
+      );
       GlobalConfig.set({
         localDir: __dirname,
         allowedPostUpgradeCommands: ['some-command'],

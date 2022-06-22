@@ -16,7 +16,7 @@ export const bitbucketRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
+  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
 );
 export const azureDevOpsSshRefMatchRegex = regEx(
   /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?ref=(?<tag>.*)$/
@@ -30,14 +30,14 @@ export function extractTerraformModule(
 ): ExtractionResult {
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     dep.managerData!.terraformDependencyType = TerraformDependencyTypes.module;
   });
   return result;
 }
 
 export function analyseTerraformModule(dep: PackageDependency): void {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const source = dep.managerData!.source as string;
   const githubRefMatch = githubRefMatchRegex.exec(source);
   const bitbucketRefMatch = bitbucketRefMatchRegex.exec(source);
@@ -62,6 +62,12 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.packageName = dep.depName;
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
+  } else if (azureDevOpsSshRefMatch?.groups) {
+    dep.depType = 'module';
+    dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
+    dep.packageName = azureDevOpsSshRefMatch.groups.url;
+    dep.currentValue = azureDevOpsSshRefMatch.groups.tag;
+    dep.datasource = GitTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'module';
     if (gitTagsRefMatch.groups.path.includes('//')) {
@@ -74,12 +80,6 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       dep.packageName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = GitTagsDatasource.id;
-  } else if (azureDevOpsSshRefMatch?.groups) {
-    dep.depType = 'module';
-    dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
-    dep.packageName = azureDevOpsSshRefMatch.groups.url;
-    dep.currentValue = azureDevOpsSshRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;
   } else if (source) {
     const moduleParts = source.split('//')[0].split('/');

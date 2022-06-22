@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
@@ -287,7 +286,6 @@ describe('config/presets/index', () => {
 
       expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
-      expect(local.getPreset.mock.calls[0][0].baseConfig).toBeDefined();
       expect(res).toMatchSnapshot();
     });
 
@@ -308,26 +306,6 @@ describe('config/presets/index', () => {
         endpoint: 'https://dummy.example.com/api/v4',
         labels: ['self-hosted resolved'],
       });
-      expect(local.getPreset.mock.calls).toMatchObject([
-        [
-          {
-            baseConfig: {
-              platform: 'gitlab',
-              endpoint: 'https://dummy.example.com/api/v4',
-              extends: ['local>username/preset-repo'],
-            },
-          },
-        ],
-        [
-          {
-            baseConfig: {
-              platform: 'gitlab',
-              endpoint: 'https://dummy.example.com/api/v4',
-              extends: ['local>username/preset-repo'],
-            },
-          },
-        ],
-      ]);
     });
   });
 

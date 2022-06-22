@@ -5,10 +5,10 @@ description: Configuration Options usable in renovate.json or package.json
 
 # Configuration Options
 
-This document describes all the configuration options you may configure in a Renovate configuration file.
+This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of the following locations:
+You can store your Renovate configuration file in one of these locations:
 
 1. `renovate.json`
 1. `renovate.json5`
@@ -94,23 +94,6 @@ You normally don't need to configure this, but one example where it can be usefu
 In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
 This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
 
-## aliases
-
-The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
-
-The above managers include this default alias:
-
-```json
-{
-  "aliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
-
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
@@ -133,7 +116,8 @@ If configured, Renovate will take a random sample of given size from assignees a
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone or something else to merge them.
-By configuring this setting, you can enable Renovate to automerge PRs or even branches itself, therefore reducing the amount of human intervention required.
+By configuring this setting, you allow Renovate to automerge PRs or even branches.
+Using automerge reduces the amount of human intervention required.
 
 Usually you won't want to automerge _all_ PRs, for example most people would want to leave major dependency updates to a human to review first.
 You could configure Renovate to automerge all but major this way:
@@ -184,6 +168,12 @@ Example use:
   "automergeComment": "bors: r+"
 }
 ```
+
+## automergeSchedule
+
+Use the `automergeSchedule` option to define times of week or month during which Renovate may automerge its PRs.
+The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
+To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
 
 ## automergeStrategy
 
@@ -313,6 +303,12 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
     This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
     If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
 
+## branchPrefixOld
+
+Renovate uses branch names as part of its checks to see if an update PR was created previously, and already merged or ignored.
+If you change `branchPrefix`, then no previously closed PRs will match, which could lead to Renovate recreating PRs in such cases.
+Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate to look for those branches too, and avoid this happening.
+
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
@@ -421,6 +417,31 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 !!! note
     This option is applicable to GitLab only.
 
+## configMigration
+
+If enabled, Renovate will raise a pull request if config file migration is needed.
+
+We're adding new features to Renovate bot often.
+Most times you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to change your Renovate configuration.
+To help you with this, Renovate will create config migration pull requests.
+
+Example:
+
+After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would make this change:
+
+```diff
+{
+- "baseBranch": "main"
++ "baseBranches": ["main"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! info
+    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
@@ -498,8 +519,9 @@ Examples of what having a Dependency Dashboard will allow you to do:
 
 <!-- prettier-ignore -->
 !!! tip
-    Enabling the Dependency Dashboard does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting.
-    The Dependency Dashboard therefore provides visibility as well as additional control.
+    Just enabling the Dependency Dashboard doesn't change the "control flow" of Renovate.
+    Renovate still creates and manages PRs, and still follows your schedules and rate limits.
+    The Dependency Dashboard gives you extra visibility and control over your updates.
 
 ## dependencyDashboardApproval
 
@@ -609,7 +631,7 @@ This option is evaluated at PR/MR creation time and is only supported on the fol
 <!-- prettier-ignore -->
 !!! note
     GitLab implements draft status by checking whether the PR's title starts with certain strings.
-    Therefore, `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    This means that `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -841,7 +863,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 Configuration added here applies for all Go-related updates.
 The only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
-For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
+For self-hosted users, `GOPROXY`, `GONOPROXY`, `GOPRIVATE` and `GOINSECURE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
 Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
 Also we support the `off` keyword which will stop any fetching immediately.
@@ -1240,7 +1262,7 @@ By default, Renovate will skip over any repositories that are forked.
 This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
 
-If you are using the hosted WhiteSource Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
+If you are using the hosted Mend Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
 
 ## includePaths
 
@@ -1349,7 +1371,7 @@ This option exists to provide flexibility about whether `npmrc` strings in confi
 In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
 A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
-If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
+If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
 
 ## packageRules
@@ -1434,7 +1456,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 ```
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-Therefore, you should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if necessary.
+You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
 
 ### allowedVersions
 
@@ -1881,7 +1903,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `gomodNoMassage`: Skip massaging `replace` directives before calling `go` commands
+- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
@@ -2011,6 +2033,9 @@ This setting - if enabled - limits Renovate to a maximum of x concurrent PRs ope
 
 This limit is enforced on a per-repository basis.
 
+Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+Security PRs have `[SECURITY]` in their PR title.
+
 ## prCreation
 
 This setting tells Renovate when you would like it to raise PRs:
@@ -2055,7 +2080,7 @@ This limit is enforced on a per-repository basis.
 
 If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs.
 However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely.
-Therefore we configure an upper limit for how long we wait until creating a PR.
+This is why we configured an upper limit for how long we wait until creating a PR.
 
 <!-- prettier-ignore -->
 !!! note
@@ -2066,7 +2091,7 @@ Therefore we configure an upper limit for how long we wait until creating a PR.
 Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
 In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major).
 If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
-The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
+The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
 
 Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
 
@@ -2124,7 +2149,7 @@ Renovate's `"auto"` strategy works like this for npm:
 5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
-Therefore, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
+Renovate won't deliberately "narrow" any range by increasing the semver value inside.
 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range.
 If instead you'd prefer to be updated to `^1.2.0` in cases like this, then configure `rangeStrategy` to `bump` in your Renovate config.
@@ -2174,25 +2199,54 @@ Typically you shouldn't need to modify this setting.
 
 ## regexManagers
 
-`regexManagers` entries are used to configure the `regex` Manager in Renovate.
+Use `regexManagers` entries to configure the `regex` manager in Renovate.
 
-Users can define custom managers for cases such as:
+You can define custom managers for cases such as:
 
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
 The custom manager concept is based on using Regular Expression named capture groups.
-For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`).
-It's not recommended to do both, due to the potential for confusion.
-It is recommended to also include `versioning` but if it is missing then it will default to `semver`.
 
-For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
+You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure it's corresponding template (e.g. `depNameTemplate`) for these fields:
+
+- `datasource`
+- `depName`
+- `currentValue`
+
+Use named capture group matching _or_ set a corresponding template.
+We recommend you use only one of these methods, or you'll get confused.
+
+We recommend that you also tell Renovate what `versioning` to use.
+If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
+
+For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
 
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
-Currently only a length of one `matchString` is supported.
 
 Example:
 
@@ -2484,8 +2538,6 @@ See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-re
 
 ## reviewersSampleSize
 
-Take a random sample of given size from reviewers.
-
 ## rollback
 
 Add to this object if you wish to define rules that apply only to PRs that roll back versions.
@@ -2563,6 +2615,10 @@ Technical details: We mostly rely on the text parsing of the library [@breejs/la
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+
+<!-- prettier-ignore -->
+!!! note
+    Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
 
 ## semanticCommitScope
 
