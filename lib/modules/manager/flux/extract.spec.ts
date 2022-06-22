@@ -55,7 +55,7 @@ describe('modules/manager/flux/extract', () => {
         `# Flux Version: v0.27.0`,
         'clusters/my-cluster/flux-system/gotk-components.yaml'
       );
-      expect(result.deps[0].managerData.components).toBeUndefined();
+      expect(result?.deps[0].managerData?.components).toBeUndefined();
     });
 
     it('ignores system manifests without a version', () => {
@@ -71,7 +71,7 @@ describe('modules/manager/flux/extract', () => {
         loadFixture('release.yaml'),
         'release.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('ignores HelmRelease resources without an apiVersion', () => {
@@ -93,7 +93,7 @@ kind: HelmRepository
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('ignores HelmRelease resources without a chart name', () => {
@@ -138,7 +138,7 @@ spec:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('does not match HelmRelease resources without a sourceRef', () => {
@@ -157,7 +157,7 @@ spec:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('does not match HelmRelease resources without a namespace', () => {
@@ -177,7 +177,7 @@ spec:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('ignores HelmRepository resources without a namespace', () => {
@@ -191,7 +191,7 @@ metadata:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('ignores HelmRepository resources without a URL', () => {
@@ -206,7 +206,7 @@ metadata:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe('unknown-registry');
+      expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
 
     it('ignores resources of an unknown kind', () => {

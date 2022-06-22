@@ -233,8 +233,8 @@ export function parseCatalog(
   content: string
 ): PackageDependency<GradleManagerData>[] {
   const tomlContent = parse(content) as GradleCatalog;
-  const versions = tomlContent.versions || {};
-  const libs = tomlContent.libraries || {};
+  const versions = tomlContent.versions ?? {};
+  const libs = tomlContent.libraries ?? {};
   const libStartIndex = content.indexOf('libraries');
   const libSubContent = content.slice(libStartIndex);
   const versionStartIndex = content.indexOf('versions');
@@ -254,7 +254,7 @@ export function parseCatalog(
     extractedDeps.push(dependency);
   }
 
-  const plugins = tomlContent.plugins || {};
+  const plugins = tomlContent.plugins ?? {};
   const pluginsStartIndex = content.indexOf('[plugins]');
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {

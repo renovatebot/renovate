@@ -19,7 +19,7 @@ export abstract class Datasource implements DatasourceApi {
 
   defaultConfig: Record<string, unknown> | undefined;
 
-  defaultRegistryUrls: string[] | undefined;
+  defaultRegistryUrls?: string[] | (() => string[]);
 
   defaultVersioning: string | undefined;
 

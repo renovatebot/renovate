@@ -120,7 +120,6 @@ function handleAssignment({
   if (dep) {
     dep.groupName = key;
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: valToken.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -149,7 +148,6 @@ function processDepString({
   const dep = parseDependencyString(token.value);
   if (dep) {
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: token.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -278,8 +276,14 @@ function processPlugin({
 
 function processCustomRegistryUrl({
   tokenMap,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const registryUrl = tokenMap.registryUrl?.value;
+  let registryUrl: string | null = tokenMap.registryUrl?.value;
+  if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
+    const token = tokenMap.registryUrl as StringInterpolation;
+    registryUrl = interpolateString(token.children, variables);
+  }
+
   try {
     if (registryUrl) {
       const { host, protocol } = url.parse(registryUrl);
@@ -303,7 +307,6 @@ function processPredefinedRegistryUrl({
     google: GOOGLE_REPO,
     gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return { urls: [registryUrl!] };
 }
 
@@ -367,9 +370,11 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
 
   if (groupId && artifactId) {
     res.vars = { [key]: { key, value, fileReplacePosition, packageFile } };
-    const versionRefToken = tokenMap.version;
-    if (versionRefToken) {
-      const version: Token = { ...versionRefToken, type: TokenType.Word };
+    const version = tokenMap.version;
+    if (version) {
+      if (tokenMap.versionType?.value === 'versionRef') {
+        version.type = TokenType.Word;
+      }
       const depRes = processLongFormDep({
         ...input,
         tokenMap: { ...input.tokenMap, version },
@@ -381,6 +386,18 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
+  {
+    // ext.foo.bar = 'baz'
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'ext' },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
   {
     // foo.bar = 'baz'
     matchers: [
@@ -530,7 +547,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'maven',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -549,7 +569,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'url',
       },
       { matchType: TokenType.Assignment },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -572,7 +595,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'uri',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -590,7 +616,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchType: TokenType.Word,
         matchValue: 'url',
       },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -599,7 +628,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -609,7 +641,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -617,6 +652,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // library("foobar", "foo", "bar").versionRef("foo.bar")
+    // library("foobar", "foo", "bar").version("1.2.3")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'library' },
       { matchType: TokenType.LeftParen },
@@ -627,7 +663,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Dot },
-      { matchType: TokenType.Word, matchValue: 'versionRef' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['versionRef', 'version'],
+        tokenMapKey: 'versionType',
+      },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'version' },
       { matchType: TokenType.RightParen },
@@ -895,7 +935,7 @@ export function parseGradle(
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
 const propRegex = regEx(
-  `^(?<leftPart>\\s*(?<key>${propWord})\\s*=\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
+  `^(?<leftPart>\\s*(?<key>${propWord})\\s*[= :]\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
 );
 
 export function parseProps(
@@ -916,7 +956,6 @@ export function parseProps(
             ...dep,
             managerData: {
               fileReplacePosition:
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                 offset + leftPart.length + dep.depName!.length + 1,
               packageFile,
             },

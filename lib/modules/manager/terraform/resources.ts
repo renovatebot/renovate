@@ -5,6 +5,7 @@ import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import { extractTerraformKubernetesResource } from './extract/kubernetes';
 import { analyseTerraformVersion } from './required-version';
 import type { ExtractionResult, ResourceManagerData } from './types';
 import {
@@ -37,10 +38,26 @@ export function extractTerraformResource(
 
   const typeMatch = resourceTypeExtractionRegex.exec(line);
 
-  // Sets the resourceType, e.g. "helm_release" 'resource "helm_release" "test_release"'
-  managerData.resourceType =
-    TerraformResourceTypes[typeMatch?.groups?.type as TerraformResourceTypes] ??
-    TerraformResourceTypes.unknown;
+  // Sets the resourceType, e.g., 'resource "helm_release" "test_release"' -> helm_release
+  const resourceType = typeMatch?.groups?.type;
+
+  const isKnownType =
+    resourceType &&
+    Object.keys(TerraformResourceTypes).some((key) => {
+      return TerraformResourceTypes[key].includes(resourceType);
+    });
+
+  if (isKnownType && resourceType.startsWith('kubernetes_')) {
+    return extractTerraformKubernetesResource(
+      startingLine,
+      lines,
+      resourceType
+    );
+  }
+
+  managerData.resourceType = isKnownType
+    ? resourceType
+    : TerraformResourceTypes.unknown[0];
 
   /**
    * Iterates over all lines of the resource to extract the relevant key value pairs,
@@ -58,8 +75,8 @@ export function extractTerraformResource(
     // istanbul ignore else
     if (is.string(line)) {
       // `{` will be counted with +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(regEx(/\{/g)) || []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
+      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
+      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       const kvMatch = keyValueExtractionRegex.exec(line);
@@ -96,21 +113,19 @@ export function extractTerraformResource(
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
-  // istanbul ignore if: should tested?
-  if (!dep.managerData) {
-    return;
-  }
-  switch (dep.managerData.resourceType) {
-    case TerraformResourceTypes.docker_container:
+  switch (dep.managerData?.resourceType) {
+    case TerraformResourceTypes.generic_image_resource.find(
+      (key) => key === dep.managerData?.resourceType
+    ):
       if (dep.managerData.image) {
         applyDockerDependency(dep, dep.managerData.image);
-        dep.depType = 'docker_container';
+        dep.depType = dep.managerData.resourceType;
       } else {
         dep.skipReason = 'invalid-dependency-specification';
       }
       break;
 
-    case TerraformResourceTypes.docker_image:
+    case TerraformResourceTypes.docker_image[0]:
       if (dep.managerData.name) {
         applyDockerDependency(dep, dep.managerData.name);
         dep.depType = 'docker_image';
@@ -119,29 +134,20 @@ export function analyseTerraformResource(
       }
       break;
 
-    case TerraformResourceTypes.docker_service:
-      if (dep.managerData.image) {
-        applyDockerDependency(dep, dep.managerData.image);
-        dep.depType = 'docker_service';
-      } else {
-        dep.skipReason = 'invalid-dependency-specification';
-      }
-      break;
-
-    case TerraformResourceTypes.helm_release:
+    case TerraformResourceTypes.helm_release[0]:
       if (!dep.managerData.chart) {
         dep.skipReason = 'invalid-name';
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = 'local-chart';
       }
       dep.depType = 'helm_release';
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       dep.registryUrls = [dep.managerData.repository!];
       dep.depName = dep.managerData.chart;
       dep.datasource = HelmDatasource.id;
       break;
 
-    case TerraformResourceTypes.tfe_workspace:
+    case TerraformResourceTypes.tfe_workspace[0]:
       if (dep.currentValue) {
         analyseTerraformVersion(dep);
         dep.depType = 'tfe_workspace';

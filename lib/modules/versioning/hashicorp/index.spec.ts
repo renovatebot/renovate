@@ -38,7 +38,7 @@ describe('modules/versioning/hashicorp/index', () => {
   `(
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
-      expect(semver.isLessThanRange(version, range)).toBe(expected);
+      expect(semver.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 

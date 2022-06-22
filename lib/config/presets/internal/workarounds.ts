@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
     ],
+    ignoreDeps: [],
   },
   mavenCommonsAncientVersion: {
     description: 'Fix some problems with very old Maven commons versions',

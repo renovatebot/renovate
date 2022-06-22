@@ -95,7 +95,7 @@ export async function extractPackageFile(
       lockFiles[key] = undefined;
     }
   }
-  lockFiles.npmLock = lockFiles.packageLock || lockFiles.shrinkwrapJson;
+  lockFiles.npmLock = lockFiles.packageLock ?? lockFiles.shrinkwrapJson;
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
 
@@ -109,7 +109,7 @@ export async function extractPackageFile(
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
     } else {
-      npmrc = config.npmrc || '';
+      npmrc = config.npmrc ?? '';
       if (npmrc.length) {
         if (!npmrc.endsWith('\n')) {
           npmrc += '\n';
@@ -152,7 +152,8 @@ export async function extractPackageFile(
     | undefined;
   try {
     lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
-    lernaJson = JSON.parse(await readLocalFile(lernaJsonFile, 'utf8'));
+    // TODO #7154
+    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
@@ -306,7 +307,7 @@ export async function extractPackageFile(
       githubRepo = matchUrlSshFormat[2];
       githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/; // TODO #12872 lookahead
+    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
     if (
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
@@ -472,11 +473,8 @@ export async function extractPackageFile(
   };
 }
 
-export async function postExtract(
-  packageFiles: PackageFile[],
-  updateInternalDeps: boolean
-): Promise<void> {
-  await detectMonorepos(packageFiles, updateInternalDeps);
+export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
+  await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
 
@@ -500,7 +498,8 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  await postExtract(npmFiles, !!config.updateInternalDeps);
+
+  await postExtract(npmFiles);
   return npmFiles;
 }
 

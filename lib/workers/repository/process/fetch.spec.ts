@@ -80,7 +80,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: 'abcd' },
               { currentValue: '2.8.11', datasource: 'docker' },
               { depName: ' ' },
-              { depName: null },
+              {},
               { depName: undefined },
               { depName: { oh: 'no' } as unknown as string },
             ],
@@ -95,6 +95,51 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.docker[0].deps[4].skipReason).toBe('invalid-name');
       expect(packageFiles.docker[0].deps[5].skipReason).toBe('invalid-name');
       expect(packageFiles.docker[0].deps[6].skipReason).toBe('invalid-name');
+    });
+
+    it('skips internal deps by default', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        docker: [
+          {
+            packageFile: 'values.yaml',
+            deps: [
+              {
+                depName: 'dep-name',
+                currentValue: '2.8.11',
+                datasource: 'docker',
+                isInternal: true,
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.docker[0].deps[0].skipReason).toBe(
+        'internal-package'
+      );
+      expect(packageFiles.docker[0].deps[0].updates).toHaveLength(0);
+    });
+
+    it('fetch updates for internal deps if updateInternalDeps is true', async () => {
+      config.updateInternalDeps = true;
+      config.rangeStrategy = 'auto';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                isInternal: true,
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
     });
   });
 });
