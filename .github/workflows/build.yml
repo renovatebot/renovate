@@ -137,8 +137,8 @@ jobs:
       - name: Type check
         run: yarn type-check
 
-      - name: Null check
-        run: yarn null-check
+      - name: Strict check
+        run: yarn strict-check
 
   release:
     needs: [lint, test]

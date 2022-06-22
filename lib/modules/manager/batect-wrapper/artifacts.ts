@@ -34,7 +34,6 @@ export async function updateArtifacts({
   packageFileName,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const version = config.newVersion!;
 
   logger.debug({ version, packageFileName }, 'Updating Batect wrapper scripts');

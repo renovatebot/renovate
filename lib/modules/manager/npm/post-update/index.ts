@@ -84,7 +84,7 @@ export function determineLockFileDirs(
 
   function getPackageFile(fileName: string): Partial<PackageFile> {
     logger.trace('Looking for packageFile: ' + fileName);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
     for (const packageFile of packageFiles.npm!) {
       if (packageFile.packageFile === fileName) {
         logger.trace({ packageFile }, 'Found packageFile');
@@ -95,7 +95,7 @@ export function determineLockFileDirs(
     return {};
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
@@ -138,9 +138,8 @@ export async function writeExistingFiles(
     'Writing package.json files'
   );
   for (const packageFile of npmFiles) {
-    const basedir =
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      upath.dirname(packageFile.packageFile!);
+    // TODO #7154
+    const basedir = upath.dirname(packageFile.packageFile!);
     const npmrc: string = packageFile.npmrc ?? config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
@@ -182,7 +181,7 @@ export async function writeExistingFiles(
               upgrade.rangeStrategy === 'widen' &&
               upgrade.npmLock === npmLock
             ) {
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+              // TODO #7154
               widens.push(upgrade.depName!);
             }
             const { depName } = upgrade;
@@ -209,7 +208,7 @@ export async function writeExistingFiles(
                 npmLockParsed.dependencies
               ) {
                 widens.forEach((depName) => {
-                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                  // TODO #7154
                   delete npmLockParsed.dependencies![depName];
                 });
               }
@@ -258,7 +257,7 @@ export async function writeUpdatedPackageFiles(
     ) {
       logger.debug(`Writing lock file: ${packageFile.path}`);
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
@@ -268,11 +267,11 @@ export async function writeUpdatedPackageFiles(
     logger.debug(`Writing ${packageFile.path}`);
     const detectedIndent =
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
       detectIndent(packageFile.contents!.toString()).indent || '  ';
 
     // TODO #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
     const massagedFile = JSON.parse(packageFile.contents!.toString());
     try {
       const { token } = hostRules.find({
@@ -282,12 +281,10 @@ export async function writeUpdatedPackageFiles(
       for (const upgrade of config.upgrades) {
         // istanbul ignore if: test me
         if (upgrade.gitRef && upgrade.packageFile === packageFile.path) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           massagedFile[upgrade.depType as NpmDepType][upgrade.depName!] =
-            massagedFile[
-              upgrade.depType as NpmDepType
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            ][upgrade.depName!].replace(
+            massagedFile[upgrade.depType as NpmDepType][
+              upgrade.depName!
+            ].replace(
               'git+https://github.com',
               `git+https://${token}@github.com`
             );
@@ -574,8 +571,8 @@ export async function getAdditionalFiles(
         updatedArtifacts.push({
           type: 'addition',
           path: npmLock,
-          // TODO: can this be undefined?
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO: can this be undefined? (#7154)
+
           contents: res.lockFile!.replace(tokenRe, ''),
         });
       }
@@ -642,8 +639,7 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: yarnLock,
-        // TODO #7154
-
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -658,8 +654,7 @@ export async function getAdditionalFiles(
         updatedArtifacts.push({
           type: 'addition',
           path: lockFileName,
-          //
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           contents: res.lockFile!,
         });
         await updateYarnOffline(lockFileDir, updatedArtifacts);
@@ -677,7 +672,7 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(lockFileDir, npmrcContent);
     // istanbul ignore if: needs test
     if (existingYarnrcYmlContent) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);
     }
   }
@@ -715,7 +710,7 @@ export async function getAdditionalFiles(
       }
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
-        // TODO #7154
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -730,8 +725,7 @@ export async function getAdditionalFiles(
         updatedArtifacts.push({
           type: 'addition',
           path: pnpmShrinkwrap,
-          // TODO: can be undefined?
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO: can be undefined? (#7154)
           contents: res.lockFile!,
         });
       }
@@ -743,7 +737,7 @@ export async function getAdditionalFiles(
     let lockFile: string;
     logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       (p) => getSubDirectory(p.packageFile!) === getSubDirectory(lernaJsonFile)
     );
     // istanbul ignore if: not sure how to test
@@ -824,13 +818,13 @@ export async function getAdditionalFiles(
         const filename = packageFile.npmLock ?? packageFile.yarnLock;
         logger.trace(`Checking for ${filename}`);
         const existingContent = await getFile(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           filename!,
           config.reuseExistingBranch ? config.branchName : config.baseBranch
         );
         if (existingContent) {
           logger.trace('Found lock file');
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           const lockFilePath = filename!;
           logger.trace('Checking against ' + lockFilePath);
           try {
@@ -850,7 +844,7 @@ export async function getAdditionalFiles(
               logger.debug('File is updated: ' + lockFilePath);
               updatedArtifacts.push({
                 type: 'addition',
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                // TODO #7154
                 path: filename!,
                 contents: newContent,
               });

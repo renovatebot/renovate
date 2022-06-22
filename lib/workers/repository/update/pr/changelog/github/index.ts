@@ -116,7 +116,7 @@ export async function getReleaseList(
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const apiBaseUrl = project.apiBaseUrl!;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const repository = project.repository!;
