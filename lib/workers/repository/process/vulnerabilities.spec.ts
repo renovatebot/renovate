@@ -12,7 +12,9 @@ jest.mock('@jamiemagee/osv-offline', () => {
   return {
     __esModule: true,
     OsvOffline: class {
-      static create = () => createMock();
+      static create() {
+        return createMock();
+      }
     },
   };
 });

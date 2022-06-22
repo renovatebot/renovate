@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
@@ -20,6 +19,7 @@ export function getPrList(
 
   for (const branch of branches) {
     const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
+    // TODO #7154
     prDesc += `<details>\n<summary>${branch.prTitle!.replace(
       prTitleRe,
       '@&#8203;$1'
@@ -60,6 +60,7 @@ export function getPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
+  // TODO #7154
   const prHourlyLimit = config.prHourlyLimit!;
   if (
     prHourlyLimit > 0 &&

@@ -73,13 +73,16 @@ const lexer = moo.states({
     },
     def: {
       match: new RegExp(
-        [
-          'container_pull',
-          'http_archive',
-          'http_file',
-          'go_repository',
-          'git_repository',
-        ].join('|')
+        '(?:' +
+          [
+            'container_pull',
+            'http_archive',
+            'http_file',
+            'go_repository',
+            'git_repository',
+            'maybe',
+          ].join('|') +
+          ')\\s*\\('
       ),
     },
     unknown: moo.fallback,
@@ -168,8 +171,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   definitions.forEach((def) => {
     logger.debug({ def }, 'Checking bazel definition');
-    const [depType] = def.split('(', 1);
-    const dep: PackageDependency = { depType, managerData: { def } };
+    let [depType] = def.split('(', 1);
     let depName: string | undefined;
     let importpath: string | undefined;
     let remote: string | undefined;
@@ -226,6 +228,12 @@ export function extractPackageFile(
       [, importpath] = match;
     }
     logger.debug({ dependency: depName, remote, currentValue });
+
+    if (depType === 'maybe') {
+      depType = def.split('(', 2).pop()!.split(',', 1).pop()!.trim();
+    }
+
+    const dep: PackageDependency = { depType, managerData: { def } };
     if (
       depType === 'git_repository' &&
       depName &&
@@ -254,7 +262,7 @@ export function extractPackageFile(
       (currentValue || commit)
     ) {
       dep.depName = depName;
-      dep.currentValue = currentValue || commit?.substring(0, 7);
+      dep.currentValue = currentValue ?? commit?.substring(0, 7);
       dep.datasource = GoDatasource.id;
       dep.packageName = importpath;
       if (remote) {

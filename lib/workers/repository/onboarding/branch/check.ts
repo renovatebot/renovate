@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -42,7 +41,7 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
   return false;
 };
 
-// TODO: types
+// TODO: types (#7154)
 export type Pr = any;
 
 const closedPrExists = (config: RenovateConfig): Promise<Pr> =>

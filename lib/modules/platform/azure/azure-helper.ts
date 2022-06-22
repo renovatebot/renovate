@@ -49,9 +49,8 @@ export async function getAzureBranchObj(
     };
   }
   return {
-    // TODO: fix undefined
+    // TODO: fix undefined (#7154)
     name: getNewBranchName(branchName)!,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     oldObjectId: refs[0].objectId!,
   };
 }
@@ -134,10 +133,10 @@ export async function getMergeMethod(
     if (!branchRef) {
       return true;
     }
+    // TODO #7154
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
-      : // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        branchRef.startsWith(scope.refName!);
+      : branchRef.startsWith(scope.refName!);
   };
 
   const policyConfigurations = (

@@ -159,7 +159,7 @@ export async function getAuthHeaders(
       )
     ).body;
 
-    const token = authResponse.token || authResponse.access_token;
+    const token = authResponse.token ?? authResponse.access_token;
     // istanbul ignore if
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
@@ -512,7 +512,7 @@ export class DockerDatasource extends Datasource {
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
       (!manifest.mediaType && hasKey('manifests', manifest))
     ) {
-      const imageList = manifest as OciImageList;
+      const imageList = manifest;
       if (imageList.manifests.length) {
         logger.trace(
           { registry, dockerRepository, tag },
@@ -812,10 +812,9 @@ export class DockerDatasource extends Datasource {
       { registryUrl, packageName }: GetReleasesConfig,
       newValue?: string
     ) => {
-      const newTag = newValue || 'latest';
+      const newTag = newValue ?? 'latest';
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         registryUrl!
       );
       return `${registryHost}:${dockerRepository}:${newTag}`;
@@ -827,13 +826,12 @@ export class DockerDatasource extends Datasource {
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       registryUrl!
     );
     logger.debug(
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
-    const newTag = newValue || 'latest';
+    const newTag = newValue ?? 'latest';
     let digest: string | null = null;
     try {
       let manifestResponse = await this.getManifestResponse(
@@ -857,7 +855,6 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             newTag
           );
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
         logger.debug({ digest }, 'Got docker digest');
@@ -895,7 +892,6 @@ export class DockerDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       registryUrl!
     );
     const tags = await this.getTags(registryHost, dockerRepository);

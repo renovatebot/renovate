@@ -78,7 +78,6 @@ describe('modules/manager/batect/extract', () => {
 
       // TODO: #7154
       expect(
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         result?.sort((a, b) => a.packageFile!.localeCompare(b.packageFile!))
       ).toEqual([
         {

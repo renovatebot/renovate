@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// TODO #7154
 import { Ecosystem, Osv, OsvOffline } from '@jamiemagee/osv-offline';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';

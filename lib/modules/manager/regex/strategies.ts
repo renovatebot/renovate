@@ -79,7 +79,7 @@ export function handleRecursive(
         packageFile,
         config,
         index + 1,
-        mergeGroups(combinedGroups, match.groups || {})
+        mergeGroups(combinedGroups, match.groups ?? {})
       );
     })
     .filter(is.truthy);

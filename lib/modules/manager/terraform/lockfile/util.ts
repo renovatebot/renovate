@@ -139,30 +139,28 @@ export function writeLockUpdates(
   const sections: string[][] = [];
 
   // sort updates in order of appearance in the lockfile
-  /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+  // TODO #7154
   updates.sort(
     (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
   );
-  /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
   updates.forEach((update, index, array) => {
     // re add leading whitespace
     let startWhitespace: number | undefined;
     if (index > 0) {
       // get end of the
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       startWhitespace = array[index - 1].lineNumbers.block!.end;
     }
     const leadingNonRelevantLines = lines.slice(
       startWhitespace,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       update.lineNumbers.block!.start
     );
     sections.push(leadingNonRelevantLines);
 
     const providerBlockLines = lines.slice(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       update.lineNumbers.block!.start,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       update.lineNumbers.block!.end
     );
     const newProviderBlockLines: string[] = [];
@@ -201,7 +199,7 @@ export function writeLockUpdates(
       (value) => `${hashLinePrefix}${value}${hashLineSuffix}`
     );
     newProviderBlockLines.splice(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       update.lineNumbers.hashes.start!,
       0,
       ...hashesWithWhitespace

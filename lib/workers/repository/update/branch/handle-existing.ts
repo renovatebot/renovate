@@ -10,7 +10,7 @@ import type { BranchConfig } from '../../../types';
 export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
   if (pr.state === PrState.Closed) {
     let content;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     const userStrings = config.userStrings!;
     if (config.updateType === 'major') {
       content = template.compile(userStrings.ignoreMajor, config);
