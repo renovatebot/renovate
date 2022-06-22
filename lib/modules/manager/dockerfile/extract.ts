@@ -294,7 +294,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
 
       if (fromMatch.groups?.name) {
-        logger.debug('Found a multistage build stage name');
+        logger.debug(
+          `Found a multistage build stage name: ${fromMatch.groups.name}`
+        );
         stageNames.push(fromMatch.groups.name);
       }
       if (fromImage === 'scratch') {
