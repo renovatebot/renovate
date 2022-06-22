@@ -10,4 +10,5 @@ interface HelmDockerImageDependencyVersion {
   version: string;
   tag?: never;
 }
-export type HelmDockerImageDependency = HelmDockerImageDependencyBasic & (HelmDockerImageDependencyTag | HelmDockerImageDependencyVersion);
+export type HelmDockerImageDependency = HelmDockerImageDependencyBasic &
+  (HelmDockerImageDependencyTag | HelmDockerImageDependencyVersion);
