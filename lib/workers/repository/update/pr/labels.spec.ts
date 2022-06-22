@@ -49,11 +49,12 @@ describe('workers/repository/update/pr/labels', () => {
     });
 
     it('null labels ignored', () => {
+      // TODO #7154
       const result = prepareLabels({
-        labels: ['labelA', null],
+        labels: ['labelA', null] as never,
         // an empty space between two commas in an array is categorized as a null value
         // eslint-disable-next-line no-sparse-arrays
-        addLabels: ['labelB', '', undefined, , ,],
+        addLabels: ['labelB', '', undefined, , ,] as never,
       });
       expect(result).toBeArrayOfSize(2);
       expect(result).toEqual(['labelA', 'labelB']);

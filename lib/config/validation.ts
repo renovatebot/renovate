@@ -320,7 +320,6 @@ export async function validateConfig(
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
                 if (is.object(packageRule)) {
-                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                   const resolvedRule = migrateConfig({
                     packageRules: [
                       await resolveConfigPresets(
@@ -505,7 +504,6 @@ export async function validateConfig(
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
               // TODO: can be undefined ? #7154
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
               !rulesRe.test(parentPath!) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {

@@ -24,16 +24,13 @@ export async function detectMonorepos(
     } = p;
     const { lernaJsonFile, yarnZeroInstall, hasPackageManager } = managerData;
 
-    const packages = yarnWorkspacesPackages || lernaPackages;
+    const packages = yarnWorkspacesPackages ?? lernaPackages;
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
-      )
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        .map((pattern) => getSiblingFileName(packageFile!, pattern));
+      ).map((pattern) => getSiblingFileName(packageFile!, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           getSubDirectory(sp.packageFile!),
           internalPackagePatterns
         )
@@ -49,17 +46,17 @@ export async function detectMonorepos(
       });
 
       for (const subPackage of internalPackageFiles) {
-        subPackage.managerData = subPackage.managerData || {};
+        subPackage.managerData = subPackage.managerData ?? {};
         subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
         subPackage.lernaClient = lernaClient;
-        subPackage.yarnLock = subPackage.yarnLock || yarnLock;
-        subPackage.npmLock = subPackage.npmLock || npmLock;
+        subPackage.yarnLock = subPackage.yarnLock ?? yarnLock;
+        subPackage.npmLock = subPackage.npmLock ?? npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
         if (subPackage.yarnLock) {
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
-          subPackage.npmrc = subPackage.npmrc || npmrc;
+          subPackage.npmrc = subPackage.npmrc ?? npmrc;
         }
 
         if (p.constraints) {

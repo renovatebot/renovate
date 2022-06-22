@@ -35,7 +35,7 @@ describe('workers/repository/update/branch/reuse', () => {
 
     it('returns true if no PR', async () => {
       git.branchExists.mockReturnValueOnce(true);
-      platform.getBranchPr.mockReturnValue(null);
+      platform.getBranchPr.mockResolvedValue(null);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });

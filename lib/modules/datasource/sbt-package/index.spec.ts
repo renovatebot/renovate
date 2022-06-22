@@ -22,7 +22,7 @@ describe('modules/datasource/sbt-package/index', () => {
       httpMock
         .scope('https://failed_repo')
         .get('/maven/org/scalatest/')
-        .reply(404, null);
+        .reply(404);
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/com/example/')
