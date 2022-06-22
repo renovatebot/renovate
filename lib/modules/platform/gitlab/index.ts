@@ -55,10 +55,10 @@ import { getMR, updateMR } from './merge-request';
 import type {
   GitLabMergeRequest,
   GitlabComment,
+  GitlabDiscussion,
   GitlabIssue,
   MergeMethod,
   RepoResponse,
-  GitlabDiscussion,
 } from './types';
 
 let config: {
