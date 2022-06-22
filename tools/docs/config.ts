@@ -170,7 +170,7 @@ function genExperimentalMsg(el: Record<string, any>): string {
   }
 
   const issues: string[] = [];
-  for (const issue of el.experimentalIssues) {
+  for (const issue of el.experimentalIssues ?? []) {
     issues.push(`[#${issue}](${ghIssuesUrl}${issue})`);
   }
 
