@@ -28,7 +28,7 @@ describe('modules/manager/fleet/extract', () => {
         const result = extractPackageFile(validFleetYaml, 'fleet.yaml');
 
         expect(result).not.toBeNull();
-        expect(result.deps).toMatchObject([
+        expect(result?.deps).toMatchObject([
           {
             currentValue: 'v1.8.0',
             datasource: 'helm',
@@ -52,7 +52,7 @@ describe('modules/manager/fleet/extract', () => {
         const result = extractPackageFile(inValidFleetYaml, 'fleet.yaml');
 
         expect(result).not.toBeNull();
-        expect(result.deps).toMatchObject([
+        expect(result?.deps).toMatchObject([
           {
             skipReason: 'no-version',
             datasource: 'helm',
@@ -89,7 +89,7 @@ describe('modules/manager/fleet/extract', () => {
         const result = extractPackageFile(validGitRepoYaml, 'test.yaml');
 
         expect(result).not.toBeNull();
-        expect(result.deps).toMatchObject([
+        expect(result?.deps).toMatchObject([
           {
             currentValue: 'v0.3.0',
             datasource: 'git-tags',
@@ -111,7 +111,7 @@ describe('modules/manager/fleet/extract', () => {
         const result = extractPackageFile(invalidGitRepoYaml, 'test.yaml');
 
         expect(result).not.toBeNull();
-        expect(result.deps).toMatchObject([
+        expect(result?.deps).toMatchObject([
           {
             datasource: 'git-tags',
             depType: 'git_repo',
