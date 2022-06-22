@@ -75,7 +75,6 @@ export class GitlabTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const urlEncodedRepo = encodeURIComponent(repo!);
     let digest: string | null = null;
 

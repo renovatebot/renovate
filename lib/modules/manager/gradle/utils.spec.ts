@@ -1,4 +1,5 @@
 import { TokenType } from './common';
+import type { VariableRegistry } from './types';
 import {
   getVars,
   interpolateString,
@@ -176,7 +177,7 @@ describe('modules/manager/gradle/utils', () => {
   });
 
   it('getVars', () => {
-    const registry = {
+    const registry: VariableRegistry = {
       [toAbsolutePath('/foo')]: {
         foo: { key: 'foo', value: 'FOO' } as never,
         bar: { key: 'bar', value: 'BAR' } as never,

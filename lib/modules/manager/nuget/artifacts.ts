@@ -5,11 +5,11 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
-  ensureCacheDir,
+  ensureDir,
   getSiblingFileName,
   outputFile,
+  privateCacheDir,
   readLocalFile,
-  remove,
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
@@ -22,12 +22,12 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { getDependentPackageFiles } from './package-tree';
 import {
-  getConfiguredRegistries,
-  getDefaultRegistries,
-  getRandomString,
-} from './util';
+  MSBUILD_CENTRAL_FILE,
+  NUGET_CENTRAL_FILE,
+  getDependentPackageFiles,
+} from './package-tree';
+import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
 async function addSourceCmds(
   packageFileName: string,
@@ -35,7 +35,7 @@ async function addSourceCmds(
   nugetConfigFile: string
 ): Promise<string[]> {
   const registries =
-    (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
@@ -66,15 +66,19 @@ async function runDotnetRestore(
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig
 ): Promise<void> {
+  const nugetCacheDir = join(privateCacheDir(), 'nuget');
+
   const execOptions: ExecOptions = {
     docker: {
       image: 'dotnet',
     },
+    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
   };
 
-  const nugetCacheDir = await ensureCacheDir('nuget');
-  const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
-  const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
+  const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
+
+  await ensureDir(nugetCacheDir);
+
   await outputFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
@@ -90,7 +94,6 @@ async function runDotnetRestore(
     ),
   ];
   await exec(cmds, execOptions);
-  await remove(nugetConfigDir);
 }
 
 async function getLockFileContentMap(
@@ -116,7 +119,18 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  if (!regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)) {
+  // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
+  // https://github.com/microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions
+  const isCentralManament =
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE ||
+    packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
+    packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
+
+  if (
+    !isCentralManament &&
+    !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
+  ) {
     // This could be implemented in the future if necessary.
     // It's not that easy though because the questions which
     // project file to restore how to determine which lock files
@@ -129,9 +143,12 @@ export async function updateArtifacts({
   }
 
   const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName)),
-    packageFileName,
+    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
   ];
+
+  if (!isCentralManament) {
+    packageFiles.push(packageFileName);
+  }
 
   logger.trace(
     { packageFiles },
@@ -202,7 +219,8 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileNames.join(', '),
-          stderr: err.message,
+          // error is written to stdout
+          stderr: err.stdout || err.message,
         },
       },
     ];

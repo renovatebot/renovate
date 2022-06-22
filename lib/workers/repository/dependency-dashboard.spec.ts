@@ -5,6 +5,7 @@ import {
   RenovateConfig,
   getConfig,
   logger,
+  mockedFunction,
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -517,7 +518,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      platform.getIssue.mockResolvedValueOnce({
+      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -558,6 +559,9 @@ describe('workers/repository/dependency-dashboard', () => {
 
     describe('checks detected dependencies section', () => {
       const packageFiles = Fixtures.getJson('./package-files.json');
+      const packageFilesWithDigest = Fixtures.getJson(
+        './package-files-digest.json'
+      );
       let config: RenovateConfig;
 
       beforeAll(() => {
@@ -601,6 +605,17 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           PackageFiles.clear();
           PackageFiles.add('main', null);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('shows different combinations of version+digest for a given dependency', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', packageFilesWithDigest);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();

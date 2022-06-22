@@ -25,7 +25,7 @@ export async function extractPackageFile(
     let sourceMatch: RegExpMatchArray | null = null;
     for (const delimiter of delimiters) {
       sourceMatch =
-        sourceMatch ||
+        sourceMatch ??
         regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
           line
         );

@@ -49,12 +49,17 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('handles empty template', async () => {
-      const res = await getPrBody({ branchName: 'some-branch', upgrades: [] });
+      const res = await getPrBody({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        upgrades: [],
+      });
       expect(res).toBeEmptyString();
     });
 
     it('massages upgrades', async () => {
       const upgrade = {
+        manager: 'some-manager',
         branchName: 'some-branch',
         dependencyUrl: 'https://github.com/foo/bar',
         sourceUrl: 'https://github.com/foo/bar.git',
@@ -64,7 +69,11 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
-      await getPrBody({ branchName: 'some-branch', upgrades: [upgrade] });
+      await getPrBody({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        upgrades: [upgrade],
+      });
 
       expect(upgrade).toMatchObject({
         branchName: 'some-branch',
@@ -83,11 +92,16 @@ describe('workers/repository/update/pr/body/index', () => {
 
     it('uses dependencyUrl as primary link', async () => {
       const upgrade = {
+        manager: 'some-manager',
         branchName: 'some-branch',
         dependencyUrl: 'https://github.com/foo/bar',
       };
 
-      await getPrBody({ branchName: 'some-branch', upgrades: [upgrade] });
+      await getPrBody({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        upgrades: [upgrade],
+      });
 
       expect(upgrade).toMatchObject({
         branchName: 'some-branch',
@@ -101,6 +115,7 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = await getPrBody({
+        manager: 'some-manager',
         branchName: 'some-branch',
         upgrades: [],
         prBodyTemplate: 'PR BODY',
@@ -113,6 +128,7 @@ describe('workers/repository/update/pr/body/index', () => {
       template.compile.mockImplementation((x) => x);
       const res = await getPrBody(
         {
+          manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),

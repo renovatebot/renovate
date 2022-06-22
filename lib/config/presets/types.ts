@@ -7,7 +7,6 @@ export type PresetConfig = {
   repo: string;
   presetPath?: string;
   presetName?: string;
-  baseConfig?: RenovateConfig;
   tag?: string;
 };
 

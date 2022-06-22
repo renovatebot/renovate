@@ -8,7 +8,8 @@ import { getChangeLogJSON } from '.';
 jest.mock('../../../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
-  branchName: undefined,
+  manager: 'some-manager',
+  branchName: '',
   endpoint: 'https://gitlab.com/api/v4/ ',
   depName: 'renovate',
   versioning: semverVersioning.id,
@@ -50,7 +51,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          currentVersion: null,
+          currentVersion: undefined,
         })
       ).toBeNull();
     });
