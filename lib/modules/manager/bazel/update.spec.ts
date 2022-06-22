@@ -22,7 +22,7 @@ describe('modules/manager/bazel/update', () => {
       jest.resetAllMocks();
     });
 
-    it('updates tag', async () => {
+    it('updates git_repository tag', async () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
         depType: 'git_repository',
@@ -37,6 +37,24 @@ describe('modules/manager/bazel/update', () => {
         upgrade,
       });
       expect(res).not.toEqual(content);
+    });
+
+    it('updates maybe(git_repository) tag', async () => {
+      const upgrade = {
+        depName: 'build_bazel_rules_nodejs',
+        depType: 'git_repository',
+        managerData: {
+          def: `maybe(\n    git_repository,\n    name = "build_bazel_rules_nodejs",\n    remote = "https://github.com/bazelbuild/rules_nodejs.git",\n    tag = "0.1.8",\n)`,
+        },
+        currentValue: '0.1.8',
+        newValue: '0.2.0',
+      };
+      const res = await updateDependency({
+        fileContent: content,
+        upgrade,
+      });
+      expect(res).not.toEqual(content);
+      expect(res).toMatch(/maybe\([\n\s]*git_repository,/);
     });
 
     it('updates container_pull deptype and preserves comment', async () => {
@@ -232,6 +250,32 @@ http_archive(
       expect(res).toBeNull();
     });
 
+    it('errors for maybe(http_archive) without urls', async () => {
+      const upgrade = {
+        depName: 'bazel_skylib',
+        depType: 'http_archive',
+        repo: 'bazelbuild/bazel-skylib',
+        managerData: {
+          def:
+            `
+maybe(
+  http_archive,
+  name = "bazel_skylib",
+  sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
+  strip_prefix = "bazel-skylib-0.5.0",
+)
+        `.trim() + '\n',
+        },
+        currentValue: '0.5.0',
+        newValue: '0.6.2',
+      };
+      const res = await updateDependency({
+        fileContent: content,
+        upgrade,
+      });
+      expect(res).toBeNull();
+    });
+
     it('updates http_archive with urls array', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
@@ -269,6 +313,47 @@ http_archive(
       expect(res).not.toEqual(content);
       expect(res?.indexOf('0.5.0')).toBe(-1);
       expect(res?.indexOf('0.6.2')).not.toBe(-1);
+    });
+
+    it('updates maybe(http_archive) with urls array', async () => {
+      const upgrade = {
+        depName: 'bazel_skylib',
+        depType: 'http_archive',
+        repo: 'bazelbuild/bazel-skylib',
+        managerData: {
+          def:
+            `
+maybe(
+  http_archive,
+  name = "bazel_skylib",
+  sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
+  strip_prefix = "bazel-skylib-0.5.0",
+  urls = [
+      "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+      "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+  ],
+)
+        `.trim() + '\n',
+        },
+        currentValue: '0.5.0',
+        newValue: '0.6.2',
+      };
+      httpMock
+        .scope('https://github.com')
+        .get('/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+        .reply(200, Readable.from(['foo']));
+      httpMock
+        .scope('https://mirror.bazel.build')
+        .get('/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+        .reply(200, Readable.from(['foo']));
+      const res = await updateDependency({
+        fileContent: content,
+        upgrade,
+      });
+      expect(res).not.toEqual(content);
+      expect(res?.indexOf('0.5.0')).toBe(-1);
+      expect(res?.indexOf('0.6.2')).not.toBe(-1);
+      expect(res).toMatch(/maybe\([\n\s]*http_archive,/);
     });
   });
 });
