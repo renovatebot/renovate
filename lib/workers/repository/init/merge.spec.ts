@@ -186,14 +186,14 @@ describe('workers/repository/init/merge', () => {
       migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
         errors: [{ topic: 'dep', message: 'test error' }],
       });
-      let e: Error;
+      let e: Error | undefined;
       try {
         await mergeRenovateConfig(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.toString()).toBe('Error: config-validation');
+      expect(e?.toString()).toBe('Error: config-validation');
     });
 
     it('migrates nested config', async () => {

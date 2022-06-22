@@ -11,7 +11,7 @@ jest.mock('../../../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
   manager: 'some-manager',
-  branchName: undefined,
+  branchName: '',
   depName: 'renovate',
   endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
@@ -53,7 +53,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          currentVersion: null,
+          currentVersion: undefined,
         })
       ).toBeNull();
     });
@@ -313,7 +313,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',
-        branchName: undefined,
+        branchName: '',
         depName: 'correctPrefix/target',
         endpoint: 'https://api.github.com/',
         versioning: 'npm',

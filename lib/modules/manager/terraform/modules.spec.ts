@@ -8,18 +8,23 @@ import {
 describe('modules/manager/terraform/modules', () => {
   describe('githubRefMatchRegex', () => {
     it('should split project and tag from source', () => {
-      const { project, tag } = githubRefMatchRegex.exec(
+      const groups = githubRefMatchRegex.exec(
         'github.com/hashicorp/example?ref=v1.0.0'
-      ).groups;
-      expect(project).toBe('hashicorp/example');
-      expect(tag).toBe('v1.0.0');
+      )?.groups;
+      expect(groups).toEqual({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
-      const { project } = githubRefMatchRegex.exec(
+      const groups = githubRefMatchRegex.exec(
         'github.com/hashicorp/example.repo-123?ref=v1.0.0'
-      ).groups;
-      expect(project).toBe('hashicorp/example.repo-123');
+      )?.groups;
+      expect(groups).toEqual({
+        project: 'hashicorp/example.repo-123',
+        tag: 'v1.0.0',
+      });
     });
   });
 
@@ -27,50 +32,59 @@ describe('modules/manager/terraform/modules', () => {
     it('should split project and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(
         'http://github.com/hashicorp/example?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const https = gitTagsRefMatchRegex.exec(
         'https://github.com/hashicorp/example?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const ssh = gitTagsRefMatchRegex.exec(
         'ssh://github.com/hashicorp/example?ref=v1.0.0'
-      ).groups;
+      )?.groups;
 
-      expect(http.project).toBe('hashicorp/example');
-      expect(http.tag).toBe('v1.0.0');
-
-      expect(https.project).toBe('hashicorp/example');
-      expect(https.tag).toBe('v1.0.0');
-
-      expect(ssh.project).toBe('hashicorp/example');
-      expect(ssh.tag).toBe('v1.0.0');
+      expect(http).toMatchObject({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+      expect(https).toMatchObject({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+      expect(ssh).toMatchObject({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
       const http = gitTagsRefMatchRegex.exec(
         'http://github.com/hashicorp/example.repo-123?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const https = gitTagsRefMatchRegex.exec(
         'https://github.com/hashicorp/example.repo-123?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const ssh = gitTagsRefMatchRegex.exec(
         'ssh://github.com/hashicorp/example.repo-123?ref=v1.0.0'
-      ).groups;
+      )?.groups;
 
       const withoutSshHttpHttps = gitTagsRefMatchRegex.exec(
         'git@my-gitlab-instance.local:devops/terraform/instance.git?ref=v5.0.0'
-      ).groups;
+      )?.groups;
 
-      expect(http.project).toBe('hashicorp/example.repo-123');
-      expect(http.tag).toBe('v1.0.0');
-
-      expect(https.project).toBe('hashicorp/example.repo-123');
-      expect(https.tag).toBe('v1.0.0');
-
-      expect(ssh.project).toBe('hashicorp/example.repo-123');
-      expect(ssh.tag).toBe('v1.0.0');
-
-      expect(withoutSshHttpHttps.project).toBe('terraform/instance.git');
-      expect(withoutSshHttpHttps.tag).toBe('v5.0.0');
+      expect(http).toMatchObject({
+        project: 'hashicorp/example.repo-123',
+        tag: 'v1.0.0',
+      });
+      expect(https).toMatchObject({
+        project: 'hashicorp/example.repo-123',
+        tag: 'v1.0.0',
+      });
+      expect(ssh).toMatchObject({
+        project: 'hashicorp/example.repo-123',
+        tag: 'v1.0.0',
+      });
+      expect(withoutSshHttpHttps).toMatchObject({
+        project: 'terraform/instance.git',
+        tag: 'v5.0.0',
+      });
     });
   });
 
@@ -78,49 +92,57 @@ describe('modules/manager/terraform/modules', () => {
     it('should split workspace, project and tag from source', () => {
       const ssh = bitbucketRefMatchRegex.exec(
         'git::ssh://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const https = bitbucketRefMatchRegex.exec(
         'git::https://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const plain = bitbucketRefMatchRegex.exec(
         'bitbucket.org/hashicorp/example.git?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const subfolder = bitbucketRefMatchRegex.exec(
         'bitbucket.org/hashicorp/example.git/terraform?ref=v1.0.0'
-      ).groups;
+      )?.groups;
       const subfolderWithDoubleSlash = bitbucketRefMatchRegex.exec(
         'bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0'
-      ).groups;
+      )?.groups;
 
-      expect(ssh.workspace).toBe('hashicorp');
-      expect(ssh.project).toBe('example');
-      expect(ssh.tag).toBe('v1.0.0');
-
-      expect(https.workspace).toBe('hashicorp');
-      expect(https.project).toBe('example');
-      expect(https.tag).toBe('v1.0.0');
-
-      expect(plain.workspace).toBe('hashicorp');
-      expect(plain.project).toBe('example');
-      expect(plain.tag).toBe('v1.0.0');
-
-      expect(subfolder.workspace).toBe('hashicorp');
-      expect(subfolder.project).toBe('example');
-      expect(subfolder.tag).toBe('v1.0.0');
-
-      expect(subfolderWithDoubleSlash.workspace).toBe('hashicorp');
-      expect(subfolderWithDoubleSlash.project).toBe('example');
-      expect(subfolderWithDoubleSlash.tag).toBe('v1.0.0');
+      expect(ssh).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
+      expect(https).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
+      expect(plain).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
+      expect(subfolder).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
+      expect(subfolderWithDoubleSlash).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
       const dots = bitbucketRefMatchRegex.exec(
         'bitbucket.org/hashicorp/example.repo-123.git?ref=v1.0.0'
-      ).groups;
+      )?.groups;
 
-      expect(dots.workspace).toBe('hashicorp');
-      expect(dots.project).toBe('example.repo-123');
-      expect(dots.tag).toBe('v1.0.0');
+      expect(dots).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example.repo-123',
+        tag: 'v1.0.0',
+      });
     });
   });
 

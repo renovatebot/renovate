@@ -120,7 +120,6 @@ function handleAssignment({
   if (dep) {
     dep.groupName = key;
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: valToken.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -149,7 +148,6 @@ function processDepString({
   const dep = parseDependencyString(token.value);
   if (dep) {
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: token.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -320,7 +318,6 @@ function processPredefinedRegistryUrl({
     google: GOOGLE_REPO,
     gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return { urls: [registryUrl!] };
 }
 
@@ -1001,7 +998,6 @@ export function parseProps(
             ...dep,
             managerData: {
               fileReplacePosition:
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                 offset + leftPart.length + dep.depName!.length + 1,
               packageFile,
             },

@@ -137,7 +137,7 @@ export async function getRawFile(
   } as GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     repoId!,
     fileName,
     undefined,
@@ -159,7 +159,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   return JSON5.parse(raw!);
 }
 
@@ -186,8 +186,9 @@ export async function initRepo({
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
   }
+  // TODO #7154
   config.repoId = repo.id!;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
   config.project = repo.project!.name!;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
@@ -196,7 +197,7 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
   const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     repo.id!,
     names.project,
     null,
@@ -210,10 +211,10 @@ export async function initRepo({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const manualUrl =
-    defaults.endpoint +
-    `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
-  const url = repo.remoteUrl || manualUrl;
+  const manualUrl = `${defaults.endpoint}${encodeURIComponent(
+    projectName
+  )}/_git/${encodeURIComponent(repoName)}`;
+  const url = repo.remoteUrl ?? manualUrl;
   await git.initRepo({
     ...config,
     url,
@@ -335,12 +336,12 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
   const branch = await azureApiGit.getBranch(
     config.repoId,
 
-    // TODO: fix undefined
+    // TODO: fix undefined (#7154)
     getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   // only grab the latest statuses, it will group any by context
   return azureApiGit.getStatuses(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     branch.commit!.commitId!,
     config.repoId,
     undefined,
@@ -366,7 +367,7 @@ export async function getBranchStatusCheck(
   const res = await getStatusCheck(branchName);
   for (const check of res) {
     if (getGitStatusContextCombinedName(check.context) === context) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       return azureToRenovateStatusMapping[check.state!] ?? BranchStatus.yellow;
     }
   }
@@ -435,7 +436,7 @@ export async function createPr({
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           id: pr.createdBy!.id,
         },
         completionOptions: {
@@ -445,35 +446,32 @@ export async function createPr({
         },
       },
       config.repoId,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       pr.pullRequestId!
     );
   }
   if (platformOptions?.azureAutoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         reviewerUrl: pr.createdBy!.url,
         vote: AzurePrVote.Approved,
         isFlagged: false,
         isRequired: false,
       },
       config.repoId,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       pr.pullRequestId!,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       pr.createdBy!.id!
     );
   }
   await Promise.all(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     labels!.map((label) =>
       azureApiGit.createPullRequestLabel(
         {
           name: label,
         },
         config.repoId,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         pr.pullRequestId!
       )
     )
@@ -558,7 +556,7 @@ export async function ensureComment({
       config.repoId,
       number,
       threadIdFound,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       commentIdFound!
     );
     logger.debug(
@@ -647,7 +645,7 @@ export async function setBranchStatus({
   };
   await azureApiGit.createCommitStatus(
     statusToCreate,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     branch.commit!.commitId!,
     config.repoId
   );
@@ -663,10 +661,9 @@ export async function mergePr({
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
+  // TODO #7154
   const mergeMethod =
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     config.mergeMethods[pr.targetRefName!] ??
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     (config.mergeMethods[pr.targetRefName!] = await azureHelper.getMergeMethod(
       config.repoId,
       config.project,
@@ -721,7 +718,7 @@ export async function mergePr({
         { pullRequestId, status: pr.status },
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
         }, however it is ${PullRequestStatus[pr.status!]}.`
       );
     }
@@ -771,15 +768,15 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter((c) => c.id === config.repoId)[0];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+  // TODO #7154
   const teams = await azureApiCore.getTeams(repo.project!.id!);
   const members = await Promise.all(
     teams.map(
       async (t) =>
         await azureApiCore.getTeamMembersWithExtendedProperties(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           repo.project!.id!,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           t.id!
         )
     )
@@ -794,7 +791,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
           r.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
         ) {
           if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            // TODO #7154
             ids.push({ id: m.identity.id!, name: r });
           }
         }
@@ -806,7 +803,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
     users.forEach((r) => {
       if (r.toLowerCase() === t.name?.toLowerCase()) {
         if (ids.filter((c) => c.id === t.id).length === 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           ids.push({ id: t.id!, name: r });
         }
       }

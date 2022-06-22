@@ -8,6 +8,7 @@ import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
 import type {
   CacheOptions,
+  ChangelogRelease,
   GithubDatasourceCache,
   GithubQueryParams,
   QueryResponse,
@@ -163,7 +164,10 @@ export abstract class AbstractGithubDatasourceCache<
   /**
    * Pre-fetch, update, or just return the package cache items.
    */
-  async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
+  async getItems(
+    releasesConfig: GetReleasesConfig,
+    changelogRelease?: ChangelogRelease
+  ): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
     // The time meant to be used across the function
@@ -213,7 +217,15 @@ export abstract class AbstractGithubDatasourceCache<
         }
       }
 
-      if (isExpired(now, cacheUpdatedAt, updateDuration)) {
+      if (
+        isExpired(now, cacheUpdatedAt, updateDuration) ||
+        this.newChangelogReleaseDetected(
+          changelogRelease,
+          now,
+          updateDuration,
+          cacheItems
+        )
+      ) {
         const variables: GithubQueryParams = {
           owner,
           name,
@@ -364,5 +376,30 @@ export abstract class AbstractGithubDatasourceCache<
     }
 
     return result;
+  }
+
+  newChangelogReleaseDetected(
+    changelogRelease: ChangelogRelease | undefined,
+    now: DateTime,
+    updateDuration: DurationLikeObject,
+    cacheItems: Record<string, StoredItem>
+  ): boolean {
+    if (!changelogRelease) {
+      return false;
+    }
+
+    const releaseTime = changelogRelease.date.toString();
+    const isVersionPresentInCache = !!cacheItems[changelogRelease.version];
+    const isChangelogReleaseFresh = !isExpired(
+      now,
+      releaseTime,
+      updateDuration
+    );
+
+    if (isVersionPresentInCache || !isChangelogReleaseFresh) {
+      return false;
+    }
+
+    return true;
   }
 }

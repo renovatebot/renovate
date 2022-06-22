@@ -1,15 +1,17 @@
+// TODO #7154
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
 
 export function getWarnings(config: RenovateConfig): string {
-  if (!config.warnings.length) {
+  const warnings = config.warnings!;
+  if (!warnings.length) {
     return '';
   }
-  let warningText = `\n# Warnings (${config.warnings.length})\n\n`;
+  let warningText = `\n# Warnings (${warnings.length})\n\n`;
   warningText += `Please correct - or verify that you can safely ignore - these warnings before you merge this PR.\n\n`;
-  config.warnings.forEach((w) => {
+  warnings.forEach((w) => {
     warningText += `-   \`${w.topic}\`: ${w.message}\n`;
   });
   warningText += '\n---\n';
@@ -18,12 +20,13 @@ export function getWarnings(config: RenovateConfig): string {
 
 export function getErrors(config: RenovateConfig): string {
   let errorText = '';
-  if (!config.errors.length) {
+  const errors = config.errors!;
+  if (!errors.length) {
     return '';
   }
-  errorText = `\n# Errors (${config.errors.length})\n\n`;
+  errorText = `\n# Errors (${errors.length})\n\n`;
   errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
-  config.errors.forEach((e) => {
+  errors.forEach((e) => {
     errorText += `-   \`${e.topic}\`: ${e.message}\n`;
   });
   errorText += '\n---\n';
@@ -46,8 +49,8 @@ export function getDepWarnings(
               if (!warnings.includes(message)) {
                 warnings.push(message);
               }
-              if (!warningFiles.includes(file.packageFile)) {
-                warningFiles.push(file.packageFile);
+              if (!warningFiles.includes(file.packageFile!)) {
+                warningFiles.push(file.packageFile!);
               }
             }
           }

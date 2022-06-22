@@ -866,7 +866,9 @@ describe('util/package-rules', () => {
   });
 
   it('empty rules', () => {
-    expect(applyPackageRules({ ...config1, packageRules: null })).toEqual({
+    expect(
+      applyPackageRules({ ...config1, packageRules: null as never })
+    ).toEqual({
       foo: 'bar',
       packageRules: null,
     });

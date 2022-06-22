@@ -40,7 +40,8 @@ export async function getDependentPackageFiles(
   for (const f of packageFiles) {
     const packageFileContent = await readLocalFile(f, 'utf8');
 
-    const doc = new xmldoc.XmlDocument(packageFileContent);
+    // TODO #7154
+    const doc = new xmldoc.XmlDocument(packageFileContent!);
     const projectReferenceAttributes = doc
       .childrenNamed('ItemGroup')
       .map((ig) => ig.childrenNamed('ProjectReference'))

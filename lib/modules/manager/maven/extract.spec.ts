@@ -11,7 +11,7 @@ const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
 describe('modules/manager/maven/extract', () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
-      expect(extractPackage(undefined)).toBeNull();
+      expect(extractPackage('')).toBeNull();
       expect(extractPackage('invalid xml content')).toBeNull();
       expect(extractPackage('<foobar></foobar>')).toBeNull();
       expect(extractPackage('<project></project>')).toBeNull();
@@ -143,7 +143,7 @@ describe('modules/manager/maven/extract', () => {
 
   describe('extractRegistries', () => {
     it('returns null for invalid XML', () => {
-      expect(extractRegistries(undefined)).toBeEmptyArray();
+      expect(extractRegistries('')).toBeEmptyArray();
       expect(extractRegistries('invalid xml content')).toBeEmptyArray();
       expect(extractRegistries('<foobar></foobar>')).toBeEmptyArray();
       expect(extractRegistries('<settings></settings>')).toBeEmptyArray();
