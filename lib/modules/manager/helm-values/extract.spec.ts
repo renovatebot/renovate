@@ -61,7 +61,11 @@ describe('modules/manager/helm-values/extract', () => {
       fourthImage:
         registry: docker.io
         repository: bitnami/postgres-exporter2
-        tag: 7.0.100-preview.1.22110.4`;
+        tag: 7.0.100-preview.1.22110.4
+      sixthImage:
+        registry: docker.io
+        repository: bitnami/postgres-exporter3
+        tag: 1.2.2@sha256:xxxxxx`;
       const result = extractPackageFile(input);
       expect(result).toEqual({
         deps: [
@@ -73,7 +77,7 @@ describe('modules/manager/helm-values/extract', () => {
             versioning: 'docker',
             currentDigest: undefined,
             autoReplaceStringTemplate:
-              '"{{newValue}}"{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
           },
           {
             depName: 'docker.io/bitnami/postgres-exporter',
@@ -83,7 +87,7 @@ describe('modules/manager/helm-values/extract', () => {
             versioning: 'docker',
             currentDigest: undefined,
             autoReplaceStringTemplate:
-              '"{{newValue}}"{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
           },
           {
             depName: 'docker.io/bitnami/postgres-exporter1',
@@ -93,7 +97,7 @@ describe('modules/manager/helm-values/extract', () => {
             versioning: 'docker',
             currentDigest: undefined,
             autoReplaceStringTemplate:
-              '"{{newValue}}"{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
           },
           {
             depName: 'docker.io/bitnami/postgres-exporter2',
@@ -103,7 +107,17 @@ describe('modules/manager/helm-values/extract', () => {
             versioning: 'docker',
             currentDigest: undefined,
             autoReplaceStringTemplate:
-              '"{{newValue}}"{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
+          },
+          {
+            depName: 'docker.io/bitnami/postgres-exporter3',
+            currentValue: '1.2.2',
+            datasource: 'docker',
+            replaceString: '1.2.2@sha256:xxxxxx',
+            versioning: 'docker',
+            currentDigest: 'sha256:xxxxxx',
+            autoReplaceStringTemplate:
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
           },
         ],
       });

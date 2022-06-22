@@ -22,7 +22,7 @@ function getHelmDep({
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
-    '"{{newValue}}"{{#if newDigest}}@{{newDigest}}{{/if}}';
+    '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"';
   return dep;
 }
 
