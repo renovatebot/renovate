@@ -1,14 +1,14 @@
-interface HelmDockerImageDependencyBasic {
+export interface HelmDockerImageDependencyBasic {
   registry?: string;
   repository: string;
 }
-interface HelmDockerImageDependencyTag {
+export interface HelmDockerImageDependencyTag extends HelmDockerImageDependencyBasic {
   tag: string;
   version?: never;
 }
-interface HelmDockerImageDependencyVersion {
+export interface HelmDockerImageDependencyVersion extends HelmDockerImageDependencyBasic {
   version: string;
   tag?: never;
 }
-export type HelmDockerImageDependency = HelmDockerImageDependencyBasic &
-  (HelmDockerImageDependencyTag | HelmDockerImageDependencyVersion);
+export type HelmDockerImageDependency = HelmDockerImageDependencyTag |
+HelmDockerImageDependencyVersion;
