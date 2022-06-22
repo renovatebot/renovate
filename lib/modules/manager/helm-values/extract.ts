@@ -46,8 +46,7 @@ function findDependencies(
       let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
-      let tag = currentItem.tag;
-      tag = tag ? String(tag) : String(currentItem.version);
+      const tag = `${currentItem.tag ?? currentItem.version}`;
       packageDependencies.push(getHelmDep({ repository, tag, registry }));
     } else if (matchesHelmValuesInlineImage(key, value)) {
       packageDependencies.push(getDep(value));
