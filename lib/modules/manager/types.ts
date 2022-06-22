@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
@@ -15,18 +16,10 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
-  aliases?: Record<string, string>;
+  registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-}
-
-export interface RegexManagerTemplates {
-  depNameTemplate?: string;
-  packageNameTemplate?: string;
-  datasourceTemplate?: string;
-  versioningTemplate?: string;
-  depTypeTemplate?: string;
 }
 
 export interface CustomExtractConfig
@@ -49,7 +42,7 @@ export interface UpdateArtifactsConfig {
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
-  aliases?: Record<string, string>;
+  registryAliases?: Record<string, string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -76,6 +69,7 @@ export interface PackageFile<T = Record<string, any>>
   autoReplaceStringTemplate?: string;
   hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
+  extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
@@ -114,7 +108,7 @@ export interface Package<T> extends ManagerData<T> {
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   githubRepo?: string;
   pinDigests?: boolean;
   currentRawValue?: string;

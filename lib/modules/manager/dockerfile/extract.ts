@@ -1,46 +1,118 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
 const variableMarker = '$';
-const variableOpen = '${';
-const variableClose = '}';
-const variableDefaultValueSplit = ':-';
+
+export function extractVariables(image: string): Record<string, string> {
+  const variables: Record<string, string> = {};
+  const variableRegex = regEx(
+    /(?<fullvariable>\\?\$(?<simplearg>\w+)|\\?\${(?<complexarg>\w+)(?::.+?)?}+)/gi
+  );
+
+  let match: RegExpExecArray | null;
+  do {
+    match = variableRegex.exec(image);
+    if (match?.groups?.fullvariable) {
+      variables[match.groups.fullvariable] =
+        match.groups?.simplearg || match.groups?.complexarg;
+    }
+  } while (match);
+
+  return variables;
+}
+
+function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
+  let template = dep.replaceString;
+
+  if (dep.currentValue) {
+    let placeholder = '{{#if newValue}}{{newValue}}{{/if}}';
+    if (!dep.currentDigest) {
+      placeholder += '{{#if newDigest}}@{{newDigest}}{{/if}}';
+    }
+    template = template?.replace(dep.currentValue, placeholder);
+  }
+
+  if (dep.currentDigest) {
+    template = template?.replace(
+      dep.currentDigest,
+      '{{#if newDigest}}{{newDigest}}{{/if}}'
+    );
+  }
+
+  return template;
+}
+
+function processDepForAutoReplace(
+  dep: PackageDependency,
+  lineNumberRanges: number[][],
+  lines: string[],
+  linefeed: string
+): void {
+  const lineNumberRangesToReplace: number[][] = [];
+  for (const lineNumberRange of lineNumberRanges) {
+    for (const lineNumber of lineNumberRange) {
+      if (
+        (dep.currentValue && lines[lineNumber].includes(dep.currentValue)) ||
+        (dep.currentDigest && lines[lineNumber].includes(dep.currentDigest))
+      ) {
+        lineNumberRangesToReplace.push(lineNumberRange);
+      }
+    }
+  }
+
+  lineNumberRangesToReplace.sort((a, b) => {
+    return a[0] - b[0];
+  });
+
+  const minLine = lineNumberRangesToReplace[0]?.[0];
+  const maxLine =
+    lineNumberRangesToReplace[lineNumberRangesToReplace.length - 1]?.[1];
+  if (
+    lineNumberRanges.length === 1 ||
+    minLine === undefined ||
+    maxLine === undefined
+  ) {
+    return;
+  }
+
+  const unfoldedLineNumbers = Array.from(
+    { length: maxLine - minLine + 1 },
+    (_v, k) => k + minLine
+  );
+
+  dep.replaceString = unfoldedLineNumbers
+    .map((lineNumber) => lines[lineNumber])
+    .join(linefeed);
+
+  dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+}
 
 export function splitImageParts(currentFrom: string): PackageDependency {
+  let isVariable = false;
+  let cleanedCurrentFrom = currentFrom;
+
   // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
   // If so, remove everything except the image, defaultVal and digest.
-  let isVariable = false;
-  let cleanedCurrentFrom: string = currentFrom;
-  if (
-    currentFrom.startsWith(variableOpen) &&
-    currentFrom.endsWith(variableClose)
-  ) {
-    isVariable = true;
+  if (cleanedCurrentFrom?.includes(variableMarker)) {
+    const defaultValueRegex = regEx(/^\${.+?:-"?(?<value>.*?)"?}$/);
+    const defaultValueMatch =
+      defaultValueRegex.exec(cleanedCurrentFrom)?.groups;
+    if (defaultValueMatch?.value) {
+      isVariable = true;
+      cleanedCurrentFrom = defaultValueMatch.value;
+    }
 
-    // If the variable contains exactly one $ and has the default value, we consider it as a valid dependency;
-    // otherwise skip it.
-    if (
-      currentFrom.split('$').length !== 2 ||
-      currentFrom.indexOf(variableDefaultValueSplit) === -1
-    ) {
+    if (cleanedCurrentFrom?.includes(variableMarker)) {
+      // If cleanedCurrentFrom contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we do not support this.
       return {
         skipReason: 'contains-variable',
       };
     }
-
-    cleanedCurrentFrom = currentFrom.substr(
-      variableOpen.length,
-      currentFrom.length - (variableClose.length + 2)
-    );
-    cleanedCurrentFrom = cleanedCurrentFrom.substr(
-      cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
-        variableDefaultValueSplit.length
-    );
   }
 
   const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
@@ -57,30 +129,14 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  if (depName?.includes(variableMarker)) {
-    // If depName contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we currently not support this.
-    return {
-      skipReason: 'contains-variable',
-    };
-  }
-
-  if (currentValue?.includes(variableMarker)) {
-    // If tag contains a variable, e.g. "5.0${VERSION_SUFFIX}", we do not support this.
-    return {
-      skipReason: 'contains-variable',
-    };
-  }
+  const dep: PackageDependency = {
+    depName,
+    currentValue,
+    currentDigest,
+  };
 
   if (isVariable) {
-    // If we have the variable and it contains the default value, we need to return
-    // it as a valid dependency.
-
-    const dep: PackageDependency = {
-      depName,
-      currentValue,
-      currentDigest,
-      replaceString: cleanedCurrentFrom,
-    };
+    dep.replaceString = cleanedCurrentFrom;
 
     if (!dep.currentValue) {
       delete dep.currentValue;
@@ -89,15 +145,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     if (!dep.currentDigest) {
       delete dep.currentDigest;
     }
-
-    return dep;
   }
 
-  const dep: PackageDependency = {
-    depName,
-    currentValue,
-    currentDigest,
-  };
   return dep;
 }
 
@@ -162,69 +211,150 @@ export function getDep(
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
+  const args: Record<string, string> = {};
+  const argsLines: Record<string, number[]> = {};
 
-  const fromMatches = content.matchAll(
-    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim // TODO #12875 complex for re2 has too many not supported groups
-  );
+  let escapeChar = '\\\\';
+  let lookForEscapeChar = true;
 
-  for (const fromMatch of fromMatches) {
-    if (fromMatch.groups?.name) {
-      logger.debug('Found a multistage build stage name');
-      stageNames.push(fromMatch.groups.name);
+  const lineFeed = content.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+  const lines = content.split(newlineRegex);
+  for (let lineNumber = 0; lineNumber < lines.length; ) {
+    const lineNumberInstrStart = lineNumber;
+    let instruction = lines[lineNumber];
+
+    if (lookForEscapeChar) {
+      const directivesMatch = regEx(
+        /^[ \t]*#[ \t]*(?<directive>syntax|escape)[ \t]*=[ \t]*(?<escapeChar>\S)/i
+      ).exec(instruction);
+      if (!directivesMatch) {
+        lookForEscapeChar = false;
+      } else if (directivesMatch.groups?.directive.toLowerCase() === 'escape') {
+        if (directivesMatch.groups?.escapeChar === '`') {
+          escapeChar = '`';
+        }
+        lookForEscapeChar = false;
+      }
     }
-    if (fromMatch.groups?.image === 'scratch') {
-      logger.debug('Skipping scratch');
-    } else if (
-      fromMatch.groups?.image &&
-      stageNames.includes(fromMatch.groups.image)
+
+    const lineContinuationRegex = regEx(escapeChar + '[ \\t]*$|^[ \\t]*#', 'm');
+    let lineLookahead = instruction;
+    while (
+      !lookForEscapeChar &&
+      !instruction.trimStart().startsWith('#') &&
+      lineContinuationRegex.test(lineLookahead)
     ) {
-      logger.debug({ image: fromMatch.groups.image }, 'Skipping alias FROM');
-    } else {
-      const dep = getDep(fromMatch.groups?.image);
-      logger.trace(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Dockerfile FROM'
-      );
-      deps.push(dep);
+      lineLookahead = lines[++lineNumber] || '';
+      instruction += '\n' + lineLookahead;
     }
+
+    const argRegex = regEx(
+      '^[ \\t]*ARG(?:' +
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\S+)[ =](?<value>.*)',
+      'im'
+    );
+    const argMatch = argRegex.exec(instruction);
+    if (argMatch?.groups?.name) {
+      argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
+      let argMatchValue = argMatch.groups?.value;
+
+      if (
+        argMatchValue.charAt(0) === '"' &&
+        argMatchValue.charAt(argMatchValue.length - 1) === '"'
+      ) {
+        argMatchValue = argMatchValue.slice(1, -1);
+      }
+
+      args[argMatch.groups.name] = argMatchValue || '';
+    }
+
+    const fromRegex = new RegExp(
+      '^[ \\t]*FROM(?:' +
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:' +
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?',
+      'im'
+    ); // TODO #12875 complex for re2 has too many not supported groups
+    const fromMatch = instruction.match(fromRegex);
+    if (fromMatch?.groups?.image) {
+      let fromImage = fromMatch.groups.image;
+      const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
+
+      if (fromImage.includes(variableMarker)) {
+        const variables = extractVariables(fromImage);
+        for (const [fullVariable, argName] of Object.entries(variables)) {
+          const resolvedArgValue = args[argName];
+          if (resolvedArgValue || resolvedArgValue === '') {
+            fromImage = fromImage.replace(fullVariable, resolvedArgValue);
+            lineNumberRanges.push(argsLines[argName]);
+          }
+        }
+      }
+
+      if (fromMatch.groups?.name) {
+        logger.debug('Found a multistage build stage name');
+        stageNames.push(fromMatch.groups.name);
+      }
+      if (fromImage === 'scratch') {
+        logger.debug('Skipping scratch');
+      } else if (fromImage && stageNames.includes(fromImage)) {
+        logger.debug({ image: fromImage }, 'Skipping alias FROM');
+      } else {
+        const dep = getDep(fromImage);
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+        logger.trace(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Dockerfile FROM'
+        );
+        deps.push(dep);
+      }
+    }
+
+    const copyFromRegex = new RegExp(
+      '^[ \\t]*COPY(?:' +
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+=[a-zA-Z0-9_.:-]+?)+--from=(?<image>\\S+)',
+      'im'
+    ); // TODO #12875 complex for re2 has too many not supported groups
+    const copyFromMatch = instruction.match(copyFromRegex);
+    if (copyFromMatch?.groups?.image) {
+      if (stageNames.includes(copyFromMatch.groups.image)) {
+        logger.debug(
+          { image: copyFromMatch.groups.image },
+          'Skipping alias COPY --from'
+        );
+      } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
+        const dep = getDep(copyFromMatch.groups.image);
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+        logger.debug(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Dockerfile COPY --from'
+        );
+        deps.push(dep);
+      } else {
+        logger.debug(
+          { image: copyFromMatch.groups.image },
+          'Skipping index reference COPY --from'
+        );
+      }
+    }
+
+    lineNumber += 1;
   }
 
-  const copyFromMatches = content.matchAll(
-    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim // TODO #12875 complex for re2 has too many not supported groups
-  );
-
-  for (const copyFromMatch of copyFromMatches) {
-    // istanbul ignore if: will never happen
-    if (!copyFromMatch.groups?.image) {
-      continue;
-    }
-    if (stageNames.includes(copyFromMatch.groups.image)) {
-      logger.debug(
-        { image: copyFromMatch.groups.image },
-        'Skipping alias COPY --from'
-      );
-    } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-      const dep = getDep(copyFromMatch.groups.image);
-      logger.debug(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Dockerfile COPY --from'
-      );
-      deps.push(dep);
-    } else {
-      logger.debug(
-        { image: copyFromMatch.groups.image },
-        'Skipping index reference COPY --from'
-      );
-    }
-  }
   if (!deps.length) {
     return null;
   }

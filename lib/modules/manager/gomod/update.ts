@@ -58,10 +58,8 @@ export function updateDependency({
     }
     let newLine: string;
     if (upgrade.updateType === 'digest') {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const newDigestRightSized = upgrade.newDigest!.substring(
         0,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         upgrade.currentDigest!.length
       );
       if (lineToChange.includes(newDigestRightSized)) {
@@ -72,15 +70,13 @@ export function updateDependency({
         'gomod: need to update digest'
       );
       newLine = lineToChange.replace(
-        // TODO: can be undefined?
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO: can be undefined? (#7154)
         updateLineExp!,
         `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
       newLine = lineToChange.replace(
-        // TODO: can be undefined?
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO: can be undefined? (#7154)
         updateLineExp!,
         `$<depPart>$<divider>${upgrade.newValue}`
       );
@@ -96,7 +92,6 @@ export function updateDependency({
           'rethinkdb/rethinkdb-go.v5'
         );
       } else if (
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         upgrade.newMajor! > 1 &&
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
@@ -105,7 +100,6 @@ export function updateDependency({
           newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           const [oldV] = upgrade.currentValue!.split('.');
           newLine = newLine.replace(
             regEx(`/${oldV}(\\s+)`, undefined, false),
@@ -117,7 +111,6 @@ export function updateDependency({
     if (lineToChange.endsWith('+incompatible')) {
       let toAdd = '+incompatible';
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       if (upgrade.updateType === 'major' && upgrade.newMajor! >= 2) {
         toAdd = '';
       }

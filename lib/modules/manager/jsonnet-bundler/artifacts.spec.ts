@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git } from '../../../../test/util';
+import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { StatusResult } from '../../../util/git/types';
@@ -27,7 +27,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
   });
 
   it('returns null if jsonnetfile.lock does not exist', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce('');
     expect(
       await updateArtifacts({
         packageFileName: 'jsonnetfile.json',
@@ -41,14 +41,16 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
   it('returns null if there are no changes', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll(exec);
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: [],
-      not_added: [],
-      deleted: [],
-      isClean(): boolean {
-        return true;
-      },
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+        not_added: [],
+        deleted: [],
+        isClean(): boolean {
+          return true;
+        },
+      })
+    );
     expect(
       await updateArtifacts({
         packageFileName: 'jsonnetfile.json',

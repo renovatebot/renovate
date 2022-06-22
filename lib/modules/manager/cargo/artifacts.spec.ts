@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
-import * as cargo from './artifacts';
+import * as cargo from '.';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');

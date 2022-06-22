@@ -17,7 +17,7 @@ describe('modules/datasource/git-refs/index', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(null) as Response<string>;
+          return Promise.resolve('') as Response<string>;
         },
       });
       const versions = await getPkgReleases({
@@ -33,10 +33,10 @@ describe('modules/datasource/git-refs/index', () => {
           return Promise.resolve('aabbccddeeff') as Response<string>;
         },
       });
-      const { releases } = await getPkgReleases({
+      const { releases } = (await getPkgReleases({
         datasource,
         depName,
-      });
+      }))!;
       expect(releases).toBeEmpty();
     });
 
@@ -65,7 +65,7 @@ describe('modules/datasource/git-refs/index', () => {
         depName,
       });
       expect(versions).toMatchSnapshot();
-      const result = versions.releases.map((x) => x.version).sort();
+      const result = versions?.releases.map((x) => x.version).sort();
       expect(result).toHaveLength(6);
     });
   });

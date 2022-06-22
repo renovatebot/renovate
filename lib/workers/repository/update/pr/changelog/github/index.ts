@@ -10,7 +10,12 @@ import type {
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash } from '../../../../../../util/url';
-import type { ChangeLogFile, ChangeLogNotes } from '../types';
+import type {
+  ChangeLogFile,
+  ChangeLogNotes,
+  ChangeLogProject,
+  ChangeLogRelease,
+} from '../types';
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
@@ -107,17 +112,24 @@ export async function getReleaseNotesMd(
 }
 
 export async function getReleaseList(
-  apiBaseUrl: string,
-  repository: string
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
+  // TODO #7154
+  const apiBaseUrl = project.apiBaseUrl!;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const repository = project.repository!;
   const notesSourceUrl = `${ensureTrailingSlash(
     apiBaseUrl
   )}repos/${repository}/releases`;
-  const items = await releasesCache.getItems({
-    registryUrl: apiBaseUrl,
-    packageName: repository,
-  });
+  const items = await releasesCache.getItems(
+    {
+      registryUrl: apiBaseUrl,
+      packageName: repository,
+    },
+    release
+  );
   return items.map(({ url, id, version: tag, name, description: body }) => ({
     url,
     notesSourceUrl,

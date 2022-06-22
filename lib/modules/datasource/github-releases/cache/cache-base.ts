@@ -8,6 +8,7 @@ import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
 import type {
   CacheOptions,
+  ChangelogRelease,
   GithubDatasourceCache,
   GithubQueryParams,
   QueryResponse,
@@ -21,7 +22,26 @@ const cacheDefaults: Required<CacheOptions> = {
   /**
    * How many minutes to wait until next cache update
    */
-  updateAfterMinutes: 30,
+  updateAfterMinutes: 120,
+
+  /**
+   * If package was released recently, we assume higher
+   * probability of having one more release soon.
+   *
+   * In this case, we use `updateAfterMinutesFresh` option.
+   */
+  packageFreshDays: 7,
+
+  /**
+   * If package was released recently, we assume higher
+   * probability of having one more release soon.
+   *
+   * In this case, this option will be used
+   * instead of `updateAfterMinutes`.
+   *
+   * Fresh period is configured via `freshDays` option.
+   */
+  updateAfterMinutesFresh: 30,
 
   /**
    * How many days to wait until full cache reset (for single package).
@@ -80,6 +100,8 @@ export abstract class AbstractGithubDatasourceCache<
   FetchedItem = unknown
 > {
   private updateDuration: DurationLikeObject;
+  private packageFreshDaysDuration: DurationLikeObject;
+  private updateDurationFresh: DurationLikeObject;
   private resetDuration: DurationLikeObject;
   private stabilityDuration: DurationLikeObject;
 
@@ -94,6 +116,8 @@ export abstract class AbstractGithubDatasourceCache<
   constructor(private http: GithubHttp, opts: CacheOptions = {}) {
     const {
       updateAfterMinutes,
+      packageFreshDays,
+      updateAfterMinutesFresh,
       resetAfterDays,
       unstableDays,
       maxPrefetchPages,
@@ -107,6 +131,8 @@ export abstract class AbstractGithubDatasourceCache<
     };
 
     this.updateDuration = { minutes: updateAfterMinutes };
+    this.packageFreshDaysDuration = { days: packageFreshDays };
+    this.updateDurationFresh = { minutes: updateAfterMinutesFresh };
     this.resetDuration = { days: resetAfterDays };
     this.stabilityDuration = { days: unstableDays };
 
@@ -138,7 +164,10 @@ export abstract class AbstractGithubDatasourceCache<
   /**
    * Pre-fetch, update, or just return the package cache items.
    */
-  async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
+  async getItems(
+    releasesConfig: GetReleasesConfig,
+    changelogRelease?: ChangelogRelease
+  ): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
     // The time meant to be used across the function
@@ -156,7 +185,7 @@ export abstract class AbstractGithubDatasourceCache<
     // so that soft update mechanics is immediately starting.
     let cacheUpdatedAt = now.minus(this.updateDuration).toISO();
 
-    const baseUrl = getApiBaseUrl(registryUrl).replace('/v3/', '/'); // Replace for GHE
+    const baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
 
     const [owner, name] = packageName.split('/');
     if (owner && name) {
@@ -168,15 +197,35 @@ export abstract class AbstractGithubDatasourceCache<
 
       const cacheDoesExist =
         cache && !isExpired(now, cache.createdAt, this.resetDuration);
+      let lastReleasedAt: string | null = null;
+      let updateDuration = this.updateDuration;
       if (cacheDoesExist) {
         // Keeping the the original `cache` value intact
         // in order to be used in exception handler
         cacheItems = { ...cache.items };
         cacheCreatedAt = cache.createdAt;
         cacheUpdatedAt = cache.updatedAt;
+        lastReleasedAt =
+          cache.lastReleasedAt ?? this.getLastReleaseTimestamp(cacheItems);
+
+        // Release is considered fresh, so we'll check it earlier
+        if (
+          lastReleasedAt &&
+          !isExpired(now, lastReleasedAt, this.packageFreshDaysDuration)
+        ) {
+          updateDuration = this.updateDurationFresh;
+        }
       }
 
-      if (isExpired(now, cacheUpdatedAt, this.updateDuration)) {
+      if (
+        isExpired(now, cacheUpdatedAt, updateDuration) ||
+        this.newChangelogReleaseDetected(
+          changelogRelease,
+          now,
+          updateDuration,
+          cacheItems
+        )
+      ) {
         const variables: GithubQueryParams = {
           owner,
           name,
@@ -203,7 +252,13 @@ export abstract class AbstractGithubDatasourceCache<
           });
           pagesRemained -= 1;
 
-          const data = graphqlRes.body.data;
+          const { data, errors } = graphqlRes.body;
+
+          const errorMessage = errors?.[0]?.message;
+          if (errorMessage) {
+            throw Error(errorMessage);
+          }
+
           if (data) {
             const {
               nodes: fetchedItems,
@@ -219,7 +274,7 @@ export abstract class AbstractGithubDatasourceCache<
             for (const item of fetchedItems) {
               const newStoredItem = this.coerceFetched(item);
               if (newStoredItem) {
-                const { version } = newStoredItem;
+                const { version, releaseTimestamp } = newStoredItem;
 
                 // Stop earlier if the stored item have reached stability,
                 // which means `unstableDays` period have passed
@@ -238,6 +293,18 @@ export abstract class AbstractGithubDatasourceCache<
 
                 cacheItems[version] = newStoredItem;
                 checkedVersions.add(version);
+
+                lastReleasedAt ??= releaseTimestamp;
+                // It may be tempting to optimize the code and
+                // remove the check, as we're fetching fresh releases here.
+                // That's wrong, because some items are already cached,
+                // and they obviously aren't latest.
+                if (
+                  DateTime.fromISO(releaseTimestamp) >
+                  DateTime.fromISO(lastReleasedAt)
+                ) {
+                  lastReleasedAt = releaseTimestamp;
+                }
               }
             }
           }
@@ -266,6 +333,11 @@ export abstract class AbstractGithubDatasourceCache<
             createdAt: cacheCreatedAt,
             updatedAt: now.toISO(),
           };
+
+          if (lastReleasedAt) {
+            cacheValue.lastReleasedAt = lastReleasedAt;
+          }
+
           await packageCache.set(
             this.cacheNs,
             cacheKey,
@@ -283,5 +355,51 @@ export abstract class AbstractGithubDatasourceCache<
   getRandomDeltaMinutes(): number {
     const rnd = Math.random();
     return Math.floor(rnd * this.resetDeltaMinutes);
+  }
+
+  public getLastReleaseTimestamp(
+    items: Record<string, StoredItem>
+  ): string | null {
+    let result: string | null = null;
+    let latest: DateTime | null = null;
+
+    for (const { releaseTimestamp } of Object.values(items)) {
+      const timestamp = DateTime.fromISO(releaseTimestamp);
+
+      result ??= releaseTimestamp;
+      latest ??= timestamp;
+
+      if (timestamp > latest) {
+        result = releaseTimestamp;
+        latest = timestamp;
+      }
+    }
+
+    return result;
+  }
+
+  newChangelogReleaseDetected(
+    changelogRelease: ChangelogRelease | undefined,
+    now: DateTime,
+    updateDuration: DurationLikeObject,
+    cacheItems: Record<string, StoredItem>
+  ): boolean {
+    if (!changelogRelease) {
+      return false;
+    }
+
+    const releaseTime = changelogRelease.date.toString();
+    const isVersionPresentInCache = !!cacheItems[changelogRelease.version];
+    const isChangelogReleaseFresh = !isExpired(
+      now,
+      releaseTime,
+      updateDuration
+    );
+
+    if (isVersionPresentInCache || !isChangelogReleaseFresh) {
+      return false;
+    }
+
+    return true;
   }
 }

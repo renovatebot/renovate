@@ -66,7 +66,7 @@ export function generateUpdate(
     return update;
   }
   update.updateType =
-    update.updateType ||
+    update.updateType ??
     getUpdateType(config, versioning, currentVersion, newVersion);
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
@@ -76,7 +76,7 @@ export function generateUpdate(
   }
   if (
     rangeStrategy === 'bump' &&
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     versioning.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// TODO #7154
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
@@ -45,7 +45,7 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
     config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle || `Dependency Dashboard`;
+      config.dependencyDashboardTitle ?? `Dependency Dashboard`;
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
@@ -63,7 +63,7 @@ function getListItem(branch: BranchConfig, type: string): string {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => '`' + upgrade.depName + '`')),
+    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -114,8 +114,8 @@ export async function ensureDependencyDashboard(
       config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
       branches.some(
         (branch) =>
-          branch.dependencyDashboardApproval ||
-          branch.dependencyDashboardPrApproval
+          !!branch.dependencyDashboardApproval ||
+          !!branch.dependencyDashboardPrApproval
       )
     )
   ) {
@@ -271,7 +271,7 @@ export async function ensureDependencyDashboard(
       branch.prBlockedBy !== 'BranchAutomerge'
   );
   const otherBranches = inProgress.filter(
-    (branch) => branch.prBlockedBy || !branch.prNo
+    (branch) => !!branch.prBlockedBy || !branch.prNo
   );
   // istanbul ignore if
   if (otherBranches.length) {

@@ -22,7 +22,7 @@ function extractBlock(
     if (kvMatch?.groups) {
       switch (kvMatch.groups.key) {
         case 'source':
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           dep.managerData!.source = kvMatch.groups.value;
           break;
 
@@ -58,14 +58,14 @@ export function extractTerraformRequiredProviders(
     const kvMatch = keyValueExtractionRegex.exec(line);
     if (kvMatch?.groups) {
       dep.currentValue = kvMatch.groups.value;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       dep.managerData!.moduleName = kvMatch.groups.key;
       deps.push(dep);
     } else {
       const nameMatch = providerBlockExtractionRegex.exec(line);
 
       if (nameMatch?.groups) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         dep.managerData!.moduleName = nameMatch.groups.key;
         lineNumber = extractBlock(lineNumber, lines, dep);
         deps.push(dep);

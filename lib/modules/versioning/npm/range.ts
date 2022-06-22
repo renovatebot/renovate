@@ -56,6 +56,7 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
   return needReplace ? resultTuple.join('.') : oldValue;
 }
 
+// TODO: #7154
 export function getNewValue({
   currentValue,
   rangeStrategy,
@@ -92,14 +93,14 @@ export function getNewValue({
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
-      return splitCurrent.join(element.operator) + newValue;
+      return `${splitCurrent.join(element.operator)}${newValue}`;
     }
     if (parsedRange.length > 1) {
       const previousElement = parsedRange[parsedRange.length - 2];
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();
-        return splitCurrent.join('-') + '- ' + newValue;
+        return `${splitCurrent.join('-')}- ${newValue}`;
       }
       if (element.operator?.startsWith('>')) {
         logger.warn(`Complex ranges ending in greater than are not supported`);

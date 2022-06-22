@@ -14,8 +14,8 @@ describe('modules/manager/velaci/extract', () => {
     });
 
     it('extracts multiple step pipeline image lines', () => {
-      const res = extractPackageFile(Fixtures.get('.vela-steps.yml'));
-      expect(res.deps).toMatchObject([
+      const res = extractPackageFile(Fixtures?.get('.vela-steps.yml'));
+      expect(res?.deps).toMatchObject([
         {
           currentValue: '1.13',
           depName: 'golang',
@@ -28,8 +28,8 @@ describe('modules/manager/velaci/extract', () => {
     });
 
     it('extracts multiple services pipeline image lines', () => {
-      const res = extractPackageFile(Fixtures.get('.vela-services.yml'));
-      expect(res.deps).toMatchObject([
+      const res = extractPackageFile(Fixtures?.get('.vela-services.yml'));
+      expect(res?.deps).toMatchObject([
         {
           currentValue: '10.0.0',
           depName: 'node',
@@ -46,8 +46,8 @@ describe('modules/manager/velaci/extract', () => {
     });
 
     it('extracts multiple stages pipeline image lines', () => {
-      const res = extractPackageFile(Fixtures.get('.vela-stages.yaml'));
-      expect(res.deps).toMatchObject([
+      const res = extractPackageFile(Fixtures?.get('.vela-stages.yaml'));
+      expect(res?.deps).toMatchObject([
         {
           currentValue: '1.13',
           depName: 'golang',
@@ -60,8 +60,8 @@ describe('modules/manager/velaci/extract', () => {
     });
 
     it('extracts multiple secrets pipeline image lines', () => {
-      const res = extractPackageFile(Fixtures.get('.vela-secrets.yml'));
-      expect(res.deps).toMatchObject([
+      const res = extractPackageFile(Fixtures?.get('.vela-secrets.yml'));
+      expect(res?.deps).toMatchObject([
         {
           currentValue: '10.0.0',
           depName: 'node',

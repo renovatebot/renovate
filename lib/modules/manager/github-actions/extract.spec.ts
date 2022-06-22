@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
@@ -9,21 +9,23 @@ describe('modules/manager/github-actions/extract', () => {
 
     it('extracts multiple docker image lines from yaml configuration file', () => {
       const res = extractPackageFile(Fixtures.get('workflow_1.yml'));
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(2);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
+        2
+      );
     });
 
     it('extracts multiple action tag lines from yaml configuration file', () => {
       const res = extractPackageFile(Fixtures.get('workflow_2.yml'));
-      expect(res.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchSnapshot();
       expect(
-        res.deps.filter((d) => d.datasource === 'github-tags')
+        res?.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(8);
     });
 
     it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(Fixtures.get('workflow_3.yml'));
-      expect(res.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchSnapshot([
         {
           currentValue: 'v0.13.1',
           datasource: 'github-tags',
@@ -77,7 +79,7 @@ describe('modules/manager/github-actions/extract', () => {
               uses: "actions/setup-java@v2"`;
 
       const res = extractPackageFile(yamlContent);
-      expect(res.deps).toMatchObject([
+      expect(res?.deps).toMatchObject([
         {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',

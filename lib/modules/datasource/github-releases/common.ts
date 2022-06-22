@@ -10,9 +10,19 @@ export function getSourceUrlBase(registryUrl: string | undefined): string {
 
 export function getApiBaseUrl(registryUrl: string | undefined): string {
   const sourceUrlBase = getSourceUrlBase(registryUrl);
-  return [defaultSourceUrlBase, defaultApiBaseUrl].includes(sourceUrlBase)
-    ? defaultApiBaseUrl
-    : `${sourceUrlBase}api/v3/`;
+
+  if (
+    sourceUrlBase === defaultSourceUrlBase ||
+    sourceUrlBase === defaultApiBaseUrl
+  ) {
+    return defaultApiBaseUrl;
+  }
+
+  if (sourceUrlBase.endsWith('/api/v3/')) {
+    return sourceUrlBase;
+  }
+
+  return `${sourceUrlBase}api/v3/`;
 }
 
 export function getSourceUrl(
