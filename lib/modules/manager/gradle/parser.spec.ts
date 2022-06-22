@@ -141,7 +141,6 @@ describe('modules/manager/gradle/parser', () => {
       const [res] = deps;
       const idx = content
         // TODO #7154
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         .slice(res.managerData!.fileReplacePosition)
         .indexOf('1.2.3');
       expect(idx).toBe(0);
@@ -152,7 +151,6 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
         // TODO #7154
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         content.slice(managerData!.fileReplacePosition).indexOf(currentValue!)
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();

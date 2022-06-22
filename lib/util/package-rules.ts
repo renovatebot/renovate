@@ -29,25 +29,25 @@ function matchesRule(
     manager,
     datasource,
   } = inputConfig;
-  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
+  const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
   // Setting empty arrays simplifies our logic later
-  const matchFiles = packageRule.matchFiles || [];
-  const matchPaths = packageRule.matchPaths || [];
-  const matchLanguages = packageRule.matchLanguages || [];
-  const matchBaseBranches = packageRule.matchBaseBranches || [];
-  const matchManagers = packageRule.matchManagers || [];
-  const matchDatasources = packageRule.matchDatasources || [];
-  const matchDepTypes = packageRule.matchDepTypes || [];
-  const matchPackageNames = packageRule.matchPackageNames || [];
-  let matchPackagePatterns = packageRule.matchPackagePatterns || [];
-  const matchPackagePrefixes = packageRule.matchPackagePrefixes || [];
-  const excludePackageNames = packageRule.excludePackageNames || [];
-  const excludePackagePatterns = packageRule.excludePackagePatterns || [];
-  const excludePackagePrefixes = packageRule.excludePackagePrefixes || [];
-  const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
-  const matchSourceUrls = packageRule.matchSourceUrls || [];
-  const matchCurrentVersion = packageRule.matchCurrentVersion || null;
-  const matchUpdateTypes = packageRule.matchUpdateTypes || [];
+  const matchFiles = packageRule.matchFiles ?? [];
+  const matchPaths = packageRule.matchPaths ?? [];
+  const matchLanguages = packageRule.matchLanguages ?? [];
+  const matchBaseBranches = packageRule.matchBaseBranches ?? [];
+  const matchManagers = packageRule.matchManagers ?? [];
+  const matchDatasources = packageRule.matchDatasources ?? [];
+  const matchDepTypes = packageRule.matchDepTypes ?? [];
+  const matchPackageNames = packageRule.matchPackageNames ?? [];
+  let matchPackagePatterns = packageRule.matchPackagePatterns ?? [];
+  const matchPackagePrefixes = packageRule.matchPackagePrefixes ?? [];
+  const excludePackageNames = packageRule.excludePackageNames ?? [];
+  const excludePackagePatterns = packageRule.excludePackagePatterns ?? [];
+  const excludePackagePrefixes = packageRule.excludePackagePrefixes ?? [];
+  const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes ?? [];
+  const matchSourceUrls = packageRule.matchSourceUrls ?? [];
+  const matchCurrentVersion = packageRule.matchCurrentVersion ?? null;
+  const matchUpdateTypes = packageRule.matchUpdateTypes ?? [];
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
@@ -269,7 +269,7 @@ function matchesRule(
       const compareVersion =
         currentValue && version.isVersion(currentValue)
           ? currentValue // it's a version so we can match against it
-          : lockedVersion || currentVersion; // need to match against this currentVersion, if available
+          : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
         // istanbul ignore next
         if (version.isVersion(compareVersion)) {
@@ -298,7 +298,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T
 ): T {
   let config = { ...inputConfig };
-  const packageRules = config.packageRules || [];
+  const packageRules = config.packageRules ?? [];
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`

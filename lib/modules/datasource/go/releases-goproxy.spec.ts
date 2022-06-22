@@ -282,6 +282,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       delete process.env.GOPROXY;
       delete process.env.GONOPROXY;
       delete process.env.GOPRIVATE;
+      delete process.env.GOINSECURE;
     });
 
     it('skips GONOPROXY and GOPRIVATE packages', async () => {

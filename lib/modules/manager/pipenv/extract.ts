@@ -60,7 +60,6 @@ function extractFromSection(
           skipReason = 'invalid-name';
         }
         // validated above
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const specifierMatches = specifierRegex.exec(currentValue!);
         if (!specifierMatches) {
           logger.debug(
@@ -83,7 +82,7 @@ function extractFromSection(
         dep.datasource = PypiDatasource.id;
       }
       if (nestedVersion) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         dep.managerData!.nestedVersion = nestedVersion;
       }
       if (requirements.index) {
@@ -132,15 +131,12 @@ export async function extractPackageFile(
   const constraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     constraints.python = `== ${pipfile.requires!.python_version}.*`;
   } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     constraints.python = `== ${pipfile.requires!.python_full_version}`;
   }
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     constraints.pipenv = pipfile.packages!.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
     constraints.pipenv = pipfile['dev-packages']!.pipenv;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -17,6 +16,7 @@ export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
+  // TODO #7154
   if (await isBranchModified(config.onboardingBranch!)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
@@ -24,6 +24,7 @@ export async function rebaseOnboardingBranch(
   const configFile = defaultConfigFile(config);
   const existingContents = await getFile(configFile, config.onboardingBranch);
   const contents = await getOnboardingConfigContents(config, configFile);
+  // TODO #7154
   if (
     contents === existingContents &&
     !(await isBranchStale(config.onboardingBranch!))
@@ -45,6 +46,7 @@ export async function rebaseOnboardingBranch(
     return null;
   }
 
+  // TODO #7154
   return commitAndPush({
     branchName: config.onboardingBranch!,
     files: [

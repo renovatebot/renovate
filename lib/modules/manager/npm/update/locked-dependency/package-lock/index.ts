@@ -30,13 +30,12 @@ export async function updateLockedDependency(
   try {
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     const detectedIndent = detectIndent(lockFileContent!).indent || '  ';
     let newPackageJsonContent: string | null | undefined;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       packageJson = JSON.parse(packageFileContent!);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       packageLockJson = JSON.parse(lockFileContent!);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
@@ -46,7 +45,7 @@ export async function updateLockedDependency(
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       currentVersion!
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
@@ -129,7 +128,7 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       currentVersion!,
       newVersion
     );
@@ -203,7 +202,7 @@ export async function updateLockedDependency(
           newVersion,
         })!;
         newPackageJsonContent = updateDependency({
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           fileContent: packageFileContent!,
           upgrade: { depName, depType, newValue },
         });
@@ -226,7 +225,7 @@ export async function updateLockedDependency(
         ...config,
         ...parentUpdate,
         lockFileContent: newLockFileContent,
-        packageFileContent: newPackageJsonContent || packageFileContent,
+        packageFileContent: newPackageJsonContent ?? packageFileContent,
       };
       const parentUpdateResult = await updateLockedDependency(
         parentUpdateConfig,

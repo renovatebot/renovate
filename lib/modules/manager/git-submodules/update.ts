@@ -13,9 +13,7 @@ export default async function updateDependency({
   const submoduleGit = Git(upath.join(localDir, upgrade.depName));
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     await git.submoduleUpdate(['--init', upgrade.depName!]);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     await submoduleGit.checkout([upgrade.newDigest!]);
     return fileContent;
   } catch (err) {
