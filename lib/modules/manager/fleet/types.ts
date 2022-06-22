@@ -1,3 +1,7 @@
+/**
+  Represent a GitRepo Kubernetes manifest of Fleet.
+  @link https://fleet.rancher.io/gitrepo-add/#create-gitrepo-instance
+ */
 export interface GitRepo {
   metadata: {
     name: string;
@@ -9,6 +13,10 @@ export interface GitRepo {
   };
 }
 
+/**
+ Represent a Bundle configuration of Fleet, which is located in `fleet.yaml` files.
+ @link https://fleet.rancher.io/gitrepo-structure/#fleetyaml
+ */
 export interface FleetFile {
   helm: FleetFileHelm;
 }
