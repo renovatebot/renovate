@@ -1,4 +1,3 @@
-import { pkg } from '../../../../../expose.cjs';
 import { PrDebugData, platform } from '../../../../../modules/platform';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import { regEx } from '../../../../../util/regex';
