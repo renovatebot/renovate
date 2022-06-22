@@ -29,7 +29,7 @@ const {
 
 function isVersion(input: string | undefined | null): boolean {
   // @renovatebot/pep440 isn't strict null save
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
   return !!valid(input!);
 }
 

@@ -11,11 +11,11 @@ import { logger } from '../../../../logger';
 import {
   PlatformPrOptions,
   Pr,
-  RenovatePrData,
+  PrDebugData,
   platform,
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody, prVerDataRe } from '../../../../modules/platform/pr-body';
+import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
@@ -64,35 +64,24 @@ export type ResultWithoutPr = {
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
-export function updatePrRenovateVerData(
-  existingPr: Pr | undefined,
-  prBody: string
-): string {
-  let res = prBody;
-  let oldData: string | undefined;
-  let prDataNew: RenovatePrData;
-  if (existingPr) {
-    oldData = existingPr.bodyStruct?.renovatePrVerData;
-    if (oldData) {
-      prDataNew = JSON.parse(oldData);
-      prDataNew.prUpdateVer = pkg.version;
-    } else {
-      prDataNew = { prCreationVer: '', prUpdateVer: pkg.version };
-    }
+export function updatePrDebugData(
+  debugData: PrDebugData | undefined
+): PrDebugData {
+  let res: PrDebugData;
+  if (debugData) {
+    debugData.updatedByRenovateVersion = pkg.version;
+    res = debugData;
   } else {
-    prDataNew = { prCreationVer: pkg.version, prUpdateVer: pkg.version };
+    res = { updatedByRenovateVersion: pkg.version };
   }
-
-  const prVerNew64 = toBase64(JSON.stringify(prDataNew));
-
-  if (oldData) {
-    res = res.replace(prVerDataRe, `<!--renovate-pr-data:${prVerNew64}-->`);
-  } else {
-    res += `\n<!--renovate-pr-data:${prVerNew64}-->\n`;
-  }
-  res = platform.massageMarkdown(res);
-  logger.debug(prDataNew, 'PR Renovate Version Data');
   return res;
+}
+
+export function updatePrDataCreation(prBody: string): string {
+  const prData = { prCreationVer: pkg.version, prUpdateVer: pkg.version };
+  const prData64 = toBase64(JSON.stringify(prData));
+  const res = prBody + `\n<!--renovate-debug:${prData64}-->\n`;
+  return platform.massageMarkdown(res);
 }
 
 // Ensures that PR exists with matching title/body
@@ -287,7 +276,9 @@ export async function ensurePr(
     }
   }
 
-  let prBody = await getPrBody(config);
+  let prBody = await getPrBody(config, {
+    debugData: existingPr?.bodyStruct?.debugData,
+  });
 
   try {
     if (existingPr) {
@@ -335,7 +326,6 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
-        prBody = updatePrRenovateVerData(existingPr, prBody);
         await platform.updatePr({
           number: existingPr.number,
           prTitle,
@@ -364,7 +354,8 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        prBody = updatePrRenovateVerData(undefined, prBody);
+        prBody = updatePrDataCreation(prBody);
+
         pr = await platform.createPr({
           sourceBranch: branchName,
           targetBranch: config.baseBranch ?? '',

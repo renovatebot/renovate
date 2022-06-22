@@ -4,7 +4,7 @@ import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
 import type { PrBodyStruct } from './types';
 
-export const prVerDataRe = regEx(/<!--renovate-pr-data:(?<payload>.*?)-->/s);
+export const prDebugDataRe = regEx(/<!--renovate-debug:(?<payload>.*?)-->/s);
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
@@ -28,8 +28,8 @@ function isRebaseRequested(body: string | undefined): boolean {
   return !!body?.includes(`- [x] <!-- rebase-check -->`);
 }
 
-export function getRenovatePrVerData(body: string): string | undefined {
-  const match = prVerDataRe.exec(body);
+export function getRenovateDebugPayload(body: string): string | undefined {
+  const match = prDebugDataRe.exec(body);
   return match?.groups?.payload;
 }
 
@@ -45,9 +45,9 @@ export function getPrBodyStruct(
     result.rebaseRequested = rebaseRequested;
   }
 
-  const base64data = getRenovatePrVerData(body);
+  const base64data = getRenovateDebugPayload(body);
   if (base64data) {
-    result.renovatePrVerData = fromBase64(base64data);
+    result.debugData = JSON.parse(fromBase64(base64data));
   }
   return result;
 }

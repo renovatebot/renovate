@@ -10,7 +10,7 @@ import {
 import * as _comment from '../../../../modules/platform/comment';
 import {
   getPrBodyStruct,
-  prVerDataRe,
+  prDebugDataRe,
 } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
 import { BranchStatus, PrState } from '../../../../types';
@@ -25,7 +25,7 @@ import {
   ChangeLogRelease,
 } from './changelog/types';
 import * as _participants from './participants';
-import { ensurePr, updatePrRenovateVerData } from '.';
+import { ensurePr, updatePrDataCreation } from '.';
 
 jest.mock('../../../../util/git');
 
@@ -71,9 +71,6 @@ describe('workers/repository/update/pr/index', () => {
       jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockResolvedValue(body);
-      jest.spyOn(platform, 'massageMarkdown').mockImplementation((prBody) => {
-        return prBody;
-      });
     });
 
     describe('Create', () => {
@@ -277,36 +274,13 @@ describe('workers/repository/update/pr/index', () => {
 
       it('creates PR with pr data', () => {
         const prbodyContent = Fixtures.get('prbody1');
-        const res = updatePrRenovateVerData(undefined, prbodyContent);
-        const match = prVerDataRe.exec(res);
+        jest.spyOn(platform, 'massageMarkdown').mockImplementation((prBody) => {
+          return prBody;
+        });
+        const res = updatePrDataCreation(prbodyContent);
+        const match = prDebugDataRe.exec(res);
         expect(match?.groups?.payload).toBe(
           'eyJwckNyZWF0aW9uVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSIsInByVXBkYXRlVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSJ9'
-        );
-      });
-
-      it('updates PR due to body change with pr data', () => {
-        const prbodyContent = Fixtures.get('prbody2');
-        const changedPr: Pr = {
-          ...pr,
-          bodyStruct: getPrBodyStruct(`${prbodyContent} updated`),
-        };
-        const res = updatePrRenovateVerData(changedPr, prbodyContent);
-        const match = prVerDataRe.exec(res);
-        expect(match?.groups?.payload).toBe(
-          'eyJwckNyZWF0aW9uVmVyIjoieC55LnoiLCJwclVwZGF0ZVZlciI6IjAuMC4wLXNlbWFudGljLXJlbGVhc2UifQ=='
-        );
-      });
-
-      it('updates PR due to body change without pr data', () => {
-        const prbodyContent = Fixtures.get('prbody1');
-        const changedPr: Pr = {
-          ...pr,
-          bodyStruct: getPrBodyStruct(`${prbodyContent} updated`),
-        };
-        const res = updatePrRenovateVerData(changedPr, prbodyContent);
-        const match = prVerDataRe.exec(res);
-        expect(match?.groups?.payload).toBe(
-          'eyJwckNyZWF0aW9uVmVyIjoiIiwicHJVcGRhdGVWZXIiOiIwLjAuMC1zZW1hbnRpYy1yZWxlYXNlIn0='
         );
       });
 

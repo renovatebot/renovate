@@ -1,4 +1,10 @@
+import { Fixtures } from '../../../../../../test/fixtures';
 import { mocked, platform } from '../../../../../../test/util';
+import { Pr } from '../../../../../modules/platform';
+import {
+  getPrBodyStruct,
+  prDebugDataRe,
+} from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
 import * as _changelogs from './changelogs';
 import * as _configDescription from './config-description';
@@ -49,11 +55,14 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('handles empty template', async () => {
-      const res = await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [],
-      });
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+        },
+        {}
+      );
       expect(res).toBeEmptyString();
     });
 
@@ -69,11 +78,14 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
-      await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [upgrade],
-      });
+      await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {}
+      );
 
       expect(upgrade).toMatchObject({
         branchName: 'some-branch',
@@ -97,11 +109,14 @@ describe('workers/repository/update/pr/body/index', () => {
         dependencyUrl: 'https://github.com/foo/bar',
       };
 
-      await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [upgrade],
-      });
+      await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {}
+      );
 
       expect(upgrade).toMatchObject({
         branchName: 'some-branch',
@@ -114,12 +129,15 @@ describe('workers/repository/update/pr/body/index', () => {
     it('compiles template', async () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
-      const res = await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [],
-        prBodyTemplate: 'PR BODY',
-      });
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: 'PR BODY',
+        },
+        {}
+      );
       expect(res).toBe('PR BODY');
     });
 
@@ -136,6 +154,45 @@ describe('workers/repository/update/pr/body/index', () => {
         { rebasingNotice: 'BAR' }
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
+    });
+
+    it('updates PR due to body change without pr data', async () => {
+      platform.massageMarkdown.mockImplementation((x) => x);
+      template.compile.mockImplementation((x) => x);
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: 'PR BODY',
+        },
+        {}
+      );
+
+      const match = prDebugDataRe.exec(res);
+      expect(match?.groups?.payload).toBeString();
+    });
+
+    it('updates PR due to body change with pr data', async () => {
+      platform.massageMarkdown.mockImplementation((x) => x);
+      template.compile.mockImplementation((x) => x);
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: `PR BODY \n<!--renovate-debug:ewogICJwckNyZWF0a-->\n`,
+        },
+        {
+          debugData: {
+            createdByRenovateVersion: '1.2.3',
+            updatedByRenovateVersion: '1.2.4',
+          },
+        }
+      );
+
+      const match = prDebugDataRe.exec(res);
+      expect(match?.groups?.payload).toBeString();
     });
   });
 });
