@@ -87,7 +87,6 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(deps).toHaveLength(8);
 
       // TODO #7154
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       expect(deps.some((dep) => dep.currentValue!.includes("'"))).toBeFalse();
     });
 

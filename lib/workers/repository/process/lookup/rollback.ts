@@ -19,7 +19,7 @@ export function getRollbackUpdate(
     return null;
   }
   const lessThanVersions = versions.filter((v) =>
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     version.isLessThanRange!(v.version, currentValue!)
   );
   // istanbul ignore if
@@ -55,15 +55,15 @@ export function getRollbackUpdate(
     return null;
   }
   const newValue = version.getNewValue({
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     currentValue: currentValue!,
     rangeStrategy: 'replace',
     newVersion,
   });
   return {
     bucket: 'rollback',
+    // TODO #7154
     newMajor: version.getMajor(newVersion)!,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     newValue: newValue!,
     newVersion,
     updateType: 'rollback',

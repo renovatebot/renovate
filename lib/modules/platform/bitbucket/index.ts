@@ -89,7 +89,7 @@ export async function initPlatform({
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9594)
   const platformConfig: PlatformResult = {
-    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
+    endpoint: endpoint ?? BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
 }
@@ -125,7 +125,7 @@ export async function getRawFile(
 
   const url =
     `/2.0/repositories/${repo}/src/` +
-    (finalBranchOrTag || `HEAD`) +
+    (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
@@ -136,7 +136,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -189,7 +189,7 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
   const url = git.getUrl({
@@ -374,7 +374,7 @@ export async function getBranchStatusCheck(
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = statuses.find((status) => status.key === context)?.state;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   return bbToRenovateStatusMapping[bbState!] || null;
 }
 
@@ -388,7 +388,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
+  const url = targetUrl ?? /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -595,8 +595,8 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const { title } = (await getPr(prId)) as Pr;
+  // TODO #7154
+  const { title } = (await getPr(prId))!;
 
   const body = {
     title,

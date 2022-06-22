@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// TODO #7154
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -116,6 +116,7 @@ export function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
+      // TODO: #7154 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }

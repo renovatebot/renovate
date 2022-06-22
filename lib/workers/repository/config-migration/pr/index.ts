@@ -117,7 +117,7 @@ If you need any further assistance then you can also [request help here](${
     } else {
       const pr = await platform.createPr({
         sourceBranch: branchName,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         targetBranch: config.defaultBranch!,
         prTitle,
         prBody,

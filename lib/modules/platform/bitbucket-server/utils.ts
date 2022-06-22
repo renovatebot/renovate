@@ -172,11 +172,11 @@ export function getRepoGitUrl(
   if (!cloneUrl) {
     // Fallback to generating the url if the API didn't give us an URL
     const { host, pathname } = url.parse(defaultEndpoint);
+    // TODO #7154
     gitUrl = git.getUrl({
       protocol: defaultEndpoint.split(':')[0] as GitProtocol,
       auth: `${opts.username}:${opts.password}`,
       host: `${host}${pathname}${
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
       }scm`,
       repository,

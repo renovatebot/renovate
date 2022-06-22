@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// TODO #7154
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
@@ -353,8 +353,8 @@ export async function processBranch(
 
     const userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
-      config.dependencyDashboardRebaseAllOpen ||
-      config.rebaseRequested;
+      !!config.dependencyDashboardRebaseAllOpen ||
+      !!config.rebaseRequested;
 
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');

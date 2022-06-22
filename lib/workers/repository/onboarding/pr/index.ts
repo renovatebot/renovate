@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -32,6 +31,7 @@ export async function ensureOnboardingPr(
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
+  // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
@@ -45,6 +45,7 @@ export async function ensureOnboardingPr(
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
         );
+  // TODO #7154
   prTemplate += emojify(
     `
 
@@ -150,6 +151,7 @@ If you need any further assistance then you can also [request help here](${
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
+      // TODO #7154
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,
         targetBranch: config.defaultBranch!,
