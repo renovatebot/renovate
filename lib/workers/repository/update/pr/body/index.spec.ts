@@ -1,10 +1,5 @@
-import { Fixtures } from '../../../../../../test/fixtures';
 import { mocked, platform } from '../../../../../../test/util';
-import { Pr } from '../../../../../modules/platform';
-import {
-  getPrBodyStruct,
-  prDebugDataRe,
-} from '../../../../../modules/platform/pr-body';
+import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
 import * as _changelogs from './changelogs';
 import * as _configDescription from './config-description';
