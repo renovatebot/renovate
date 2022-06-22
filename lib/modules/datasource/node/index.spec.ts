@@ -49,7 +49,7 @@ describe('modules/datasource/node/index', () => {
         depName: 'node',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(64);
+      expect(res?.releases).toHaveLength(64);
     });
   });
 });

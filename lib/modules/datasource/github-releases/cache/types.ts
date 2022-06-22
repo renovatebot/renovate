@@ -50,6 +50,9 @@ export interface GithubDatasourceCache<StoredItem extends StoredItemBase> {
 
   /** Cache soft updates are performed depending on `updatedAt` value. */
   updatedAt: string;
+
+  /** Latest release timestamp (`releaseTimestamp`) of all releases. */
+  lastReleasedAt?: string;
 }
 
 /**
@@ -60,6 +63,25 @@ export interface CacheOptions {
    * How many minutes to wait until next cache update
    */
   updateAfterMinutes?: number;
+
+  /**
+   * If package was released recently, we assume higher
+   * probability of having one more release soon.
+   *
+   * In this case, we use `updateAfterMinutesFresh` option.
+   */
+  packageFreshDays?: number;
+
+  /**
+   * If package was released recently, we assume higher
+   * probability of having one more release soon.
+   *
+   * In this case, this option will be used
+   * instead of `updateAfterMinutes`.
+   *
+   * Fresh period is configured via `freshDays` option.
+   */
+  updateAfterMinutesFresh?: number;
 
   /**
    * How many days to wait until full cache reset (for single package).
@@ -97,4 +119,9 @@ export interface CacheOptions {
    * How many pages to fetch (at most) during the soft update
    */
   maxUpdatePages?: number;
+}
+
+export interface ChangelogRelease {
+  date: string | Date;
+  version: string;
 }

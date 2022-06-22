@@ -4,12 +4,12 @@ import { extractGradleVersion, getJavaContraint } from './utils';
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaContraint()', () => {
     it('return null for global mode', () => {
-      expect(getJavaContraint(undefined)).toBeNull();
+      expect(getJavaContraint('6')).toBeNull();
     });
 
     it('return ^11.0.0 for docker mode and undefined gradle', () => {
       GlobalConfig.set({ binarySource: 'docker' });
-      expect(getJavaContraint(undefined)).toBe('^11.0.0');
+      expect(getJavaContraint('')).toBe('^11.0.0');
     });
 
     it('return ^8.0.0 for docker gradle < 5', () => {
@@ -30,7 +30,8 @@ describe('modules/manager/gradle-wrapper/util', () => {
 
   describe('extractGradleVersion()', () => {
     it('works for undefined', () => {
-      expect(extractGradleVersion(undefined)).toBeNull();
+      // TODO #7154
+      expect(extractGradleVersion(undefined as never)).toBeNull();
     });
   });
 });

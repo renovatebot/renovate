@@ -4,9 +4,12 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and:
 2. Extracts `github-releases` dependencies from system manifests (`flux-system/gotk-components.yaml` files) and regenerates them when new versions of Flux are available
 
 The `flux` manager will only extract `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` sources.
-`HelmRelease` resources linked to other kinds of sources like `GitRepository` or `Bucket` will be ignored.
+The following configurations are currently unsupported:
 
-For the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
+- OCI `HelmRepository` sources (those with `type: oci`)
+- `HelmRelease` resources linked to other kinds of sources like `GitRepository` or `Bucket`
+
+In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
 1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` property set
 2. The referenced `HelmRepository` resource must have its `metadata.namespace` property set

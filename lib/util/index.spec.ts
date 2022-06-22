@@ -13,7 +13,7 @@ describe('util/index', () => {
     });
 
     it('returns full array for null number', () => {
-      expect(sampleSize(array, null)).toBeEmptyArray();
+      expect(sampleSize(array, null as never)).toBeEmptyArray();
     });
 
     it('returns full array for 0 number', () => {
@@ -21,11 +21,11 @@ describe('util/index', () => {
     });
 
     it('returns empty array for null array', () => {
-      expect(sampleSize(null, 1)).toBeEmptyArray();
+      expect(sampleSize(null as never, 1)).toBeEmptyArray();
     });
 
     it('returns empty array for undefined array', () => {
-      expect(sampleSize(undefined, 1)).toBeEmptyArray();
+      expect(sampleSize(undefined as never, 1)).toBeEmptyArray();
     });
 
     it('returns empty array for empty array', () => {

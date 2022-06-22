@@ -319,6 +319,46 @@ None detected
 "
 `;
 
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo shows different combinations of version+digest for a given dependency 1`] = `
+"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>ver-and-digest/Dockerfile</summary>
+
+ - \`ubuntu 18.04@sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79\`
+
+</details>
+
+<details><summary>no-ver-no-digest/Dockerfile</summary>
+
+ - \`ubuntu no version found\`
+
+</details>
+
+<details><summary>ver-only/Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+<details><summary>digest-only/Dockerfile</summary>
+
+ - \`ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f\`
+
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems 1`] = `
 "This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
 

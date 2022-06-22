@@ -2,7 +2,6 @@
 
 exports[`modules/manager/poetry/extract extractPackageFile() extracts mixed versioning types 1`] = `
 Object {
-  "constraints": Object {},
   "deps": Array [
     Object {
       "currentValue": "0.2",
@@ -345,13 +344,13 @@ Object {
       "versioning": "pep440",
     },
   ],
+  "extractedConstraints": Object {},
   "registryUrls": undefined,
 }
 `;
 
 exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple dependencies (with dep = {version = "1.2.3"} case) 1`] = `
 Object {
-  "constraints": Object {},
   "deps": Array [
     Object {
       "currentValue": "*",
@@ -424,6 +423,7 @@ Object {
       "versioning": "poetry",
     },
   ],
+  "extractedConstraints": Object {},
   "registryUrls": undefined,
 }
 `;
@@ -533,7 +533,6 @@ Array [
 
 exports[`modules/manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
 Object {
-  "constraints": Object {},
   "deps": Array [
     Object {
       "currentValue": "",
@@ -546,15 +545,13 @@ Object {
       "skipReason": "multiple-constraint-dep",
     },
   ],
+  "extractedConstraints": Object {},
   "registryUrls": undefined,
 }
 `;
 
 exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
 Object {
-  "constraints": Object {
-    "python": "^3.9",
-  },
   "deps": Array [
     Object {
       "currentValue": "*",
@@ -568,6 +565,9 @@ Object {
       "versioning": "poetry",
     },
   ],
+  "extractedConstraints": Object {
+    "python": "^3.9",
+  },
   "registryUrls": undefined,
 }
 `;

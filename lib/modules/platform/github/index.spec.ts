@@ -2338,6 +2338,94 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
+      it('should skip automerge if GHE <3.3.0', async () => {
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200, '', { 'x-github-enterprise-version': '3.1.7' })
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, []);
+
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        hostRules.find.mockReturnValue({
+          token: '123test',
+        });
+        await github.initRepo({
+          repository: 'some/repo',
+        } as any);
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenNthCalledWith(
+          10,
+          { prNumber: 123 },
+          'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+        );
+      });
+
+      it('should perform automerge if GHE >=3.3.0', async () => {
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200, '', { 'x-github-enterprise-version': '3.3.5' })
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, [])
+          .post('/graphql')
+          .reply(200, {
+            data: {
+              repository: {
+                defaultBranchRef: {
+                  name: 'main',
+                },
+                nameWithOwner: 'some/repo',
+                autoMergeAllowed: true,
+              },
+            },
+          });
+
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        hostRules.find.mockReturnValue({
+          token: '123test',
+        });
+        await github.initRepo({
+          repository: 'some/repo',
+        } as any);
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenNthCalledWith(
+          11,
+          { prNumber: 123 },
+          'GitHub-native automerge: success'
+        );
+      });
+
       it('should set automatic merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);

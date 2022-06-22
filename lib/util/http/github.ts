@@ -50,7 +50,6 @@ export interface GithubGraphqlResponse<T = unknown> {
   errors?: {
     type?: string;
     message: string;
-    locations: unknown;
   }[];
 }
 
@@ -186,7 +185,7 @@ interface GraphqlPageCacheItem {
   pageSize: number;
 }
 
-type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
+export type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
 
 function getGraphqlPageSize(
   fieldName: string,

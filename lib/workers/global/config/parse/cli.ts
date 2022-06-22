@@ -31,6 +31,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
         .replace(/^--dry-run$/, '--dry-run=true')
         .replace(/^--require-config$/, '--require-config=true')
+        .replace('--aliases', '--registry-aliases')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();

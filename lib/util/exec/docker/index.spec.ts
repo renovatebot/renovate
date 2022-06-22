@@ -208,7 +208,7 @@ describe('util/exec/docker/index', () => {
   });
 
   describe('generateDockerCommand', () => {
-    const preCommands = [null, 'foo', undefined];
+    const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';

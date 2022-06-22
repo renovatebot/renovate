@@ -56,7 +56,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines.node;
+  const range = pkg.engines!.node;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
@@ -118,6 +118,9 @@ export async function start(): Promise<number> {
     // initialize all submodules
     config = await globalInitialize(config);
 
+    // Set platform and endpoint in case local presets are used
+    GlobalConfig.set({ platform: config.platform, endpoint: config.endpoint });
+
     await validatePresets(config);
 
     checkEnv();
@@ -138,7 +141,7 @@ export async function start(): Promise<number> {
     }
 
     // Iterate through repositories sequentially
-    for (const repository of config.repositories) {
+    for (const repository of config.repositories!) {
       if (haveReachedLimits()) {
         break;
       }
@@ -158,13 +161,13 @@ export async function start(): Promise<number> {
     } else {
       logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
     }
-    if (!config) {
+    if (!config!) {
       // return early if we can't parse config options
       logger.debug(`Missing config`);
       return 2;
     }
   } finally {
-    await globalFinalize(config);
+    await globalFinalize(config!);
     logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);

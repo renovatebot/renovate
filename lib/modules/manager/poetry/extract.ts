@@ -91,7 +91,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
       registryUrls.add(source.url);
     }
   }
-  registryUrls.add(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
+  registryUrls.add(process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
 }
@@ -115,7 +115,8 @@ export async function extractPackageFile(
 
   // handle the lockfile
   const lockfileName = getSiblingFileName(fileName, 'poetry.lock');
-  const lockContents = await readLocalFile(lockfileName, 'utf8');
+  // TODO #7154
+  const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
   const lockfileMapping = extractLockFileEntries(lockContents);
 
@@ -128,16 +129,17 @@ export async function extractPackageFile(
     return null;
   }
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
-    constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
+    extractedConstraints.python =
+      pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFile = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
-    constraints,
+    extractedConstraints,
   };
   // Try poetry.lock first
   let lockFile = getSiblingFileName(fileName, 'poetry.lock');

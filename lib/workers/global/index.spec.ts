@@ -176,7 +176,7 @@ describe('workers/global/index', () => {
         endpoint: 'https://github.com/',
         writeDiscoveredRepos: '/tmp/renovate-output.json',
       });
-      fs.writeFile.mockReturnValueOnce(null);
+      fs.writeFile.mockResolvedValueOnce();
 
       expect(await globalWorker.start()).toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
