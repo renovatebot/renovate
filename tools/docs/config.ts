@@ -156,8 +156,7 @@ function stringifyArrays(el: Record<string, any>): void {
 
 function genExperimentalMsg(el: Record<string, any>): string {
   const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
+  let warning = '\n!!! warning "This feature is flagged as experimental"\n';
 
   if (!el.experimental) {
     return '';
