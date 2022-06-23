@@ -97,7 +97,6 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackagePrefixes: ['mcr.microsoft.com/dotnet/'],
         allowedVersions: '!/^7\\./',
-        matchUpdateTypes: ['major'],
         dependencyDashboardApproval: true,
       },
     ],
