@@ -1,6 +1,6 @@
 // istanbul ignore file
+import { RequestError as HttpError } from 'got';
 import { parseUrl } from '../url';
-import { HttpError } from './types';
 
 // TODO: remove when code is refactored (#9651)
 

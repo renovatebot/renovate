@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
+import type { VersioningApi } from '../../../../modules/versioning/types';
 import { regEx } from '../../../../util/regex';
-import type { VersioningApi } from '../../../../versioning/types';
 
 export function getCurrentVersion(
   currentValue: string,

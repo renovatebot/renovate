@@ -1,0 +1,8 @@
+# not existing
+include: 'lib/modules/manager/gitlabci/__fixtures__/include.2.yml'
+
+test:
+  stage: test
+  image: node:12
+  script:
+    - echo test

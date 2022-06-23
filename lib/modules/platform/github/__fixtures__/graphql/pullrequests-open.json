@@ -1,0 +1,47 @@
+{
+  "data": {
+    "repository": {
+      "pullRequests": {
+        "pageInfo": {},
+        "nodes": [
+          {
+            "number": 2433,
+            "baseRefName": "master",
+            "headRefName": "renovate/major-got-packages",
+            "title": "build(deps): update got packages (major)",
+            "labels": {
+              "nodes": [
+                {
+                  "name": "blocked"
+                }
+              ]
+            }
+          },
+          {
+            "number": 2500,
+            "baseRefName": "master",
+            "headRefName": "renovate/jest-monorepo",
+            "title": "chore(deps): update dependency jest to v23.6.0",
+            "body": "Some body",
+            "assignees": {
+              "totalCount": 1
+            },
+            "reviewRequests": {
+              "totalCount": 2
+            }
+          },
+          {
+            "number": 2079,
+            "headRefName": "feat/nodever",
+            "title": "feat: node versioning (WIP)"
+          },
+          {
+            "number": 2086,
+            "headRefName": "fix/deletePRafterDeleteBranch",
+            "title": "feat(azure): abandon pr after delete branch"
+          }
+        ]
+      }
+    }
+  }
+}

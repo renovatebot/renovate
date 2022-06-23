@@ -1,7 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
 import { PlatformId } from '../../constants';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases';
+import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
 
@@ -48,11 +48,8 @@ describe('util/http/gitlab', () => {
       .reply(200, ['d']);
     const res = await gitlabApi.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
-
-    const trace = httpMock.getTrace();
-    expect(trace).toHaveLength(3);
-    expect(trace).toMatchSnapshot();
   });
+
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
     process.env.GITLAB_IGNORE_REPO_URL = 'true';
     setBaseUrl(`${selfHostedUrl}/api/v4/`);
@@ -71,10 +68,6 @@ describe('util/http/gitlab', () => {
       .reply(200, ['d']);
     const res = await gitlabApi.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
-
-    const trace = httpMock.getTrace();
-    expect(trace).toHaveLength(3);
-    expect(trace).toMatchSnapshot();
   });
 
   it('supports different datasources', async () => {
@@ -90,10 +83,6 @@ describe('util/http/gitlab', () => {
       .reply(200);
     const response = await gitlabApiDatasource.get('/some-url');
     expect(response).not.toBeNull();
-
-    const trace = httpMock.getTrace();
-    expect(trace).toHaveLength(1);
-    expect(trace).toMatchSnapshot();
   });
 
   it('attempts to paginate', async () => {
@@ -102,18 +91,15 @@ describe('util/http/gitlab', () => {
     });
     const res = await gitlabApi.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
-
-    const trace = httpMock.getTrace();
-    expect(trace).toHaveLength(1);
-    expect(trace).toMatchSnapshot();
   });
+
   it('posts', async () => {
     const body = ['a', 'b'];
     httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(200, body);
     const res = await gitlabApi.postJson('some-url');
     expect(res.body).toEqual(body);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
+
   it('sets baseUrl', () => {
     expect(() => setBaseUrl(`${selfHostedUrl}/api/v4/`)).not.toThrow();
   });

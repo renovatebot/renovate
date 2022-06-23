@@ -3,7 +3,7 @@ import type { GitOptions } from '../../types/git';
 export type { DiffResult, StatusResult } from 'simple-git';
 
 export interface GitAuthor {
-  name?: string;
+  name?: string | null;
   address?: string;
 }
 
@@ -26,7 +26,7 @@ export interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   ignoredAuthors: string[];
-  gitAuthorName?: string;
+  gitAuthorName?: string | null;
   gitAuthorEmail?: string;
 
   writeGitDone?: boolean;
@@ -46,7 +46,7 @@ export interface FileAddition {
   /**
    * File contents
    */
-  contents: string | Buffer;
+  contents: string | Buffer | null;
 
   /**
    * The executable bit
@@ -93,8 +93,16 @@ export interface SourceBranchConflict {
 }
 
 export interface CommitResult {
-  sha: string;
+  parentCommitSha: string;
+  commitSha: string;
   files: FileChange[];
+}
+
+export interface TreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: string;
 }
 
 /**

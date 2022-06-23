@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import type {
@@ -13,19 +14,20 @@ async function getOnboardingConfig(
 ): Promise<RenovateSharedConfig> {
   let onboardingConfig = clone(config.onboardingConfig);
 
-  let orgPreset: string;
+  let orgPreset: string | undefined;
 
   logger.debug(
     'Checking if this org/owner has a default Renovate preset which can be used.'
   );
 
-  const orgName = config.repository.split('/')[0];
+  // TODO #7154
+  const orgName = config.repository!.split('/')[0];
 
   // Check for org/renovate-config
   try {
-    const packageName = `${orgName}/renovate-config`;
-    await getPreset({ packageName, baseConfig: config });
-    orgPreset = `local>${packageName}`;
+    const repo = `${orgName}/renovate-config`;
+    await getPreset({ repo });
+    orgPreset = `local>${repo}`;
   } catch (err) {
     if (
       err.message !== PRESET_DEP_NOT_FOUND &&
@@ -37,15 +39,15 @@ async function getOnboardingConfig(
 
   if (!orgPreset) {
     // Check for org/.{{platform}}
+    const platform = GlobalConfig.get('platform');
     try {
-      const packageName = `${orgName}/.${config.platform}`;
+      const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';
       await getPreset({
-        packageName,
+        repo,
         presetName,
-        baseConfig: config,
       });
-      orgPreset = `local>${packageName}:${presetName}`;
+      orgPreset = `local>${repo}:${presetName}`;
     } catch (err) {
       if (
         err.message !== PRESET_DEP_NOT_FOUND &&

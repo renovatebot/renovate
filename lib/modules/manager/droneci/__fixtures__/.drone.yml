@@ -1,0 +1,46 @@
+kind: pipeline
+name: Test
+
+steps:
+  - name: mix
+    image: elixir:1.8.1-alpine
+    environment:
+      DB_HOST: mysql
+    commands:
+      - apk add --no-cache gcc g++ git imagemagick libc-dev libmcrypt-dev make
+      - mix local.hex --force
+      - mix local.rebar --force
+      - mix deps.get
+      - mix test
+
+  - name: node
+    image: amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201
+    commands:
+      - npm install
+      - npm test
+
+services:
+  - name: mysql
+    image: mysql:5.7.24
+    ports:
+      - 3306
+
+  - name: redis
+    image: redis:alpine
+    ports:
+      - 6379
+
+  - name: node
+    image: "amd64/node:10.0.0\
+            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201"
+    commands:
+      - npm install
+      - npm test
+
+  - name: node
+    image: 'amd64/node\
+            :10.0.0\
+            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201'
+    commands:
+      - npm install
+      - npm test

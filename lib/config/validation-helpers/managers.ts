@@ -1,4 +1,4 @@
-import { getManagerList } from '../../manager';
+import { getManagerList } from '../../modules/manager';
 import type { ValidationMessage } from '../types';
 import type { CheckManagerArgs } from './types';
 
@@ -9,7 +9,7 @@ export function check({
   resolvedRule,
   currentPath,
 }: CheckManagerArgs): ValidationMessage[] {
-  let managersErrMessage: string;
+  let managersErrMessage: string | undefined;
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(

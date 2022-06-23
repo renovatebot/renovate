@@ -126,7 +126,7 @@ export default async function handleError(
   }
   if (err instanceof ExternalHostError) {
     logger.warn(
-      { hostType: err.hostType, lookupName: err.lookupName, err: err.err },
+      { hostType: err.hostType, packageName: err.packageName, err: err.err },
       'Host error'
     );
     logger.info('External host error causing abort - skipping');

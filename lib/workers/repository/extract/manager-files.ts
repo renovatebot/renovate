@@ -1,17 +1,17 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
-} from '../../../manager';
-import type { PackageFile } from '../../../manager/types';
+} from '../../../modules/manager';
+import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
+import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
-  config: RenovateConfig
-): Promise<PackageFile[]> {
+  config: WorkerExtractConfig
+): Promise<PackageFile[] | null> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {

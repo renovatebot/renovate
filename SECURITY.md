@@ -1,4 +1,7 @@
-# Security Policy
+# Security / Disclosure
 
-Please send an email to [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com) describing what you have found.
-Please do not raise an issue in this repository or publicize your concern in any other forum without giving us adequate time to investigate first.
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com).
+This way we can evaluate the bug and hopefully fix it before it gets abused.
+Please give us enough time to investigate the bug before you report it anywhere else.
+
+Please do not create GitHub issues for security-related doubts or problems.

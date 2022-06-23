@@ -4,7 +4,7 @@ If you've been referred to this document, it's because someone you're interactin
 
 ## Be positive and polite
 
-This project is open source, and contains the work of a lot of contributors who are proud of it.
+This project is open source, and has the work of a lot of contributors who are proud of it.
 Please avoid unnecessary criticism, especially if you are new to the project or have not contributed anything.
 You are welcome to make it better, and do not need to criticize the works of others first.
 
@@ -12,7 +12,7 @@ You are welcome to make it better, and do not need to criticize the works of oth
 
 We ask that you respect the time of the contributors and maintainers who are helping you.
 This means accepting that sometimes a question might sit around for a bit before getting answered.
-This also means that features/bugfixes that you really want can take a long time to appear.
+This also means that features or bug fixes that you really want can take a long time to appear.
 
 ## Be respectful to competitors
 
@@ -35,7 +35,7 @@ In other words, if someone's taking the time to help you, "don't be lazy".
 
 If someone's helped you get some functionality working, or successfully troubleshoot a problem, please try to do this:
 
-- Confirm which advice fixed your problem, if it's unclear
+- Let us know which advice fixed your problem, if it's unclear
 - If you're feeling polite, thank the person who helped you
 - If you're feeling helpful, submit a Pull Request to improve the relevant documentation
 
@@ -69,3 +69,12 @@ A full log dump takes a lot of time to scroll through, and it is next to impossi
 
 Instead, please select the logs relevant to your problem and paste just those.
 If it turns out there's a need for the full dump, someone can ask you for it later.
+
+## Avoid unjustified bug reports
+
+Don't raise a bug report unless it's definitely a bug.
+"I don't like this" or "I didn't expect this to happen" is not the same thing as a bug.
+
+Many unjustified bug reports are filed because people they think it will get them more attention.
+Instead, you may be just wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you are much less likely to get the attention you're hoping for.
+If in doubt, start a discussion instead.

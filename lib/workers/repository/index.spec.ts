@@ -16,10 +16,12 @@ jest.mock('./error');
 describe('workers/repository/index', () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       config = getConfig();
       GlobalConfig.set({ localDir: '' });
     });
+
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);

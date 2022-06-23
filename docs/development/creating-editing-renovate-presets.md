@@ -41,6 +41,6 @@ Rules:
 
 Rules:
 
-1. The primary use case of monorepo presets is identifying packages from the same origin source repository which should be updated together
+1. The primary use case of monorepo presets is finding packages from the same origin source repository which should be updated together
 1. Packages from the same repository which are developed and versioned independently do not need to be grouped as a monorepo, but in many cases we still do
 1. Packages from separate repositories but which are released together and dependent on each other may also be added to the "monorepo" definitions even if not strictly true

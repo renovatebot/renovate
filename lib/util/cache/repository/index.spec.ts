@@ -1,56 +1,43 @@
-import * as _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import * as repositoryCache from '.';
+import type { RenovateConfig } from '../../../config/types';
+import * as _fs from '../../fs';
+import { initRepoCache } from './init';
+import { getCache, resetCache, saveCache } from '.';
 
-jest.mock('fs-extra');
+jest.mock('../../fs');
 
 const fs = mocked(_fs);
 
 describe('util/cache/repository/index', () => {
   beforeEach(() => {
+    resetCache();
     jest.resetAllMocks();
-    GlobalConfig.set({ cacheDir: '/tmp/renovate/cache/' });
+    GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
-  const config = {
+
+  const config: RenovateConfig = {
     platform: 'github',
-    repository: 'abc/def',
+    repository: 'some/repo',
+    repositoryCache: 'enabled',
   };
-  it('catches and returns', async () => {
-    await repositoryCache.initialize({});
-    expect(fs.readFile.mock.calls).toHaveLength(0);
-  });
+
   it('returns if cache not enabled', async () => {
-    await repositoryCache.initialize({
-      ...config,
-      repositoryCache: 'disabled',
-    });
-    expect(fs.readFile.mock.calls).toHaveLength(0);
+    await initRepoCache({ ...config, repositoryCache: 'disabled' });
+    expect(fs.readFile).not.toHaveBeenCalled();
+    expect(getCache()).toBeEmpty();
   });
-  it('resets if invalid', async () => {
-    fs.readFile.mockResolvedValueOnce('{}' as any);
-    await repositoryCache.initialize({
-      ...config,
-      repositoryCache: 'enabled',
-    });
-    expect(repositoryCache.getCache()).toEqual({
-      repository: 'abc/def',
-      revision: repositoryCache.CACHE_REVISION,
-    });
+
+  it('saves cache', async () => {
+    await initRepoCache({ ...config, repositoryCache: 'enabled' });
+    await saveCache();
+    expect(fs.outputFile).toHaveBeenCalled();
   });
-  it('reads from cache and finalizes', async () => {
-    fs.readFile.mockResolvedValueOnce(
-      `{"repository":"abc/def","revision":${repositoryCache.CACHE_REVISION}}` as any
-    );
-    await repositoryCache.initialize({
-      ...config,
-      repositoryCache: 'enabled',
-    });
-    await repositoryCache.finalize();
-    expect(fs.readFile.mock.calls).toHaveLength(1);
-    expect(fs.outputFile.mock.calls).toHaveLength(1);
-  });
-  it('gets', () => {
-    expect(repositoryCache.getCache()).toEqual({});
+
+  it('resets cache', async () => {
+    await initRepoCache({ ...config, repositoryCache: 'reset' });
+    expect(fs.readFile).not.toHaveBeenCalled();
+    expect(fs.outputFile).toHaveBeenCalled();
+    expect(getCache()).toBeEmpty();
   });
 });

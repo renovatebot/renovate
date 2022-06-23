@@ -1,3 +1,0 @@
-paths-ignore:
-  - '**/__fixtures__/'
-  - /opt/hostedtoolcache

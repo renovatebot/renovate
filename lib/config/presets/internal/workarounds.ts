@@ -12,7 +12,9 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
+      'workarounds:doNotUpgradeFromAlpineStableToEdge',
     ],
+    ignoreDeps: [],
   },
   mavenCommonsAncientVersion: {
     description: 'Fix some problems with very old Maven commons versions',
@@ -73,6 +75,17 @@ export const presets: Record<string, Preset> = {
       {
         matchHost: 'repology.org',
         concurrentRequestLimit: 1,
+      },
+    ],
+  },
+  doNotUpgradeFromAlpineStableToEdge: {
+    description: 'Do not upgrade from Alpine stable to edge',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['alpine'],
+        matchCurrentVersion: '<20000000',
+        allowedVersions: '<20000000',
       },
     ],
   },

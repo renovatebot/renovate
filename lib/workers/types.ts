@@ -2,21 +2,27 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
 } from '../config/types';
-import type { Release } from '../datasource/types';
+import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
+  CustomExtractConfig,
+  ExtractConfig,
   LookupUpdate,
   PackageDependency,
   PackageFile,
-} from '../manager/types';
-import type { PlatformPrOptions } from '../platform/types';
+} from '../modules/manager/types';
+import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence';
-import type { ChangeLogRelease, ChangeLogResult } from './pr/changelog/types';
+import type {
+  ChangeLogRelease,
+  ChangeLogResult,
+} from './repository/update/pr/changelog/types';
 
 export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
@@ -34,15 +40,13 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-  constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
   language?: string;
-  manager?: string;
+  manager: string;
   packageFile?: string;
   lockFile?: string;
   lockFiles?: string[];
@@ -62,7 +66,7 @@ export interface BranchUpgradeConfig
   updatedPackageFiles?: FileChange[];
   updatedArtifacts?: FileChange[];
 
-  logJSON?: ChangeLogResult;
+  logJSON?: ChangeLogResult | null;
 
   hasReleaseNotes?: boolean;
   homepage?: string;
@@ -121,4 +125,18 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+}
+
+export interface WorkerExtractConfig
+  extends ExtractConfig,
+    Partial<CustomExtractConfig> {
+  manager: string;
+  fileList: string[];
+  fileMatch?: string[];
+  updateInternalDeps?: boolean;
+  includePaths?: string[];
+  ignorePaths?: string[];
+  regexManagers?: RegExManager[];
+  enabledManagers?: string[];
+  enabled?: boolean;
 }

@@ -29,7 +29,7 @@ If set to any value, Renovate will always paginate requests to GitHub fully, ins
 
 ## `RENOVATE_REUSE_PACKAGE_LOCK`
 
-If set to "false" (string), Renovate will remove any existing `package-lock.json` before attempting to update it.
+If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
 
 ## `RENOVATE_USER_AGENT`
 

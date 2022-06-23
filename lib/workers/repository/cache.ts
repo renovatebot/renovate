@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
@@ -20,7 +20,7 @@ function generateBranchUpgradeCache(
   const {
     datasource,
     depName,
-    lookupName,
+    packageName,
     fixedVersion,
     currentVersion,
     newVersion,
@@ -28,10 +28,9 @@ function generateBranchUpgradeCache(
     newDigest,
     sourceUrl,
   } = upgrade;
-  return {
+  const result: BranchUpgradeCache = {
     datasource,
     depName,
-    lookupName,
     fixedVersion,
     currentVersion,
     newVersion,
@@ -39,12 +38,18 @@ function generateBranchUpgradeCache(
     newDigest,
     sourceUrl,
   };
+  if (packageName) {
+    result.packageName = packageName;
+  }
+  return result;
 }
 
-async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
+async function generateBranchCache(
+  branch: BranchConfig
+): Promise<BranchCache | null> {
   const { branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName) || null;
+    const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
     let parentSha = null;
     if (sha) {
@@ -89,9 +94,12 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
 }
 
 export async function setBranchCache(branches: BranchConfig[]): Promise<void> {
-  const branchCache: BranchCache[] = [];
+  const branchCaches: BranchCache[] = [];
   for (const branch of branches) {
-    branchCache.push(await generateBranchCache(branch));
+    const branchCache = await generateBranchCache(branch);
+    if (branchCache) {
+      branchCaches.push(branchCache);
+    }
   }
-  getCache().branches = branchCache.filter(Boolean);
+  getCache().branches = branchCaches;
 }

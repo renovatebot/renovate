@@ -1,7 +1,8 @@
+// TODO #7154
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { Pr, platform } from '../../../platform';
+import { Pr, platform } from '../../../modules/platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
@@ -19,8 +20,8 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
-          pr.sourceBranch.startsWith(config.branchPrefix) &&
-          DateTime.fromISO(pr.createdAt) > currentHourStart
+          pr.sourceBranch.startsWith(config.branchPrefix!) &&
+          DateTime.fromISO(pr.createdAt!) > currentHourStart
       );
       const prsRemaining = Math.max(
         0,
@@ -115,6 +116,7 @@ export function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
+      // TODO: #7154 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }
