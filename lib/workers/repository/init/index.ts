@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
+import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import { initApis } from './apis';
@@ -41,7 +42,10 @@ export async function initRepo(
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
-    logger.info({ config }, 'Full resolved config including presets');
+    logger.info(
+      { config, hostRules: getAll() },
+      'Full resolved config and hostRules including presets'
+    );
   }
   return config;
 }
