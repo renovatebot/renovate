@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
+      'workarounds:ignoreDotnet7Preview',
     ],
     ignoreDeps: [],
   },
