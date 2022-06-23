@@ -201,7 +201,11 @@ describe('modules/datasource/helm/index', () => {
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).not.toBeNull();
-      expect(releases).toMatchSnapshot();
+      expect(releases).toMatchObject({
+        homepage: 'https://www.autoscaler.io/9.11.0',
+        sourceDirectory: 'cluster-autoscaler#9.11.0',
+        sourceUrl: 'https://github.com/kubernetes/autoscaler',
+      });
     });
   });
 });

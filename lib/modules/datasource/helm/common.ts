@@ -50,11 +50,13 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
     }
   }
 
-  const firstSourceMatch = githubUrl.exec(release.sources[0])?.groups;
-  if (firstSourceMatch) {
-    const { url: sourceUrl, path: sourceDirectory } = firstSourceMatch;
-    if (sourceUrl && sourceDirectory) {
-      return { sourceUrl, sourceDirectory };
+  for (const source of release.sources) {
+    const firstSourceMatch = githubUrl.exec(source)?.groups;
+    if (firstSourceMatch) {
+      const { url: sourceUrl, path: sourceDirectory } = firstSourceMatch;
+      if (sourceUrl && sourceDirectory) {
+        return { sourceUrl, sourceDirectory };
+      }
     }
   }
 
