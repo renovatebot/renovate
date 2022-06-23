@@ -20,4 +20,3 @@ For Renovate to work with .NET Framework projects, you need to update these file
 - `.props`
 - `.targets`
 
-The NuGet manager also supports `global.json` and `dotnet-tools.json` SDK files.
