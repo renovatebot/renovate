@@ -311,12 +311,10 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      jest
-        .spyOn(prWorker, 'updatePrDebugData')
-        .mockReturnValueOnce({
-          updatedByRenovateVersion: '1.0.3',
-          createdByRenovateVersion: '1.0.2',
-        });
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedByRenovateVersion: '1.0.3',
+        createdByRenovateVersion: '1.0.2',
+      });
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
@@ -333,12 +331,10 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if target branch changed', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      jest
-        .spyOn(prWorker, 'updatePrDebugData')
-        .mockReturnValueOnce({
-          updatedByRenovateVersion: '1.0.3',
-          createdByRenovateVersion: '1.0.2',
-        });
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedByRenovateVersion: '1.0.3',
+        createdByRenovateVersion: '1.0.2',
+      });
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
@@ -930,12 +926,10 @@ describe('workers/repository/update/branch/index', () => {
 
     it('branch pr no rebase (dry run)', async () => {
       git.branchExists.mockReturnValue(true);
-      jest
-        .spyOn(prWorker, 'updatePrDebugData')
-        .mockReturnValueOnce({
-          updatedByRenovateVersion: '1.0.3',
-          createdByRenovateVersion: '1.0.2',
-        });
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedByRenovateVersion: '1.0.3',
+        createdByRenovateVersion: '1.0.2',
+      });
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
       } as Pr);
