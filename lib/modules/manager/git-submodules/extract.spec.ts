@@ -46,18 +46,19 @@ describe('modules/manager/git-submodules/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
+      const config = { manager: 'git-submodules' };
       GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
       hostRules.add({ matchHost: 'github.com', token: '123test' });
       let res: PackageFile | null;
-      expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
-      res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(await extractPackageFile('', '.gitmodules.1', config)).toBeNull();
+      res = await extractPackageFile('', '.gitmodules.2', config);
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].currentValue).toBe('main');
-      res = await extractPackageFile('', '.gitmodules.3', {});
+      res = await extractPackageFile('', '.gitmodules.3', config);
       expect(res?.deps).toHaveLength(1);
-      res = await extractPackageFile('', '.gitmodules.4', {});
+      res = await extractPackageFile('', '.gitmodules.4', config);
       expect(res?.deps).toHaveLength(1);
-      res = await extractPackageFile('', '.gitmodules.5', {});
+      res = await extractPackageFile('', '.gitmodules.5', config);
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps[2].packageName).toBe(
         'https://github.com/renovatebot/renovate-config.git'

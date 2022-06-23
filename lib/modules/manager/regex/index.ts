@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RegexManagerTemplates } from '../../../config/types';
 import type {
-  CustomExtractConfig,
+  ExtractConfig,
   PackageDependency,
   PackageFile,
   Result,
@@ -18,7 +18,7 @@ export const supportedDatasources = ['*'];
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: ExtractConfig
 ): Result<PackageFile | null> {
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {

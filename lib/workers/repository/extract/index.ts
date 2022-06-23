@@ -33,7 +33,7 @@ export function narrowedConfig(
     npmrcMerge: config.npmrcMerge,
     skipInstalls: config.skipInstalls as boolean,
     autoReplaceStringTemplate: config.autoReplaceStringTemplate,
-    matchStrings: config.matchStrings,
+    matchStrings: config.matchStrings as string[],
     matchStringsStrategy: config.matchStringsStrategy as MatchStringsStrategy,
     depNameTemplate: config.depNameTemplate,
     packageNameTemplate: config.packageNameTemplate,

@@ -6,7 +6,7 @@ import * as npmExtract from '.';
 const fs: any = _fs;
 
 // TODO: fix types
-const defaultConfig = getConfig();
+const defaultConfig = { ...getConfig(), manager: 'npm' };
 
 const input01Content = loadFixture('inputs/01.json', '..');
 const input01GlobContent = loadFixture('inputs/01-glob.json', '..');
@@ -163,7 +163,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        {}
+        { manager: 'npm' }
       );
       expect(res?.npmrc).toBeDefined();
     });
@@ -178,7 +178,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'some-configured-npmrc' }
+        { npmrc: 'some-configured-npmrc', manager: 'npm' }
       );
       expect(res?.npmrc).toBeUndefined();
     });
@@ -193,7 +193,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'config-npmrc', npmrcMerge: true }
+        { npmrc: 'config-npmrc', npmrcMerge: true, manager: 'npm' }
       );
       expect(res?.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
@@ -208,7 +208,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        {}
+        { manager: 'npm' }
       );
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });

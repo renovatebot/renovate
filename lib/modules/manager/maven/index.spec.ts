@@ -12,7 +12,7 @@ const pomParent = Fixtures.get('parent.pom.xml');
 const pomChild = Fixtures.get('child.pom.xml');
 const origContent = Fixtures.get('grouping.pom.xml');
 const settingsContent = Fixtures.get('mirror.settings.xml');
-
+const config = { manager: 'maven' };
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
 }
@@ -21,13 +21,13 @@ describe('modules/manager/maven/index', () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('');
-      const res = await extractAllPackageFiles({}, ['random.pom.xml']);
+      const res = await extractAllPackageFiles(config, ['random.pom.xml']);
       expect(res).toBeEmptyArray();
     });
 
     it('should return empty for packages with invalid content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('invalid content');
-      const res = await extractAllPackageFiles({}, ['random.pom.xml']);
+      const res = await extractAllPackageFiles(config, ['random.pom.xml']);
       expect(res).toBeEmptyArray();
     });
 
@@ -35,7 +35,7 @@ describe('modules/manager/maven/index', () => {
       fs.readLocalFile
         .mockResolvedValueOnce(settingsContent)
         .mockResolvedValueOnce(pomContent);
-      const packages = await extractAllPackageFiles({}, [
+      const packages = await extractAllPackageFiles(config, [
         'settings.xml',
         'simple.pom.xml',
       ]);
@@ -54,7 +54,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should return package files info', async () => {
       fs.readLocalFile.mockResolvedValueOnce(pomContent);
-      const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
+      const packages = await extractAllPackageFiles(config, ['random.pom.xml']);
       // windows path fix
       for (const p of packages) {
         if (p.parent) {
@@ -211,7 +211,7 @@ describe('modules/manager/maven/index', () => {
       fs.readLocalFile
         .mockResolvedValueOnce(pomParent)
         .mockResolvedValueOnce(pomChild);
-      const packages = await extractAllPackageFiles({}, [
+      const packages = await extractAllPackageFiles(config, [
         'parent.pom.xml',
         'child.pom.xml',
       ]);
@@ -245,7 +245,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should update to version of the latest dep in implicit group', async () => {
       fs.readLocalFile.mockResolvedValueOnce(origContent);
-      const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
+      const [{ deps }] = await extractAllPackageFiles(config, ['pom.xml']);
 
       const dep1 = selectDep(deps, 'org.example:foo-1');
       const upgrade1 = { ...dep1, newValue: '1.0.2' };
@@ -290,7 +290,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should return null for ungrouped deps if content was updated outside', async () => {
       fs.readLocalFile.mockResolvedValueOnce(origContent);
-      const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
+      const [{ deps }] = await extractAllPackageFiles(config, ['pom.xml']);
       const dep = selectDep(deps, 'org.example:bar');
       const upgrade = { ...dep, newValue: '2.0.2' };
       const updatedOutside = origContent.replace('2.0.0', '2.0.1');

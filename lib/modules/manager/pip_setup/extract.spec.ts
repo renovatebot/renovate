@@ -4,7 +4,7 @@ import { extractPackageFile } from '.';
 
 const packageFile = 'setup.py';
 
-const config: ExtractConfig = {};
+const config: ExtractConfig = { manager: 'pip_setup' };
 
 describe('modules/manager/pip_setup/extract', () => {
   describe('extractPackageFile()', () => {

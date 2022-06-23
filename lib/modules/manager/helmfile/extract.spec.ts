@@ -18,6 +18,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).toBeNull();
     });
@@ -35,6 +36,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).toBeNull();
     });
@@ -54,6 +56,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -78,6 +81,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).toMatchSnapshot({
         datasource: 'helm',
@@ -109,6 +113,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -130,6 +135,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -154,6 +160,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -174,6 +181,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -189,6 +197,7 @@ describe('modules/manager/helmfile/extract', () => {
           registryAliases: {
             stable: 'https://charts.helm.sh/stable',
           },
+          manager: 'helmfile',
         }
       );
       expect(result).toMatchSnapshot({
@@ -225,6 +234,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -262,6 +272,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -302,6 +313,7 @@ describe('modules/manager/helmfile/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable',
         },
+        manager: 'helmfile',
       });
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -329,6 +341,7 @@ describe('modules/manager/helmfile/extract', () => {
           registryAliases: {
             stable: 'https://charts.helm.sh/stable',
           },
+          manager: 'helmfile',
         }
       );
       expect(result).toMatchObject({

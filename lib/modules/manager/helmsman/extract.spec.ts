@@ -9,20 +9,26 @@ describe('modules/manager/helmsman/extract', () => {
     it('returns null if empty', () => {
       const content = ``;
       const fileName = 'desired_state.yaml';
-      const result = extractPackageFile(content, fileName, {});
+      const result = extractPackageFile(content, fileName, {
+        manager: 'helmsman',
+      });
       expect(result).toBeNull();
     });
 
     it('returns null if extracting non helmsman yaml file', () => {
       const content = otherYamlFile;
       const fileName = 'requirements.yaml';
-      const result = extractPackageFile(content, fileName, {});
+      const result = extractPackageFile(content, fileName, {
+        manager: 'helmsman',
+      });
       expect(result).toBeNull();
     });
 
     it('extract deps', () => {
       const fileName = 'helmsman.yaml';
-      const result = extractPackageFile(multiDepFile, fileName, {});
+      const result = extractPackageFile(multiDepFile, fileName, {
+        manager: 'helmsman',
+      });
       expect(result).not.toBeNull();
       expect(result?.deps).toHaveLength(10);
       expect(result?.deps.filter((value) => value.skipReason)).toHaveLength(5);

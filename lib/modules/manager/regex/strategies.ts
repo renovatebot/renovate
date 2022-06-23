@@ -13,8 +13,8 @@ export function handleAny(
   packageFile: string,
   config: CustomExtractConfig
 ): PackageDependency[] {
-  return config.matchStrings
-    .map((matchString) => regEx(matchString, 'g'))
+  return config
+    .matchStrings!.map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
@@ -30,8 +30,8 @@ export function handleCombination(
   packageFile: string,
   config: CustomExtractConfig
 ): PackageDependency[] {
-  const matches = config.matchStrings
-    .map((matchString) => regEx(matchString, 'g'))
+  const matches = config
+    .matchStrings!.map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
 
   if (!matches.length) {
@@ -54,7 +54,7 @@ export function handleRecursive(
   index = 0,
   combinedGroups: Record<string, string> = {}
 ): PackageDependency[] {
-  const regexes = config.matchStrings.map((matchString) =>
+  const regexes = config.matchStrings!.map((matchString) =>
     regEx(matchString, 'g')
   );
   // abort if we have no matchString anymore

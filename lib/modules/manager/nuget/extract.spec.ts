@@ -5,7 +5,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
-const config: ExtractConfig = {};
+const config: ExtractConfig = { manager: 'nuget' };
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('lib/modules/manager/nuget/__fixtures__'),
