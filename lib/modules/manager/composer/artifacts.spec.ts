@@ -11,6 +11,7 @@ import * as _datasource from '../../datasource';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
@@ -103,6 +104,12 @@ describe('modules/manager/composer/artifacts', () => {
       matchHost: 'api.github.com',
       token: 'github-token',
     });
+    // This rule should not affect the result the Github rule has priority to avoid breaking changes.
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'git-tags-token',
+    });
     hostRules.add({
       hostType: PlatformId.Gitlab,
       matchHost: 'gitlab.com',
@@ -149,16 +156,11 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('packagist hostRule for github.com supersede github hostRule to set COMPOSER_AUTH', async () => {
+  it('git-tags hostRule for github.com set github-token in COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
-      matchHost: 'api.github.com',
-      token: 'github-token',
-    });
-    hostRules.add({
-      hostType: PackagistDatasource.id,
+      hostType: GitTagsDatasource.id,
       matchHost: 'github.com',
-      token: 'github-packagist-token',
+      token: 'git-tags-token',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);

@@ -29,17 +29,24 @@ import {
   getPhpConstraint,
   requireComposerDependencyInstallation,
 } from './utils';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubCredentials = hostRules.find({
+  let githubHostRule = hostRules.find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  if (githubCredentials?.token) {
+  if (!githubHostRule?.token) {
+    githubHostRule = hostRules.find({
+      hostType: GitTagsDatasource.id,
+      url: 'https://github.com',
+    });
+  }
+  if (githubHostRule?.token) {
     authJson['github-oauth'] = {
-      'github.com': githubCredentials.token.replace('x-access-token:', ''),
+      'github.com': githubHostRule.token.replace('x-access-token:', ''),
     };
   }
 
@@ -62,12 +69,7 @@ function getAuthJson(): string | null {
     .findAll({ hostType: PackagistDatasource.id })
     ?.forEach((hostRule) => {
       const { resolvedHost, username, password, token } = hostRule;
-      if (resolvedHost === 'github.com' && token) {
-        // Allow the use of a GitHub access token for packagist only.
-        authJson['github-oauth'] = {
-          'github.com': token.replace('x-access-token:', ''),
-        };
-      } else if (resolvedHost && username && password) {
+      if (resolvedHost && username && password) {
         authJson['http-basic'] = authJson['http-basic'] ?? {};
         authJson['http-basic'][resolvedHost] = { username, password };
       } else if (resolvedHost && token) {
