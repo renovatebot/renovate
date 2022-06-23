@@ -62,7 +62,7 @@ function getAuthJson(): string | null {
     .findAll({ hostType: PackagistDatasource.id })
     ?.forEach((hostRule) => {
       const { resolvedHost, username, password, token } = hostRule;
-      if (resolvedHost === 'api.github.com' && token) {
+      if (resolvedHost === 'github.com' && token) {
         // Allow the use of a Google access token for packagist only.
         authJson['github-oauth'] = {
           'github.com': token.replace('x-access-token:', ''),
