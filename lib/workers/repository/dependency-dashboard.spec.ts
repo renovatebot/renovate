@@ -11,6 +11,7 @@ import {
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import type { Platform } from '../../modules/platform';
+import { massageMarkdown } from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
@@ -22,7 +23,7 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  massageMkSpy.mockImplementation((str) => str);
+  massageMkSpy.mockImplementation(massageMarkdown);
   config = getConfig();
   config.platform = PlatformId.Github;
   config.errors = [];
@@ -564,6 +565,9 @@ describe('workers/repository/dependency-dashboard', () => {
       const packageFilesWithDigest = Fixtures.getJson(
         './package-files-digest.json'
       );
+      const packageFilesBigRepo = Fixtures.getJson(
+        './package-files-big-repo.json'
+      );
       let config: RenovateConfig;
 
       beforeAll(() => {
@@ -664,6 +668,20 @@ describe('workers/repository/dependency-dashboard', () => {
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('truncates the body of a really big repo', async () => {
+          const branches: BranchConfig[] = [];
+          const truncatedLength = 60000;
+          PackageFiles.add('main', packageFilesBigRepo);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toHaveLength(
+            truncatedLength
+          );
 
           // same with dry run
           await dryRun(branches, platform);
