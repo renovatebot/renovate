@@ -170,10 +170,13 @@ function genExperimentalMsg(el: Record<string, any>): string {
     warning += `<br>To track this feature visit the following GitHub ${
       issues.length > 1 ? 'issues' : 'issue'
     } `;
-    warning += issues.map(s => `[#${issue}](${ghIssuesUrl}${issue})`).join(', ') + '.\n';
+    warning +=
+      (issues
+        .map((issue: number) => `[#${issue}](${ghIssuesUrl}${issue})`)
+        .join(', ') as string) + '.';
   }
 
-  return warning;
+  return warning + '\n';
 }
 
 function indexMarkdown(lines: string[]): Record<string, [number, number]> {
@@ -208,7 +211,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   const indexed = indexMarkdown(configOptionsRaw);
 
   options
-    .filter((option) => option.releaseStatus !== 'unpublished')
+    .filter((option) => !!option.globalOnly === bot)
     .forEach((option) => {
       // TODO: fix types (#7154,#9610)
       const el: Record<string, any> = { ...option };
