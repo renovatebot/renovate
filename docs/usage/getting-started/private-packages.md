@@ -123,6 +123,7 @@ The following details the most common/popular manager artifacts updating and how
 
 Any `hostRules` token for `github.com` or `gitlab.com` are found and written out to `COMPOSER_AUTH` in env for Composer to parse.
 Any `hostRules` with `hostType=packagist` are also included.
+To use `github.com` token only for composer authentication, add `hostRules` with `hostType=packagist` and `matchHost=gitub.com`.
 
 ### gomod
 
