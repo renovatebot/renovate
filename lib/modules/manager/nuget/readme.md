@@ -7,6 +7,8 @@ The NuGet package manager supports these SDK-style files and formats:
 - `.vbproj`
 - `.props`
 - `.targets`
+- `global.json`
+- `dotnet-tools.json`
 
 .NET Core projects are supported by default.
 
