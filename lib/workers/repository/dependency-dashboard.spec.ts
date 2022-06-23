@@ -10,6 +10,10 @@ import {
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
@@ -29,6 +33,30 @@ beforeEach(() => {
   config.errors = [];
   config.warnings = [];
 });
+
+function genRandString(length: number): string {
+  let result = '';
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const charsLen = chars.length;
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * charsLen));
+  }
+  return result;
+}
+
+function genRandPackageFile(
+  depsNum: number,
+  depNameLen: number
+): Record<string, PackageFile[]> {
+  const deps: PackageDependency[] = [];
+  for (let i = 0; i < depsNum; i++) {
+    deps.push({
+      depName: genRandString(depNameLen),
+      currentVersion: '1.0.0',
+    });
+  }
+  return { npm: [{ packageFile: 'package.json', deps }] };
+}
 
 async function dryRun(
   branches: BranchConfig[],
@@ -565,9 +593,6 @@ describe('workers/repository/dependency-dashboard', () => {
       const packageFilesWithDigest = Fixtures.getJson(
         './package-files-digest.json'
       );
-      const packageFilesBigRepo = Fixtures.getJson(
-        './package-files-big-repo.json'
-      );
       let config: RenovateConfig;
 
       beforeAll(() => {
@@ -676,6 +701,7 @@ describe('workers/repository/dependency-dashboard', () => {
         it('truncates the body of a really big repo', async () => {
           const branches: BranchConfig[] = [];
           const truncatedLength = 60000;
+          const packageFilesBigRepo = genRandPackageFile(100, 700);
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
