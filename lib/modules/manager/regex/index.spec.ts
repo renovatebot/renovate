@@ -17,7 +17,6 @@ describe('modules/manager/regex/index', () => {
 
   it('extracts multiple dependencies', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
@@ -43,7 +42,6 @@ describe('modules/manager/regex/index', () => {
 
   it('returns null if no dependencies found', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
@@ -56,7 +54,6 @@ describe('modules/manager/regex/index', () => {
 
   it('returns null if invalid template', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
@@ -72,7 +69,6 @@ describe('modules/manager/regex/index', () => {
 
   it('extracts extractVersion', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV NGINX_MODULE_HEADERS_MORE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?(\\&extractVersion=(?<extractVersion>.*?))?\\s',
       ],
@@ -93,7 +89,6 @@ describe('modules/manager/regex/index', () => {
 
   it('extracts registryUrl', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'chart:\n *repository: (?<registryUrl>.*?)\n *name: (?<depName>.*?)\n *version: (?<currentValue>.*)\n',
       ],
@@ -130,7 +125,6 @@ describe('modules/manager/regex/index', () => {
 
   it('extracts and applies a registryUrlTemplate', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
       ],
@@ -151,7 +145,6 @@ describe('modules/manager/regex/index', () => {
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
     jest.mock('../../../logger');
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
       ],
@@ -180,7 +173,6 @@ describe('modules/manager/regex/index', () => {
 
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
         'ENV NODE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
@@ -205,7 +197,6 @@ describe('modules/manager/regex/index', () => {
 
   it('extracts dependency with autoReplaceStringTemplate', async () => {
     const config = {
-      manager: 'regex',
       matchStrings: [
         'image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)',
       ],
@@ -231,9 +222,11 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
     };
-    const res = await extractPackageFile(ansibleYamlContent, 'ansible.yml', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -250,9 +243,11 @@ describe('modules/manager/regex/index', () => {
       datasourceTemplate: 'docker',
       depNameTemplate: '{{{ registry }}}/{{{ repository }}}',
     };
-    const res = await extractPackageFile(ansibleYamlContent, 'ansible.yml', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
     expect(res?.deps).toHaveLength(1);
     expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
     expect(res).toMatchSnapshot();
@@ -267,9 +262,11 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
     };
-    const res = await extractPackageFile(ansibleYamlContent, 'ansible.yml', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -284,9 +281,11 @@ describe('modules/manager/regex/index', () => {
       ],
       datasourceTemplate: 'helm',
     };
-    const res = await extractPackageFile(exampleGitlabCiYml, '.gitlab-ci.yml', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleGitlabCiYml,
+      '.gitlab-ci.yml',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -301,9 +300,11 @@ describe('modules/manager/regex/index', () => {
       datasourceTemplate: 'helm',
       depNameTemplate: 'helm_repo/{{{ depName }}}',
     };
-    const res = await extractPackageFile(exampleGitlabCiYml, '.gitlab-ci.yml', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleGitlabCiYml,
+      '.gitlab-ci.yml',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -318,9 +319,7 @@ describe('modules/manager/regex/index', () => {
       datasourceTemplate: 'helm',
       depNameTemplate: 'helm_repo/{{{ depName }}}',
     };
-    const res = await extractPackageFile('', '.gitlab-ci.yml', {
-      ...config,
-    });
+    const res = await extractPackageFile('', '.gitlab-ci.yml', config);
     expect(res).toBeNull();
   });
 
@@ -332,9 +331,11 @@ describe('modules/manager/regex/index', () => {
       ],
       matchStringsStrategy: 'recursive',
     };
-    const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -347,9 +348,11 @@ describe('modules/manager/regex/index', () => {
       ],
       matchStringsStrategy: 'recursive',
     };
-    const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
   });
@@ -363,9 +366,11 @@ describe('modules/manager/regex/index', () => {
       ],
       matchStringsStrategy: 'recursive',
     };
-    const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -375,9 +380,11 @@ describe('modules/manager/regex/index', () => {
       matchStrings: ['"group.{1}":\\s*\\{[^}]*}'],
       matchStringsStrategy: 'recursive',
     };
-    const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
     expect(res).toBeNull();
   });
 
@@ -386,9 +393,11 @@ describe('modules/manager/regex/index', () => {
       matchStrings: ['"trunk.{1}":\\s*\\{[^}]*}'],
       matchStringsStrategy: 'recursive',
     };
-    const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
     expect(res).toBeNull();
   });
 
@@ -402,9 +411,11 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'recursive',
       depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
     };
-    const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      ...config,
-    });
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(4);
   });

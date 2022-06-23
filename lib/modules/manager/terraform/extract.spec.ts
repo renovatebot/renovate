@@ -30,7 +30,6 @@ const adminConfig: RepoGlobalConfig = {
 
 // auto-mock fs
 jest.mock('../../../util/fs');
-const config = {};
 
 describe('modules/manager/terraform/extract', () => {
   beforeEach(() => {
@@ -39,24 +38,18 @@ describe('modules/manager/terraform/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(
-        await extractPackageFile('nothing here', '1.tf', config)
-      ).toBeNull();
+      expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
     });
 
     it('extracts  modules', async () => {
-      const res = await extractPackageFile(modules, 'modules.tf', config);
+      const res = await extractPackageFile(modules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(18);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res).toMatchSnapshot();
     });
 
     it('extracts bitbucket modules', async () => {
-      const res = await extractPackageFile(
-        bitbucketModules,
-        'modules.tf',
-        config
-      );
+      const res = await extractPackageFile(bitbucketModules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(11);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
       expect(res).toMatchSnapshot();
@@ -66,7 +59,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         azureDevOpsModules,
         'modules.tf',
-        config
+        {}
       );
       expect(res).toEqual({
         deps: [
@@ -99,21 +92,21 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts providers', async () => {
-      const res = await extractPackageFile(providers, 'providers.tf', config);
+      const res = await extractPackageFile(providers, 'providers.tf', {});
       expect(res?.deps).toHaveLength(14);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res).toMatchSnapshot();
     });
 
     it('extracts docker resources', async () => {
-      const res = await extractPackageFile(docker, 'docker.tf', config);
+      const res = await extractPackageFile(docker, 'docker.tf', {});
       expect(res?.deps).toHaveLength(8);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
       expect(res).toMatchSnapshot();
     });
 
     it('extracts kubernetes resources', async () => {
-      const res = await extractPackageFile(kubernetes, 'kubernetes.tf', config);
+      const res = await extractPackageFile(kubernetes, 'kubernetes.tf', {});
       expect(res?.deps).toHaveLength(18);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
       expect(res?.deps).toMatchObject([
@@ -211,11 +204,11 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('returns null if only local deps', async () => {
-      expect(await extractPackageFile(tf2, '2.tf', config)).toBeNull();
+      expect(await extractPackageFile(tf2, '2.tf', {})).toBeNull();
     });
 
     it('extract helm releases', async () => {
-      const res = await extractPackageFile(helm, 'helm.tf', config);
+      const res = await extractPackageFile(helm, 'helm.tf', {});
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(6);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
@@ -228,7 +221,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         lockedVersion,
         'lockedVersion.tf',
-        config
+        {}
       );
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
@@ -239,7 +232,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         terraformBlock,
         'terraformBlock.tf',
-        config
+        {}
       );
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
@@ -250,7 +243,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         tfeWorkspaceBlock,
         'tfeWorkspace.tf',
-        config
+        {}
       );
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);

@@ -109,8 +109,12 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(manager.extractPackageFile('unknown', '', 'filename')).toBeNull();
-      expect(manager.extractPackageFile('dummy', '', 'filename')).toBeNull();
+      expect(
+        manager.extractPackageFile('unknown', '', 'filename', {})
+      ).toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', '', 'filename', {})
+      ).toBeNull();
     });
 
     it('returns non-null', () => {
@@ -121,7 +125,7 @@ describe('modules/manager/index', () => {
       });
 
       expect(
-        manager.extractPackageFile('dummy', '', 'filename')
+        manager.extractPackageFile('dummy', '', 'filename', {})
       ).not.toBeNull();
     });
 

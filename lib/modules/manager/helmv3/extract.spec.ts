@@ -7,7 +7,6 @@ const config = {
   registryAliases: {
     stable: 'https://charts.helm.sh/stable',
   },
-  manager: 'helmv3',
 };
 
 describe('modules/manager/helmv3/extract', () => {
