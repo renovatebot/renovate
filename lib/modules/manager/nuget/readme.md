@@ -1,4 +1,4 @@
-You can use the `nuget` configuration object to control the settings for the NuGet package manager.
+Use [`packageRules`](https://docs.renovatebot.com/configuration-options/#packagerules) to control the behavior of the NuGet package manager.
 
 The NuGet package manager supports these SDK-style files and formats:
 
