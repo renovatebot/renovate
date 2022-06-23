@@ -22,12 +22,12 @@ import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
-const massageMkSpy = jest.spyOn(platform, 'massageMarkdown');
+const massageMdSpy = jest.spyOn(platform, 'massageMarkdown');
 let config: RenovateConfig;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  massageMkSpy.mockImplementation(massageMarkdown);
+  massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
   config.platform = PlatformId.Github;
   config.errors = [];
