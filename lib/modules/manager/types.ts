@@ -1,7 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  RegExManager,
   RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
@@ -25,12 +24,6 @@ export interface CustomExtractConfig extends RegexManagerTemplates {
 export interface ExtractConfig extends CustomExtractConfig {
   manager: string;
   fileList?: string[];
-  fileMatch?: string[];
-  updateInternalDeps?: boolean;
-  includePaths?: string[];
-  ignorePaths?: string[];
-  regexManagers?: RegExManager[];
-  enabledManagers?: string[];
   enabled?: boolean;
   registryAliases?: Record<string, string>;
   npmrc?: string;
