@@ -156,7 +156,8 @@ function stringifyArrays(el: Record<string, any>): void {
 
 function genExperimentalMsg(el: Record<string, any>): string {
   const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
-  let warning = '\n!!! warning "This feature is flagged as experimental"\n';
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
 
   if (!el.experimental) {
     return '';
@@ -177,10 +178,29 @@ function genExperimentalMsg(el: Record<string, any>): string {
     warning += `<br>To track this feature visit the following GitHub ${
       issues.length > 1 ? 'issues' : 'issue'
     } `;
-    warning += issues.join(', ') + '.';
+    warning += issues.join(', ') + '.\n';
   }
 
   return warning;
+}
+
+function indexMarkdown(lines: string[]): Record<string, [number, number]> {
+  const indexed: Record<string, [number, number]> = {};
+
+  let optionName = '';
+  let start = 0;
+  for (const [i, line] of lines.entries()) {
+    if (line.startsWith('##')) {
+      if (optionName) {
+        indexed[optionName] = [start, i - 1];
+      }
+      start = i;
+      optionName = line.split(' ')[1];
+    }
+  }
+  indexed[optionName] = [start, lines.length - 1];
+
+  return indexed;
 }
 
 export async function generateConfig(dist: string, bot = false): Promise<void> {
@@ -193,15 +213,19 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     '\n'
   );
 
+  const indexed = indexMarkdown(configOptionsRaw);
+
   options
     .filter((option) => option.releaseStatus !== 'unpublished')
     .forEach((option) => {
       // TODO: fix types (#9610)
       const el: Record<string, any> = { ...option };
-      let headerIndex = configOptionsRaw.indexOf(`## ${option.name}`);
-      if (headerIndex === -1) {
-        headerIndex = configOptionsRaw.indexOf(`### ${option.name}`);
+
+      if (!indexed[option.name]) {
+        return;
       }
+      const [headerIndex, footerIndex] = indexed[option.name];
+
       el.cli = getCliName(option);
       el.env = getEnvName(option);
       stringifyArrays(el);
@@ -211,13 +235,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         genTable(Object.entries(el), option.type, option.default);
 
       if (el.experimental) {
-        const footerIndex = configOptionsRaw.indexOf(
-          `<!-- Auto-generated-warning-for ${option.name} -->`,
-          headerIndex + 1
-        );
-        if (footerIndex !== -1) {
-          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
-        }
+        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
       }
     });
 
