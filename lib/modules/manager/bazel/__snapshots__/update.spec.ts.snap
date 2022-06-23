@@ -108,6 +108,29 @@ http_archive(
     urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
 )
 
+load(\\"@bazel_tools//tools/build_defs/repo:utils.bzl\\", \\"maybe\\")
+maybe(
+  http_archive,
+  name = \\"io_bazel_rules_go\\",
+  sha256 = \\"2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f\\",
+  url = \\"https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip\\",
+)
+maybe(
+    http_archive,
+    name = \\"bazel_gazelle\\",
+    sha256 = \\"de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb\\",
+    urls = [
+        \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz\\",
+        \\"https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz\\",
+    ],
+)
+maybe(
+    go_repository,
+    name = \\"com_github_pkg_errors\\",
+    commit = \\"816c9085562cd7ee03e7f8188a1cfd942858cded\\",
+    importpath = \\"github.com/pkg/errors\\",
+)
+
 load(\\"@io_bazel_rules_go//go:def.bzl\\", \\"go_rules_dependencies\\", \\"go_register_toolchains\\")
 
 go_rules_dependencies()

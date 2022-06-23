@@ -262,9 +262,8 @@ const options: RenovateOptions[] = [
   {
     name: 'printConfig',
     description:
-      'If enabled, Renovate logs the fullly resolved config for each repo, plus the fully resolved presets.',
+      'If enabled, Renovate logs the fully resolved config for each repo, plus the fully resolved presets.',
     type: 'boolean',
-    globalOnly: true,
     default: false,
   },
   {

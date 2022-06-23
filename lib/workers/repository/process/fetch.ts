@@ -9,6 +9,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import { PackageFiles } from '../package-files';
@@ -47,10 +48,26 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      dep = {
-        ...dep,
-        ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-      };
+      try {
+        dep = {
+          ...dep,
+          ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
+        };
+      } catch (err) {
+        if (
+          packageFileConfig.repoIsOnboarded ||
+          !(err instanceof ExternalHostError)
+        ) {
+          throw err;
+        }
+
+        const cause = err.err;
+        dep.warnings ??= [];
+        dep.warnings.push({
+          topic: 'Lookup Error',
+          message: `${depName}: ${cause.message}`,
+        });
+      }
     }
     dep.updates = dep.updates ?? [];
   }
