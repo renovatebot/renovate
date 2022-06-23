@@ -1108,7 +1108,7 @@ export async function clearRenovateRefs(): Promise<void> {
 }
 
 const treeItemRegex = regEx(
-  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+  /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
