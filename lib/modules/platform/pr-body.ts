@@ -45,9 +45,9 @@ export function getPrBodyStruct(
     result.rebaseRequested = rebaseRequested;
   }
 
-  const base64data = getRenovateDebugPayload(body);
-  if (base64data) {
-    result.debugData = JSON.parse(fromBase64(base64data));
+  const debugPayload = getRenovateDebugPayload(body);
+  if (debugPayload) {
+    result.debugData = JSON.parse(fromBase64(debugPayload));
   }
   return result;
 }

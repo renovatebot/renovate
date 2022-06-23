@@ -133,7 +133,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {}
       );
-      expect(res).toBe('PR BODY');
+      expect(res).toContain('PR BODY');
+      expect(res).toContain(`<!--renovate-debug`);
     });
 
     it('supports custom rebasing message', async () => {

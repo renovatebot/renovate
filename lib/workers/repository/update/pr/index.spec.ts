@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon';
-import { Fixtures } from '../../../../../test/fixtures';
 import { git, logger, mocked, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -8,10 +7,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
 import * as _comment from '../../../../modules/platform/comment';
-import {
-  getPrBodyStruct,
-  prDebugDataRe,
-} from '../../../../modules/platform/pr-body';
+import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
@@ -25,7 +21,7 @@ import {
   ChangeLogRelease,
 } from './changelog/types';
 import * as _participants from './participants';
-import { ensurePr, updatePrDataCreation } from '.';
+import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
 
@@ -270,18 +266,6 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
-      });
-
-      it('creates PR with pr data', () => {
-        const prbodyContent = Fixtures.get('prbody1');
-        jest.spyOn(platform, 'massageMarkdown').mockImplementation((prBody) => {
-          return prBody;
-        });
-        const res = updatePrDataCreation(prbodyContent);
-        const match = prDebugDataRe.exec(res);
-        expect(match?.groups?.payload).toBe(
-          'eyJwckNyZWF0aW9uVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSIsInByVXBkYXRlVmVyIjoiMC4wLjAtc2VtYW50aWMtcmVsZWFzZSJ9'
-        );
       });
 
       it('ignores reviewable content ', async () => {

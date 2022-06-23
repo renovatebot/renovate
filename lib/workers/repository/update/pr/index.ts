@@ -74,6 +74,10 @@ export function updatePrDebugData(
   } else {
     res = { updatedByRenovateVersion: pkg.version };
   }
+
+  if (!res.createdByRenovateVersion) {
+    res.createdByRenovateVersion = pkg.version;
+  }
   return res;
 }
 
@@ -276,7 +280,7 @@ export async function ensurePr(
     }
   }
 
-  let prBody = await getPrBody(config, {
+  const prBody = await getPrBody(config, {
     debugData: existingPr?.bodyStruct?.debugData,
   });
 
@@ -354,8 +358,6 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        prBody = updatePrDataCreation(prBody);
-
         pr = await platform.createPr({
           sourceBranch: branchName,
           targetBranch: config.baseBranch ?? '',
