@@ -63,7 +63,7 @@ function getAuthJson(): string | null {
     ?.forEach((hostRule) => {
       const { resolvedHost, username, password, token } = hostRule;
       if (resolvedHost === 'github.com' && token) {
-        // Allow the use of a Google access token for packagist only.
+        // Allow the use of a GitHub access token for packagist only.
         authJson['github-oauth'] = {
           'github.com': token.replace('x-access-token:', ''),
         };
