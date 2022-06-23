@@ -159,26 +159,18 @@ function genExperimentalMsg(el: Record<string, any>): string {
   let warning =
     '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
 
-  if (!el.experimental) {
-    return '';
-  }
-
   if (el.experimentalDescription) {
     warning += indent`${2}${el.experimentalDescription}`;
   } else {
     warning += indent`${2}Experimental features might be changed or even removed at any time.`;
   }
 
-  const issues: string[] = [];
-  for (const issue of el.experimentalIssues ?? []) {
-    issues.push(`[#${issue}](${ghIssuesUrl}${issue})`);
-  }
-
+  const issues = el.experimentalIssues ?? [];
   if (issues.length > 0) {
     warning += `<br>To track this feature visit the following GitHub ${
       issues.length > 1 ? 'issues' : 'issue'
     } `;
-    warning += issues.join(', ') + '.\n';
+    warning += issues.map(s => `[#${issue}](${ghIssuesUrl}${issue})`).join(', ') + '.\n';
   }
 
   return warning;
@@ -190,7 +182,7 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   let optionName = '';
   let start = 0;
   for (const [i, line] of lines.entries()) {
-    if (line.startsWith('##')) {
+    if (line.startsWith('## ') || line.startsWith('### ')) {
       if (optionName) {
         indexed[optionName] = [start, i - 1];
       }
@@ -218,7 +210,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   options
     .filter((option) => option.releaseStatus !== 'unpublished')
     .forEach((option) => {
-      // TODO: fix types (#9610)
+      // TODO: fix types (#7154,#9610)
       const el: Record<string, any> = { ...option };
 
       if (!indexed[option.name]) {

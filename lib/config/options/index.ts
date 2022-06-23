@@ -224,9 +224,6 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     default: 'disabled',
     experimental: true,
-    experimentalDescription:
-      'This is an experimental feature and may be modified or removed in a future non-major release.',
-    experimentalIssues: [6589],
   },
   {
     name: 'force',
