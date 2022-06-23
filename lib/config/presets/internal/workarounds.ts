@@ -90,7 +90,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreDotnet7Preview: {
-    description: 'Require dashboard approval for dotnet 7 or higher.',
+    description: 'Require dashboard approval for dotnet 7.',
     packageRules: [
       {
         matchDatasources: ['docker'],
