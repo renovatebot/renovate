@@ -21,7 +21,6 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { toBase64 } from '../../../../util/string';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -79,13 +78,6 @@ export function updatePrDebugData(
     res.createdByRenovateVersion = pkg.version;
   }
   return res;
-}
-
-export function updatePrDataCreation(prBody: string): string {
-  const prData = { prCreationVer: pkg.version, prUpdateVer: pkg.version };
-  const prData64 = toBase64(JSON.stringify(prData));
-  const res = prBody + `\n<!--renovate-debug:${prData64}-->\n`;
-  return platform.massageMarkdown(res);
 }
 
 // Ensures that PR exists with matching title/body
