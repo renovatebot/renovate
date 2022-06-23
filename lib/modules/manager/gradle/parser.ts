@@ -120,7 +120,6 @@ function handleAssignment({
   if (dep) {
     dep.groupName = key;
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: valToken.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -149,7 +148,6 @@ function processDepString({
   const dep = parseDependencyString(token.value);
   if (dep) {
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: token.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -280,10 +278,21 @@ function processCustomRegistryUrl({
   tokenMap,
   variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
+  let localVariables = variables;
+  if (tokenMap.keyToken?.value === 'name') {
+    localVariables = {
+      ...variables,
+      name: {
+        key: 'name',
+        value: tokenMap.valToken.value,
+      },
+    };
+  }
+
   let registryUrl: string | null = tokenMap.registryUrl?.value;
   if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
     const token = tokenMap.registryUrl as StringInterpolation;
-    registryUrl = interpolateString(token.children, variables);
+    registryUrl = interpolateString(token.children, localVariables);
   }
 
   try {
@@ -309,7 +318,6 @@ function processPredefinedRegistryUrl({
     google: GOOGLE_REPO,
     gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return { urls: [registryUrl!] };
 }
 
@@ -555,6 +563,37 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         tokenMapKey: 'registryUrl',
       },
       { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { name = "baz"; url = "https://maven.springframework.org/${name}" }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'name',
+        tokenMapKey: 'keyToken',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'valToken',
+      },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -959,7 +998,6 @@ export function parseProps(
             ...dep,
             managerData: {
               fileReplacePosition:
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                 offset + leftPart.length + dep.depName!.length + 1,
               packageFile,
             },

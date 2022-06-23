@@ -1,3 +1,4 @@
+// TODO #7154
 import { Ecosystem, Osv, OsvOffline } from '@jamiemagee/osv-offline';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
@@ -104,16 +105,16 @@ export class Vulnerabilities {
     packageDependency: PackageDependency
   ): Promise<PackageRule[]> {
     const ecosystem =
-      Vulnerabilities.managerEcosystemMap[packageFileConfig.manager];
+      Vulnerabilities.managerEcosystemMap[packageFileConfig.manager!];
 
     const vulnerabilities = await this.osvOffline?.getVulnerabilities(
-      ecosystem,
-      packageDependency.depName
+      ecosystem!,
+      packageDependency.depName!
     );
     return this.convertToPackageRule(
       vulnerabilities ?? [],
-      packageDependency.depName,
-      ecosystem
+      packageDependency.depName!,
+      ecosystem!
     );
   }
 
@@ -134,7 +135,7 @@ export class Vulnerabilities {
           matchPackageNames: [dependencyName],
           allowedVersions: affected?.ranges?.[0].events.find(
             (event) => event.fixed !== undefined
-          ).fixed,
+          )!.fixed,
           isVulnerabilityAlert: true,
         })
       );

@@ -45,7 +45,7 @@ describe('workers/repository/errors-warnings', () => {
             packageFile: 'package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
+                warnings: [{ message: 'Warning 1', topic: '' }],
               },
               {},
             ],
@@ -54,7 +54,7 @@ describe('workers/repository/errors-warnings', () => {
             packageFile: 'backend/package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
+                warnings: [{ message: 'Warning 1', topic: '' }],
               },
             ],
           },
@@ -64,7 +64,7 @@ describe('workers/repository/errors-warnings', () => {
             packageFile: 'Dockerfile',
             deps: [
               {
-                warnings: [{ message: 'Warning 2', topic: undefined }],
+                warnings: [{ message: 'Warning 2', topic: '' }],
               },
             ],
           },

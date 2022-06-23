@@ -61,7 +61,6 @@ export async function extractPackageFile(
       return res;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const repository = resolveAlias(dep.repository, config.registryAliases!);
     if (!repository) {
       res.skipReason = 'placeholder-url';

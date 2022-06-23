@@ -68,6 +68,7 @@ function toRenovateIssue(data: helper.Issue): Issue {
   };
 }
 
+// TODO #7154
 function toRenovatePR(data: helper.PR): Pr | null {
   if (!data) {
     return null;
@@ -104,7 +105,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     cannotMergeReason: data.mergeable
       ? undefined
       : `pr.mergeable="${data.mergeable}"`,
-    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
+    hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
   };
 }
 
@@ -193,7 +194,7 @@ const platform: Platform = {
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
+      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
       defaults.version = await helper.getVersion({ token });
@@ -226,12 +227,8 @@ const platform: Platform = {
     repoName?: string,
     branchOrTag?: string
   ): Promise<any | null> {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const raw = (await platform.getRawFile(
-      fileName,
-      repoName,
-      branchOrTag
-    )) as string;
+    // TODO #7154
+    const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
     return JSON5.parse(raw);
   },
 
@@ -341,7 +338,7 @@ const platform: Platform = {
       // Create new status for branch commit
       const branchCommit = git.getBranchCommit(branchName);
       // TODO: check branchCommit
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
       await helper.createCommitStatus(config.repository, branchCommit!, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
@@ -376,7 +373,7 @@ const platform: Platform = {
 
     logger.debug({ ccs }, 'Branch status check result');
     return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ||
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
       BranchStatus.yellow
     );
   },
@@ -435,7 +432,7 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (config.prList !== null) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         (await config.prList).push(pr!);
       }
     }
@@ -610,7 +607,7 @@ const platform: Platform = {
       return null;
     }
     logger.debug(`Found Issue #${issue.number}`);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     return getIssue!(issue.number!);
   },
 
@@ -660,7 +657,7 @@ const platform: Platform = {
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
             logger.warn(`Closing duplicate Issue #${issue.number}`);
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            // TODO #7154
             await helper.closeIssue(config.repository, issue.number!);
           }
         }
@@ -681,7 +678,7 @@ const platform: Platform = {
         logger.debug(`Updating Issue #${activeIssue.number}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           activeIssue.number!,
           {
             body,
@@ -704,7 +701,7 @@ const platform: Platform = {
         ) {
           await helper.updateIssueLabels(
             config.repository,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            // TODO #7154
             activeIssue.number!,
             {
               labels,
@@ -738,7 +735,7 @@ const platform: Platform = {
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
         logger.debug({ number: issue.number }, 'Closing issue');
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         await helper.closeIssue(config.repository, issue.number!);
       }
     }
