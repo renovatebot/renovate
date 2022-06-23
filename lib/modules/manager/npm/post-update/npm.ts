@@ -134,7 +134,11 @@ export async function generateLockFile(
     }
 
     // Read the result
-    lockFile = await readLocalFile(upath.join(lockFileDir, filename), 'utf8');
+    // TODO #7154
+    lockFile = (await readLocalFile(
+      upath.join(lockFileDir, filename),
+      'utf8'
+    ))!;
 
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
@@ -145,13 +149,9 @@ export async function generateLockFile(
           const depType = lockUpdate.depType as
             | 'dependencies'
             | 'optionalDependencies';
-          if (
-            lockFileParsed.packages?.['']?.[depType]?.[
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-              lockUpdate.depName!
-            ]
-          ) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+          // TODO #7154
+          if (lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.depName!]) {
             lockFileParsed.packages[''][depType]![lockUpdate.depName!] =
               lockUpdate.newValue!;
           }

@@ -1,13 +1,13 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-package/util';
 import { SbtPluginDatasource } from '.';
 
-const mavenIndexHtml = loadFixture(`maven-index.html`);
-const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
+const mavenIndexHtml = Fixtures.get(`maven-index.html`);
+const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);
 
 describe('modules/datasource/sbt-plugin/index', () => {
   it('parses Maven index directory', () => {
@@ -23,7 +23,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
       httpMock
         .scope('https://failed_repo')
         .get('/maven/org/scalatest/')
-        .reply(404, null);
+        .reply(404);
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/')

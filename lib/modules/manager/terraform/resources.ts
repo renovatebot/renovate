@@ -75,8 +75,8 @@ export function extractTerraformResource(
     // istanbul ignore else
     if (is.string(line)) {
       // `{` will be counted with +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(regEx(/\{/g)) || []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
+      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
+      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       const kvMatch = keyValueExtractionRegex.exec(line);
@@ -141,7 +141,7 @@ export function analyseTerraformResource(
         dep.skipReason = 'local-chart';
       }
       dep.depType = 'helm_release';
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       dep.registryUrls = [dep.managerData.repository!];
       dep.depName = dep.managerData.chart;
       dep.datasource = HelmDatasource.id;

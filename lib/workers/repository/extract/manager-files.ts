@@ -13,7 +13,7 @@ import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig
-): Promise<PackageFile[]> {
+): Promise<PackageFile[] | null> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
@@ -44,8 +44,7 @@ export async function getManagerPackageFiles(
         }
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return allPackageFiles!;
+    return allPackageFiles;
   }
   const packageFiles: PackageFile[] = [];
   for (const packageFile of fileList) {

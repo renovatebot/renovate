@@ -30,14 +30,14 @@ export function extractTerraformModule(
 ): ExtractionResult {
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     dep.managerData!.terraformDependencyType = TerraformDependencyTypes.module;
   });
   return result;
 }
 
 export function analyseTerraformModule(dep: PackageDependency): void {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const source = dep.managerData!.source as string;
   const githubRefMatch = githubRefMatchRegex.exec(source);
   const bitbucketRefMatch = bitbucketRefMatchRegex.exec(source);

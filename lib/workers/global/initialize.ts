@@ -12,7 +12,7 @@ import { Limit, setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
-  process.env.TMPDIR = process.env.RENOVATE_TMPDIR || os.tmpdir();
+  process.env.TMPDIR = process.env.RENOVATE_TMPDIR ?? os.tmpdir();
   if (config.baseDir) {
     logger.debug('Using configured baseDir: ' + config.baseDir);
   } else {
