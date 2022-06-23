@@ -5,12 +5,14 @@ import {
   extractPackageFile,
   get,
 } from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
+import type {
+  ExtractConfig,
+  PackageFile,
+} from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
-import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
-  config: WorkerExtractConfig
+  config: ExtractConfig
 ): Promise<PackageFile[] | null> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
