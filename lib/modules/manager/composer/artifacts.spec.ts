@@ -149,6 +149,36 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('packagist hostRule for github.com supersede github hostRule to set COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: PlatformId.Github,
+      matchHost: 'api.github.com',
+      token: 'github-token',
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'github.com',
+      token: 'github-packagist-token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('returns updated composer.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
