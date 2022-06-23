@@ -4,8 +4,8 @@ import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type {
-  ExtractConfig,
   PackageFile,
+  WorkerExtractConfig,
 } from '../../../modules/manager/types';
 import { getFileList } from '../../../util/git';
 import { getMatchingFiles } from './file-match';
@@ -22,7 +22,7 @@ export async function extractAllDependencies(
       enabledManagers.includes(manager)
     );
   }
-  const extractList: ExtractConfig[] = [];
+  const extractList: WorkerExtractConfig[] = [];
   const fileList = await getFileList();
 
   const tryConfig = (managerConfig: ManagerConfig): void => {

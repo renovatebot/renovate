@@ -9,7 +9,7 @@ import {
 } from './extract';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
-const config: ExtractConfig = { manager: 'gitlabci' };
+const config: ExtractConfig = {};
 
 const adminConfig: RepoGlobalConfig = { localDir: '' };
 

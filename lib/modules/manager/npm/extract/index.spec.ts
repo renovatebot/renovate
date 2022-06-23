@@ -163,7 +163,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { manager: 'npm' }
+        {}
       );
       expect(res?.npmrc).toBeDefined();
     });
@@ -178,7 +178,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'some-configured-npmrc', manager: 'npm' }
+        { npmrc: 'some-configured-npmrc' }
       );
       expect(res?.npmrc).toBeUndefined();
     });
@@ -193,7 +193,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'config-npmrc', npmrcMerge: true, manager: 'npm' }
+        { npmrc: 'config-npmrc', npmrcMerge: true }
       );
       expect(res?.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
@@ -208,7 +208,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { manager: 'npm' }
+        {}
       );
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });

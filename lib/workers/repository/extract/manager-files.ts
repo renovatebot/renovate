@@ -6,13 +6,13 @@ import {
   get,
 } from '../../../modules/manager';
 import type {
-  ExtractConfig,
   PackageFile,
+  WorkerExtractConfig,
 } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(
-  config: ExtractConfig
+  config: WorkerExtractConfig
 ): Promise<PackageFile[] | null> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);

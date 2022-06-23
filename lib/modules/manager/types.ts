@@ -23,6 +23,13 @@ export interface CustomExtractConfig extends RegexManagerTemplates {
 }
 
 export interface ExtractConfig extends CustomExtractConfig {
+  registryAliases?: Record<string, string>;
+  npmrc?: string;
+  npmrcMerge?: boolean;
+  skipInstalls?: boolean;
+}
+
+export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList?: string[];
   fileMatch?: string[];
@@ -31,10 +38,6 @@ export interface ExtractConfig extends CustomExtractConfig {
   ignorePaths?: string[];
   regexManagers?: RegExManager[];
   enabledManagers?: string[];
-  registryAliases?: Record<string, string>;
-  npmrc?: string;
-  npmrcMerge?: boolean;
-  skipInstalls?: boolean;
 }
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;

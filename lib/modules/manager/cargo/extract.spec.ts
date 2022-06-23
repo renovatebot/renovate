@@ -22,7 +22,7 @@ describe('modules/manager/cargo/extract', () => {
     let tmpDir: DirectoryResult;
 
     beforeEach(async () => {
-      config = { manager: 'cargo' };
+      config = {};
       tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = {
         localDir: join(tmpDir.path, 'local'),

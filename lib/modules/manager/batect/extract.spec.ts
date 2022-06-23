@@ -30,7 +30,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: '',
 };
 
-const config: ExtractConfig = { manager: 'batect' };
+const config: ExtractConfig = {};
 
 describe('modules/manager/batect/extract', () => {
   describe('extractPackageFile()', () => {

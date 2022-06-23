@@ -126,7 +126,6 @@ describe('modules/manager/helmv3/extract', () => {
           longalias: 'https://registry.example.com/',
           ociRegistry: 'oci://quay.example.com/organization',
         },
-        manager: 'helmv3',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();

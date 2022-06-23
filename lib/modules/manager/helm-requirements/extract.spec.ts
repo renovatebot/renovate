@@ -29,7 +29,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).not.toBeNull();
       expect(result?.deps[0]?.currentValue).toBeString();
@@ -61,7 +60,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -90,7 +88,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).toMatchSnapshot({
         datasource: 'helm',
@@ -113,7 +110,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).toBeNull();
     });
@@ -141,7 +137,6 @@ describe('modules/manager/helm-requirements/extract', () => {
           placeholder: 'https://my-registry.gcr.io/',
           longalias: 'https://registry.example.com/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -170,7 +165,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).toMatchSnapshot({
         deps: [
@@ -196,7 +190,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).toBeNull();
     });
@@ -219,7 +212,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).toBeNull();
     });
@@ -231,7 +223,6 @@ describe('modules/manager/helm-requirements/extract', () => {
         registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
-        manager: 'helm-requirements',
       });
       expect(result).toBeNull();
     });
@@ -299,9 +290,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       version: 0.1.0
       `);
         const fileName = 'requirements.yaml';
-        const result = extractPackageFile(params.content, fileName, {
-          manager: 'helm-requirements',
-        });
+        const result = extractPackageFile(params.content, fileName, {});
         expect(result).toEqual(params.want);
       });
     });
@@ -327,9 +316,7 @@ describe('modules/manager/helm-requirements/extract', () => {
           repository: https://charts.helm.sh/stable/
       `;
       const fileName = 'requirements.yaml';
-      const result = extractPackageFile(content, fileName, {
-        manager: 'helm-requirements',
-      });
+      const result = extractPackageFile(content, fileName, {});
       expect(result).toEqual({
         datasource: 'helm',
         deps: [

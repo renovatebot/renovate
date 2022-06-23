@@ -4,7 +4,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
-const config: ExtractConfig = { manager: 'flux' };
+const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
 
 describe('modules/manager/flux/extract', () => {

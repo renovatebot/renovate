@@ -30,7 +30,7 @@ const adminConfig: RepoGlobalConfig = {
 
 // auto-mock fs
 jest.mock('../../../util/fs');
-const config = { manager: 'terraform' };
+const config = {};
 
 describe('modules/manager/terraform/extract', () => {
   beforeEach(() => {

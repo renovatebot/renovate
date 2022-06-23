@@ -12,7 +12,7 @@ const pomParent = Fixtures.get('parent.pom.xml');
 const pomChild = Fixtures.get('child.pom.xml');
 const origContent = Fixtures.get('grouping.pom.xml');
 const settingsContent = Fixtures.get('mirror.settings.xml');
-const config = { manager: 'maven' };
+const config = {};
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
 }

@@ -232,7 +232,6 @@ describe('modules/manager/regex/index', () => {
       datasourceTemplate: 'docker',
     };
     const res = await extractPackageFile(ansibleYamlContent, 'ansible.yml', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -252,7 +251,6 @@ describe('modules/manager/regex/index', () => {
       depNameTemplate: '{{{ registry }}}/{{{ repository }}}',
     };
     const res = await extractPackageFile(ansibleYamlContent, 'ansible.yml', {
-      manager: 'regex',
       ...config,
     });
     expect(res?.deps).toHaveLength(1);
@@ -270,7 +268,6 @@ describe('modules/manager/regex/index', () => {
       datasourceTemplate: 'docker',
     };
     const res = await extractPackageFile(ansibleYamlContent, 'ansible.yml', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -288,7 +285,6 @@ describe('modules/manager/regex/index', () => {
       datasourceTemplate: 'helm',
     };
     const res = await extractPackageFile(exampleGitlabCiYml, '.gitlab-ci.yml', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -306,7 +302,6 @@ describe('modules/manager/regex/index', () => {
       depNameTemplate: 'helm_repo/{{{ depName }}}',
     };
     const res = await extractPackageFile(exampleGitlabCiYml, '.gitlab-ci.yml', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -324,7 +319,6 @@ describe('modules/manager/regex/index', () => {
       depNameTemplate: 'helm_repo/{{{ depName }}}',
     };
     const res = await extractPackageFile('', '.gitlab-ci.yml', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toBeNull();
@@ -339,7 +333,6 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -355,7 +348,6 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -372,7 +364,6 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
@@ -385,7 +376,6 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toBeNull();
@@ -397,7 +387,6 @@ describe('modules/manager/regex/index', () => {
       matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toBeNull();
@@ -414,7 +403,6 @@ describe('modules/manager/regex/index', () => {
       depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
     };
     const res = await extractPackageFile(exampleJsonContent, 'example.json', {
-      manager: 'regex',
       ...config,
     });
     expect(res).toMatchSnapshot();
