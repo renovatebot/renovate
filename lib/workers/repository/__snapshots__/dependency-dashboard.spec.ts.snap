@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo add detected dependencies to the Dependency Dashboard body 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -109,7 +109,7 @@ This repository currently has no open or pending branches.
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo show default message in issues body when packageFiles is empty 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -176,7 +176,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo show default message in issues body when when packageFiles is null 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -243,7 +243,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo add detected dependencies to the Dependency Dashboard body 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -296,7 +296,7 @@ This repository currently has no open or pending branches.
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when packageFiles is empty 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -308,7 +308,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when when packageFiles is null 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -320,7 +320,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo shows different combinations of version+digest for a given dependency 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -360,7 +360,7 @@ This repository currently has no open or pending branches.
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 ## Repository problems
 
@@ -414,7 +414,7 @@ And this is a footer for repository:test
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists all Renovate updates and their statuses. It also shows the dependencies that Renovate detected in your repository. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 ## Pending Approval
 
