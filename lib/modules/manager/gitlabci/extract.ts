@@ -169,11 +169,7 @@ export async function extractAllPackageFiles(
       }
     }
 
-    const result = extractPackageFile(
-      content,
-      file,
-      config.gitLabContainerRegistryPrefix
-    );
+    const result = extractPackageFile(content, file, config);
     if (result !== null) {
       results.push({
         packageFile: file,
