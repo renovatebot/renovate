@@ -5,14 +5,18 @@ import {
   GITLAB_API_USING_HOST_TYPES,
   PlatformId,
 } from '../../constants';
+import { logger } from '../../logger';
 import type { GotOptions } from './types';
 
 export function applyAuthorization(inOptions: GotOptions): GotOptions {
   const options: GotOptions = { ...inOptions };
 
+  logger.error('bla');
   if (options.headers?.authorization || options.noAuth) {
     return options;
   }
+
+  logger.error({ inOptions }, 'here');
 
   options.headers ??= {};
   if (options.token) {
@@ -51,11 +55,14 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
       if (type === 'Token-Only') {
         options.headers.authorization = options.token;
       } else {
+        logger.error(`token blau ${options.token}`);
         options.headers.authorization = `${type} ${options.token}`;
+        logger.error(`headers blau ${options.headers.authorization}`);
       }
     }
     delete options.token;
   } else if (options.password !== undefined) {
+    logger.error('asdadsa');
     // Otherwise got will add username and password to url and header
     const auth = Buffer.from(
       `${options.username ?? ''}:${options.password}`

@@ -69,6 +69,7 @@ async function gotRoutine<T>(
     // Cheat the TS compiler using `as` to pick a specific overload.
     // Otherwise it doesn't typecheck.
     const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
+
     statusCode = resp.statusCode;
     duration =
       resp.timings.phases.total ??
@@ -107,7 +108,6 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
-
     let options: GotOptions = merge<GotOptions>(
       {
         method: 'get',
@@ -130,6 +130,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (options.enabled === false) {
       throw new Error(HOST_DISABLED);
     }
+
     options = applyAuthorization(options);
 
     const cacheKey = crypto
@@ -173,10 +174,12 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
 
     try {
+      // Error happening here
       const res = await resPromise;
       res.authorization = !!options?.headers?.authorization;
       return cloneResponse(res);
     } catch (err) {
+      logger.error(`ERROR!!! ${err}`);
       const { abortOnError, abortIgnoreStatusCodes } = options;
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);

@@ -1,5 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import got from 'got';
 import JSON5 from 'json5';
 import { PlatformId } from '../../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
@@ -50,6 +51,8 @@ const pathSeparator = '/';
 
 let renovateUserUuid: string | null = null;
 
+let bearer_token: string | null = null;
+
 export async function initPlatform({
   endpoint,
   username,
@@ -69,14 +72,18 @@ export async function initPlatform({
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
   try {
-    const { uuid } = (
-      await bitbucketHttp.getJson<Account>('/2.0/user', {
-        username,
-        password,
-        useCache: false,
-      })
-    ).body;
-    renovateUserUuid = uuid;
+    const { body } = await got({
+      url: 'https://bitbucket.org/site/oauth2/access_token',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      username: username,
+      password: password,
+      body: 'grant_type=client_credentials',
+    });
+    //TODO should get user uuid
+    bearer_token = JSON.parse(body)['access_token'];
   } catch (err) {
     if (
       err.statusCode === 403 &&
@@ -94,12 +101,20 @@ export async function initPlatform({
   return Promise.resolve(platformConfig);
 }
 
+export function getAuthorizationHeader(): any {
+  return {
+    token: `: ${bearer_token}`,
+  };
+}
+
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
     const repos = await utils.accumulateValues<{ full_name: string }>(
-      `/2.0/repositories/?role=contributor`
+      `/2.0/repositories/?role=contributor`,
+      'get',
+      getAuthorizationHeader()
     );
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
@@ -127,7 +142,7 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url);
+  const res = await bitbucketHttp.get(url, getAuthorizationHeader());
   return res.body;
 }
 
@@ -162,7 +177,8 @@ export async function initRepo({
     info = utils.repoInfoTransformer(
       (
         await bitbucketHttp.getJson<RepoInfoBody>(
-          `/2.0/repositories/${repository}`
+          `/2.0/repositories/${repository}`,
+          getAuthorizationHeader()
         )
       ).body
     );
@@ -237,7 +253,12 @@ export async function getPrList(): Promise<Pr[]> {
     if (renovateUserUuid && !config.ignorePrAuthor) {
       url += `&q=author.uuid="${renovateUserUuid}"`;
     }
-    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
+    const prs = await utils.accumulateValues(
+      url,
+      undefined,
+      getAuthorizationHeader(),
+      50
+    );
     config.prList = prs.map(utils.prInfo);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }

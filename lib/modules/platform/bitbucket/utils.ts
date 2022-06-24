@@ -198,3 +198,7 @@ export interface Account {
   nickname?: string;
   account_status?: string;
 }
+
+export interface AccountV2 {
+  access_token: string;
+}
