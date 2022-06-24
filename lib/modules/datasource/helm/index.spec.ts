@@ -5,6 +5,7 @@ import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
 const indexYaml = Fixtures.get('index.yaml');
+const indexAwsEksYaml = Fixtures.get('index-aws-eks.yaml');
 
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
@@ -169,6 +170,21 @@ describe('modules/datasource/helm/index', () => {
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();
+    });
+
+    it('returns list of versions for coercible version', async () => {
+      httpMock
+        .scope('https://aws.github.io/eks-charts')
+        .get('/index.yaml')
+        .reply(200, indexAwsEksYaml);
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        depName: 'aws-sigv4-proxy-admission-controller',
+        registryUrls: ['https://aws.github.io/eks-charts'],
+      });
+      expect(releases).toMatchObject({
+        releases: expect.toBeArrayOfSize(3),
+      });
     });
 
     it('adds trailing slash to subdirectories', async () => {
