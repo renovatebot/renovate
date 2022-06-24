@@ -16,17 +16,17 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface CustomExtractConfig extends RegexManagerTemplates {
-  autoReplaceStringTemplate?: string;
-  matchStrings?: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
-}
-
 export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
+}
+
+export interface CustomExtractConfig extends RegexManagerTemplates {
+  autoReplaceStringTemplate?: string;
+  matchStrings?: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface WorkerExtractConfig extends ExtractConfig {
@@ -39,6 +39,7 @@ export interface WorkerExtractConfig extends ExtractConfig {
   regexManagers?: RegExManager[];
   enabledManagers?: string[];
 }
+
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
