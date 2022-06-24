@@ -1,10 +1,14 @@
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
+import { getManagerList } from '../../lib/modules/manager';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
+const managers: Map<string, null> = new Map(
+  getManagerList().map((m) => [m, null])
+);
 
 /**
  * Merge string arrays one by one
@@ -217,6 +221,11 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       const el: Record<string, any> = { ...option };
 
       if (!indexed[option.name]) {
+        if (!managers.has(option.name)) {
+          throw new Error(
+            `Config option "${option.name}" is missing an entry in ${configFile}`
+          );
+        }
         return;
       }
       const [headerIndex, footerIndex] = indexed[option.name];
