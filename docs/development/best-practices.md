@@ -11,6 +11,7 @@ Follow these best practices when you're working on our code.
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
+- Avoid cast or prefer `x as T` instead of `<T>x` cast.
 
 ```ts
 // istanbul ignore next: can never happen
