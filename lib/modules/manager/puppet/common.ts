@@ -37,10 +37,10 @@ export function parseGitOwnerRepo(
   }
 }
 
-function invalidUrl(git: string): PackageDependency {
+function invalidUrl(sourceUrl: string): PackageDependency {
   return {
     gitRef: true,
-    sourceUrl: git,
+    sourceUrl,
     skipReason: 'invalid-url',
   };
 }
