@@ -24,7 +24,7 @@ describe('modules/manager/gitlabci/extract', () => {
 
   describe('extractAllPackageFile()', () => {
     it('extracts from empty file', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', '', {})).toBeNull();
     });
   });
 
@@ -169,7 +169,8 @@ describe('modules/manager/gitlabci/extract', () => {
     });
 
     it('extract images from dependency proxy', () => {
-      const res = extractPackageFile(`
+      const res = extractPackageFile(
+        `
         image:
           name: $\{CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim
 
@@ -177,7 +178,10 @@ describe('modules/manager/gitlabci/extract', () => {
           - $CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11
           - name: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0
             alias: imagealias1
-      `);
+      `,
+        '',
+        {}
+      );
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
