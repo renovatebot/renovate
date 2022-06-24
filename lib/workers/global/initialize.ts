@@ -1,6 +1,7 @@
 import os from 'os';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { initPlatform } from '../../modules/platform';
@@ -9,7 +10,6 @@ import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { Limit, setMaxLimit } from './limits';
-import { applySecretsToConfig } from '../../config/secrets';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
