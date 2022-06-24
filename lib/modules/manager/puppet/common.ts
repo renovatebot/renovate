@@ -45,6 +45,8 @@ function invalidUrl(sourceUrl: string): PackageDependency {
   };
 }
 
-export function isGithubUrl(git: string, parsedUrl: URL | undefined): boolean {
-  return parsedUrl?.host === 'github.com' || git.startsWith('git@github.com');
+export function isGithubUrl(gitUrl: string, parsedUrl: URL | null): boolean {
+  return (
+    parsedUrl?.host === 'github.com' || gitUrl.startsWith('git@github.com')
+  );
 }
