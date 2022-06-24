@@ -19,4 +19,3 @@ For Renovate to work with .NET Framework projects, you need to update these file
 - `.vbproj`
 - `.props`
 - `.targets`
-
