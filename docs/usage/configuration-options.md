@@ -2313,7 +2313,7 @@ This can be used to narrow down the search area to prevent multiple matches.
 But the `recursive` strategy still allows the matching of multiple dependencies as described below.
 All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
 If the next `matchStrings` pattern has multiple matches then it will split again.
-This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
 
 Matched groups will be available in subsequent matching layers.
 

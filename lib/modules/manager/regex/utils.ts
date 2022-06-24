@@ -97,3 +97,10 @@ export function mergeExtractionTemplate(
     replaceString: addition.replaceString ?? base.replaceString,
   };
 }
+
+export function isValidDependency(dep: PackageDependency): boolean {
+  // check if all the fields are set
+  return !['depName', 'currentValue'].some(
+    (value) => !dep[value as keyof PackageDependency]
+  );
+}

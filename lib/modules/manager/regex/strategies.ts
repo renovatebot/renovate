@@ -3,6 +3,7 @@ import { regEx } from '../../../util/regex';
 import type { CustomExtractConfig, PackageDependency } from '../types';
 import {
   createDependency,
+  isValidDependency,
   mergeExtractionTemplate,
   mergeGroups,
   regexMatchAll,
@@ -22,7 +23,8 @@ export function handleAny(
         config
       )
     )
-    .filter(is.truthy);
+    .filter(is.truthy)
+    .filter(isValidDependency);
 }
 
 export function handleCombination(
@@ -44,7 +46,9 @@ export function handleCombination(
       replaceString: match?.groups?.currentValue ? match[0] : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config)].filter(is.truthy);
+  return [createDependency(extraction, config)]
+    .filter(is.truthy)
+    .filter(isValidDependency);
 }
 
 export function handleRecursive(
@@ -59,21 +63,17 @@ export function handleRecursive(
   );
   // abort if we have no matchString anymore
   if (!regexes[index]) {
-    return [];
+    const result = createDependency(
+      {
+        groups: combinedGroups,
+        replaceString: content,
+      },
+      config
+    );
+    return result ? [result] : [];
   }
   return regexMatchAll(regexes[index], content)
     .flatMap((match) => {
-      // if we have a depName and a currentValue which have the minimal viable definition
-      if (match?.groups?.depName && match?.groups?.currentValue) {
-        return createDependency(
-          {
-            groups: mergeGroups(combinedGroups, match.groups),
-            replaceString: match[0],
-          },
-          config
-        );
-      }
-
       return handleRecursive(
         match[0],
         packageFile,
@@ -82,5 +82,5 @@ export function handleRecursive(
         mergeGroups(combinedGroups, match.groups ?? {})
       );
     })
-    .filter(is.truthy);
+    .filter(isValidDependency);
 }
