@@ -21,8 +21,15 @@ describe('modules/datasource/puppet-forge/index', () => {
         depName: 'puppetlabs/apache',
         packageName: 'puppetlabs/apache',
       });
-      expect(res).toBeDefined();
-      expect(res.registryUrl).toBe('https://forgeapi.puppet.com');
+      expect(res).toMatchObject({
+        registryUrl: 'https://forgeapi.puppet.com',
+        releases: [
+          { version: '6.4.0' },
+          { version: '6.5.0' },
+          { version: '6.5.1' },
+          { version: '7.0.0' },
+        ],
+      });
     });
 
     it('parses real data', async () => {
